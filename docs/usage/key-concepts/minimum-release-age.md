@@ -29,6 +29,25 @@ The following configuration options can be used to enable and tune the functiona
 - [`minimumReleaseAgeBehaviour`](../configuration-options.md#minimumreleaseagebehaviour)
 - [`internalChecksFilter`](../configuration-options.md#internalchecksfilter)
 
+### `minimumReleaseAgeBehaviour=timestamp-optional` warning
+
+When Renovate runs with `minimumReleaseAgeBehaviour=timestamp-optional`, Renovate will log a warning, which is then also shown on the Dependency Dashboard.
+
+This warning serves to inform users about at least one dependency not being able to adhere to the minimum release age due to the configuration.
+
+In cases where this is not desired, you can remap the warning to a lower log level with [`logLevelRemap`](../configuration-options.md#loglevelremap):
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Some .+ did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding/",
+      "newLogLevel": "info"
+    }
+  ]
+}
+```
+
 ## FAQs
 
 ### Where does the release timestamp need to be set?
@@ -72,6 +91,13 @@ In this case, Renovate automatically retries without `--before` and logs a warni
 This ensures existing lock files are never broken by the `--before` flag.
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
+
+#### Poetry
+
+When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
+This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
+
+The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
@@ -130,6 +156,14 @@ The recommendation is to set `internalChecksFilter=strict` when using `minimumRe
 ### Which update types take `minimumReleaseAge` into account?
 
 Depending on your manager, datasource and the given package(s), it may be that some updates provide a release timestamp that can have `minimumReleaseAge` enforced.
+
+<!--
+  Keep the update types marked as not supported (❌) below in sync with the
+  `unsupportedUpdateTypeRules` carve-outs in
+  `lib/config/presets/internal/security.preset.ts`, so the
+  `security:minimumReleaseAge*` presets keep raising those update types (with a
+  warning) rather than holding them back indefinitely.
+-->
 
 <!-- markdownlint-disable MD060 -->
 
@@ -333,7 +367,9 @@ If you are using a custom registry, or unsure about a public registry, you can c
 
 <summary><code>packageFiles with updates</code> debug log example</summary>
 
-```jsonc
+<!-- doc-fence-check-disable-next-block -->
+
+```json
 DEBUG: packageFiles with updates
 {
   "baseBranch": "main",

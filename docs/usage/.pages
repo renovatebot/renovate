@@ -36,6 +36,7 @@ nav:
       - "How does Renovate's Docker image get built?": 'docker-build-process.md'
   - Tool Calling:
       - 'Environment variable handling': 'environment-variable-handling.md'
+      - 'Calling AWS Services': 'calling-aws-services.md'
   - Included Presets:
       - 'Abandonment Presets': 'presets-abandonments.md'
       - 'Custom Manager Presets': 'presets-customManagers.md'

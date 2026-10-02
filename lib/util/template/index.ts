@@ -49,6 +49,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   replace: (find, replace, context) =>
     (context ?? '').replace(regEx(find, 'g'), replace),
   lowercase: (str: string) => str?.toLowerCase(),
+  uppercase: (str: string) => str?.toUpperCase(),
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {

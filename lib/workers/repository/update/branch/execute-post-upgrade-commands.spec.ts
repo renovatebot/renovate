@@ -29,6 +29,9 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
     beforeEach(async () => {
       GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
+        ...env,
+      }));
 
       tmpDir = await dir({ unsafeCleanup: true });
     });
@@ -1053,7 +1056,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'some-command',
         expect.objectContaining({
           cwd: localDir,
-          extraEnv: gitEnvVars,
+          env: gitEnvVars,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);
@@ -1207,6 +1210,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
             jenkins: '2.541.3',
           },
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally uses `jenkins`, which is not a valid ToolName, to test that invalid tools are ignored
           installTools: {
             jenkins: {},
           } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match

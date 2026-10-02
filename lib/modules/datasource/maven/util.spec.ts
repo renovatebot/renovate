@@ -27,7 +27,7 @@ function httpError({
   message?: string;
   code?: HttpError['code'];
   request?: Record<string, unknown>;
-  response?: Partial<Response>;
+  response?: Partial<NonNullable<HttpError['response']>>;
 }): HttpError {
   type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -42,7 +42,7 @@ function httpError({
   }
 
   if (response) {
-    err.response = response as never;
+    err.response = response as HttpError['response'];
   }
 
   return err;
@@ -219,7 +219,7 @@ describe('modules/datasource/maven/util', () => {
               Promise.reject(
                 httpError({
                   code: 'ECONNRESET',
-                  response: { statusCode: 429 } as never,
+                  response: { statusCode: 429 },
                 }),
               ),
           });
@@ -241,7 +241,7 @@ describe('modules/datasource/maven/util', () => {
             Promise.reject(
               httpError({
                 code: 'ECONNRESET',
-                response: { statusCode: 429 } as never,
+                response: { statusCode: 429 },
               }),
             ),
         });
@@ -306,9 +306,7 @@ describe('modules/datasource/maven/util', () => {
         vi.spyOn(packageCache, 'get').mockResolvedValue(null);
         const http = partial<Http>({
           getText: () =>
-            Promise.reject(
-              httpError({ response: { statusCode: 404 } as never }),
-            ),
+            Promise.reject(httpError({ response: { statusCode: 404 } })),
         });
 
         const res = await downloadHttpProtocol(http, metadataUrl);
@@ -331,9 +329,7 @@ describe('modules/datasource/maven/util', () => {
           .mockResolvedValue(undefined);
         const http = partial<Http>({
           getText: () =>
-            Promise.reject(
-              httpError({ response: { statusCode: 404 } as never }),
-            ),
+            Promise.reject(httpError({ response: { statusCode: 404 } })),
         });
 
         await downloadHttpProtocol(http, nonMetadataUrl);

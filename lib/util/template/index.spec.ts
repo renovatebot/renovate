@@ -122,7 +122,7 @@ describe('util/template/index', () => {
     const userTemplate =
       '{{{ stringToPrettyJSON \'{"some":{"fancy":"json"}}\'}}}';
     const output = template.compile(userTemplate, {});
-    expect(output).toMatchSnapshot();
+    expect(output).toBe('{\n  "some": {\n    "fancy": "json"\n  }\n}');
   });
 
   it('to JSON', () => {
@@ -200,6 +200,12 @@ describe('util/template/index', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, {});
     expect(output).toBe('foo');
+  });
+
+  it('uppercase', () => {
+    const userTemplate = "{{{ uppercase 'foo'}}}";
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('FOO');
   });
 
   it('has access to basic environment variables (basicEnvVars)', () => {

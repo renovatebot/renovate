@@ -1,20 +1,10 @@
 /**
  * Fast local CI check script
- *
- * Usage: pnpm check [options] [targets...]
- *
- * Arguments:
- *   targets           Files or directories to scope checks to
- *
- * Options:
- *   --all             Run fixers first, then all lint checks and tests
- *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
- *   --no-test         Skip tests
  */
 
 import { readdir } from 'node:fs/promises';
 import { extname } from 'node:path';
-import { parseArgs } from 'node:util';
+import { Command } from 'commander';
 import {
   getCoverageForDir,
   getCoverageForFiles,
@@ -162,7 +152,7 @@ function toSourcePath(target: string): string | null {
 }
 
 async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
-  const coverageData = await loadCoverage('./coverage');
+  const coverageData = await loadCoverage(args.coverageDir);
   if (!coverageData) {
     return [];
   }
@@ -186,21 +176,31 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
 }
 
 function parseCliArgs(): CliArgs {
-  const { values, positionals } = parseArgs({
-    options: {
-      all: { type: 'boolean', default: false },
-      fix: { type: 'boolean', default: false },
-      'no-test': { type: 'boolean', default: false },
-    },
-    allowPositionals: true,
-  });
+  let args: CliArgs | undefined;
 
-  return {
-    all: values.all ?? false,
-    fix: values.fix ?? false,
-    noTest: values['no-test'] ?? false,
-    targets: positionals,
-  };
+  new Command('pnpm check')
+    .description('Fast local CI check script')
+    .argument('[targets...]', 'files or directories to scope checks to')
+    .option('--all', 'run fixers first, then all lint checks and tests')
+    .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
+    .option('--no-test', 'skip tests')
+    .option(
+      '--coverage-dir <dir>',
+      'directory the tests write their coverage report to',
+      'coverage',
+    )
+    .action((targets, opts) => {
+      args = {
+        all: opts.all ?? false,
+        fix: opts.fix ?? false,
+        noTest: !opts.test,
+        coverageDir: opts.coverageDir,
+        targets,
+      };
+    })
+    .parse();
+
+  return args!;
 }
 
 async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
@@ -208,8 +208,10 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
     return [];
   }
 
+  const coverageArg = `--coverage.reportsDirectory=${args.coverageDir}`;
+
   if (args.targets.length === 0) {
-    return [{ name: 'test', cmd: 'pnpm', args: ['vitest'] }];
+    return [{ name: 'test', cmd: 'pnpm', args: ['vitest', coverageArg] }];
   }
 
   const patterns = [
@@ -231,7 +233,11 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   }
   const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
   return [
-    { name, cmd: 'pnpm', args: ['vitest', '--passWithNoTests', ...patterns] },
+    {
+      name,
+      cmd: 'pnpm',
+      args: ['vitest', '--passWithNoTests', coverageArg, ...patterns],
+    },
   ];
 }
 

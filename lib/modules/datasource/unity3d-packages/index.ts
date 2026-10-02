@@ -10,9 +10,9 @@ export class Unity3dPackagesDatasource extends Datasource {
 
   static readonly defaultRegistryUrl = 'https://packages.unity.com';
 
-  override readonly defaultRegistryUrls = [
-    Unity3dPackagesDatasource.defaultRegistryUrl,
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [Unity3dPackagesDatasource.defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = Unity3dPackagesVersioning.id;
 

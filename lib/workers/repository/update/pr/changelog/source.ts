@@ -3,7 +3,10 @@ import {
   isFalsy,
   isNonEmptyString,
   isNullOrUndefined,
+  isTruthy,
 } from '@sindresorhus/is';
+import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
+import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
@@ -12,41 +15,40 @@ import * as packageCache from '../../../../../util/cache/package/index.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
-import { parseUrl, trimSlashes } from '../../../../../util/url.ts';
+import {
+  isHttpUrl,
+  joinUrlParts,
+  parseUrl,
+  trimSlashes,
+} from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { slugifyUrl } from './common.ts';
 import { addReleaseNotes } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
+  ChangeLogFile,
+  ChangeLogNotes,
   ChangeLogPlatform,
+  ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
 
+// Number of dot-separated segments, used as a proxy for how precise a tag is,
+// e.g. `v7` (0) < `v7.0` (1) < `v7.0.0` (2).
+function tagPrecision(tag: string): number {
+  return tag.split('.').length - 1;
+}
+
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
-  private readonly platform: ChangeLogPlatform;
-  private readonly datasource:
-    | 'bitbucket-tags'
-    | 'bitbucket-server-tags'
-    | 'forgejo-tags'
-    | 'gitea-tags'
-    | 'github-tags'
-    | 'gitlab-tags';
+  protected readonly platform: ChangeLogPlatform;
+  private readonly family: (typeof PLATFORM_FAMILIES)[ChangeLogPlatform];
 
-  constructor(
-    platform: ChangeLogPlatform,
-    datasource:
-      | 'bitbucket-tags'
-      | 'bitbucket-server-tags'
-      | 'forgejo-tags'
-      | 'gitea-tags'
-      | 'github-tags'
-      | 'gitlab-tags',
-  ) {
+  constructor(platform: ChangeLogPlatform) {
     this.platform = platform;
-    this.datasource = datasource;
+    this.family = PLATFORM_FAMILIES[platform];
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -57,13 +59,36 @@ export abstract class ChangeLogSource {
     nextHead: string,
   ): string;
 
-  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.family.apiBaseUrl(this.getBaseUrl(config));
+  }
+
+  /**
+   * Fetch the repository's changelog markdown file, if it has one.
+   */
+  abstract getReleaseNotesMd(
+    repository: string,
+    apiBaseUrl: string,
+    sourceDirectory?: string,
+  ): Promise<ChangeLogFile | null>;
+
+  /**
+   * Fetch the platform's list of releases for the project. Platforms without a
+   * releases API keep this default.
+   */
+  getReleaseList(
+    _project: ChangeLogProject,
+    _release: ChangeLogRelease,
+  ): Promise<ChangeLogNotes[]> {
+    logger.trace(`${this.platform}: release lists are not supported`);
+    return Promise.resolve([]);
+  }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
         registryUrls: [endpoint],
-        datasource: this.datasource,
+        datasource: this.family.tagsDatasource,
         packageName: repository,
         versioning:
           'regex:(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?',
@@ -72,7 +97,7 @@ export abstract class ChangeLogSource {
 
     if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`,
+        `No ${this.family.tagsDatasource} tags found for repository: ${repository}`,
       );
 
       return [];
@@ -84,138 +109,162 @@ export abstract class ChangeLogSource {
   public async getChangeLogJSON(
     config: BranchUpgradeConfig,
   ): Promise<ChangeLogResult | null> {
-    logger.trace(`getChangeLogJSON for ${this.platform}`);
+    return await instrument(
+      `source.getChangeLogJSON(${this.platform})`,
+      async () => {
+        logger.trace(`getChangeLogJSON for ${this.platform}`);
 
-    const versioning = config.versioning!;
-    const currentVersion = config.currentVersion!;
-    const newVersion = config.newVersion!;
-    const sourceUrl = config.sourceUrl!;
-    const packageName = config.packageName!;
-    const depName = config.depName!;
-    const sourceDirectory = config.sourceDirectory;
-    const versioningApi = allVersioning.get(versioning);
+        const versioning = config.versioning!;
+        const currentVersion = config.currentVersion!;
+        const newVersion = config.newVersion!;
+        const sourceUrl = config.sourceUrl!;
+        const packageName = config.packageName!;
+        const depName = config.depName!;
+        const sourceDirectory = config.sourceDirectory;
+        const versioningApi = allVersioning.get(versioning);
 
-    if (this.shouldSkipPackage(config)) {
-      return null;
-    }
+        if (this.shouldSkipPackage(config)) {
+          return null;
+        }
 
-    const baseUrl = this.getBaseUrl(config);
-    const apiBaseUrl = this.getAPIBaseUrl(config);
-    const repository = this.getRepositoryFromUrl(config);
+        const baseUrl = this.getBaseUrl(config);
+        const apiBaseUrl = this.getAPIBaseUrl(config);
+        const repository = this.getRepositoryFromUrl(config);
 
-    const tokenResponse = this.hasValidToken(config);
-    if (!tokenResponse.isValid) {
-      if (tokenResponse.error) {
-        return {
-          error: tokenResponse.error,
-        };
-      }
-      return null;
-    }
+        const tokenResponse = this.hasValidToken(config);
+        if (!tokenResponse.isValid) {
+          if (tokenResponse.error) {
+            return {
+              error: tokenResponse.error,
+            };
+          }
+          return null;
+        }
 
-    if (isFalsy(this.hasValidRepository(repository))) {
-      logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
-      return null;
-    }
+        if (isFalsy(this.hasValidRepository(repository))) {
+          logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
+          return null;
+        }
 
-    const releases = config.releases ?? (await getInRangeReleases(config));
-    if (!releases?.length) {
-      logger.debug('No releases');
-      return null;
-    }
-    // This extra filter/sort should not be necessary, but better safe than sorry
-    const validReleases = [...releases]
-      .filter((release) => versioningApi.isVersion(release.version))
-      .sort((a, b) => versioningApi.sortVersions(a.version, b.version));
+        const releases = config.releases ?? (await getInRangeReleases(config));
+        // v8 ignore next -- `getInRangeReleases` only returns null on paths it already ignores
+        if (!releases?.length) {
+          logger.debug('No releases');
+          return null;
+        }
+        // This extra filter/sort should not be necessary, but better safe than sorry
+        const validReleases = [...releases]
+          .filter((release) => versioningApi.isVersion(release.version))
+          .sort((a, b) => versioningApi.sortVersions(a.version, b.version))
+          // Drop versions equal under this versioning, e.g. the Docker tags
+          // `3.7.12` and `v3.7.12`, else their notes are rendered twice
+          .filter(
+            (release, index, sorted) =>
+              index === sorted.length - 1 ||
+              !versioningApi.equals(release.version, sorted[index + 1].version),
+          );
 
-    if (validReleases.length < 2) {
-      logger.debug(
-        `Not enough valid releases for dep ${depName} (${packageName})`,
-      );
-      return null;
-    }
+        if (validReleases.length < 2) {
+          logger.debug(
+            `Not enough valid releases for dep ${depName} (${packageName})`,
+          );
+          return null;
+        }
 
-    const changelogReleases: ChangeLogRelease[] = [];
+        const changelogReleases: ChangeLogRelease[] = [];
 
-    // Check if `v` belongs to the range (currentVersion, newVersion]
-    function inRange(v: string): boolean {
-      return (
-        versioningApi.isGreaterThan(v, currentVersion) &&
-        !versioningApi.isGreaterThan(v, newVersion)
-      );
-    }
-
-    const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
-    for (let i = 1; i < validReleases.length; i += 1) {
-      const prev = validReleases[i - 1];
-      const next = validReleases[i];
-      if (!inRange(next.version)) {
-        continue;
-      }
-      let release = await packageCache.get(
-        this.cacheNamespace,
-        this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
-      );
-      if (!release) {
-        release = {
-          version: next.version,
-          date: next.releaseTimestamp,
-          gitRef: next.gitRef,
-          // put empty changes so that existing templates won't break
-          changes: [],
-          compare: {},
-        };
-        const tags = await getTags();
-        const prevHead = this.getRef(
-          versioningApi,
-          packageName,
-          depName,
-          prev,
-          tags,
-        );
-        const nextHead = this.getRef(
-          versioningApi,
-          packageName,
-          depName,
-          next,
-          tags,
-        );
-        if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
-          release.compare.url = this.getCompareURL(
-            baseUrl,
-            repository,
-            prevHead,
-            nextHead,
+        // Check if `v` belongs to the range (currentVersion, newVersion]
+        function inRange(v: string): boolean {
+          return (
+            versioningApi.isGreaterThan(v, currentVersion) &&
+            !versioningApi.isGreaterThan(v, newVersion)
           );
         }
-        const cacheMinutes = 55;
-        await packageCache.set(
-          this.cacheNamespace,
-          this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
-          release,
-          cacheMinutes,
-        );
-      }
-      changelogReleases.unshift(release);
-    }
 
-    let res: ChangeLogResult | null = {
-      project: {
-        apiBaseUrl,
-        baseUrl,
-        type: this.platform,
-        repository,
-        sourceUrl,
-        sourceDirectory,
-        packageName,
-        depName,
+        const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
+        // Fetch releases newest-first, matching the order they're shown in the PR body.
+        for (let i = validReleases.length - 1; i >= 1; i -= 1) {
+          const prev = validReleases[i - 1];
+          const next = validReleases[i];
+          if (!inRange(next.version)) {
+            continue;
+          }
+          let release = await packageCache.get(
+            this.cacheNamespace,
+            this.getCacheKey(
+              sourceUrl,
+              packageName,
+              prev.version,
+              next.version,
+            ),
+          );
+          if (!release) {
+            release = {
+              version: next.version,
+              date: next.releaseTimestamp,
+              gitRef: next.gitRef,
+              // put empty changes so that existing templates won't break
+              changes: [],
+              compare: {},
+            };
+            const tags = await getTags();
+            const prevHead = this.getRef(
+              versioningApi,
+              packageName,
+              depName,
+              prev,
+              tags,
+            );
+            const nextHead = this.getRef(
+              versioningApi,
+              packageName,
+              depName,
+              next,
+              tags,
+            );
+            if (isNonEmptyString(prevHead) && isNonEmptyString(nextHead)) {
+              release.compare.url = this.getCompareURL(
+                baseUrl,
+                repository,
+                prevHead,
+                nextHead,
+              );
+            }
+            const cacheMinutes = 55;
+            await packageCache.set(
+              this.cacheNamespace,
+              this.getCacheKey(
+                sourceUrl,
+                packageName,
+                prev.version,
+                next.version,
+              ),
+              release,
+              cacheMinutes,
+            );
+          }
+          changelogReleases.push(release);
+        }
+
+        let res: ChangeLogResult | null = {
+          project: {
+            apiBaseUrl,
+            baseUrl,
+            type: this.platform,
+            repository,
+            sourceUrl,
+            sourceDirectory,
+            packageName,
+            depName,
+          },
+          versions: changelogReleases,
+        };
+
+        res = await addReleaseNotes(res, config, this);
+
+        return res;
       },
-      versions: changelogReleases,
-    };
-
-    res = await addReleaseNotes(res, config);
-
-    return res;
+    );
   }
 
   private findTagOfRelease(
@@ -232,11 +281,23 @@ export abstract class ChangeLogSource {
       return exactReleaseRegex.test(tag);
     });
     const tagList = exactTagsList.length ? exactTagsList : tags;
-    return tagList
+    const candidates = tagList
       .filter((tag) => versioningApi.isVersion(tag.replace(regex, '')))
-      .find((tag) =>
+      .filter((tag) =>
         versioningApi.equals(tag.replace(regex, ''), depNewVersion),
       );
+    if (!candidates.length) {
+      return undefined;
+    }
+    // Some versioning schemes (e.g. `github-actions`) treat a floating tag
+    // like `v7` as equal to a precise one like `v7.0.0` via coercion, so more
+    // than one tag can match the same release. Prefer the most precise tag
+    // (most dot-separated segments), else keep the first match found.
+    return candidates.reduce((mostPrecise, candidate) =>
+      tagPrecision(candidate) > tagPrecision(mostPrecise)
+        ? candidate
+        : mostPrecise,
+    );
   }
 
   private getRef(
@@ -303,5 +364,33 @@ export abstract class ChangeLogSource {
 
   hasValidRepository(repository: string): boolean {
     return repository.split('/').length === 2;
+  }
+
+  /**
+   * Build the URL to the changelog markdown file for the release notes.
+   * Platform sources can override this to match their web UI conventions.
+   */
+  getNotesSourceUrl(
+    baseUrl: string,
+    repository: string,
+    changelogFile: string,
+  ): string {
+    return joinUrlParts(baseUrl, repository, 'blob', 'HEAD', changelogFile);
+  }
+
+  /**
+   * Build the URL pointing to a specific heading within the changelog markdown
+   * file. Platform sources can override this to match their anchor conventions.
+   */
+  getReleaseNotesMdAnchorUrl(notesSourceUrl: string, heading: string): string {
+    const mdHeadingLink = heading
+      .replace(regEx(/[[\]()]/g), ' ')
+      .replace(regEx(/^\s*#*\s*/), '')
+      .split(' ')
+      .filter(isTruthy)
+      .filter((word) => !isHttpUrl(word))
+      .join('-')
+      .replace(regEx(/[^A-Za-z0-9-]/g), '');
+    return `${notesSourceUrl}#${mdHeadingLink}`;
   }
 }

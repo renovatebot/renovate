@@ -1,3 +1,4 @@
+import { coerceObject } from '../../../util/object.ts';
 import type { RenovateConfig } from '../../types.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
@@ -10,7 +11,7 @@ export class NodeMigration extends AbstractMigration {
     if ((value as RenovateConfig).enabled === true) {
       // validated non-null
       delete node.enabled;
-      const travis = this.get('travis') ?? {};
+      const travis = coerceObject(this.get('travis'));
       travis.enabled = true;
       if (Object.keys(node).length) {
         this.rewrite(node);

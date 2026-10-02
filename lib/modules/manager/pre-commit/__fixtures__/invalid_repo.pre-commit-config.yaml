@@ -1,4 +1,0 @@
-# invalid repo item
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    revv: v3.3.0

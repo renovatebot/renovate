@@ -37,6 +37,7 @@ export async function extractPackageFile(
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {
     if (dep.depName === 'python') {
+      // v8 ignore else -- a python dep always carries a current value
       if (dep.currentValue) {
         pythonVersion = dep.currentValue;
       }

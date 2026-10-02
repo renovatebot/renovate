@@ -40,6 +40,19 @@ describe('modules/datasource/go/goproxy-parser', () => {
       ]);
     });
 
+    it('skips empty segments', () => {
+      expect(parseGoproxy(',foo')).toMatchObject([{ url: 'foo' }]);
+      expect(parseGoproxy('|')).toBeEmpty();
+      expect(parseGoproxy('foo,,bar')).toMatchObject([
+        { url: 'foo', fallback: ',' },
+        { url: 'bar', fallback: '|' },
+      ]);
+      expect(parseGoproxy('foo|,bar')).toMatchObject([
+        { url: 'foo', fallback: '|' },
+        { url: 'bar', fallback: '|' },
+      ]);
+    });
+
     it('caches results', () => {
       expect(parseGoproxy('foo,bar')).toBe(parseGoproxy('foo,bar'));
     });

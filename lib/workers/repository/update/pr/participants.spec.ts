@@ -13,6 +13,7 @@ vi.mock('./code-owners.ts');
 const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
+  // oxlint-disable-next-line renovate/prefer-partial-in-specs -- assigneesSampleSize/reviewersSampleSize intentionally set to null, which the type does not allow, to simulate an unset value
   const config: RenovateConfig = {
     assignees: ['a', 'b', '@c'],
     reviewers: ['x', 'y', '@z'],
@@ -51,6 +52,14 @@ describe('workers/repository/update/pr/participants', () => {
         'a',
         'b',
       ]);
+    });
+
+    it('adds nothing when filtering leaves no assignee', async () => {
+      platform.filterUnavailableUsers = vi.fn().mockResolvedValueOnce([]);
+
+      await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
+
+      expect(platform.addAssignees).not.toHaveBeenCalled();
     });
 
     it('expands group code owners assignees', async () => {

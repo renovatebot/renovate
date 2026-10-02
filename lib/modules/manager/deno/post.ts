@@ -2,6 +2,7 @@ import {
   isEmptyObject,
   isNonEmptyArray,
   isNonEmptyObject,
+  isString,
 } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -110,7 +111,7 @@ export function getLockedVersion(
       const match = depValueRegex.exec(key);
       // find "jsr:@scope/name@1" intersects "jsr:@scope/name@^1.0.0"
       if (
-        typeof depName === 'string' &&
+        isString(depName) &&
         match?.groups?.depName === depName &&
         match?.groups?.datasource === datasource &&
         currentValue &&

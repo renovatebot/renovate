@@ -87,17 +87,33 @@ describe('workers/repository/reconfigure/index', () => {
       reconfigureBranchCache: {
         reconfigureBranchSha,
         isConfigValid: true,
-        extractResult: {
-          branches: [partial<BranchConfig>()],
-          branchList: ['some-branch'],
-          packageFiles: {},
-        },
+        extractionSucceeded: true,
       },
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
     expect(
       validate.validateReconfigureBranch,
     ).not.toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('migrates the extract result persisted by earlier versions', async () => {
+    const repoCache = {
+      reconfigureBranchCache: {
+        reconfigureBranchSha,
+        isConfigValid: true,
+        extractResult: { packageFiles: {} },
+      },
+    };
+    cache.getCache.mockReturnValue(repoCache);
+
+    await checkReconfigureBranch(config, repoConfig);
+
+    expect(repoCache.reconfigureBranchCache).toEqual({
+      reconfigureBranchSha,
+      isConfigValid: true,
+      extractionSucceeded: true,
+    });
+    expect(validate.validateReconfigureBranch).not.toHaveBeenCalled();
   });
 
   it('skips if error while finding reconfigure config', async () => {

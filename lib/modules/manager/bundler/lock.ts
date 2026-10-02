@@ -143,7 +143,7 @@ export async function runBundlerLock(
       {} as Record<string, string>,
     );
 
-    const bundler = getBundlerConstraint(
+    const bundler = await getBundlerConstraint(
       updateArtifact,
       existingLockFileContent,
     );

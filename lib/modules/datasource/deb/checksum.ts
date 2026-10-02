@@ -1,6 +1,6 @@
 import { createCacheReadStream } from '../../../util/fs/index.ts';
 import { hashStream } from '../../../util/hash.ts';
-import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 
 /**
  * Parses the SHA256 checksum for a specified package path from the InRelease content.
@@ -15,7 +15,7 @@ export function parseChecksumsFromInRelease(
 ): string | null {
   const lines = inReleaseContent.split(newlineRegex);
   const regex = regEx(
-    `([a-f0-9]{64})\\s+\\d+\\s+${escapeRegExp(packagePath)}$`,
+    `([a-f0-9]{64})\\s+\\d+\\s+${RegExp.escape(packagePath)}$`,
   );
 
   for (const line of lines) {

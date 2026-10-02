@@ -9,6 +9,8 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
+vi.mock('../../../util/fs/index.ts');
+
 describe('modules/manager/github-actions/integration', () => {
   const getGithubTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
   const getGithubDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
@@ -56,7 +58,7 @@ describe('modules/manager/github-actions/integration', () => {
                 sha256: ${currentDigest}
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -94,7 +96,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -148,7 +150,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -199,7 +201,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v1.2
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -264,7 +266,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v4.0.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -313,7 +315,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -373,7 +375,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -447,7 +449,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7.5.0
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning-semver.yml',
       {},
@@ -520,7 +522,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7.5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-another.yml',
       {},
@@ -583,7 +585,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@v4
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -618,7 +620,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@e06108dd0aef18192324c70427afc47652e63a82 # v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning-best-practices.yml',
       {},
@@ -678,7 +680,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-pinning.yml',
       {},
@@ -713,7 +715,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -763,7 +765,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -794,7 +796,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -841,7 +843,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: astral-sh/setup-uv@v7.5
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci.yml',
       {},
@@ -890,7 +892,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: actions/setup-node@v2
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/test.yml',
       {},
@@ -966,7 +968,7 @@ describe('modules/manager/github-actions/integration', () => {
             - uses: codecov/codecov-action@v5.5.3
     `;
 
-    const extracted = extractPackageFile(
+    const extracted = await extractPackageFile(
       workflow,
       '.github/workflows/ci-another.yml',
       {},

@@ -29,3 +29,8 @@ Some configuration examples:
   }
 }
 ```
+
+### OCI Helm charts
+
+Renovate looks up Helm charts stored in OCI registries with the `docker` datasource.
+Use [`registryAliases`](../../../configuration-options.md#registryaliases) to map a registry host, for example a pull-through cache, to the registry Renovate should query instead.

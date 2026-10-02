@@ -93,7 +93,8 @@ export function emojify(text: string): string {
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
   (r) => (r as RegExp).source,
 );
-const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
+// oxlint-disable-next-line renovate/require-regex-util -- RE2 compiles this pattern but does not match astral-plane emoji correctly, TODO #12875
+const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g');
 const excludedModifiers = new Set([
   '20E3',
   '200D',

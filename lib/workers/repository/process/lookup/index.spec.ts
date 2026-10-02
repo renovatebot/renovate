@@ -28,6 +28,7 @@ import { id as nodeVersioningId } from '../../../../modules/versioning/node/inde
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
+import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as McApi from '../../../../util/merge-confidence/index.ts';
@@ -51,6 +52,11 @@ const nextJson = Fixtures.get('next.json');
 const typescriptJson = Fixtures.get('typescript.json');
 const vueJson = Fixtures.get('vue.json');
 const webpackJson = Fixtures.get('webpack.json');
+
+const githubApiHost = 'https://api.github.com';
+const emptyGithubGraphqlPayload = {
+  data: { repository: { isPrivate: false, payload: { nodes: [] } } },
+};
 
 let config: LookupUpdateConfig;
 
@@ -91,12 +97,6 @@ describe('workers/repository/process/lookup/index', () => {
     );
   });
 
-  // TODO: fix mocks
-  afterEach(() => {
-    httpMock.clear(false);
-    hostRules.clear();
-  });
-
   describe('.lookupUpdates()', () => {
     it('returns null if invalid currentValue', async () => {
       // @ts-expect-error: testing invalid currentValue
@@ -109,15 +109,35 @@ describe('workers/repository/process/lookup/index', () => {
       expect(skipReason).toBe('invalid-value');
     });
 
-    it('returns null if unknown datasource', async () => {
+    it('returns invalid-config without warning if packageName is missing', async () => {
+      config.datasource = NpmDatasource.id;
+      // @ts-expect-error: testing missing packageName
+      config.packageName = undefined;
+
+      const { skipReason, warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('returns warning if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
 
-      const { updates } = await Result.wrap(
+      const { updates, skipReason, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
       expect(updates).toBeEmptyArray();
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toEqual([
+        {
+          topic: 'some-dep',
+          message: 'Unknown datasource "does not exist" for package some-dep',
+        },
+      ]);
     });
 
     it('handles error result from getPkgReleasesWithResult', async () => {
@@ -135,6 +155,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.packageName = 'q';
+      config.depName = 'q';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
@@ -163,6 +184,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -171,9 +193,31 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('warns if there is nothing to roll back to', async () => {
+      // below every published version, so nothing satisfies it and nothing is older
+      config.currentValue = '0.0.0-alpha';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      config.rollbackPrs = true;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toBeEmpty();
+      expect(res.warnings).toEqual([
+        {
+          topic: 'q',
+          message: "Can't find version matching 0.0.0-alpha for npm package q",
+        },
+      ]);
+    });
+
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.packageName = 'q';
+      config.depName = 'q';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
@@ -225,6 +269,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '^0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -239,6 +284,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -271,6 +317,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 4,
           newValue: '^0.4.0',
           newVersion: '0.4.4',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.4.4.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2011-06-10T17:20:04.719Z' as Timestamp,
           updateType: 'patch',
@@ -285,6 +332,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '^0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -299,6 +347,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -328,6 +377,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -341,6 +391,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -371,6 +422,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 4,
           newValue: '0.4.4',
           newVersion: '0.4.4',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.4.4.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -384,6 +436,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -397,6 +450,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -427,6 +481,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -464,6 +519,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '^0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -478,6 +534,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -506,6 +563,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -534,6 +592,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -562,6 +621,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -591,6 +651,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -620,6 +681,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 4,
           newValue: '0.9.4',
           newVersion: '0.9.4',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.4.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-05-22T20:26:50.888Z' as Timestamp,
           updateType: 'minor',
@@ -660,6 +722,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -673,6 +736,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -707,6 +771,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -720,6 +785,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -749,6 +815,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'patch',
@@ -762,6 +829,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -791,6 +859,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 12,
           newValue: '0.8.12',
           newVersion: '0.8.12',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.8.12.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -804,6 +873,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -817,6 +887,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -854,6 +925,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -883,6 +955,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -911,10 +984,34 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.0.1',
           newVersion: '1.0.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.0.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
           hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('bumps instead of updating the lockfile for vulnerabilityAlerts without a locked version', async () => {
+      config.currentValue = '^1.0.0';
+      config.isVulnerabilityAlert = true;
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // without a lockfile to update the strategy falls back to bump, which
+      // widens the range rather than leaving it untouched
+      expect(updates).toMatchObject([
+        {
+          isBump: true,
+          newValue: '^1.0.1',
+          newVersion: '1.0.1',
         },
       ]);
     });
@@ -940,6 +1037,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -969,6 +1067,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.1.0',
           newVersion: '1.1.0',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.1.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -998,6 +1097,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.1.0',
           newVersion: '1.1.0',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.1.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -1027,6 +1127,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.1.0',
           newVersion: '1.1.0',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.1.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -1057,6 +1158,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -1086,6 +1188,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.0.1',
           newVersion: '1.0.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.0.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -1137,6 +1240,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '~0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -1151,6 +1255,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -1293,6 +1398,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -1328,6 +1434,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1359,12 +1466,108 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.2.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
           hasAttestation: false,
         },
       ]);
+    });
+
+    it('handles lockfile-only updates for pinned locked versions', async () => {
+      config.currentValue = '1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.updatePinnedDependencies = false;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          isLockfileUpdate: true,
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 1,
+          newValue: '1.2.1',
+          newVersion: '1.4.1',
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'minor',
+          hasAttestation: false,
+        },
+      ]);
+    });
+
+    it('keeps lockfile-only updates when package rules change rangeStrategy', async () => {
+      config.currentValue = '1.2.1';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'replace';
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: '1.2.1',
+        newVersion: '1.4.1',
+      });
+    });
+
+    it('uses lockedVersion to look up an unversioned lockfile-only selector', async () => {
+      config.currentValue = 'latest';
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: 'latest',
+        newVersion: '1.4.1',
+      });
+    });
+
+    it('allows lockfile-only selectors to cross versioning compatibility boundaries', async () => {
+      config.currentValue = '1.2.1-alpine';
+      config.lockedVersion = '1.2.1-alpine';
+      config.rangeStrategy = 'update-lockfile';
+      config.versioning = dockerVersioningId;
+      config.isLockfileOnly = true;
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({
+        isLockfileUpdate: true,
+        newValue: '1.2.1-alpine',
+        newVersion: '1.4.1',
+      });
     });
 
     it('handles the in-range-only strategy and updates lockfile within range', async () => {
@@ -1390,6 +1593,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.2.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -1421,6 +1625,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.2.0',
           newVersion: '1.2.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.2.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -1451,6 +1656,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: undefined,
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -1480,6 +1686,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: undefined,
           newVersion: '1.3.0',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.3.0.tgz',
           releaseTimestamp: '2015-04-26T16:42:11.311Z' as Timestamp,
           updateType: 'minor',
           hasAttestation: false,
@@ -1510,6 +1717,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.3.0 || ~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1539,6 +1747,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1571,6 +1780,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^2.0.0 || ^3.0.0',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -1603,6 +1815,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^3.0.0',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -1713,6 +1928,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1749,6 +1965,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.x',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1778,6 +1995,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1807,6 +2025,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.x',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -1836,6 +2055,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.x',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1865,6 +2085,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.2.x - 1.4.x',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1894,6 +2115,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -1923,6 +2145,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -1952,6 +2175,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '~0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -1966,6 +2190,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -1995,6 +2220,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '^0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -2009,6 +2235,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -2038,6 +2265,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '^0.7.0 || ^0.8.0 || ^0.9.0',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -2052,6 +2280,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^0.7.0 || ^0.8.0 || ^1.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -2084,6 +2313,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.0.0 || ^2.0.0 || ^3.0.0',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -2116,6 +2348,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.x - 3.x',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -2148,6 +2383,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.x || 2.x || 3.x',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -2180,6 +2418,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1 || 2 || 3',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
           updateType: 'major',
@@ -2209,6 +2450,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.2.0 || ~1.3.0 || ~1.4.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -2252,6 +2494,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '<= 0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -2266,6 +2509,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '<= 1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -2295,6 +2539,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '< 0.9.8',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2013-09-04T17:07:22.948Z' as Timestamp,
           updateType: 'minor',
@@ -2309,6 +2554,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '< 1.4.2',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -2338,6 +2584,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '< 2',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -2367,6 +2614,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '<= 1.4',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -2396,6 +2644,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '=1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -2426,6 +2675,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 3,
           newValue: '<= 2',
           newVersion: '2.0.3',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-2.0.3.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-01-31T08:11:47.852Z' as Timestamp,
           updateType: 'major',
@@ -2455,6 +2705,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '<= 1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -2484,6 +2735,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '< 2.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -2513,6 +2765,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '>= 0.5.0 < 2.0.0',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -2542,6 +2795,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '>= 0.5.0 <0.10',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -2556,6 +2810,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '>= 0.5.0 <1.5',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -2585,6 +2840,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 7,
           newValue: '>= 0.5.0 <= 0.9.7',
           newVersion: '0.9.7',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-0.9.7.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -2599,6 +2855,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '>= 0.5.0 <= 1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -2641,6 +2898,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 3,
           newValue: '2.0.3',
           newVersion: '2.0.3',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-2.0.3.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-01-31T08:11:47.852Z' as Timestamp,
           updateType: 'major',
@@ -2838,6 +3096,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 17,
           newValue: '2.5.17-beta.0',
           newVersion: '2.5.17-beta.0',
+          newDigest:
+            'sha512-9BZOxpRe1TaGLS4oXyrUp3BC1dlc93js/yvnHtOovWzrkrjFMm58X+BCHrA/xgMXSM1iyRTEGoxAURyOUaK1dA==',
+          downloadUrl: 'https://registry.npmjs.org/vue/-/vue-2.5.17-beta.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -2868,6 +3129,10 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '3.1.0-dev.20180813',
           newVersion: '3.1.0-dev.20180813',
+          newDigest:
+            'sha512-3sooaeRS1KvHoZ/hE8v2VhlxojcPvHBVZ5jXi070GscZA9BeZ/sXA21Un5m9xqeXMESrWFt7onto2xZfwj2XQg==',
+          downloadUrl:
+            'https://registry.npmjs.org/typescript/-/typescript-3.1.0-dev.20180813.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -2898,6 +3163,10 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '3.0.1',
           newVersion: '3.0.1',
+          newDigest:
+            'sha512-zQIMOmC+372pC/CCVLqnQ0zSBiY7HHodU7mpQdjiZddek4GMj31I3dUJ7gAs9o65X7mnRma6OokOkc6f9jjfBg==',
+          downloadUrl:
+            'https://registry.npmjs.org/typescript/-/typescript-3.0.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -2929,6 +3198,8 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 35,
           newValue: '0.0.35',
           newVersion: '0.0.35',
+          downloadUrl:
+            'https://registry.npmjs.org/@types/helmet/-/helmet-0.0.35.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -2942,10 +3213,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.updatePinnedDependencies = false;
       config.packageName = '@types/helmet';
       config.datasource = NpmDatasource.id;
-      httpMock
-        .scope(npmDefaultRegistryUrl)
-        .get('/@types%2Fhelmet')
-        .reply(200, helmetJson);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -2977,6 +3244,10 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '3.0.1-insiders.20180726',
           newVersion: '3.0.1-insiders.20180726',
+          newDigest:
+            'sha512-fSY7XOiD1xObVp+vCamB9Hivvvu/SlUu/tzoPz+7xZGk2pqVTRFG7+1a2okxIBVV+C1ePXOR163PIjB3+L4SPA==',
+          downloadUrl:
+            'https://registry.npmjs.org/typescript/-/typescript-3.0.1-insiders.20180726.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -2988,6 +3259,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('should roll back to dist-tag if current version is higher', async () => {
       config.currentValue = '3.1.0-dev.20180813';
       config.packageName = 'typescript';
+      config.depName = 'typescript';
       config.datasource = NpmDatasource.id;
       config.followTag = 'insiders';
       config.rollbackPrs = true;
@@ -3040,6 +3312,10 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '3.0.1-insiders.20180726',
           newVersion: '3.0.1-insiders.20180726',
+          newDigest:
+            'sha512-fSY7XOiD1xObVp+vCamB9Hivvvu/SlUu/tzoPz+7xZGk2pqVTRFG7+1a2okxIBVV+C1ePXOR163PIjB3+L4SPA==',
+          downloadUrl:
+            'https://registry.npmjs.org/typescript/-/typescript-3.0.1-insiders.20180726.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
@@ -3107,6 +3383,11 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .times(2)
+        .reply(200, emptyGithubGraphqlPayload);
 
       const { updates, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3120,6 +3401,64 @@ describe('workers/repository/process/lookup/index', () => {
           topic: 'angular/angular',
         },
       ]);
+    });
+
+    describe('digest managed externally', () => {
+      it('does not create a pinDigest update', async () => {
+        config.currentValue = 'v1.0.0';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        // for instance, if a lockfile manages the digest instead of the package file
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        const getDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toBeEmptyArray();
+        expect(getDigest).not.toHaveBeenCalled();
+      });
+
+      it('still refreshes a digest that is already inline', async () => {
+        config.currentValue = 'v1.0.0';
+        config.currentDigest = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getDigest',
+        ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toMatchObject([{ updateType: 'digest' }]);
+      });
     });
 
     describe('pinning enabled but no existing digest', () => {
@@ -3142,6 +3481,11 @@ describe('workers/repository/process/lookup/index', () => {
             },
           ],
         });
+        httpMock
+          .scope(githubApiHost)
+          .post('/graphql')
+          .times(4)
+          .reply(200, emptyGithubGraphqlPayload);
 
         const { updates, warnings } = await Result.wrap(
           lookup.lookupUpdates(config),
@@ -3238,6 +3582,8 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 35,
           newValue: '^0.0.35',
           newVersion: '0.0.35',
+          downloadUrl:
+            'https://registry.npmjs.org/@types/helmet/-/helmet-0.0.35.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2017-04-27T16:59:06.479Z' as Timestamp,
           updateType: 'patch',
@@ -3249,6 +3595,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('should downgrade from missing versions', async () => {
       config.currentValue = '1.16.1';
       config.packageName = 'coffeelint';
+      config.depName = 'coffeelint';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock
@@ -3277,6 +3624,31 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('skips an update which downgrades the current value', async () => {
+      // The package file pins a version the registry no longer serves, while the lockfile is behind it, so the update resolved from the lockfile would rewrite the package file downwards.
+      config.currentValue = '1.5.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.2.0' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toBeEmptyArray();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageName: 'my-package',
+          compareValue: '1.5.0',
+        }),
+        'Unexpected downgrade detected: skipping',
+      );
+    });
+
     it('should upgrade to only one major', async () => {
       config.currentValue = '1.0.0';
       config.packageName = 'webpack';
@@ -3299,6 +3671,8 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.15.0',
           newVersion: '1.15.0',
+          downloadUrl:
+            'https://registry.npmjs.org/webpack/-/webpack-1.15.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -3312,6 +3686,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '3.8.1',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -3343,6 +3720,8 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '1.15.0',
           newVersion: '1.15.0',
+          downloadUrl:
+            'https://registry.npmjs.org/webpack/-/webpack-1.15.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'minor',
@@ -3356,6 +3735,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 0,
           newValue: '2.7.0',
           newVersion: '2.7.0',
+          newDigest:
+            'sha512-MjAA0ZqO1ba7ZQJRnoCdbM56mmFpipOPUv/vQpwwfSI42p5PVDdoiuK2AL2FwFUVgT859Jr43bFZXRg/LNsqvg==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-2.7.0.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -3370,6 +3752,9 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '3.8.1',
           newVersion: '3.8.1',
+          newDigest:
+            'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+          downloadUrl: 'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'major',
@@ -3429,6 +3814,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '^1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -3460,6 +3846,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.0.1',
           newVersion: '1.0.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.0.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2014-03-11T18:47:17.560Z' as Timestamp,
           updateType: 'patch',
@@ -3474,6 +3861,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -3506,6 +3894,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.0.1',
           newVersion: '1.0.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.0.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2014-03-11T18:47:17.560Z' as Timestamp,
           updateType: 'patch',
@@ -3520,6 +3909,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -3550,6 +3940,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '>=1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -3581,6 +3972,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '>=1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -3652,6 +4044,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '1.4.1',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'minor',
@@ -3664,7 +4057,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
-      httpMock.scope('https://pypi.org').get('/pypi/foo/json').reply(404);
+      httpMock.scope(githubApiHost).post('/graphql').reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -3679,8 +4072,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
       httpMock
-        .scope('https://api.github.com')
-        .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .scope('https://pypi.org')
+        .get('/pypi/foo/json')
+        .reply(404)
+        .get('/pypi/foo/')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -3701,6 +4096,8 @@ describe('workers/repository/process/lookup/index', () => {
         .get('/packages.json')
         .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/foo/bar.json')
+        .reply(404)
+        .get('/p2/foo/bar~dev.json')
         .reply(404);
 
       const { updates } = await Result.wrap(
@@ -3758,6 +4155,7 @@ describe('workers/repository/process/lookup/index', () => {
           newPatch: 1,
           newValue: '~=1.4',
           newVersion: '1.4.1',
+          downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: '2015-05-17T04:25:07.299Z' as Timestamp,
           updateType: 'major',
@@ -3791,6 +4189,7 @@ describe('workers/repository/process/lookup/index', () => {
             newPatch: 1,
             newValue: '1.4.1',
             newVersion: '1.4.1',
+            downloadUrl: 'https://registry.npmjs.org/q/-/q-1.4.1.tgz',
             newVersionAgeInDays: expect.any(Number),
             releaseTimestamp: expect.any(String),
             updateType: 'minor',
@@ -3974,6 +4373,27 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [],
       });
+    });
+
+    it('does not skip when the current version is unresolvable but a locked version is set', async () => {
+      // `^5.0.0` matches none of the published versions, so no current version
+      // can be resolved - but a lockedVersion means this is not invalid
+      config.currentValue = '^5.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // returning before `currentVersion` is recorded proves the early return
+      // was taken, and the missing skipReason proves it was the lockedVersion path
+      expect(res.currentVersion).toBeUndefined();
+      expect(res.skipReason).toBeUndefined();
+      expect(res.updates).toBeEmpty();
     });
 
     it('handles digest pin', async () => {
@@ -4178,6 +4598,36 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('preserves currentCompatibility after lookup', async () => {
+      config.currentValue = 'distroless-v1.38.3';
+      config.packageName = 'envoyproxy/envoy';
+      config.versioning = semverVersioningId;
+      config.versionCompatibility = '^(?<compatibility>.*)-(?<version>.*)$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'distroless-v1.38.3' },
+          { version: 'distroless-v1.39.0' },
+          { version: 'v1.40.0' },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toMatchObject({
+        currentCompatibility: 'distroless',
+        currentVersion: 'v1.38.3',
+        updates: [
+          {
+            newValue: 'distroless-v1.39.0',
+            newVersion: 'v1.39.0',
+          },
+        ],
+      });
+    });
+
     it('applies versionCompatibility for 18.10.0', async () => {
       config.currentValue = '18.10.0-alpine';
       config.currentDigest = 'aaa111';
@@ -4222,6 +4672,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
 
       expect(res).toEqual({
+        currentCompatibility: '-alpine',
         currentVersion: '18.10.0',
         fixedVersion: '18.10.0',
         isSingleVersion: true,
@@ -4250,6 +4701,26 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('returns no updates if the datasource rejects every candidate release', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'com.example:artifact';
+      config.versioning = mavenVersioningId;
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+      });
+      // nothing survives postprocessing, so no bucket yields a release
+      postprocessMavenRelease.mockResolvedValue('reject');
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // the current version resolves, proving we reached the per-bucket loop
+      expect(res.currentVersion).toBe('1.0.0');
+      expect(res.updates).toBeEmpty();
+    });
+
     it('applies versionCompatibility for maven', async () => {
       config.currentValue = '12.4.2.jre8';
       config.packageName = 'com.microsoft.sqlserver:mssql-jdbc';
@@ -4266,9 +4737,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '12.6.2.jre11' },
         ],
       });
-      postprocessMavenRelease.mockImplementationOnce((_, x) =>
-        Promise.resolve(x),
-      );
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
 
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -4337,6 +4806,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(res).toEqual({
+        currentCompatibility: '-slim',
         currentVersion: 'bullseye',
         fixedVersion: 'bullseye',
         isSingleVersion: true,
@@ -5493,6 +5963,7 @@ describe('workers/repository/process/lookup/index', () => {
             newPatch: 0,
             newValue: '1.3.0',
             newVersion: '1.3.0',
+            downloadUrl: 'https://registry.npmjs.org/q/-/q-1.3.0.tgz',
             newVersionAgeInDays: expect.any(Number),
             releaseTimestamp: expect.any(String),
             updateType: 'major',
@@ -6296,6 +6767,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.packageName = 'vue';
+      config.depName = 'vue';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       config.ignoreUnstable = true;
@@ -6376,6 +6848,10 @@ describe('workers/repository/process/lookup/index', () => {
             newPatch: 1,
             newValue: '3.8.1',
             newVersion: '3.8.1',
+            newDigest:
+              'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+            downloadUrl:
+              'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
             newVersionAgeInDays: expect.any(Number),
             releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
             updateType: 'minor',
@@ -6407,6 +6883,10 @@ describe('workers/repository/process/lookup/index', () => {
             newPatch: 1,
             newValue: '3.8.1',
             newVersion: '3.8.1',
+            newDigest:
+              'sha512-5ZXLWWsMqHKFr5y0N3Eo5IIisxeEeRAajNq4mELb/WELOR7srdbQk2N5XiyNy2A/AgvlR3AmeBCZJW8lHrolbw==',
+            downloadUrl:
+              'https://registry.npmjs.org/webpack/-/webpack-3.8.1.tgz',
             newVersionAgeInDays: expect.any(Number),
             releaseTimestamp: '2017-10-17T15:22:36.646Z' as Timestamp,
             updateType: 'minor',
@@ -6450,10 +6930,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),
@@ -6473,6 +6955,40 @@ describe('workers/repository/process/lookup/index', () => {
           releaseTimestamp: '2024-05-09T18:34:42.000Z' as Timestamp,
           updateType: 'digest',
           hasAttestation: undefined,
+        },
+      ]);
+    });
+
+    it('uses updateType=digest for pseudo-versions of a major version module', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v2.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'github.com/foo/bar/v2';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope('https://proxy.golang.org/github.com/foo/bar/v2')
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/@latest')
+        .reply(200, { Version: 'v2.0.0-20240509183442-62759503f434' });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(404)
+        .post('/graphql')
+        .reply(404);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          newDigest: '62759503f434',
+          newValue: 'v2.0.0-20240509183442-62759503f434',
+          updateType: 'digest',
         },
       ]);
     });
@@ -6505,10 +7021,12 @@ describe('workers/repository/process/lookup/index', () => {
         )
         .get('/@v/list')
         .reply(200, '')
-        .get('/v2/@v/list')
-        .reply(404)
         .get('/@latest')
         .reply(200, { Version: newVersion });
+      httpMock
+        .scope('https://google.golang.org')
+        .get('/genproto/googleapis/rpc?go-get=1')
+        .reply(404);
 
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(config),

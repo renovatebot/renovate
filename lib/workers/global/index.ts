@@ -157,6 +157,7 @@ export async function start(): Promise<number> {
   }
 
   let config: AllConfig;
+  let repoExitCode = 0;
   const env = getEnv();
   try {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
@@ -165,24 +166,35 @@ export async function start(): Promise<number> {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SESSION_TOKEN)) {
       addSecretForSanitizing(env.AWS_SESSION_TOKEN, 'global');
     }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_TOKEN)) {
+      addSecretForSanitizing(env.COREPACK_NPM_TOKEN, 'global');
+    }
+    if (isNonEmptyStringAndNotWhitespace(env.COREPACK_NPM_PASSWORD)) {
+      addSecretForSanitizing(env.COREPACK_NPM_PASSWORD, 'global');
+    }
 
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
       // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
+      // `platform`, `endpoint` and `internalHostAccess` are set here too, so that the platform's own initialization requests - which happen inside `globalInitialize()`, before the config below is set - are judged by the administrator's `internalHostAccess` setting, and are recognized as going to the platform endpoint
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
+        endpoint: config.endpoint,
+        internalHostAccess: config.internalHostAccess,
+        platform: config.platform,
         userAgent: config.userAgent,
       });
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
+      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used, now that platform initialization may have changed them
       GlobalConfig.set({
         allowedHeaders: config.allowedHeaders,
         platform: config.platform,
         endpoint: config.endpoint,
+        internalHostAccess: config.internalHostAccess,
         userAgent: config.userAgent,
       });
 
@@ -217,7 +229,7 @@ export async function start(): Promise<number> {
       }
 
       const { owner, repo } = repositoryToOwnerAndRepo(
-        typeof repository === 'string' ? repository : repository.repository,
+        isString(repository) ? repository : repository.repository,
       );
 
       await instrument(
@@ -227,7 +239,10 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            for (const rule of repoConfig.hostRules) {
+              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host, and exempt from `allowedHeaders` altogether
+              hostRules.add(rule, { trusted: true });
+            }
             repoConfig.hostRules = [];
           }
 
@@ -235,7 +250,11 @@ export async function start(): Promise<number> {
           queue.clear();
           throttle.clear();
 
-          await repositoryWorker.renovateRepository(repoConfig);
+          const repoResult =
+            await repositoryWorker.renovateRepository(repoConfig);
+          if (config.exitCodeForErrors && !repoExitCode) {
+            repoExitCode = repoResult?.exitCode ?? 0;
+          }
           setMeta({});
         },
         {
@@ -244,10 +263,9 @@ export async function start(): Promise<number> {
             [ATTR_VCS_OWNER_NAME]: owner,
             [ATTR_VCS_REPOSITORY_NAME]: repo,
             /** @deprecated TODO remove */
-            repository:
-              typeof repository === 'string'
-                ? repository
-                : repository.repository,
+            repository: isString(repository)
+              ? repository
+              : repository.repository,
           },
         },
       );
@@ -276,6 +294,13 @@ export async function start(): Promise<number> {
         `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
       );
     }
+  }
+  if (repoExitCode) {
+    logger.info(
+      { exitCode: repoExitCode },
+      'Renovate is exiting with an error-specific code due to a repository error',
+    );
+    return repoExitCode;
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {

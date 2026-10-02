@@ -4,22 +4,8 @@ import { regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PackageDependency } from '../../types.ts';
+import type { NpmManagerData, NpmUrlParsedResult } from '../types.ts';
 import { HomebrewUrlHandler } from './base.ts';
-
-// URL parsing result
-export interface NpmUrlParsedResult {
-  type: 'npm';
-  currentValue: string;
-  packageName: string;
-}
-
-// Manager data with type discriminator
-export interface NpmManagerData {
-  type: 'npm';
-  packageName: string;
-  sha256: string | null;
-  url: string | null;
-}
 
 export class NpmUrlHandler extends HomebrewUrlHandler {
   readonly type = 'npm';

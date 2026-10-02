@@ -70,6 +70,38 @@ describe('workers/repository/update/pr/body/index', () => {
       expect(res).toBeEmptyString();
     });
 
+    it('leaves an upgrade with no links unlinked', () => {
+      template.compile.mockImplementation((x) => x);
+
+      const upgrade = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        depName: 'some-dep',
+      };
+
+      getPrBody(
+        {
+          manager: 'some-manager',
+          baseBranch: 'base',
+          branchName: 'some-branch',
+          upgrades: [upgrade],
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'base',
+          },
+        },
+        {},
+      );
+
+      expect(upgrade).toMatchObject({
+        depNameLinked: 'some-dep',
+        references: '',
+      });
+    });
+
     it('massages upgrades', () => {
       template.compile.mockImplementation((x) => x);
 

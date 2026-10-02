@@ -6,6 +6,7 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
   ExtractConfig,
@@ -110,8 +111,8 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   );
 
   const registryNames = new Set([
-    ...Object.keys(config.registries ?? {}),
-    ...Object.keys(config.source ?? {}),
+    ...Object.keys(coerceObject(config.registries)),
+    ...Object.keys(coerceObject(config.source)),
   ]);
   for (const registryName of registryNames) {
     result[registryName] = resolveRegistryIndex(registryName, config);
@@ -170,7 +171,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<CargoManagerData> | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
-  const cargoConfig = (await readCargoConfig()) ?? {};
+  const cargoConfig = coerceObject(await readCargoConfig());
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
   const parsedCargoManifest = CargoManifest.safeParse(content);

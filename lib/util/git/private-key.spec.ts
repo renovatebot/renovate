@@ -22,7 +22,10 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 vi.mock('../exec/index.ts', () => ({ exec: mockFn() }));
-vi.mock('../sanitize.ts', () => ({ addSecretForSanitizing: mockFn() }));
+vi.mock('../sanitize.ts', () => ({
+  addSecretForSanitizing: mockFn(),
+  clearRepoSanitizedSecretsList: mockFn(),
+}));
 
 const exec = mockedExtended(exec_);
 const sanitize = mockedExtended(sanitize_);
@@ -214,8 +217,8 @@ some-private-key
         cwd: repoDir,
       });
 
-      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
-      expect(await fs.pathExists(publicKeyFile)).toBeTrue();
+      await expect(fs.pathExists(privateKeyFile)).resolves.toBeTrue();
+      await expect(fs.pathExists(publicKeyFile)).resolves.toBeTrue();
 
       processExitSpy.mockImplementationOnce(() => undefined as never);
     });
@@ -243,7 +246,7 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
 
-      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
+      await expect(fs.pathExists(privateKeyFile)).resolves.toBeTrue();
     });
   });
 
