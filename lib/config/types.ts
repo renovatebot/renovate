@@ -776,6 +776,11 @@ export interface RenovateStringOption extends RenovateOptionBase {
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
+
+  /**
+   * The keys the object accepts, for an option whose keys are a known set rather than the user's choice.
+   */
+  properties?: Record<string, unknown>;
   mergeable?: boolean;
   type: 'object';
 }
