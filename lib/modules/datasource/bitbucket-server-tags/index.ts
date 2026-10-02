@@ -33,11 +33,11 @@ export class BitbucketServerTagsDatasource extends GitHostTagsDigestDatasource<B
     return `${ensureTrailingSlash(res)}rest/api/1.0/`;
   }
 
-  getRegistryUrl(registryUrl?: string): string {
+  protected getRegistryUrl(registryUrl?: string): string {
     return BitbucketServerTagsDatasource.getRegistryURL(registryUrl ?? '');
   }
 
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     const [projectKey, repositorySlug] = packageName.split('/');
     const url = this.getRegistryUrl(registryUrl);
     return joinUrlParts(url, 'projects', projectKey, 'repos', repositorySlug);
