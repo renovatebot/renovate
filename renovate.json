@@ -76,11 +76,6 @@
       "enabled": false
     },
     {
-      "description": "@yarnpkg/core 4.9.2 was published with a yarn-only `patch:` dependency that npm cannot install, see https://github.com/yarnpkg/berry/issues/7281",
-      "matchPackageNames": ["@yarnpkg/core"],
-      "allowedVersions": "!/^4\\.9\\.2$/"
-    },
-    {
       "description": "require approval on next branch",
       "matchPackageNames": ["*"],
       "matchBaseBranches": ["next"],
