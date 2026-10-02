@@ -13,6 +13,7 @@ import {
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
 } from '../types.ts';
+import { sharedScopes } from './scopes.ts';
 
 /**
  * The constraints which a Containerbase tool defines, as the keys of an object option.
@@ -654,6 +655,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'draftPR',
+    scopes: sharedScopes,
     description:
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
@@ -996,6 +998,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardApproval',
+    scopes: sharedScopes,
     description:
       'Controls if updates need manual approval from the Dependency Dashboard issue before PRs are created.',
     type: 'boolean',
@@ -1571,6 +1574,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'azureWorkItemId',
+    scopes: sharedScopes,
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
@@ -1587,6 +1591,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'autoApprove',
+    scopes: sharedScopes,
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
@@ -2074,6 +2079,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchPrefix',
+    scopes: sharedScopes,
     description: 'Prefix to use for all branch names.',
     stage: 'branch',
     type: 'string',
@@ -2082,6 +2088,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchPrefixOld',
+    scopes: sharedScopes,
     description: 'Old branchPrefix value to check for existing PRs.',
     stage: 'branch',
     type: 'string',
@@ -2205,6 +2212,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Semantic commit / Semantic release
   {
     name: 'semanticCommits',
+    scopes: sharedScopes,
     description: 'Enable Semantic Commit prefixes for commits and PR titles.',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
@@ -2212,6 +2220,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'semanticCommitType',
+    scopes: sharedScopes,
     description: 'Commit type to use if Semantic Commits is enabled.',
     type: 'string',
     default: 'chore',
@@ -2219,6 +2228,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'semanticCommitScope',
+    scopes: sharedScopes,
     description: 'Commit scope to use if Semantic Commits are enabled.',
     type: 'string',
     default: 'deps',
@@ -2227,6 +2237,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageLowerCase',
+    scopes: sharedScopes,
     description: 'Lowercase PR- and commit titles.',
     type: 'string',
     allowedValues: ['auto', 'never'],
@@ -2235,6 +2246,7 @@ const options: Readonly<RenovateOptions>[] = [
   // PR Behavior
   {
     name: 'keepUpdatedLabel',
+    scopes: sharedScopes,
     description:
       'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
@@ -2256,6 +2268,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'recreateWhen',
+    scopes: sharedScopes,
     description: 'Recreate PRs even if same ones were closed previously.',
     type: 'string',
     default: 'auto',
@@ -2263,6 +2276,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rebaseWhen',
+    scopes: sharedScopes,
     description: 'Controls when Renovate rebases an existing branch.',
     type: 'string',
     allowedValues: [
@@ -2276,12 +2290,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rebaseLabel',
+    scopes: sharedScopes,
     description: 'Label to request a rebase from Renovate.',
     type: 'string',
     default: 'rebase',
   },
   {
     name: 'stopUpdatingLabel',
+    scopes: sharedScopes,
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
@@ -2369,6 +2385,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prCreation',
+    scopes: sharedScopes,
     description: 'When to create the PR for a branch.',
     type: 'string',
     allowedValues: ['immediate', 'not-pending', 'status-success', 'approval'],
@@ -2376,6 +2393,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prNotPendingHours',
+    scopes: sharedScopes,
     description: 'Timeout in hours for when `prCreation=not-pending`.',
     type: 'integer',
     default: 25,
@@ -2452,6 +2470,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bbAutoResolvePrTasks',
+    scopes: sharedScopes,
     description:
       'The PR tasks will be automatically completed after the PR is raised.',
     type: 'boolean',
@@ -2460,6 +2479,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bbUseDefaultReviewers',
+    scopes: sharedScopes,
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
@@ -2569,6 +2589,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pruneBranchAfterAutomerge',
+    scopes: sharedScopes,
     description: 'Set to `true` to enable branch pruning after automerging.',
     type: 'boolean',
     default: true,
@@ -2576,6 +2597,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Default templates
   {
     name: 'branchName',
+    scopes: sharedScopes,
     description: 'Branch name template.',
     type: 'string',
     default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
@@ -2586,6 +2608,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'additionalBranchPrefix',
+    scopes: sharedScopes,
     description: 'Additional string value to be appended to `branchPrefix`.',
     type: 'string',
     default: '',
@@ -2594,6 +2617,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchTopic',
+    scopes: sharedScopes,
     description: 'Branch topic.',
     type: 'string',
     default:
@@ -2603,6 +2627,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessage',
+    scopes: sharedScopes,
     description: 'Message to use for commit messages and pull request titles.',
     type: 'string',
     default:
@@ -2614,6 +2639,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitBody',
+    scopes: sharedScopes,
     description:
       'Commit message body template. Will be appended to commit message, separated by two line returns.',
     type: 'string',
@@ -2622,6 +2648,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitBodyTable',
+    scopes: sharedScopes,
     description:
       'If enabled, append a table in the commit message body describing all updates in the commit.',
     type: 'boolean',
@@ -2629,6 +2656,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitTrailers',
+    scopes: sharedScopes,
     description:
       'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
     type: 'array',
@@ -2640,6 +2668,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessagePrefix',
+    scopes: sharedScopes,
     description:
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
     type: 'string',
@@ -2649,6 +2678,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageAction',
+    scopes: sharedScopes,
     description: 'Action verb to use in commit messages and PR titles.',
     type: 'string',
     default: 'Update',
@@ -2658,6 +2688,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageTopic',
+    scopes: sharedScopes,
     description:
       'The upgrade topic/noun used in commit messages and PR titles.',
     type: 'string',
@@ -2668,6 +2699,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageExtra',
+    scopes: sharedScopes,
     description:
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
@@ -2679,6 +2711,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageSuffix',
+    scopes: sharedScopes,
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
     cli: false,
@@ -2687,6 +2720,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyTemplate',
+    scopes: sharedScopes,
     description:
       'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
@@ -2697,6 +2731,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prTitle',
+    scopes: sharedScopes,
     description:
       'Pull Request title template. Inherits from `commitMessage` if null.',
     type: 'string',
@@ -2708,6 +2743,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prTitleStrict',
+    scopes: sharedScopes,
     description:
       'Whether to bypass appending extra context to the Pull Request title.',
     type: 'boolean',
@@ -2717,12 +2753,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prHeader',
+    scopes: sharedScopes,
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
     supportsTemplating: true,
   },
   {
     name: 'prFooter',
+    scopes: sharedScopes,
     description:
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
@@ -2763,6 +2801,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'hashedBranchLength',
+    scopes: sharedScopes,
     description:
       'If enabled, branch names will use a hashing function to ensure each branch has that length.',
     type: 'integer',
@@ -2812,6 +2851,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Pull Request options
   {
     name: 'labels',
+    scopes: sharedScopes,
     description: 'Labels to set in Pull Request.',
     type: 'array',
     subType: 'string',
@@ -2819,6 +2859,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'addLabels',
+    scopes: sharedScopes,
     description: 'Labels to add to Pull Request.',
     type: 'array',
     subType: 'string',
@@ -2827,6 +2868,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assignees',
+    scopes: sharedScopes,
     description:
       'Assignees for Pull Request (either username or email address depending on the platform).',
     type: 'array',
@@ -2834,6 +2876,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assigneesFromCodeOwners',
+    scopes: sharedScopes,
     description:
       'Determine assignees based on configured code owners and changes in PR.',
     type: 'boolean',
@@ -2841,6 +2884,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'expandCodeOwnersGroups',
+    scopes: sharedScopes,
     description:
       'Expand the configured code owner groups into a full list of group members.',
     type: 'boolean',
@@ -2849,12 +2893,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assigneesSampleSize',
+    scopes: sharedScopes,
     description: 'Take a random sample of given size from `assignees`.',
     type: 'integer',
     default: null,
   },
   {
     name: 'assignAutomerge',
+    scopes: sharedScopes,
     description:
       'Assign reviewers and assignees even if the PR is to be automerged.',
     type: 'boolean',
@@ -2862,6 +2908,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreReviewers',
+    scopes: sharedScopes,
     description:
       'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
     type: 'array',
@@ -2869,6 +2916,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewers',
+    scopes: sharedScopes,
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',
     type: 'array',
@@ -2876,6 +2924,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewersFromCodeOwners',
+    scopes: sharedScopes,
     description:
       'Determine reviewers based on configured code owners and changes in PR.',
     type: 'boolean',
@@ -2883,6 +2932,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'filterUnavailableUsers',
+    scopes: sharedScopes,
     description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
@@ -2906,12 +2956,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewersSampleSize',
+    scopes: sharedScopes,
     description: 'Take a random sample of given size from `reviewers`.',
     type: 'integer',
     default: null,
   },
   {
     name: 'additionalReviewers',
+    scopes: sharedScopes,
     description:
       'Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it).',
     type: 'array',
@@ -3232,6 +3284,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyDefinitions',
+    scopes: sharedScopes,
     description: 'Table column definitions to use in PR tables.',
     type: 'object',
     freeChoice: true,
@@ -3261,6 +3314,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyHeadingDefinitions',
+    scopes: sharedScopes,
     description: 'Table header definitions to use in PR tables.',
     type: 'object',
     freeChoice: true,
@@ -3275,6 +3329,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyColumns',
+    scopes: sharedScopes,
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
@@ -3282,6 +3337,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyNotes',
+    scopes: sharedScopes,
     description:
       'List of extra notes or templates to include in the Pull Request body.',
     type: 'array',
@@ -3293,6 +3349,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'suppressNotifications',
+    scopes: sharedScopes,
     description:
       'Options to suppress various types of warnings and other notifications.',
     type: 'array',
@@ -3329,6 +3386,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitLabIgnoreApprovals',
+    scopes: sharedScopes,
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
@@ -3583,6 +3641,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'platformAutomerge',
+    scopes: sharedScopes,
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
@@ -3614,6 +3673,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'platformCommit',
+    scopes: sharedScopes,
     description:
       'Use platform API to perform commits instead of using Git directly.',
     type: 'string',
@@ -3623,6 +3683,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchNameStrict',
+    scopes: sharedScopes,
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',
     default: false,
@@ -3688,6 +3749,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'milestone',
+    scopes: sharedScopes,
     description: `The number of a milestone. If set, the milestone will be set when Renovate creates the PR.`,
     type: 'integer',
     default: null,
