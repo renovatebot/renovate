@@ -579,6 +579,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'constraintsFiltering',
+    scopes: lookupScopes,
     description: 'Perform release filtering based on language constraints.',
     type: 'string',
     allowedValues: ['none', 'strict'],
@@ -763,6 +764,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'customDatasources',
+    scopes: lookupScopes,
     description: 'Defines custom datasources for usage by managers.',
     type: 'object',
     experimental: true,
@@ -1630,6 +1632,7 @@ const options: Readonly<RenovateOptions>[] = [
   // depType
   {
     name: 'ignoreDeps',
+    scopes: lookupScopes,
     description: 'Dependencies to ignore.',
     type: 'array',
     subType: 'string',
@@ -2398,6 +2401,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'abandonmentThreshold',
+    scopes: lookupScopes,
     description:
       'Flags packages that have not been updated within this period as abandoned.',
     type: 'string',
@@ -3959,6 +3963,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'constraintsVersioning',
+    scopes: lookupScopes,
     description:
       'Override the versioning scheme used when filtering releases by specific constraint names. Does not apply to tools.',
     type: 'object',
