@@ -1,9 +1,18 @@
+import type { ValidateFunction } from 'ajv';
+import { Ajv } from 'ajv';
+import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
 import type { RenovateOptions } from '../../../lib/config/types.ts';
 import { allManagersList } from '../../../lib/modules/manager/index.ts';
 import { partial } from '../../../test/util.ts';
 import type { DocsHeadings } from '../schema.ts';
-import { getOptionDocsUrl, readAllDocsHeadings } from '../schema.ts';
+import {
+  buildSchema,
+  getOptionDocsUrl,
+  readAllDocsHeadings,
+} from '../schema.ts';
+
+const addFormats = _addFormats as unknown as typeof _addFormats.default;
 
 const managers = new Set<string>(allManagersList);
 
@@ -18,6 +27,12 @@ function option(overrides: Partial<RenovateOptions>): RenovateOptions {
 
 function headings(repo: string[], global: string[] = []): DocsHeadings {
   return { repo: new Set(repo), global: new Set(global) };
+}
+
+async function compileSchema(isGlobal = false): Promise<ValidateFunction> {
+  const ajv = new Ajv({ schemaId: '$id', strict: false });
+  addFormats(ajv);
+  return ajv.compile(await buildSchema({ isGlobal }));
 }
 
 describe('tools/docs/test/schema', () => {
@@ -76,6 +91,33 @@ describe('tools/docs/test/schema', () => {
       ).toBe(
         'https://docs.renovatebot.com/self-hosted-configuration/#onboarding',
       );
+    });
+  });
+
+  describe('object options', () => {
+    let repoSchema: ValidateFunction;
+    let globalSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+      globalSchema = await compileSchema(true);
+    });
+
+    it('allows a map of values to use any key', () => {
+      expect(globalSchema({ secrets: { enabled: 'a-secret' } })).toBeTrue();
+      expect(
+        repoSchema({ registryAliases: { labels: 'https://example.com' } }),
+      ).toBeTrue();
+    });
+
+    it('validates the values of a map', () => {
+      expect(globalSchema({ secrets: { MY_TOKEN: 123 } })).toBeFalse();
+      expect(repoSchema({ registryAliases: { docker: 123 } })).toBeFalse();
+    });
+
+    it('validates an option which nests a config as a config', () => {
+      expect(globalSchema({ force: { automerge: true } })).toBeTrue();
+      expect(globalSchema({ force: { automerge: 'nope' } })).toBeFalse();
     });
   });
 
