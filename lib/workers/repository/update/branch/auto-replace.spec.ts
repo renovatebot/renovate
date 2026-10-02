@@ -516,7 +516,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'activemodel';
       upgrade.newValue = "'~> 5.0', '!= 4.2.5'";
       upgrade.packageFile = 'Gemfile';
+
       const res = await doAutoReplace(upgrade, gemfile, reuseExistingBranch);
+
       expect(res).toBe(
         gemfile
           .replace(upgrade.depName, upgrade.newName)
@@ -543,7 +545,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       })!;
       upgrade.depIndex = 0;
       upgrade.packageFile = 'foo.gemspec';
+
       const res = await doAutoReplace(upgrade, gemspec, reuseExistingBranch);
+
       expect(upgrade.newValue).toBe('"~> 7.0"');
       expect(res).toBe(gemspec.replace(upgrade.currentValue, upgrade.newValue));
     });
@@ -567,7 +571,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       })!;
       upgrade.depIndex = 0;
       upgrade.packageFile = 'foo.gemspec';
+
       const res = await doAutoReplace(upgrade, gemspec, reuseExistingBranch);
+
       // ~> and < both fall out of range for 6.0.0; >= 4.2.1 still holds
       expect(upgrade.newValue).toBe('"~> 6.0", "< 6.0.1", ">= 4.2.1"');
       expect(res).toBe(gemspec.replace(upgrade.currentValue, upgrade.newValue));

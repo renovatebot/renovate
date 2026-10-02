@@ -24,6 +24,7 @@ describe('modules/manager/gemspec/artifacts', () => {
 
   it('returns null when there is no sibling Gemfile.lock', async () => {
     fs.localPathExists.mockResolvedValue(false);
+
     await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(fs.readLocalFile).not.toHaveBeenCalled();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
@@ -32,6 +33,7 @@ describe('modules/manager/gemspec/artifacts', () => {
   it('returns null when there is no sibling Gemfile', async () => {
     fs.localPathExists.mockResolvedValue(true);
     fs.readLocalFile.mockResolvedValue(null);
+
     await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
@@ -41,6 +43,7 @@ describe('modules/manager/gemspec/artifacts', () => {
     fs.readLocalFile.mockResolvedValue(
       "source 'https://rubygems.org'\n# gemspec\ngem 'rack'\n",
     );
+
     await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
@@ -105,6 +108,7 @@ describe('modules/manager/gemspec/artifacts', () => {
       },
     ];
     lock.runBundlerLock.mockResolvedValue(result);
+
     await expect(updateArtifacts(updateArtifact)).resolves.toBe(result);
     expect(lock.runBundlerLock).toHaveBeenCalledWith(
       updateArtifact,

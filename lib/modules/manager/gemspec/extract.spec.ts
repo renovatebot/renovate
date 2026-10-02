@@ -17,7 +17,10 @@ describe('modules/manager/gemspec/extract', () => {
         gem.add_dependency "rack", "~> 3.0"
       end
     `;
-    expect(extractPackageFile(content)).toEqual({
+
+    const res = extractPackageFile(content);
+
+    expect(res).toEqual({
       deps: [
         {
           depName: 'semantic_logger',
@@ -44,7 +47,10 @@ describe('modules/manager/gemspec/extract', () => {
   it('captures multi-part restriction constraints in full', () => {
     const content =
       'spec.add_runtime_dependency "activesupport", "~> 4.2", "!= 4.2.5", ">= 4.2.1"';
-    expect(extractPackageFile(content)?.deps[0]).toEqual({
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps[0]).toEqual({
       depName: 'activesupport',
       depType: 'runtime',
       datasource: 'rubygems',
@@ -56,7 +62,10 @@ describe('modules/manager/gemspec/extract', () => {
     const content = codeBlock`
       spec.add_dependency("graphql", "~> 1.9.19") # pinned intentionally
     `;
-    expect(extractPackageFile(content)?.deps[0]).toEqual({
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps[0]).toEqual({
       depName: 'graphql',
       depType: 'runtime',
       datasource: 'rubygems',
@@ -70,7 +79,10 @@ describe('modules/manager/gemspec/extract', () => {
       spec.add_runtime_dependency "foo", Foo::VERSION
       spec.add_dependency "bar", "~> 1.0", Bar::VERSION
     `;
-    expect(extractPackageFile(content)?.deps).toEqual([
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
       {
         depName: 'rake',
         depType: 'runtime',
@@ -97,7 +109,10 @@ describe('modules/manager/gemspec/extract', () => {
       spec.add_dependency "foo", "~> #{Foo::VERSION}"
       spec.add_runtime_dependency 'bar', "= #{version}"
     `;
-    expect(extractPackageFile(content)?.deps).toEqual([
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
       {
         depName: 'foo',
         depType: 'runtime',
@@ -119,7 +134,10 @@ describe('modules/manager/gemspec/extract', () => {
         spec.add_dependency "my-framework-#{variant}", '~> 1.0'
       end
     `;
-    expect(extractPackageFile(content)?.deps).toEqual([
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
       {
         depName: 'my-framework-#{variant}',
         depType: 'runtime',
@@ -136,7 +154,10 @@ describe('modules/manager/gemspec/extract', () => {
         spec.add_dependency "bar", "~> 2.0"
       end
     `;
-    expect(extractPackageFile(content)?.deps).toEqual([
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
       {
         depName: 'bar',
         depType: 'runtime',
