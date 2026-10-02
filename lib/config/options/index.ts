@@ -2149,6 +2149,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Major/Minor/Patch
   {
     name: 'major',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `major`.',
     stage: 'package',
     type: 'object',
@@ -2158,6 +2159,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minor',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `minor`.',
     stage: 'package',
     type: 'object',
@@ -2167,6 +2169,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'patch',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `patch`.',
     stage: 'package',
     type: 'object',
@@ -2176,6 +2179,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pin',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `pin`.',
     stage: 'package',
     type: 'object',
@@ -2194,6 +2198,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'digest',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description:
       'Configuration to apply when updating a digest (no change in tag/version).',
     stage: 'package',
@@ -2208,6 +2213,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pinDigest',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description:
       'Configuration to apply when pinning a digest (no change in tag/version).',
     stage: 'package',
@@ -2226,6 +2232,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rollback',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when rolling back a version.',
     stage: 'package',
     type: 'object',
@@ -2239,6 +2246,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'replacement',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when replacing a dependency.',
     stage: 'package',
     type: 'object',
@@ -2840,6 +2848,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'lockFileMaintenance',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration for lock file maintenance.',
     stage: 'branch',
     type: 'object',
