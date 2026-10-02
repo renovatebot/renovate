@@ -14,7 +14,7 @@ import {
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
 } from '../types.ts';
-import { sharedScopes } from './scopes.ts';
+import { lookupScopes, sharedScopes } from './scopes.ts';
 
 /**
  * The constraints which a Containerbase tool defines, as the keys of an object option.
@@ -1550,6 +1550,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'extractVersion',
+    scopes: lookupScopes,
     description:
       "A regex (`re2`) to extract a version from a datasource's raw version string.",
     type: 'string',
@@ -1559,6 +1560,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'versionCompatibility',
+    scopes: lookupScopes,
     description:
       'A regex (`re2`) with named capture groups to show how version and compatibility are split from a raw version string.',
     type: 'string',
@@ -1568,6 +1570,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'versioning',
+    scopes: lookupScopes,
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
     allowedValues: [...AllVersioningsListLiteral],
@@ -1986,12 +1989,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pinDigests',
+    scopes: lookupScopes,
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',
     default: false,
   },
   {
     name: 'separateMajorMinor',
+    scopes: lookupScopes,
     description:
       'If set to `false`, Renovate will upgrade dependencies to their latest release only. Renovate will not separate major or minor branches.',
     type: 'boolean',
@@ -1999,6 +2004,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMultipleMajor',
+    scopes: lookupScopes,
     description:
       'If set to `true`, PRs will be raised separately for each available `major` upgrade version.',
     stage: 'package',
@@ -2007,6 +2013,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMultipleMinor',
+    scopes: lookupScopes,
     description:
       'If set to `true`, Renovate creates separate PRs for each `minor` stream.',
     stage: 'package',
@@ -2016,6 +2023,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMinorPatch',
+    scopes: lookupScopes,
     description:
       'If set to `true`, Renovate will separate `minor` and `patch` updates into separate branches.',
     type: 'boolean',
@@ -2023,6 +2031,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreUnstable',
+    scopes: lookupScopes,
     description: 'Ignore versions with unstable SemVer.',
     stage: 'package',
     type: 'boolean',
@@ -2030,6 +2039,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreDeprecated',
+    scopes: lookupScopes,
     description:
       'Avoid upgrading from a non-deprecated version to a deprecated one.',
     stage: 'package',
@@ -2038,6 +2048,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'followTag',
+    scopes: lookupScopes,
     description: 'If defined, packages will follow this release tag exactly.',
     stage: 'package',
     type: 'string',
@@ -2047,6 +2058,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'maxMajorIncrement',
+    scopes: lookupScopes,
     description:
       'Limit the maximum major version increment allowed. Set to 0 to disable.',
     stage: 'package',
@@ -2057,6 +2069,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'respectLatest',
+    scopes: lookupScopes,
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',
     type: 'boolean',
@@ -2064,6 +2077,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rangeStrategy',
+    scopes: lookupScopes,
     description: 'Determines how to modify or update existing ranges.',
     type: 'string',
     default: 'auto',
@@ -2263,6 +2277,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rollbackPrs',
+    scopes: lookupScopes,
     description:
       'Create PRs to roll back versions if the current version is not found in the registry.',
     type: 'boolean',
@@ -2314,12 +2329,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumReleaseAge',
+    scopes: [...lookupScopes, 'updateType'],
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
   },
   {
     name: 'minimumReleaseAgeBehaviour',
+    scopes: [...lookupScopes, 'updateType'],
     description:
       'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
     type: 'string',
@@ -2328,6 +2345,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumReleaseAgeBuffer',
+    scopes: [...lookupScopes, 'updateType'],
     description:
       'Extra time added to `minimumReleaseAge` before an update is considered stable.',
     type: 'string',
@@ -2369,6 +2387,7 @@ const options: Readonly<RenovateOptions>[] = [
   */
   {
     name: 'internalChecksFilter',
+    scopes: [...lookupScopes, 'updateType'],
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
@@ -3611,6 +3630,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updatePinnedDependencies',
+    scopes: lookupScopes,
     description:
       'Whether to update pinned (single version) dependencies or not.',
     type: 'boolean',
