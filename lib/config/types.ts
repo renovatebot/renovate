@@ -736,6 +736,11 @@ export interface RenovateOptionBase {
   allowNegative?: boolean;
 
   /**
+   * Whether the option can be set to `null`, which is implied when it defaults to it.
+   */
+  nullable?: boolean;
+
+  /**
    * Managers which support this option, leave undefined if all managers support it.
    */
   supportedManagers?: string[];
