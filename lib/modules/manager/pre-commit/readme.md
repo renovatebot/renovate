@@ -29,8 +29,7 @@ Alternatively, add `:enablePreCommit` to your `extends` array.
 
 ### Frozen revisions
 
-Renovate cannot change a `rev` from the pinned tag format (e.g. `rev: vX.Y.Z`) to the pinned SHA format (e.g.
-`rev: 0123456789abcdef0123456789abcdef01234567  # frozen: vX.Y.Z`) written by `pre-commit autoupdate --freeze`.
+Renovate cannot change a `rev` from the pinned tag format (e.g. `rev: vX.Y.Z`) to the pinned SHA format (e.g. `rev: 0123456789abcdef0123456789abcdef01234567  # frozen: vX.Y.Z`) written by `pre-commit autoupdate --freeze`.
 If you freeze the revs yourself, Renovate keeps the frozen format when it updates a frozen `rev`.
 
 ### Additional Dependencies
