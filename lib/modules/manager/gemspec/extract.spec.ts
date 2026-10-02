@@ -145,4 +145,23 @@ describe('modules/manager/gemspec/extract', () => {
       },
     ]);
   });
+
+  it('skips semicolon-joined declarations without updating either', () => {
+    const content = codeBlock`
+      Gem::Specification.new do |spec|
+        spec.add_dependency "foo", "~> 1.0"; spec.add_dependency "bar", "~> 2.0"
+      end
+    `;
+
+    const res = extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'foo',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        skipReason: 'unspecified-version',
+      },
+    ]);
+  });
 });
