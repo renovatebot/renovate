@@ -181,10 +181,28 @@ describe('tools/docs/test/schema', () => {
       ).toBe('must be string');
     });
 
-    it('validates a map which does not declare its values as a nested config', () => {
-      expect(schemaError(repoSchema, { env: { automerge: 'true' } })).toBe(
-        'must be boolean',
+    it('allows an environment variable named after a config option', () => {
+      expect(
+        schemaError(repoSchema, { env: { automerge: 'true' } }),
+      ).toBeUndefined();
+
+      expect(schemaError(repoSchema, { env: { GOPROXY: 123 } })).toBe(
+        'must be string',
       );
+    });
+
+    it('validates the values of a map against their allowed values', () => {
+      expect(
+        schemaError(repoSchema, {
+          statusCheckWhen: { artifactError: 'failed' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, {
+          statusCheckWhen: { artifactError: 'sometimes' },
+        }),
+      ).toBe('must be equal to one of the allowed values');
     });
 
     it('does not validate the children of an option which nests a config', () => {
