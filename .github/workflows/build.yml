@@ -814,6 +814,9 @@ jobs:
       - name: Pack
         run: pnpm test-e2e:pack
 
+      - name: Check npm install
+        run: pnpm test-e2e:npm
+
       - name: Install dependencies
         run: pnpm test-e2e:install
 
