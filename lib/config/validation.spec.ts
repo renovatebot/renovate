@@ -721,7 +721,7 @@ describe('config/validation', () => {
         {
           topic: 'allowedVersions',
           message:
-            '"allowedVersions" can\'t be used in ".". Allowed objects: packageRules.',
+            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -801,22 +801,22 @@ describe('config/validation', () => {
         {
           topic: 'ansible.minor.matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'ansible.minor.matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -1725,13 +1725,13 @@ describe('config/validation', () => {
         {
           topic: 'managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
           ),
         },
         {
           topic: 'npm.minor.managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+            `"managerFilePatterns" can't be used in "minor", as it can only be used `,
           ),
         },
       ]);
@@ -1776,7 +1776,7 @@ describe('config/validation', () => {
         {
           topic: 'hostType',
           message:
-            '"hostType" can\'t be used in ".". Allowed objects: hostRules.',
+            '"hostType" can\'t be used at the top level of a config, as it can only be used in `hostRules`.',
         },
       ]);
     });
@@ -3177,7 +3177,7 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);
@@ -3203,7 +3203,7 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);
