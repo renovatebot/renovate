@@ -495,6 +495,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'extends',
+    scopes: ['any'],
     description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
@@ -504,6 +505,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignorePresets',
+    scopes: ['any'],
     description:
       'A list of presets to ignore, including any that are nested inside an `extends` array.',
     stage: 'package',
@@ -548,6 +550,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'description',
+    scopes: ['any'],
     description: 'Plain text description for a config or preset.',
     type: 'array',
     subType: 'string',
@@ -559,6 +562,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'overrideDescription',
+    scopes: ['any'],
     description:
       'Description which replaces the descriptions of any presets which this config extends.',
     type: 'array',
@@ -1119,6 +1123,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'encrypted',
+    scopes: ['any'],
     description:
       'An object containing configuration encrypted with project key.',
     stage: 'repository',
