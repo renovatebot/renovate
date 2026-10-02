@@ -1,7 +1,14 @@
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { coerceArray } from '../../util/array.ts';
 import type { AllowedParents, ConfigScope, RenovateOptions } from '../types.ts';
-import { UpdateTypesOptions } from '../types.ts';
+import { UpdateTypesOptions, configScopes } from '../types.ts';
+
+const scopeDescriptions: Record<ConfigScope, string> = {
+  repo: 'at the top level of a config',
+  packageRule: 'in a `packageRules` entry',
+  manager: "in a manager's config",
+  updateType: "in an update type's config",
+};
 
 const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   repo: ['.'],
@@ -30,4 +37,45 @@ export function getAllowedParents(
   }
 
   return [...parents];
+}
+
+/**
+ * A description of everywhere an option can be used, for telling someone where they can move it to.
+ *
+ * Returns `undefined` for an option which can be used anywhere.
+ */
+export function describeAllowedLocations(
+  option: RenovateOptions,
+): string | undefined {
+  if (!getAllowedParents(option)) {
+    return undefined;
+  }
+
+  const scopes = new Set(coerceArray(option.scopes));
+  if (option.parents?.includes('.')) {
+    scopes.add('repo');
+  }
+
+  const locations = configScopes
+    .filter((scope) => scopes.has(scope))
+    .map((scope) => scopeDescriptions[scope]);
+
+  const parents = coerceArray(option.parents)
+    .filter((parent) => parent !== '.')
+    .toSorted();
+  if (parents.length) {
+    locations.push(
+      `in ${joinWithOr(parents.map((parent) => `\`${parent}\``))}`,
+    );
+  }
+
+  return joinWithOr(locations);
+}
+
+function joinWithOr(parts: string[]): string {
+  if (parts.length < 2) {
+    return parts.join('');
+  }
+
+  return `${parts.slice(0, -1).join(', ')} or ${parts.at(-1)}`;
 }
