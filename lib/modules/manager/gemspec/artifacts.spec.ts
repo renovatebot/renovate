@@ -24,7 +24,7 @@ describe('modules/manager/gemspec/artifacts', () => {
 
   it('returns null when there is no sibling Gemfile.lock', async () => {
     fs.localPathExists.mockResolvedValue(false);
-    expect(await updateArtifacts(updateArtifact)).toBeNull();
+    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(fs.readLocalFile).not.toHaveBeenCalled();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
@@ -32,7 +32,7 @@ describe('modules/manager/gemspec/artifacts', () => {
   it('returns null when there is no sibling Gemfile', async () => {
     fs.localPathExists.mockResolvedValue(true);
     fs.readLocalFile.mockResolvedValue(null);
-    expect(await updateArtifacts(updateArtifact)).toBeNull();
+    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
 
@@ -41,9 +41,54 @@ describe('modules/manager/gemspec/artifacts', () => {
     fs.readLocalFile.mockResolvedValue(
       "source 'https://rubygems.org'\n# gemspec\ngem 'rack'\n",
     );
-    expect(await updateArtifacts(updateArtifact)).toBeNull();
+    await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     expect(lock.runBundlerLock).not.toHaveBeenCalled();
   });
+
+  it.each`
+    directive
+    ${"gemspec name: 'bar'"}
+    ${'gemspec :name => "bar"'}
+    ${"gemspec path: 'other'"}
+    ${"gemspec name: 'foo', path: '../foo'"}
+  `(
+    'returns null when `$directive` targets a different gemspec',
+    async ({ directive }: { directive: string }) => {
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValue(
+        `source 'https://rubygems.org'\n\n${directive}\n`,
+      );
+
+      const res = await updateArtifacts(updateArtifact);
+
+      expect(res).toBeNull();
+      expect(lock.runBundlerLock).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each`
+    directive
+    ${'gemspec'}
+    ${"gemspec name: 'foo'"}
+    ${'gemspec(:name => "foo", :path => ".")'}
+    ${"gemspec path: './', development_group: :test"}
+  `(
+    'delegates to runBundlerLock when `$directive` targets the gemspec',
+    async ({ directive }: { directive: string }) => {
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValue(
+        `source 'https://rubygems.org'\n\n${directive}\n`,
+      );
+      lock.runBundlerLock.mockResolvedValue(null);
+
+      await updateArtifacts(updateArtifact);
+
+      expect(lock.runBundlerLock).toHaveBeenCalledWith(
+        updateArtifact,
+        'sub/Gemfile.lock',
+      );
+    },
+  );
 
   it('delegates to runBundlerLock when the Gemfile uses the gemspec directive', async () => {
     fs.localPathExists.mockResolvedValue(true);
@@ -60,7 +105,7 @@ describe('modules/manager/gemspec/artifacts', () => {
       },
     ];
     lock.runBundlerLock.mockResolvedValue(result);
-    expect(await updateArtifacts(updateArtifact)).toBe(result);
+    await expect(updateArtifacts(updateArtifact)).resolves.toBe(result);
     expect(lock.runBundlerLock).toHaveBeenCalledWith(
       updateArtifact,
       'sub/Gemfile.lock',

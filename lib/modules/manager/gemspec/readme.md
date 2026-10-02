@@ -12,8 +12,9 @@ end
 
 ### Lock file maintenance
 
-When a sibling `Gemfile` uses the [`gemspec` directive](https://bundler.io/guides/creating_gem.html) and a sibling `Gemfile.lock` exists, Renovate refreshes the lock file with Bundler after changing a constraint.
-If the `Gemfile` has no `gemspec` directive, or there is no `Gemfile.lock`, then Renovate only updates the `*.gemspec` file.
+When a sibling `Gemfile` loads the `*.gemspec` file with the [`gemspec` directive](https://bundler.io/guides/creating_gem.html) and a sibling `Gemfile.lock` exists, Renovate refreshes the lock file with Bundler after changing a constraint.
+A `gemspec` directive loads the file when its `name:` option is absent or matches the file name, and its `path:` option is absent or `.`.
+Otherwise, Renovate only updates the `*.gemspec` file.
 
 ### Limitations
 
