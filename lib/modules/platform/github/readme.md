@@ -130,7 +130,8 @@ GitHub processes the merge in the background, so Renovate waits a short time for
 If the merge is not done by then, Renovate checks the PR again on its next run.
 
 Renovate asks GitHub to bypass the repository rules that Renovate is permitted to bypass, which matches how the classic merge endpoint behaves.
-If GitHub refuses the direct merge and the base branch has a merge queue, Renovate adds the PR to the merge queue.
+If the base branch has a merge queue, GitHub merges the PR directly when Renovate may bypass the merge queue, and otherwise adds the PR to the merge queue.
+On branches with a merge queue, `automergeStrategy=auto` lets GitHub use the repository's default merge method.
 
 GitHub Enterprise Server versions that do not have the asynchronous merge API yet fall back to the classic merge endpoint.
 

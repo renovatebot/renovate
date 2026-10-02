@@ -2250,12 +2250,20 @@ async function asyncMergePr(
   prNo: number,
   strategy?: MergeStrategy,
 ): Promise<boolean | 'unsupported'> {
+  const queueEnabled =
+    !!pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch));
+  // GitHub merges directly when the actor may bypass the merge queue and
+  // enqueues the PR otherwise
   const body: Record<string, unknown> = {
-    merge_action: 'direct_merge',
+    merge_action: 'default',
     bypass_rules: true,
   };
   const mergeMethod = mapMergeStartegy(strategy) ?? config.mergeMethod;
-  if (mergeMethod) {
+  // GitHub refuses a merge method once the merge queue takes over ("Custom
+  // merge params are not supported when merging via a merge queue"), so only
+  // send it on queue branches when the user configured an explicit strategy
+  const explicitStrategy = !!strategy && strategy !== 'auto';
+  if (mergeMethod && (!queueEnabled || explicitStrategy)) {
     body.merge_method = mergeMethod;
   }
 
@@ -2272,14 +2280,12 @@ async function asyncMergePr(
 
   logger.debug(
     { pr: prNo, message: outcome.details.message },
-    'GitHub refused the direct merge',
+    'GitHub refused the merge',
   );
-  if (
-    !pr?.targetBranch ||
-    !(await isBranchMergeQueueEnabled(pr.targetBranch))
-  ) {
+  if (!queueEnabled || !body.merge_method) {
     return false;
   }
+  // The failure may be the merge queue rejecting the merge method
   return asyncEnqueuePr(prNo);
 }
 
