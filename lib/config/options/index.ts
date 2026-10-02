@@ -452,6 +452,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'statusCheckNames',
+    scopes: sharedScopes,
     description: 'Custom strings to use as status check names.',
     type: 'object',
     mergeable: true,
@@ -472,6 +473,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'statusCheckWhen',
+    scopes: sharedScopes,
     description:
       'Control when each Renovate status check is set on branches. Keys match `statusCheckNames`.',
     type: 'object',
@@ -1029,6 +1031,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardCategory',
+    scopes: sharedScopes,
     description:
       'The category to group branches on the Dependency Dashboard issue.',
     type: 'string',
@@ -1917,6 +1920,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'replacementApproach',
+    scopes: sharedScopes,
     description:
       'Select whether to perform a direct replacement or alias replacement.',
     type: 'string',
@@ -3022,6 +3026,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'forkModeDisallowMaintainerEdits',
+    scopes: sharedScopes,
     description:
       'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
     type: 'boolean',
@@ -3103,6 +3108,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'constraints',
+    scopes: sharedScopes,
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
@@ -3741,6 +3747,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'userStrings',
+    scopes: sharedScopes,
     description:
       'User-facing strings for the Renovate comment when a PR is closed.',
     type: 'object',
