@@ -159,7 +159,7 @@ export async function runBundlerLock(
       toolConstraints: [
         {
           toolName: 'ruby',
-          constraint: await getRubyConstraint(updateArtifact),
+          constraint: await getRubyConstraint(updateArtifact, lockFileName),
         },
         {
           toolName: 'bundler',
