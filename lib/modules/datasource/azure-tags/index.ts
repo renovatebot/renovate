@@ -11,12 +11,12 @@ export class AzureTagsDatasource extends GitHostTagsDatasource {
     super(AzureTagsDatasource.id);
   }
 
-  getRegistryUrl(registryUrl?: string): string {
+  protected getRegistryUrl(registryUrl?: string): string {
     // the Azure DevOps organization URL is always known
     return registryUrl!;
   }
 
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     const normalizedUrl = ensureTrailingSlash(this.getRegistryUrl(registryUrl));
     return `${normalizedUrl}_git/${packageName}`;
   }
