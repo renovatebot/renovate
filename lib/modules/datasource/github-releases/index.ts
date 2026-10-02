@@ -1,4 +1,5 @@
 import { isBoolean } from '@sindresorhus/is';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { logger } from '../../../logger/index.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import { findCommitOfTag } from '../../../util/github/tags.ts';
@@ -13,7 +14,7 @@ import type {
 } from '../types.ts';
 
 export class GithubReleasesDatasource extends Datasource<GithubHttp> {
-  static id = 'github-releases';
+  static readonly id: DatasourceName = 'github-releases';
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com'];
@@ -21,7 +22,7 @@ export class GithubReleasesDatasource extends Datasource<GithubHttp> {
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
-  override readonly releaseTimestampNote: string =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `releaseTimestamp` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
