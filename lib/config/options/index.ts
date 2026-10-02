@@ -398,6 +398,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'configMigration',
+    scopes: ['repo'],
     description: 'Enable this to get config migration PRs when needed.',
     stage: 'repository',
     type: 'boolean',
@@ -678,6 +679,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'printConfig',
+    scopes: ['repo'],
     description:
       'If enabled, Renovate logs the fully resolved config for each repository, plus the fully resolved presets.',
     type: 'boolean',
@@ -859,6 +861,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'forkProcessing',
+    scopes: ['repo'],
     description:
       'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
@@ -985,6 +988,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Dependency Dashboard
   {
     name: 'dependencyDashboard',
+    scopes: ['repo'],
     description:
       'Whether to create a "Dependency Dashboard" issue in the repository.',
     type: 'boolean',
@@ -999,6 +1003,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardAutoclose',
+    scopes: ['repo'],
     description:
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
@@ -1006,6 +1011,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardTitle',
+    scopes: ['repo'],
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
@@ -1021,6 +1027,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardHeader',
+    scopes: ['repo'],
     description:
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
@@ -1030,6 +1037,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardFooter',
+    scopes: ['repo'],
     description:
       'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
     type: 'string',
@@ -1037,6 +1045,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardLabels',
+    scopes: ['repo'],
     description:
       'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
     type: 'array',
@@ -1045,6 +1054,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
+    scopes: ['repo'],
     description:
       'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
     type: 'string',
@@ -1054,6 +1064,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'configWarningReuseIssue',
+    scopes: ['repo'],
     description:
       'Set this to `true` to make Renovate reuse/reopen an existing closed Config Warning issue, instead of opening a new one each time.',
     type: 'boolean',
@@ -1353,6 +1364,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'baseBranchPatterns',
+    scopes: ['repo'],
     description:
       'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
@@ -1362,6 +1374,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'useBaseBranchConfig',
+    scopes: ['repo'],
     description:
       'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
@@ -2310,6 +2323,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardReportAbandonment',
+    scopes: ['repo'],
     description:
       'Controls whether abandoned packages are reported in the dependency dashboard.',
     type: 'boolean',
@@ -2544,6 +2558,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'osvVulnerabilityAlerts',
+    scopes: ['repo'],
     description: 'Use vulnerability alerts from `osv.dev`.',
     type: 'boolean',
     default: false,
@@ -2714,6 +2729,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'customizeDashboard',
+    scopes: ['repo'],
     description: 'Customize sections in the Dependency Dashboard issue.',
     type: 'object',
     default: {},
@@ -2975,6 +2991,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'hostRules',
+    scopes: ['repo'],
     description: 'Host rules/configuration including credentials.',
     type: 'array',
     subType: 'object',
@@ -3296,6 +3313,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pruneStaleBranches',
+    scopes: ['repo'],
     description: 'Set to `false` to disable pruning stale branches.',
     type: 'boolean',
     default: true,
@@ -3315,6 +3333,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'customManagers',
+    scopes: ['repo'],
     description: 'Custom managers using regex matching.',
     type: 'array',
     subType: 'object',
@@ -3475,6 +3494,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'cloneSubmodules',
+    scopes: ['repo'],
     description:
       'Set to `true` to initialize submodules during repository clone.',
     type: 'boolean',
@@ -3482,6 +3502,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'cloneSubmodulesFilter',
+    scopes: ['repo'],
     description:
       'List of submodules names or patterns to clone when cloneSubmodules=true.',
     type: 'array',
