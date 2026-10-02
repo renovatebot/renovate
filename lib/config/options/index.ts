@@ -1432,6 +1432,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'enabledManagers',
+    scopes: ['repo'],
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
@@ -1441,6 +1442,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'includePaths',
+    scopes: ['repo', 'manager'],
     description: 'Include package files only within these defined paths.',
     type: 'array',
     subType: 'string',
@@ -1450,6 +1452,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignorePaths',
+    scopes: ['repo', 'manager'],
     description:
       'Skip any package file whose path matches one of these. Can be a string or glob pattern.',
     type: 'array',
