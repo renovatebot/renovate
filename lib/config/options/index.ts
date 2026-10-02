@@ -761,6 +761,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'customDatasources',
+    scopes: lookupScopes,
     description: 'Defines custom datasources for usage by managers.',
     type: 'object',
     experimental: true,
@@ -2621,6 +2622,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'vulnerabilityAlerts',
+    scopes: ['repo'],
     description:
       'Config to apply when a PR is needed due to a vulnerability in the existing package version.',
     type: 'object',
@@ -3802,6 +3804,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'logLevelRemap',
+    scopes: ['repo'],
     description: 'Remap log levels to different levels.',
     type: 'array',
     subType: 'object',
