@@ -303,10 +303,8 @@ describe('tools/docs/test/schema', () => {
       return rejected;
     }
 
-    it('rejects some of the presets we ship', () => {
-      expect(getPresetsRejectedBySchema()).toEqual([
-        'default:semanticCommitScopeDisabled -> must be string',
-      ]);
+    it('accepts every preset we ship', () => {
+      expect(getPresetsRejectedBySchema()).toBeEmptyArray();
     });
   });
 
