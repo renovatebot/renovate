@@ -260,42 +260,7 @@ function addChildrenToParents(
       getChildrenSchema(definitions[parent]).allOf = [
         {
           type: 'object',
-          properties: {
-            description: {
-              oneOf: [
-                {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    description:
-                      'A custom description for this configuration object',
-                  },
-                },
-                {
-                  type: 'string',
-                  description:
-                    'A custom description for this configuration object',
-                },
-              ],
-            },
-            overrideDescription: {
-              oneOf: [
-                {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    description:
-                      'Description which replaces the descriptions of any presets which this config extends',
-                  },
-                },
-                {
-                  type: 'string',
-                  description:
-                    'Description which replaces the descriptions of any presets which this config extends',
-                },
-              ],
-            },
-          },
+          properties: {},
         },
       ];
     }
