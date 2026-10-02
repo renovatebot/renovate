@@ -24,10 +24,6 @@ function inferHashAlg(digest: string): string {
 export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
   static override readonly id = 'github-release-attachments';
 
-  // Note: not sure
-  override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `releaseTimestamp` field in the results.';
-
   constructor() {
     super(GithubReleaseAttachmentsDatasource.id);
   }
