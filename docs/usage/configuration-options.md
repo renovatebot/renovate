@@ -280,7 +280,8 @@ This matches how GitHub's classic merge endpoint behaves.
 Renovate merges a PR itself when `automergeType=pr` and either `platformAutomerge=false` or the platform automerge was not possible.
 
 Set `automergeBypassRules` to `false` to have GitHub enforce those rules.
-If the PR still needs reviews or a merge queue, Renovate adds it to the merge queue when the base branch has one, otherwise the PR stays open.
+If the base branch has a merge queue, GitHub then adds the PR to the merge queue instead of merging it directly.
+Otherwise a PR that still needs reviews stays open.
 
 This option has no effect on GitHub's native auto-merge (`platformAutomerge=true`), which never bypasses rules.
 It also has no effect on GitHub Enterprise Server versions without the asynchronous merge API, where the classic merge endpoint always bypasses the rules.
@@ -331,6 +332,7 @@ You may choose from these values:
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
+On GitHub branches with a merge queue, `auto` uses the repository's default merge method.
 
 If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
 In that case you'll have to set a supported automerge strategy.
