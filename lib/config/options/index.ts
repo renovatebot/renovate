@@ -1597,6 +1597,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'azureWorkItemType',
+    scopes: ['repo'],
     description:
       'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on Azure DevOps.',
     type: 'string',
@@ -2993,6 +2994,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'confidential',
+    scopes: ['repo'],
     description:
       'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
