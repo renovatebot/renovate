@@ -123,6 +123,17 @@ The [GitHub App associated email](https://github.community/t/logging-into-git-as
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
+## Merging pull requests
+
+Renovate merges PRs with GitHub's [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously).
+GitHub processes the merge in the background, so Renovate waits a short time for the result.
+If the merge is not done by then, Renovate checks the PR again on its next run.
+
+Renovate asks GitHub to bypass the repository rules that Renovate is permitted to bypass, which matches how the classic merge endpoint behaves.
+If GitHub refuses the direct merge and the base branch has a merge queue, Renovate adds the PR to the merge queue.
+
+GitHub Enterprise Server versions that do not have the asynchronous merge API yet fall back to the classic merge endpoint.
+
 ## Package Registry Credentials
 
 When Renovate runs against repositories on `github.com`, and the environment variable `RENOVATE_X_GITHUB_HOST_RULES` is set, then Renovate automatically provisions `hostRules` for these GitHub Packages registries using the platform token:

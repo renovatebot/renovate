@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+} from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
@@ -99,6 +104,7 @@ import {
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
+  MergeAsyncResult,
 } from './schema.ts';
 import type {
   AggregatedVulnerabilities,
@@ -131,6 +137,9 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
+
+const asyncMergeMaxPollAttempts = 5;
+const asyncMergePollBaseDelayMs = 500;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -2218,6 +2227,207 @@ export async function mergePr({
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   const pr = await getPr(prNo);
+  if (isAsyncMergeUsable()) {
+    const merged = await asyncMergePr(pr, prNo, strategy);
+    if (merged !== 'unsupported') {
+      return merged;
+    }
+  }
+  return legacyMergePr(pr, prNo, strategy);
+}
+
+function isAsyncMergeUsable(): boolean {
+  if (!isGithubEnterpriseServer(platformConfig.host)) {
+    return true;
+  }
+  return platformConfig.asyncMergeSupported !== false;
+}
+
+type AsyncMergeOutcome = MergeAsyncResult | 'unsupported' | 'rejected';
+
+async function asyncMergePr(
+  pr: GhPr | null,
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean | 'unsupported'> {
+  const body: Record<string, unknown> = {
+    merge_action: 'direct_merge',
+    bypass_rules: true,
+  };
+  const mergeMethod = mapMergeStartegy(strategy) ?? config.mergeMethod;
+  if (mergeMethod) {
+    body.merge_method = mergeMethod;
+  }
+
+  const outcome = await requestAsyncMerge(prNo, body);
+  if (outcome === 'unsupported') {
+    return outcome;
+  }
+  if (outcome === 'rejected') {
+    return false;
+  }
+  if (outcome.status !== 'failed') {
+    return handleAsyncMergeResult(prNo, outcome);
+  }
+
+  logger.debug(
+    { pr: prNo, message: outcome.details.message },
+    'GitHub refused the direct merge',
+  );
+  if (
+    !pr?.targetBranch ||
+    !(await isBranchMergeQueueEnabled(pr.targetBranch))
+  ) {
+    return false;
+  }
+  return asyncEnqueuePr(prNo);
+}
+
+async function asyncEnqueuePr(prNo: number): Promise<boolean> {
+  const outcome = await requestAsyncMerge(prNo, {
+    merge_action: 'merge_queue',
+  });
+  if (isString(outcome)) {
+    return false;
+  }
+  if (outcome.status === 'failed') {
+    logger.debug(
+      { pr: prNo, message: outcome.details.message },
+      'Failed to add PR to the merge queue',
+    );
+    return false;
+  }
+  return handleAsyncMergeResult(prNo, outcome);
+}
+
+function handleAsyncMergeResult(
+  prNo: number,
+  result: MergeAsyncResult,
+): boolean {
+  if (result.status === 'merged') {
+    logger.debug({ automergeResult: result.details, pr: prNo }, 'PR merged');
+    cacheMergedPr(prNo);
+    return true;
+  }
+  if (result.status === 'enqueued') {
+    // The PR is in the merge queue, so it must not be cached as merged
+    logger.debug(`PR #${prNo} is in the merge queue`);
+    return true;
+  }
+  logger.info(
+    { pr: prNo, uuid: result.details.uuid },
+    'Async merge still pending after polling, will check again next run',
+  );
+  return false;
+}
+
+async function requestAsyncMerge(
+  prNo: number,
+  body: Record<string, unknown>,
+): Promise<AsyncMergeOutcome> {
+  const url = `repos/${
+    config.parentRepo ?? config.repository
+  }/pulls/${prNo}/merge-async`;
+  const result = await sendAsyncMergeRequest(url, prNo, body);
+  if (isString(result) || result.status !== 'pending') {
+    return result;
+  }
+  return pollAsyncMerge(url, prNo, result);
+}
+
+async function sendAsyncMergeRequest(
+  url: string,
+  prNo: number,
+  body: Record<string, unknown>,
+): Promise<AsyncMergeOutcome> {
+  const options: GithubHttpOptions = { body };
+  if (config.forkToken) {
+    options.token = config.forkToken;
+  }
+  logger.debug({ options, url }, 'mergePr');
+  try {
+    const res = await githubApi.putJson(url, options, MergeAsyncResult);
+    platformConfig.asyncMergeSupported = true;
+    return res.body;
+  } catch (err) {
+    return handleAsyncMergeError(err, prNo);
+  }
+}
+
+function handleAsyncMergeError(err: any, prNo: number): AsyncMergeOutcome {
+  const response = err.response?.body;
+  if (err.statusCode === 409) {
+    const pending = MergeAsyncResult.safeParse(response);
+    if (pending.success && pending.data.details.uuid) {
+      platformConfig.asyncMergeSupported = true;
+      return pending.data;
+    }
+  }
+  if (err.statusCode === 400) {
+    platformConfig.asyncMergeSupported = true;
+    logger.debug(
+      { pr: prNo, message: response?.details?.message },
+      'GitHub refused the async merge request',
+    );
+    return 'rejected';
+  }
+  if (
+    err.statusCode === 404 &&
+    isGithubEnterpriseServer(platformConfig.host) &&
+    platformConfig.asyncMergeSupported === undefined
+  ) {
+    platformConfig.asyncMergeSupported = false;
+    logger.debug(
+      'async merge API not available on this GitHub Enterprise Server, falling back to the merge endpoint',
+    );
+    return 'unsupported';
+  }
+  logger.warn({ err }, 'Failed to merge PR');
+  return 'rejected';
+}
+
+async function pollAsyncMerge(
+  url: string,
+  prNo: number,
+  pending: MergeAsyncResult,
+): Promise<AsyncMergeOutcome> {
+  const uuid = pending.details.uuid;
+  if (!uuid) {
+    return pending;
+  }
+  let result: AsyncMergeOutcome = pending;
+  for (let attempt = 1; attempt <= asyncMergeMaxPollAttempts; attempt++) {
+    await setTimeout(asyncMergePollBaseDelayMs * attempt ** 2);
+    result = await fetchAsyncMergeStatus(`${url}/${uuid}`, prNo);
+    if (isString(result) || result.status !== 'pending') {
+      return result;
+    }
+  }
+  return result;
+}
+
+async function fetchAsyncMergeStatus(
+  url: string,
+  prNo: number,
+): Promise<AsyncMergeOutcome> {
+  try {
+    const res = await githubApi.getJson(
+      url,
+      { memCache: false },
+      MergeAsyncResult,
+    );
+    return res.body;
+  } catch (err) {
+    logger.warn({ err, pr: prNo }, 'Failed to fetch async merge status');
+    return 'rejected';
+  }
+}
+
+async function legacyMergePr(
+  pr: GhPr | null,
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean> {
   if (await directMergePr(prNo, strategy)) {
     return true;
   }
@@ -2227,6 +2437,13 @@ export async function mergePr({
     return tryEnqueuePr(pr);
   }
   return false;
+}
+
+function cacheMergedPr(prNo: number): void {
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    cachePr({ ...cachedPr, state: 'merged' });
+  }
 }
 
 async function directMergePr(
@@ -2326,10 +2543,7 @@ async function directMergePr(
     { automergeResult: automergeResult!.body, pr: prNo },
     'PR merged',
   );
-  const cachedPr = config.prList?.find(({ number }) => number === prNo);
-  if (cachedPr) {
-    cachePr({ ...cachedPr, state: 'merged' });
-  }
+  cacheMergedPr(prNo);
   return true;
 }
 
