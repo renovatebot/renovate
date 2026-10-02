@@ -304,6 +304,26 @@ describe('tools/docs/test/schema', () => {
       ).toBe('must be string');
     });
 
+    it('suggests the host types we know about, without constraining them', () => {
+      expect(
+        schemaError(repoSchema, {
+          hostRules: [{ hostType: 'github', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, {
+          hostRules: [{ hostType: 'something-we-do-not-know', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, {
+          hostRules: [{ hostType: 123, matchHost: 'x' }],
+        }),
+      ).toBe('must be string');
+    });
+
     it('suggests the datasources and categories we know about', () => {
       expect(
         schemaError(repoSchema, {
