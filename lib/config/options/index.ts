@@ -1,7 +1,6 @@
 import { isArray, isObject } from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
-import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import type { ConstraintDefinition } from '../../util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
@@ -11,7 +10,6 @@ import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
   type RenovateOptions,
-  UpdateTypesOptions,
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
 } from '../types.ts';
@@ -568,14 +566,8 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'package',
     type: 'boolean',
     default: true,
-    parents: [
-      '.',
-      'packageRules',
-      ...AllManagersListLiteral,
-      'hostRules',
-      'vulnerabilityAlerts',
-      ...UpdateTypesOptions,
-    ],
+    scopes: ['repo', 'packageRule', 'manager', 'updateType'],
+    parents: ['hostRules', 'vulnerabilityAlerts'],
   },
   {
     name: 'constraintsFiltering',
@@ -2919,7 +2911,8 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
-    parents: [...AllManagersListLiteral, 'customManagers'],
+    scopes: ['manager'],
+    parents: ['customManagers'],
   },
   {
     name: 'postUpdateOptions',
