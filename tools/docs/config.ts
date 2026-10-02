@@ -137,6 +137,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'properties',
     'requiresCheckAtTrustBoundary',
   ];
   obj.forEach(([key, val]) => {
