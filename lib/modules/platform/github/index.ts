@@ -2221,6 +2221,7 @@ async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
 
 export async function mergePr({
   branchName,
+  bypassRules,
   id: prNo,
   strategy,
 }: MergePRConfig): Promise<boolean> {
@@ -2228,10 +2229,15 @@ export async function mergePr({
 
   const pr = await getPr(prNo);
   if (isAsyncMergeUsable()) {
-    const merged = await asyncMergePr(pr, prNo, strategy);
+    const merged = await asyncMergePr(pr, prNo, strategy, bypassRules);
     if (merged !== 'unsupported') {
       return merged;
     }
+  }
+  if (bypassRules === false) {
+    logger.debug(
+      'The classic merge endpoint cannot honour automergeBypassRules=false',
+    );
   }
   return legacyMergePr(pr, prNo, strategy);
 }
@@ -2249,10 +2255,11 @@ async function asyncMergePr(
   pr: GhPr | null,
   prNo: number,
   strategy?: MergeStrategy,
+  bypassRules?: boolean,
 ): Promise<boolean | 'unsupported'> {
   const body: Record<string, unknown> = {
     merge_action: 'direct_merge',
-    bypass_rules: true,
+    bypass_rules: bypassRules ?? true,
   };
   const mergeMethod = mapMergeStartegy(strategy) ?? config.mergeMethod;
   if (mergeMethod) {

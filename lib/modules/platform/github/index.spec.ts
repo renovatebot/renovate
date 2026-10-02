@@ -6095,6 +6095,22 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('asks GitHub to enforce the rules if bypassRules is false', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      scope
+        .put(asyncUrl, { ...directMergeBody, bypass_rules: false })
+        .reply(200, merged());
+      await initRepoWithPr(scope);
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        bypassRules: false,
+      });
+
+      expect(res).toBeTrue();
+    });
+
     it('returns true if the PR is already merged', async () => {
       const scope = httpMock.scope(githubApiHost);
       scope.put(asyncUrl).reply(200, merged());
@@ -6422,6 +6438,29 @@ describe('modules/platform/github/index', () => {
         expect(res2).toBeTrue();
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'async merge API not available on this GitHub Enterprise Server, falling back to the merge endpoint',
+        );
+      });
+
+      it('logs that the merge endpoint cannot honour bypassRules=false', async () => {
+        const scope = httpMock.scope(gheApiHost);
+        initRepoMock(scope, 'some/repo');
+        prListMock(scope, 1234);
+        scope
+          .put(gheAsyncUrl)
+          .reply(404, { message: 'Not Found' })
+          .put('/repos/some/repo/pulls/1234/merge')
+          .reply(200);
+        await github.initRepo({ repository: 'some/repo' });
+
+        const res = await github.mergePr({
+          id: 1234,
+          branchName: 'b',
+          bypassRules: false,
+        });
+
+        expect(res).toBeTrue();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'The classic merge endpoint cannot honour automergeBypassRules=false',
         );
       });
 

@@ -271,6 +271,22 @@ You must select at least one status check in the _Require status checks to pass 
 
 If you don't select any status check, and you use platform automerge, then GitHub might automerge PRs with failing tests!
 
+## `automergeBypassRules`
+
+This option only works on GitHub.
+
+When Renovate merges a PR itself, it asks GitHub to bypass the branch protections and repository rules that the Renovate account or app is permitted to bypass.
+This matches how GitHub's classic merge endpoint behaves.
+Renovate merges a PR itself when `automergeType=pr` and either `platformAutomerge=false` or the platform automerge was not possible.
+
+Set `automergeBypassRules` to `false` to have GitHub enforce those rules.
+If the PR still needs reviews or a merge queue, Renovate adds it to the merge queue when the base branch has one, otherwise the PR stays open.
+
+This option has no effect on GitHub's native auto-merge (`platformAutomerge=true`), which never bypasses rules.
+It also has no effect on GitHub Enterprise Server versions without the asynchronous merge API, where the classic merge endpoint always bypasses the rules.
+
+Read the [GitHub Docs, about bypass permissions](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets#about-bypass-permissions) to learn who can bypass rulesets.
+
 ## `automergeComment`
 
 Use this only if you configure `automergeType="pr-comment"`.

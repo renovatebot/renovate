@@ -2404,6 +2404,14 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
   },
   {
+    name: 'automergeBypassRules',
+    description:
+      'Whether Renovate may bypass branch protections and repository rules it is permitted to bypass when it merges a PR itself. Used only if `automergeType=pr`.',
+    type: 'boolean',
+    default: true,
+    supportedPlatforms: ['github'],
+  },
+  {
     name: 'automergeComment',
     description:
       'PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.',
