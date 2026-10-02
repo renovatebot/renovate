@@ -399,9 +399,6 @@ export async function buildSchema({
       }
       return isGlobal;
     }
-
-    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
-    throw new Error(`Unhandled case for \`${o.name}\``);
   });
 
   configurationOptions.sort((a, b) => {

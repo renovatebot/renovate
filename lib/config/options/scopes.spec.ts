@@ -1,13 +1,19 @@
 import { partial } from '../../../test/util.ts';
-import type { RenovateOptions, RenovateStringOption } from '../types.ts';
+import type {
+  ConfigScope,
+  RenovateOptions,
+  RenovateStringOption,
+} from '../types.ts';
 import {
   describeAllowedLocations,
   getAllowedParents,
   sharedScopes,
 } from './scopes.ts';
 
-function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
-  return partial<RenovateStringOption>({
+function option(
+  overrides: Partial<RenovateStringOption & { scopes: ConfigScope[] }>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { scopes: ConfigScope[] }>({
     name: 'anOption',
     description: 'A description',
     type: 'string',
