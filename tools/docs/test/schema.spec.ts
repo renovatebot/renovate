@@ -2,6 +2,7 @@ import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
+import { groups } from '../../../lib/config/presets/internal/index.ts';
 import type {
   RenovateOptions,
   RenovateStringOption,
@@ -270,6 +271,41 @@ describe('tools/docs/test/schema', () => {
         'must be array',
         'must be string',
         'must match exactly one schema in oneOf',
+      ]);
+    });
+  });
+
+  describe('internal presets', () => {
+    let repoSchema: ValidateFunction;
+    let globalSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+      globalSchema = await compileSchema({ isGlobal: true });
+    });
+
+    function getPresetsRejectedBySchema(): string[] {
+      const rejected: string[] = [];
+
+      for (const [group, presets] of Object.entries(groups)) {
+        /* the `global:` presets configure the Renovate instance, so are only valid in a global config */
+        const validate = group === 'global' ? globalSchema : repoSchema;
+
+        for (const [name, preset] of Object.entries(presets)) {
+          if (!validate(preset)) {
+            rejected.push(
+              `${group}:${name} -> ${validate.errors?.[0]?.message}`,
+            );
+          }
+        }
+      }
+
+      return rejected;
+    }
+
+    it('rejects some of the presets we ship', () => {
+      expect(getPresetsRejectedBySchema()).toEqual([
+        'default:semanticCommitScopeDisabled -> must be string',
       ]);
     });
   });
