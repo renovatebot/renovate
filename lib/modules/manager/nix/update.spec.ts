@@ -169,6 +169,83 @@ describe('modules/manager/nix/update', () => {
       });
     });
 
+    describe('GitLab sources', () => {
+      it('updates a path ref', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              home-manager.url = "gitlab:rycee/home-manager/release-24.05";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'home-manager',
+            currentValue: 'release-24.05',
+            newValue: 'release-25.05',
+          },
+        });
+
+        expect(result).toContain('gitlab:rycee/home-manager/release-25.05');
+        expect(result).not.toContain('gitlab:rycee/home-manager/release-24.05');
+      });
+    });
+
+    describe('SourceHut sources', () => {
+      it('updates a path ref', () => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              firefox-addons.url = "sourcehut:~rycee/nur-expressions/release-24.05";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'firefox-addons',
+            currentValue: 'release-24.05',
+            newValue: 'release-25.05',
+          },
+        });
+
+        expect(result).toContain(
+          'sourcehut:~rycee/nur-expressions/release-25.05',
+        );
+        expect(result).not.toContain(
+          'sourcehut:~rycee/nur-expressions/release-24.05',
+        );
+      });
+    });
+
+    describe('Nix channel sources', () => {
+      it.each`
+        oldUrl                                                         | newUrl
+        ${'https://channels.nixos.org/nixpkgs-24.05/nixexprs.tar.xz'}  | ${'https://channels.nixos.org/nixpkgs-25.05/nixexprs.tar.xz'}
+        ${'https://nixos.org/channels/nixpkgs-24.05/nixexprs.tar.zst'} | ${'https://nixos.org/channels/nixpkgs-25.05/nixexprs.tar.zst'}
+      `('updates the channel in $oldUrl', ({ oldUrl, newUrl }) => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              nixpkgs.url = "${oldUrl}";
+            };
+          }
+        `;
+        const result = updateDependency({
+          fileContent,
+          upgrade: {
+            depName: 'nixpkgs',
+            currentValue: 'nixpkgs-24.05',
+            newValue: 'nixpkgs-25.05',
+          },
+        });
+
+        expect(result).toContain(newUrl);
+        expect(result).not.toContain(oldUrl);
+      });
+    });
+
     describe('Git sources', () => {
       it('updates branch ref with refs/heads/ prefix', () => {
         const fileContent = codeBlock`
@@ -537,6 +614,33 @@ describe('modules/manager/nix/update', () => {
       expect(result).toContain(
         'nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"',
       );
+    });
+
+    it('does not update a nested override when the root input is complex', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            foo = {
+              url = "github:owner/foo";
+              inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+            };
+            nixpkgs = {
+              flake = true;
+              url = "github:NixOS/nixpkgs/nixos-24.05";
+            };
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs',
+          currentValue: '24.05',
+          newValue: '25.05',
+        },
+      });
+
+      expect(result).toBe(fileContent);
     });
 
     it('does not match complex attribute sets', () => {

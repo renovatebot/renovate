@@ -25,7 +25,7 @@ function replaceVersion(
   return value.replace(currentValue, newValue);
 }
 
-function updateGithubPath(
+function updateFlakePath(
   url: string,
   currentValue?: string,
   newValue?: string,
@@ -33,7 +33,7 @@ function updateGithubPath(
   newDigest?: string,
 ): string {
   const match = regEx(
-    /^(?<prefix>github:[^/?#]+\/[^/?#]+\/)(?<ref>[^?#]+)(?<suffix>[?#].*)?$/,
+    /^(?<prefix>(?:github|gitlab|sourcehut):[^/?#]+\/[^/?#]+\/)(?<ref>[^?#]+)(?<suffix>[?#].*)?$/,
   ).exec(url);
   if (!match?.groups) {
     return url;
@@ -50,6 +50,22 @@ function updateGithubPath(
   }
 
   return `${match.groups.prefix}${ref}${match.groups.suffix ?? ''}`;
+}
+
+function updateNixChannel(
+  url: string,
+  currentValue?: string,
+  newValue?: string,
+): string {
+  const match = regEx(
+    /^(?<prefix>https:\/\/(?:channels\.nixos\.org\/|nixos\.org\/channels\/))(?<channel>[^/?#]+)(?<suffix>\/nixexprs\.tar\.(?:xz|zst)(?:[?#].*)?)$/,
+  ).exec(url);
+  if (!match?.groups) {
+    return url;
+  }
+
+  const channel = replaceVersion(match.groups.channel, currentValue, newValue);
+  return `${match.groups.prefix}${channel}${match.groups.suffix}`;
 }
 
 function updateQueryParameter(
@@ -99,15 +115,14 @@ function updateUrl(
   }
 
   let newUrl = oldUrl;
-  if (parsedUrl.protocol === 'github:') {
-    newUrl = updateGithubPath(
-      newUrl,
-      currentValue,
-      newValue,
-      currentDigest,
-      newDigest,
-    );
-  }
+  newUrl = updateFlakePath(
+    newUrl,
+    currentValue,
+    newValue,
+    currentDigest,
+    newDigest,
+  );
+  newUrl = updateNixChannel(newUrl, currentValue, newValue);
 
   newUrl = updateQueryParameter(newUrl, 'ref', (ref) =>
     replaceVersion(ref, currentValue, newValue),
@@ -146,17 +161,13 @@ function findInputUrl(
   fileContent: string,
   patterns: RegExp[],
 ): RegExpMatchArray | null {
-  const matches = patterns.flatMap((pattern) => [
-    ...fileContent.matchAll(pattern),
-  ]);
-
-  matches.sort(
-    (left, right) =>
-      getBraceDepth(fileContent, left.index) -
-      getBraceDepth(fileContent, right.index),
+  return (
+    patterns
+      .flatMap((pattern) => [...fileContent.matchAll(pattern)])
+      // Root declarations are inside the flake attrset (depth 1) or its inputs
+      // attrset (depth 2). Deeper matches are overrides nested in another input.
+      .find((match) => getBraceDepth(fileContent, match.index) <= 2) ?? null
   );
-
-  return matches[0] ?? null;
 }
 
 export function updateDependency({

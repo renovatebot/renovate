@@ -148,8 +148,6 @@ Use `updateDependency` if _both_ conditions apply:
 - a custom replacement has to be provided
 
 Return the updated package file content as a string, or return `null` when the dependency cannot be updated.
-If an update changes only an artifact, return an object with the unchanged `content` and `updateArtifacts: true`.
-This triggers `updateArtifacts` without adding the unchanged package file to the commit.
 
 ### `updateLockedDependency` (optional)
 
