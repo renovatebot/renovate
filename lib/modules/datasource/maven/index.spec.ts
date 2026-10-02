@@ -108,6 +108,163 @@ function get(
 }
 
 describe('modules/datasource/maven/index', () => {
+  describe('java.version constraints', () => {
+    const packageName = 'org.example:java-constraints';
+    const packagePath = '/org/example/java-constraints';
+    const metadata = codeBlock`
+      <metadata><versioning><versions>
+        <version>1.0.0</version><version>2.0.0</version><version>3.0.0</version>
+      </versions></versioning></metadata>
+    `;
+
+    it('returns each release POM Java constraint only for strict filtering', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`${packagePath}/maven-metadata.xml`)
+        .reply(200, metadata)
+        .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+        .reply(200, '<project />')
+        .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+        .optionally()
+        .reply(200, '<project />')
+        .get(`${packagePath}/1.0.0/java-constraints-1.0.0.pom`)
+        .optionally()
+        .reply(
+          200,
+          '<project><properties><java.version> 17 </java.version></properties></project>',
+        )
+        .get(`${packagePath}/2.0.0/java-constraints-2.0.0.pom`)
+        .optionally()
+        .reply(
+          200,
+          '<project><properties><java.version>21</java.version></properties></project>',
+        );
+
+      const result = await new MavenDatasource().getReleases({
+        packageName,
+        registryUrl: baseUrl,
+        constraintsFiltering: 'strict',
+        constraints: { java: '17' },
+      });
+
+      expect(result?.releases).toEqual([
+        { version: '1.0.0', constraints: { java: ['17'] } },
+        { version: '2.0.0', constraints: { java: ['21'] } },
+        { version: '3.0.0' },
+      ]);
+    });
+
+    it('filters incompatible Java releases and keeps releases without constraints', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(`${packagePath}/maven-metadata.xml`)
+        .reply(200, metadata)
+        .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+        .reply(200, '<project />')
+        .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+        .optionally()
+        .reply(200, '<project />')
+        .get(`${packagePath}/1.0.0/java-constraints-1.0.0.pom`)
+        .optionally()
+        .reply(
+          200,
+          '<project><properties><java.version>17</java.version></properties></project>',
+        )
+        .get(`${packagePath}/2.0.0/java-constraints-2.0.0.pom`)
+        .optionally()
+        .reply(
+          200,
+          '<project><properties><java.version>21</java.version></properties></project>',
+        );
+
+      const result = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [baseUrl],
+        versioning,
+        constraintsFiltering: 'strict',
+        constraints: { java: '17' },
+      });
+
+      expect(result?.releases).toEqual([
+        { version: '1.0.0' },
+        { version: '3.0.0' },
+      ]);
+    });
+
+    it.each`
+      constraintsFiltering | constraints
+      ${undefined}         | ${{ java: '17' }}
+      ${'none'}            | ${{ java: '17' }}
+      ${'strict'}          | ${undefined}
+      ${'strict'}          | ${{}}
+      ${'strict'}          | ${{ java: '' }}
+      ${'strict'}          | ${{ java: '   ' }}
+      ${'strict'}          | ${{ node: '20' }}
+    `(
+      'does not fetch extra release POMs for $constraintsFiltering with $constraints',
+      async ({ constraintsFiltering, constraints }) => {
+        httpMock
+          .scope(baseUrl)
+          .get(`${packagePath}/maven-metadata.xml`)
+          .reply(200, metadata)
+          .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+          .reply(200, '<project />');
+
+        const result = await new MavenDatasource().getReleases({
+          packageName,
+          registryUrl: baseUrl,
+          constraintsFiltering,
+          constraints,
+        });
+
+        expect(result?.releases).toEqual([
+          { version: '1.0.0' },
+          { version: '2.0.0' },
+          { version: '3.0.0' },
+        ]);
+      },
+    );
+
+    it.each`
+      pom
+      ${'<project />'}
+      ${'<project><properties><java.version /></properties></project>'}
+      ${'<project><properties><java.version> </java.version></properties></project>'}
+      ${'<project><properties><java.version>${runtime.version}</java.version></properties></project>'}
+      ${'<project><properties><java.version>{{runtime_version}}</java.version></properties></project>'}
+      ${'<project><properties><maven.compiler.release>21</maven.compiler.release></properties></project>'}
+      ${'<project>'}
+    `(
+      'keeps a release without a usable Java property in $pom',
+      async ({ pom }) => {
+        httpMock
+          .scope(baseUrl)
+          .get(`${packagePath}/maven-metadata.xml`)
+          .reply(
+            200,
+            '<metadata><versioning><versions><version>1.0.0</version></versions></versioning></metadata>',
+          )
+          .get(`${packagePath}/1.0.0/java-constraints-1.0.0.pom`)
+          .reply(200, pom)
+          .get(`${packagePath}/1.0.0/java-constraints-1.0.0.pom`)
+          .optionally()
+          .reply(200, pom);
+
+        const result = await getPkgReleases({
+          datasource,
+          packageName,
+          registryUrls: [baseUrl],
+          versioning,
+          constraintsFiltering: 'strict',
+          constraints: { java: '17' },
+        });
+
+        expect(result?.releases).toEqual([{ version: '1.0.0' }]);
+      },
+    );
+  });
+
   beforeEach(() => {
     hostRules.add({
       hostType: datasource,
