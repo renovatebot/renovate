@@ -1,6 +1,12 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { Categories } from '../../constants/category.ts';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { AllDatasourcesListLiteral } from '../../datasource-list.generated.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
+import {
+  AllManagersListLiteral,
+  CustomManagersListLiteral,
+} from '../../manager-list.generated.ts';
 import type { ConstraintDefinition } from '../../util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
@@ -1689,6 +1695,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues: [...Categories],
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
@@ -1731,6 +1738,12 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues: [
+      ...AllManagersListLiteral,
+      ...CustomManagersListLiteral.map(
+        (manager: string) => `custom.${manager}`,
+      ),
+    ],
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
@@ -1744,6 +1757,7 @@ const options: Readonly<RenovateOptions>[] = [
       'List of datasources to match (e.g. `["orb"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
+    suggestedValues: [...AllDatasourcesListLiteral],
     allowString: true,
     parents: ['packageRules'],
     stage: 'package',

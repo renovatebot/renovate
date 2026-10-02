@@ -263,6 +263,48 @@ describe('tools/docs/test/schema', () => {
     });
   });
 
+  describe('suggested values', () => {
+    let repoSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+    });
+
+    it('suggests the managers we know about, without rejecting a pattern', () => {
+      expect(
+        schemaError(repoSchema, {
+          packageRules: [{ matchManagers: ['npm', 'custom.regex'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, {
+          packageRules: [{ matchManagers: ['/^npm$/', 'not-a-manager'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, { packageRules: [{ matchManagers: [123] }] }),
+      ).toBe('must be string');
+    });
+
+    it('suggests the datasources and categories we know about', () => {
+      expect(
+        schemaError(repoSchema, {
+          packageRules: [
+            { matchDatasources: ['npm'], matchCategories: ['js'] },
+          ],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaError(repoSchema, {
+          packageRules: [{ matchDatasources: ['/^np/'] }],
+        }),
+      ).toBeUndefined();
+    });
+  });
+
   describe('internal presets', () => {
     let repoSchema: ValidateFunction;
     let globalSchema: ValidateFunction;
