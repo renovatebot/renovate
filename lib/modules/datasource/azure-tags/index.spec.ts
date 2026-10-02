@@ -77,19 +77,4 @@ describe('modules/datasource/azure-tags/index', () => {
       ).rejects.toThrow('API error');
     });
   });
-
-  describe('helpers', () => {
-    it('getCacheKey returns the expected format', () => {
-      const key = azureTags.getCacheKey('registry-url', 'repo-name', 'tags');
-      expect(key).toBe('registry-url:repo-name:tags');
-    });
-
-    it('getSourceUrl returns the correct URL format', () => {
-      const url = azureTags.getSourceUrl(
-        'repo-name',
-        'https://dev.azure.com/organization/',
-      );
-      expect(url).toBe('https://dev.azure.com/organization/_git/repo-name');
-    });
-  });
 });

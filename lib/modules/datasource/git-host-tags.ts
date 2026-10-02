@@ -24,17 +24,20 @@ export abstract class GitHostTagsDatasource<
    * Normalizes the registry URL, applying the datasource default and stripping
    * any API path suffix.
    */
-  abstract getRegistryUrl(registryUrl?: string): string;
+  protected abstract getRegistryUrl(registryUrl?: string): string;
 
   /** Browser URL of the repository. */
-  abstract getSourceUrl(packageName: string, registryUrl?: string): string;
+  protected abstract getSourceUrl(
+    packageName: string,
+    registryUrl?: string,
+  ): string;
 
   /** Fetches the tags of the repository. */
   protected abstract fetchTags(
     config: GetReleasesConfig,
   ): Promise<GitHostTag[] | null>;
 
-  getCacheKey(
+  protected getCacheKey(
     registryUrl: string | undefined,
     repo: string,
     type: string,
@@ -91,7 +94,7 @@ export abstract class GitHostTagsDigestDatasource<
     repo: string,
   ): Promise<string | null>;
 
-  getTagCommit(
+  protected getTagCommit(
     registryUrl: string | undefined,
     repo: string,
     tag: string,
