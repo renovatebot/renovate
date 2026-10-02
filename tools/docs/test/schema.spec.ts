@@ -217,24 +217,38 @@ describe('tools/docs/test/schema', () => {
       ).toBe('must be equal to one of the allowed values');
     });
 
-    it('does not validate the children of an option which nests a config', () => {
+    it('validates the children of an option which nests a config', () => {
+      expect(
+        schemaError(repoSchema, {
+          postUpgradeTasks: { commands: ['echo hi'], executionMode: 'branch' },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaError(repoSchema, { postUpgradeTasks: { commands: 'echo hi' } }),
-      ).toBeUndefined();
+      ).toBe('must be array');
 
       expect(
         schemaError(repoSchema, {
           vulnerabilityAlerts: { vulnerabilityFixStrategy: 'nope' },
         }),
-      ).toBeUndefined();
+      ).toBe('must be equal to one of the allowed values');
     });
 
-    it('does not validate the children of a map of configs', () => {
+    it('validates the children of a map of configs', () => {
+      expect(
+        schemaError(repoSchema, {
+          customDatasources: {
+            myDatasource: { format: 'json', transformTemplates: ['{}'] },
+          },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaError(repoSchema, {
           customDatasources: { myDatasource: { format: 'nope' } },
         }),
-      ).toBeUndefined();
+      ).toBe('must be equal to one of the allowed values');
     });
 
     it('validates an option which nests a config as a config', () => {
