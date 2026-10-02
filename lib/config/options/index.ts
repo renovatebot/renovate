@@ -214,6 +214,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bumpVersions',
+    scopes: sharedScopes,
     description:
       'A list of bumpVersion config options to bump generic version numbers.',
     type: 'array',
@@ -250,6 +251,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'postUpgradeTasks',
+    scopes: sharedScopes,
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate.',
     type: 'object',
@@ -2888,6 +2890,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'group',
+    scopes: sharedScopes,
     description: 'Config if `groupName` is enabled.',
     type: 'object',
     default: {
@@ -3896,6 +3899,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'toolSettings',
+    scopes: sharedScopes,
     description:
       'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
