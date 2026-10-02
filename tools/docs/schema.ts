@@ -170,6 +170,10 @@ function createSingleConfig(
   ) {
     temp.additionalProperties = option.additionalProperties;
   }
+  if (hasKey('properties', option) && option.properties !== undefined) {
+    /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
+    temp.properties = { ...option.properties };
+  }
   if (option.default === null) {
     temp.type = [option.type, 'null'];
   }
