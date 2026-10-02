@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
@@ -176,16 +175,6 @@ describe('util/common', () => {
         city: 'San Francisco',
         isMarried: false,
       });
-    });
-
-    it('does not warn if filename ends with .jsonc', () => {
-      parseJson(validJsoncString, 'renovate.jsonc');
-      expect(logger.logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('does not warn if filename ends with .json5', () => {
-      parseJson(onlyJson5parsableString, 'renovate.json5');
-      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 

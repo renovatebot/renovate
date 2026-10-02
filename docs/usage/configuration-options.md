@@ -46,7 +46,6 @@ Renovate stops the search after it finds the first match.
   We also recommend you prefer using a `.jsonc` file if you want to add comments to your configuration, instead of a `.json5` file.
   Using an explicit `.jsonc` file is preferred over using a `.json` file with comments, as it can cause issues with editors and syntax highlighting.
   JSON5-only syntax, such as unquoted property names and single-quoted strings, requires a `.json5` filename.
-  Other configuration filenames no longer fall back to JSON5 parsing when JSONC parsing fails.
 
 Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
 Renovate does not read/override the config from within each base branch if present.
