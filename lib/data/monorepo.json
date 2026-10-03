@@ -144,6 +144,7 @@
     "capacitor": "https://github.com/ionic-team/capacitor",
     "cedar": "https://github.com/cedarjs/cedar",
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
+    "chat-sdk": "https://github.com/vercel/chat",
     "chromely": "https://github.com/chromelyapps/Chromely",
     "citation-js": "https://github.com/citation-js/citation-js",
     "ckeditor": [
