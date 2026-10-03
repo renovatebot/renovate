@@ -113,6 +113,7 @@ export interface PlatformConfig {
   existingRepos?: string[];
   userDetails?: UserDetails;
   userEmail?: EmailAddress | null;
+  asyncMergeSupported?: boolean;
 }
 
 export interface LocalRepoConfig {
