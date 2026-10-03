@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
@@ -7,7 +8,12 @@ import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexDatasource } from '../../datasource/hex/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import { getRepoOptions, stripComments } from './utils.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -18,7 +24,6 @@ const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
-const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
 );
@@ -29,12 +34,11 @@ const onlyEnvironmentsRegexp = regEx(/:(?<env>\w+)/gm);
 export async function extractPackageFile(
   content: string,
   packageFile: string,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps = new Map<string, PackageDependency>();
-  const contentArr = content
-    .split(newlineRegex)
-    .map((line) => line.replace(commentMatchRegExp, ''));
+  const contentArr = stripComments(content).split(newlineRegex);
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';
@@ -48,7 +52,20 @@ export async function extractPackageFile(
         const git = gitRegexp.exec(opts)?.groups?.value;
         const ref = refRegexp.exec(opts)?.groups?.value;
         const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
-        const organization = organizationRegexp.exec(opts)?.groups?.value;
+        // `repo: "hexpm"` is the explicit default registry and
+        // `repo: "hexpm:<org>"` is the canonical form of `organization:`.
+        // Any other name refers to a third-party registry.
+        // `opts` is an optional match group, so it is absent for deps
+        // declared without any options.
+        const [repoOption] = getRepoOptions(opts ?? '');
+        const [repoName, repoOrganization] = coerceArray(
+          repoOption?.split(':'),
+        );
+        const isHexpmRepo = repoName === 'hexpm';
+        const repo = isHexpmRepo ? undefined : repoOption;
+        const organization =
+          organizationRegexp.exec(opts)?.groups?.value ??
+          (isHexpmRepo ? repoOrganization : undefined);
         const hexGroups = hexRegexp.exec(opts)?.groups;
         const hex = hexGroups?.strValue ?? hexGroups?.atomValue;
 
@@ -83,6 +100,20 @@ export async function extractPackageFile(
 
           if (requirement?.startsWith('==')) {
             dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
+
+          // A third-party `repo:` has no URL in `mix.exs`, so it must be mapped
+          // through `registryAliases`, keyed by the repo name.
+          if (repo) {
+            const registryUrl = config?.registryAliases?.[repo];
+            if (registryUrl) {
+              dep.registryUrls = [registryUrl];
+            } else {
+              logger.debug(
+                `No registryAliases entry for mix repo ${repo}, skipping ${app}`,
+              );
+              dep.skipReason = 'unknown-registry';
+            }
           }
         }
 
