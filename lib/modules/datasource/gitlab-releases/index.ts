@@ -1,6 +1,12 @@
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import {
+  defaultRegistryUrl,
+  getApiBaseUrl,
+  getSourceUrl,
+} from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { GitlabReleases } from './schema.ts';
@@ -9,7 +15,7 @@ export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-releases';
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://gitlab.com'];
+    return [defaultRegistryUrl];
   }
 
   override readonly releaseTimestampSupport = true;
@@ -36,12 +42,17 @@ export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
     }
 
     const urlEncodedRepo = encodeURIComponent(packageName);
-    const apiUrl = `${registryUrl}/api/v4/projects/${urlEncodedRepo}/releases`;
+    const apiUrl = joinUrlParts(
+      getApiBaseUrl(registryUrl),
+      'projects',
+      urlEncodedRepo,
+      'releases',
+    );
 
     const gitlabReleasesResponse = await this.fetchJson(apiUrl, GitlabReleases);
 
     return {
-      sourceUrl: `${registryUrl}/${packageName}`,
+      sourceUrl: getSourceUrl(packageName, registryUrl),
       releases: gitlabReleasesResponse.map(({ tag_name, released_at }) => {
         const release: Release = {
           registryUrl,
