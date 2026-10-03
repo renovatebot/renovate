@@ -16,7 +16,7 @@ Permissions for your PAT should be at minimum:
 | Scope        | Permission   | Description                                           |
 | ------------ | ------------ | ----------------------------------------------------- |
 | `Code`       | Read & Write | Required                                              |
-| `Work Items` | Read & write | Needed for link to work item and dependecy dashboards |
+| `Work Items` | Read & write | Needed for link to work item and dependency dashboards |
 
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
