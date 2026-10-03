@@ -107,6 +107,9 @@ export const toolDefinitions = [
     name: 'npm',
   },
   {
+    name: 'nub',
+  },
+  {
     name: 'pdm',
   },
   {
