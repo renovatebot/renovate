@@ -1,6 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
 import { GlobalConfig } from '../../../config/global.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import {
   extractConstraints,
@@ -12,10 +11,6 @@ import {
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
 describe('modules/manager/composer/utils', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('extractConstraints', () => {
     it('returns from require', () => {
       const file = PackageFile.parse({

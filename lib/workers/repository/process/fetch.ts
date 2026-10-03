@@ -1,14 +1,18 @@
 // TODO #22198
-import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import {
+  applyDatasourceDefaultConfig,
+  getManagerConfig,
+  mergeChildConfig,
+} from '../../../config/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
-import { getDefaultConfig } from '../../../modules/datasource/index.ts';
 import type {
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { clone } from '../../../util/clone.ts';
@@ -22,6 +26,34 @@ import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
 type LookupResult = Result<PackageDependency>;
 
+/**
+ * Merge the constraints which a manager extracted into `target`, without ever letting them override a value which was configured.
+ *
+ * `overrides` holds the values which must win over the extracted ones: the repository config for a package file, the package file config for a dependency. They cannot be read from `target`, because `mergeChildConfig()` has already merged `constraintsVersioning` from `extracted` into it, the other way round.
+ */
+function mergeExtractedConstraints(
+  target: RenovateConfig,
+  extracted: Pick<
+    PackageFileContent,
+    'extractedConstraints' | 'constraintsVersioning'
+  >,
+  overrides: Pick<RenovateConfig, 'constraints' | 'constraintsVersioning'>,
+): void {
+  if (extracted.extractedConstraints) {
+    target.constraints = {
+      ...extracted.extractedConstraints,
+      ...overrides.constraints,
+    };
+  }
+  const constraintsVersioning = {
+    ...extracted.constraintsVersioning,
+    ...overrides.constraintsVersioning,
+  };
+  if (Object.keys(constraintsVersioning).length > 0) {
+    target.constraintsVersioning = constraintsVersioning;
+  }
+}
+
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
@@ -30,13 +62,13 @@ async function lookup(
 
   dep.updates = [];
 
-  if (isString(dep.depName)) {
-    dep.depName = dep.depName.trim();
-  }
-
-  dep.packageName ??= dep.depName;
-
-  if (dep.skipReason) {
+  // `unknown-registry` says the manager could not work out where to look, which
+  // `applyPackageRules()` clears when config supplies a registry. Such a dep has
+  // to reach the rules to be given one, so it is dropped afterwards rather than
+  // here - unless its manager already gave it a registry it could not use.
+  const mayBeGivenARegistry =
+    dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
+  if (dep.skipReason && !mayBeGivenARegistry) {
     return Result.ok(dep);
   }
 
@@ -53,17 +85,22 @@ async function lookup(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
-  if (dep.extractedConstraints) {
-    depConfig.constraints = {
-      ...dep.extractedConstraints,
-      ...depConfig.constraints,
-    };
-  }
-  const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
-  depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
+  mergeExtractedConstraints(depConfig, dep, packageFileConfig);
+  depConfig = await applyDatasourceDefaultConfig(depConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-  depConfig.packageName ??= depConfig.depName;
+
+  if (mayBeGivenARegistry) {
+    if (depConfig.skipReason === 'unknown-registry') {
+      logger.debug(
+        `Dependency: ${depName!}, has no registry to be looked up in - set registryUrls to say which one to use`,
+      );
+      return Result.ok(dep);
+    }
+
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
 
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
@@ -127,19 +164,7 @@ async function fetchManagerPackagerFileUpdates(
 ): Promise<void> {
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
-  const mergedConstraintsVersioning = {
-    ...pFile.constraintsVersioning,
-    ...config.constraintsVersioning,
-  };
-  if (Object.keys(mergedConstraintsVersioning).length > 0) {
-    packageFileConfig.constraintsVersioning = mergedConstraintsVersioning;
-  }
+  mergeExtractedConstraints(packageFileConfig, pFile, config);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
     (dep) => async (): Promise<PackageDependency> => {

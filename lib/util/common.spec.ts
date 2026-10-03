@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
+import { PLATFORM_FAMILIES } from '../constants/index.ts';
 import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
 import * as hostRules from './host-rules.ts';
 
@@ -40,8 +41,6 @@ const validJsoncString = `
 `;
 
 describe('util/common', () => {
-  beforeEach(() => hostRules.clear());
-
   describe('detectPlatform', () => {
     it.each`
       url                                                                    | hostType
@@ -53,6 +52,7 @@ describe('util/common', () => {
       ${'https://bitbucket.com/some-org/some-repo'}                          | ${'bitbucket'}
       ${'https://bitbucket.example.com/some-org/some-repo'}                  | ${'bitbucket-server'}
       ${'https://gitea.com/semantic-release/gitlab'}                         | ${'gitea'}
+      ${'https://gitea.example.com/semantic-release/gitlab'}                 | ${'gitea'}
       ${'https://forgejo.example.com/semantic-release/gitlab'}               | ${'forgejo'}
       ${'https://codeberg.org/forgejo/forgejo'}                              | ${'forgejo'}
       ${'https://codefloe.com/some-org/some-repo'}                           | ${'forgejo'}
@@ -62,6 +62,14 @@ describe('util/common', () => {
       ${'https://gitlab-enterprise.example.com/chalk/chalk'}                 | ${'gitlab'}
     `('("$url") === $hostType', ({ url, hostType }) => {
       expect(detectPlatform(url)).toBe(hostType);
+    });
+
+    it.each(
+      Object.entries(PLATFORM_FAMILIES).flatMap(([family, { knownHosts }]) =>
+        knownHosts.map((host) => ({ family, host })),
+      ),
+    )('knows $host as $family', ({ family, host }) => {
+      expect(detectPlatform(`https://${host}/some-org/some-repo`)).toBe(family);
     });
 
     it('uses host rules', () => {

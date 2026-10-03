@@ -1,10 +1,5 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import {
-  isFunction,
-  isNonEmptyArray,
-  isString,
-  isTruthy,
-} from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -45,6 +40,7 @@ import type {
   GetDigestInputConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
+  RegistryUrlsConfig,
   ReleaseResult,
 } from './types.ts';
 
@@ -58,7 +54,34 @@ export function getDatasourceList(): string[] {
   return Array.from(datasources.keys());
 }
 
-type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
+/**
+ * Projects the registry-level config onto the fields a datasource
+ * implementation is allowed to see.
+ */
+function toGetReleasesConfig(
+  config: GetPkgReleasesConfig,
+  registryUrl = config.registryUrl,
+): GetReleasesConfig {
+  const {
+    customDatasources,
+    datasource,
+    packageName,
+    currentValue,
+    constraints,
+    constraintsVersioning,
+    constraintsFiltering,
+  } = config;
+  return {
+    customDatasources,
+    datasource,
+    packageName,
+    registryUrl,
+    currentValue,
+    constraints,
+    constraintsVersioning,
+    constraintsFiltering,
+  };
+}
 
 // TODO: fix error Type
 function logError(datasource: string, packageName: string, err: any): void {
@@ -79,7 +102,7 @@ function logError(datasource: string, packageName: string, err: any): void {
 
 async function getRegistryReleases(
   datasource: DatasourceApi,
-  config: GetReleasesConfig,
+  config: GetPkgReleasesConfig,
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
@@ -105,7 +128,7 @@ async function getRegistryReleases(
 
   const res = await instrument(
     'getReleases',
-    () => datasource.getReleases({ ...config, registryUrl }),
+    () => datasource.getReleases(toGetReleasesConfig(config, registryUrl)),
     {
       attributes: {
         [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
@@ -142,7 +165,7 @@ async function getRegistryReleases(
 }
 
 function firstRegistry(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
   datasource: DatasourceApi,
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
@@ -161,7 +184,7 @@ function firstRegistry(
 }
 
 async function huntRegistries(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
   datasource: DatasourceApi,
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
@@ -192,7 +215,7 @@ async function huntRegistries(
 }
 
 async function mergeRegistries(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
   datasource: DatasourceApi,
   registryUrls: string[],
 ): Promise<ReleaseResult | null> {
@@ -320,11 +343,18 @@ function massageRegistryUrls(registryUrls: string[]): string[] {
 
 function resolveRegistryUrls(
   datasource: DatasourceApi,
-  defaultRegistryUrls: string[] | undefined,
-  registryUrls: string[] | undefined | null,
-  additionalRegistryUrls: string[] | undefined,
+  packageName: string,
+  {
+    defaultRegistryUrls,
+    registryUrls,
+    additionalRegistryUrls,
+  }: RegistryUrlsConfig,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  const customRegistrySupport = datasource.supportsCustomRegistry(packageName);
+  const datasourceDefaultRegistryUrls =
+    datasource.getDefaultRegistryUrls(packageName);
+
+  if (!customRegistrySupport) {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -340,29 +370,26 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
-      ? datasource.defaultRegistryUrls()
-      : coerceArray(datasource.defaultRegistryUrls);
+    return coerceArray(datasourceDefaultRegistryUrls);
   }
   const customUrls = registryUrls?.filter(isTruthy);
-  let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
-    resolvedUrls = [...customUrls];
-  } else if (isNonEmptyArray(defaultRegistryUrls)) {
-    resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(coerceArray(additionalRegistryUrls));
+    return massageRegistryUrls(customUrls);
   }
-  return massageRegistryUrls(resolvedUrls);
+  const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
+    ? defaultRegistryUrls
+    : datasourceDefaultRegistryUrls;
+  if (!isNonEmptyArray(defaultUrls)) {
+    return [];
+  }
+  return massageRegistryUrls([
+    ...defaultUrls,
+    ...coerceArray(additionalRegistryUrls),
+  ]);
 }
 
 function applyReplacements(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
 ): Pick<ReleaseResult, 'replacementName' | 'replacementVersion'> | undefined {
   if (config.replacementName && config.replacementVersion) {
     return {
@@ -374,10 +401,10 @@ function applyReplacements(
 }
 
 async function fetchReleases(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource: datasourceName } = config;
-  let { registryUrls } = config;
+  let registryUrlsConfig: RegistryUrlsConfig = config;
   // istanbul ignore if: need test
   if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
     logger.warn({ datasource: datasourceName }, 'Unknown datasource');
@@ -388,8 +415,11 @@ async function fetchReleases(
       setNpmrc(config.npmrc);
     }
     // v8 ignore else -- npm lookups here never arrive with explicit registryUrls
-    if (!isNonEmptyArray(registryUrls)) {
-      registryUrls = [resolveRegistryUrl(config.packageName)];
+    if (!isNonEmptyArray(config.registryUrls)) {
+      registryUrlsConfig = {
+        ...config,
+        registryUrls: [resolveRegistryUrl(config.packageName)],
+      };
     }
   }
   const datasource = getDatasourceFor(datasourceName);
@@ -398,15 +428,14 @@ async function fetchReleases(
     logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
-  registryUrls = resolveRegistryUrls(
+  const registryUrls = resolveRegistryUrls(
     datasource,
-    config.defaultRegistryUrls,
-    registryUrls,
-    config.additionalRegistryUrls,
+    config.packageName,
+    registryUrlsConfig,
   );
   let dep: ReleaseResult | null = null;
   const registryStrategy =
-    config.registryStrategy ?? datasource.registryStrategy ?? 'hunt';
+    config.registryStrategy ?? datasource.registryStrategy;
   try {
     if (isNonEmptyArray(registryUrls)) {
       if (registryStrategy === 'first') {
@@ -420,7 +449,7 @@ async function fetchReleases(
     } else {
       dep = await instrument(
         'getReleases',
-        () => datasource.getReleases(config),
+        () => datasource.getReleases(toGetReleasesConfig(config)),
         {
           attributes: {
             [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
@@ -452,7 +481,7 @@ async function fetchReleases(
 }
 
 function fetchCachedReleases(
-  config: GetReleasesInternalConfig,
+  config: GetPkgReleasesConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
   const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${safeStringify(
@@ -542,12 +571,7 @@ function getDigestConfig(
   // Prefer registryUrl from getReleases() lookup if it has been passed
   const registryUrl =
     config.registryUrl ??
-    resolveRegistryUrls(
-      datasource,
-      config.defaultRegistryUrls,
-      config.registryUrls,
-      config.additionalRegistryUrls,
-    )[0];
+    resolveRegistryUrls(datasource, packageName, config)[0];
   return { lookupName, packageName, registryUrl, currentValue, currentDigest };
 }
 

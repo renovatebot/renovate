@@ -291,6 +291,10 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+  postUpgradeTasks?: {
+    commands?: string[];
+    fileFilters?: string[];
+  };
 }
 
 export interface ExtractResult {

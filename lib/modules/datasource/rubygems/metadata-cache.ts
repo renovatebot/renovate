@@ -19,7 +19,17 @@ function hashVersions(versions: string[]): string {
 }
 
 function hashReleases(releases: ReleaseResult): string {
-  return hashVersions(releases.releases.map((release) => release.version));
+  const versions = releases.releases.map((release) => {
+    const platform = release.constraints?.platform?.[0];
+
+    if (platform && platform !== 'ruby') {
+      return `${release.version}-${platform}`;
+    }
+
+    return release.version;
+  });
+
+  return hashVersions(versions);
 }
 
 interface CacheNotFoundError {

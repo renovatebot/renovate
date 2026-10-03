@@ -1280,6 +1280,7 @@ describe('workers/repository/update/pr/index', () => {
             branchName: sourceBranch,
             depType: 'foo',
             depName: 'bar',
+            packageName: 'bar',
             manager: 'npm',
             currentVersion: '1.2.3',
             newVersion: '2.3.4',

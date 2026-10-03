@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractVariables, getDep } from './extract.ts';
 import { extractPackageFile } from './index.ts';
+import type { GetDepOptions } from './types.ts';
 
 const d1 = Fixtures.get('1.Dockerfile');
 const d2 = Fixtures.get('2.Dockerfile');
@@ -51,6 +52,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -83,6 +86,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'bash',
           depType: 'install',
           replaceString: 'bash=5.2.37-r2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -118,6 +123,8 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'curl',
           depType: 'install',
           replaceString: 'curl=8.14.1-2',
+          skipReason: 'unknown-registry',
+          skipStage: 'extract',
         },
       ]);
     });
@@ -165,6 +172,21 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'install',
         },
       ]);
+    });
+
+    it('keeps the reason a package was already skipped for', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM alpine:3.21
+          RUN apk add bash
+        `,
+        '',
+        {},
+      );
+      expect(res?.deps.at(-1)).toMatchObject({
+        depName: 'bash',
+        skipReason: 'unspecified-version',
+      });
     });
 
     it('handles naked dep', () => {
@@ -1855,10 +1877,32 @@ describe('modules/manager/dockerfile/extract', () => {
         imageName: string;
         dep: PackageDependency;
       }) => {
-        expect(getDep(imageName, true, registryAliases)).toMatchObject({
+        expect(getDep(imageName, { registryAliases })).toMatchObject({
           ...dep,
           replaceString: imageName,
         });
+      },
+    );
+
+    it.each`
+      name                                   | imageName          | options                                             | dep
+      ${'defaults to specifyReplaceString'}  | ${'nginx:1.0'}     | ${{}}                                               | ${{ datasource: 'docker', depName: 'nginx', packageName: 'nginx', currentValue: '1.0', replaceString: 'nginx:1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
+      ${'honors specifyReplaceString false'} | ${'nginx:1.0'}     | ${{ specifyReplaceString: false }}                  | ${{ datasource: 'docker', depName: 'nginx', packageName: 'nginx', currentValue: '1.0' }}
+      ${'resolves registry aliases'}         | ${'foo/image:1.0'} | ${{ registryAliases: { foo: 'foo.registry.com' } }} | ${{ datasource: 'docker', depName: 'foo/image', packageName: 'foo.registry.com/image', currentValue: '1.0', replaceString: 'foo/image:1.0', autoReplaceStringTemplate: `foo/image${versionAndDigestTemplate}` }}
+      ${'sets depType on a valid dep'}       | ${'nginx:1.0'}     | ${{ depType: 'docker' }}                            | ${{ datasource: 'docker', depType: 'docker', depName: 'nginx', packageName: 'nginx', currentValue: '1.0', replaceString: 'nginx:1.0', autoReplaceStringTemplate: defaultAutoReplaceStringTemplate }}
+      ${'sets depType on an invalid dep'}    | ${''}              | ${{ depType: 'docker' }}                            | ${{ depType: 'docker', skipReason: 'invalid-value' }}
+    `(
+      '$name',
+      ({
+        imageName,
+        options,
+        dep,
+      }: {
+        imageName: string;
+        options: GetDepOptions;
+        dep: PackageDependency;
+      }) => {
+        expect(getDep(imageName, options)).toEqual(dep);
       },
     );
   });

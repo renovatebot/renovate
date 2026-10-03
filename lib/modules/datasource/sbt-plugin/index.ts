@@ -21,7 +21,9 @@ export const SBT_PLUGINS_REPO =
 export class SbtPluginDatasource extends Datasource {
   static readonly id = 'sbt-plugin';
 
-  override readonly defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [SBT_PLUGINS_REPO, MAVEN_REPO];
+  }
 
   override readonly defaultVersioning = ivyVersioning.id;
 
