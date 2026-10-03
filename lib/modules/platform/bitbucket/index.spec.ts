@@ -2285,7 +2285,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, '!@#');
       await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
+        'Parse error: Unexpected token on line 1 column 1',
       );
     });
 

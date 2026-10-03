@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
 import { PLATFORM_FAMILIES } from '../constants/index.ts';
@@ -156,32 +155,26 @@ describe('util/common', () => {
 
     it('throws error for invalid json', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
-        "JSON5: invalid character '\\\"' at 7:3",
+        'Parse error: Expected comma on line 6 column 47',
       );
     });
 
-    it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
-      expect(parseJson(onlyJson5parsableString, 'renovate.json')).toEqual({
+    it.each(['renovate.json', 'renovate.jsonc', '.renovaterc'])(
+      'rejects JSON5-only syntax in %s',
+      (filename) => {
+        expect(() => parseJson(onlyJson5parsableString, filename)).toThrow(
+          'Parse error: Expected string for object property on line 3 column 3',
+        );
+      },
+    );
+
+    it('preserves JSON5 support for an explicit .json5 filename', () => {
+      expect(parseJson(onlyJson5parsableString, 'renovate.json5')).toEqual({
         name: 'Bob',
         age: 35,
         city: 'San Francisco',
         isMarried: false,
       });
-
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { context: 'renovate.json' },
-        'File contents are invalid JSONC but parse using JSON5. Support for this will be removed in a future release so please change to a support .json5 file name or ensure correct JSON syntax.',
-      );
-    });
-
-    it('does not warn if filename ends with .jsonc', () => {
-      parseJson(validJsoncString, 'renovate.jsonc');
-      expect(logger.logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('does not warn if filename ends with .json5', () => {
-      parseJson(onlyJson5parsableString, 'renovate.json5');
-      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 

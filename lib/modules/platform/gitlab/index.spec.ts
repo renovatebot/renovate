@@ -4412,7 +4412,7 @@ These updates have all been created already. To force a retry/rebase of any, cli
           content: toBase64('!@#'),
         });
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
+        'Parse error: Unexpected token on line 1 column 1',
       );
     });
 

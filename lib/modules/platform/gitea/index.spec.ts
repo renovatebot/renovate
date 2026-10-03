@@ -3263,7 +3263,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
       await expect(gitea.getJsonFile('file.json')).rejects.toThrow(
-        "JSON5: invalid character '!' at 1:1",
+        'Parse error: Unexpected token on line 1 column 1',
       );
     });
 

@@ -61,7 +61,7 @@ describe('config/parse', () => {
         success: false,
         validationError: 'Invalid JSON (parsing failed)',
         validationMessage:
-          'JSON.parse error:  `JSON5: invalid end of input at 1:2`',
+          'JSON.parse error:  `Parse error: Unterminated object on line 1 column 2`',
       });
     });
   });

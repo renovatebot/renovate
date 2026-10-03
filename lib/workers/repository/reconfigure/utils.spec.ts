@@ -50,7 +50,7 @@ describe('workers/repository/reconfigure/utils', () => {
 
     it('return config', async () => {
       merge.detectConfigFile.mockResolvedValue('package.json'); // using package.json for coverage
-      fs.readLocalFile.mockResolvedValue('{renovate: {}}');
+      fs.readLocalFile.mockResolvedValue('{"renovate": {}}');
       const res = await getReconfigureConfig(reconfigureBranch);
       expect(res).toMatchObject({
         ok: true,
