@@ -197,6 +197,7 @@ export async function getUpdatedPackageFiles(
   const nonUpdatedFileContents: Record<string, string> = {};
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
+  const packageFileBumpUpgrades: Record<string, BranchUpgradeConfig> = {};
   const lockFileMaintenanceFiles: string[] = [];
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
@@ -352,12 +353,11 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const newContent = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -392,6 +392,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
+        packageFileBumpUpgrades[packageFile] ??= upgrade;
       }
       if (
         newContent === packageFileContent &&
@@ -401,6 +402,16 @@ export async function getUpdatedPackageFiles(
         delete nonUpdatedFileContents[packageFile];
       }
     }
+  }
+  // Bump once all updates to a file are applied: a bump that changes the file
+  // length would shift the fileReplacePosition of the updates still to come
+  for (const [packageFile, upgrade] of Object.entries(
+    packageFileBumpUpgrades,
+  )) {
+    updatedFileContents[packageFile] = (await applyManagerBumpPackageVersion(
+      updatedFileContents[packageFile],
+      upgrade,
+    ))!;
   }
   const updatedPackageFiles: FileAddition[] = Object.keys(
     updatedFileContents,

@@ -1,4 +1,5 @@
 import { isArray } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
@@ -1195,6 +1196,65 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('bumps the version once after all updates to the same package file', async () => {
+      const pom = codeBlock`
+        <project>
+          <version>1.0.99</version>
+          <properties>
+            <foo.version>1.2.3</foo.version>
+            <bar.version>3.4.5</bar.version>
+          </properties>
+        </project>
+      `;
+      git.getFile.mockReset();
+      git.getFile.mockResolvedValue(pom);
+      const upgrade = {
+        packageFile: 'pom.xml',
+        branchName: '',
+        manager: 'maven',
+        datasource: 'maven',
+        bumpVersion: 'patch',
+        packageFileVersion: '1.0.99',
+      } satisfies BranchUpgradeConfig;
+      // sorted by descending fileReplacePosition, as generateBranchConfig does
+      config.upgrades.push(
+        {
+          ...upgrade,
+          depName: 'org.example:bar',
+          sharedVariableName: 'bar.version',
+          currentValue: '3.4.5',
+          newValue: '3.4.6',
+          fileReplacePosition: pom.indexOf('3.4.5'),
+        },
+        {
+          ...upgrade,
+          depName: 'org.example:foo',
+          sharedVariableName: 'foo.version',
+          currentValue: '1.2.3',
+          newValue: '1.2.4',
+          fileReplacePosition: pom.indexOf('1.2.3'),
+        },
+      );
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'pom.xml',
+          contents: codeBlock`
+            <project>
+              <version>1.0.100</version>
+              <properties>
+                <foo.version>1.2.4</foo.version>
+                <bar.version>3.4.6</bar.version>
+              </properties>
+            </project>
+          `,
+        },
+      ]);
     });
 
     it('bumps versions in autoReplace managers', async () => {
