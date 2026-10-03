@@ -103,6 +103,7 @@ describe('workers/repository/process/fetch', () => {
               deps: [
                 {
                   depName: 'foo:bar',
+                  packageName: 'foo:bar',
                   datasource: MavenDatasource.id,
                   currentValue: '1.0.0',
                   enabled: false,
