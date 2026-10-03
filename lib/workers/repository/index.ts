@@ -165,15 +165,14 @@ export async function renovateRepository(
             return recursiveRes;
           }
           logger.debug(`Automerged but already retried once`);
-        } else {
-          const configMigrationRes = await configMigration(config, branchList);
-          await ensureDependencyDashboard(
-            config,
-            branches,
-            packageFiles,
-            configMigrationRes,
-          );
         }
+        const configMigrationRes = await configMigration(config, branchList);
+        await ensureDependencyDashboard(
+          config,
+          branches,
+          packageFiles,
+          configMigrationRes,
+        );
         await finalizeRepo(config, branchList, repoConfig);
         repoResult = processResult(config, res);
       }
