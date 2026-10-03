@@ -33,6 +33,10 @@ describe('modules/datasource/helm/schema', () => {
           sourceUrl:
             'https://gitlab.example.com/some/group/charts/-/tree/master/private-chart',
         },
+        'ascending-releases': {
+          homepage: 'https://github.com/some-org/helm-charts',
+          sourceUrl: 'https://github.com/some-org/helm-charts',
+        },
       });
     });
   });
