@@ -857,7 +857,7 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'yarn',
             depType: 'volta',
             prettyDepType: 'volta',
-            packageName: '@yarnpkg/cli',
+            packageName: '@yarnpkg/cli-dist',
           },
         ],
       });
@@ -1068,7 +1068,7 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'yarn',
             depType: 'volta',
             prettyDepType: 'volta',
-            packageName: '@yarnpkg/cli',
+            packageName: '@yarnpkg/cli-dist',
           },
         ],
       });

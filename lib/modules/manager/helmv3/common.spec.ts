@@ -39,10 +39,6 @@ describe('modules/manager/helmv3/common', () => {
   });
 
   describe('generateRegistryLoginCmd', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('generates a login command when a matching host rule exists', async () => {
       hostRules.add({
         hostType: 'docker',

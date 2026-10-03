@@ -17,7 +17,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowedHeaders',
     description:
-      'List of allowed patterns for header names in hostRules config.',
+      'List of allowed patterns for header names in repository hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',
@@ -704,7 +704,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.102.7',
+    default: 'ghcr.io/renovatebot/base-image:13.105.1',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1094,8 +1094,9 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
-    name: 'allowCustomCrateRegistries',
-    description: 'Set this to `true` to allow custom crate registries.',
+    name: 'allowCustomCrateGitRegistries',
+    description:
+      'Set this to `true` to allow cloning custom Cargo `git` registries. This only restricts non-sparse registries.',
     globalOnly: true,
     type: 'boolean',
     default: false,

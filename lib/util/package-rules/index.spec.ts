@@ -943,7 +943,6 @@ describe('util/package-rules/index', () => {
     };
 
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add(hostRule);
     });
 
