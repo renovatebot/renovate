@@ -1,10 +1,8 @@
 import {
   isArray,
   isFunction,
-  isNonEmptyObject,
   isNonEmptyString,
   isObject,
-  isString,
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
@@ -19,6 +17,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
+  createCondaToolConfig,
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
@@ -26,11 +25,14 @@ import {
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
+  createPypiToolConfig,
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { extractGitReference } from './git-reference.ts';
+import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
-import type { MiseTool, MiseToolOptions } from './schema.ts';
+import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
 import type { BackendToolingConfig, ToolingDefinition } from './types.ts';
 import {
@@ -86,7 +88,26 @@ export async function extractPackageFile(
     }
   }
 
-  if (!toolEntries.length) {
+  const taskFileDeps: PackageDependency[] = [];
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
+    if (taskData.file) {
+      // local paths and plain http(s) urls have no version
+      const dep = extractGitReference(
+        taskData.file.trim(),
+        content,
+        `task-${taskName}-file`,
+      );
+      if (dep) {
+        taskFileDeps.push(dep);
+      }
+    }
+  }
+
+  const includeDeps = misefile.include.map((include) =>
+    extractInclude(include, content),
+  );
+
+  if (!toolEntries.length && !taskFileDeps.length && !includeDeps.length) {
     return null;
   }
 
@@ -105,9 +126,13 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(name, toolData, depType, lockFileData),
-  );
+  const deps = [
+    ...toolEntries.map(([name, toolData, depType]) =>
+      extractToolEntry(name, toolData, depType, lockFileData),
+    ),
+    ...taskFileDeps,
+    ...includeDeps,
+  ];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {
@@ -117,21 +142,28 @@ export async function extractPackageFile(
   return result;
 }
 
-function parseVersion(toolData: MiseTool): string | null {
-  if (isNonEmptyString(toolData)) {
+/**
+ * Returns the primary tool entry. For arrays only the first entry is managed,
+ * e.g. 'erlang = ["23.3", "24.0"]' or
+ * 'rust = [{ version = "1.98.1", profile = "minimal" }, { version = "nightly" }]'.
+ */
+function getPrimaryToolValue(toolData: MiseTool): MiseToolValue | null {
+  if (isArray(toolData)) {
+    return toolData.length ? toolData[0] : null;
+  }
+  return toolData;
+}
+
+function parseVersion(toolValue: MiseToolValue | null): string | null {
+  if (isNonEmptyString(toolValue)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
-    return toolData;
+    return toolValue;
   }
-  if (isArray(toolData, isString)) {
-    // Handle the array case
-    // e.g. 'erlang = ["23.3", "24.0"]'
-    return toolData.length ? toolData[0] : null; // Get the first version in the array
-  }
-  if (isObject(toolData) && isNonEmptyString(toolData.version)) {
+  if (isObject(toolValue) && isNonEmptyString(toolValue.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
-    return toolData.version;
+    return toolValue.version;
   }
   return null; // Return null if no version is found
 }
@@ -212,6 +244,8 @@ function getToolConfig(
       );
     case 'cargo':
       return createCargoToolConfig(toolName, version);
+    case 'conda':
+      return createCondaToolConfig(toolName);
     case 'dotnet':
       return createDotnetToolConfig(toolName);
     case 'gem':
@@ -226,6 +260,8 @@ function getToolConfig(
       return createNpmToolConfig(toolName);
     case 'pipx':
       return createPipxToolConfig(toolName);
+    case 'pypi':
+      return createPypiToolConfig(toolName);
     case 'spm':
       return createSpmToolConfig(toolName);
     case 'ubi':
@@ -385,7 +421,8 @@ function extractToolEntry(
   depType: string,
   lockFileData?: MiseLockFile,
 ): PackageDependency {
-  const version = parseVersion(toolData);
+  const toolValue = getPrimaryToolValue(toolData);
+  const version = parseVersion(toolValue);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
     name.trim(),
   )!.groups!;
@@ -394,7 +431,7 @@ function extractToolEntry(
   const toolName = depName.substring(delimiterIndex + 1);
   const options = parseOptions(
     optionsInName,
-    isNonEmptyObject(toolData) ? toolData : {},
+    isObject(toolValue) ? toolValue : {},
   );
   const toolConfig =
     version === null

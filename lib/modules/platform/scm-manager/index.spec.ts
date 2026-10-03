@@ -553,7 +553,7 @@ describe('modules/platform/scm-manager/index', () => {
     it('should Not implemented and return null', async () => {
       const result = await scmPlatform.getBranchStatusCheck(
         'test/branch',
-        null,
+        'test-context',
       );
       expect(result).toBeNull();
     });
@@ -641,13 +641,6 @@ describe('modules/platform/scm-manager/index', () => {
     it('should adjust smart link for Pull Requests', () => {
       const result = scmPlatform.massageMarkdown('[PR](../pull/1)');
       expect(result).toBe('[PR](pulls/1)');
-    });
-  });
-
-  describe('getRepoForceRebase', () => {
-    it('should Not implemented and return false', async () => {
-      const result = await scmPlatform.getRepoForceRebase();
-      expect(result).toBeFalse();
     });
   });
 

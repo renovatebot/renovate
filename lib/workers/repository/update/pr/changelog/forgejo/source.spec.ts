@@ -5,9 +5,8 @@ import * as hostRules from '../../../../../../util/host-rules.ts';
 import { toBase64 } from '../../../../../../util/string.ts';
 import type { Timestamp } from '../../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
-import { GiteaChangeLogSource } from '../gitea/source.ts';
 import { getChangeLogJSON } from '../index.ts';
-import { getReleaseNotesMd } from './index.ts';
+import { ForgejoChangeLogSource } from './source.ts';
 
 const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
@@ -16,7 +15,7 @@ const upgrade = partial<BranchUpgradeConfig>({
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
   newVersion: '5.7.0',
-  sourceUrl: 'https://gitea.com/meno/dropzone/',
+  sourceUrl: 'https://code.forgejo.org/meno/dropzone/',
   releases: [
     // TODO: test gitRef
     { version: '5.2.0' },
@@ -33,11 +32,11 @@ const upgrade = partial<BranchUpgradeConfig>({
   ],
 });
 
-const matchHost = 'https://gitea.com/';
+const matchHost = 'https://code.forgejo.org/';
 
-const changelogSource = new GiteaChangeLogSource();
+const changelogSource = new ForgejoChangeLogSource();
 
-describe('workers/repository/update/pr/changelog/gitea/index', () => {
+describe('workers/repository/update/pr/changelog/forgejo/source', () => {
   beforeAll(() => {
     // TODO: why?
     vi.stubEnv('GITHUB_ENDPOINT', undefined);
@@ -45,9 +44,8 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
-        hostType: 'gitea',
+        hostType: 'forgejo',
         matchHost,
         token: 'abc',
       });
@@ -76,12 +74,12 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       await expect(
         getChangeLogJSON({
           ...upgrade,
-          sourceUrl: 'https://gitea.com/help',
+          sourceUrl: 'https://code.forgejo.org/help',
         }),
       ).resolves.toBeNull();
     });
 
-    it('works without gitea', async () => {
+    it('works without forgejo', async () => {
       await expect(
         getChangeLogJSON({
           ...upgrade,
@@ -89,13 +87,13 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://gitea.com/api/v1/',
-          baseUrl: 'https://gitea.com/',
+          apiBaseUrl: 'https://code.forgejo.org/api/v1/',
+          baseUrl: 'https://code.forgejo.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
-          sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
+          sourceUrl: 'https://code.forgejo.org/meno/dropzone/',
+          type: 'forgejo',
         },
         versions: [
           { version: '5.6.1' },
@@ -108,7 +106,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       httpMock.clear(false);
     });
 
-    it('uses gitea tags', async () => {
+    it('uses forgejo tags', async () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
@@ -194,13 +192,13 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       ).resolves.toMatchObject({
         hasReleaseNotes: true,
         project: {
-          apiBaseUrl: 'https://gitea.com/api/v1/',
-          baseUrl: 'https://gitea.com/',
+          apiBaseUrl: 'https://code.forgejo.org/api/v1/',
+          baseUrl: 'https://code.forgejo.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
-          sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
+          sourceUrl: 'https://code.forgejo.org/meno/dropzone/',
+          type: 'forgejo',
         },
         versions: [
           {
@@ -209,9 +207,9 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
               body: 'some changes\n',
               name: '5.6.1 - Some feature',
               notesSourceUrl:
-                'https://gitea.com/api/v1/repos/meno/dropzone/releases',
+                'https://code.forgejo.org/api/v1/repos/meno/dropzone/releases',
               tag: 'v5.6.1',
-              url: 'https://gitea.com/meno/dropzone/releases/tag/v5.6.1',
+              url: 'https://code.forgejo.org/meno/dropzone/releases/tag/v5.6.1',
             },
           },
           { version: '5.6.0' },
@@ -221,7 +219,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       });
     });
 
-    it('handles empty gitea tags response', async () => {
+    it('handles empty forgejo tags response', async () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
@@ -239,13 +237,13 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://gitea.com/api/v1/',
-          baseUrl: 'https://gitea.com/',
+          apiBaseUrl: 'https://code.forgejo.org/api/v1/',
+          baseUrl: 'https://code.forgejo.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
-          sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
+          sourceUrl: 'https://code.forgejo.org/meno/dropzone/',
+          type: 'forgejo',
         },
         versions: [
           { version: '5.6.1' },
@@ -256,11 +254,11 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       });
     });
 
-    it('uses gitea tags with error', async () => {
+    it('uses forgejo tags with error', async () => {
       httpMock
         .scope(matchHost)
         .get('/api/v1/repos/meno/dropzone/tags')
-        .replyWithError('Unknown gitea Repo')
+        .replyWithError('Unknown forgejo Repo')
         .get('/api/v1/repos/meno/dropzone/contents')
         .times(4)
         .reply(200, [])
@@ -274,13 +272,13 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       ).resolves.toMatchObject({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://gitea.com/api/v1/',
-          baseUrl: 'https://gitea.com/',
+          apiBaseUrl: 'https://code.forgejo.org/api/v1/',
+          baseUrl: 'https://code.forgejo.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
-          sourceUrl: 'https://gitea.com/meno/dropzone/',
-          type: 'gitea',
+          sourceUrl: 'https://code.forgejo.org/meno/dropzone/',
+          type: 'forgejo',
         },
         versions: [
           { version: '5.6.1' },
@@ -327,44 +325,10 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('supports gitea enterprise and gitea enterprise changelog', async () => {
-      hostRules.add({
-        hostType: 'gitea',
-        matchHost: 'https://gitea-enterprise.example.com/',
-        token: 'abc',
-      });
-      await expect(
-        getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
-        }),
-      ).resolves.toMatchObject({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://gitea-enterprise.example.com/api/v1/',
-          baseUrl: 'https://gitea-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
-          type: 'gitea',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
-
-      // TODO: find right mocks
-      httpMock.clear(false);
-    });
-
-    it('supports self-hosted gitea changelog', async () => {
+    it('supports self-hosted forgejo changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: 'gitea',
+        hostType: 'forgejo',
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
@@ -382,7 +346,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
-          type: 'gitea',
+          type: 'forgejo',
         },
         versions: [
           { version: '5.6.1' },
@@ -425,6 +389,49 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
   });
 
   describe('getReleaseNotesMd', () => {
+    it('ignores symlink and submodule entries in directory listing', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v1/repos/some/repo/contents/charts/some')
+        .reply(200, [
+          {
+            name: 'CHANGELOG.md',
+            path: 'charts/some/CHANGELOG.md',
+            type: 'file',
+            content: null,
+          },
+          {
+            name: 'link',
+            path: 'charts/some/link',
+            type: 'symlink',
+            content: null,
+          },
+          {
+            name: 'vendor',
+            path: 'charts/some/vendor',
+            type: 'submodule',
+            content: null,
+          },
+        ])
+        .get('/api/v1/repos/some/repo/contents/charts/some/CHANGELOG.md')
+        .reply(200, {
+          name: 'CHANGELOG.md',
+          path: 'charts/some/CHANGELOG.md',
+          type: 'file',
+          content: toBase64('some content'),
+        });
+      await expect(
+        changelogSource.getReleaseNotesMd(
+          'some/repo',
+          'https://git.test.com/api/v1/',
+          'charts/some',
+        ),
+      ).resolves.toEqual({
+        changelogFile: 'charts/some/CHANGELOG.md',
+        changelogMd: 'some content\n#\n##',
+      });
+    });
+
     it('works', async () => {
       httpMock
         .scope('https://git.test.com/')
@@ -457,7 +464,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           content: toBase64('some content'),
         });
       await expect(
-        getReleaseNotesMd(
+        changelogSource.getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
           'charts/some',

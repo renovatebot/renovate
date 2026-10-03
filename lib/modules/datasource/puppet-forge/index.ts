@@ -10,7 +10,9 @@ export class PuppetForgeDatasource extends Datasource {
     super(PuppetForgeDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [PUPPET_FORGE];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [PUPPET_FORGE];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =

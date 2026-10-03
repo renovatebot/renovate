@@ -27,7 +27,7 @@ A Go proxy reports the commit time of the tagged commit as a version's `Time`, w
 This inconsistency can lead to `minimumReleaseAge` being applied incorrectly to the Go module's updates.
 
 !!! note
-  For modules hosted on GitHub, Renovate will look up if there is a GitHub Release on the repository, and if so, use the Release's publication time, if it's later than the timestamp reported by the Go proxy.
+  For modules hosted on GitHub, Renovate will look up the repository's GitHub Releases and git tags, and use whichever of the Release's publication time or the tag's own creation time is later than the timestamp reported by the Go proxy. A Release's publication time takes precedence over a tag's creation time if both exist for the same version.
   <br><br>
   This lookup needs a GitHub token to be configured, and is skipped if the lookup fails, leaving the timestamp reported by the Go proxy in place.
 
@@ -36,6 +36,8 @@ For example, this happens when:
 - an infrequently updated repository prepares a GitHub Release by creating a draft release
 - some time passes, and the maintainers publish the Release
 - no new commits are pushed to the release branch (i.e. `main`) in that time
+
+Similarly, a lightweight git tag has no creation time of its own and always matches the commit it points to, but an _annotated_ git tag carries its own, separate creation time that can be later than the commit it points to, even without a GitHub Release ever being published.
 
 ## Fallback to direct lookups
 

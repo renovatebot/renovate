@@ -1,5 +1,6 @@
 import is, {
   isArray,
+  isBoolean,
   isEmptyString,
   isNonEmptyArray,
   isNonEmptyString,
@@ -560,6 +561,7 @@ export async function validateConfig(
                   'matchSourceUrls',
                   'matchRegistryUrls',
                   'matchUpdateTypes',
+                  'matchIsBreaking',
                   'matchConfidence',
                   'matchCurrentAge',
                   'matchRepositories',
@@ -640,10 +642,18 @@ export async function validateConfig(
                         'separateMultipleMinor',
                         'versioning',
                       ] as const;
+                      // These selectors are only known after the lookup
+                      const postLookupSelectors: string[] = [];
                       if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
+                        postLookupSelectors.push('matchUpdateTypes');
+                      }
+                      if (isBoolean(resolvedRule.matchIsBreaking)) {
+                        postLookupSelectors.push('matchIsBreaking');
+                      }
+                      for (const selector of postLookupSelectors) {
                         for (const option of preLookupOptions) {
                           if (resolvedRule[option] !== undefined) {
-                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
+                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both ${selector} and ${option}. Rule: ${JSON.stringify(
                               packageRule,
                             )}`;
                             errors.push({

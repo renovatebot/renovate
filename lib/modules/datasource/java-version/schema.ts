@@ -11,6 +11,13 @@ export const AdoptiumJavaResponse = z.object({
 
 export type AdoptiumJavaResponse = z.infer<typeof AdoptiumJavaResponse>;
 
+export const MiseJavaRelease = z.object({
+  image_type: z.string(),
+  vendor: z.string(),
+  version: z.string(),
+});
+
+export type MiseJavaRelease = z.infer<typeof MiseJavaRelease>;
 export const AdoptiumAvailableReleases = z.object({
   available_lts_releases: z.array(z.number()),
 });

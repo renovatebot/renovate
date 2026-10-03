@@ -36,7 +36,6 @@ describe('modules/manager/cargo/extract', () => {
       vi.stubEnv('CARGO_REGISTRIES_PRIVATE_CRATES_INDEX', undefined);
       vi.stubEnv('CARGO_REGISTRIES_MCORBIN_INDEX', undefined);
 
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'git.example.com',

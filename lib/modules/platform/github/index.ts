@@ -52,7 +52,7 @@ import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
-import { fromBase64, looseEquals } from '../../../util/string.ts';
+import { looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -79,6 +79,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
+import { getRepoFile } from './files.ts';
 import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
@@ -424,17 +425,14 @@ export async function getRawFile(
     httpOptions.cacheProvider = repoCacheProvider;
   }
 
-  let url = `repos/${repo}/contents/${fileName}`;
-  if (branchOrTag) {
-    url += `?ref=${branchOrTag}`;
-  }
-  const res = await githubApi.getJsonUnchecked<{ content: string }>(
-    url,
+  return await getRepoFile(
+    githubApi,
+    // TODO #22198
+    repo!,
+    fileName,
+    branchOrTag,
     httpOptions,
   );
-  const buf = res.body.content;
-  const str = fromBase64(buf);
-  return str;
 }
 
 export async function getJsonFile(

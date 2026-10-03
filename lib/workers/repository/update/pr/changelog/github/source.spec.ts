@@ -63,7 +63,7 @@ function expectedChangeLog({
   };
 }
 
-describe('workers/repository/update/pr/changelog/github/index', () => {
+describe('workers/repository/update/pr/changelog/github/source', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
@@ -71,7 +71,6 @@ describe('workers/repository/update/pr/changelog/github/index', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'https://api.github.com/',

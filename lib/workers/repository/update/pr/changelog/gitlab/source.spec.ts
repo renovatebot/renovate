@@ -55,7 +55,7 @@ function expectedChangeLog({ baseUrl = 'https://gitlab.com/' } = {}) {
   };
 }
 
-describe('workers/repository/update/pr/changelog/gitlab/index', () => {
+describe('workers/repository/update/pr/changelog/gitlab/source', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
     httpMock.clear(false);
@@ -63,7 +63,6 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'gitlab',
         matchHost,

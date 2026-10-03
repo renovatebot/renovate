@@ -42,7 +42,9 @@ interface PomInfo {
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
-  override readonly defaultRegistryUrls = [MAVEN_REPO];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [MAVEN_REPO];
+  }
 
   override readonly defaultVersioning = ivyVersioning.id;
 

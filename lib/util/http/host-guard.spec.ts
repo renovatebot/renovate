@@ -43,7 +43,6 @@ function mockResolvedAddresses(...addresses: string[]): void {
 describe('util/http/host-guard', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    hostRules.clear();
   });
   describe('classifyIpAddress', () => {
     it.each`
