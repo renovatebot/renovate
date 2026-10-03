@@ -86,4 +86,5 @@ export interface UpdateResult {
   vulnerabilityFixStrategy?: string;
   mostRecentTimestamp?: Timestamp | null;
   isAbandoned?: boolean;
+  respectLatest?: boolean;
 }
