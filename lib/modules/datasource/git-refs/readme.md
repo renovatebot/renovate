@@ -1,4 +1,4 @@
-You can use this datasource plus [regex managers](../../manager/regex/index.md) to update git-based dependencies that are not natively supported by Renovate.
+You can use this datasource plus custom managers such as [regex managers](../../manager/regex/index.md) to update git-based dependencies that are not natively supported by Renovate.
 
 The `git-refs` datasource returns a reference from a Git repository.
 
