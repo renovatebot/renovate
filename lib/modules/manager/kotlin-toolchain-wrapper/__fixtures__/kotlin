@@ -1,0 +1,286 @@
+#!/bin/sh
+
+#
+# Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+#
+
+# Possible environment variables:
+#   KOTLIN_CLI_DOWNLOAD_ROOT        Maven repository to download the Kotlin CLI dist from.
+#                                     default: https://packages.jetbrains.team/maven/p/amper/amper
+#   KOTLIN_CLI_JRE_DOWNLOAD_ROOT    Url prefix to download the JRE to run the Kotlin CLI
+#                                     default: https:/
+#   KOTLIN_CLI_BOOTSTRAP_CACHE_DIR  Cache directory to store the extracted JRE and Kotlin CLI distribution
+#   KOTLIN_CLI_JAVA_HOME            JRE to run the Kotlin CLI itself (optional, does not affect compilation)
+#   KOTLIN_CLI_JAVA_OPTIONS         JVM options to pass to the JVM running the Kotlin CLI (does not affect the user's application)
+#   KOTLIN_CLI_NO_WELCOME_BANNER    Disables the first-run welcome message if set to a non-empty value
+
+set -e -u
+
+# The version of the Kotlin Toolchain (and CLI) distribution to provision and use
+kotlin_cli_version=0.12.0-dev-4139
+# Establish chain of trust from here by specifying exact checksum of Kotlin Toolchain (and CLI) distribution to be run
+kotlin_cli_sha256=442cf2ea77c4c3c2228c3d256d6bd48fb7a319df4a16abbd57dbc2fc9a944d42
+
+KOTLIN_CLI_DOWNLOAD_ROOT="${KOTLIN_CLI_DOWNLOAD_ROOT:-https://packages.jetbrains.team/maven/p/amper/amper}"
+
+die() {
+  echo >&2
+  echo "$@" >&2
+  echo >&2
+  exit 1
+}
+
+# usage: check_sha SOURCE_MONIKER FILE SHA_CHECKSUM SHA_SIZE
+# $1 SOURCE_MONIKER (e.g. url)
+# $2 FILE
+# $3 SHA hex string
+# $4 SHA size in bits (256, 512, ...)
+check_sha() {
+  sha_size=$4
+  if command -v shasum >/dev/null 2>&1; then
+    echo "$3 *$2" | shasum -a "$sha_size" --status -c || {
+      die "ERROR: Checksum mismatch for $2 (downloaded from $1): expected checksum $3 but got $(shasum --binary -a "$sha_size" "$2" | awk '{print $1}')"
+    }
+    return 0
+  fi
+
+  shaNsumCommand="sha${sha_size}sum"
+  if command -v "$shaNsumCommand" >/dev/null 2>&1; then
+    # discard the output as sha*sum may print redundant warnings in some versions
+    echo "$3 *$2" | $shaNsumCommand -w -c >/dev/null 2>&1 || {
+      die "ERROR: Checksum mismatch for $2 (downloaded from $1): expected checksum $3 but got $($shaNsumCommand "$2" | awk '{print $1}')"
+    }
+    return 0
+  fi
+
+  echo "Both 'shasum' and 'sha${sha_size}sum' utilities are missing. Please install one of them"
+  return 1
+}
+
+
+download_and_extract() {
+  moniker="$1"
+  file_url="$2"
+  file_sha="$3"
+  sha_size="$4"
+  cache_dir="$5"
+  extract_dir="$6"
+  show_banner_on_cache_miss="$7"
+
+  if [ -e "$extract_dir/.flag" ] && [ "$(cat "$extract_dir/.flag")" = "${file_sha}" ]; then
+    # Everything is up-to-date in $extract_dir, do nothing
+    return 0;
+  fi
+
+  mkdir -p "$cache_dir"
+
+  # Take a lock for the download of this file
+  short_sha=$(echo "$file_sha" | cut -c1-32) # cannot use the ${short_sha:0:32} syntax in regular /bin/sh
+  download_lock_file="$cache_dir/download-${short_sha}.lock"
+  process_lock_file="$cache_dir/download-${short_sha}.$$.lock"
+  echo $$ >"$process_lock_file"
+  while ! ln "$process_lock_file" "$download_lock_file" 2>/dev/null; do
+    lock_owner=$(cat "$download_lock_file" 2>/dev/null || true)
+    # We use `kill -0` instead of `ps -p` as the first one is more portable
+    if [ -n "$lock_owner" ] && kill -0 "$lock_owner" >/dev/null; then
+      echo "Another Kotlin CLI instance (pid $lock_owner) is downloading $moniker. Awaiting the result..."
+      sleep 1
+    elif [ -n "$lock_owner" ] && [ "$(cat "$download_lock_file" 2>/dev/null)" = "$lock_owner" ]; then
+      rm -f "$download_lock_file"
+      # We don't want to simply loop again here, because multiple concurrent processes may face this at the same time,
+      # which means the 'rm' command above from another script could delete our new valid lock file. Instead, we just
+      # ask the user to try again. This doesn't 100% eliminate the race, but the probability of issues is drastically
+      # reduced because it would involve 4 processes with perfect timing. We can revisit this later.
+      die "Another Kotlin CLI instance (pid $lock_owner) locked the download of $moniker, but is no longer running. The lock file is now removed, please try again."
+    fi
+  done
+
+  # shellcheck disable=SC2064
+  trap "rm -f \"$download_lock_file\"" EXIT
+  rm -f "$process_lock_file"
+
+  unlock_and_cleanup() {
+    rm -f "$download_lock_file"
+    trap - EXIT
+    return 0
+  }
+
+  if [ -e "$extract_dir/.flag" ] && [ "$(cat "$extract_dir/.flag")" = "${file_sha}" ]; then
+    # Everything is up-to-date in $extract_dir, just release the lock
+    unlock_and_cleanup
+    return 0;
+  fi
+
+  if [ "$show_banner_on_cache_miss" = "true" ] && [ -z "${KOTLIN_CLI_NO_WELCOME_BANNER:-}" ]; then
+      echo
+      cat <<EOF
+Welcome to
+
+@@@        @@@@                               @@@    @@@
+@@@      @@@@                       @@@       @@@    @@@
+@@@    #@@@"                       ,@@@       @@@
+@@@  ,@@@%         ,@@@@@@@,     @@@@@@@@@@   @@@    @@@    @@@  ,@@@@@,
+@@@ @@@@         @@@@@%"%@@@@@   @@@@@@@@@@   @@@    @@@    @@@@@@%%@@@@@
+@@@@@@%         @@@%       %@@@     @@@       @@@    @@@    @@@@      %@@%
+@@@ @@@@=      #@@@         @@@#    @@@       @@@    @@@    @@@        @@@
+@@@   @@@@     #@@@         @@@#    @@@       @@@    @@@    @@@        @@@
+@@@    *@@@%    @@@@       @@@@     @@@       @@@    @@@    @@@        @@@
+@@@      %@@@=   %@@@@*,*@@@@%      @@@@###   @@@    @@@    @@@        @@@
+@@@        @@@@    "@@@@@@@"         %@@@@@   @@@    @@@    @@@        @@@
+EOF
+      echo
+      echo "This is the first run of the Kotlin CLI v$kotlin_cli_version, so we need to download the Kotlin Toolchain."
+      echo "Please give us a few seconds, subsequent runs will be faster."
+      echo
+  fi
+
+  echo "Downloading $moniker..."
+
+  temp_file="$cache_dir/download-file-$$.bin"
+  rm -f "$temp_file"
+  if command -v curl >/dev/null 2>&1; then
+    if [ -t 1 ]; then CURL_PROGRESS="--progress-bar"; else CURL_PROGRESS="--silent --show-error"; fi
+    # shellcheck disable=SC2086
+    curl $CURL_PROGRESS -L --fail --retry 5 --connect-timeout 30 --output "${temp_file}" "$file_url"
+  elif command -v wget >/dev/null 2>&1; then
+    if [ -t 1 ]; then WGET_PROGRESS=""; else WGET_PROGRESS="-nv"; fi
+    wget $WGET_PROGRESS --tries=5 --connect-timeout=30 --read-timeout=120 -O "${temp_file}" "$file_url"
+  else
+    die "ERROR: Please install 'wget' or 'curl', as one of them is required to download $moniker"
+  fi
+
+  check_sha "$file_url" "$temp_file" "$file_sha" "$sha_size"
+
+  rm -rf "$extract_dir"
+  mkdir -p "$extract_dir"
+
+  case "$file_url" in
+    *".zip")
+      if command -v unzip >/dev/null 2>&1; then
+        unzip -q "$temp_file" -d "$extract_dir"
+      else
+        die "ERROR: Please install 'unzip', which is required to extract $moniker"
+      fi ;;
+    *)
+      if command -v tar >/dev/null 2>&1; then
+        tar -x -f "$temp_file" -C "$extract_dir"
+      else
+        die "ERROR: Please install 'tar', which is required to extract $moniker"
+      fi ;;
+  esac
+
+  rm -f "$temp_file"
+
+  echo "$file_sha" >"$extract_dir/.flag"
+
+  # Unlock and cleanup the lock file
+  unlock_and_cleanup
+
+  echo "Download complete."
+  echo
+}
+
+
+# ********** Project-local version detection **********
+
+# 1. Search upwards for an executable `amper` file and/or `project.yaml`
+# Sets wrapper_script to the found wrapper path, or empty string if not found.
+find_project_context() {
+  wrapper_script=""
+  this_script="$(realpath "$0")"
+  project_dir=$(pwd)
+  while [ "$project_dir" != "/" ] && [ -n "$project_dir" ]; do
+    wrapper_candidate="$project_dir/kotlin"
+    if [ "$this_script" = "$wrapper_candidate" ]; then
+      # Found itself (local wrapper case), no need to update any version or search further.
+      return 1
+    fi
+
+    if [ -f "$wrapper_candidate" ] && [ -x "$wrapper_candidate" ]; then
+      # Found the wrapper — check that a project context exists alongside it
+      if [ -f "$project_dir/project.yaml" ] || [ -f "$project_dir/module.yaml" ]; then
+        wrapper_script="$wrapper_candidate"
+        return 0
+      else
+        echo "WARNING: Found wrapper script '$wrapper_candidate', but no project.yaml or module.yaml near it. Skipping." >&2
+        # Continue the search
+      fi
+    elif [ -f "$project_dir/project.yaml" ]; then
+      # Found project.yaml but no executable wrapper alongside it
+      echo "WARNING: Found a project.yaml in '$project_dir', but the wrapper script is missing; using Kotlin Toolchain v$kotlin_cli_version." >&2
+      return 1
+    fi
+
+    project_dir=$(dirname "$project_dir")
+  done
+  # Do not check root '/' - it's an unlikely candidate for a project
+
+  return 1
+}
+
+parse_project_context() {
+  # Parse kotlin_cli_version and kotlin_cli_sha256 from "$wrapper_script" without executing it.
+  parsed_kotlin_cli_version=$(
+    sed -n 's/^kotlin_cli_version=\([A-Za-z0-9._+-]\{1,\}\)[[:space:]]*$/\1/p' "$wrapper_script" \
+      | head -n 1
+  )
+  parsed_kotlin_cli_sha256=$(
+    sed -n 's/^kotlin_cli_sha256=\([0-9a-fA-F]\{64\}\)[[:space:]]*$/\1/p' "$wrapper_script" \
+      | head -n 1
+  )
+
+  if [ -z "$parsed_kotlin_cli_version" ]; then
+    echo "ERROR: Suspicious local wrapper script: failed to detect the distribution version in '$wrapper_script'" >&2
+    return 1
+  fi
+  if [ -z "$parsed_kotlin_cli_sha256" ]; then
+    echo "ERROR: Suspicious local wrapper script: failed to detect the distribution checksum in '$wrapper_script'" >&2
+    return 1
+  fi
+
+  # overwrite builtin values and proceed
+  kotlin_cli_version=$parsed_kotlin_cli_version
+  kotlin_cli_sha256=$parsed_kotlin_cli_sha256
+  return 0
+}
+
+if [ -z "${KOTLIN_CLI_WRAPPER_ALWAYS_USE_INTRINSIC_VERSION:-}" ]; then
+  find_project_context && parse_project_context
+fi
+
+# ********** System detection **********
+
+kernelName=$(uname -s)
+case "$kernelName" in
+  Darwin* )
+    default_kotlin_cli_cache_dir="$HOME/Library/Caches/JetBrains/Kotlin/cli"
+    ;;
+  Linux* )
+    default_kotlin_cli_cache_dir="$HOME/.cache/JetBrains/Kotlin/cli"
+    ;;
+  CYGWIN* | MSYS* | MINGW* )
+    if command -v cygpath >/dev/null 2>&1; then
+      default_kotlin_cli_cache_dir=$(cygpath -u "$LOCALAPPDATA\JetBrains\Kotlin\cli")
+    else
+      die "The 'cypath' command is not available, but the Kotlin CLI needs it. Use kotlin.bat instead, or try a Cygwin or MSYS environment."
+    fi
+    ;;
+  *)
+    die "Unsupported platform $kernelName"
+    ;;
+esac
+
+kotlin_cli_cache_dir="${KOTLIN_CLI_BOOTSTRAP_CACHE_DIR:-$default_kotlin_cli_cache_dir}"
+
+# ********** Provision the Kotlin Toolchain distribution **********
+
+kotlin_cli_url="$KOTLIN_CLI_DOWNLOAD_ROOT/org/jetbrains/kotlin/kotlin-cli/$kotlin_cli_version/kotlin-cli-$kotlin_cli_version-dist.tgz"
+kotlin_cli_target_dir="$kotlin_cli_cache_dir/kotlin-cli-$kotlin_cli_version"
+download_and_extract "Kotlin Toolchain distribution v$kotlin_cli_version" "$kotlin_cli_url" "$kotlin_cli_sha256" 256 "$kotlin_cli_cache_dir" "$kotlin_cli_target_dir" "true"
+
+# ********** Launch the Kotlin CLI **********
+
+launcher_script="$kotlin_cli_target_dir/bin/launcher.sh"
+
+KOTLIN_CLI_WRAPPER_PATH="$(realpath "$0")" \
+exec /bin/sh "$launcher_script" "$@"
