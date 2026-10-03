@@ -525,7 +525,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'repositoryCacheForceLocal',
     description:
-      'If set to `true`, Renovate will persist repository cache locally after uploading to S3.',
+      'If set to `true`, Renovate will persist repository cache locally after uploading to the remote repository cache.',
     type: 'boolean',
     default: false,
     globalOnly: true,
