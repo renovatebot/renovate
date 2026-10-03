@@ -585,6 +585,94 @@ describe('workers/repository/dependency-dashboard', () => {
       );
     });
 
+    it('does not report schedules by default', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
+          branchName: 'scheduled-branch',
+        },
+      ];
+      config.dependencyDashboard = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      expect(platform.ensureIssue.mock.calls[0][0].body).not.toContain(
+        'Schedule (UTC):',
+      );
+    });
+
+    it('groups schedules with their timezone when enabled', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['before 5am on Monday'],
+          timezone: 'Europe/Berlin',
+          branchName: 'scheduled-branch',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'second scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'second-scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['before 5am on Monday'],
+          timezone: 'Europe/Berlin',
+          branchName: 'second-scheduled-branch',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'UTC scheduled update',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'utc-scheduled-dep' }],
+          result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
+          branchName: 'utc-scheduled-branch',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'update without schedule details',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'missing-schedule-dep' }],
+          result: 'not-scheduled',
+          branchName: 'missing-schedule-branch',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardReportSchedules = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(codeBlock`
+        ### Schedule (Europe/Berlin): \`before 5am on Monday\`
+
+         - [ ] <!-- unschedule-branch=scheduled-branch -->scheduled update
+         - [ ] <!-- unschedule-branch=second-scheduled-branch -->second scheduled update
+
+        ### Schedule (UTC): Between 12:00 AM and 03:59 AM (\`* 0-3 * * *\`)
+
+         - [ ] <!-- unschedule-branch=utc-scheduled-branch -->UTC scheduled update
+
+        ### Schedule unavailable
+
+         - [ ] <!-- unschedule-branch=missing-schedule-branch -->update without schedule details
+      `);
+    });
+
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other', async () => {
       const branches: BranchConfig[] = [
         {
@@ -606,6 +694,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
         {
@@ -613,6 +702,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName4',
         },
         {
@@ -661,6 +751,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
+      config.dependencyDashboardReportSchedules = true;
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -710,6 +801,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
         {
@@ -717,6 +809,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName4',
           dependencyDashboardCategory: 'Category #1',
         },
@@ -760,6 +853,7 @@ describe('workers/repository/dependency-dashboard', () => {
         },
       ];
       config.dependencyDashboard = true;
+      config.dependencyDashboardReportSchedules = true;
       await dependencyDashboard.ensureDependencyDashboard(
         config,
         branches,
@@ -791,9 +885,13 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(body).toContain(codeBlock`
         ### Category #1
 
+        #### Schedule (UTC): Between 12:00 AM and 03:59 AM (\`* 0-3 * * *\`)
+
          - [ ] <!-- unschedule-branch=branchName4 -->pr4
 
         ### Others
+
+        #### Schedule (UTC): Between 12:00 AM and 03:59 AM (\`* 0-3 * * *\`)
 
          - [ ] <!-- unschedule-branch=branchName3 -->pr3
 
@@ -1413,6 +1511,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
           result: 'not-scheduled',
+          schedule: ['* 0-3 * * *'],
           branchName: 'branchName3',
         },
       ];
@@ -1438,7 +1537,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
         The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
 
-         - [x] <!-- unschedule-branch=branchName3 -->pr3
+         - [x] <!-- unschedule-branch=branchName3 -->pr3 → [Schedule: Between 12:00 AM and 03:59 AM (\`* 0-3 * * *\`)]
 
          - [x] <!-- rebase-all-open-prs -->'
         `,
