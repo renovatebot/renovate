@@ -34,6 +34,22 @@ const KubernetesJobTemplateInit = [
   'init_container',
   'image',
 ];
+const GoogleCloudRunV1Container = ['template', 'spec', 'containers', 'image'];
+const GoogleCloudRunV2Container = ['template', 'containers', 'image'];
+const GoogleCloudRunV2JobContainer = ['template', ...GoogleCloudRunV2Container];
+const GoogleCloudRunV2SandboxTemplate = [
+  'template',
+  'sandboxes',
+  'templates',
+  'image',
+];
+const GoogleDataplexContainerImage = [
+  'infrastructure_spec',
+  'container_image',
+  'image',
+];
+const GoogleRuntimeConfigContainerImage = ['runtime_config', 'container_image'];
+const GoogleCloudDeployTaskContainer = ['tasks', 'container', 'image'];
 
 export const generic_image_datasource: GenericImageResourceDef[] = [
   { type: 'docker_registry_image', path: ['name'] },
@@ -86,4 +102,128 @@ export const generic_image_resource: GenericImageResourceDef[] = [
   { type: 'kubernetes_stateful_set', path: KubernetesSpecTemplateInit },
   { type: 'kubernetes_stateful_set_v1', path: KubernetesSpecTemplate },
   { type: 'kubernetes_stateful_set_v1', path: KubernetesSpecTemplateInit },
+  // Google provider: https://registry.terraform.io/providers/hashicorp/google
+  { type: 'google_cloud_run_service', path: GoogleCloudRunV1Container },
+  { type: 'google_cloud_run_v2_service', path: GoogleCloudRunV2Container },
+  {
+    type: 'google_cloud_run_v2_service',
+    path: GoogleCloudRunV2SandboxTemplate,
+  },
+  { type: 'google_cloud_run_v2_worker_pool', path: GoogleCloudRunV2Container },
+  { type: 'google_cloud_run_v2_job', path: GoogleCloudRunV2JobContainer },
+  {
+    type: 'google_app_engine_flexible_app_version',
+    path: ['deployment', 'container', 'image'],
+  },
+  {
+    type: 'google_workstations_workstation_config',
+    path: ['container', 'image'],
+  },
+  {
+    type: 'google_dataproc_batch',
+    path: GoogleRuntimeConfigContainerImage,
+  },
+  {
+    type: 'google_dataproc_session_template',
+    path: GoogleRuntimeConfigContainerImage,
+  },
+  {
+    type: 'google_dataplex_task',
+    path: ['spark', ...GoogleDataplexContainerImage],
+  },
+  {
+    type: 'google_dataplex_task',
+    path: ['notebook', ...GoogleDataplexContainerImage],
+  },
+  {
+    type: 'google_vertex_ai_reasoning_engine',
+    path: ['spec', 'container_spec', 'image_uri'],
+  },
+  {
+    type: 'google_vertex_ai_endpoint_with_model_garden_deployment',
+    path: ['model_config', 'container_spec', 'image_uri'],
+  },
+  {
+    type: 'google_firebase_app_hosting_build',
+    path: ['source', 'container', 'image'],
+  },
+  {
+    type: 'google_bigquery_routine',
+    path: ['spark_options', 'container_image'],
+  },
+  { type: 'google_cloudbuild_trigger', path: ['build', 'step', 'name'] },
+  {
+    type: 'google_network_services_wasm_plugin',
+    path: ['versions', 'image_uri'],
+  },
+  {
+    type: 'google_dataproc_gdc_spark_application',
+    path: ['dependency_images'],
+  },
+  {
+    type: 'google_clouddeploy_custom_target_type',
+    path: ['tasks', 'deploy', 'container', 'image'],
+  },
+  {
+    type: 'google_clouddeploy_custom_target_type',
+    path: ['tasks', 'render', 'container', 'image'],
+  },
+  {
+    type: 'google_clouddeploy_delivery_pipeline',
+    path: [
+      'serial_pipeline',
+      'stages',
+      'strategy',
+      'canary',
+      'canary_deployment',
+      'verify_config',
+      ...GoogleCloudDeployTaskContainer,
+    ],
+  },
+  {
+    type: 'google_clouddeploy_delivery_pipeline',
+    path: [
+      'serial_pipeline',
+      'stages',
+      'strategy',
+      'canary',
+      'custom_canary_deployment',
+      'phase_configs',
+      'verify_config',
+      ...GoogleCloudDeployTaskContainer,
+    ],
+  },
+  {
+    type: 'google_clouddeploy_delivery_pipeline',
+    path: [
+      'serial_pipeline',
+      'stages',
+      'strategy',
+      'standard',
+      'predeploy',
+      ...GoogleCloudDeployTaskContainer,
+    ],
+  },
+  {
+    type: 'google_clouddeploy_delivery_pipeline',
+    path: [
+      'serial_pipeline',
+      'stages',
+      'strategy',
+      'standard',
+      'postdeploy',
+      ...GoogleCloudDeployTaskContainer,
+    ],
+  },
+  {
+    type: 'google_clouddeploy_delivery_pipeline',
+    path: [
+      'serial_pipeline',
+      'stages',
+      'strategy',
+      'standard',
+      'verify_config',
+      ...GoogleCloudDeployTaskContainer,
+    ],
+  },
 ];
