@@ -14,7 +14,7 @@ import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { isHttpUrl, joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
@@ -511,6 +511,9 @@ export class CrateDatasource extends Datasource {
 
     const git = createSimpleGit({
       config: { maxConcurrentProcesses: 1 },
+      ...(isHttpUrl(registryFetchUrl) && {
+        authentication: { hostTypes: [CrateDatasource.id] },
+      }),
     });
 
     try {
