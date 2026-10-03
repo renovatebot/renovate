@@ -644,8 +644,10 @@ async function tryPrAutomerge(
       const desiredStatus = 'can_be_merged';
       const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
+      // `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS` is the original misspelled name, still honored.
       const retryTimes = parseInteger(
-        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS ??
+          env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
