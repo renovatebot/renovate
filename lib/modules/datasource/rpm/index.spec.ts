@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { promisify } from 'node:util';
-import { gzip as _gzip } from 'node:zlib';
+import zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
@@ -17,7 +17,8 @@ const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
 
-const gzip = promisify(_gzip);
+const gzip = promisify(zlib.gzip);
+const zstdCompress = promisify(zlib.zstdCompress);
 
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
@@ -501,6 +502,38 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         cacheFs.readCacheFile(extractedPrimaryXmlPath, 'utf8'),
       ).resolves.toContain('ver="2.0"');
+    });
+
+    it.each([
+      {
+        name: 'uncompressed',
+        compress: (input: string) => Buffer.from(input),
+      },
+      { name: 'gzip-compressed', compress: gzip },
+      { name: 'zstd-compressed', compress: zstdCompress },
+    ])('handles $name primary.xml', async ({ compress }) => {
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .get('/somesha256-primary.xml.gz')
+        .reply(
+          200,
+          await compress(
+            buildPrimaryXml(codeBlock`
+                <package type="rpm">
+                  <name>example-package</name>
+                  <arch>x86_64</arch>
+                  <version epoch="0" ver="1.0" rel="2.azl3"/>
+                </package>
+              `),
+          ),
+        );
+
+      const releases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        packageName,
+      );
+
+      expect(releases).toEqual({ releases: [{ version: '1.0-2.azl3' }] });
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
