@@ -4,6 +4,11 @@ import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import type { PackageFile } from '../../../types.ts';
+import {
+  isDevEnginesDepType,
+  isPackageManagerDepType,
+  isToolDepType,
+} from '../../dep-types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { getNpmLock } from '../npm.ts';
 import { getPnpmLock } from '../pnpm.ts';
@@ -39,10 +44,7 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
-        if (
-          dep.depType !== 'devEngines.runtime' &&
-          dep.depType !== 'devEngines.packageManager'
-        ) {
+        if (!isDevEnginesDepType(dep.depType)) {
           dep.lockedVersion =
             lockFileCache[yarnLock].lockedVersions?.[
               // TODO: types (#22198)
@@ -50,9 +52,7 @@ export async function getLockedVersions(
             ];
         }
         if (
-          (dep.depType === 'engines' ||
-            dep.depType === 'packageManager' ||
-            dep.depType === 'devEngines.packageManager') &&
+          (dep.depType === 'engines' || isPackageManagerDepType(dep.depType)) &&
           dep.depName === 'yarn' &&
           !isYarn1
         ) {
@@ -119,13 +119,7 @@ export async function getLockedVersions(
 
       for (const dep of packageFile.deps) {
         // Skip dependency types which are not locked in the lock file
-        if (
-          dep.depType === 'engines' ||
-          dep.depType === 'packageManager' ||
-          dep.depType === 'volta' ||
-          dep.depType === 'devEngines.runtime' ||
-          dep.depType === 'devEngines.packageManager'
-        ) {
+        if (isToolDepType(dep.depType) || dep.depType === 'volta') {
           continue;
         }
 

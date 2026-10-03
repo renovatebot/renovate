@@ -12,6 +12,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { isPackageManagerDepType } from './dep-types.ts';
 import { updateDependency } from './update/dependency/index.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
@@ -49,8 +50,7 @@ function handlePackageManagerUpdates(
     updateArtifactsConfig;
   const packageManagerUpdates = updatedDeps.filter(
     (dep) =>
-      (dep.depType === 'packageManager' ||
-        dep.depType === 'devEngines.packageManager') &&
+      isPackageManagerDepType(dep.depType) &&
       dep.currentValue &&
       regEx(versionWithHashRegString).test(dep.currentValue),
   );
