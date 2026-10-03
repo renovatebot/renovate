@@ -90,7 +90,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });
 

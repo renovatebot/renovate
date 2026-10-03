@@ -24,10 +24,6 @@ describe('workers/repository/update/pr/participants', () => {
 
   const pr = partial<Pr>({ number: 123 });
 
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('assignees', () => {
     it('does not assignees when there are none', async () => {
       await addParticipants({ ...config, assignees: undefined }, pr);

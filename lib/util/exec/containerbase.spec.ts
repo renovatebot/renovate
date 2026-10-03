@@ -16,7 +16,6 @@ const datasource = vi.mocked(_datasource);
 describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
-      GlobalConfig.reset();
       vi.stubEnv('CONTAINERBASE', undefined);
     });
 

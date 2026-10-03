@@ -15,7 +15,6 @@ describe('workers/repository/update/branch/handle-existing', () => {
   let config: BranchConfig;
 
   beforeEach(() => {
-    GlobalConfig.reset();
     config = {
       manager: 'some-manager',
       branchName: 'some-branch',

@@ -2,10 +2,6 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { getTtlOverride, resolveTtlValues } from './ttl.ts';
 
 describe('util/cache/package/ttl', () => {
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('getTtlOverride', () => {
     describe('No configuration', () => {
       it('returns undefined when no cacheTtlOverride config exists', () => {

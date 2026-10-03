@@ -70,7 +70,6 @@ describe('config/migrations/custom/extends-migration', () => {
         extends: ['local>org/renovate-config'],
       },
     );
-    GlobalConfig.reset();
   });
 
   it('migrate merge confidence config preset to internal preset', async () => {

@@ -15,7 +15,6 @@ describe('config/decrypt', () => {
 
     beforeEach(() => {
       config = {};
-      GlobalConfig.reset();
       vi.stubEnv('MEND_HOSTED', undefined);
       vi.stubEnv('RENOVATE_X_ENCRYPTED_STRICT', undefined);
     });
@@ -79,10 +78,6 @@ describe('config/decrypt', () => {
   });
 
   describe('validateDecryptedValue()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     describe('platforms non azure', () => {
       it.each`
         str                                                 | repo             | expected
@@ -247,10 +242,6 @@ describe('config/decrypt', () => {
   });
 
   describe('getAzureCollection()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('no pathname and url ends with slash', () => {
       GlobalConfig.set({
         platform: 'azure',

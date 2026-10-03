@@ -43,7 +43,6 @@ describe('modules/manager/git-submodules/update', () => {
 
     afterAll(async () => {
       await tmpDir.cleanup();
-      GlobalConfig.reset();
     });
 
     it('returns null on error', async () => {

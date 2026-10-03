@@ -31,10 +31,6 @@ describe('modules/datasource/go/base', () => {
   });
 
   describe('go-get requests', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     describe('meta name=go-source', () => {
       it('returns null for unknown prefix', async () => {
         const meta =

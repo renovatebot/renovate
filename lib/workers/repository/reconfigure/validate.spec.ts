@@ -1,7 +1,6 @@
 import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { fakeSha, git, partial, platform } from '~test/util.ts';
-import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
 import { validateReconfigureBranch } from './validate.ts';
@@ -28,7 +27,6 @@ describe('workers/repository/reconfigure/validate', () => {
     config.repository = 'some/repo';
     git.getBranchCommit.mockReturnValue(fakeSha('sha'));
     platform.getBranchStatusCheck.mockResolvedValue(null);
-    GlobalConfig.reset();
   });
 
   it('handles failed validation', async () => {

@@ -28,7 +28,6 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     afterEach(() => {
-      GlobalConfig.reset();
       Fixtures.reset();
     });
 

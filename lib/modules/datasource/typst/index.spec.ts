@@ -22,7 +22,6 @@ describe('modules/datasource/typst/index', () => {
       vi.restoreAllMocks();
       await packageCache.cleanup({});
       memCache.reset();
-      GlobalConfig.reset();
       await cacheDir.cleanup();
     });
 

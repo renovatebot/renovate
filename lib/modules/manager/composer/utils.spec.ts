@@ -132,10 +132,6 @@ describe('modules/manager/composer/utils', () => {
   });
 
   describe('getComposerArguments', () => {
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('disables scripts and plugins by default', () => {
       expect(
         getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),

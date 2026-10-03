@@ -65,10 +65,6 @@ describe('modules/manager/composer/artifacts', () => {
     });
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns if no composer.lock found', async () => {
     await expect(
       composer.updateArtifacts({

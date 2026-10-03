@@ -15,10 +15,6 @@ type TestConfig = PackageRuleInputConfig & {
 };
 
 describe('util/package-rules/index', () => {
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   const config1: TestConfig = {
     foo: 'bar',
 
@@ -944,10 +940,6 @@ describe('util/package-rules/index', () => {
 
     beforeEach(() => {
       hostRules.add(hostRule);
-    });
-
-    afterEach(() => {
-      GlobalConfig.reset();
     });
 
     it('matches matchConfidence', async () => {

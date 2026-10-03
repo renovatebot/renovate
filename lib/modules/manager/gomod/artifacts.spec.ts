@@ -89,10 +89,6 @@ describe('modules/manager/gomod/artifacts', () => {
     docker.resetPrefetchedImages();
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns if no go.sum found', async () => {
     const execSnapshots = mockExecAll();
     await expect(

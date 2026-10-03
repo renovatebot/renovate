@@ -13,7 +13,6 @@ describe('util/cache/package/with-cache', () => {
 
   beforeEach(async () => {
     vi.useRealTimers();
-    GlobalConfig.reset();
     memCache.init();
     dirResult = await tmpDir({ unsafeCleanup: true });
     setCache = vi.spyOn(packageCache, 'setWithRawTtl');

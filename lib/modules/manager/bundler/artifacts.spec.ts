@@ -59,10 +59,6 @@ describe('modules/manager/bundler/artifacts', () => {
       fs.ensureCacheDir.mockResolvedValue('/tmp/cache/others/gem');
     });
 
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns null by default', async () => {
       await expect(
         updateArtifacts({
