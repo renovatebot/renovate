@@ -15,12 +15,11 @@ function artifactForPath(
     updatedDeps: [
       {
         depName: 'batect/batect',
+        newVersion,
       },
     ],
     newPackageFileContent: 'not used',
-    config: {
-      newVersion,
-    },
+    config: {},
   };
 }
 
@@ -89,6 +88,38 @@ describe('modules/manager/batect-wrapper/artifacts', () => {
           file: {
             type: 'addition',
             path: 'some/sub/dir/batect.cmd',
+            contents: newWindowsWrapperContent,
+          },
+        },
+      ]);
+    });
+
+    it('uses the batect dependency to pick the version when grouped with an unrelated dependency', async () => {
+      const artifact: UpdateArtifact = {
+        packageFileName: 'batect',
+        updatedDeps: [
+          // with a grouped, unrelated dependency first, `config.newVersion`
+          // is the unrelated dependency's, not batect's
+          { depName: 'some-other-dep', newVersion: '9.9.9' },
+          { depName: 'batect/batect', newVersion: defaultTo },
+        ],
+        newPackageFileContent: 'not used',
+        config: { newVersion: '9.9.9' },
+      };
+      const result = await updateArtifacts(artifact);
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'batect',
+            contents: newUnixWrapperContent,
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: 'batect.cmd',
             contents: newWindowsWrapperContent,
           },
         },
