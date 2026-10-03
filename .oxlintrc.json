@@ -318,7 +318,6 @@
         "lib/modules/datasource/terraform-provider/index.ts",
         "lib/modules/datasource/unity3d-packages/index.ts",
         "lib/modules/datasource/unity3d/index.ts",
-        "lib/modules/manager/maven-wrapper/artifacts.ts",
         "lib/modules/manager/terraform/lockfile/hash.ts"
       ],
       "rules": {
