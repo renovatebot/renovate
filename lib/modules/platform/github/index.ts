@@ -960,9 +960,15 @@ async function fetchPr(prNo: number): Promise<GhPr | null> {
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<GhPr | null> {
+export async function getPr(
+  prNo: number,
+  refresh = false,
+): Promise<GhPr | null> {
   if (!prNo) {
     return null;
+  }
+  if (refresh) {
+    return await fetchPr(prNo);
   }
   const prList = await getPrList();
   let pr = prList.find(({ number }) => number === prNo) ?? null;

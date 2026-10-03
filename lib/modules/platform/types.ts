@@ -297,7 +297,7 @@ export interface Platform {
       EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr | null>;
+  getPr(number: number, refresh?: boolean): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   reattemptPlatformAutomerge?(
