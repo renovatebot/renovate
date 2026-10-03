@@ -1,3 +1,4 @@
+import type { ToolName as ContainerbaseToolName } from '@containerbase/base';
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 import type { VersioningName } from '../../versioning-list.generated.ts';
@@ -8,9 +9,21 @@ export interface ConstraintDefinition {
 }
 
 /**
+ * Tools defined below that Containerbase doesn't (yet) recognise, kept only while their
+ * continued existence in `toolDefinitions` is under investigation.
+ *
+ * Do not add to this list for a genuinely new tool — add it to Containerbase first, see
+ * https://docs.renovatebot.com/docker-build-process/#adding-new-tools
+ */
+export const knownUnsupportedToolNames = ['java-maven'] as const;
+type KnownUnsupportedToolName = (typeof knownUnsupportedToolNames)[number];
+
+/**
  * A `tool` that Containerbase supports.
  *
- * TODO #41849 replace with upstream types
+ * Every `name` below is checked with `satisfies` against `@containerbase/base`'s real tool list
+ * (other than `knownUnsupportedToolNames`), so a typo or a tool Containerbase has removed fails
+ * to compile. `types.spec.ts` runs the same check at test time, with an actionable message.
  */
 export const toolDefinitions = [
   {
@@ -155,7 +168,9 @@ export const toolDefinitions = [
   {
     name: 'vendir',
   },
-] as const satisfies ConstraintDefinition[];
+] as const satisfies readonly (ConstraintDefinition & {
+  name: ContainerbaseToolName | KnownUnsupportedToolName;
+})[];
 
 /**
  * A `tool` that Containerbase supports.

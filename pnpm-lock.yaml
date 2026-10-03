@@ -398,6 +398,9 @@ importers:
       '@commander-js/extra-typings':
         specifier: 15.0.0
         version: 15.0.0(commander@15.0.0)
+      '@containerbase/base':
+        specifier: link:../../../../containerbase/base/packages/base
+        version: link:../../../../containerbase/base/packages/base
       '@containerbase/istanbul-reports-html':
         specifier: 2.0.19
         version: 2.0.19
