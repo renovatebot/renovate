@@ -4,6 +4,7 @@ import type { PlatformId } from '../../constants/index.ts';
 import { DefaultGitScm } from './default-scm.ts';
 import { GerritScm } from './gerrit/scm.ts';
 import { GithubScm } from './github/scm.ts';
+import { GitlabScm } from './gitlab/scm.ts';
 import { LocalFs } from './local/scm.ts';
 import type { PlatformScm } from './types.ts';
 
@@ -16,7 +17,7 @@ platformScmImpls.set('forgejo', DefaultGitScm);
 platformScmImpls.set('gerrit', GerritScm);
 platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
-platformScmImpls.set('gitlab', DefaultGitScm);
+platformScmImpls.set('gitlab', GitlabScm);
 platformScmImpls.set('local', LocalFs);
 platformScmImpls.set('scm-manager', DefaultGitScm);
 
