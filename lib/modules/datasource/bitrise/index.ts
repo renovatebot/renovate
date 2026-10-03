@@ -10,6 +10,7 @@ import semver from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
+import { isPublicRegistry } from './url.ts';
 
 export class BitriseDatasource extends Datasource {
   static readonly id = 'bitrise';
@@ -132,6 +133,7 @@ export class BitriseDatasource extends Datasource {
       {
         key: `${config.registryUrl}/${config.packageName}`,
         fallback: true,
+        cacheable: isPublicRegistry(config.registryUrl),
       },
       () => this.fetchReleases(config),
     );
