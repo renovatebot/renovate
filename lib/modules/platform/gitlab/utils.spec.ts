@@ -45,6 +45,22 @@ describe('modules/platform/gitlab/utils', () => {
       );
     });
 
+    it('uses the configured endpoint instead of the returned repository URL', () => {
+      defaults.endpoint = 'https://gitlab.example.com/api/v4/';
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'gitlab.example.com',
+        token: 'test-token',
+      });
+      const res = makeRes({
+        http_url_to_repo: 'https://other.example.com/group/repo.git',
+      });
+
+      expect(getRepoUrl('group/repo', 'endpoint', res)).toBe(
+        'https://oauth2:test-token@gitlab.example.com/group/repo.git',
+      );
+    });
+
     it('throws on invalid endpoint when http_url_to_repo is null', () => {
       expect(() =>
         getRepoUrl(
@@ -56,3 +72,5 @@ describe('modules/platform/gitlab/utils', () => {
     });
   });
 });
+
+import * as hostRules from '../../../util/host-rules.ts';

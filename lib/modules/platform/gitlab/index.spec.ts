@@ -527,7 +527,7 @@ describe('modules/platform/gitlab/index', () => {
       ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
     });
 
-    it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {
+    it('ignores the removed GITLAB_IGNORE_REPO_URL environment variable', async () => {
       vi.stubEnv('GITLAB_IGNORE_REPO_URL', 'true');
       const selfHostedUrl = 'http://mycompany.com/gitlab';
       httpMock
@@ -558,7 +558,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(git.initRepo.mock.calls).toMatchObject([
         [
           {
-            url: 'http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git',
+            url: 'http://oauth2:123test@other.host.com/gitlab/some/repo/project.git',
           },
         ],
       ]);
