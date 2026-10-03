@@ -129,8 +129,8 @@ let platformConfig: PlatformConfig;
 
 const defaultGithubApiUrl = 'https://api.github.com/';
 
-// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
-const GitHubMaxPrBodyLen = 58000;
+// GitHub's max is 60k, but the hosted app can encounter connection resets near the limit
+const GitHubMaxPrBodyLen = 50000;
 
 export function resetConfigs(): void {
   config = {} as never;
