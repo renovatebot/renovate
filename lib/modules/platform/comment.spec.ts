@@ -1,19 +1,14 @@
 import { platform } from '~test/util.ts';
-import * as _cache from '../../util/cache/repository/index.ts';
+import { getCache, resetCache } from '../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../util/cache/repository/types.ts';
 import { ensureComment, ensureCommentRemoval } from './comment.ts';
-
-vi.mock('../../util/cache/repository/index.ts');
-
-const cache = vi.mocked(_cache);
 
 describe('modules/platform/comment', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
-    repoCache = {};
-
-    cache.getCache.mockReturnValue(repoCache);
+    resetCache();
+    repoCache = getCache();
   });
 
   describe('ensureComment', () => {
@@ -75,6 +70,17 @@ describe('modules/platform/comment', () => {
       await ensureComment({ number: 1, topic: 'aaa', content: '111' });
 
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+
+    it('checks the platform after repository cache reset', async () => {
+      platform.ensureComment.mockResolvedValue(true);
+      const comment = { number: 1, topic: 'aaa', content: '111' };
+
+      await ensureComment(comment);
+      resetCache();
+      await ensureComment(comment);
+
+      expect(platform.ensureComment).toHaveBeenCalledTimes(2);
     });
 
     it('rewrites content hash', async () => {
