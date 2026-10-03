@@ -237,6 +237,7 @@ export interface PackageDependency<
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  versionCompatibility?: string;
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;

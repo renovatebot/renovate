@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it } from 'vitest';
+import { regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -386,6 +387,80 @@ describe('modules/manager/apm/extract', () => {
           replaceString: 'owner/repo#v1.0.0',
           autoReplaceStringTemplate:
             '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+        },
+      ]);
+    });
+  });
+
+  describe('per-package tags', () => {
+    it.each`
+      ref                    | compatibility    | version
+      ${'foo--v1.0.0'}       | ${'foo--'}       | ${'1.0.0'}
+      ${'foo-v1.0.0'}        | ${'foo-'}        | ${'1.0.0'}
+      ${'foo_v1.0.0'}        | ${'foo_'}        | ${'1.0.0'}
+      ${'my-plugin--v1.0.0'} | ${'my-plugin--'} | ${'1.0.0'}
+      ${'my-plugin-v1.0.0'}  | ${'my-plugin-'}  | ${'1.0.0'}
+      ${'foo--v1.2.0-rc.1'}  | ${'foo--'}       | ${'1.2.0-rc.1'}
+    `(
+      'scopes $ref to tags of the same package',
+      ({ ref, compatibility, version }) => {
+        const content = codeBlock`
+          dependencies:
+            apm:
+              - owner/repo/plugins/foo#${ref}
+        `;
+
+        const dep = extractPackageFile(content, packageFile)?.deps[0];
+
+        expect(dep).toMatchObject({ currentValue: ref });
+        expect(
+          regEx(dep!.versionCompatibility!).exec(ref)?.groups,
+        ).toMatchObject({ compatibility, version });
+      },
+    );
+
+    it.each`
+      ref
+      ${'v1.2.3'}
+      ${'1.2.3'}
+      ${'v1.2.3-beta.1'}
+      ${'main'}
+      ${'foo-v1'}
+      ${'foo@1.2.3'}
+    `('leaves $ref compared as-is', ({ ref }) => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - owner/repo#${ref}
+      `;
+
+      const dep = extractPackageFile(content, packageFile)?.deps[0];
+
+      expect(dep).toMatchObject({ currentValue: ref });
+      expect(dep).not.toHaveProperty('versionCompatibility');
+    });
+
+    it('scopes a SHA pin by the tag in its comment', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - owner/repo/plugins/foo#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # foo--v1.0.0
+      `;
+
+      expect(extractPackageFile(content, packageFile)?.deps).toEqual([
+        {
+          depName: 'owner/repo/plugins/foo',
+          depType: 'apm',
+          datasource: GithubTagsDatasource.id,
+          packageName: 'owner/repo',
+          currentValue: 'foo--v1.0.0',
+          currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          replaceString:
+            'owner/repo/plugins/foo#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # foo--v1.0.0',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+          versionCompatibility:
+            '^(?<compatibility>.+[-_])v(?<version>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?)$',
         },
       ]);
     });

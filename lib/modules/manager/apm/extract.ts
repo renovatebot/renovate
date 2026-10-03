@@ -64,6 +64,36 @@ const autoReplaceStringTemplate =
   '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}';
 
 /**
+ * A tag scoped to one package of a monorepo: `<name>--v<semver>`,
+ * `<name>-v<semver>` or `<name>_v<semver>`, the forms `apm outdated` resolves.
+ *
+ * The `compatibility` group captures the package prefix, so only tags of the
+ * same package are update candidates and the new value keeps the prefix.
+ * Without it the default versioning reads every prefixed tag as unstable and
+ * proposes nothing, and with unstable updates allowed it would cross into
+ * other packages' tags. Repo-wide tags (`v1.2.3`) do not match, so they keep
+ * their existing behaviour.
+ */
+const packageTagCompatibility =
+  '^(?<compatibility>.+[-_])v(?<version>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?)$';
+const packageTagRegex = regEx(packageTagCompatibility);
+
+/**
+ * Restrict a dependency pinned to a per-package tag to that package's tags.
+ *
+ * Only set when the current tag matches: `versionCompatibility` also filters
+ * the datasource's releases, so applying it to a repo-wide tag would discard
+ * every release.
+ */
+function packageTagConfig(
+  currentValue: string,
+): Pick<PackageDependency, 'versionCompatibility'> {
+  return packageTagRegex.test(currentValue)
+    ? { versionCompatibility: packageTagCompatibility }
+    : {};
+}
+
+/**
  * APM virtual-package subpaths (skills/prompts/etc.) begin at one of these
  * "primitive" directories or at a file with a virtual extension. APM only uses
  * these to find where a repo path ends for hosts with nested namespaces; see
@@ -229,6 +259,7 @@ export function parseApmDependency(
       currentValue: tail.currentValue,
       currentDigest: ref,
       replaceString: tail.replaceString,
+      ...packageTagConfig(tail.currentValue),
     };
   }
 
@@ -236,6 +267,7 @@ export function parseApmDependency(
     ...dep,
     currentValue: ref,
     replaceString: entry,
+    ...packageTagConfig(ref),
   };
 }
 
