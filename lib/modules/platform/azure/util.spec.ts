@@ -287,6 +287,7 @@ describe('modules/platform/azure/util', () => {
       );
     });
   });
+
   it('returns the raw title if not a dependency dashboard', () => {
     expect(getWorkItemTitle('Some Issue', 'project/repo')).toBe('Some Issue');
   });
