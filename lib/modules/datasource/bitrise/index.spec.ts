@@ -16,7 +16,7 @@ describe('modules/datasource/bitrise/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('support GitHub Enterprise API URL', async () => {
+    it('supports a GHES API URL', async () => {
       httpMock
         .scope(
           'https://github.mycompany.com/api/v3/repos/foo/bar/contents/steps',

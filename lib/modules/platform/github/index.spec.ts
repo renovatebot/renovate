@@ -89,7 +89,7 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow('Invalid GitHub endpoint URL: https://[invalid');
     });
 
-    it('should throw if using fine-grained token with GHE <3.10', async () => {
+    it('should throw if using fine-grained token with GHES <3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -104,7 +104,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should throw if using fine-grained token with GHE unknown version', async () => {
+    it('should throw if using fine-grained token with GHES unknown version', async () => {
       httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
       await expect(
         github.initPlatform({
@@ -116,7 +116,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('should support fine-grained token with GHE >=3.10', async () => {
+    it('should support fine-grained token with GHES >=3.10', async () => {
       httpMock
         .scope('https://ghe.renovatebot.com')
         .head('/')
@@ -242,7 +242,7 @@ describe('modules/platform/github/index', () => {
             );
           });
 
-          it('if on GitHub Enterprise, a warning is not shown', async () => {
+          it('if on GHES, a warning is not shown', async () => {
             httpMock
               .scope('https://ghe.renovatebot.com')
               .head('/')
@@ -304,7 +304,7 @@ describe('modules/platform/github/index', () => {
             expect(logger.logger.once.warn).not.toHaveBeenCalled();
           });
 
-          it('if on GitHub Enterprise, a warning is not shown', async () => {
+          it('if on GHES, a warning is not shown', async () => {
             httpMock
               .scope('https://ghe.renovatebot.com')
               .head('/')
@@ -351,7 +351,7 @@ describe('modules/platform/github/index', () => {
           );
         });
 
-        it('if on GitHub Enterprise, a warning is not shown', async () => {
+        it('if on GHES, a warning is not shown', async () => {
           httpMock
             .scope('https://ghe.renovatebot.com')
             .head('/')
@@ -390,7 +390,7 @@ describe('modules/platform/github/index', () => {
           );
         });
 
-        it('if on GitHub Enterprise, a warning is not shown', async () => {
+        it('if on GHES, a warning is not shown', async () => {
           httpMock
             .scope('https://ghe.renovatebot.com')
             .head('/')
@@ -627,7 +627,7 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
-    it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
+    it('should autodetect email/user on GHEC endpoint with GitHub App', async () => {
       httpMock
         .scope('https://api.octocorp.ghe.com', {
           reqheaders: {
@@ -4367,7 +4367,7 @@ describe('modules/platform/github/index', () => {
         expect(pr).toMatchObject({ number: 123 });
       });
 
-      it('should skip automerge if GHE <3.3.0', async () => {
+      it('should skip automerge if GHES <3.3.0', async () => {
         const scope = httpMock
           .scope('https://github.company.com')
           .head('/')
@@ -4395,11 +4395,11 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 123 },
-          'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+          'GitHub-native automerge: not supported by this GitHub Enterprise Server version. Use 3.3.0 or newer.',
         );
       });
 
-      it('should perform automerge if GHE >=3.3.0', async () => {
+      it('should perform automerge if GHES >=3.3.0', async () => {
         const scope = httpMock
           .scope('https://github.company.com')
           .head('/')
@@ -5159,7 +5159,7 @@ describe('modules/platform/github/index', () => {
       ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
     });
 
-    it('skips merge queue check on GHE <3.12.0', async () => {
+    it('skips merge queue check on GHES <3.12.0', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
         .head('/')
@@ -5868,7 +5868,7 @@ describe('modules/platform/github/index', () => {
       );
     });
 
-    it('returns not-updated pr body for GHE', async () => {
+    it('returns not-updated pr body for GHES', async () => {
       const scope = httpMock
         .scope('https://github.company.com')
         .head('/')
