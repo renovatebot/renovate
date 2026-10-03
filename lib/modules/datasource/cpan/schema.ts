@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { CpanRelease } from './types.ts';
@@ -37,7 +38,10 @@ const MetaCpanApiFile = z
         return undefined;
       }
       return {
-        version: module[0].version,
+        // Modules with dotted-decimal versions are published with a leading
+        // 'v' (e.g. `v1.1.1`); strip it so versions match the cpanfile, where
+        // the manager already reads them without the prefix.
+        version: module[0].version.replace(regEx(/^v/), ''),
         distribution,
         isDeprecated: deprecated,
         isStable: maturity === 'released',
