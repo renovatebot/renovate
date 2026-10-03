@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
@@ -245,25 +246,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
-    it('sets query.S with startOffset if provided', async () => {
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/changes/')
-        .query((query) => query.S === '5')
-        .reply(
-          200,
-          gerritRestResponse([gerritChange({ _number: 1 })]),
-          jsonResultHeader,
-        );
-      await expect(
-        client.findChanges('repo', {
-          branchName: 'dependency-xyz',
-          startOffset: 5,
-        }),
-      ).resolves.toEqual([gerritChange({ _number: 1 })]);
-    });
-
-    it('sets query.S as 0 if startOffset is not provided', async () => {
+    it('sets query.S to 0 on the first page', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -328,9 +311,27 @@ describe('modules/platform/gerrit/client', () => {
       ]);
     });
 
-    it('handles pagination with startOffset', async () => {
+    it('calls shouldFetchNextPage callback after each page', async () => {
+      const calls: GerritChange[][] = [];
+      let callCount = 0;
+      function shouldFetchNextPage(changes: GerritChange[]): boolean {
+        calls.push(changes);
+        callCount++;
+        return callCount < 2; // Stop after second call
+      }
+
       httpMock
         .scope(gerritEndpointUrl)
+        .get('/a/changes/')
+        .query((query) => query.n === '2' && query.S === '0')
+        .reply(
+          200,
+          gerritRestResponse([
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
+          ]),
+          jsonResultHeader,
+        )
         .get('/a/changes/')
         .query((query) => query.n === '2' && query.S === '2')
         .reply(
@@ -340,32 +341,38 @@ describe('modules/platform/gerrit/client', () => {
             gerritChange({ _number: 4, _more_changes: true }),
           ]),
           jsonResultHeader,
-        )
-        .get('/a/changes/')
-        .query((query) => query.n === '2' && query.S === '4')
-        .reply(
-          200,
-          gerritRestResponse([
-            gerritChange({ _number: 5 }),
-            gerritChange({ _number: 6 }),
-          ]),
-          jsonResultHeader,
         );
-      await expect(
-        client.findChanges('repo', {
-          branchName: 'dependency-xyz',
-          pageLimit: 2,
-          startOffset: 2,
-        }),
-      ).resolves.toEqual([
+
+      const result = await client.findChanges('repo', {
+        branchName: 'dependency-xyz',
+        pageLimit: 2,
+        shouldFetchNextPage,
+      });
+
+      expect(result).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
         gerritChange({ _number: 3 }),
         gerritChange({ _number: 4 }),
-        gerritChange({ _number: 5 }),
-        gerritChange({ _number: 6 }),
+      ]);
+      expect(calls).toHaveLength(2);
+      expect(calls[0]).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+      ]);
+      expect(calls[1]).toEqual([
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
       ]);
     });
 
-    it('allows disabling automatic pagination', async () => {
+    it('stops pagination when shouldFetchNextPage returns false', async () => {
+      let callCount = 0;
+      function shouldFetchNextPage(): boolean {
+        callCount++;
+        return false;
+      }
+
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -378,16 +385,18 @@ describe('modules/platform/gerrit/client', () => {
           ]),
           jsonResultHeader,
         );
-      await expect(
-        client.findChanges('repo', {
-          branchName: 'dependency-xyz',
-          noPagination: true,
-          pageLimit: 2,
-        }),
-      ).resolves.toEqual([
+
+      const result = await client.findChanges('repo', {
+        branchName: 'dependency-xyz',
+        pageLimit: 2,
+        shouldFetchNextPage,
+      });
+
+      expect(result).toEqual([
         gerritChange({ _number: 1 }),
         gerritChange({ _number: 2 }),
       ]);
+      expect(callCount).toBe(1);
     });
 
     it('sets query.o when requestDetails is provided', async () => {
@@ -444,25 +453,27 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('abandonChange()', () => {
     it('abandon', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
-      await expect(client.abandonChange(123456)).toResolve();
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.abandonChange(123456)).resolves.toEqual(change);
     });
     it('abandon with message', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon', {
           message: 'The abandon reason is important.',
           notify: 'OWNER_REVIEWERS',
         })
-        .reply(200, gerritRestResponse({}), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
         client.abandonChange(123456, 'The abandon reason is important.'),
-      ).toResolve();
+      ).resolves.toEqual(change);
     });
   });
 
@@ -623,7 +634,11 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('addMessage()', () => {
-    it('add with tag', async () => {
+    it('returns updated timestamp from change_info when Gerrit provides it (>= 3.10)', async () => {
+      const change = gerritChange({
+        _number: 123456,
+        updated: '2025-01-01 12:00:00.000000000',
+      });
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
@@ -631,19 +646,33 @@ describe('modules/platform/gerrit/client', () => {
           tag: 'tag',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
+        .reply(
+          200,
+          gerritRestResponse({ change_info: change }),
+          jsonResultHeader,
+        );
+      await expect(client.addMessage(123456, 'message', 'tag')).resolves.toBe(
+        '2025-01-01 12:00:00.000000000',
+      );
     });
 
-    it('add without tag', async () => {
+    it('synthesizes a Gerrit-formatted timestamp when change_info is absent (< 3.10)', async () => {
+      const t0 = DateTime.fromISO('2025-06-15T09:30:45.123Z', {
+        zone: 'utc',
+      });
+      vi.useFakeTimers();
+      vi.setSystemTime(t0.toMillis());
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message')).toResolve();
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
+      await expect(client.addMessage(123456, 'message')).resolves.toBe(
+        '2025-06-15 09:30:45.123000000',
+      );
+      vi.useRealTimers();
     });
 
     it('add too big message', async () => {
@@ -653,14 +682,13 @@ describe('modules/platform/gerrit/client', () => {
       const truncatedMessage =
         tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +
         truncationNotice;
-      httpMock.scope(gerritEndpointUrl);
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: truncatedMessage,
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
       await expect(client.addMessage(123456, tooBigMessage)).toResolve();
     });
   });
@@ -856,6 +884,7 @@ function gerritChange(overrides: Partial<GerritChange> = {}): GerritChange {
     subject: 'subject',
     status: 'NEW',
     created: '2024-01-01 00:00:00.000000000',
+    updated: '2024-01-01 00:00:00.000000000',
     hashtags: [],
     _number: 0,
     ...overrides,
