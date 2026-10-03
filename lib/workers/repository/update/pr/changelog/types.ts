@@ -45,6 +45,12 @@ export interface ChangeLogResult {
   project?: ChangeLogProject;
   versions?: ChangeLogRelease[];
   error?: ChangeLogError;
+  /**
+   * Notes were supplied by the dependency's own datasource response rather than
+   * fetched from a shared upstream source, so they are unique per dependency
+   * and must not be deduplicated against other upgrades.
+   */
+  perDependencyNotes?: boolean;
 }
 
 export interface ChangeLogFile {
