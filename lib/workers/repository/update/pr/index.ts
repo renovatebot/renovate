@@ -324,9 +324,12 @@ export async function ensurePr(
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
+          (logJSON.perDependencyNotes ||
+            !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade)))
         ) {
-          commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          if (!logJSON.perDependencyNotes) {
+            commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          }
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             for (const version of logJSON.versions) {
@@ -362,6 +365,10 @@ export async function ensurePr(
 
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
+    if (upgrade.logJSON?.perDependencyNotes) {
+      continue;
+    }
+
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     // TODO: types (#22198)
     notesSourceUrl ??= `${upgrade.sourceUrl!}${

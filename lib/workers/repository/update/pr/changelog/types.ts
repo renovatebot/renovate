@@ -42,6 +42,8 @@ export type ChangeLogError =
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;
+  /** Embedded notes belong to this dependency and must not be deduplicated by repository. */
+  perDependencyNotes?: boolean;
   project?: ChangeLogProject;
   versions?: ChangeLogRelease[];
   error?: ChangeLogError;
