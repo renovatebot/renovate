@@ -244,6 +244,8 @@ export interface PackageDependency<
   fixedVersion?: string;
   currentVersion?: string;
   currentVersionTimestamp?: string;
+  /** Timestamp of the newest version matching the current value, or null for an unversioned value. */
+  currentValueTimestamp?: Timestamp | null;
   lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;
