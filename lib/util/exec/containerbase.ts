@@ -128,12 +128,6 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'java?system=true',
     versioning: 'npm',
   },
-  /* not used in Renovate */
-  'java-maven': {
-    datasource: 'java-version',
-    packageName: 'java?system=true',
-    versioning: 'maven',
-  },
   jb: {
     datasource: 'github-releases',
     packageName: 'jsonnet-bundler/jsonnet-bundler',

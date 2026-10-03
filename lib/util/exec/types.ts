@@ -83,9 +83,6 @@ export const toolDefinitions = [
     name: 'java',
   },
   {
-    name: 'java-maven',
-  },
-  {
     name: 'jb',
   },
   {
