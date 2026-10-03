@@ -1,5 +1,6 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import type { ReleaseResult } from '../types.ts';
 import { GiteaDatasource } from './base.ts';
 import { Tags } from './schema.ts';
@@ -11,9 +12,9 @@ export class GiteaTagsDatasource extends GiteaDatasource {
   protected readonly cacheNamespace: PackageCacheNamespace =
     'datasource-gitea-tags';
 
-  /** Subclasses for other Gitea-compatible hosts pass their own id. */
-  constructor(id: string = GiteaTagsDatasource.id) {
-    super(id, { cacheKeyType: 'tags', releaseTimestampField: 'created' });
+  /** Subclasses for other Gitea-compatible hosts pass their own id and client. */
+  constructor(id: string = GiteaTagsDatasource.id, http?: GiteaHttp) {
+    super(id, { cacheKeyType: 'tags', releaseTimestampField: 'created' }, http);
   }
 
   // _getReleases fetches list of tags for the repository
