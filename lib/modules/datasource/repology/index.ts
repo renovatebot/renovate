@@ -12,6 +12,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { type RepologyPackage, RepologyPackages } from './schema.ts';
 import type { RepologyPackageType } from './types.ts';
+import { isPublicRegistry } from './url.ts';
 
 const packageTypes: RepologyPackageType[] = ['binname', 'srcname'];
 
@@ -195,6 +196,7 @@ export class RepologyDatasource extends Datasource {
     return withCache(
       {
         ttlMinutes: 60,
+        cacheable: isPublicRegistry(registryUrl),
         namespace: `datasource-${RepologyDatasource.id}`,
         key: joinUrlParts(registryUrl, repoName, pkgName),
       },
