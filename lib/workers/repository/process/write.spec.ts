@@ -108,6 +108,30 @@ describe('workers/repository/process/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
 
+    it('continues after a branch error', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'timed-out',
+          baseBranch: 'base',
+          manager: 'poetry',
+          upgrades: [],
+        },
+        {
+          branchName: 'next-update',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+      ]);
+      scm.branchExists.mockResolvedValue(false);
+      branchWorker.processBranch
+        .mockResolvedValueOnce({ branchExists: false, result: 'error' })
+        .mockResolvedValueOnce({ branchExists: false, result: 'done' });
+
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
+    });
+
     it('counts vulnerability alert branches separately', async () => {
       const branches = partial<BranchConfig[]>([
         {

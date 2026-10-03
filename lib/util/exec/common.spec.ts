@@ -45,6 +45,11 @@ interface StubArgs {
   stdout?: string;
   stderr?: string;
   timeout?: number;
+  timeoutRejection?: 'internal' | 'subprocess';
+  resolvedResult?: {
+    shortMessage?: string;
+    timedOut?: boolean;
+  };
   pid?: number;
 }
 
@@ -79,9 +84,40 @@ function getSpawnStub(args: StubArgs): any {
     stdout,
     stderr,
     timeout,
+    timeoutRejection,
+    resolvedResult = { timedOut: false },
     pid = 31415,
   } = args;
   const listeners: Events = {};
+  let complete = false;
+  let resolveResult!: (result: {
+    shortMessage?: string;
+    timedOut?: boolean;
+  }) => void;
+  let rejectResult!: (error: Error) => void;
+  const resultPromise = new Promise<{
+    shortMessage?: string;
+    timedOut?: boolean;
+  }>((resolve, reject) => {
+    resolveResult = resolve;
+    rejectResult = reject;
+  });
+  let normalizedResult: typeof resultPromise | undefined;
+  const subprocess =
+    timeoutRejection === 'internal'
+      ? {
+          // oxlint-disable-next-line unicorn/no-thenable -- emulate Execa 8's lazy thenable
+          then(...args: Parameters<typeof resultPromise.then>) {
+            normalizedResult ??= resultPromise.catch(
+              (error: Error & { timedOut?: boolean }) => ({
+                shortMessage: `Command timed out after ${timeout} milliseconds: ${cmd}`,
+                timedOut: error.timedOut === true,
+              }),
+            );
+            return normalizedResult.then(...args);
+          },
+        }
+      : resultPromise;
 
   // init listeners
   function on(name: string, cb: Listener) {
@@ -135,18 +171,45 @@ function getSpawnStub(args: StubArgs): any {
   // queue events and wait for event loop to clear
   setTimeout(() => {
     if (error) {
+      complete = true;
+      resolveResult(resolvedResult);
       listeners.error?.(error);
+      return;
     }
+    if (exitSignal === 'SIGSTOP' && timeout) {
+      listeners.exit?.(exitCode, exitSignal);
+      return;
+    }
+    complete = true;
+    resolveResult(resolvedResult);
     listeners.exit?.(exitCode, exitSignal);
   }, 0);
 
   if (timeout) {
     setTimeout(() => {
+      if (complete) {
+        return;
+      }
+      complete = true;
+      if (timeoutRejection) {
+        rejectResult(
+          Object.assign(new Error('Timed out'), {
+            signal: 'SIGTERM',
+            timedOut: true,
+          }),
+        );
+        setTimeout(() => listeners.exit?.(null, 'SIGTERM'), 0);
+        return;
+      }
+      resolveResult({
+        shortMessage: `Command timed out after ${timeout} milliseconds: ${cmd}`,
+        timedOut: true,
+      });
       listeners.exit?.(null, 'SIGTERM');
     }, timeout);
   }
 
-  return {
+  void Object.assign(subprocess, {
     nodeChildProcess: {
       on,
       spawnargs: cmd.split(regEx(/\s+/)),
@@ -158,7 +221,8 @@ function getSpawnStub(args: StubArgs): any {
       pid,
     },
     pid,
-  };
+  });
+  return subprocess;
 }
 
 function stringify(list: Buffer[]): string {
@@ -628,6 +692,63 @@ describe('util/exec/common', () => {
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
+        timedOut: undefined,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+    });
+
+    it('handles a SIGTERM result without timeout metadata', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal,
+        resolvedResult: {},
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        timedOut: undefined,
+        message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
+      });
+    });
+
+    it('reports a timeout without a configured duration', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGTERM';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal,
+        resolvedResult: { timedOut: true },
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
+        timedOut: true,
+        message: `Command timed out: ${cmd}`,
+      });
+    });
+
+    it('process terminated with another signal', async () => {
+      const cmd = 'ls -l';
+      const exitSignal = 'SIGINT';
+      const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+      await expect(
+        exec(cmd, partial<RawExecOptions>({})),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: exitSignal,
         message: `Command failed: ${cmd}\nInterrupted by ${exitSignal}`,
       });
     });
@@ -638,10 +759,51 @@ describe('util/exec/common', () => {
         cmd,
         exitCode: null,
         exitSignal: 'SIGSTOP',
-        timeout: 500,
+        timeout: 5,
+        timeoutRejection: 'internal',
       });
       execa.mockImplementationOnce((_cmd, _opts) => stub);
-      await expect(exec(cmd, partial<RawExecOptions>({}))).toReject();
+      const unhandledRejection = vi.fn();
+      process.on('unhandledRejection', unhandledRejection);
+
+      try {
+        await expect(
+          exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+        ).rejects.toMatchObject({
+          cmd,
+          signal: 'SIGTERM',
+          timedOut: true,
+          message: `Command timed out after 5 milliseconds: ${cmd}`,
+        });
+        await new Promise<void>((resolve) => {
+          setImmediate(resolve);
+        });
+
+        expect(unhandledRejection).not.toHaveBeenCalled();
+      } finally {
+        process.off('unhandledRejection', unhandledRejection);
+      }
+    });
+
+    it('normalizes a rejected Execa timeout result', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal: 'SIGSTOP',
+        timeout: 5,
+        timeoutRejection: 'subprocess',
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(cmd, partial<RawExecOptions>({ timeout: 5 })),
+      ).rejects.toMatchObject({
+        cmd,
+        signal: 'SIGTERM',
+        timedOut: true,
+        message: `Command timed out after 5 milliseconds: ${cmd}`,
+      });
     });
 
     it('process exits due to error', async () => {
@@ -657,6 +819,26 @@ describe('util/exec/common', () => {
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
+    });
+
+    it('settles only once when multiple process events are emitted', async () => {
+      const firstError = new Error('first error');
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: null,
+        exitSignal: null,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+      const result = exec(cmd, partial<RawExecOptions>({}));
+
+      stub.nodeChildProcess.emit('error', firstError);
+      stub.nodeChildProcess.emit('error', new Error('second error'));
+      stub.nodeChildProcess.emit('exit', 0, null);
+
+      await expect(result).rejects.toMatchObject({
+        cmd,
+        message: firstError.message,
+      });
     });
 
     it('process exits with error due to exceeded stdout maxBuffer', async () => {

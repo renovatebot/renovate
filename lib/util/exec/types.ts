@@ -350,6 +350,8 @@ export interface ExecOptions {
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: Opt<string[]>;
   ignoreStdout?: boolean;
+  /** Let the caller handle command timeouts instead of aborting the repository. */
+  abortOnTimeout?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
   timeout?: number | undefined;

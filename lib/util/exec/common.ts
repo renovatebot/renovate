@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isNullOrUndefined, isObject, isString } from '@sindresorhus/is';
 import { execa } from 'execa';
 import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation/index.ts';
@@ -142,12 +142,13 @@ export function exec(
       detached: process.platform !== 'win32',
       shell,
       extendEnv: false,
-      // Suppress execa's internal promise rejection (e.g., from timeout).
-      // We handle all exit scenarios via 'exit' and 'error' event listeners below,
-      // so the promise rejection would otherwise surface as an unhandledRejection.
-      // TODO: Refactor to await execa result (#45650)
-      reject: false,
     });
+    // Execa 8 starts its timeout promise before its lazy thenable is consumed.
+    // Handle both outcomes now so a timeout cannot reject before the exit event.
+    const subprocessResult = subprocess.then(
+      (result) => ({ result }),
+      (error: unknown) => ({ error }),
+    );
     const cp = subprocess.nodeChildProcess;
 
     // handle streams
@@ -155,9 +156,13 @@ export function exec(
       ...opts,
       maxBuffer,
     });
+    let settlementStarted = false;
 
     // handle process events
     void cp.on('error', (error) => {
+      if (!beginSettlement()) {
+        return;
+      }
       kill(cp, 'SIGTERM');
       // rethrowing, use originally emitted error message
       reject(new ExecError(error.message, rejectInfo(), error));
@@ -167,8 +172,38 @@ export function exec(
       if (NONTERM.includes(signal)) {
         return;
       }
+      if (!beginSettlement()) {
+        return;
+      }
       if (signal) {
         kill(cp, signal);
+        if (signal === 'SIGTERM') {
+          void subprocessResult.then((outcome) => {
+            const result = 'result' in outcome ? outcome.result : outcome.error;
+            const timedOut =
+              isObject(result) &&
+              'timedOut' in result &&
+              result.timedOut === true;
+            const command = cp.spawnargs.join(' ');
+            let message = `Command failed: ${command}\nInterrupted by ${signal}`;
+            if (timedOut) {
+              message =
+                isObject(result) &&
+                'shortMessage' in result &&
+                isString(result.shortMessage)
+                  ? result.shortMessage
+                  : `Command timed out${opts.timeout === undefined ? '' : ` after ${opts.timeout} milliseconds`}: ${command}`;
+            }
+            reject(
+              new ExecError(message, {
+                ...rejectInfo(),
+                signal,
+                timedOut,
+              }),
+            );
+          });
+          return;
+        }
         reject(
           new ExecError(
             `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
@@ -216,6 +251,14 @@ export function exec(
         stdout: stringify(stdout, opts.outputWriters?.stdout),
       });
     });
+
+    function beginSettlement(): boolean {
+      if (settlementStarted) {
+        return false;
+      }
+      settlementStarted = true;
+      return true;
+    }
 
     function rejectInfo(): ExecErrorData {
       return {
