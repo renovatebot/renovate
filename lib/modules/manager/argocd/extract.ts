@@ -33,7 +33,7 @@ export function extractPackageFile(
   config?: ExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
+  if (!fileTestRegex.test(content)) {
     logger.debug(
       `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`,
     );
@@ -60,11 +60,15 @@ function processSource(
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
     if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
       const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+      const depName =
+        registryURL === source.chart || registryURL.endsWith(`/${source.chart}`)
+          ? registryURL
+          : `${registryURL}/${source.chart}`;
 
       return [
         {
-          ...getOciChartDep(source.repoURL, source.chart, registryAliases),
-          depName: `${registryURL}/${source.chart}`,
+          ...getOciChartDep(depName, undefined, registryAliases),
+          depName,
           currentValue: source.targetRevision,
         },
       ];
@@ -80,12 +84,32 @@ function processSource(
     ];
   }
 
-  // Handle OCI Helm chart without explicit chart field
+  // Handle OCI Helm chart without an explicit chart field
   if (isOCIRegistry(source.repoURL)) {
+    let registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
+
+    // Some users repeat the chart name at the end of the repoURL, following
+    // the `helm pull oci://.../<chart>` convention. It is not part of the OCI
+    // image, so strip it before building the dependency.
+    const parts = registryURL.split('/');
+    const lastPart = parts.at(-1);
+    if (parts.length > 1 && lastPart === parts.at(-2)) {
+      const dedupedURL = parts.slice(0, -1).join('/');
+      logger.warn(
+        {
+          repoURL: source.repoURL,
+          chartName: lastPart,
+          dedupedURL,
+        },
+        'ArgoCD OCI repoURL repeats the chart name at the end; using the deduplicated chart reference',
+      );
+      registryURL = dedupedURL;
+    }
+
     return [
       {
-        ...getOciChartDep(source.repoURL, undefined, registryAliases),
-        depName: trimTrailingSlash(removeOCIPrefix(source.repoURL)),
+        ...getOciChartDep(registryURL, undefined, registryAliases),
+        depName: registryURL,
         currentValue: source.targetRevision,
       },
     ];
@@ -99,7 +123,7 @@ function processSource(
     },
   ];
 
-  // Git repo is pointing to a Kustomize resources
+  // Git repo is pointing to a Kustomize resource
   if (source.kustomize?.images) {
     dependencies.push(
       ...source.kustomize.images.map(processKustomizeImage).filter(isTruthy),
