@@ -138,6 +138,37 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       );
     });
 
+    it('ignores trailing comments in requirements.yml', () => {
+      const yamlFile = codeBlock`
+        roles:
+          - src: yatesr.timezone # a comment
+            version: "0.1.0" # a comment
+        collections:
+          - name: community.hashi_vault # spellchecker:disable-line
+            source: https://github.com/ansible-collections/community.hashi_vault.git
+            type: git # a comment
+            version: 6.2.0 # a comment
+      `;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '6.2.0',
+          datasource: 'git-tags',
+          depName: 'community.hashi_vault',
+          depType: 'galaxy-collection',
+          packageName:
+            'https://github.com/ansible-collections/community.hashi_vault.git',
+        },
+        {
+          currentValue: '0.1.0',
+          datasource: 'galaxy',
+          depName: 'yatesr.timezone',
+          depType: 'role',
+          packageName: 'yatesr.timezone',
+        },
+      ]);
+    });
+
     it('check if an empty file returns null', () => {
       const res = extractPackageFile('\n', 'requirements.yml');
       expect(res).toBeNull();
