@@ -19,6 +19,7 @@ import { DockerDatasource } from './index.ts';
 const googleAuth = vi.mocked(_googleAuth, true);
 
 vi.mock('google-auth-library');
+vi.unmock('../../../util/cache/package/index.ts');
 
 const ecrMock = mockClient(ECRClient);
 

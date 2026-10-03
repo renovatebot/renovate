@@ -77,6 +77,42 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it.each(['repo', 'inherit'] as const)(
+      'reserves packageCacheMemoryLimit for administrators in %s config',
+      async (configType) => {
+        const { errors, warnings } = await configValidation.validateConfig(
+          configType,
+          {
+            packageCacheMemoryLimit: 0,
+          },
+        );
+
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'The "packageCacheMemoryLimit" option is a global option reserved only for Renovate\'s global configuration and cannot be configured within a repository\'s config file.',
+          },
+        ]);
+      },
+    );
+
+    it.each([0, 64, 128])(
+      'accepts an administrator memory limit of %i MiB',
+      async (packageCacheMemoryLimit) => {
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          {
+            packageCacheMemoryLimit,
+          },
+        );
+
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([]);
+      },
+    );
+
     it('catches global options in repo config', async () => {
       const config = {
         binarySource: 'something',
