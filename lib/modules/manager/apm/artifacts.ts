@@ -4,7 +4,6 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -41,9 +40,6 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -55,9 +51,23 @@ export async function updateArtifacts({
         },
       ],
     };
-    await exec('apm install', execOptions);
+    // `apm install` only resolves the refs `apm.yml` already pins, so it is a
+    // no-op on an up-to-date project. `apm update` re-resolves each dependency
+    // to the latest matching ref and leaves `apm.yml` untouched, which is what
+    // lock file maintenance means; `--yes` skips its confirmation prompt.
+    //
+    // The lockfile is no longer removed first. `apm.lock.yaml` records which
+    // harness files APM owns and their integrity hashes, and `apm install`
+    // cannot rebuild those rows when the files are already on disk - it deploys
+    // nothing, so it records no ownership. Deleting the lockfile therefore
+    // discards the `deployments` ledger and every `deployed_file_hashes` entry,
+    // which `apm audit` then reports as unrecorded files.
+    await exec(
+      isLockFileMaintenance ? 'apm update --yes' : 'apm install',
+      execOptions,
+    );
 
-    // `apm install` regenerates the lockfile and re-deploys the harness
+    // The command regenerates the lockfile and re-deploys the harness
     // directories (`.github/`, `.claude/`, ...) that APM consumers commit, so
     // return every file it changed - not just the lockfile - or the committed
     // instruction files go stale after a bump. `apm_modules/` is the gitignored

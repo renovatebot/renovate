@@ -24,3 +24,9 @@ A SHA pin without a tag comment is skipped, as there is no version to track.
 
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
+
+With `lockFileMaintenance` enabled, Renovate runs `apm update --yes` instead, which re-resolves each dependency to the latest matching ref without editing `apm.yml`.
+The lockfile is kept in place for both commands, because `apm.lock.yaml` records which harness files APM owns along with their integrity hashes, and those rows cannot be rebuilt from `apm.yml` alone.
+
+Note that `apm update` drops lockfile entries whose packages are not declared in `apm.yml`, so the lockfile matches the manifest.
+That is APM's intended behaviour, but it means a lockfile carrying entries from outside the manifest loses them on the first maintenance run.
