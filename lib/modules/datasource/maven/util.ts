@@ -9,6 +9,7 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
+import type { HttpCache } from '../../../util/http/cache/schema.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
@@ -66,16 +67,36 @@ function isUnsupportedHostError(err: HttpError): boolean {
   return err.name === 'UnsupportedProtocolError';
 }
 
-const cacheProvider = new PackageHttpCacheProvider({
-  namespace: 'datasource-maven:cache-provider',
+const POM_CACHE_KEY_PREFIX = 'v2:';
+
+class MavenPomCacheProvider extends PackageHttpCacheProvider {
+  override load(method: string, url: string): Promise<unknown> {
+    return super.load(method, `${POM_CACHE_KEY_PREFIX}${url}`);
+  }
+
+  override persist(
+    method: string,
+    url: string,
+    data: HttpCache,
+  ): Promise<void> {
+    return super.persist(method, `${POM_CACHE_KEY_PREFIX}${url}`, data);
+  }
+}
+
+const cacheProviderOptions = {
+  namespace: 'datasource-maven:cache-provider' as const,
   softTtlMinutes: 15,
   checkAuthorizationHeader: true,
   checkCacheControlHeader: false, // Maven doesn't respond with `cache-control` headers
   writeSchema: CachedMavenXml,
-});
+};
+const cacheProvider = new PackageHttpCacheProvider(cacheProviderOptions);
+const snapshotPomCacheProvider = new MavenPomCacheProvider(
+  cacheProviderOptions,
+);
 
 // Release POMs and timestamped snapshot POMs are immutable once published, so we can cache them much longer than mutable metadata files.
-const pomCacheProvider = new PackageHttpCacheProvider({
+const pomCacheProvider = new MavenPomCacheProvider({
   namespace: 'datasource-maven:pom-cache-provider',
   softTtlMinutes: 60 * 24 * 28, // 28 days before we'll give it another check, just in case it's updated
   checkAuthorizationHeader: true,
@@ -85,8 +106,10 @@ const pomCacheProvider = new PackageHttpCacheProvider({
 
 function selectCacheProvider(url: string): PackageHttpCacheProvider {
   // Non-timestamped -SNAPSHOT.pom files are mutable; everything else ending in .pom (release POMs and timestamped snapshot POMs) is immutable.
-  if (url.endsWith('.pom') && !url.endsWith('-SNAPSHOT.pom')) {
-    return pomCacheProvider;
+  if (url.endsWith('.pom')) {
+    return url.endsWith('-SNAPSHOT.pom')
+      ? snapshotPomCacheProvider
+      : pomCacheProvider;
   }
   return cacheProvider;
 }

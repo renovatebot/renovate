@@ -1,6 +1,8 @@
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -107,6 +109,8 @@ export class MavenDatasource extends Datasource {
   async getReleases({
     packageName,
     registryUrl,
+    constraints,
+    constraintsFiltering,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next -- should never happen */
     if (!registryUrl) {
@@ -135,7 +139,9 @@ export class MavenDatasource extends Datasource {
     if (!metadata.versions?.length) {
       return null;
     }
-    const releases = metadata.versions.map((version) => ({ version }));
+    const releases: Release[] = metadata.versions.map((version) => ({
+      version,
+    }));
 
     logger.debug(
       `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
@@ -150,6 +156,34 @@ export class MavenDatasource extends Datasource {
         repoUrl,
         latestSuitableVersion,
       ));
+
+    if (
+      constraintsFiltering === 'strict' &&
+      isNonEmptyStringAndNotWhitespace(constraints?.java)
+    ) {
+      for (const release of releases) {
+        const path = await createUrlForDependencyPom(
+          this.http,
+          release.version,
+          dependency,
+          repoUrl,
+        );
+        const pomUrl = getMavenUrl(dependency, repoUrl, path);
+        const pom = await downloadMavenXml(this.http, pomUrl);
+        const javaVersion = pom
+          .transform(
+            ({ data }) =>
+              data
+                .childNamed('properties')
+                ?.childNamed('java.version')
+                ?.val.trim() ?? '',
+          )
+          .unwrapOrNull();
+        if (javaVersion && !regEx(/\${|\{\{/).test(javaVersion)) {
+          release.constraints = { java: [javaVersion] };
+        }
+      }
+    }
 
     const result: ReleaseResult = {
       ...dependency,
