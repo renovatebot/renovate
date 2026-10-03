@@ -91,6 +91,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (str.startsWith('custom.')) {
+    presetSource = 'custom';
+    str = str.substring('custom.'.length);
   } else if (str.startsWith('npm>@')) {
     // only scoped packages are unambiguous, all other `npm>` references are
     // handled by the legacy strip below to stay backwards compatible
@@ -140,6 +143,9 @@ export function parsePreset(input: string): ParsedPreset {
   ({ str, params, rawParams } = splitPresetParams(str));
   if (presetSource === 'http') {
     return { presetSource, repo: str, presetName: '', params, rawParams };
+  }
+  if (presetSource === 'custom') {
+    return { presetSource, repo: '', presetName: str, params, rawParams };
   }
   const presetsPackages = [
     'abandonments',
