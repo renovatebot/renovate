@@ -1,5 +1,28 @@
 {% extends "base.html" %}
 
+<!-- This adds Open Graph and Twitter Card meta tags, so shared docs links get a rich preview on socials/Slack/etc. -->
+<!-- https://ogp.me/ -->
+<!-- https://squidfunk.github.io/mkdocs-material/customization/#extending-the-theme -->
+{% block extrahead %}
+{% set og_page_title = page.meta.title if page and page.meta and page.meta.title else page.title %}
+{% set og_title = og_page_title ~ ' - ' ~ config.site_name if page and og_page_title else config.site_name %}
+{% set og_description = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+{% set og_image = config.site_url | trim('/') ~ '/assets/images/logo.png' %}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+{% if page %}
+<meta property="og:url" content="{{ page.canonical_url }}">
+{% endif %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="201">
+<meta property="og:image:height" content="201">
+<meta property="og:site_name" content="{{ config.site_name }}">
+<!-- X/Twitter falls back to the og: tags above for title/description/image, so we only need the card type here. -->
+<meta name="twitter:card" content="summary">
+{% endblock %}
+
 <!-- This file has the content for our announcement bar. -->
 <!-- https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-header/#announcement-bar -->
 <!-- https://squidfunk.github.io/mkdocs-material/customization/#overriding-blocks -->
