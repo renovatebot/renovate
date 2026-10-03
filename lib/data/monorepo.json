@@ -602,6 +602,12 @@
     "ngxs-store": "https://github.com/ngxs/store",
     "nivo": "https://github.com/plouc/nivo",
     "njson-schema": "https://github.com/RicoSuter/NJsonSchema",
+    "nlog": [
+      "https://github.com/NLog/NLog",
+      "https://github.com/NLog/NLog.Extensions.Logging",
+      "https://github.com/NLog/NLog.Targets.Database",
+      "https://github.com/NLog/NLog.Web"
+    ],
     "nswag": "https://github.com/RicoSuter/NSwag",
     "nuget": "https://github.com/NuGet/NuGet.Client",
     "nuke-build": "https://github.com/nuke-build/nuke",
