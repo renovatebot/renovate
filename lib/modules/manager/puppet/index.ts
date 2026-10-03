@@ -4,12 +4,13 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge/index.ts';
 
 export { extractPackageFile } from './extract.ts';
+export { getRangeStrategy } from './range.ts';
 
 export const url = 'https://www.puppet.com/docs/index.html';
 export const categories: Category[] = ['iac', 'ruby'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)Puppetfile$/'],
+  managerFilePatterns: ['/(^|/)Puppetfile$/', '/(^|/)metadata\\.json$/'],
 };
 
 export const supportedDatasources = [
