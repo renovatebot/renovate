@@ -6,7 +6,10 @@ import { capitalize } from '../../../../../util/string.ts';
 import type { BranchConfig } from '../../../../types.ts';
 
 export function getPrConfigDescription(config: BranchConfig): string {
-  let prBody = `\n\n---\n\n### Configuration\n\n`;
+  const configurationHeading = config.dependencyDashboardIssue
+    ? `[Configuration](../issues/${config.dependencyDashboardIssue} "Dependency Dashboard")`
+    : 'Configuration';
+  let prBody = `\n\n---\n\n### ${configurationHeading}\n\n`;
   prBody += emojify(`:date: **Schedule**: `);
 
   if (config.timezone) {
