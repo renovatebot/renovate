@@ -9,7 +9,7 @@ description: Frequently Asked Questions for Renovate Configuration
 
 Renovate will:
 
-- Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
+- Look for configuration options in a configuration file (e.g. `renovate.json`)
 - Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
 - Use separate branches/PR for each dependency
 - Use separate branches for each _major_ version of each dependency
@@ -137,7 +137,7 @@ Define a `packageRules` entry which has the dependency type(s) in `matchDepTypes
 
 ### Use a single branch/PR for all dependency upgrades
 
-Add a configuration for configuration option `groupName` set to value `"all"`, at the top level of your `renovate.json` or `package.json`.
+Add a configuration for configuration option `groupName` set to value `"all"`, at the top level of your `renovate.json`.
 
 ### Use separate branches per dependency, but not one per major release
 

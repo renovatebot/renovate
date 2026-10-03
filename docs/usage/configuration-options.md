@@ -1,6 +1,6 @@
 ---
 title: Configuration Options
-description: Configuration Options usable in renovate.json or package.json
+description: Configuration Options usable in Renovate configuration files
 ---
 
 # Configuration Options
@@ -39,7 +39,7 @@ Renovate first checks all the files in the `configFileNames` array before checki
 Renovate stops the search after it finds the first match.
 
 !!! warning
-  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+  Renovate no longer reads configuration from `package.json`. Move the contents of its `renovate` key to a dedicated configuration file such as `renovate.json`.
 
 !!! note
   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).

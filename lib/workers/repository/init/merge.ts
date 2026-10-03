@@ -65,21 +65,7 @@ import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 export async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
   for (const fileName of getConfigFileNames()) {
-    if (fileName === 'package.json') {
-      try {
-        const pJson = JSON.parse(
-          (await readLocalFile('package.json', 'utf8'))!,
-        );
-        if (pJson.renovate) {
-          logger.warn(
-            'Using package.json for Renovate config is deprecated - please use a dedicated configuration file instead',
-          );
-          return 'package.json';
-        }
-      } catch {
-        // Do nothing
-      }
-    } else if (fileList.includes(fileName)) {
+    if (fileList.includes(fileName)) {
       return fileName;
     }
   }
@@ -91,6 +77,10 @@ export async function detectRepoFileConfig(
 ): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
+  if (configFileName === 'package.json') {
+    delete cache.configFileName;
+    configFileName = undefined;
+  }
   if (isNonEmptyString(configFileName)) {
     let configFileRaw: string | null;
     try {
@@ -107,18 +97,21 @@ export async function detectRepoFileConfig(
       configFileRaw = null;
     }
     if (configFileRaw) {
-      let configFileParsed = parseJson(configFileRaw, configFileName) as any;
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
-      }
+      const configFileParsed = parseJson(configFileRaw, configFileName) as any;
       return { configFileName, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');
     delete cache.configFileName;
   }
 
-  if (OnboardingState.onboardingCacheValid) {
-    configFileName = getOnboardingFileNameFromCache();
+  const onboardingFileName = OnboardingState.onboardingCacheValid
+    ? getOnboardingFileNameFromCache()
+    : undefined;
+  const useOnboardingCache =
+    OnboardingState.onboardingCacheValid &&
+    onboardingFileName !== 'package.json';
+  if (useOnboardingCache) {
+    configFileName = onboardingFileName;
   } else {
     configFileName = coerceString(await detectConfigFile());
   }
@@ -130,11 +123,9 @@ export async function detectRepoFileConfig(
   }
   cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
-  // TODO #22198
-  let configFileParsed: any;
   let configFileRaw: string | undefined | null;
 
-  if (OnboardingState.onboardingCacheValid) {
+  if (useOnboardingCache) {
     const cachedConfig = getOnboardingConfigFromCache();
     const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
@@ -143,47 +134,33 @@ export async function detectRepoFileConfig(
     }
   }
 
-  if (configFileName === 'package.json') {
-    // We already know it parses
-    configFileParsed = JSON.parse(
-      // TODO #22198
-      (await readLocalFile('package.json', 'utf8'))!,
-    ).renovate;
-    if (isString(configFileParsed)) {
-      logger.debug('Massaging string renovate config to extends array');
-      configFileParsed = { extends: [configFileParsed] };
-    }
-    logger.debug({ config: configFileParsed }, 'package.json>renovate config');
-  } else {
-    configFileRaw = await readLocalFile(configFileName, 'utf8');
-    // istanbul ignore if
-    if (!isString(configFileRaw)) {
-      logger.warn({ configFileName }, 'Null contents when reading config file');
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    // istanbul ignore if
-    if (!configFileRaw.length) {
-      configFileRaw = '{}';
-    }
-
-    const parseResult = parseFileConfig(configFileName, configFileRaw);
-
-    if (!parseResult.success) {
-      return {
-        configFileName,
-        configFileParseError: {
-          validationError: parseResult.validationError,
-          validationMessage: parseResult.validationMessage,
-        },
-      };
-    }
-    configFileParsed = parseResult.parsedContents;
-    logger.debug(
-      { fileName: configFileName, config: configFileParsed },
-      'Repository config',
-    );
+  configFileRaw = await readLocalFile(configFileName, 'utf8');
+  // istanbul ignore if
+  if (!isString(configFileRaw)) {
+    logger.warn({ configFileName }, 'Null contents when reading config file');
+    throw new Error(REPOSITORY_CHANGED);
+  }
+  // istanbul ignore if
+  if (!configFileRaw.length) {
+    configFileRaw = '{}';
   }
 
+  const parseResult = parseFileConfig(configFileName, configFileRaw);
+
+  if (!parseResult.success) {
+    return {
+      configFileName,
+      configFileParseError: {
+        validationError: parseResult.validationError,
+        validationMessage: parseResult.validationMessage,
+      },
+    };
+  }
+  const configFileParsed = parseResult.parsedContents;
+  logger.debug(
+    { fileName: configFileName, config: configFileParsed },
+    'Repository config',
+  );
   setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
   return { configFileName, configFileParsed };
 }

@@ -101,20 +101,12 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.renovaterc`
 - `.renovaterc.json`
 - `.renovaterc.json5`
-- `package.json` (deprecated)
 
 Or in a custom file present within the [`configFileNames`](../self-hosted-configuration.md#configfilenames).
 Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
 
-#### package.json
-
 !!! warning
-  This approach has been deprecated and will be removed in a future release.
-
-You can add the same settings to a `"renovate"` section in your `package.json` file instead.
-The `package.json` file must be located at the root of your repository.
-This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
-The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
+  Renovate no longer reads the `renovate` section in `package.json`. Move these settings to a dedicated configuration file such as `renovate.json`.
 
 ### Customized defaults
 
