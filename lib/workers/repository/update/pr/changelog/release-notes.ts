@@ -413,16 +413,14 @@ export async function getReleaseNotesMd(
             // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
             // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
             const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
-            const bodyLines = body.split('\n');
-            if (
-              bodyLines.some(
-                (line) =>
-                  line.includes(packageName) &&
-                  line.includes(version) &&
-                  !isHttpUrl(line) &&
-                  !linkRefDefRegex.test(line),
-              )
-            ) {
+            const hasMatchingReleaseLine = body
+              .split('\n')
+              .filter((line) => !isHttpUrl(line) && !linkRefDefRegex.test(line))
+              .map((line) => line.replace(regEx(/https?:\/\/\S+/g), ' '))
+              .some(
+                (line) => line.includes(packageName) && line.includes(version),
+              );
+            if (hasMatchingReleaseLine) {
               logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
