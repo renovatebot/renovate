@@ -44,6 +44,7 @@ describe('modules/platform/gitlab/index', () => {
     vi.stubEnv('GITLAB_IGNORE_REPO_URL', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', undefined);
@@ -2348,7 +2349,7 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('createPr(branchName, title, body)', () => {
     beforeEach(() => {
-      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '2');
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', '2');
       vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', '100');
     });
 
@@ -2709,7 +2710,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2744,6 +2745,60 @@ describe('modules/platform/gitlab/index', () => {
       ]);
     });
 
+    it.each`
+      attempts     | legacyAttempts | expectedAttempts
+      ${undefined} | ${'3'}         | ${3}
+      ${'1'}       | ${'3'}         | ${1}
+    `(
+      'uses $expectedAttempts mergeable check attempts (ATTEMPTS=$attempts, legacy ATTEMPS=$legacyAttempts)',
+      async ({ attempts, legacyAttempts, expectedAttempts }) => {
+        await initPlatform('15.6.0-ee');
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+          )
+          .reply(200, [])
+          .post('/api/v4/projects/undefined/merge_requests')
+          .reply(200, {
+            id: 1,
+            iid: 12345,
+            title: 'some title',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            description: 'the-body',
+          })
+          .get('/api/v4/projects/undefined/merge_requests/12345')
+          .times(expectedAttempts)
+          .reply(200, { detailed_merge_status: 'pending' });
+        scope
+          .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+          .reply(200, {});
+        vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', attempts);
+        vi.stubEnv(
+          'RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS',
+          legacyAttempts,
+        );
+
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+          },
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          `PR not yet in mergeable state. Retrying ${expectedAttempts}`,
+        );
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          `PR not yet in mergeable state. Retrying ${expectedAttempts + 1}`,
+        );
+      },
+    );
+
     it('should parse detailed_merge_status attribute on >= 15.6', async () => {
       await initPlatform('15.6.0-ee');
       const reply_body = {
@@ -2772,7 +2827,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2834,7 +2889,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '3');
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPTS', '3');
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
