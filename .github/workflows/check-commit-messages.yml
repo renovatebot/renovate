@@ -60,6 +60,7 @@ jobs:
       - name: Full semantic-release dry-run
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
@@ -89,8 +90,8 @@ jobs:
 
           mirror="$RUNNER_TEMP/release-mirror.git"
           git clone --bare --quiet . "$mirror"
-          # Pin the mirror's base branch to the merge commit's first parent,
-          # so the checked-out merge is strictly ahead of the actual base.
-          git -C "$mirror" branch -f "$BASE_REF" "$HEAD_SHA^1"
+          # Pin the mirror's base branch to the PR base so the checked-out merge
+          # commit is strictly ahead of it (semantic-release treats it as releasable).
+          git -C "$mirror" branch -f "$BASE_REF" "$BASE_SHA"
 
           node tools/check-release-dry-run.ts "file://$mirror" "$BASE_REF" "$HEAD_SHA"
