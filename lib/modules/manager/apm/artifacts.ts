@@ -51,17 +51,17 @@ export async function updateArtifacts({
         },
       ],
     };
-    // Lock file maintenance runs `apm update`, which re-resolves each
-    // dependency to the latest ref its spec allows and leaves `apm.yml`
-    // untouched (`--yes` skips its prompt). `apm install` can't do this: it only
-    // syncs the lockfile to the manifest.
+    // Plain `apm install` only syncs the lockfile to the manifest. For lock
+    // file maintenance, `--update` re-resolves each dependency to the latest
+    // ref `apm.yml` allows, without editing `apm.yml`. (`apm update` would also
+    // move full-SHA pins in `apm.yml`, which is for Renovate's own updates.)
     //
     // The lockfile stays in place. It is APM's record of which deployed files
     // it owns, so without it `apm install` skips the committed files as
     // unmanaged: the ownership ledger and file hashes are lost, and when a ref
     // moves, the deployed files stay at the old version.
     await exec(
-      isLockFileMaintenance ? 'apm update --yes' : 'apm install',
+      isLockFileMaintenance ? 'apm install --update' : 'apm install',
       execOptions,
     );
 

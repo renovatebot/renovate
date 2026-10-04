@@ -177,7 +177,7 @@ describe('modules/manager/apm/artifacts', () => {
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
     });
 
-    it('runs apm update on lockFileMaintenance, keeping the lock file', async () => {
+    it('runs apm install --update on lockFileMaintenance, keeping the lock file', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
@@ -205,7 +205,7 @@ describe('modules/manager/apm/artifacts', () => {
       // deployed-file integrity hashes, which `apm install` cannot rebuild
       // while the deployed files are already on disk.
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-      expect(execSnapshots).toMatchObject([{ cmd: 'apm update --yes' }]);
+      expect(execSnapshots).toMatchObject([{ cmd: 'apm install --update' }]);
     });
 
     it('supports docker mode with tool constraint', async () => {
