@@ -985,15 +985,6 @@ export class DockerDatasource extends Datasource {
 
       let manifestResponse: HttpResponse | null = null;
       if (!architecture) {
-        // Reuse the digest cached from the Docker Hub tag API
-        if (registryHost === DOCKER_HUB) {
-          const cache = await DockerHubCache.init(dockerRepository);
-          const cachedDigest = cache.getDigestForTag(newTag);
-          if (cachedDigest) {
-            return cachedDigest;
-          }
-        }
-
         manifestResponse = await this.getManifestResponse(
           registryHost,
           dockerRepository,
@@ -1016,15 +1007,6 @@ export class DockerDatasource extends Datasource {
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
-        // Reuse the per-arch digest cached from the Docker Hub tag API
-        if (isNonEmptyString(architecture) && registryHost === DOCKER_HUB) {
-          const cache = await DockerHubCache.init(dockerRepository);
-          const cachedDigest = cache.getArchDigestForTag(newTag, architecture);
-          if (cachedDigest) {
-            return cachedDigest;
-          }
-        }
-
         logger.debug(
           { registryHost, dockerRepository },
           'Architecture-specific digest or missing docker-content-digest header - pulling full manifest',
@@ -1203,8 +1185,7 @@ export class DockerDatasource extends Datasource {
 
       // Digest is intentionally not propagated — the Docker Hub tag API
       // returns the manifest-list digest, which would bypass arch-aware
-      // resolution in `getDigest()`. `getDigest()` consults the same cache
-      // as a shortcut when no arch resolution is needed.
+      // resolution in `getDigest()` and may be stale for mutable tags.
       return release;
     });
   }
