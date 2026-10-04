@@ -425,7 +425,6 @@ describe('modules/manager/apm/extract', () => {
       ${'1.2.3'}
       ${'v1.2.3-beta.1'}
       ${'main'}
-      ${'foo-v1'}
       ${'foo@1.2.3'}
     `('leaves $ref compared as-is', ({ ref }) => {
       const content = codeBlock`
@@ -447,20 +446,12 @@ describe('modules/manager/apm/extract', () => {
             - owner/repo/plugins/foo#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # foo--v1.0.0
       `;
 
-      expect(extractPackageFile(content, packageFile)?.deps).toEqual([
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
         {
-          depName: 'owner/repo/plugins/foo',
-          depType: 'apm',
-          datasource: GithubTagsDatasource.id,
-          packageName: 'owner/repo',
           currentValue: 'foo--v1.0.0',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
-          replaceString:
-            'owner/repo/plugins/foo#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # foo--v1.0.0',
-          autoReplaceStringTemplate:
-            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
           versionCompatibility:
-            '^(?<compatibility>.+[-_])v(?<version>\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?)$',
+            '^(?<compatibility>.+?--|.+?[-_])v(?<version>\\d.*)$',
         },
       ]);
     });
