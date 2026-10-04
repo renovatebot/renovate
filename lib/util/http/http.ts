@@ -477,18 +477,6 @@ export abstract class HttpBase<
     });
   }
 
-  /**
-   * @deprecated use `getYaml` instead
-   */
-  async getYamlUnchecked<ResT>(
-    url: string,
-    options?: Opts,
-  ): Promise<HttpResponse<ResT>> {
-    const res = await this.getText(url, options);
-    const body = parseSingleYaml<ResT>(res.body);
-    return { ...res, body };
-  }
-
   async getYaml<Schema extends ZodType<any, any, any>>(
     url: string,
     schema: Schema,
@@ -630,13 +618,6 @@ export abstract class HttpBase<
     return Result.wrap(this.requestJson<ResT>('get', args)).transform(
       (response) => Result.ok(response.body),
     );
-  }
-
-  /**
-   * @deprecated use `head` instead
-   */
-  headJson(url: string, httpOptions?: JSONOpts): Promise<HttpResponse<never>> {
-    return this.requestJson<never>('head', { url, httpOptions });
   }
 
   postJson<T>(url: string, options?: JSONOpts): Promise<HttpResponse<T>>;

@@ -168,7 +168,7 @@ async function detectGithubHost(
   }
 
   const gheHeaderKey = 'x-github-enterprise-version';
-  const gheQueryRes = await githubApi.headJson('/', { token });
+  const gheQueryRes = await githubApi.head('/', { token });
   const gheHeaders = coerceObject(gheQueryRes?.headers);
   const gheVersionHeader = Object.entries(gheHeaders).find(
     ([k]) => k.toLowerCase() === gheHeaderKey,

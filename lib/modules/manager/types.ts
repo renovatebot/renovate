@@ -161,11 +161,6 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
-  /**
-   *  where this is set?
-   * @deprecated Never set?
-   */
-  updateTypes?: UpdateType[];
   isBreaking?: boolean;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;

@@ -166,10 +166,6 @@ export interface BranchConfig
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
 
-  /** ??? never set
-   * @deprecated never set
-   */
-  committedFiles?: unknown;
   confidenceStatus?: BranchStatus;
 
   dependencyDashboardRebaseAllOpen?: boolean;

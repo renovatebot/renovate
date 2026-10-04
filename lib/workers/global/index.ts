@@ -262,10 +262,6 @@ export async function start(): Promise<number> {
             [ATTR_VCS_PROVIDER_NAME]: config.platform,
             [ATTR_VCS_OWNER_NAME]: owner,
             [ATTR_VCS_REPOSITORY_NAME]: repo,
-            /** @deprecated TODO remove */
-            repository: isString(repository)
-              ? repository
-              : repository.repository,
           },
         },
       );

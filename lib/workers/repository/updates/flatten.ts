@@ -134,12 +134,6 @@ export async function flattenUpdates(
               // @ts-expect-error -- not easily typed
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
-            if (updateConfig.updateTypes) {
-              updateConfig.updateTypes.forEach((updateType: string) => {
-                // @ts-expect-error -- not easily typed
-                updateConfig[`is${upper(updateType)}`] = true;
-              });
-            }
             updateConfig = await applyDatasourceDefaultConfig(updateConfig);
             updateConfig = await applyPackageRules(
               updateConfig,

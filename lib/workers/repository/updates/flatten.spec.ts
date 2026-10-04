@@ -100,7 +100,6 @@ describe('workers/repository/updates/flatten', () => {
                 ],
               },
               {
-                updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
               {
