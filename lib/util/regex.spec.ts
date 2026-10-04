@@ -2,7 +2,10 @@ import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
 import { regEx, regexEngineStatus } from './regex.ts';
 
 describe('util/regex', () => {
-  describe.skipIf(regexEngineStatus.type !== 'available')('with RE2', () => {
+  describe.skipIf(
+    regexEngineStatus.type !== 'available' &&
+      (!process.env.CI || !!process.versions.bun),
+  )('with RE2', () => {
     it('uses RE2', async () => {
       // Import lazily so skipped runtimes never load the incompatible native addon.
       const { default: RE2 } = await import('re2');
