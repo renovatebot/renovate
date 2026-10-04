@@ -66,15 +66,15 @@ const autoReplaceStringTemplate =
 /**
  * Match `<name>--v<version>`, `<name>-v<version>`, and `<name>_v<version>` tags.
  */
-const packageTagCompatibility =
-  '^(?<compatibility>.+?--|.+?[-_])v(?<version>\\d.*)$';
-const packageTagRegex = regEx(packageTagCompatibility);
+const packageTagRegex = regEx(
+  /^(?<compatibility>.+?--|.+?[-_])v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/,
+);
 
 function packageTagConfig(
   currentValue: string,
 ): Pick<PackageDependency, 'versionCompatibility'> {
   return packageTagRegex.test(currentValue)
-    ? { versionCompatibility: packageTagCompatibility }
+    ? { versionCompatibility: packageTagRegex.source }
     : {};
 }
 

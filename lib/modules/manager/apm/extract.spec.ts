@@ -425,6 +425,7 @@ describe('modules/manager/apm/extract', () => {
       ${'1.2.3'}
       ${'v1.2.3-beta.1'}
       ${'main'}
+      ${'foo-v1'}
       ${'foo@1.2.3'}
     `('leaves $ref compared as-is', ({ ref }) => {
       const content = codeBlock`
@@ -450,8 +451,6 @@ describe('modules/manager/apm/extract', () => {
         {
           currentValue: 'foo--v1.0.0',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
-          versionCompatibility:
-            '^(?<compatibility>.+?--|.+?[-_])v(?<version>\\d.*)$',
         },
       ]);
     });
