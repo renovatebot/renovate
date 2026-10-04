@@ -51,17 +51,15 @@ export async function updateArtifacts({
         },
       ],
     };
-    // `apm install` only resolves the refs `apm.yml` already pins, so it is a
-    // no-op on an up-to-date project. `apm update` re-resolves each dependency
-    // to the latest matching ref and leaves `apm.yml` untouched, which is what
-    // lock file maintenance means; `--yes` skips its confirmation prompt.
+    // Lock file maintenance runs `apm update`, which re-resolves each
+    // dependency to the latest ref its spec allows and leaves `apm.yml`
+    // untouched (`--yes` skips its prompt). `apm install` can't do this: it only
+    // syncs the lockfile to the manifest.
     //
-    // The lockfile is no longer removed first. `apm.lock.yaml` records which
-    // harness files APM owns and their integrity hashes, and `apm install`
-    // cannot rebuild those rows when the files are already on disk - it deploys
-    // nothing, so it records no ownership. Deleting the lockfile therefore
-    // discards the `deployments` ledger and every `deployed_file_hashes` entry,
-    // which `apm audit` then reports as unrecorded files.
+    // The lockfile stays in place. It is APM's record of which deployed files
+    // it owns, so without it `apm install` skips the committed files as
+    // unmanaged: the ownership ledger and file hashes are lost, and when a ref
+    // moves, the deployed files stay at the old version.
     await exec(
       isLockFileMaintenance ? 'apm update --yes' : 'apm install',
       execOptions,
