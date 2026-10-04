@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
@@ -25,7 +26,9 @@ export const ComposerRepo = z.object({
    *
    * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
    */
-  url: z.string().transform((url) => url.replace(/\/packages\.json$/, '')),
+  url: z
+    .string()
+    .transform((url) => url.replace(regEx(/\/packages\.json$/), '')),
 });
 export type ComposerRepo = z.infer<typeof ComposerRepo>;
 
@@ -222,7 +225,7 @@ export const ComposerExtract = z
     fileName: z.string(),
   })
   .transform(({ content, fileName }) => {
-    const lockfileName = fileName.replace(/\.json$/, '.lock');
+    const lockfileName = fileName.replace(regEx(/\.json$/), '.lock');
     return {
       file: content,
       lockfileName,
@@ -259,12 +262,12 @@ export const ComposerExtract = z
       {
         depType: 'require',
         req: require,
-        locked: lockfile?.packages ?? [],
+        locked: coerceArray(lockfile?.packages),
       },
       {
         depType: 'require-dev',
         req: requireDev,
-        locked: lockfile?.packagesDev ?? [],
+        locked: coerceArray(lockfile?.packagesDev),
       },
     ];
 

@@ -9,6 +9,7 @@ export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['packages.lock.json'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'NuGet';
 export const url = 'https://learn.microsoft.com/nuget';

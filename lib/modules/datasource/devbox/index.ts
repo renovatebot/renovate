@@ -15,14 +15,16 @@ export class DevboxDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
   override readonly releaseTimestampSupport = true;
-
-  override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = devboxVersioning.id;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   async getReleases({
     registryUrl,
@@ -44,10 +46,8 @@ export class DevboxDatasource extends Datasource {
       res.releases = response.body.releases;
       res.homepage = response.body.homepage;
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }

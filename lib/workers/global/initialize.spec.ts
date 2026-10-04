@@ -1,4 +1,5 @@
-import { git } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
@@ -43,10 +44,6 @@ describe('workers/global/initialize', () => {
   });
 
   describe('setGlobalHostRules', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('should have run before initPlatform', async () => {
       const hostRule = {
         hostType: 'github',
@@ -79,12 +76,40 @@ describe('workers/global/initialize', () => {
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
+
+    it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      const config: RenovateConfig = {
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
+          },
+        ],
+      };
+
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+
+      expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Allowed', 'Authorization'],
+      });
+      const denialWarnings = logger.logger.warn.mock.calls.filter(
+        ([, message]) =>
+          message ===
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+      expect(denialWarnings).toHaveLength(0);
+    });
   });
 
   describe('configureThirdPartyLibraries()', () => {
     beforeEach(() => {
-      delete process.env.AWS_EC2_METADATA_DISABLED;
-      delete process.env.METADATA_SERVER_DETECTION;
+      vi.stubEnv('AWS_EC2_METADATA_DISABLED', undefined);
+      vi.stubEnv('METADATA_SERVER_DETECTION', undefined);
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {

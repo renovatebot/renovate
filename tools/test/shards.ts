@@ -69,6 +69,6 @@ export const testShards: Record<string, ShardConfig> = {
     matchPaths: ['lib/util'],
   },
   other: {
-    matchPaths: ['lib'],
+    matchPaths: ['lib', 'tools'],
   },
 };

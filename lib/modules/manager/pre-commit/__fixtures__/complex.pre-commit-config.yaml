@@ -40,6 +40,16 @@ repos:
     rev: v42.0
     hooks:
       - id: custom-hook
+  - repo: https://code.forgejo.org/forgejo/runner
+    # should also detect forgejo
+    rev: v12.13.0
+    hooks:
+      - id: forgejo-runner-validate
+  - repo: https://codeberg.org/gherynos/pre-commit-java
+    # should also detect codeberg as forgejo
+    rev: v0.6.37
+    hooks:
+      - id: cpd
   - repo: https://github.com/prettier/pre-commit
     # should accept different order of keys
     hooks:

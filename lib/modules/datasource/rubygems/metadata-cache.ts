@@ -19,7 +19,17 @@ function hashVersions(versions: string[]): string {
 }
 
 function hashReleases(releases: ReleaseResult): string {
-  return hashVersions(releases.releases.map((release) => release.version));
+  const versions = releases.releases.map((release) => {
+    const platform = release.constraints?.platform?.[0];
+
+    if (platform && platform !== 'ruby') {
+      return `${release.version}-${platform}`;
+    }
+
+    return release.version;
+  });
+
+  return hashVersions(versions);
 }
 
 interface CacheNotFoundError {
@@ -51,8 +61,8 @@ export class MetadataCache {
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
     const versionsHash = hashVersions(versions);
 
-    const loadCache = (): AsyncResult<ReleaseResult, CacheLoadError> =>
-      Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
+    function loadCache(): AsyncResult<ReleaseResult, CacheLoadError> {
+      return Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
         { type: 'cache-not-found' },
       ).transform((cache) => {
@@ -60,19 +70,21 @@ export class MetadataCache {
           ? Result.ok(cache.data)
           : Result.err({ type: 'cache-stale', cache });
       });
+    }
 
-    const saveCache = async (
+    async function saveCache(
       cache: CacheRecord,
       ttlMinutes = 100 * 24 * 60,
       ttlDelta = 10 * 24 * 60,
-    ): Promise<void> => {
+    ): Promise<void> {
       const registryHostname = parseUrl(registryUrl)?.hostname;
+      // v8 ignore else -- needs a save against a non-rubygems.org host
       if (registryHostname === 'rubygems.org') {
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         const ttl = ttlMinutes + ttlRandomDelta;
         await packageCache.set(cacheNs, cacheKey, cache, ttl);
       }
-    };
+    }
 
     return await loadCache()
       .catch((err) =>
@@ -95,6 +107,7 @@ export class MetadataCache {
              */
             if (err.type === 'cache-stale') {
               const staleCache = err.cache;
+              // v8 ignore else -- needs a stale cache already marked fallback
               if (!staleCache.isFallback) {
                 await saveCache(
                   { ...staleCache, isFallback: true },
@@ -115,7 +128,7 @@ export class MetadataCache {
           'Rubygems: error fetching rubygems data, falling back to versions-only result',
         );
         const releases = versions.map((version) => ({ version }));
-        return Result.ok({ releases } as ReleaseResult);
+        return Result.ok({ releases });
       })
       .unwrapOrThrow();
   }

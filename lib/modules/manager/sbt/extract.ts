@@ -427,9 +427,8 @@ function extractPackageFileInternal(
       return {
         deps: [sbtDependency],
       };
-    } else {
-      return null;
     }
+    return null;
   }
 
   let parsedResult: Ctx | null = null;

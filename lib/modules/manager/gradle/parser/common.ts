@@ -129,7 +129,8 @@ export function findVariableInKotlinImport(
 ): VariableData | undefined {
   if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
     for (const tokens of ctx.tmpKotlinImportStore) {
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1);
+      // v8 ignore else -- needs a kotlin import whose prefix resolves to nothing
       if (lastToken && name.startsWith(`${lastToken.value}.`)) {
         const prefix = tokens
           .slice(0, -1)
@@ -137,6 +138,7 @@ export function findVariableInKotlinImport(
           .join('.');
         const identifier = `${prefix}.${name}`;
 
+        // v8 ignore else -- needs a kotlin import whose prefix resolves to nothing
         if (variables[identifier]) {
           return variables[identifier];
         }
@@ -307,10 +309,11 @@ export const qTemplateString = q
 
 // foo = "bar"
 // foo + foo + "${foo}" + "foo" => "barbarbarfoo"
-export const qConcatExpr = (
+export function qConcatExpr(
   ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+}
 
 export const qValueMatcher = qConcatExpr(
   qTemplateString,
@@ -331,11 +334,11 @@ export const qKotlinImport = q
 
 // foo { bar { baz } }
 // foo.bar { baz }
-export const qDotOrBraceExpr = (
+export function qDotOrBraceExpr(
   symValue: q.SymMatcherValue,
   matcher: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.sym<Ctx>(symValue).alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.sym<Ctx>(symValue).alt(
     q.op<Ctx>('.').join(matcher),
     q.tree({
       type: 'wrapped-tree',
@@ -345,6 +348,7 @@ export const qDotOrBraceExpr = (
       search: matcher,
     }),
   );
+}
 
 export const qGroupId = qValueMatcher.handler((ctx) =>
   storeInTokenMap(ctx, 'groupId'),

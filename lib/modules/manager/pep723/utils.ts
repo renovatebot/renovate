@@ -5,7 +5,7 @@ import { Pep723 } from './schema.ts';
 
 // Adapted regex from the Python reference implementation: https://packaging.python.org/en/latest/specifications/inline-script-metadata/#reference-implementation
 const regex = regEx(
-  /^# \/\/\/ (?<type>[a-zA-Z0-9-]+)$\s(?<content>(^#(| .*)$\s)+)^# \/\/\/$/,
+  /^# \/\/\/ (?<type>[a-zA-Z0-9-]+)$\s(?<content>(?:^#(?:| .*)$\s)+)^# \/\/\/$/,
   'm',
 );
 
@@ -30,7 +30,7 @@ export function extractPep723(
 
   if (error) {
     logger.debug(
-      { packageFile, error },
+      { packageFile, err: error },
       `Error parsing PEP 723 inline script metadata`,
     );
     return null;

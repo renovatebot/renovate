@@ -33,17 +33,19 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('caches string result', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
-    ).toBe('111');
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
-    ).toBe('111');
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
-    ).toBe('111');
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
+    ).resolves.toBe('111');
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
+    ).resolves.toBe('111');
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
+    ).resolves.toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
@@ -55,26 +57,28 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('disables cache if cacheable is false', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
-    expect(
-      await withCache(
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('111');
-    expect(
-      await withCache(
+    ).resolves.toBe('111');
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('222');
-    expect(
-      await withCache(
+    ).resolves.toBe('222');
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('333');
+    ).resolves.toBe('333');
 
     expect(getValue).toHaveBeenCalledTimes(3);
     expect(setCache).not.toHaveBeenCalled();
@@ -82,26 +86,28 @@ describe('util/cache/package/with-cache', () => {
 
   it('forces cache if cachePrivatePackages=true', async () => {
     GlobalConfig.set({ cachePrivatePackages: true });
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
-    expect(
-      await withCache(
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('111');
-    expect(
-      await withCache(
+    ).resolves.toBe('111');
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('111');
-    expect(
-      await withCache(
+    ).resolves.toBe('111');
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', cacheable: false },
         fn,
       ),
-    ).toBe('111');
+    ).resolves.toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
@@ -113,20 +119,20 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('caches null values', async () => {
-    const fn = async (): Promise<string | null> => {
+    async function fn(): Promise<string | null> {
       await getValue();
       return null;
-    };
+    }
 
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeNull();
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeNull();
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeNull();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeNull();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeNull();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeNull();
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
@@ -138,48 +144,54 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('does not cache values rejected by cacheResult predicate', async () => {
-    const fn = async (): Promise<string | null> => {
+    async function fn(): Promise<string | null> {
       await getValue();
       return null;
-    };
-    const shouldCacheResult = (value: unknown): boolean => value !== null;
+    }
+    function shouldCacheResult(value: unknown): boolean {
+      return value !== null;
+    }
 
-    expect(
-      await withCache(
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', shouldCacheResult },
         fn,
       ),
-    ).toBeNull();
-    expect(
-      await withCache(
+    ).resolves.toBeNull();
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', shouldCacheResult },
         fn,
       ),
-    ).toBeNull();
-    expect(
-      await withCache(
+    ).resolves.toBeNull();
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', shouldCacheResult },
         fn,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
 
     expect(getValue).toHaveBeenCalledTimes(3);
     expect(setCache).not.toHaveBeenCalled();
   });
 
   it('ignores cached values rejected by cacheResult predicate', async () => {
-    const nullFn = async (): Promise<string | null> => {
+    async function nullFn(): Promise<string | null> {
       await getValue();
       return null;
-    };
-    const fn = () => getValue();
-    const cacheResult = (value: unknown): boolean => value !== null;
+    }
+    function fn() {
+      return getValue();
+    }
+    function cacheResult(value: unknown): boolean {
+      return value !== null;
+    }
 
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, nullFn),
-    ).toBeNull();
-    expect(
-      await withCache(
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, nullFn),
+    ).resolves.toBeNull();
+    await expect(
+      withCache(
         {
           namespace: '_test-namespace',
           key: 'key',
@@ -187,9 +199,9 @@ describe('util/cache/package/with-cache', () => {
         },
         fn,
       ),
-    ).toBe('222');
-    expect(
-      await withCache(
+    ).resolves.toBe('222');
+    await expect(
+      withCache(
         {
           namespace: '_test-namespace',
           key: 'key',
@@ -197,7 +209,7 @@ describe('util/cache/package/with-cache', () => {
         },
         fn,
       ),
-    ).toBe('222');
+    ).resolves.toBe('222');
 
     expect(getValue).toHaveBeenCalledTimes(2);
     expect(setCache).toHaveBeenCalledTimes(2);
@@ -210,34 +222,36 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('does not cache undefined', async () => {
-    const fn = async (): Promise<string | undefined> => {
+    async function fn(): Promise<string | undefined> {
       await getValue();
       return undefined;
-    };
+    }
 
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeUndefined();
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeUndefined();
-    expect(
-      await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).toBeUndefined();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeUndefined();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeUndefined();
+    await expect(
+      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
+    ).resolves.toBeUndefined();
 
     expect(getValue).toHaveBeenCalledTimes(3);
     expect(setCache).not.toHaveBeenCalled();
   });
 
   it('uses custom ttlMinutes', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
-    expect(
-      await withCache(
+    await expect(
+      withCache(
         { namespace: '_test-namespace', key: 'key', ttlMinutes: 60 },
         fn,
       ),
-    ).toBe('111');
+    ).resolves.toBe('111');
 
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
       '_test-namespace',
@@ -254,10 +268,12 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('updates cached result after soft TTL expires', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -266,12 +282,12 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
 
       vi.advanceTimersByTime(60 * 1000 - 1);
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -280,7 +296,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -290,8 +306,8 @@ describe('util/cache/package/with-cache', () => {
       );
 
       vi.advanceTimersByTime(1);
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -300,7 +316,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('222');
+      ).resolves.toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -315,10 +331,12 @@ describe('util/cache/package/with-cache', () => {
         cacheTtlOverride: { '_test-namespace': 2 },
         cacheHardTtlMinutes: 3,
       });
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -327,7 +345,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -337,8 +355,8 @@ describe('util/cache/package/with-cache', () => {
       );
 
       vi.advanceTimersByTime(120 * 1000 - 1);
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -347,13 +365,13 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
 
       vi.advanceTimersByTime(1);
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -362,7 +380,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('222');
+      ).resolves.toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -373,10 +391,12 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('returns stale result on error', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -385,7 +405,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -396,8 +416,8 @@ describe('util/cache/package/with-cache', () => {
 
       vi.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -406,21 +426,25 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenCalledTimes(1);
     });
 
     it('does not return stale values rejected by cacheResult predicate', async () => {
-      const nullFn = async (): Promise<string | null> => {
+      async function nullFn(): Promise<string | null> {
         await getValue();
         return null;
-      };
-      const fn = () => getValue();
-      const shouldCacheResult = (value: unknown): boolean => value !== null;
+      }
+      function fn() {
+        return getValue();
+      }
+      function shouldCacheResult(value: unknown): boolean {
+        return value !== null;
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -429,7 +453,7 @@ describe('util/cache/package/with-cache', () => {
           },
           nullFn,
         ),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenCalledTimes(1);
 
@@ -452,10 +476,12 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('drops stale value after hard TTL expires', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -464,7 +490,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         '_test-namespace',
@@ -475,8 +501,8 @@ describe('util/cache/package/with-cache', () => {
 
       vi.advanceTimersByTime(2 * 60 * 1000 - 1);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -485,7 +511,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
 
       vi.advanceTimersByTime(1);
       getValue.mockRejectedValueOnce(new Error('test'));
@@ -503,10 +529,12 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('does not use fallback when fallback=false', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
-      expect(
-        await withCache(
+      await expect(
+        withCache(
           {
             namespace: '_test-namespace',
             key: 'key',
@@ -515,7 +543,7 @@ describe('util/cache/package/with-cache', () => {
           },
           fn,
         ),
-      ).toBe('111');
+      ).resolves.toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       // Without fallback, hard TTL equals soft TTL
       expect(setCache).toHaveBeenLastCalledWith(

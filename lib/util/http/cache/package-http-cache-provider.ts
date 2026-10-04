@@ -18,13 +18,13 @@ export interface PackageHttpCacheProviderOptions {
   softTtlMinutes?: number;
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
-  writeSchema?: ZodType<unknown>;
+  writeSchema?: ZodType;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
   private defaultTtlMinutes: number;
-  private writeSchema?: ZodType<unknown>;
+  private writeSchema?: ZodType;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -86,10 +86,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return;
     }
 
-    const httpResponse = copyResponse(
-      data.httpResponse as HttpResponse<unknown>,
-      false,
-    );
+    const httpResponse = copyResponse(data.httpResponse, false);
 
     const { data: body, error: err } = this.writeSchema.safeParse(
       httpResponse.body,

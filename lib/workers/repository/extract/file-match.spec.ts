@@ -13,15 +13,13 @@ describe('workers/repository/extract/file-match', () => {
     it('returns exact matches', () => {
       const includePaths = ['frontend/package.json'];
       const res = fileMatch.getIncludedFiles(fileList, includePaths);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toEqual(['frontend/package.json']);
     });
 
     it('returns minimatch matches', () => {
       const includePaths = ['frontend/**'];
       const res = fileMatch.getIncludedFiles(fileList, includePaths);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toEqual(['frontend/package.json']);
     });
   });
 
@@ -34,15 +32,13 @@ describe('workers/repository/extract/file-match', () => {
     it('ignores partial matches', () => {
       const ignoredPaths = ['frontend'];
       const res = fileMatch.filterIgnoredFiles(fileList, ignoredPaths);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toEqual(['package.json']);
     });
 
     it('returns minimatch matches', () => {
       const ignoredPaths = ['frontend/**'];
       const res = fileMatch.filterIgnoredFiles(fileList, ignoredPaths);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toEqual(['package.json']);
     });
   });
 
@@ -57,15 +53,13 @@ describe('workers/repository/extract/file-match', () => {
     it('returns npm files', () => {
       fileList.push('Dockerfile');
       const res = fileMatch.getMatchingFiles(config, fileList);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual(['frontend/package.json', 'package.json']);
     });
 
     it('deduplicates', () => {
       config.managerFilePatterns?.push('package.json');
       const res = fileMatch.getMatchingFiles(config, fileList);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual(['frontend/package.json', 'package.json']);
     });
   });
 });

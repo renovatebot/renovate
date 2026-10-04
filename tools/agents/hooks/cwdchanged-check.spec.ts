@@ -13,10 +13,10 @@ vi.mock('./utils/git.ts', () => ({ getRepoRoot, getChangedFiles: vi.fn() }));
 const { provision } = vi.hoisted(() => ({ provision: vi.fn() }));
 vi.mock('./utils/provision.ts', () => ({ provision }));
 
-const { existsSync } = vi.hoisted(() => ({
-  existsSync: vi.fn<(path: string) => boolean>(),
+const { access } = vi.hoisted(() => ({
+  access: vi.fn<(path: string) => Promise<void>>(),
 }));
-vi.mock('node:fs', () => ({ existsSync }));
+vi.mock('node:fs/promises', () => ({ access }));
 
 const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
   throw new Error('process.exit');
@@ -24,11 +24,6 @@ const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
 
 beforeEach(() => {
   vi.resetModules();
-  readStdin.mockReset();
-  getRepoRoot.mockReset();
-  provision.mockReset();
-  existsSync.mockReset();
-  exitSpy.mockClear();
 });
 
 it('exits with code 1 when stdin is not valid JSON', async () => {
@@ -83,12 +78,12 @@ it('exits silently when node_modules already exists (already installed checkout)
     }),
   );
   getRepoRoot.mockResolvedValue('/repo');
-  existsSync.mockReturnValue(true);
+  access.mockResolvedValue(undefined);
 
   await expect(import('./cwdchanged-check.ts')).rejects.toThrow('process.exit');
 
   expect(exitSpy).toHaveBeenCalledWith(0);
-  expect(existsSync).toHaveBeenCalledWith('/repo/node_modules');
+  expect(access).toHaveBeenCalledWith('/repo/node_modules');
   expect(provision).not.toHaveBeenCalled();
 });
 
@@ -102,13 +97,13 @@ it('provisions the root when it is a fresh worktree (no node_modules)', async ()
     }),
   );
   getRepoRoot.mockResolvedValue('/worktrees/my-feature');
-  existsSync.mockReturnValue(false);
+  access.mockRejectedValue(new Error('ENOENT'));
   provision.mockResolvedValue(undefined);
 
   await import('./cwdchanged-check.ts');
 
   expect(getRepoRoot).toHaveBeenCalledWith('/worktrees/my-feature');
-  expect(existsSync).toHaveBeenCalledWith('/worktrees/my-feature/node_modules');
+  expect(access).toHaveBeenCalledWith('/worktrees/my-feature/node_modules');
   expect(provision).toHaveBeenCalledWith('/worktrees/my-feature');
   expect(exitSpy).not.toHaveBeenCalled();
 });

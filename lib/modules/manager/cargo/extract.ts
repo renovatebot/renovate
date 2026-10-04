@@ -6,6 +6,7 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../util/fs/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { api as versioning } from '../../versioning/cargo/index.ts';
 import type {
   ExtractConfig,
@@ -88,12 +89,11 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
       const parsedCargoConfig = CargoConfig.safeParse(payload);
       if (parsedCargoConfig.success) {
         return parsedCargoConfig.data;
-      } else {
-        logger.debug(
-          { err: parsedCargoConfig.error, path },
-          `Error parsing cargo config`,
-        );
       }
+      logger.debug(
+        { err: parsedCargoConfig.error, path },
+        `Error parsing cargo config`,
+      );
     }
   }
 
@@ -111,8 +111,8 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   );
 
   const registryNames = new Set([
-    ...Object.keys(config.registries ?? {}),
-    ...Object.keys(config.source ?? {}),
+    ...Object.keys(coerceObject(config.registries)),
+    ...Object.keys(coerceObject(config.source)),
   ]);
   for (const registryName of registryNames) {
     result[registryName] = resolveRegistryIndex(registryName, config);
@@ -155,15 +155,13 @@ function resolveRegistryIndex(
   const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
-  } else {
-    // we don't need an explicit index if we're using the default registry
-    if (registryName === DEFAULT_REGISTRY_ID) {
-      return DEFAULT_REGISTRY_URL;
-    } else {
-      logger.debug(`${registryName} cargo registry is missing index`);
-      return null;
-    }
   }
+  // we don't need an explicit index if we're using the default registry
+  if (registryName === DEFAULT_REGISTRY_ID) {
+    return DEFAULT_REGISTRY_URL;
+  }
+  logger.debug(`${registryName} cargo registry is missing index`);
+  return null;
 }
 
 export async function extractPackageFile(
@@ -173,7 +171,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent<CargoManagerData> | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
-  const cargoConfig = (await readCargoConfig()) ?? {};
+  const cargoConfig = coerceObject(await readCargoConfig());
   const cargoRegistries = extractCargoRegistries(cargoConfig);
 
   const parsedCargoManifest = CargoManifest.safeParse(content);

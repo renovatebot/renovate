@@ -1,5 +1,5 @@
-import { mockDeep } from 'vitest-mock-extended';
-import { hostRules, logger } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
@@ -14,8 +14,6 @@ import {
   takePersonalAccessTokenIfPossible,
 } from './check-token.ts';
 
-vi.mock('./host-rules.ts', () => mockDeep());
-
 describe('util/check-token', () => {
   describe('checkGithubToken', () => {
     beforeEach(() => {
@@ -24,33 +22,25 @@ describe('util/check-token', () => {
     });
 
     it('does nothing if data is empty', () => {
-      hostRules.find.mockReturnValue({});
       checkGithubToken(undefined);
       expect(logger.logger.trace).not.toHaveBeenCalled();
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('returns early if GitHub token is found', () => {
-      hostRules.find.mockReturnValueOnce({ token: '123' });
-      checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledExactlyOnceWith({
+      hostRules.add({
         hostType: 'github',
-        url: 'https://api.github.com',
+        matchHost: 'api.github.com',
+        token: '123',
       });
-
+      checkGithubToken({});
       expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
 
     it('returns early if token warnings are disabled', () => {
       GlobalConfig.set({ githubTokenWarn: false });
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({});
-      expect(hostRules.find).toHaveBeenCalledExactlyOnceWith({
-        hostType: 'github',
-        url: 'https://api.github.com',
-      });
-
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'GitHub token warning is disabled',
       );
@@ -58,7 +48,6 @@ describe('util/check-token', () => {
     });
 
     it('does not warn if there is dependencies with GitHub sourceUrl', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [{ deps: [{ depName: 'renovatebot/renovate' }] }],
       });
@@ -66,7 +55,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning for github-tags datasource', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [
           {
@@ -83,7 +71,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning for github-releases datasource', () => {
-      hostRules.find.mockReturnValueOnce({});
       checkGithubToken({
         npm: [
           {
@@ -100,7 +87,6 @@ describe('util/check-token', () => {
     });
 
     it('logs warning once', () => {
-      hostRules.find.mockReturnValueOnce({});
       const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {

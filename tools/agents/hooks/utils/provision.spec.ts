@@ -4,11 +4,6 @@ const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
 vi.mock('./exec.ts', () => ({ exec }));
 const errorSpy = vi.spyOn(console, 'error');
 
-beforeEach(() => {
-  exec.mockReset();
-  errorSpy.mockReset();
-});
-
 it('runs mise install then pnpm install', async () => {
   exec.mockResolvedValue(undefined);
 

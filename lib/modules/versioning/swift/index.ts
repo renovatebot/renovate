@@ -34,10 +34,13 @@ const {
   eq: equals,
 } = semver;
 
-export const isValid = (input: string): boolean =>
-  !!valid(input) || !!validRange(toSemverRange(input));
+export function isValid(input: string): boolean {
+  return !!valid(input) || !!validRange(toSemverRange(input));
+}
 
-export const isVersion = (input: string): boolean => !!valid(input);
+export function isVersion(input: string): boolean {
+  return !!valid(input);
+}
 
 function getSatisfyingVersion(
   versions: string[],

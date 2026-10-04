@@ -16,6 +16,7 @@ export interface GitlabComment {
 export interface GitLabUser {
   id: number;
   username: string;
+  access_level?: number; // present on project/group member responses
 }
 
 export interface GitlabPr extends Pr {
@@ -36,6 +37,7 @@ export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 export interface RepoResponse {
   id: number;
   archived: boolean;
+  marked_for_deletion_at?: string | null;
   mirror: boolean;
   default_branch: string;
   empty_repo: boolean;

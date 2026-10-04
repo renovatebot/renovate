@@ -14,8 +14,16 @@ describe('modules/datasource/jsr/util', () => {
     expect(res).toBeNull();
   });
 
-  it('should return null for below scope min length', () => {
-    const res = extractJsrPackageName('@sc/packagename');
+  it('should extract a scope shorter than the JSR registration minimum', () => {
+    const res = extractJsrPackageName('@db/sqlite');
+    expect(res).toStrictEqual({
+      scope: 'db',
+      name: 'sqlite',
+    });
+  });
+
+  it('should return null for an empty scope', () => {
+    const res = extractJsrPackageName('@/packagename');
     expect(res).toBeNull();
   });
 

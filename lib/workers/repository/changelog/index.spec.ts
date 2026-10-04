@@ -53,26 +53,28 @@ describe('workers/repository/changelog/index', () => {
   });
 
   it('only fetches changelogs for upgrades whose fetchChangeLogs matches the stage name', async () => {
-    const freshUpgrades = (): BranchUpgradeConfig[] => [
-      {
-        branchName: 'foo',
-        manager: 'bar',
-        groupName: 'fetchChangeLogs is pr',
-        fetchChangeLogs: 'pr',
-      },
-      {
-        branchName: 'foo2',
-        manager: 'bar',
-        groupName: 'fetchChangeLogs is branch',
-        fetchChangeLogs: 'branch',
-      },
-      {
-        branchName: 'foo3',
-        manager: 'bar',
-        groupName: 'fetchChangeLogs is off',
-        fetchChangeLogs: 'off',
-      },
-    ];
+    function freshUpgrades(): BranchUpgradeConfig[] {
+      return [
+        {
+          branchName: 'foo',
+          manager: 'bar',
+          groupName: 'fetchChangeLogs is pr',
+          fetchChangeLogs: 'pr',
+        },
+        {
+          branchName: 'foo2',
+          manager: 'bar',
+          groupName: 'fetchChangeLogs is branch',
+          fetchChangeLogs: 'branch',
+        },
+        {
+          branchName: 'foo3',
+          manager: 'bar',
+          groupName: 'fetchChangeLogs is off',
+          fetchChangeLogs: 'off',
+        },
+      ];
+    }
 
     await expect(
       embedChangelogs({
