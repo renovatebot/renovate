@@ -1,8 +1,15 @@
+import { z } from 'zod/v4';
+import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
+import * as datasourceCommon from '../../../../../modules/datasource/common.ts';
 import * as datasource from '../../../../../modules/datasource/index.ts';
 import * as releasePostprocess from '../../../../../modules/datasource/postprocess-release.ts';
+import type { DatasourceApi } from '../../../../../modules/datasource/types.ts';
 import * as dockerVersioning from '../../../../../modules/versioning/docker/index.ts';
 import * as npmVersioning from '../../../../../modules/versioning/npm/index.ts';
+import * as hostRules from '../../../../../util/host-rules.ts';
+import { Http } from '../../../../../util/http/index.ts';
+import * as queue from '../../../../../util/http/queue.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import * as releases from './releases.ts';
 
@@ -282,6 +289,95 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         { version: '1.1.0', gitRef: 'release/1.1.0' },
       ]);
     });
+
+    it.each([1, 2])(
+      'respects a shared host concurrency limit of %s during hydration',
+      async (concurrentRequestLimit) => {
+        const registryUrl = 'https://registry.example.com';
+        const packageNames = ['first-package', 'second-package'];
+        const versions = ['1.0.0', '1.0.1', '1.1.0'];
+        const responseGate = Promise.withResolvers<void>();
+        let inFlight = 0;
+        let maxConcurrent = 0;
+
+        queue.clear();
+        hostRules.add({
+          matchHost: 'registry.example.com',
+          concurrentRequestLimit,
+        });
+        const http = new Http('some-datasource');
+        vi.spyOn(datasourceCommon, 'getDatasourceFor').mockReturnValue(
+          partial<DatasourceApi>({
+            async postprocessRelease({ packageName, registryUrl }, release) {
+              const { body } = await http.getJson(
+                `${registryUrl}/${packageName}/${release.version}`,
+                { memCache: false },
+                z.object({ gitRef: z.string() }),
+              );
+              return { ...release, ...body };
+            },
+          }),
+        );
+        vi.mocked(datasource.getPkgReleases).mockReset();
+        vi.mocked(datasource.getPkgReleases).mockImplementation(() =>
+          Promise.resolve({
+            releases: versions.map((version) => ({ version })),
+          }),
+        );
+        for (const packageName of packageNames) {
+          for (const version of versions) {
+            httpMock
+              .scope(registryUrl)
+              .get(`/${packageName}/${version}`)
+              .reply(200, async () => {
+                inFlight += 1;
+                maxConcurrent = Math.max(maxConcurrent, inFlight);
+                await responseGate.promise;
+                inFlight -= 1;
+                return { gitRef: `${packageName}/${version}` };
+              });
+          }
+        }
+
+        const hydration = Promise.all(
+          packageNames.map((packageName) =>
+            releases.getInRangeReleases(
+              partial<BranchUpgradeConfig>({
+                datasource: 'some-datasource',
+                packageName,
+                registryUrl,
+                versioning: npmVersioning.id,
+                currentVersion: '1.0.0',
+                newVersion: '1.1.0',
+              }),
+            ),
+          ),
+        );
+        try {
+          await vi.waitFor(() => {
+            expect(inFlight).toBe(concurrentRequestLimit);
+            expect(queue.getQueue(registryUrl)?.size).toBe(
+              packageNames.length * versions.length - concurrentRequestLimit,
+            );
+          });
+        } finally {
+          responseGate.resolve();
+          await hydration;
+          queue.clear();
+        }
+        const results = await hydration;
+
+        expect(maxConcurrent).toBe(concurrentRequestLimit);
+        expect(results).toEqual(
+          packageNames.map((packageName) =>
+            versions.map((version) => ({
+              version,
+              gitRef: `${packageName}/${version}`,
+            })),
+          ),
+        );
+      },
+    );
 
     it('uses the release registryUrl when hydrating merged-registry releases', async () => {
       vi.mocked(datasource.getPkgReleases).mockReset();
