@@ -67,7 +67,7 @@ const autoReplaceStringTemplate =
  * Match `<name>--v<version>`, `<name>-v<version>`, and `<name>_v<version>` tags.
  */
 const packageTagRegex = regEx(
-  /^(?<compatibility>.+?--|.+?[-_])v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/,
+  /^(?<compatibility>.+?[-_])v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/,
 );
 
 function packageTagConfig(

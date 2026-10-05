@@ -451,6 +451,7 @@ describe('modules/manager/apm/extract', () => {
         {
           currentValue: 'foo--v1.0.0',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          versionCompatibility: expect.any(String),
         },
       ]);
     });
