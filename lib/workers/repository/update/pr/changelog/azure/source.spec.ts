@@ -321,6 +321,7 @@ describe('workers/repository/update/pr/changelog/azure/source', () => {
       ${'https://dev.azure.com/some-org/'}                           | ${'https://some-org.visualstudio.com/some-project/_git/some-repo'}
       ${'https://development.some-host.org/collection/'}             | ${'https://development.some-host.org/collection/project/_git/repo'}
       ${'https://development.some-host.org/multi/level/collection/'} | ${'https://development.some-host.org/multi/level/collection/project/_git/repo'}
+      ${'https://azure.example.com/'}                                | ${'https://azure.example.com/project/_git/repo'}
     `(
       'accepts sources in configured organization $endpoint',
       async ({ endpoint, sourceUrl }) => {
