@@ -4,7 +4,6 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
@@ -233,7 +232,6 @@ export async function updateArtifacts({
           cwdFile: packageFileName,
           extraEnv,
           docker: {},
-          abortOnTimeout: false,
           toolConstraints: [
             { toolName: 'python', constraint: pythonConstraint },
             { toolName: 'poetry', constraint: poetryConstraint },
@@ -243,18 +241,6 @@ export async function updateArtifacts({
       },
     });
   } catch (err) {
-    if (err instanceof ExecError && err.timedOut) {
-      logger.debug({ err }, `Failed to update ${lockFileName} file`);
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: err.message,
-            timedOut: true,
-          },
-        },
-      ];
-    }
     /* v8 ignore if -- defensive rethrow, not reproduced in the poetry specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;

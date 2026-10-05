@@ -113,7 +113,7 @@ describe('workers/repository/process/write', () => {
         {
           branchName: 'timed-out',
           baseBranch: 'base',
-          manager: 'poetry',
+          manager: 'npm',
           upgrades: [],
         },
         {
