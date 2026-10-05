@@ -1,5 +1,8 @@
 name: PR Size Labeler
 
+# Unprivileged half: runs for every pull request (including forks) with no
+# permissions and only records the pull request number. The label is applied by
+# `pr-size-labeler-apply.yml`, which runs on `workflow_run` in the base context.
 on:
   pull_request:
     types:
@@ -8,23 +11,22 @@ on:
       - reopened
       - ready_for_review
 
+permissions: {}
+
 jobs:
-  auto-label-pr:
+  save-pr-number:
     if: github.event.pull_request.draft != true
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          filter: blob:none # we don't need all blobs
-          show-progress: false
+      - name: Save pull request number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > pr-number.txt
 
-      - name: Label PR based on size
-        uses: cbrgm/pr-size-labeler-action@6b70abfe1f75f6f35ca24731f6d25fb7251b6127 # v1.3.13
+      - name: Upload pull request number
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          github_token: ${{ github.token }} # Pass the GitHub token for authentication
-          github_repository: ${{ github.repository }} # Pass the repository name
-          github_pr_number: ${{ github.event.number }} # Pass the pull request number
-          config_file_path: '.github/pull-request-size.yml' # Specify the path to the configuration file
+          name: pr-number
+          path: pr-number.txt
+          retention-days: 1

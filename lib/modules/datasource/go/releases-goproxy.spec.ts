@@ -100,10 +100,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
     const baseUrl = 'https://proxy.golang.org';
 
     let githubQueryReleases: MockInstance<typeof githubGraphql.queryReleases>;
+    let githubQueryTags: MockInstance<typeof githubGraphql.queryTags>;
 
     beforeEach(() => {
       githubQueryReleases = vi.spyOn(githubGraphql, 'queryReleases');
       githubQueryReleases.mockResolvedValue([]);
+      githubQueryTags = vi.spyOn(githubGraphql, 'queryTags');
+      githubQueryTags.mockResolvedValue([]);
     });
 
     it('handles direct', async () => {
@@ -451,6 +454,131 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(404);
 
       githubQueryReleases.mockRejectedValueOnce(new Error('unknown'));
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.0.0',
+            releaseTimestamp: '2018-08-13T15:31:12.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.0' },
+      });
+    });
+
+    it('prefers the GitHub tag timestamp over the commit timestamp when there is no GitHub Release', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/kr/pretty`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v0.3.0 2020-11-24T22:22:38Z
+            v0.3.1 2022-08-29T23:03:05Z
+          `,
+        )
+        .get('/@latest')
+        .reply(200, { Version: 'v0.3.1' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockResolvedValueOnce([
+        {
+          version: 'v0.3.1',
+          releaseTimestamp: '2022-10-07T23:12:13.000Z' as Timestamp,
+          gitRef: 'v0.3.1',
+          hash: 'abc123',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/kr/pretty',
+      });
+
+      expect(githubQueryTags).toHaveBeenCalledWith(
+        { packageName: 'kr/pretty', registryUrl: 'https://github.com' },
+        expect.anything(),
+      );
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v0.3.0',
+            releaseTimestamp: '2020-11-24T22:22:38.000Z',
+          },
+          {
+            version: 'v0.3.1',
+            releaseTimestamp: '2022-10-07T23:12:13.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/kr/pretty',
+        tags: { latest: 'v0.3.1' },
+      });
+    });
+
+    it('prefers the GitHub Release timestamp over the GitHub tag timestamp when both exist', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/stretchr/testify`)
+        .get('/@v/list')
+        .reply(200, 'v1.12.0 2026-06-10T14:10:43Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.12.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockResolvedValueOnce([
+        {
+          version: 'v1.12.0',
+          releaseTimestamp: '2026-07-01T00:00:00.000Z' as Timestamp,
+          gitRef: 'v1.12.0',
+          hash: 'abc123',
+        },
+      ]);
+      githubQueryReleases.mockResolvedValueOnce([
+        {
+          version: 'v1.12.0',
+          releaseTimestamp: '2026-08-17T09:00:00.000Z' as Timestamp,
+          url: 'https://github.com/stretchr/testify/releases/tag/v1.12.0',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/stretchr/testify',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.12.0',
+            releaseTimestamp: '2026-08-17T09:00:00.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/stretchr/testify',
+        tags: { latest: 'v1.12.0' },
+      });
+    });
+
+    it('handles GitHub Tags fetch errors', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200, 'v1.0.0 2018-08-13T15:31:12Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockRejectedValueOnce(new Error('unknown'));
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',
