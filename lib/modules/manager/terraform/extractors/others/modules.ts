@@ -1,5 +1,6 @@
-import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
+import { isNullOrUndefined, isPlainObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import { regEx } from '../../../../../util/regex.ts';
 import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags/index.ts';
 import { GitTagsDatasource } from '../../../../datasource/git-tags/index.ts';
@@ -28,6 +29,48 @@ export const azureDevOpsSshRefMatchRegex = regEx(
 export const hostnameMatchRegex = regEx(
   /^(?<hostname>[a-zA-Z\d](?:[a-zA-Z\d-]*\.)+[a-zA-Z\d]+)/,
 );
+
+// Terraform 1.15+ allows a `local` or (`const`) `variable` reference to be used
+// as the whole value of a module's `source`/`version` ref, e.g. `${local.tag}`
+// or `${var.tag}`. This regex matches that entire reference so the underlying
+// local/variable value can be resolved and tracked by Renovate instead.
+export const localOrVariableRefRegex = regEx(
+  /^\$\{\s*(?<kind>local|var)\.(?<name>[a-zA-Z_][a-zA-Z0-9_-]*)\s*\}$/,
+);
+
+/**
+ * Resolves a `${local.x}` or `${var.x}` reference to its underlying string
+ * value, if it is declared in the same file and the value can be statically
+ * determined (i.e. a `locals` value or a `variable` block with a string
+ * `default`).
+ */
+export function resolveLocalOrVariableValue(
+  value: string,
+  hclRoot: TerraformDefinitionFile,
+): string | undefined {
+  const match = localOrVariableRefRegex.exec(value);
+  if (!match?.groups) {
+    return undefined;
+  }
+  const { kind, name } = match.groups;
+
+  if (kind === 'local') {
+    for (const localsBlock of coerceArray(hclRoot.locals)) {
+      const localValue = localsBlock[name];
+      if (isString(localValue)) {
+        return localValue;
+      }
+    }
+    return undefined;
+  }
+
+  for (const variableBlock of coerceArray(hclRoot.variable?.[name])) {
+    if (isString(variableBlock.default)) {
+      return variableBlock.default;
+    }
+  }
+  return undefined;
+}
 
 export class ModuleExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -61,7 +104,7 @@ export class ModuleExtractor extends DependencyExtractor {
             source: moduleElement.source,
           },
         };
-        dependencies.push(this.analyseTerraformModule(dep, config));
+        dependencies.push(this.analyseTerraformModule(dep, config, hclRoot));
       }
     }
 
@@ -71,6 +114,7 @@ export class ModuleExtractor extends DependencyExtractor {
   private analyseTerraformModule(
     dep: PackageDependency,
     config: ExtractConfig,
+    hclRoot: TerraformDefinitionFile,
   ): PackageDependency {
     // TODO #22198
     const source = dep.managerData!.source as string;
@@ -126,6 +170,26 @@ export class ModuleExtractor extends DependencyExtractor {
     } else {
       logger.debug({ dep }, 'terraform dep has no source');
       dep.skipReason = 'no-source';
+    }
+
+    if (
+      isString(dep.currentValue) &&
+      !dep.skipReason &&
+      localOrVariableRefRegex.test(dep.currentValue)
+    ) {
+      const resolvedValue = resolveLocalOrVariableValue(
+        dep.currentValue,
+        hclRoot,
+      );
+      if (isString(resolvedValue)) {
+        dep.currentValue = resolvedValue;
+      } else {
+        logger.debug(
+          { dep },
+          'Terraform: unable to resolve local/variable reference used as module ref/version',
+        );
+        dep.skipReason = 'contains-variable';
+      }
     }
 
     return dep;
