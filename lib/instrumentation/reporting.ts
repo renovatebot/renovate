@@ -50,7 +50,6 @@ export function addRepositoryMetadata(
   coerceRepo(config.repository!);
   const repoReport = report.repositories[config.repository!];
   repoReport.platform = GlobalConfig.get('platform');
-  repoReport.endpoint = GlobalConfig.get('endpoint');
   repoReport.defaultBranch = config.defaultBranch;
   repoReport.dependencyDashboardIssue = config.dependencyDashboardIssue ?? null;
   // Omit when there is no in-repo config file (cache stores an empty string).

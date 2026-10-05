@@ -60,10 +60,6 @@ interface RepoReport {
    */
   platform?: PlatformId;
   /**
-   * The platform API endpoint used for the repository.
-   */
-  endpoint?: string;
-  /**
    * The default branch name of the repository.
    */
   defaultBranch?: string;

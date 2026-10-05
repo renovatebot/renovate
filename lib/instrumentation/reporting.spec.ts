@@ -98,10 +98,7 @@ describe('instrumentation/reporting', () => {
   });
 
   it('adds repository metadata to the report', () => {
-    GlobalConfig.set({
-      platform: 'github',
-      endpoint: 'https://api.github.com/',
-    });
+    GlobalConfig.set({ platform: 'github' });
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
       reportType: 'logging',
@@ -119,7 +116,6 @@ describe('instrumentation/reporting', () => {
           branches: [],
           packageFiles: {},
           platform: 'github',
-          endpoint: 'https://api.github.com/',
           defaultBranch: 'main',
           dependencyDashboardIssue: 42,
           configFileName: '.github/renovate.json5',
