@@ -366,7 +366,7 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBe('datasource-merge');
   });
 
-  it('skips skipReason=package-rules if enabled=true', async () => {
+  it('sets skipReason=package-rules if the dependency is already disabled', async () => {
     const dep: any = {
       enabled: false,
       depName: 'foo',
@@ -377,7 +377,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const res = await applyPackageRules(dep);
-    expect(res.skipReason).toBeUndefined();
+    expect(res.skipReason).toBe('package-rules');
   });
 
   it('matches anything if missing inclusive rules', async () => {
