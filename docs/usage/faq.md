@@ -32,7 +32,7 @@ If you're self hosting Renovate, use the latest release if possible.
 ## Renovate core features not supported on all platforms
 
 | Feature               | Platforms which lack feature                                 | See Renovate issue(s) |
-|-----------------------|--------------------------------------------------------------|-----------------------|
+| --------------------- | ------------------------------------------------------------ | --------------------- |
 | Dependency Dashboard  | Bitbucket, Bitbucket Server, Gerrit, SCM-Manager             |                       |
 | The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab, SCM-Manager |                       |
 
