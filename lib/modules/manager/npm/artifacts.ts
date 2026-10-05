@@ -8,6 +8,8 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { hashStream } from '../../../util/hash.ts';
+import { Http } from '../../../util/http/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
@@ -20,6 +22,8 @@ const versionWithHashRegString = '^(?<version>.*)\\+(?<hash>.*)';
 // Matches a Subresource Integrity string, eg. sha512-<base64 digest>
 const sriRegString = '^(?<algo>sha\\d+)-(?<hash>[A-Za-z0-9+/]+={0,2})$';
 
+const http = new Http('npm');
+
 const packageManagerFieldRegString = '("packageManager"\\s*:\\s*")[^"]*"';
 
 export async function updateArtifacts(
@@ -27,7 +31,9 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
-  res.push(coerceObject(handlePackageManagerUpdates(updateArtifactsConfig)));
+  res.push(
+    coerceObject(await handlePackageManagerUpdates(updateArtifactsConfig)),
+  );
   res.push(coerceObject(await updatePnpmWorkspace(updateArtifactsConfig)));
 
   res = res.filter(isNonEmptyObject);
@@ -39,12 +45,21 @@ export async function updateArtifacts(
 }
 
 /**
+ * Corepack hashes `yarn.js` for yarn berry instead of the npm tarball, so the registry integrity can't be used.
+ * @see https://github.com/nodejs/corepack/blob/d4dcb1f89741603e776bba9d457425750fa26987/config.json#L152-L171
+ */
+async function getYarnBerryHash(version: string): Promise<string> {
+  const url = `https://repo.yarnpkg.com/${version}/packages/yarnpkg-cli/bin/yarn.js`;
+  return `sha512.${await hashStream(http.stream(url))}`;
+}
+
+/**
  * Updates corepack hashes in `packageManager` and `devEngines.packageManager` from the new version's integrity digest.
  * @see https://github.com/nodejs/corepack/blob/57bfb67b062ea1b8746b302bcdbf9f8e8438c526/sources/corepackUtils.ts#L300
  */
-function handlePackageManagerUpdates(
+async function handlePackageManagerUpdates(
   updateArtifactsConfig: UpdateArtifact,
-): UpdateArtifactsResult | null {
+): Promise<UpdateArtifactsResult | null> {
   const { packageFileName, updatedDeps, newPackageFileContent } =
     updateArtifactsConfig;
   const packageManagerUpdates = updatedDeps.filter(
@@ -57,24 +72,43 @@ function handlePackageManagerUpdates(
 
   let newContent = newPackageFileContent;
   for (const packageManagerUpdate of packageManagerUpdates) {
-    const { depName, newVersion, newDigest } = packageManagerUpdate;
-    const sriMatch = regEx(sriRegString).exec(newDigest ?? '');
-    if (!sriMatch?.groups) {
-      logger.warn(
-        { packageFileName, depName, newVersion, newDigest },
-        'Cannot update packageManager hash: no valid digest available',
-      );
-      return {
-        artifactError: {
-          fileName: packageFileName,
-          stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: no valid digest available`,
-        },
-      };
-    }
+    const { depName, packageName, newVersion, newDigest } =
+      packageManagerUpdate;
+    let corepackHash: string;
+    if (packageName === '@yarnpkg/cli-dist' && newVersion) {
+      try {
+        corepackHash = await getYarnBerryHash(newVersion);
+      } catch (err) {
+        logger.warn(
+          { err, packageFileName, depName, newVersion },
+          'Cannot update packageManager hash: failed to download yarn.js',
+        );
+        return {
+          artifactError: {
+            fileName: packageFileName,
+            stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: failed to download yarn.js`,
+          },
+        };
+      }
+    } else {
+      const sriMatch = regEx(sriRegString).exec(newDigest ?? '');
+      if (!sriMatch?.groups) {
+        logger.warn(
+          { packageFileName, depName, newVersion, newDigest },
+          'Cannot update packageManager hash: no valid digest available',
+        );
+        return {
+          artifactError: {
+            fileName: packageFileName,
+            stderr: `Cannot update packageManager hash for ${depName}@${newVersion}: no valid digest available`,
+          },
+        };
+      }
 
-    const { algo, hash } = sriMatch.groups;
-    const hexHash = Buffer.from(hash, 'base64').toString('hex');
-    const versionWithHash = `${newVersion}+${algo}.${hexHash}`;
+      const { algo, hash } = sriMatch.groups;
+      corepackHash = `${algo}.${Buffer.from(hash, 'base64').toString('hex')}`;
+    }
+    const versionWithHash = `${newVersion}+${corepackHash}`;
 
     if (packageManagerUpdate.depType === 'packageManager') {
       newContent = newContent.replace(
