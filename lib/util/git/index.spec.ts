@@ -17,6 +17,7 @@ import { postUpgradeCommandsExecutor } from '../../workers/repository/update/bra
 import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as _execCommon from '../exec/common.ts';
+import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { type LongCommitSha, toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
@@ -1223,6 +1224,23 @@ describe('util/git/index', { timeout: 30000 }, () => {
           expect((await repo.status()).isClean()).toBeFalse();
         });
 
+        it('passes the unchanged submodule env when Git LFS is not enabled', async () => {
+          const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+          await git.initRepo({
+            cloneSubmodules: true,
+            url: base.path,
+          });
+
+          await git.syncGit();
+
+          expect(
+            auth.getGitEnvironmentVariables,
+          ).toHaveBeenCalledExactlyOnceWith(getChildEnv());
+          expect(envSpy).toHaveBeenLastCalledWith({
+            GIT_ALLOW_PROTOCOL: 'file',
+          });
+        });
+
         it('sets non-master base branch with submodule update', async () => {
           await git.initRepo({
             cloneSubmodules: true,
@@ -1822,6 +1840,73 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
         const result = await local.raw(['ls-tree', 'HEAD', 'master_file']);
         expect(result).toStartWith('100755');
+      });
+    });
+
+    describe('Git LFS backwards compatibility', () => {
+      const lfsPointer = codeBlock`
+        version https://git-lfs.github.com/spec/v1
+        oid sha256:${'a'.repeat(64)}
+        size 12345
+      `;
+
+      it('commits raw bytes for LFS-tracked paths when gitLfs is not set', async () => {
+        const home = await tmp.dir({ unsafeCleanup: true });
+        setCustomEnv({ HOME: home.path });
+        const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+        const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+        await git.initRepo({ url: origin.path });
+        await git.syncGit();
+        const contents = Buffer.from([0x00, 0x01, 0x02, 0xff, 0xfe]);
+
+        const commit = await git.commitFiles({
+          branchName: 'renovate/lfs_binary',
+          files: [
+            {
+              type: 'addition',
+              path: '.gitattributes',
+              contents: '*.bin filter=lfs diff=lfs merge=lfs -text\n',
+            },
+            { type: 'addition', path: 'x.bin', contents },
+          ],
+          message: 'Add binary',
+        });
+
+        expect(commit).not.toBeNull();
+        const size = await simpleGit(origin.path).raw([
+          'cat-file',
+          '-s',
+          `${commit}:x.bin`,
+        ]);
+        expect(size.trim()).toBe(`${contents.length}`);
+        expect(rawSpy).not.toHaveBeenCalledWith(
+          expect.arrayContaining(['lfs']),
+        );
+        for (const [env] of envSpy.mock.calls) {
+          const values = JSON.stringify(env);
+          expect(values).not.toContain('filter.lfs');
+          expect(values).not.toContain('core.hooksPath');
+          expect(values).not.toContain('lfs.url');
+        }
+        await home.cleanup();
+      });
+
+      it('returns LFS pointers from getFile() and warns', async () => {
+        await git.commitFiles({
+          branchName: 'renovate/lfs_pointer',
+          files: [
+            { type: 'addition', path: 'lock.json', contents: lfsPointer },
+          ],
+          message: 'Add pointer',
+        });
+
+        const content = await git.getFile('lock.json', 'renovate/lfs_pointer');
+
+        expect(content).toBe(lfsPointer);
+        expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
+          { fileName: 'lock.json' },
+          'File is stored in Git LFS and Renovate read its LFS pointer instead of the content. See the `gitLfs` documentation.',
+        );
       });
     });
 

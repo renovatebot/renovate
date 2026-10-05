@@ -38,6 +38,7 @@ export class GlobalConfig {
     'endpoint',
     'executionTimeout',
     'exposeAllEnv',
+    'gitLfs',
     'gitTimeout',
     'githubTokenWarn',
     'httpCacheTtlDays',

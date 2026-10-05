@@ -126,6 +126,28 @@ describe('util/fs/index', () => {
       await expect(readLocalFile('foobar')).resolves.toBeNull();
     });
 
+    it('logs a warning if the file is a Git LFS pointer', async () => {
+      await fs.outputFile(
+        `${localDir}/a.bin`,
+        `version https://git-lfs.github.com/spec/v1\noid sha256:${'a'.repeat(64)}\nsize 1\n`,
+      );
+
+      await readLocalFile('a.bin');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
+        { fileName: 'a.bin' },
+        'File is stored in Git LFS and Renovate read its LFS pointer instead of the content. See the `gitLfs` documentation.',
+      );
+    });
+
+    it('does not warn for regular files', async () => {
+      await fs.outputFile(`${localDir}/file.txt`, 'foobar');
+
+      await readLocalFile('file.txt', 'utf8');
+
+      expect(logger.logger.once.warn).not.toHaveBeenCalled();
+    });
+
     it('logs a warning if hidden Unciode characters are found', async () => {
       await fs.outputFile(`${localDir}/file.txt`, 'some\u00A0content\u200Bfoo');
       await readLocalFile('file.txt', 'utf8');

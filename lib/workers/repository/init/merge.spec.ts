@@ -205,6 +205,22 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('returns error if the config file is a Git LFS pointer', async () => {
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue(
+        `version https://git-lfs.github.com/spec/v1\noid sha256:${'a'.repeat(64)}\nsize 2\n`,
+      );
+
+      await expect(detectRepoFileConfig()).resolves.toEqual({
+        configFileName: 'renovate.json',
+        configFileParseError: {
+          validationError: 'Renovate config file is stored in Git LFS',
+          validationMessage:
+            'Renovate cannot read its config file from Git LFS. Store `renovate.json` as a regular Git file.',
+        },
+      });
+    });
+
     it('throws error if duplicate keys', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
       fs.readLocalFile.mockResolvedValue(

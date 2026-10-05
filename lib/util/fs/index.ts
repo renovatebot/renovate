@@ -6,6 +6,8 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
+import { logWarningIfGitLfsPointer } from '../git/lfs.ts';
+import { getLfsState } from '../git/lfs-state.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
@@ -39,6 +41,8 @@ export async function readLocalFile(
       : await fs.readFile(localFileName);
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(fileName, fileContent);
+    const { mode, active } = getLfsState();
+    logWarningIfGitLfsPointer(fileName, fileContent, mode, active);
 
     return fileContent;
   } catch (err) {

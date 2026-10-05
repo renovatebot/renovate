@@ -27,6 +27,44 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
     });
 
+    it.each`
+      gitLfs       | version    | minimum    | found
+      ${'upload'}  | ${null}    | ${'3.2.0'} | ${'none'}
+      ${'enabled'} | ${'3.6.0'} | ${'3.7.1'} | ${'3.6.0'}
+    `(
+      'throws if git-lfs is not valid for gitLfs=$gitLfs',
+      async ({ gitLfs, version, minimum, found }) => {
+        const config: AllConfig = { gitLfs };
+        git.validateGitVersion.mockResolvedValueOnce(true);
+        git.validateGitLfs.mockResolvedValueOnce({ ok: false, version });
+
+        await expect(globalInitialize(config)).rejects.toThrow(
+          `Init: gitLfs="${gitLfs}" requires git-lfs >= ${minimum} on PATH (found: ${found})`,
+        );
+        expect(git.validateGitLfs).toHaveBeenCalledExactlyOnceWith(gitLfs);
+      },
+    );
+
+    it('returns if git-lfs is valid', async () => {
+      const config: AllConfig = { gitLfs: 'upload' };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      git.validateGitLfs.mockResolvedValueOnce({ ok: true, version: '3.8.0' });
+
+      await expect(globalInitialize(config)).toResolve();
+    });
+
+    it.each`
+      gitLfs
+      ${'disabled'}
+      ${'true'}
+    `('does not check git-lfs when gitLfs is $gitLfs', async ({ gitLfs }) => {
+      const config: AllConfig = { gitLfs };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+
+      await expect(globalInitialize(config)).toResolve();
+      expect(git.validateGitLfs).not.toHaveBeenCalled();
+    });
+
     it('supports containerbase', async () => {
       const config: AllConfig = { binarySource: 'docker' };
       git.validateGitVersion.mockResolvedValueOnce(true);

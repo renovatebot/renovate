@@ -1315,6 +1315,16 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
   },
   {
+    name: 'gitLfsInclude',
+    description:
+      'Git LFS include patterns for LFS-tracked files whose real content Renovate downloads when `gitLfs=enabled`.',
+    type: 'array',
+    subType: 'string',
+    default: [],
+    stage: 'repository',
+    experimental: true,
+  },
+  {
     name: 'gitTimeout',
     description:
       'Configure the timeout with a number of milliseconds to wait for a Git task.',
@@ -3430,6 +3440,17 @@ const options: Readonly<RenovateOptions>[] = [
     default: ['commit', 'push'],
     stage: 'global',
     globalOnly: true,
+  },
+  {
+    name: 'gitLfs',
+    description:
+      'Enable Git LFS support: commit LFS-tracked files as pointers and upload their objects with `git lfs push` before pushing. `enabled` also allows downloading `gitLfsInclude` paths. Requires `git-lfs` on PATH.',
+    type: 'string',
+    allowedValues: ['disabled', 'upload', 'enabled'],
+    default: 'disabled',
+    globalOnly: true,
+    experimental: true,
+    experimentalIssues: [6842],
   },
   {
     name: 'updatePinnedDependencies',

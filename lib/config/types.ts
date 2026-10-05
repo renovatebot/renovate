@@ -20,6 +20,7 @@ import type {
   ConstraintName,
   ToolName,
 } from '../util/exec/types.ts';
+import type { GitLfsMode } from '../util/git/lfs.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -100,6 +101,7 @@ export interface RenovateSharedConfig {
   followTag?: string;
   force?: RenovateConfig;
   gitIgnoredAuthors?: string[];
+  gitLfsInclude?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSingleUpdates?: boolean;
@@ -251,6 +253,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  gitLfs?: GitLfsMode;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;

@@ -810,12 +810,55 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
   Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
+## `gitLfs`
+
+Controls Renovate's native [Git LFS](https://git-lfs.com/) support.
+Read the [Git LFS guide](./git-lfs.md) for worked examples and troubleshooting.
+
+- `disabled` (default): Renovate does not use Git LFS
+- `upload`: Renovate commits LFS-tracked files as LFS pointers and uploads their objects before it pushes, it never downloads LFS content
+- `enabled`: like `upload`, but Renovate also downloads the LFS-tracked files that match the repository's [`gitLfsInclude`](./configuration-options.md#gitlfsinclude)
+
+`upload` needs `git-lfs` 3.2.0 or newer on the `PATH`, and `enabled` needs `git-lfs` 3.7.1 or newer.
+Renovate checks the version when it starts, and refuses to start if `git-lfs` is missing or too old.
+
+!!! warning
+  Install the `git-lfs` binary only, do not run `git lfs install`.
+  <br>
+  A system-wide or global `git lfs install` makes every Git clone download all LFS content, even when `gitLfs` is `disabled`.
+
+How it works, when `gitLfs` is `upload` or `enabled`:
+
+1. Renovate clones the repository with the LFS filters in "skip" mode, so LFS-tracked files are LFS pointers and nothing is downloaded
+1. With `enabled` and a `gitLfsInclude` from the repository config, Renovate downloads the matching files once, and keeps them real on every later checkout
+1. When Renovate commits an LFS-tracked file, `git add` stores it as an LFS pointer
+1. Before it pushes, Renovate uploads exactly the LFS objects that its new commit added with `git lfs push --object-id`, then it pushes as usual
+
+This should also work with `platformCommit`, because the upload happens before the commit is sent to the platform, but this has not been verified end-to-end yet.
+
+Security model:
+
+- Renovate passes the Git LFS filters and endpoint config with each of its Git commands, and never writes them to the repository's `.git/config`
+- The LFS endpoint is pinned to the repository's own remote URL, so the repository's `.lfsconfig` can't redirect uploads or downloads to another server
+- Renovate never installs or runs Git hooks for its own Git commands: `core.hooksPath` is set to `/dev/null`, even if you set `gitNoVerify` to `[]`
+- The `.lfsconfig` safety keys (`fetchinclude`, `fetchexclude`, `allowincompletepush`, `locksverify`) are overridden
+- `GIT_CONFIG_*`, `GIT_CONFIG_PARAMETERS` and the variables that locate the Git config or the repository, like `GIT_CONFIG_GLOBAL`, `HOME`, `GIT_DIR` or `GIT_COMMON_DIR`, are ignored from the repository `env` for Renovate's Git commands
+- Other variables from the repository `env`, for example `PATH`, still reach Git only if your `allowedEnv` allows them, as without Git LFS
+
+We recommend `upload` for multi-tenant or hosted setups, because it guarantees that Renovate downloads no LFS content.
+Uploads and downloads count against the repository owner's LFS storage and bandwidth quota.
+
+Git LFS stays inactive for a repository, with a warning in the logs, when the repository uses an SSH remote, when Renovate runs in fork mode, or when the repository's `.lfsconfig` points to a different LFS server.
+Read the [limitations in the Git LFS guide](./git-lfs.md#limitations) to learn more.
+
 ## `gitNoVerify`
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
 The flag can be passed to `git commit` and/or `git push`.
 Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify) and [git push --no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to learn exactly what each flag does.
 To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
+
+You don't need to remove `push` from `gitNoVerify` to push Git LFS files, set [`gitLfs`](#gitlfs) instead.
 
 ## `gitPrivateKey`
 

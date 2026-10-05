@@ -2039,6 +2039,84 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('validates valid gitLfsInclude', async () => {
+      const config = {
+        gitLfsInclude: ['package-lock.json', '.yarn/cache/**'],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it.each`
+      entry       | reason
+      ${'a,b'}    | ${'must not contain commas or control characters'}
+      ${'a\nb'}   | ${'must not contain commas or control characters'}
+      ${''}       | ${'must be a non-empty string'}
+      ${42}       | ${'must be a non-empty string'}
+      ${' x'}     | ${'must not have leading or trailing whitespace'}
+      ${'-x'}     | ${'must not start with `-` or `!`'}
+      ${'!x'}     | ${'must not start with `-` or `!`'}
+      ${'a/../b'} | ${'must not contain `..` path segments'}
+    `('errors on gitLfsInclude entry $entry', async ({ entry, reason }) => {
+      const config = { gitLfsInclude: [entry] };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Invalid gitLfsInclude entry "${entry}": ${reason}`,
+        },
+      ]);
+    });
+
+    it('errors on more than 100 gitLfsInclude entries', async () => {
+      const config = {
+        gitLfsInclude: Array.from({ length: 101 }, (_, i) => `f${i}.bin`),
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'gitLfsInclude: must not contain more than 100 entries',
+        },
+      ]);
+    });
+
+    it('warns on gitLfs in a repository config', async () => {
+      const config = { gitLfs: 'upload' };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error -- invalid config
+        config,
+      );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `The "gitLfs" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+    });
+
     it('validates valid commitTrailers', async () => {
       const config = {
         commitTrailers: [
@@ -3222,6 +3300,24 @@ describe('config/validation', () => {
           {
             message:
               'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
+            topic: 'Configuration Error',
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('gitLfs', async () => {
+        const config = {
+          gitLfs: 'true' as never,
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `true` for `gitLfs`. The allowed values are disabled, upload, enabled.',
             topic: 'Configuration Error',
           },
         ]);
