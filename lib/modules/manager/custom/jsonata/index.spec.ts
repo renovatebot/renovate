@@ -460,7 +460,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
-  it('catches jsonata evaluation errors', async () => {
+  it('extracts other matchStrings if $each finds no match', async () => {
     const yaml = codeBlock`
       public.ecr.aws:
         images-by-semver:
@@ -469,7 +469,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'yaml',
       matchStrings: [
-        '$error("test evaluation error")',
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
         '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
       ],
       datasourceTemplate: 'docker',
@@ -488,16 +488,49 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
       fileFormat: 'yaml',
       matchStrings: [
-        '$error("test evaluation error")',
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
         '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
       ],
     });
 
+    expect(logger.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('continues extraction if a query fails on a non-string version', async () => {
+    const yaml = codeBlock`
+      broken:
+        package: example/broken
+        version: 42
+      valid:
+        package: example/valid
+        version: 1.2.3
+    `;
+    const config = {
+      fileFormat: 'yaml',
+      matchStrings: [
+        'broken.{ "depName": package, "currentValue": $replace(version, ">=", "") }',
+        'valid.{ "depName": package, "currentValue": version }',
+      ],
+      datasourceTemplate: 'docker',
+    };
+
+    const res = await extractPackageFile(yaml, 'some.yaml', config);
+
+    expect(res).toEqual({
+      ...config,
+      deps: [
+        {
+          depName: 'example/valid',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+        },
+      ],
+    });
     expect(logger.logger.warn).toHaveBeenCalledWith(
       {
-        err: expect.objectContaining({ message: 'test evaluation error' }),
+        err: expect.objectContaining({ code: 'T0410' }),
         packageFile: 'some.yaml',
-        jsonataQuery: '$error("test evaluation error")',
+        jsonataQuery: config.matchStrings[0],
       },
       'Error executing jsonata query. Please check your query.',
     );
