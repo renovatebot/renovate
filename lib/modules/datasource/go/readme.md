@@ -21,6 +21,24 @@ Therefore Renovate will also query `@v2/list` just in case there also exists a v
 Similarly, if the dependency is already on a higher version such as `v5`, Renovate will check in case higher major versions exist.
 You do not need to be worried about any 403/404 responses which result from such checks - they are the only way for Renovate to know if newer major releases exist.
 
+## Release timestamps
+
+A Go proxy reports the commit time of the tagged commit as a version's `Time`, which can be different to when the release first existed.
+This inconsistency can lead to `minimumReleaseAge` being applied incorrectly to the Go module's updates.
+
+!!! note
+  For modules hosted on GitHub, Renovate will look up the repository's GitHub Releases and git tags, and use whichever of the Release's publication time or the tag's own creation time is later than the timestamp reported by the Go proxy. A Release's publication time takes precedence over a tag's creation time if both exist for the same version.
+  <br><br>
+  This lookup needs a GitHub token to be configured, and is skipped if the lookup fails, leaving the timestamp reported by the Go proxy in place.
+
+For example, this happens when:
+
+- an infrequently updated repository prepares a GitHub Release by creating a draft release
+- some time passes, and the maintainers publish the Release
+- no new commits are pushed to the release branch (i.e. `main`) in that time
+
+Similarly, a lightweight git tag has no creation time of its own and always matches the commit it points to, but an _annotated_ git tag carries its own, separate creation time that can be later than the commit it points to, even without a GitHub Release ever being published.
+
 ## Fallback to direct lookups
 
 If no result is found from Go proxy lookups then Renovate will fall back to direct lookups.

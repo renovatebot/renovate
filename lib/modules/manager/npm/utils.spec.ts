@@ -6,6 +6,7 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { LockFile } from './types.ts';
@@ -60,7 +61,23 @@ describe('modules/manager/npm/utils', () => {
         version: '1.0.0',
       };
       const lockFileComposed = composeLockFile(lockFile, '  ');
-      expect(lockFileComposed).toMatchSnapshot();
+      expect(lockFileComposed).toBe(
+        `${codeBlock`
+          {
+            "lockfileVersion": 2,
+            "name": "lockfile-parsing",
+            "packages": {
+              "": {
+                "license": "ISC",
+                "name": "lockfile-parsing",
+                "version": "1.0.0"
+              }
+            },
+            "requires": true,
+            "version": "1.0.0"
+          }
+        `}\n`,
+      );
     });
 
     it('adds trailing newline to match npms behavior and avoid diffs', () => {

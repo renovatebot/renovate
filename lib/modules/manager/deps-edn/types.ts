@@ -11,9 +11,7 @@ export type ParsedEdnArray = ParsedEdnData[];
 // oxlint-disable-next-line typescript/consistent-type-definitions
 export type ParsedEdnRecord = { [k: string]: ParsedEdnData };
 export type ParsedEdnData =
-  | ParsedEdnPrimitive
-  | ParsedEdnRecord
-  | ParsedEdnArray;
+  ParsedEdnPrimitive | ParsedEdnRecord | ParsedEdnArray;
 
 export type ParserState =
   | {

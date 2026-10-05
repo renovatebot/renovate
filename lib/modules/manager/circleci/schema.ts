@@ -31,7 +31,7 @@ type Orb = z.infer<typeof BaseOrb> & {
 
 export const CircleCiOrb: z.ZodType<Orb> = BaseOrb.extend({
   orbs: LooseRecord(z.union([z.string(), z.lazy(() => CircleCiOrb)])).catch({}),
-}) as never;
+});
 export type CircleCiOrb = z.infer<typeof CircleCiOrb>;
 
 export const CircleCiFile = NotCircular.pipe(

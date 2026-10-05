@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -36,7 +37,7 @@ export function extractPackageFile(
   }
 
   // iterate over stages
-  for (const stage of Object.values(doc.stages ?? {})) {
+  for (const stage of Object.values(coerceObject(doc.stages))) {
     for (const step of coerceArray(stage.steps)) {
       const dep = getDep(step.image);
 
@@ -45,7 +46,7 @@ export function extractPackageFile(
   }
 
   // check secrets
-  for (const secret of Object.values(doc.secrets ?? {})) {
+  for (const secret of Object.values(coerceObject(doc.secrets))) {
     if (secret.origin) {
       const dep = getDep(secret.origin.image);
 

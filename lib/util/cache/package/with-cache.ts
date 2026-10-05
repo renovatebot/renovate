@@ -7,7 +7,7 @@ import * as packageCache from './index.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
-interface CachedOptions {
+export interface CachedOptions {
   /**
    * The cache namespace.
    */
@@ -70,10 +70,11 @@ export async function withCache<T>(
     return fn();
   }
 
-  let shouldCacheResult = (value: unknown): boolean => true;
-  if (options.shouldCacheResult) {
-    shouldCacheResult = options.shouldCacheResult;
+  function defaultShouldCacheResult(_value: unknown): boolean {
+    return true;
   }
+  const shouldCacheResult =
+    options.shouldCacheResult ?? defaultShouldCacheResult;
 
   // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {

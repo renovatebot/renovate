@@ -87,10 +87,10 @@ const qGroovySingleMapOfVarAssignment = q.alt(
   qDependencyStrings,
 );
 
-const qGroovyMapOfExpr = (
+function qGroovyMapOfExpr(
   search: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
     q.alt(q.sym(storeVarToken), q.str(storeVarToken)).op(':').tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -102,6 +102,7 @@ const qGroovyMapOfExpr = (
     }),
     qGroovySingleMapOfVarAssignment,
   );
+}
 
 // versions = [ android: [ buildTools: '30.0.3' ], kotlin: '1.4.30' ]
 const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
@@ -127,10 +128,10 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
   .handler(handleAssignment);
 
-const qKotlinMapOfExpr = (
+function qKotlinMapOfExpr(
   search: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> =>
-  q.alt(
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
     qStringValue.sym('to').sym('mapOf').tree({
       type: 'wrapped-tree',
       maxDepth: 1,
@@ -142,6 +143,7 @@ const qKotlinMapOfExpr = (
     }),
     qKotlinSingleMapOfVarAssignment,
   );
+}
 
 // val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
 export const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier

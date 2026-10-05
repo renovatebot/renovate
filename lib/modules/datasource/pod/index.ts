@@ -1,10 +1,14 @@
 import crypto from 'node:crypto';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import { massageGithubUrl } from '../metadata.ts';
@@ -67,8 +71,8 @@ function handleError(packageName: string, err: HttpError): void {
     logger.debug(errorData, 'Authorization error');
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
-  } else if (err.message === HOST_DISABLED) {
-    logger.trace(errorData, 'Host disabled');
+  } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+    logger.trace(errorData, refusedHostMessage(err));
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
   }
@@ -93,7 +97,9 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
 export class PodDatasource extends Datasource {
   static readonly id = 'pod';
 
-  override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://cdn.cocoapods.org'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -126,6 +132,7 @@ export class PodDatasource extends Datasource {
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJsonUnchecked<T>(url);
+      // v8 ignore else -- an empty json body throws before it gets here
       if (resp?.body) {
         return resp.body;
       }
@@ -205,7 +212,7 @@ export class PodDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -214,7 +221,7 @@ export class PodDatasource extends Datasource {
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
-      [baseUrl] = this.defaultRegistryUrls;
+      [baseUrl] = this.getDefaultRegistryUrls('');
     }
 
     let result: ReleaseResult | null = null;

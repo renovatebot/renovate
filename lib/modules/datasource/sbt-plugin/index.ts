@@ -21,7 +21,9 @@ export const SBT_PLUGINS_REPO =
 export class SbtPluginDatasource extends Datasource {
   static readonly id = 'sbt-plugin';
 
-  override readonly defaultRegistryUrls = [SBT_PLUGINS_REPO, MAVEN_REPO];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [SBT_PLUGINS_REPO, MAVEN_REPO];
+  }
 
   override readonly defaultVersioning = ivyVersioning.id;
 
@@ -161,13 +163,13 @@ export class SbtPluginDatasource extends Datasource {
     scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
-    const hrefFilterMap = (href: string): string | null => {
+    function hrefFilterMap(href: string): string | null {
       if (href.startsWith('.')) {
         return null;
       }
 
       return href;
-    };
+    }
     const searchRootContent = await downloadHttpContent(
       this.http,
       ensureTrailingSlash(searchRoot),
@@ -190,6 +192,7 @@ export class SbtPluginDatasource extends Datasource {
           this.http,
           ensureTrailingSlash(searchSubRoot),
         );
+        // v8 ignore else -- needs a nested directory listing fixture
         if (subRootContent) {
           const sbtVersionItems = extractPageLinks(
             subRootContent,
@@ -201,6 +204,7 @@ export class SbtPluginDatasource extends Datasource {
               this.http,
               ensureTrailingSlash(releasesRoot),
             );
+            // v8 ignore else -- needs a nested directory listing fixture
             if (releasesIndexContent) {
               const releasesParsed = extractPageLinks(
                 releasesIndexContent,
@@ -211,6 +215,7 @@ export class SbtPluginDatasource extends Datasource {
           }
         }
       }
+      // v8 ignore else -- needs a nested directory listing fixture
       if (releases.length) {
         return [...new Set(releases)].sort(compare);
       }
@@ -222,7 +227,7 @@ export class SbtPluginDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

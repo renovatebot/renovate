@@ -1,9 +1,10 @@
-import type { ExecaChildProcess } from 'execa';
+import type { ResultPromise } from 'execa';
 
 export interface CliArgs {
   all: boolean;
   fix: boolean;
   noTest: boolean;
+  coverageDir: string;
   targets: string[];
 }
 
@@ -33,7 +34,7 @@ export interface CheckResultWithCoverage {
 }
 
 export interface ProcessManager {
-  subprocesses: Set<ExecaChildProcess>;
+  subprocesses: Set<ResultPromise>;
   abortController: AbortController;
   renderInterval: ReturnType<typeof setInterval> | null;
 }

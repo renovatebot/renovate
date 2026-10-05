@@ -2,23 +2,25 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { customManagerList as customManagers } from './custom/index.ts';
 
+const managerList: string[] = (
+  await fs.readdir(import.meta.dirname, { withFileTypes: true })
+)
+  .filter((dirent) => dirent.isDirectory())
+  .map((dirent) => dirent.name)
+  .filter((name) => !name.startsWith('__') && name !== 'custom')
+  .sort();
+
+const customManagerList = (
+  await fs.readdir(upath.join(import.meta.dirname, 'custom'), {
+    withFileTypes: true,
+  })
+)
+  .filter((dirent) => dirent.isDirectory())
+  .map((dirent) => dirent.name)
+  .filter((name) => !name.startsWith('__'))
+  .sort();
+
 describe('modules/manager/metadata', () => {
-  const managerList: string[] = fs
-    .readdirSync(import.meta.dirname, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name)
-    .filter((name) => !name.startsWith('__') && name !== 'custom')
-    .sort();
-
-  const customManagerList = fs
-    .readdirSync(upath.join(import.meta.dirname, 'custom'), {
-      withFileTypes: true,
-    })
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name)
-    .filter((name) => !name.startsWith('__'))
-    .sort();
-
   it.each([...managerList, ...customManagerList])(
     '%s has readme with no h1 or h2',
     async (manager) => {

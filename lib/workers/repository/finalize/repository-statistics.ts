@@ -2,6 +2,7 @@ import type { RenovateConfig } from '../../../config/types.ts';
 import { addBranchStats } from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   getCache,
   isCacheModified,
@@ -11,6 +12,7 @@ import type {
   BranchUpgradeCache,
 } from '../../../util/cache/repository/types.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
+import { coerceObject } from '../../../util/object.ts';
 import type {
   BaseBranchMetadata,
   BaseBranchUpdateSummary,
@@ -25,6 +27,7 @@ export function runRenovateRepoStats(
   prList: Pr[],
 ): void {
   const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
+  let lastPRMergedAt: string | undefined;
 
   for (const pr of prList) {
     if (
@@ -37,6 +40,9 @@ export function runRenovateRepoStats(
     switch (pr.state) {
       case 'merged':
         prStats.merged += 1;
+        if (pr.closedAt && (!lastPRMergedAt || pr.closedAt > lastPRMergedAt)) {
+          lastPRMergedAt = pr.closedAt;
+        }
         break;
       case 'closed':
         prStats.closed += 1;
@@ -48,7 +54,10 @@ export function runRenovateRepoStats(
         break;
     }
   }
-  logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+  logger.debug(
+    { stats: prStats, lastPRMergedAt },
+    `Renovate repository PR statistics`,
+  );
 }
 
 function branchCacheToMetadata({
@@ -87,7 +96,7 @@ function filterDependencyDashboardData(
       prBlockedBy,
     } = branch;
 
-    for (const upgrade of upgrades ?? []) {
+    for (const upgrade of coerceArray(upgrades)) {
       const {
         datasource,
         depName,
@@ -142,14 +151,14 @@ export function runBranchSummary(config: RenovateConfig): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
-  for (const [branchName, cached] of Object.entries(scan ?? {})) {
+  for (const [branchName, cached] of Object.entries(coerceObject(scan))) {
     baseMetadata.push({ branchName, sha: cached.sha });
   }
 
   const branchMetadata: BranchMetadata[] = [];
   const inactiveBranches: string[] = [];
 
-  for (const branch of branches ?? []) {
+  for (const branch of coerceArray(branches)) {
     if (branch.sha) {
       branchMetadata.push(branchCacheToMetadata(branch));
     } else {
@@ -193,7 +202,7 @@ export function getUpdateSummary(branches: BranchCache[]): UpdateSummary {
       };
       summaryByBase.set(baseBranch, entry);
     }
-    for (const upgrade of branch.upgrades ?? []) {
+    for (const upgrade of coerceArray(branch.upgrades)) {
       const { updateType } = upgrade;
       if (updateType) {
         entry.total += 1;

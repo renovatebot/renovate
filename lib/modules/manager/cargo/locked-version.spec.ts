@@ -17,24 +17,26 @@ function mockReadLocalFile(files: Record<string, string | null>) {
 describe('modules/manager/cargo/locked-version', () => {
   describe('extractLockFileVersions()', () => {
     it('returns null for missing lock file', async () => {
-      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toBeNull();
     });
 
     it('returns null for invalid lock file', async () => {
       mockReadLocalFile({ 'Cargo.lock': 'foo' });
-      expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toBeNull();
     });
 
     it('returns empty map for lock file without packages', async () => {
       mockReadLocalFile({ 'Cargo.lock': '[metadata]' });
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual(
+        new Map(),
+      );
     });
 
     it('returns a map of package versions', async () => {
       mockReadLocalFile({
         'Cargo.lock': Fixtures.get('lockfile-update/Cargo.1.lock'),
       });
-      expect(await extractLockFileVersions('Cargo.lock')).toEqual(
+      await expect(extractLockFileVersions('Cargo.lock')).resolves.toEqual(
         new Map([
           ['proc-macro2', ['1.0.66']],
           ['quote', ['1.0.33']],

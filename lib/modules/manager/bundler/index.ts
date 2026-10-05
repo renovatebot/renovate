@@ -8,6 +8,7 @@ import { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['Gemfile.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 /*
  * Each of the below functions contain some explanations within their own files.
