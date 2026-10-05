@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read # download the artifact of the triggering run
-      contents: read
       pull-requests: write
     steps:
       - name: Download pull request number
@@ -49,20 +48,41 @@ jobs:
           fi
           echo "number=$pr_number" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout code
-        if: steps.pr.outputs.number
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          sparse-checkout: .github/pull-request-size.yml
-          sparse-checkout-cone-mode: false
-          show-progress: false
-
+      # A PR gets the smallest size whose line (additions + deletions) and file
+      # limits both fit, and `size:xl` above all limits.
       - name: Label PR based on size
         if: steps.pr.outputs.number
-        uses: cbrgm/pr-size-labeler-action@dde44ebdc37889cb56322a38a0b880aeaa462337 # v1.3.14
-        with:
-          github_token: ${{ github.token }} # Pass the GitHub token for authentication
-          github_repository: ${{ github.repository }} # Pass the repository name
-          github_pr_number: ${{ steps.pr.outputs.number }} # Pass the pull request number
-          config_file_path: '.github/pull-request-size.yml' # Specify the path to the configuration file
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          labels=(size:xs size:s size:m size:l size:xl)
+          max_lines=(25 150 600 2500 5000)
+          max_files=(1 10 25 50 100)
+
+          pr="$(gh pr view "$PR_NUMBER" --repo "$REPO" --json additions,deletions,changedFiles,labels)"
+          lines="$(jq '.additions + .deletions' <<< "$pr")"
+          files="$(jq '.changedFiles' <<< "$pr")"
+
+          size=$(( ${#labels[@]} - 1 ))
+          for i in "${!labels[@]}"; do
+            if (( lines <= max_lines[i] && files <= max_files[i] )); then
+              size=$i
+              break
+            fi
+          done
+          label="${labels[size]}"
+          echo "Pull request #$PR_NUMBER: $lines lines in $files files, $label"
+
+          args=()
+          stale="$(jq -r --arg label "$label" '[.labels[].name | select(startswith("size:") and . != $label)] | join(",")' <<< "$pr")"
+          if [[ -n "$stale" ]]; then
+            args+=(--remove-label "$stale")
+          fi
+          if ! jq -e --arg label "$label" 'any(.labels[]; .name == $label)' <<< "$pr" > /dev/null; then
+            args+=(--add-label "$label")
+          fi
+          if (( ${#args[@]} > 0 )); then
+            gh pr edit "$PR_NUMBER" --repo "$REPO" "${args[@]}"
+          fi
