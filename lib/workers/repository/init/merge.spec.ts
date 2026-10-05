@@ -1,6 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import type { MockInstance } from 'vitest';
+import * as httpMock from '~test/http-mock.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
 import * as decrypt from '../../../config/decrypt.ts';
@@ -10,6 +11,7 @@ import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -71,7 +73,6 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    hostRules.clear();
     GlobalConfig.reset();
   });
 
@@ -772,7 +773,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig(config);
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: { 'X-Allowed': 'from-repo' } },
+          { headers: { 'X-Allowed': 'from-repo' }, trustedHeaderNames: [] },
         );
       });
 
@@ -804,13 +805,96 @@ describe('workers/repository/init/merge', () => {
               'custom-header': 'Bearer admin-secret',
               'X-Allowed': 'yes',
             },
+            internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['custom-header', 'X-Allowed'],
           },
         );
       });
 
-      it('drops `repositories[]` entry headers, if it is not in `allowedHeaders`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
-        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
+      it("applies a `repositories[]` entry's `allowInternal` without a validation error", async () => {
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            repositoryEntryConfig: {
+              hostRules: [
+                {
+                  matchHost: 'http://10.1.2.3',
+                  allowInternal: true,
+                },
+              ],
+            },
+          }),
+        ).toResolve();
+
+        expect(
+          hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+        ).toEqual({ explicit: true, scoped: true, implicit: true });
+      });
+
+      it('permits an internal HTTP preset granted by the repositories[] entry', async () => {
+        // proves the entry's trusted rules are registered before the repository config's presets resolve
+        httpMock
+          .scope('http://10.1.2.3')
+          .get('/granted-preset.json')
+          .reply(200, {});
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['http://10.1.2.3/granted-preset.json'] }),
+        );
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            repositoryEntryConfig: {
+              hostRules: [
+                {
+                  hostType: 'preset',
+                  matchHost: 'http://10.1.2.3/',
+                  allowInternal: true,
+                },
+              ],
+            },
+          }),
+        ).toResolve();
+      });
+
+      it('rejects an internal HTTP preset without a deliberate grant', async () => {
+        GlobalConfig.set({ internalHostAccess: 'block' });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({
+            extends: ['http://10.1.2.3/ungranted-preset.json'],
+          }),
+        );
+
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: CONFIG_VALIDATION,
+          validationError: expect.stringContaining(
+            'Preset host is blocked by this Renovate instance',
+          ),
+        });
+      });
+
+      it('rejects `allowInternal` injected by a preset as a security error', async () => {
+        memCache.set('preset:local>internalPreset', {
+          hostRules: [{ matchHost: 'http://10.1.2.3', allowInternal: true }],
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>internalPreset'] }),
+        );
+
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: CONFIG_VALIDATION,
+          validationMessage:
+            "hostRules `allowInternal` is only allowed in the self-hosted administrator's own configuration.",
+        });
+        expect(
+          hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+        ).toBeUndefined();
+      });
+
+      it('applies `repositories[]` entry headers even where they are not in `allowedHeaders`', async () => {
+        // the `repositories[]` entry is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
 
@@ -827,11 +911,11 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          {},
-        );
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { denied: ['Authorization'] },
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+          {
+            headers: { Authorization: 'from-admin' },
+            internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['Authorization'],
+          },
         );
       });
 
@@ -954,6 +1038,28 @@ describe('workers/repository/init/merge', () => {
         expect.anything(),
         "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
       );
+    });
+
+    it('exempts `allowInternal` a repositories[] entry preset contributes', async () => {
+      // the entry, and everything the presets it extends contribute, is the self-hosted admin's own config, so its `allowInternal` is not a violation
+      memCache.set('preset:local>entryGrantsInternal', {
+        hostRules: [
+          { matchHost: 'http://10.1.2.3', allowInternal: true },
+          // host-less rules are the admin's own too
+          { allowInternal: false },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: { extends: ['local>entryGrantsInternal'] },
+      });
+
+      expect(res).toBeDefined();
+      expect(
+        hostRules.find({ url: 'http://10.1.2.3' }).internalHostGrant,
+      ).toEqual({ explicit: true, scoped: true, implicit: true });
     });
 
     it("reports a repository preset replaying the admin's header to a host of its own choosing", async () => {
@@ -1207,8 +1313,8 @@ describe('workers/repository/init/merge', () => {
       );
     });
 
-    it('drops, rather than rejects, a header a repositories[] entry preset contributes outside `allowedHeaders`', async () => {
-      // the entry's presets are the admin's own config, so this is not a violation to abort the repository over - but `allowedHeaders` binds the admin too, and `applyHostRule` would drop the header at request time regardless, so it is dropped at registration with a WARN
+    it('applies a header a repositories[] entry preset contributes, even outside `allowedHeaders`', async () => {
+      // the entry's presets are the admin's own config, so their headers are exempt from `allowedHeaders` altogether, the same as the entry's own
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
       memCache.set('preset:local>entryInjectsHeader', {
         hostRules: [
@@ -1231,13 +1337,11 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(res).toBeDefined();
-      expect(
-        hostRules.find({ url: 'https://github.com' }).headers,
-      ).toBeUndefined();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['Authorization'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(hostRules.find({ url: 'https://github.com' })).toEqual({
+        headers: { Authorization: 'Bearer x' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['Authorization'],
+      });
     });
 
     it('treats non-security resolved-preset issues as advisory by default', async () => {
@@ -1651,6 +1755,7 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        trustedHeaderNames: [],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
@@ -1660,7 +1765,7 @@ describe('workers/repository/init/merge', () => {
 
     it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself, and registers them as `trusted`
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `trusted: true` exempts them from `allowedHeaders` altogether
       hostRules.add(
         {
           matchHost: 'registry.example.com',
@@ -1679,7 +1784,13 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
-        headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        headers: {
+          'X-From-Admin': 'yes',
+          Authorization: 'from-admin',
+          'X-From-Repo': 'yes',
+        },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin', 'Authorization'],
       });
     });
 
@@ -1708,6 +1819,8 @@ describe('workers/repository/init/merge', () => {
         }),
       ).toEqual({
         headers: { 'X-Api-Key': 'from-admin' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 

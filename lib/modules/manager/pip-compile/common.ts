@@ -1,4 +1,3 @@
-import { isString } from '@sindresorhus/is';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -10,76 +9,45 @@ import type {
 } from '../../../util/exec/types.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import type {
   CommandType,
   PipCompileArgs,
   SupportedManagers,
 } from './types.ts';
 
-export function getPythonVersionConstraint(
+export async function getPythonVersionConstraint(
   config: UpdateArtifactsConfig,
   extractedPythonVersion: string | undefined,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, 'python', () => {
+    if (extractedPythonVersion) {
+      logger.debug('Using python constraint extracted from the lock file');
+      return `==${extractedPythonVersion}`;
+    }
 
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  if (extractedPythonVersion) {
-    logger.debug('Using python constraint extracted from the lock file');
-    return `==${extractedPythonVersion}`;
-  }
-
-  return undefined;
+    return undefined;
+  });
 }
 
-export function getPipToolsVersionConstraint(
-  config: UpdateArtifactsConfig,
-): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (isString(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-
-export function getUvVersionConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { uv } = constraints;
-
-  if (isString(uv)) {
-    logger.debug('Using uv constraint from config');
-    return uv;
-  }
-
-  return '';
-}
-
-export function getToolVersionConstraint(
+export async function getToolVersionConstraint(
   config: UpdateArtifactsConfig,
   commandType: CommandType,
-): ToolConstraint {
+): Promise<ToolConstraint> {
   if (commandType === 'uv') {
     return {
       toolName: 'uv',
-      constraint: getUvVersionConstraint(config),
+      constraint: await resolveToolConstraint(config, 'uv'),
     };
   }
 
   return {
     toolName: 'pip-tools',
-    constraint: getPipToolsVersionConstraint(config),
+    constraint: await resolveToolConstraint(config, 'pipTools'),
   };
 }
 
@@ -90,7 +58,10 @@ export async function getExecOptions(
   extraEnv: ExtraEnv<string>,
   extractedPythonVersion: string | undefined,
 ): Promise<ExecOptions> {
-  const constraint = getPythonVersionConstraint(config, extractedPythonVersion);
+  const constraint = await getPythonVersionConstraint(
+    config,
+    extractedPythonVersion,
+  );
   const execOptions: ExecOptions = {
     cwd: ensureLocalPath(cwd),
     docker: {},
@@ -99,7 +70,7 @@ export async function getExecOptions(
         toolName: 'python',
         constraint,
       },
-      getToolVersionConstraint(config, commandType),
+      await getToolVersionConstraint(config, commandType),
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
@@ -198,6 +169,7 @@ export function extractHeaderCommand(
   } else {
     commandType = 'custom';
   }
+  // v8 ignore else -- a compile command always records its arguments
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
@@ -344,34 +316,23 @@ function throwForUnknownOption(commandType: CommandType, arg: string): void {
   throw new Error(`Option ${arg} not supported (yet)`);
 }
 
-function getRegistryCredEnvVars(
+async function getRegistryCredEnvVars(
   url: URL,
   index: number,
-): Record<string, string> {
-  const hostRule = hostRules.find({ url: url.href });
-  logger.debug(hostRule, `Found host rule for url ${url.href}`);
+): Promise<Record<string, string>> {
+  const { username, password } = await findPypiIndexCredentials(url.href);
   const ret: Record<string, string> = {};
-  if (!!hostRule.username || !!hostRule.password) {
+  if (!!username || !!password) {
     ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
-    ret[`KEYRING_SERVICE_USERNAME_${index}`] = hostRule.username ?? '';
-    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = hostRule.password ?? '';
+    ret[`KEYRING_SERVICE_USERNAME_${index}`] = username ?? '';
+    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = password ?? '';
   }
   return ret;
 }
 
-function cleanUrl(url: string): URL | null {
-  // Strip everything but protocol, host, and port
-  const urlObj = parseUrl(url);
-  if (!urlObj) {
-    return null;
-  }
-  // origin of a valid URL is always parseable
-  return parseUrl(urlObj.origin);
-}
-
-export function getRegistryCredVarsFromPackageFiles(
+export async function getRegistryCredVarsFromPackageFiles(
   packageFiles: PackageFileContent[],
-): ExtraEnv<string> {
+): Promise<ExtraEnv<string>> {
   const urls: string[] = [];
   for (const packageFile of packageFiles) {
     urls.push(
@@ -381,13 +342,12 @@ export function getRegistryCredVarsFromPackageFiles(
   }
   logger.debug(urls, 'Extracted registry URLs from package files');
 
-  const uniqueHosts = new Set<URL>(
-    urls.map(cleanUrl).filter(isNotNullOrUndefined),
-  );
+  // The full URL is kept, so that a `matchHost` narrowed to a path still matches
+  const parsedUrls = urls.map(parseUrl).filter(isNotNullOrUndefined);
 
   let allCreds: ExtraEnv<string> = {};
-  for (const [index, host] of [...uniqueHosts].entries()) {
-    const hostCreds = getRegistryCredEnvVars(host, index);
+  for (const [index, url] of parsedUrls.entries()) {
+    const hostCreds = await getRegistryCredEnvVars(url, index);
     allCreds = {
       ...allCreds,
       ...hostCreds,

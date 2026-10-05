@@ -1,0 +1,68 @@
+name: PR Size Labeler (apply)
+
+# Privileged half of `pr-size-labeler.yml`. It runs from the default branch and
+# never checks out or runs pull request code. The pull request number comes from
+# an untrusted artifact, so it is validated against the triggering run first.
+on:
+  workflow_run: # zizmor: ignore[dangerous-triggers] no pull request code is checked out or run, and the artifact is validated
+    workflows:
+      - PR Size Labeler
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  auto-label-pr:
+    if: github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read # download the artifact of the triggering run
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download pull request number
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pr-number
+          path: ${{ runner.temp }}/pr-number
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Verify pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr_number="$(cat "$RUNNER_TEMP/pr-number/pr-number.txt")"
+          if ! [[ "$pr_number" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid pull request number"
+            exit 1
+          fi
+          pr_head_sha="$(gh pr view "$pr_number" --repo "$REPO" --json headRefOid --jq .headRefOid)"
+          if [[ "$pr_head_sha" != "$HEAD_SHA" ]]; then
+            echo "::notice::Pull request #$pr_number has moved on, skipping"
+            exit 0
+          fi
+          echo "number=$pr_number" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout code
+        if: steps.pr.outputs.number
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/pull-request-size.yml
+          sparse-checkout-cone-mode: false
+          show-progress: false
+
+      - name: Label PR based on size
+        if: steps.pr.outputs.number
+        uses: cbrgm/pr-size-labeler-action@dde44ebdc37889cb56322a38a0b880aeaa462337 # v1.3.14
+        with:
+          github_token: ${{ github.token }} # Pass the GitHub token for authentication
+          github_repository: ${{ github.repository }} # Pass the repository name
+          github_pr_number: ${{ steps.pr.outputs.number }} # Pass the pull request number
+          config_file_path: '.github/pull-request-size.yml' # Specify the path to the configuration file

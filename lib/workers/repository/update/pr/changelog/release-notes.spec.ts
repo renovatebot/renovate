@@ -15,10 +15,11 @@ import type { BranchUpgradeConfig } from '../../../../types.ts';
 import { getChangeLogSourceFor } from './index.ts';
 import {
   addReleaseNotes as addReleaseNotesRaw,
-  getReleaseList,
-  getReleaseNotes,
+  getReleaseList as getReleaseListRaw,
   getReleaseNotesMd as getReleaseNotesMdRaw,
+  getReleaseNotes as getReleaseNotesRaw,
   massageBody,
+  massageName,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
 } from './release-notes.ts';
@@ -40,6 +41,30 @@ function getReleaseNotesMd(
   return getReleaseNotesMdRaw(
     project,
     release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseList(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+): Promise<ChangeLogNotes[]> {
+  return getReleaseListRaw(
+    project,
+    release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function getReleaseNotes(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+  config: BranchUpgradeConfig,
+): Promise<ChangeLogNotes | null> {
+  return getReleaseNotesRaw(
+    project,
+    release,
+    config,
     getChangeLogSourceFor(project.type)!,
   );
 }
@@ -267,6 +292,25 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
   });
 
+  describe('massageName()', () => {
+    it('strips a leading version', () => {
+      expect(massageName('Release v1.2.3 some title', '1.2.3')).toBe(
+        'some title',
+      );
+    });
+
+    it('leaves the name alone when there is no version', () => {
+      expect(massageName('v1.2.3 some title', undefined)).toBe(
+        'v1.2.3 some title',
+      );
+    });
+
+    it('returns undefined for a name that is left empty', () => {
+      expect(massageName('1.2.3', '1.2.3')).toBeUndefined();
+      expect(massageName(null, undefined)).toBeUndefined();
+    });
+  });
+
   describe('addReleaseNotes()', () => {
     it('returns null if input is null/undefined', async () => {
       await expect(
@@ -423,6 +467,62 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
         'react/react-native:1.0.0',
+      );
+    });
+
+    it('does not write back cached release notes', async () => {
+      const cached = { url: 'https://example.com/compare', notesSourceUrl: '' };
+      vi.spyOn(packageCache, 'get').mockResolvedValueOnce(cached);
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: { url: 'https://example.com/compare' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(res?.versions?.[0]?.releaseNotes).toEqual(cached);
+      expect(githubReleasesMock).not.toHaveBeenCalled();
+      expect(packageCacheSetSpy).not.toHaveBeenCalled();
+    });
+
+    it('caches the compare url when no release notes are found', async () => {
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+      githubReleasesMock.mockResolvedValueOnce([]);
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: { url: 'https://example.com/compare' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(packageCacheSetSpy).toHaveBeenCalledExactlyOnceWith(
+        'changelog-github-notes@v2',
+        'react/react-native:1.0.0',
+        { url: 'https://example.com/compare', notesSourceUrl: '' },
+        55,
       );
     });
 
@@ -731,14 +831,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseList()', () => {
-    it('should return empty array if no apiBaseUrl', async () => {
-      const res = await getReleaseList(
-        partial<ChangeLogProject>(),
-        partial<ChangeLogRelease>(),
-      );
-      expect(res).toBeEmptyArray();
-    });
-
     it('should return release list for github repo', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {

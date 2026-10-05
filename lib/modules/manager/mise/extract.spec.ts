@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -556,6 +557,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts conda backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "conda:ripgrep" = "13.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'conda:ripgrep',
+            currentValue: '13.0.0',
+            packageName: 'ripgrep',
+            datasource: 'conda',
+          },
+        ],
+      });
+    });
+
     it('extracts dotnet backend tool', async () => {
       const content = codeBlock`
       [tools]
@@ -652,6 +671,38 @@ describe('modules/manager/mise/extract', () => {
           },
           {
             depName: 'pipx:git+https://github.com/psf/black.git',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+        ],
+      });
+    });
+
+    it('extracts pypi backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "pypi:yamllint" = "1.35.0"
+      "pypi:psf/black" = "24.4.1"
+      "pypi:git+https://github.com/psf/black.git" = "24.4.1"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'pypi:yamllint',
+            currentValue: '1.35.0',
+            packageName: 'yamllint',
+            datasource: 'pypi',
+          },
+          {
+            depName: 'pypi:psf/black',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'pypi:git+https://github.com/psf/black.git',
             currentValue: '24.4.1',
             packageName: 'psf/black',
             datasource: 'github-tags',
@@ -784,6 +835,40 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts gitlab backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "gitlab:gitlab-org/cli" = "v1.54.0"
+      "gitlab:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "gitlab:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gitlab:gitlab-org/cli',
+            currentValue: 'v1.54.0',
+            packageName: 'gitlab-org/cli',
+            datasource: 'gitlab-releases',
+          },
+          {
+            depName: 'gitlab:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+          },
+          {
+            depName: 'gitlab:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', async () => {
       const content = codeBlock`
       [tools]
@@ -852,6 +937,52 @@ describe('modules/manager/mise/extract', () => {
           },
           {
             depName: 'erlang',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts the primary version from an array of inline tables', async () => {
+      const content = codeBlock`
+      [tools]
+      rust = [
+        { version = "1.98.1", targets = "aarch64-unknown-linux-gnu", components = "clippy,rustfmt" },
+        { version = "nightly-2026-07-12", profile = "minimal", components = "rustfmt" },
+      ]
+      "github:cli/cli" = [
+        { version = "v2.64.0", version_prefix = "v" },
+        "v2.63.0",
+      ]
+      "ubi:tamasfe/taplo" = [
+        "0.10.0",
+        { version = "0.9.0", tag_regex = "^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$" },
+      ]
+      python = [{ virtualenv = ".venv" }]
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'rust',
+            currentValue: '1.98.1',
+            datasource: 'rust-version',
+          },
+          {
+            depName: 'github:cli/cli',
+            packageName: 'cli/cli',
+            currentValue: 'v2.64.0',
+            datasource: 'github-releases',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+          {
+            depName: 'ubi:tamasfe/taplo',
+            packageName: 'tamasfe/taplo',
+            currentValue: '0.10.0',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'python',
             skipReason: 'unspecified-version',
           },
         ],
@@ -1001,6 +1132,7 @@ describe('modules/manager/mise/extract', () => {
             depName: 'java',
             currentValue: '21.0.2',
             datasource: 'java-version',
+            packageName: 'oracle-graalvm-jdk',
           },
         ],
       });
@@ -1244,6 +1376,50 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('uses the normalized tool name for lockfile lookup', async () => {
+      const ubiLockFileContent = codeBlock`
+        [[tools."ubi:cli/cli"]]
+        version = "2.63.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ubiLockFileContent);
+      const content = codeBlock`
+        [tools]
+        " ubi:cli/cli[exe=gh] " = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'ubi:cli/cli',
+        currentValue: '2',
+        lockedVersion: '2.63.0',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
+    it('uses a tooling depName override for lockfile lookup', async () => {
+      const asdfLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+        backend = "asdf:nodejs"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(asdfLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "asdf:nodejs" = "22"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '22',
+        lockedVersion: '22.14.0',
+        isLockfileOnly: true,
+      });
+    });
+
     it('skips lockedVersion when tool not in lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
@@ -1279,6 +1455,285 @@ describe('modules/manager/mise/extract', () => {
         currentValue: '3.10',
         lockedVersion: '3.10.17',
       });
+    });
+
+    it('treats fuzzy selectors as lockfile-only dependencies', async () => {
+      const fuzzyLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.java]]
+        version = "temurin-25.0.3+9.0.LTS"
+
+        [[tools.protoc]]
+        version = "30.2"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(fuzzyLockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "lts"
+        java = "temurin-25"
+        protoc = "latest"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'node',
+          currentValue: 'lts',
+          lockedVersion: '22.14.0',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'java',
+          currentValue: 'temurin-25',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:\\x74emurin\\x2d)?25(?:\\.|-|\\+|$)/',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'protoc',
+          currentValue: 'latest',
+          lockedVersion: '30.2',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+      ]);
+    });
+
+    it('treats a golangci-lint major selector as lockfile-only', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.golangci-lint]]
+        version = "2.12.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        golangci-lint = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'golangci-lint',
+        currentValue: '2',
+        lockedVersion: '2.12.0',
+        allowedVersions: '/^2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
+    it('allows the node datasource v prefix for a bare locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools.node]]
+        version = "20.11.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20',
+        lockedVersion: '20.11.0',
+        allowedVersions: '/^(?:\\x76)?20(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
+    });
+
+    it('allows a datasource prefix from the locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "v2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'github:cli/cli',
+        currentValue: '2',
+        lockedVersion: 'v2.64.0',
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
+    });
+
+    it('allows the default v prefix for GitHub release selectors', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        currentValue: '2',
+        lockedVersion: '2.64.0',
+      });
+    });
+
+    it('supports Java LTS selectors and leaves unsupported LTS tools unchanged', async () => {
+      const ltsLockFileContent = codeBlock`
+        [[tools.java]]
+        version = "25.0.3+9.0.LTS"
+
+        [[tools.erlang]]
+        version = "27.0.0"
+
+        [[tools.unknown]]
+        version = "1.0.0"
+
+        [[tools."vfox:unknown"]]
+        version = "1.0.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ltsLockFileContent);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+        erlang = "lts"
+        "core:unknown" = "lts"
+        "vfox:unknown" = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'java',
+          currentValue: 'lts',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+        },
+        {
+          depName: 'erlang',
+          currentValue: 'lts',
+          lockedVersion: '27.0.0',
+        },
+        {
+          depName: 'core:unknown',
+          lockedVersion: '1.0.0',
+        },
+        {
+          depName: 'vfox:unknown',
+          lockedVersion: '1.0.0',
+        },
+      ]);
+      expect(result?.deps[1]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[2]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[3]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('leaves a selector unchanged when the locked version is unsupported', async () => {
+      const lockFile = codeBlock`
+        [[tools.java]]
+        version = "not-a-version"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'java',
+        lockedVersion: 'not-a-version',
+        skipReason: 'unsupported-datasource',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('does not treat mise non-version selectors as partial versions', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.python]]
+        version = "3.13.0"
+
+        [[tools.ruby]]
+        version = "3.4.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "ref:main2"
+        python = "path:/opt/tools/1.2"
+        ruby = "sub-1"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      for (const dep of coerceArray(result?.deps)) {
+        expect(dep).not.toHaveProperty('isLockfileOnly');
+        expect(dep).not.toHaveProperty('allowedVersions');
+      }
+    });
+
+    it('does not reinterpret a value that is exact in the lockfile', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11',
+        lockedVersion: '20.11',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('keeps concrete versions on the normal update path', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11.1"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11.0"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11.0',
+        lockedVersion: '20.11.1',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[0]).not.toHaveProperty('currentRawValue');
     });
 
     it('skips kafka tool when version has no apache- prefix', async () => {
@@ -1385,5 +1840,502 @@ describe('modules/manager/mise/extract', () => {
         expect(result).toMatchObject({ deps: expectedDeps });
       },
     );
+  });
+
+  describe('include', () => {
+    const sha = 'a'.repeat(64);
+
+    it.each([
+      {
+        description: 'github git',
+        include: 'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentValue: 'v1.2.0',
+          replaceString:
+            'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'github git over ssh with sha ref',
+        include:
+          'git::ssh://git@github.com/org/cfg.git//base/tools.toml?ref=0123456789abcdef0123456789abcdef01234567',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentDigest: '0123456789abcdef0123456789abcdef01234567',
+          skipReason: 'unversioned-reference',
+        },
+      },
+      {
+        description: 'gitlab https',
+        include: 'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+        expected: {
+          depName: 'gitlab.com/group/sub/cfg',
+          packageName: 'group/sub/cfg',
+          datasource: 'gitlab-tags',
+          currentValue: '1.0',
+          replaceString:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+          autoReplaceStringTemplate:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'gitlab ssh',
+        include: 'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+        expected: {
+          depName: 'gitlab.com/group/cfg',
+          packageName: 'group/cfg',
+          datasource: 'gitlab-tags',
+          currentValue: 'main',
+          replaceString:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+          autoReplaceStringTemplate:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'bitbucket',
+        include: 'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+        expected: {
+          depName: 'bitbucket.org/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'bitbucket-tags',
+          currentValue: 'v2',
+          replaceString:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+          autoReplaceStringTemplate:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'git without ref',
+        include: 'git::https://github.com/org/cfg.git//mise.toml',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'git without path and ref',
+        include: 'git::https://git.example.com/org/cfg.git?depth=1',
+        expected: {
+          depName: 'git.example.com/org/cfg',
+          packageName: 'https://git.example.com/org/cfg.git',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          replaceString: 'ghcr.io/org/base:1.0',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci digest',
+        include: `oci::ghcr.io/org/base@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base:1.0@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'invalid entry',
+        include: 'https://example.com/mise.toml',
+        expected: {
+          depName: 'https://example.com/mise.toml',
+          skipReason: 'unsupported-url',
+        },
+      },
+      {
+        description: 'git over http',
+        include: 'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git.acme.com/org/cfg',
+          packageName: 'http://git.acme.com:8080/org/cfg.git',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops https',
+        include:
+          'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'dev.azure.com/org/proj/_git/cfg',
+          packageName: 'https://dev.azure.com/org/proj/_git/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh without ref',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'git without protocol',
+        include: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
+      {
+        description: 'git without repository',
+        include: 'git::https://github.com//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::https://github.com//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
+    ])('extracts $description', async ({ include, expected }) => {
+      const content = `include = ["${include}"]`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [{ depType: 'include', ...expected }],
+      });
+    });
+
+    describe('sha refs with comment hints', () => {
+      const sha = '0123456789abcdef0123456789abcdef01234567';
+      const gh = `git::https://github.com/org/cfg.git//mise.toml?ref=${sha}`;
+      const gl = `git::https://gitlab.com/org/cfg.git//mise.toml?ref=${sha}`;
+      const bb = `git::https://bitbucket.org/org/cfg.git//mise.toml?ref=${sha}`;
+      const digestTpl =
+        '{{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}';
+
+      async function extractOne(entry: string, comment = '', tail = ',') {
+        const content = `include = [\n  "${entry}"${tail}${comment}\n]\n`;
+        const res = await extractPackageFile(content, miseFilename);
+        return res!.deps[0];
+      }
+
+      it('extracts a version comment', async () => {
+        const dep = await extractOne(gh, ' # v0.5.0');
+        expect(dep).toMatchObject({
+          datasource: 'github-tags',
+          packageName: 'org/cfg',
+          currentDigest: sha,
+          currentValue: 'v0.5.0',
+          replaceString: `${gh}", # v0.5.0`,
+          autoReplaceStringTemplate: `git::https://github.com/org/cfg.git//mise.toml?ref=${digestTpl}", # {{newValue}}`,
+        });
+        expect(dep.skipReason).toBeUndefined();
+      });
+
+      it.each([
+        ' # tag=v0.5.0',
+        ' # renovate: tag=v0.5.0',
+        ' # pin @v0.5.0',
+        ' # v0.5.0 trailing words',
+      ])('ignores unsupported comment %s', async (comment) => {
+        const dep = await extractOne(gh, comment);
+        expect(dep).toMatchObject({
+          currentDigest: sha,
+          skipReason: 'unversioned-reference',
+        });
+        expect(dep.currentValue).toBeUndefined();
+      });
+
+      it('extracts a version comment of the last entry without comma', async () => {
+        const dep = await extractOne(gh, ' # v0.5.0', '');
+        expect(dep).toMatchObject({
+          currentValue: 'v0.5.0',
+          replaceString: `${gh}" # v0.5.0`,
+          autoReplaceStringTemplate: `git::https://github.com/org/cfg.git//mise.toml?ref=${digestTpl}" # {{newValue}}`,
+        });
+      });
+
+      it('tracks a branch on github', async () => {
+        const dep = await extractOne(gh, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'github-digest',
+          packageName: 'org/cfg',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        });
+      });
+
+      it('tracks a branch on other hosts', async () => {
+        const dep = await extractOne(gl, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'git-refs',
+          packageName: 'https://gitlab.com/org/cfg.git',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        });
+      });
+
+      it('tracks a branch on bitbucket using git-refs', async () => {
+        const dep = await extractOne(bb, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'git-refs',
+          packageName: 'https://bitbucket.org/org/cfg.git',
+        });
+      });
+
+      it('uses the tag datasource of the host for version comments', async () => {
+        const dep = await extractOne(gl, ' # v1.0.0');
+        expect(dep).toMatchObject({
+          datasource: 'gitlab-tags',
+          packageName: 'org/cfg',
+          currentValue: 'v1.0.0',
+        });
+      });
+
+      it('supports short shas', async () => {
+        const dep = await extractOne(
+          'git::https://github.com/org/cfg.git//mise.toml?ref=0123456',
+          ' # v1.0.0',
+        );
+        expect(dep).toMatchObject({
+          currentDigestShort: '0123456',
+          currentValue: 'v1.0.0',
+        });
+        expect(dep.currentDigest).toBeUndefined();
+      });
+
+      it.each([
+        { description: 'no comment', comment: '' },
+        { description: 'an empty comment', comment: ' #' },
+        { description: 'a multi word comment', comment: ' # see the docs' },
+      ])('skips a sha ref with $description', async ({ comment }) => {
+        const dep = await extractOne(gh, comment);
+        expect(dep).toMatchObject({
+          currentDigest: sha,
+          skipReason: 'unversioned-reference',
+        });
+        expect(dep.currentValue).toBeUndefined();
+      });
+
+      it('ignores the comment of a non-sha ref', async () => {
+        const dep = await extractOne(
+          'git::https://github.com/org/cfg.git//mise.toml?ref=v1.0.0',
+          ' # v2.0.0',
+        );
+        expect(dep).toMatchObject({
+          currentValue: 'v1.0.0',
+          replaceString:
+            'git::https://github.com/org/cfg.git//mise.toml?ref=v1.0.0',
+        });
+      });
+
+      it('ignores comments of single line arrays', async () => {
+        const content = `include = ["${gh}"] # v0.5.0`;
+        const res = await extractPackageFile(content, miseFilename);
+        expect(res!.deps[0]).toMatchObject({
+          skipReason: 'unversioned-reference',
+        });
+      });
+
+      it('finds the commented occurrence of a repeated entry', async () => {
+        const content = `# ${gh}\ninclude = [\n  "${gh}", # v0.5.0\n]\n`;
+        const res = await extractPackageFile(content, miseFilename);
+        expect(res!.deps[0].currentValue).toBe('v0.5.0');
+      });
+    });
+
+    it('extracts includes together with tools', async () => {
+      const content = codeBlock`
+        include = ["oci::ghcr.io/org/base:1.0"]
+
+        [tools]
+        erlang = '23.3'
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'include',
+      ]);
+    });
+
+    it('ignores invalid include values', async () => {
+      const content = codeBlock`
+        include = "not-an-array"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+  });
+
+  describe('remote task files', () => {
+    const sha = '0123456789abcdef0123456789abcdef01234567';
+
+    it('extracts a github tag ref', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'github.com/org/tasks',
+            depType: 'task-build-file',
+            datasource: 'github-tags',
+            packageName: 'org/tasks',
+            currentValue: 'v1.0.0',
+            replaceString:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0',
+            autoReplaceStringTemplate:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref={{newValue}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts a gitlab ssh ref', async () => {
+      const content = codeBlock`
+        [tasks.lint]
+        file = "git::ssh://git@gitlab.com/group/tasks.git//lint.sh?ref=v2.1"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/tasks',
+          depType: 'task-lint-file',
+          datasource: 'gitlab-tags',
+          packageName: 'group/tasks',
+          currentValue: 'v2.1',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a version comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-tags',
+          currentDigest: sha,
+          currentValue: 'v1.0.0',
+          replaceString: `git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0`,
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/tasks.git//build.sh?ref={{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}" # {{newValue}}',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a branch comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # main\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-digest',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        },
+      ]);
+    });
+
+    it('skips a ref-less file', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        { depType: 'task-build-file', skipReason: 'unspecified-version' },
+      ]);
+    });
+
+    it('ignores local and http files', async () => {
+      const content = codeBlock`
+        [tasks.local]
+        file = "scripts/build.sh"
+
+        [tasks.remote]
+        file = "https://example.com/build.sh"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts task files together with tools', async () => {
+      const content = codeBlock`
+        [tools]
+        erlang = '23.3'
+
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh?ref=v1.0.0"
+        tools = { node = "20" }
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'task-build-tools',
+        'task-build-file',
+      ]);
+    });
   });
 });

@@ -27,6 +27,7 @@ import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -98,7 +99,11 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+  return (
+    (upgrade.depType === 'packageManager' ||
+      upgrade.depType === 'devEngines.packageManager') &&
+    upgrade.depName === 'yarn'
+  );
 }
 
 export async function generateLockFile(
@@ -117,12 +122,16 @@ export async function generateLockFile(
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility =
-      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-      getYarnVersionFromLock(await getYarnLock(lockFileName));
-    const minYarnVersion =
-      semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      yarnUpdate?.newValue ??
+      (await resolveToolConstraint(
+        config,
+        'yarn',
+        async () =>
+          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+          getYarnVersionFromLock(await getYarnLock(lockFileName)),
+      ));
+    const yarnRange = semver.validRange(yarnCompatibility);
+    const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -142,7 +151,7 @@ export async function generateLockFile(
     if (!isYarn1 && hasPackageManager) {
       toolConstraints.push({
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       });
     } else {
       toolConstraints.push(yarnTool);

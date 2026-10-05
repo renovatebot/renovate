@@ -40,6 +40,7 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as comments from './comments.ts';
+import { getRepoFile } from './files.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import {
   RepoInfo,
@@ -198,9 +199,7 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  // See: https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/src/%7Bcommit%7D/%7Bpath%7D
   const repo = repoName ?? config.repository;
-  const path = fileName;
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
@@ -208,11 +207,9 @@ export async function getRawFile(
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
-  const url = `/2.0/repositories/${repo}/src/${finalBranchOrTag ?? `HEAD`}/${path}`;
-  const res = await bitbucketHttp.getText(url, {
+  return await getRepoFile(bitbucketHttp, repo, fileName, finalBranchOrTag, {
     cacheProvider: repoCacheProvider,
   });
-  return res.body;
 }
 
 export async function getJsonFile(

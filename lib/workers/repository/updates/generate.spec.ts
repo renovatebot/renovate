@@ -352,6 +352,39 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
     });
 
+    it('merges extractedConstraints of all upgrades', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { python: '==3.11' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { poetry: '1.8.0' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.extractedConstraints).toEqual({
+        python: '==3.11',
+        poetry: '1.8.0',
+      });
+    });
+
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {
@@ -814,6 +847,28 @@ describe('workers/repository/updates/generate', () => {
       );
       expect(res.commitMessage).toBe(
         'chore(package): update dependency some-dep to v1.2.0',
+      );
+    });
+
+    it('uses semantic commits without a scope', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const res = generateBranchConfig(branch);
+
+      expect(res.commitMessage).toBe(
+        'chore: update dependency some-dep to v1.2.0',
       );
     });
 
@@ -1603,6 +1658,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1614,6 +1670,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: 'docker',
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1625,6 +1682,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1636,6 +1694,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',

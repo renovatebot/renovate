@@ -3,6 +3,7 @@ import type { SemVer } from 'semver';
 import semver from 'semver';
 import stable from 'semver-stable';
 import { regEx } from '../../../util/regex.ts';
+import { coerceString } from '../../../util/string.ts';
 import { isBreaking as semverIsBreaking } from '../semver/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -10,6 +11,10 @@ export const id = 'semver-coerced';
 export const displayName = 'Coerced Semantic Versioning';
 export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = false;
+
+function coerce(version: string | SemVer): SemVer | null {
+  return semver.coerce(version, { loose: true });
+}
 
 function isStable(version: string): boolean {
   // matching a version with the semver prefix
@@ -23,49 +28,52 @@ function isStable(version: string): boolean {
     return false;
   }
 
-  const major = m.groups.major;
-  const newMinor = m.groups.minor ?? '.0';
-  const newPatch = m.groups.patch ?? '.0';
-  const others = m.groups.others ?? '';
-  const fixed = major + newMinor + newPatch + others;
+  const minor = coerceString(m.groups.minor, '.0');
+  const patch = coerceString(m.groups.patch, '.0');
+  const others = coerceString(m.groups.others);
+  const fixed = `${m.groups.major}${minor}${patch}${others}`.replace(
+    regEx(/(?<prefix>^|\.)0+(?<digit>\d)/g),
+    '$<prefix>$<digit>',
+  );
+
   return stable.is(fixed);
 }
 
 function sortVersions(a: string, b: string): number {
-  const aCoerced = semver.coerce(a);
-  const bCoerced = semver.coerce(b);
+  const aCoerced = coerce(a);
+  const bCoerced = coerce(b);
 
   return aCoerced && bCoerced ? semver.compare(aCoerced, bCoerced) : 0;
 }
 
 function getMajor(a: string | SemVer): number | null {
-  const aCoerced = semver.coerce(a);
+  const aCoerced = coerce(a);
   return aCoerced ? semver.major(aCoerced) : null;
 }
 
 function getMinor(a: string | SemVer): number | null {
-  const aCoerced = semver.coerce(a);
+  const aCoerced = coerce(a);
   return aCoerced ? semver.minor(aCoerced) : null;
 }
 
 function getPatch(a: string | SemVer): number | null {
-  const aCoerced = semver.coerce(a);
+  const aCoerced = coerce(a);
   return aCoerced ? semver.patch(aCoerced) : null;
 }
 
 function matches(version: string, range: string): boolean {
-  const coercedVersion = semver.coerce(version);
+  const coercedVersion = coerce(version);
   return coercedVersion ? semver.satisfies(coercedVersion, range) : false;
 }
 
 function equals(a: string, b: string): boolean {
-  const aCoerced = semver.coerce(a);
-  const bCoerced = semver.coerce(b);
+  const aCoerced = coerce(a);
+  const bCoerced = coerce(b);
   return aCoerced && bCoerced ? semver.eq(aCoerced, bCoerced) : false;
 }
 
 function isValid(version: string): boolean {
-  return !!semver.valid(semver.coerce(version));
+  return !!semver.valid(coerce(version));
 }
 
 function getSatisfyingVersion(
@@ -74,7 +82,7 @@ function getSatisfyingVersion(
 ): string | null {
   const coercedVersions = versions
     .map((version) =>
-      semver.valid(version) ? version : semver.coerce(version)?.version,
+      semver.valid(version) ? version : coerce(version)?.version,
     )
     .filter(isString);
 
@@ -86,20 +94,20 @@ function minSatisfyingVersion(
   range: string,
 ): string | null {
   const coercedVersions = versions
-    .map((version) => semver.coerce(version)?.version)
+    .map((version) => coerce(version)?.version)
     .filter(isString);
 
   return semver.minSatisfying(coercedVersions, range);
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  const coercedVersion = semver.coerce(version);
+  const coercedVersion = coerce(version);
   return coercedVersion ? semver.ltr(coercedVersion, range) : false;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
-  const coercedVersion = semver.coerce(version);
-  const coercedOther = semver.coerce(other);
+  const coercedVersion = coerce(version);
+  const coercedOther = coerce(other);
   if (!coercedVersion || !coercedOther) {
     return false;
   }
@@ -115,7 +123,7 @@ function isSingleVersion(version: string): boolean {
     return false;
   }
 
-  return !!semver.valid(semver.coerce(version));
+  return !!semver.valid(coerce(version));
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
@@ -137,8 +145,8 @@ function getNewValue({
 }
 
 function isBreaking(version: string, current: string): boolean {
-  const coercedVersion = semver.coerce(version)?.toString();
-  const coercedCurrent = semver.coerce(current)?.toString();
+  const coercedVersion = coerce(version)?.toString();
+  const coercedCurrent = coerce(current)?.toString();
   return !!(
     coercedVersion &&
     coercedCurrent &&

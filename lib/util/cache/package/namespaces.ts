@@ -39,6 +39,7 @@ export const packageCacheNamespaces = [
   'datasource-conda',
   'datasource-cpan',
   'datasource-crate-metadata',
+  'datasource-crate-registry-api',
   'datasource-crate',
   'datasource-deb',
   'datasource-deno',
@@ -69,6 +70,7 @@ export const packageCacheNamespaces = [
   'datasource-gitlab-tags',
   'datasource-glasskube-packages',
   'datasource-go-direct',
+  'datasource-go-proxy-timestamps',
   'datasource-go-proxy',
   'datasource-go',
   'datasource-golang-version',
@@ -115,8 +117,7 @@ export const packageCacheNamespaces = [
 ] as const;
 
 export type PackageCacheNamespace =
-  | (typeof packageCacheNamespaces)[number]
-  | `datasource-releases-${string}`;
+  (typeof packageCacheNamespaces)[number] | `datasource-releases-${string}`;
 
 export type CombinedKey =
   `datasource-mem:pkg-fetch:${PackageCacheNamespace}:${string}`;

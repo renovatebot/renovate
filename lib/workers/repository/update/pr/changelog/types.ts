@@ -44,9 +44,7 @@ export interface ChangeLogProject {
 }
 
 export type ChangeLogError =
-  | 'MissingBitbucketToken'
-  | 'MissingGithubToken'
-  | 'MissingGitlabToken';
+  'MissingBitbucketToken' | 'MissingGithubToken' | 'MissingGitlabToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

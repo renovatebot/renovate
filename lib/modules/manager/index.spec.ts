@@ -4,7 +4,11 @@ import { loadModules } from '../../util/modules.ts';
 import { getDatasourceList } from '../datasource/index.ts';
 import * as customManager from './custom/index.ts';
 import * as manager from './index.ts';
-import type { ManagerApi } from './types.ts';
+import type {
+  ManagerApi,
+  NpmrcPackageFileContent,
+  PackageFileContent,
+} from './types.ts';
 
 vi.mock('../../util/fs/index.ts');
 
@@ -45,6 +49,26 @@ describe('modules/manager/index', () => {
         );
       });
     }
+  });
+
+  describe('supportsNpmrc', () => {
+    interface Base {
+      defaultConfig: Record<string, unknown>;
+      supportedDatasources: string[];
+    }
+    type ReturnsNpmrc = Base & {
+      extractPackageFile(): NpmrcPackageFileContent | null;
+    };
+
+    it('is required for a manager returning an npmrc', () => {
+      expectTypeOf<
+        ReturnsNpmrc & { supportsNpmrc: true }
+      >().toExtend<ManagerApi>();
+      expectTypeOf<ReturnsNpmrc>().not.toExtend<ManagerApi>();
+      expectTypeOf<
+        Base & { extractPackageFile(): PackageFileContent | null }
+      >().toExtend<ManagerApi>();
+    });
   });
 
   describe('get()', () => {

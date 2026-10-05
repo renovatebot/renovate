@@ -160,6 +160,17 @@ describe('workers/repository/config-migration/pr/index', () => {
       expect(prBody).toEndWith('\n---\n\n\n');
     });
 
+    it('creates PR with no footer configured', async () => {
+      await ensureConfigMigrationPr(
+        { ...config, prFooter: undefined },
+        migratedData,
+      );
+
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      const prBody = platform.createPr.mock.calls[0][0].prBody;
+      expect(prBody).not.toContain('\n---\n');
+    });
+
     it('creates PR for JSON5 config file', async () => {
       await ensureConfigMigrationPr(config, {
         content: migratedContent,

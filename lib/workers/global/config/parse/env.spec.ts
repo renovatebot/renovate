@@ -500,5 +500,29 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.platformCommit).toBe('disabled');
     });
+
+    it('dryRun keeps a value that is already current', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_DRY_RUN: 'extract',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.dryRun).toBe('extract');
+    });
+
+    it('requireConfig keeps a value that is already current', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_REQUIRE_CONFIG: 'ignored',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.requireConfig).toBe('ignored');
+    });
+
+    it('platformCommit keeps a value that is already current', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_PLATFORM_COMMIT: 'auto',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.platformCommit).toBe('auto');
+    });
   });
 });

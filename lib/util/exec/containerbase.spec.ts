@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
+import * as memCache from '../cache/memory/index.ts';
 import {
   generateInstallCommands,
   getToolConfig,
@@ -287,6 +288,55 @@ describe('util/exec/containerbase', () => {
       await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
         'install-tool composer 2.1.0',
       ]);
+    });
+
+    it('repeats install commands when not memoizing', async () => {
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+      await generateInstallCommands(toolConstraints);
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.1.0' }],
+      });
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool composer 2.1.0',
+      ]);
+    });
+
+    describe('memoize', () => {
+      beforeEach(() => {
+        memCache.init();
+      });
+
+      afterEach(() => {
+        memCache.reset();
+      });
+
+      it('skips a tool already installed this run at the same version', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.1.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual([]);
+      });
+
+      it('re-issues the install command when the resolved version changes', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.2.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.2.0']);
+      });
     });
   });
 });

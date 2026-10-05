@@ -5,6 +5,7 @@ import { coerceArray } from '../../../../../util/array.ts';
 import type { ConstraintName } from '../../../../../util/exec/types.ts';
 import { isConstraintName } from '../../../../../util/exec/types.ts';
 import { regEx } from '../../../../../util/regex.ts';
+import { coerceString } from '../../../../../util/string.ts';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../../../datasource/npm/index.ts';
@@ -44,7 +45,7 @@ export function parseDepName(depType: string, key: string): string {
 
   const lastSegment = segments.at(-1);
   const [, depName] = coerceArray(
-    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? ''),
+    regEx(/^(?<depName>(?:@[^/]+\/)?[^@]+)/).exec(coerceString(lastSegment)),
   );
   return depName;
 }
@@ -64,7 +65,12 @@ export function extractDependency(
     return dep;
   }
   dep.currentValue = input.trim();
-  if (depType === 'engines' || depType === 'packageManager') {
+  if (
+    depType === 'engines' ||
+    depType === 'packageManager' ||
+    depType === 'devEngines.runtime' ||
+    depType === 'devEngines.packageManager'
+  ) {
     if (depName === 'node') {
       dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
@@ -73,7 +79,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;
@@ -81,6 +87,9 @@ export function extractDependency(
     } else if (depName === 'pnpm') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'pnpm';
+    } else if (depType === 'devEngines.runtime' && depName === 'deno') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Deno';
     } else if (depName === 'vscode') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
@@ -107,7 +116,7 @@ export function extractDependency(
       const major =
         isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
       if (major && major > 1) {
-        dep.packageName = '@yarnpkg/cli';
+        dep.packageName = '@yarnpkg/cli-dist';
       }
     } else if (depName === 'npm') {
       dep.datasource = NpmDatasource.id;
@@ -248,7 +257,10 @@ export function getExtractedConstraints(
   for (const dep of deps) {
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+      (dep.depType === 'engines' ||
+        dep.depType === 'packageManager' ||
+        dep.depType === 'devEngines.runtime' ||
+        dep.depType === 'devEngines.packageManager') &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&

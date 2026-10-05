@@ -1,4 +1,4 @@
-import type { PackageFile } from '../../../types.ts';
+import type { NpmrcPackageFile } from '../../../types.ts';
 import { detectMonorepos } from './monorepo.ts';
 
 vi.mock('../pnpm.ts');
@@ -6,7 +6,7 @@ vi.mock('../pnpm.ts');
 describe('modules/manager/npm/extract/post/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', async () => {
-      const packageFiles: Partial<PackageFile>[] = [
+      const packageFiles: Partial<NpmrcPackageFile>[] = [
         {
           packageFile: 'package.json',
           deps: [],
@@ -17,7 +17,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
     });
 
     it('updates internal packages', async () => {
-      const packageFiles: Partial<PackageFile>[] = [
+      const packageFiles: Partial<NpmrcPackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
@@ -72,7 +72,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings', async () => {
-      const packageFiles: Partial<PackageFile>[] = [
+      const packageFiles: Partial<NpmrcPackageFile>[] = [
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
@@ -96,7 +96,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings with extractedConstraints', async () => {
-      const packageFiles: Partial<PackageFile>[] = [
+      const packageFiles: Partial<NpmrcPackageFile>[] = [
         {
           packageFile: 'package.json',
           skipInstalls: true, // coverage
@@ -140,7 +140,7 @@ describe('modules/manager/npm/extract/post/monorepo', () => {
     });
 
     it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
-      const packageFiles: Partial<PackageFile>[] = [
+      const packageFiles: Partial<NpmrcPackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {

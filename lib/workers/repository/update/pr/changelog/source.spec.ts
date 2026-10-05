@@ -1,6 +1,8 @@
 import { partial } from '~test/util.ts';
 import type { BranchConfig } from '../../../../types.ts';
+import { AzureChangeLogSource } from './azure/source.ts';
 import { GitHubChangeLogSource } from './github/source.ts';
+import { ChangeLogSource } from './source.ts';
 
 const changelogSource = new GitHubChangeLogSource();
 const upgrade = partial<BranchConfig>({
@@ -9,6 +11,15 @@ const upgrade = partial<BranchConfig>({
 });
 
 describe('workers/repository/update/pr/changelog/source', () => {
+  describe('getAPIBaseUrl', () => {
+    it('returns empty string when the platform family has no API URL builder', () => {
+      const azureSource = new AzureChangeLogSource();
+
+      expect(
+        ChangeLogSource.prototype.getAPIBaseUrl.call(azureSource, upgrade),
+      ).toBe('');
+    });
+  });
   describe('getBaseUrl', () => {
     it('handles unsupported sourceUrl', () => {
       expect(

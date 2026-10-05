@@ -118,6 +118,13 @@
       "matchPackageNames": ["github/gh-actions-lock"],
       "matchFileNames": ["lib/config/options/index.ts"],
       "semanticCommitType": "fix"
+    },
+    {
+      "description": "Group commander major updates, they depend on each other.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "commander"
     }
   ],
   "customManagers": [

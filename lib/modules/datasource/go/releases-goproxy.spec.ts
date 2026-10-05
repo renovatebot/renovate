@@ -1,9 +1,13 @@
 import { codeBlock } from 'common-tags';
+import { dir as tmpDir } from 'tmp-promise';
 import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -96,10 +100,13 @@ describe('modules/datasource/go/releases-goproxy', () => {
     const baseUrl = 'https://proxy.golang.org';
 
     let githubQueryReleases: MockInstance<typeof githubGraphql.queryReleases>;
+    let githubQueryTags: MockInstance<typeof githubGraphql.queryTags>;
 
     beforeEach(() => {
       githubQueryReleases = vi.spyOn(githubGraphql, 'queryReleases');
       githubQueryReleases.mockResolvedValue([]);
+      githubQueryTags = vi.spyOn(githubGraphql, 'queryTags');
+      githubQueryTags.mockResolvedValue([]);
     });
 
     it('handles direct', async () => {
@@ -447,6 +454,131 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(404);
 
       githubQueryReleases.mockRejectedValueOnce(new Error('unknown'));
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.0.0',
+            releaseTimestamp: '2018-08-13T15:31:12.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.0' },
+      });
+    });
+
+    it('prefers the GitHub tag timestamp over the commit timestamp when there is no GitHub Release', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/kr/pretty`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v0.3.0 2020-11-24T22:22:38Z
+            v0.3.1 2022-08-29T23:03:05Z
+          `,
+        )
+        .get('/@latest')
+        .reply(200, { Version: 'v0.3.1' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockResolvedValueOnce([
+        {
+          version: 'v0.3.1',
+          releaseTimestamp: '2022-10-07T23:12:13.000Z' as Timestamp,
+          gitRef: 'v0.3.1',
+          hash: 'abc123',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/kr/pretty',
+      });
+
+      expect(githubQueryTags).toHaveBeenCalledWith(
+        { packageName: 'kr/pretty', registryUrl: 'https://github.com' },
+        expect.anything(),
+      );
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v0.3.0',
+            releaseTimestamp: '2020-11-24T22:22:38.000Z',
+          },
+          {
+            version: 'v0.3.1',
+            releaseTimestamp: '2022-10-07T23:12:13.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/kr/pretty',
+        tags: { latest: 'v0.3.1' },
+      });
+    });
+
+    it('prefers the GitHub Release timestamp over the GitHub tag timestamp when both exist', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/stretchr/testify`)
+        .get('/@v/list')
+        .reply(200, 'v1.12.0 2026-06-10T14:10:43Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.12.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockResolvedValueOnce([
+        {
+          version: 'v1.12.0',
+          releaseTimestamp: '2026-07-01T00:00:00.000Z' as Timestamp,
+          gitRef: 'v1.12.0',
+          hash: 'abc123',
+        },
+      ]);
+      githubQueryReleases.mockResolvedValueOnce([
+        {
+          version: 'v1.12.0',
+          releaseTimestamp: '2026-08-17T09:00:00.000Z' as Timestamp,
+          url: 'https://github.com/stretchr/testify/releases/tag/v1.12.0',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/stretchr/testify',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.12.0',
+            releaseTimestamp: '2026-08-17T09:00:00.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/stretchr/testify',
+        tags: { latest: 'v1.12.0' },
+      });
+    });
+
+    it('handles GitHub Tags fetch errors', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200, 'v1.0.0 2018-08-13T15:31:12Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      githubQueryTags.mockRejectedValueOnce(new Error('unknown'));
 
       const res = await datasource.getReleases({
         packageName: 'github.com/google/btree',
@@ -1543,6 +1675,194 @@ describe('modules/datasource/go/releases-goproxy', () => {
           ],
           tags: { latest: 'v0.1.0' },
         });
+      });
+    });
+
+    describe('package cache', () => {
+      const privateUrl = 'https://artifactory.example.com/api/go/go';
+
+      let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+      beforeEach(() => {
+        setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+      });
+
+      afterEach(() => {
+        setCache.mockRestore();
+        GlobalConfig.reset();
+      });
+
+      function mockProxy(url: string): void {
+        httpMock
+          .scope(`${url}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0 2018-01-01T00:00:00Z\n')
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+      }
+
+      it('caches modules served by the public proxy', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
+        mockProxy(baseUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+
+      it('does not cache modules served by a private proxy', async () => {
+        vi.stubEnv('GOPROXY', privateUrl);
+        mockProxy(privateUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).not.toHaveBeenCalled();
+      });
+
+      it('caches modules served by a private proxy if cachePrivatePackages is enabled', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', privateUrl);
+        mockProxy(privateUrl);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+    });
+
+    describe('version timestamps', () => {
+      let dirResult: Awaited<ReturnType<typeof tmpDir>>;
+
+      beforeEach(async () => {
+        vi.useRealTimers();
+        memCache.init();
+        dirResult = await tmpDir({ unsafeCleanup: true });
+        await packageCache.init({ cacheDir: dirResult.path });
+      });
+
+      afterEach(async () => {
+        GlobalConfig.reset();
+        await packageCache.cleanup({});
+        await dirResult.cleanup();
+        memCache.reset();
+      });
+
+      function setHttpMock(): void {
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\n')
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+      }
+
+      // As a version's publication time should never change (as the Go proxy treats this as immutable data), we should be only calling the `.info` API once
+      //
+      // This test simulates i.e.
+      //
+      // - 2026-01-01T00:00Z: Renovate runs
+      // - 2026-01-01T00:30Z: Renovate finishes
+      // - 2026-01-01T01:00Z: Renovate's caches expire
+      // - 2026-01-02T00:00Z: Renovate runs
+      //
+      // But without needing to actually wait that long
+      it('reuses timestamps fetched by an earlier run', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        setHttpMock();
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' });
+
+        const first = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        // a new run, against the same persistent cache, once the `datasource-go-proxy` cache has expired
+        memCache.init();
+        vi.advanceTimersByTime(31 * 60 * 1000);
+
+        setHttpMock();
+        const second = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(second).toEqual(first);
+      });
+
+      it('does not store a version which has no publication time', async () => {
+        GlobalConfig.set({
+          cacheTtlOverride: {
+            'datasource-go-proxy':
+              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
+              0,
+          },
+        });
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res?.releases).toEqual([{ version: 'v1.0.0' }]);
+        await expect(
+          packageCache.get(
+            'datasource-go-proxy-timestamps',
+            `${baseUrl}@@github.com/google/btree`,
+          ),
+        ).resolves.toBeUndefined();
+      });
+
+      it('stores the timestamps it fetched when another version fails', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0\nv1.1.0\n')
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' })
+          .get('/@v/v1.1.0.info')
+          .reply(410)
+          .get('/@latest')
+          .reply(200, { Version: 'v1.1.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        await expect(
+          packageCache.get(
+            'datasource-go-proxy-timestamps',
+            `${baseUrl}@@github.com/google/btree`,
+          ),
+        ).resolves.toEqual({ 'v1.0.0': '2018-01-01T00:00:00.000Z' });
       });
     });
   });
