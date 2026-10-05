@@ -3324,6 +3324,69 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v0.37.18' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.37.18',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v1' },
+      },
+      expected: [
+        {
+          currentValue: 'v1',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // `latest` is already a rolling channel, not a version to update.
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'GitTools/actions/gitversion/setup@v3',
         with: { versionSpec: '6.8.2' },
       },
