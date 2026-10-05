@@ -9,6 +9,8 @@ describe('modules/versioning/semver-coerced/index', () => {
     it('should return true for non-strictly equal versions', () => {
       expect(semverCoerced.equals('v1.0', '1.0.0')).toBeTrue();
       expect(semverCoerced.equals('v1.0', 'v1.x')).toBeTrue();
+      expect(semverCoerced.equals('2026.08.07', '2026.8.7')).toBeTrue();
+      expect(semverCoerced.equals('1.1.1', '01.01.01')).toBeTrue();
     });
 
     it('should return false for non-equal versions', () => {
@@ -27,6 +29,7 @@ describe('modules/versioning/semver-coerced/index', () => {
 
     it('should return major version number for non-strict semver', () => {
       expect(semverCoerced.getMajor('v3.1')).toBe(3);
+      expect(semverCoerced.getMajor('2026.08.07')).toBe(2026);
     });
 
     it('invalid version', () => {
@@ -41,6 +44,7 @@ describe('modules/versioning/semver-coerced/index', () => {
 
     it('should return minor version number for non-strict semver', () => {
       expect(semverCoerced.getMinor('v3.1')).toBe(1);
+      expect(semverCoerced.getMinor('2026.08.07')).toBe(8);
     });
 
     it('invalid version', () => {
@@ -66,6 +70,7 @@ describe('modules/versioning/semver-coerced/index', () => {
       ${'two1.0'}       | ${0}
       ${'ver1.2.3'}     | ${3}
       ${'r3.0'}         | ${0}
+      ${'2026.08.07'}   | ${7}
       ${'abc'}          | ${null}
     `('getPatch("$version") === $expected', ({ version, expected }) => {
       expect(semverCoerced.getPatch(version)).toBe(expected);
@@ -75,14 +80,17 @@ describe('modules/versioning/semver-coerced/index', () => {
   describe('.isBreaking(current, version)', () => {
     it('should return false for patch updates', () => {
       expect(semverCoerced.isBreaking!('1.0', '1.0.1')).toBeFalse();
+      expect(semverCoerced.isBreaking!('2026.08.01', '2026.08.07')).toBeFalse();
     });
 
     it('should return false for minor updates', () => {
       expect(semverCoerced.isBreaking!('1.0', '1.1')).toBeFalse();
+      expect(semverCoerced.isBreaking!('2026.07.01', '2026.08.07')).toBeFalse();
     });
 
     it('should return true for major updates', () => {
       expect(semverCoerced.isBreaking!('1.0.0', '2')).toBeTrue();
+      expect(semverCoerced.isBreaking!('2025.07.01', '2026.08.07')).toBeTrue();
     });
 
     it('should return true for major updates from v0.x', () => {
@@ -101,6 +109,7 @@ describe('modules/versioning/semver-coerced/index', () => {
 
     it('should return true for non-strict semver', () => {
       expect(semverCoerced.isCompatible('v3.1.2-foo')).toBeTrue();
+      expect(semverCoerced.isCompatible('2026.08.07')).toBeTrue();
     });
 
     it('should return false for non-semver', () => {
@@ -113,8 +122,16 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(semverCoerced.isGreaterThan('1.0.2', '1.0.0')).toBeTrue();
     });
 
+    it('should return true for a greater version in non-strict semver', () => {
+      expect(semverCoerced.isGreaterThan('01.02.03', '01.01.01')).toBeTrue();
+    });
+
     it('should return false for lower version in strict semver', () => {
       expect(semverCoerced.isGreaterThan('3.1.2', '4.1.0')).toBeFalse();
+    });
+
+    it('should return false for lower version in non-strict semver', () => {
+      expect(semverCoerced.isGreaterThan('03.01.02', '04.01.01')).toBeFalse();
     });
 
     it('should return false if version cannot be coerced', () => {
@@ -127,8 +144,16 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(semverCoerced.isLessThanRange?.('1.0.2', '~2.0')).toBeTrue();
     });
 
+    it('should return true for a lower version in non-strict semver', () => {
+      expect(semverCoerced.isLessThanRange?.('01.01.02', '~2.0')).toBeTrue();
+    });
+
     it('should return false for in-range version in strict semver', () => {
       expect(semverCoerced.isLessThanRange?.('3.0.2', '~3.0')).toBeFalse();
+    });
+
+    it('should return false for in-range version in non-strict semver', () => {
+      expect(semverCoerced.isLessThanRange?.('03.01.02', '~3.0')).toBeFalse();
     });
 
     it('invalid version', () => {
@@ -140,11 +165,15 @@ describe('modules/versioning/semver-coerced/index', () => {
     it('returns true if naked version', () => {
       expect(semverCoerced.isSingleVersion('1.2.3')).toBeTrue();
       expect(semverCoerced.isSingleVersion('1.2.3-alpha.1')).toBeTrue();
+      expect(semverCoerced.isSingleVersion('01.02.03')).toBeTrue();
+      expect(semverCoerced.isSingleVersion('01.02.03-alpha.1')).toBeTrue();
     });
 
     it('returns false if equals', () => {
       expect(semverCoerced.isSingleVersion('=1.2.3')).toBeFalse();
       expect(semverCoerced.isSingleVersion('= 1.2.3')).toBeFalse();
+      expect(semverCoerced.isSingleVersion('=01.02.03')).toBeFalse();
+      expect(semverCoerced.isSingleVersion('= 01.02.03')).toBeFalse();
     });
 
     it('returns false when not version', () => {
@@ -156,6 +185,7 @@ describe('modules/versioning/semver-coerced/index', () => {
     it.each`
       version           | expected
       ${'1.0.0'}        | ${true}
+      ${'02026.08.07'}  | ${true}
       ${'v1.3.5'}       | ${true}
       ${'v2.1'}         | ${true}
       ${'3.4'}          | ${true}
@@ -180,8 +210,8 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(semverCoerced.isValid('version two')).toBeFalse();
     });
 
-    it('should return null for irregular version strings', () => {
-      expect(semverCoerced.isValid('17.04.0')).toBeFalse();
+    it('should support calendar versioning', () => {
+      expect(semverCoerced.isValid('17.04.0')).toBeTrue();
     });
 
     it('should support strict semver', () => {
@@ -222,6 +252,7 @@ describe('modules/versioning/semver-coerced/index', () => {
 
     it('should support non-strict versions', () => {
       expect(semverCoerced.isValid('v1.2')).toBeTrue();
+      expect(semverCoerced.isValid('2026.08.07')).toBeTrue();
     });
   });
 
@@ -232,10 +263,12 @@ describe('modules/versioning/semver-coerced/index', () => {
 
     it('should return true with non-strict version in range', () => {
       expect(semverCoerced.matches('v1.0', '1.0.0 || 1.0.1')).toBeTrue();
+      expect(semverCoerced.matches('01.01.01', '1.0.0 || 1.1.1')).toBeTrue();
     });
 
     it('should return false when version is not in range', () => {
       expect(semverCoerced.matches('1.2.3', '1.4.1 || 1.4.2')).toBeFalse();
+      expect(semverCoerced.matches('01.01.01', '1.0.0 || 1.0.1')).toBeFalse();
     });
 
     it('invalid version', () => {
@@ -254,6 +287,9 @@ describe('modules/versioning/semver-coerced/index', () => {
       expect(
         semverCoerced.getSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0'),
       ).toBe('1.0.0');
+      expect(
+        semverCoerced.getSatisfyingVersion(['1.0.0', '01.01.01'], '^1.0'),
+      ).toBe('1.1.1');
     });
   });
 
@@ -267,6 +303,9 @@ describe('modules/versioning/semver-coerced/index', () => {
     it('should support coercion', () => {
       expect(
         semverCoerced.minSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0'),
+      ).toBe('1.0.0');
+      expect(
+        semverCoerced.minSatisfyingVersion(['1.0.0', '01.01.01'], '^1.0'),
       ).toBe('1.0.0');
     });
   });
@@ -297,20 +336,31 @@ describe('modules/versioning/semver-coerced/index', () => {
           newVersion: '1.1.0',
         }),
       ).toBe('1.1.0');
+      expect(
+        semverCoerced.getNewValue({
+          currentValue: '2025.12.31',
+          rangeStrategy: 'auto',
+          currentVersion: '2025.12.31',
+          newVersion: '2026.08.07',
+        }),
+      ).toBe('2026.08.07');
     });
   });
 
   describe('.sortVersions(a, b)', () => {
     it('should return zero for equal versions', () => {
       expect(semverCoerced.sortVersions('1.0.0', '1.0.0')).toBe(0);
+      expect(semverCoerced.sortVersions('2026.8.7', '2026.08.07')).toBe(0);
     });
 
     it('should return -1 for a < b', () => {
       expect(semverCoerced.sortVersions('1.0.0', '1.0.1')).toBe(-1);
+      expect(semverCoerced.sortVersions('2025.12.31', '2026.08.07')).toBe(-1);
     });
 
     it('should return 1 for a > b', () => {
       expect(semverCoerced.sortVersions('1.0.1', '1.0.0')).toBe(1);
+      expect(semverCoerced.sortVersions('2026.08.07', '2025.12.31')).toBe(1);
     });
 
     it('should return zero for equal non-strict versions', () => {

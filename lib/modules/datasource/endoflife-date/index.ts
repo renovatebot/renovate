@@ -12,7 +12,6 @@ export class EndoflifeDateDatasource extends Datasource {
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [registryUrl];
   }
-  override readonly caching = true;
   override readonly defaultVersioning = 'loose';
 
   override readonly releaseTimestampSupport = true;

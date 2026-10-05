@@ -19,8 +19,6 @@ export class NodeVersionDatasource extends Datasource {
 
   override readonly defaultVersioning = versioning;
 
-  override readonly caching = true;
-
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `date` field.';

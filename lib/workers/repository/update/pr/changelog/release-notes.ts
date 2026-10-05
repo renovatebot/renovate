@@ -508,26 +508,29 @@ export async function addReleaseNotes(
         const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
         const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
         releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
-        releaseNotes ??= await getReleaseNotesMd(input.project, v, source);
-        releaseNotes ??= await getReleaseNotes(
-          input.project,
-          v,
-          config,
-          source,
-        );
+        if (!releaseNotes) {
+          releaseNotes = await getReleaseNotesMd(input.project, v, source);
+          releaseNotes ??= await getReleaseNotes(
+            input.project,
+            v,
+            config,
+            source,
+          );
 
-        // If there is no release notes, at least try to show the compare URL
-        if (!releaseNotes && v.compare.url) {
-          releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
+          // If there is no release notes, at least try to show the compare URL
+          if (!releaseNotes && v.compare.url) {
+            releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
+          }
+
+          // only write on a miss: writing a hit back would refresh its TTL, so a cached compare-only fallback would never be retried
+          const cacheMinutes = releaseNotesCacheMinutes(v.date);
+          await packageCache.set(
+            cacheNamespace,
+            cacheKey,
+            releaseNotes,
+            cacheMinutes,
+          );
         }
-
-        const cacheMinutes = releaseNotesCacheMinutes(v.date);
-        await packageCache.set(
-          cacheNamespace,
-          cacheKey,
-          releaseNotes,
-          cacheMinutes,
-        );
 
         // when we have received enough changelog content to exceed the platform's limit, we should stop trying to look up more changelog entries, as we fetch newest releases first, so the most recent changelog entries will be visible in the PR
         if (shouldTruncateToPlatformLimit) {

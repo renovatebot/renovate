@@ -87,7 +87,6 @@ describe('modules/manager/gomod/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
   });
 
   afterEach(() => {

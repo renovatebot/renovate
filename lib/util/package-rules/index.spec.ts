@@ -366,7 +366,7 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBe('datasource-merge');
   });
 
-  it('skips skipReason=package-rules if enabled=true', async () => {
+  it('sets skipReason=package-rules if the dependency is already disabled', async () => {
     const dep: any = {
       enabled: false,
       depName: 'foo',
@@ -377,7 +377,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const res = await applyPackageRules(dep);
-    expect(res.skipReason).toBeUndefined();
+    expect(res.skipReason).toBe('package-rules');
   });
 
   it('matches anything if missing inclusive rules', async () => {
@@ -726,6 +726,34 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
+  it('filters isBreaking', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchIsBreaking: true,
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+        {
+          matchIsBreaking: false,
+          // @ts-expect-error -- testing
+          y: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'minor' as UpdateType,
+      isBreaking: true,
+    };
+
+    const res = await applyPackageRules({ ...config, ...dep });
+
+    expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
+  });
+
   it('matches matchSourceUrls with glob', async () => {
     const config: TestConfig = {
       packageRules: [
@@ -915,7 +943,6 @@ describe('util/package-rules/index', () => {
     };
 
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add(hostRule);
     });
 

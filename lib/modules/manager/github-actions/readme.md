@@ -222,7 +222,7 @@ steps:
     with:
       node-version: '22.0.0'
 
-- uses: astral-sh/setup-uv@v10.1.0
+- uses: astral-sh/setup-uv@v10.2.0
   with:
     version: '0.4.x'
 ```

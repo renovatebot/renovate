@@ -731,7 +731,7 @@ jobs:
         if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_RELEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_TOKEN: ${{ github.token }}
 
       - run: df -h
         if: ${{ !cancelled() }}
@@ -758,7 +758,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: 0.12.18
+          version: 0.12.23
           enable-cache: true
           cache-python: true
 
@@ -768,7 +768,7 @@ jobs:
       - name: Build
         run: pnpm build:docs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event.repository.has_issues == false) && 'true' || '' }}
 
       - name: Test docs
@@ -814,6 +814,9 @@ jobs:
       - name: Pack
         run: pnpm test-e2e:pack
 
+      - name: Check npm install
+        run: pnpm test-e2e:npm
+
       - name: Install dependencies
         run: pnpm test-e2e:install
 
@@ -853,7 +856,7 @@ jobs:
       # right at the start of the job, make sure we're not seeing another commit that's landed
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: renovatebot/renovate
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
@@ -893,7 +896,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -902,7 +905,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: 0.12.18
+          version: 0.12.23
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -924,7 +927,7 @@ jobs:
       # and one final check, in case preparing the environment has taken long enough for new commits
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
@@ -940,7 +943,7 @@ jobs:
         run: |
           pnpm semantic-release --dry-run "$DRY_RUN"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           LOG_LEVEL: debug
 
       - name: Build mkdocs site for deployment
@@ -952,7 +955,7 @@ jobs:
           mkdir -p tmp
           tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment

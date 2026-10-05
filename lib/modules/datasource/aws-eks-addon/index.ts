@@ -13,7 +13,6 @@ export class AwsEKSAddonDataSource extends Datasource {
   static readonly id = 'aws-eks-addon';
 
   override readonly defaultVersioning = awsEksAddonVersioning.id;
-  override readonly caching = true;
   private readonly clients: Record<string, EKSClient> = {};
 
   constructor() {

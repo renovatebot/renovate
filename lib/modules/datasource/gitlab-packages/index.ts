@@ -13,8 +13,6 @@ export class GitlabPackagesDatasource extends Datasource {
 
   protected override http: GitlabHttp;
 
-  override caching = true;
-
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }

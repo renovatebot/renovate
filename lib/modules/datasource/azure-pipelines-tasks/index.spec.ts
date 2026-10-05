@@ -15,7 +15,6 @@ const marketplaceTasksPath =
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    hostRules.clear();
   });
 
   it('returns null for unknown task', async () => {

@@ -14,8 +14,6 @@ export class AwsMachineImageDatasource extends Datasource {
 
   override readonly defaultVersioning = amazonMachineImageVersioning.id;
 
-  override readonly caching = true;
-
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `CreationDate` field in the results.';
