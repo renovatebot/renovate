@@ -5,6 +5,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform, getRepositoryPath } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -192,7 +193,7 @@ export function parseApmDependency(
   const repoSegments = hasHost ? segments.slice(1) : segments;
   // `detectPlatform` reads the hostname only, so one url serves both it and the
   // repository lookup.
-  const url = `https://${host}/${repoSegments.join('/')}`;
+  const url = joinUrlParts(`https://${host}`, ...repoSegments);
   const platform = detectPlatform(url);
   const repoPath = resolveRepoPath(platform, url, repoSegments);
 

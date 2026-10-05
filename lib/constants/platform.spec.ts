@@ -165,7 +165,12 @@ describe('constants/platform', () => {
       ${'azure'}            | ${['_git', 'repo']}                       | ${null}
       ${'azure'}            | ${['org', 'proj', 'team', '_git', 'r']}   | ${'org/proj/team/_git/r'}
       ${'bitbucket'}        | ${['workspace', 'repo']}                  | ${'workspace/repo'}
-      ${'bitbucket-server'} | ${['scm', 'key', 'repo']}                 | ${null}
+      ${'bitbucket-server'} | ${['scm', 'key', 'repo']}                 | ${'scm/key/repo'}
+      ${'bitbucket-server'} | ${['scm', 'key', 'repo', 'sub']}          | ${'scm/key/repo'}
+      ${'bitbucket-server'} | ${['scm', 'key']}                         | ${null}
+      ${'bitbucket-server'} | ${['projects', 'k', 'repos', 'r']}        | ${'projects/k/repos/r'}
+      ${'bitbucket-server'} | ${['projects', 'k', 'repos']}             | ${null}
+      ${'bitbucket-server'} | ${['browse', 'k', 'repos', 'r']}          | ${null}
       ${'forgejo'}          | ${['owner', 'repo']}                      | ${'owner/repo'}
       ${'gitea'}            | ${['owner', 'repo']}                      | ${'owner/repo'}
       ${'github'}           | ${['owner', 'repo', 'packages', 'ui']}    | ${'owner/repo'}

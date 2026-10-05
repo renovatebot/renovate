@@ -65,9 +65,12 @@ export interface PlatformFamily {
 
   /**
    * The repository path within the host, given the host-stripped path segments,
-   * so that a consumer can tell a repository apart from a path inside it. Spelled
-   * the way the family's own git URLs spell it, which for Azure DevOps means the
-   * `_git` segment is inserted when the caller left it out.
+   * so that a consumer can tell a repository apart from a path inside it.
+   *
+   * Spelled the way the family's own URLs spell it: `owner/repo` on GitHub,
+   * `org/project/_git/repo` on Azure DevOps - where the `_git` segment is
+   * inserted when the caller left it out - and `projects/<key>/repos/<slug>` on
+   * Bitbucket Data Center.
    *
    * `null` when the family's URL layout does not fix where the repository ends
    * and only the caller's own ecosystem can say.
@@ -124,9 +127,19 @@ export const PLATFORM_FAMILIES = {
     tagsDatasource: 'bitbucket-server-tags',
     apiBaseUrl: (baseUrl: string) => `${baseUrl}rest/api/1.0/`,
     webDirPath: 'browse',
-    // Data Center serves a repository as both `projects/<key>/repos/<slug>` and
-    // `scm/<key>/<slug>`, so the layout depends on which one a caller holds.
-    repositoryPath: () => null,
+    // Data Center serves a repository under two prefixes - `projects/<key>/repos/<slug>`
+    // in the web UI, `scm/<key>/<slug>` for cloning - and each says which it is in its
+    // first segment, so both resolve. Like the Azure path above this is the URL path, not
+    // the `<key>/<slug>` that bitbucket-server-tags takes as a package name.
+    repositoryPath: (segments: string[]) => {
+      if (segments[0] === 'projects' && segments[2] === 'repos') {
+        return segments.length >= 4 ? segments.slice(0, 4).join('/') : null;
+      }
+      if (segments[0] === 'scm') {
+        return segments.length >= 3 ? segments.slice(0, 3).join('/') : null;
+      }
+      return null;
+    },
   },
   bitbucket: {
     apiUsingHostTypes: ['bitbucket', 'bitbucket-changelog', 'bitbucket-tags'],
