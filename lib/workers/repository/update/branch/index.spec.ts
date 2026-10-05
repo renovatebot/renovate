@@ -2056,7 +2056,7 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
-    it('returns a branch error if a Poetry artifact timed out', async () => {
+    it('returns a branch error if an artifact update timed out', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -2065,8 +2065,8 @@ describe('workers/repository/update/branch/index', () => {
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [
           {
-            fileName: 'poetry.lock',
-            stderr: 'Poetry lockfile update timed out',
+            fileName: 'package-lock.json',
+            stderr: 'Artifact update timed out',
             timedOut: true,
           },
         ],
