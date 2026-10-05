@@ -460,7 +460,7 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
-  it('catches jsonata evaluation errors', async () => {
+  it('extracts other matchStrings if $each finds no match', async () => {
     const yaml = codeBlock`
       public.ecr.aws:
         images-by-semver:
@@ -493,14 +493,51 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     });
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.warn).not.toHaveBeenCalled();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       {
-        err: expect.any(TypeError),
         packageFile: 'some.yaml',
         jsonataQuery:
           '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
       },
-      'Error executing jsonata query. Please check your query.',
+      'The jsonata query returned no matches. Possible error, please check your query. Skipping',
     );
   });
+
+  it.each`
+    matchStrings
+    ${['$error("test evaluation error")', '$']}
+    ${['$', '$error("test evaluation error")']}
+  `(
+    'catches jsonata evaluation errors: $matchStrings',
+    async ({ matchStrings }) => {
+      const config = {
+        fileFormat: 'json',
+        matchStrings,
+        datasourceTemplate: 'npm',
+      };
+
+      const res = await extractPackageFile(
+        '{"depName":"foo","currentValue":"1.0.0"}',
+        'some.json',
+        config,
+      );
+
+      expect(res).toEqual({
+        ...config,
+        deps: [{ depName: 'foo', currentValue: '1.0.0', datasource: 'npm' }],
+      });
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          err: expect.objectContaining({
+            code: 'D3137',
+            message: 'test evaluation error',
+          }),
+          packageFile: 'some.json',
+          jsonataQuery: '$error("test evaluation error")',
+        },
+        'Error executing jsonata query. Please check your query.',
+      );
+    },
+  );
 });
