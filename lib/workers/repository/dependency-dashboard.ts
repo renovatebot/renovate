@@ -374,6 +374,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -440,6 +441,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -669,13 +671,19 @@ export async function ensureDependencyDashboard(
       'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
-    await platform.ensureIssue({
+    const result = await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
+    // ensureIssue doesn't return the issue, so a newly created (or renamed)
+    // dashboard needs a lookup to record its number
+    if (result && !config.dependencyDashboardIssue) {
+      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      config.dependencyDashboardIssue = issue?.number;
+    }
   }
 }
 
