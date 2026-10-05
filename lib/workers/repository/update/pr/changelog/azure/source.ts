@@ -3,7 +3,10 @@ import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js
 import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
 import { logger } from '../../../../../../logger/index.ts';
+import * as azureApi from '../../../../../../modules/platform/azure/azure-got-wrapper.ts';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
+import * as memCache from '../../../../../../util/cache/memory/index.ts';
+import { withCache } from '../../../../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../../../../util/regex.ts';
 import { coerceString } from '../../../../../../util/string.ts';
 import {
@@ -15,13 +18,118 @@ import {
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import { ChangeLogSource } from '../source.ts';
-import type { ChangeLogFile } from '../types.ts';
+import type { ChangeLogFile, ChangeLogProject } from '../types.ts';
 
 export const id = 'azure-changelog';
+
+const repositoryPathRegex = regEx(
+  /^(?<base>.+)\/_git\/(?<repository>[^/]+)\/?$/,
+);
+
+function getProject(apiBaseUrl: string): string {
+  const match = regEx('/(?<project>[^/]+)/_apis/').exec(apiBaseUrl);
+  try {
+    return decodeURIComponent(coerceString(match?.groups?.project));
+  } catch {
+    return '';
+  }
+}
+
+function getRepositoryPath(
+  url: URL,
+): { base: string; repository: string } | null {
+  const groups = repositoryPathRegex.exec(url.pathname)?.groups;
+  if (!groups) {
+    return null;
+  }
+  const segmentCount = trimSlashes(groups.base).split('/').length;
+  if (
+    (url.hostname === 'dev.azure.com' && segmentCount !== 2) ||
+    (url.hostname.endsWith('.visualstudio.com') && segmentCount !== 1)
+  ) {
+    return null;
+  }
+  return { base: groups.base, repository: groups.repository };
+}
+
+function normalizeOrganizationUrl(url: string): string {
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
+    return '';
+  }
+  if (parsedUrl.hostname.endsWith('.visualstudio.com')) {
+    const organization = parsedUrl.hostname.slice(
+      0,
+      -'.visualstudio.com'.length,
+    );
+    return `https://dev.azure.com/${organization}`;
+  }
+  const pathname = trimSlashes(parsedUrl.pathname);
+  const normalizedPath =
+    parsedUrl.hostname === 'dev.azure.com' ? pathname.toLowerCase() : pathname;
+  return `${parsedUrl.origin}${normalizedPath ? `/${normalizedPath}` : ''}`;
+}
 
 export class AzureChangeLogSource extends ChangeLogSource {
   constructor() {
     super('azure');
+  }
+
+  override getAllTags(endpoint: string, repository: string): Promise<string[]> {
+    const project = getProject(endpoint);
+    if (!project) {
+      return Promise.resolve([]);
+    }
+    const key = `changelog-project-tags:${JSON.stringify([endpoint, repository])}`;
+    const cached = memCache.get<Promise<string[]>>(key);
+    if (!is.undefined(cached)) {
+      return cached;
+    }
+    const result = withCache(
+      {
+        namespace: 'datasource-azure-tags',
+        key,
+        cacheable: false,
+        fallback: true,
+      },
+      async () => {
+        const client = await azureApi.gitApi();
+        const tags = await client.getRefs(repository, project, 'tags');
+        return tags.flatMap((tag) => (is.string(tag.name) ? [tag.name] : []));
+      },
+    ).catch((err: unknown) => {
+      memCache.set(key, undefined);
+      throw err;
+    });
+    memCache.set(key, result);
+    return result;
+  }
+
+  override getNotesCacheKey(project: ChangeLogProject): string {
+    return JSON.stringify([
+      project.baseUrl,
+      project.repository,
+      project.sourceDirectory ?? '',
+    ]);
+  }
+
+  protected override shouldSkipPackage(config: BranchUpgradeConfig): boolean {
+    const baseUrl = this.getBaseUrl(config);
+    const organizationUrl = baseUrl.replace(regEx(/\/[^/]+\/$/), '/');
+    const endpoint = azureApi.getEndpoint();
+    if (
+      !baseUrl ||
+      !endpoint ||
+      normalizeOrganizationUrl(organizationUrl) !==
+        normalizeOrganizationUrl(endpoint)
+    ) {
+      logger.debug(
+        { sourceUrl: config.sourceUrl },
+        'Skipping Azure changelog outside the configured organization',
+      );
+      return true;
+    }
+    return false;
   }
 
   async getReleaseNotesMd(
@@ -32,14 +140,13 @@ export class AzureChangeLogSource extends ChangeLogSource {
     logger.trace('azure.getReleaseNotesMd()');
 
     const sourceDir = coerceString(sourceDirectory, '/');
-    const urlEncodedRepo = encodeURIComponent(repository);
-
-    // Extract project name from API base URL (last path segment before "_apis/")
-    const projectMatch = regEx('/(?<project>[^/]+)/_apis/').exec(apiBaseUrl);
-    const project = coerceString(projectMatch?.groups?.project);
+    const project = getProject(apiBaseUrl);
+    if (!project) {
+      return null;
+    }
 
     const sourceDirectoryId = await azureHelper.getItem(
-      urlEncodedRepo,
+      repository,
       sourceDir,
       project,
     );
@@ -50,7 +157,7 @@ export class AzureChangeLogSource extends ChangeLogSource {
     }
 
     const tree = await azureHelper.getTrees(
-      urlEncodedRepo,
+      repository,
       sourceDirectoryId.objectId,
       project,
     );
@@ -82,7 +189,7 @@ export class AzureChangeLogSource extends ChangeLogSource {
     changelogFile = `${sourceDir ? ensureTrailingSlash(sourceDir) : ''}${changelogFile}`;
 
     const fileRes = await azureHelper.getItem(
-      urlEncodedRepo,
+      repository,
       changelogFile,
       project,
       true,
@@ -104,7 +211,7 @@ export class AzureChangeLogSource extends ChangeLogSource {
     nextHead: string,
   ): string {
     const regex = regEx(`^refs/tags/`, undefined);
-    return `${baseUrl}_git/${repository}/branchCompare?baseVersion=GT${prevHead.replace(
+    return `${baseUrl}_git/${encodeURIComponent(repository)}/branchCompare?baseVersion=GT${prevHead.replace(
       regex,
       '',
     )}&targetVersion=GT${nextHead.replace(regex, '')}`;
@@ -115,14 +222,17 @@ export class AzureChangeLogSource extends ChangeLogSource {
     if (is.nullOrUndefined(parsedUrl)) {
       return '';
     }
-    const protocol = parsedUrl.protocol;
-    const host = parsedUrl.host;
-    const [organization, projectName] = parsedUrl.pathname.slice(1).split('/');
-    return `${protocol}//${host}/${organization}/${projectName}/`;
+    const path = getRepositoryPath(parsedUrl);
+    if (!path) {
+      return '';
+    }
+    const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
+    return `${protocol}//${parsedUrl.host}${path.base}/`;
   }
 
   override getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return `${this.getBaseUrl(config)}_apis/`;
+    const baseUrl = this.getBaseUrl(config);
+    return baseUrl ? `${baseUrl}_apis/` : '';
   }
 
   override getRepositoryFromUrl(config: BranchUpgradeConfig): string {
@@ -130,13 +240,16 @@ export class AzureChangeLogSource extends ChangeLogSource {
     if (is.nullOrUndefined(parsedUrl)) {
       return '';
     }
-    // Azure DevOps embeds the organization and project in the base URL, so the
-    // repository is only the final path segment.
-    return trimSlashes(parsedUrl.pathname).replace(regEx(/.*\//), '');
+    const path = getRepositoryPath(parsedUrl);
+    try {
+      return decodeURIComponent(path?.repository ?? '');
+    } catch {
+      return '';
+    }
   }
 
   override hasValidRepository(repository: string): boolean {
-    return repository.split('/').length === 1;
+    return is.nonEmptyString(repository) && repository.split('/').length === 1;
   }
 
   override getNotesSourceUrl(
@@ -144,7 +257,13 @@ export class AzureChangeLogSource extends ChangeLogSource {
     repository: string,
     changelogFile: string,
   ): string {
-    return joinUrlParts(baseUrl, '_git', repository, '?path=', changelogFile);
+    return joinUrlParts(
+      baseUrl,
+      '_git',
+      encodeURIComponent(repository),
+      '?path=',
+      changelogFile,
+    );
   }
 
   override getReleaseNotesMdAnchorUrl(

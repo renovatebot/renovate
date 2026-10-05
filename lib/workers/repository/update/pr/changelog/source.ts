@@ -342,6 +342,11 @@ export abstract class ChangeLogSource {
     return `${protocol}//${host}/`;
   }
 
+  getNotesCacheKey(project: ChangeLogProject): string {
+    const { repository, sourceDirectory } = project;
+    return sourceDirectory ? `${repository}:${sourceDirectory}` : repository;
+  }
+
   getRepositoryFromUrl(config: BranchUpgradeConfig): string {
     const parsedUrl = parseUrl(config.sourceUrl);
     if (isNullOrUndefined(parsedUrl)) {

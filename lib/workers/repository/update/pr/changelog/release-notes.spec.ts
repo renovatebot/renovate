@@ -565,6 +565,78 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
     });
 
+    it('isolates Azure notes across projects and organizations and reuses same-source notes', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((_namespace, key) =>
+        Promise.resolve(cache.get(key)),
+      );
+      vi.spyOn(packageCache, 'set').mockImplementation(
+        (_namespace, key, value) => {
+          cache.set(key, value);
+          return Promise.resolve();
+        },
+      );
+      const source = getChangeLogSourceFor('azure')!;
+      const fetch = vi
+        .spyOn(source, 'getReleaseNotesMd')
+        .mockResolvedValueOnce({
+          changelogFile: '/CHANGELOG.md',
+          changelogMd: '# 1.2.3\nProject A\n# 1.0.0\nOld',
+        })
+        .mockResolvedValueOnce({
+          changelogFile: '/CHANGELOG.md',
+          changelogMd: '# 1.2.3\nProject B\n# 1.0.0\nOld',
+        })
+        .mockResolvedValueOnce({
+          changelogFile: '/CHANGELOG.md',
+          changelogMd: '# 1.2.3\nOther org\n# 1.0.0\nOld',
+        });
+      const inputs = [
+        'https://dev.azure.com/org/project-A/',
+        'https://dev.azure.com/org/project-B/',
+        'https://dev.azure.com/other/project-A/',
+      ].map((baseUrl) => ({
+        project: partial<ChangeLogProject>({
+          type: 'azure',
+          repository: 'common',
+          sourceDirectory: '/docs',
+          baseUrl,
+          apiBaseUrl: `${baseUrl}_apis/`,
+          sourceUrl: `${baseUrl}_git/common`,
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.2.3',
+            gitRef: 'refs/tags/1.2.3',
+            compare: { url: '' },
+          }),
+        ],
+      }));
+
+      const first = await addReleaseNotes(
+        inputs[0],
+        partial<BranchUpgradeConfig>(),
+      );
+      const second = await addReleaseNotes(
+        inputs[1],
+        partial<BranchUpgradeConfig>(),
+      );
+      const third = await addReleaseNotes(
+        inputs[2],
+        partial<BranchUpgradeConfig>(),
+      );
+      const repeated = await addReleaseNotes(
+        inputs[0],
+        partial<BranchUpgradeConfig>(),
+      );
+
+      expect(first?.versions?.[0].releaseNotes?.body).toContain('Project A');
+      expect(second?.versions?.[0].releaseNotes?.body).toContain('Project B');
+      expect(third?.versions?.[0].releaseNotes?.body).toContain('Other org');
+      expect(repeated).toEqual(first);
+      expect(fetch).toHaveBeenCalledTimes(3);
+    });
+
     it('matches release notes using gitRef when the tag differs from the version', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {

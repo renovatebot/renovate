@@ -487,11 +487,9 @@ export async function addReleaseNotes(
       hasReleaseNotes: false,
     };
 
-    const { repository, sourceDirectory, type: projectType } = input.project;
+    const { repository, type: projectType } = input.project;
     const cacheNamespace: PackageCacheNamespace = `changelog-${projectType}-notes@v2`;
-    const cacheKeyPrefix = sourceDirectory
-      ? `${repository}:${sourceDirectory}`
-      : `${repository}`;
+    const cacheKeyPrefix = source.getNotesCacheKey(input.project);
 
     const shouldTruncateToPlatformLimit = config.fetchChangeLogs === 'pr';
     const maxBodyLength = shouldTruncateToPlatformLimit
