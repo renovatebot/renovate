@@ -11,7 +11,6 @@ import {
   addBranchStats,
   addExtractionStats,
   addLibYears,
-  addOnboardingStatus,
   addRepositoryMetadata,
   exportStats,
   finalizeReport,
@@ -88,8 +87,7 @@ describe('instrumentation/reporting', () => {
       libYears: { managers: {}, total: 0 },
       dependencyStatus: { outdated: 0, total: 0 },
     });
-    addRepositoryMetadata(config, 'renovate.json');
-    addOnboardingStatus(config, []);
+    addRepositoryMetadata(config, 'renovate.json', []);
 
     expect(getReport()).toEqual({
       problems: [],
@@ -106,7 +104,7 @@ describe('instrumentation/reporting', () => {
       dependencyDashboardIssue: 42,
     };
 
-    addRepositoryMetadata(config, '.github/renovate.json5');
+    addRepositoryMetadata(config, '.github/renovate.json5', []);
 
     expect(getReport()).toEqual({
       problems: [],
@@ -119,6 +117,7 @@ describe('instrumentation/reporting', () => {
           defaultBranch: 'main',
           dependencyDashboardIssue: 42,
           configFileName: '.github/renovate.json5',
+          onboardingPrNumber: null,
         },
       },
     });
@@ -131,7 +130,7 @@ describe('instrumentation/reporting', () => {
       defaultBranch: 'main',
     };
 
-    addRepositoryMetadata(config);
+    addRepositoryMetadata(config, undefined, []);
 
     expect(
       getReport().repositories['myOrg/myRepo'].dependencyDashboardIssue,
@@ -145,7 +144,7 @@ describe('instrumentation/reporting', () => {
       defaultBranch: 'main',
     };
 
-    addRepositoryMetadata(config, '');
+    addRepositoryMetadata(config, '', []);
 
     expect(getReport().repositories['myOrg/myRepo']).not.toHaveProperty(
       'configFileName',
@@ -174,7 +173,7 @@ describe('instrumentation/reporting', () => {
       }),
     ];
 
-    addOnboardingStatus(config, prList);
+    addRepositoryMetadata(config, undefined, prList);
 
     const repoReport = getReport().repositories['myOrg/myRepo'];
     expect(repoReport.repoIsOnboarded).toBe(false);
@@ -197,7 +196,7 @@ describe('instrumentation/reporting', () => {
       }),
     ];
 
-    addOnboardingStatus(config, prList);
+    addRepositoryMetadata(config, undefined, prList);
 
     const repoReport = getReport().repositories['myOrg/myRepo'];
     expect(repoReport.repoIsOnboarded).toBe(true);

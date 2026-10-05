@@ -1,8 +1,5 @@
 import type { RenovateConfig } from '../../../config/types.ts';
-import {
-  addBranchStats,
-  addRepositoryMetadata,
-} from '../../../instrumentation/reporting.ts';
+import { addBranchStats } from '../../../instrumentation/reporting.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import {
@@ -141,11 +138,8 @@ function filterDependencyDashboardData(
 }
 
 export function runBranchSummary(config: RenovateConfig): void {
-  const { scan, branches, configFileName } = getCache();
-
-  addRepositoryMetadata(config, configFileName);
-
   const defaultBranch = config.defaultBranch;
+  const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
   for (const [branchName, cached] of Object.entries(scan ?? {})) {

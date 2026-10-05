@@ -41,7 +41,8 @@ export function addBranchStats(
 
 export function addRepositoryMetadata(
   config: RenovateConfig,
-  configFileName?: string,
+  configFileName: string | undefined,
+  prList: Pr[],
 ): void {
   if (isNullOrUndefined(config.reportType)) {
     return;
@@ -56,18 +57,6 @@ export function addRepositoryMetadata(
   if (configFileName) {
     repoReport.configFileName = configFileName;
   }
-}
-
-export function addOnboardingStatus(
-  config: RenovateConfig,
-  prList: Pr[],
-): void {
-  if (isNullOrUndefined(config.reportType)) {
-    return;
-  }
-
-  coerceRepo(config.repository!);
-  const repoReport = report.repositories[config.repository!];
   repoReport.repoIsOnboarded = config.repoIsOnboarded;
 
   const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
