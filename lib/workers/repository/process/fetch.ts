@@ -109,6 +109,21 @@ async function lookup(
     return Result.ok(dep);
   }
 
+  // A manager may disable a dependency by default, but a vulnerability fix
+  // still goes through - unless a package rule disabled it as well
+  if (
+    depConfig.enabled === false &&
+    dep.enabled === false &&
+    depConfig.isVulnerabilityAlert &&
+    depConfig.skipReason !== 'package-rules'
+  ) {
+    logger.debug(
+      `Dependency: ${depName!}, is disabled by default, but has a vulnerability alert`,
+    );
+    depConfig.enabled = true;
+    dep.enabled = true;
+  }
+
   if (depConfig.enabled === false) {
     logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';
