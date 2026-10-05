@@ -463,7 +463,7 @@ describe('modules/manager/gradle/extract', () => {
         ],
       },
     ]);
-    expect(res![0].deps[1].enabled).toBeUndefined();
+    expect(res![0].deps[1]).not.toHaveProperty('enabled');
   });
 
   describe('registry URLs', () => {
