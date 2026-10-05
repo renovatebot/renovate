@@ -1483,7 +1483,7 @@ describe('modules/platform/azure/index', () => {
           }),
         );
 
-        await azure.reattemptPlatformAutomerge({
+        await azure.reattemptPlatformAutomerge!({
           number: 456,
           platformPrOptions,
         });
@@ -1515,7 +1515,7 @@ describe('modules/platform/azure/index', () => {
         }),
       );
 
-      await azure.reattemptPlatformAutomerge({
+      await azure.reattemptPlatformAutomerge!({
         number: 456,
         platformPrOptions: {
           automergeStrategy: 'auto',
@@ -1545,7 +1545,7 @@ describe('modules/platform/azure/index', () => {
       );
 
       await expect(
-        azure.reattemptPlatformAutomerge({
+        azure.reattemptPlatformAutomerge!({
           number: 456,
           platformPrOptions: {
             automergeStrategy: 'squash',
