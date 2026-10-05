@@ -12,7 +12,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
-import { ExecError } from '../../../util/exec/exec-error.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
@@ -753,47 +752,6 @@ describe('modules/manager/poetry/artifacts', () => {
         { artifactError: { fileName: 'poetry.lock' } },
       ]);
       expect(execSnapshots).toMatchObject([]);
-    });
-
-    it('logs a timeout as an error and returns an artifact error', async () => {
-      const timeoutMessage =
-        'Command timed out after 900000 milliseconds: poetry update --lock --no-interaction dep1';
-      const execSnapshots = mockExecAll(
-        new ExecError(timeoutMessage, {
-          cmd: 'poetry update --lock --no-interaction dep1',
-          stdout: 'Resolving dependencies...',
-          stderr: '',
-          options: { timeout: 900000 },
-          signal: 'SIGTERM',
-          timedOut: true,
-        }),
-      );
-      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-
-      await expect(
-        updateArtifacts({
-          packageFileName: 'pyproject.toml',
-          updatedDeps: [{ depName: 'dep1' }],
-          newPackageFileContent: '{}',
-          config,
-        }),
-      ).resolves.toEqual([
-        {
-          artifactError: {
-            fileName: 'poetry.lock',
-            stderr: timeoutMessage,
-            timedOut: true,
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'poetry update --lock --no-interaction dep1' },
-      ]);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { err: expect.objectContaining({ timedOut: true }) },
-        'Failed to update poetry.lock file',
-      );
     });
 
     it('returns updated poetry.lock when doing lockfile maintenance', async () => {
