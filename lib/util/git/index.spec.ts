@@ -1852,7 +1852,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       it('commits raw bytes for LFS-tracked paths when gitLfs is not set', async () => {
         const home = await tmp.dir({ unsafeCleanup: true });
-        setCustomEnv({ HOME: home.path });
+        // Renovate's Git doesn't receive `GIT_CONFIG_GLOBAL`/`GIT_CONFIG_SYSTEM`, so isolate it from LFS filters that a system-wide git-lfs install (e.g. on CI runners) puts into the machine's Git config
+        setCustomEnv({ HOME: home.path, GIT_CONFIG_NOSYSTEM: '1' });
         const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
         const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
         await git.initRepo({ url: origin.path });

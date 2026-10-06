@@ -681,7 +681,8 @@ describe.runIf(hasGitLfsUpload)(
             ],
             message: 'no git-lfs',
           }),
-        ).rejects.toThrow("clean filter 'lfs' failed");
+          // the error text depends on the Git version
+        ).rejects.toThrow(/git-lfs|filter 'lfs'/);
 
         await expect(
           remoteHasRef('refs/heads/renovate/x'),
