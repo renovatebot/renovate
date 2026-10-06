@@ -29,6 +29,27 @@ Check the tables to see where some dependencies can be hosted.
 | GithubTags        |      yes       |       yes       |
 | TerraformRegistry |      yes       |       yes       |
 
+##### Dynamic module `source`/`version` (Terraform 1.15+)
+
+Terraform `1.15` lets you use a `local` value or a `const` input `variable` as the whole value of a module's `source` ref (the `ref=` part of a Git-style source URL) or `version` attribute, for example:
+
+```hcl
+variable "module_version" {
+  type  = string
+  const = true
+  default = "v1.2.3"
+}
+
+module "example" {
+  source  = "github.com/hashicorp/example?ref=${var.module_version}"
+}
+```
+
+When Renovate finds a `${local.x}` or `${var.x}` reference used as the **entire** `ref`/`version` value, it resolves it to the matching `locals` value or `variable` block's `default`, as long as that declaration is in the **same file**.
+Renovate then proposes updates to the `locals`/`variable` declaration itself, instead of the module's `source` line.
+
+If Renovate can't resolve the reference (for example, the `locals`/`variable` block is declared in a different file, the `variable` has no `default`, or the value isn't a plain string), the dependency is skipped with the reason `contains-variable`.
+
 #### Providers
 
 Providers are deprecated in Terraform `0.13.0`.
