@@ -24,12 +24,6 @@ export const npmActions: Record<string, KnownActionConfig> = {
     versioning: npmVersioning.id,
     withSchema: valSchema('semantic_version'),
   },
-  // https://github.com/azure/setup-helm
-  'denoland/setup-deno': {
-    datasource: NpmDatasource.id,
-    packageName: 'deno',
-    withSchema: valSchema('deno-version'),
-  },
   // https://github.com/expo/expo-github-action
   'expo/expo-github-action': {
     datasource: NpmDatasource.id,
