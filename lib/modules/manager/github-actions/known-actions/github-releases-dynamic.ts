@@ -202,6 +202,18 @@ const TflintWith: ActionSchema = z
     return [parseValue(version)];
   });
 
+// `slsa-framework/actions/{install/verifier,verify/build,verify/source,verify/vsa}`
+// all install slsa-verifier itself, from the same `version`/`repo` pair: the
+// release to install, and the (overridable) repository that publishes it.
+const SlsaVerifierWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    repo: z.string().optional(),
+  })
+  .transform(({ version, repo }) => [
+    { packageName: repo ?? 'slsa-framework/verifier', ...parseValue(version) },
+  ]);
+
 export const githubReleasesDynamicActions: Record<string, KnownActionConfig> = {
   // https://github.com/conda-incubator/setup-miniconda
   'conda-incubator/setup-miniconda': {
@@ -236,6 +248,30 @@ export const githubReleasesDynamicActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/install/verifier
+  'slsa-framework/actions/install/verifier': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/build
+  'slsa-framework/actions/verify/build': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/source
+  'slsa-framework/actions/verify/source': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/vsa
+  'slsa-framework/actions/verify/vsa': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
   },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {

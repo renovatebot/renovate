@@ -307,6 +307,18 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
   },
+  // https://github.com/slsa-framework/actions/tree/main/attest/actions
+  'slsa-framework/actions/attest/actions': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/attester',
+    withSchema: valSchema('version'),
+  },
+  // https://github.com/slsa-framework/actions/tree/main/slsa_with_provenance
+  'slsa-framework/actions/slsa_with_provenance': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/source-tool',
+    withSchema: valSchema('version'),
+  },
   // https://github.com/stCarolas/setup-maven
   'stCarolas/setup-maven': {
     datasource: GithubReleasesDatasource.id,
