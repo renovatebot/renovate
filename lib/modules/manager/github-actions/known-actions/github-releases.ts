@@ -108,6 +108,14 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     // match the bare release tag
     extractVersion: '^v(?<version>\\d+\\..*)$',
   },
+  // https://github.com/denoland/setup-deno
+  'denoland/setup-deno': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'deno',
+    packageName: 'denoland/deno',
+    versioning: npmVersioning.id,
+    withSchema: valSchema('deno-version'),
+  },
   // https://github.com/docker/setup-buildx-action
   'docker/setup-buildx-action': {
     datasource: GithubReleasesDatasource.id,

@@ -2493,10 +2493,11 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
@@ -2508,10 +2509,11 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '2.4.0',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
