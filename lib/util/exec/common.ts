@@ -181,7 +181,10 @@ export function exec(
         if (signal === 'SIGTERM') {
           let resultTimer: NodeJS.Timeout | undefined;
           const resultTimeout = new Promise<undefined>((resolve) => {
-            resultTimer = setTimeout(resolve, SIGTERM_RESULT_TIMEOUT_MS);
+            resultTimer = setTimeout(
+              () => resolve(undefined),
+              SIGTERM_RESULT_TIMEOUT_MS,
+            );
           });
           void Promise.race([subprocessResult, resultTimeout]).then(
             (outcome) => {
