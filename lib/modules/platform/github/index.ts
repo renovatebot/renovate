@@ -560,6 +560,7 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
     mergeQueueEnabled: {},
+    mergeQueueRequired: {},
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -2257,26 +2258,23 @@ async function asyncMergePr(
   strategy?: MergeStrategy,
   bypassRules?: boolean,
 ): Promise<boolean | 'unsupported'> {
+  const baseBranch = pr?.targetBranch ?? '';
   const queueEnabled =
-    !!pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch));
-  // GitHub merges directly when the actor may bypass the merge queue and
-  // enqueues the PR otherwise
+    !!baseBranch && (await isBranchMergeQueueEnabled(baseBranch));
+  if (queueEnabled && config.mergeQueueRequired[baseBranch]) {
+    return asyncEnqueuePr(prNo);
+  }
+
+  // The merge method is only supported for direct merges. GitHub refuses the
+  // direct merge when the actor may not bypass the merge queue, then the PR is
+  // enqueued without a method and the merge queue's own method applies
   const body: Record<string, unknown> = {
-    merge_action: 'default',
+    merge_action: 'direct_merge',
     bypass_rules: bypassRules ?? true,
   };
   const mergeMethod = mapMergeStartegy(strategy) ?? config.mergeMethod;
-  // The merge method only applies to direct merges. On merge queue branches
-  // GitHub uses the repository's default method for a direct bypass merge and
-  // the merge queue's configured method otherwise
-  if (mergeMethod && !queueEnabled) {
+  if (mergeMethod) {
     body.merge_method = mergeMethod;
-  }
-  if (queueEnabled && strategy && strategy !== 'auto') {
-    logger.debug(
-      { pr: prNo, strategy },
-      'The merge method is not sent on branches with a merge queue',
-    );
   }
 
   const outcome = await requestAsyncMerge(prNo, body);
@@ -2286,10 +2284,38 @@ async function asyncMergePr(
   if (outcome === 'rejected') {
     return false;
   }
+  if (outcome.status !== 'failed') {
+    return handleAsyncMergeResult(prNo, outcome);
+  }
+
+  logger.debug(
+    { pr: prNo, message: outcome.details.message },
+    'GitHub refused the direct merge',
+  );
+  if (!queueEnabled) {
+    return false;
+  }
+  if (regEx(/merge queue/i).test(outcome.details.message)) {
+    config.mergeQueueRequired[baseBranch] = true;
+    logger.debug(
+      { baseBranch },
+      'Direct merges require the merge queue, later PRs on this branch are added to the merge queue directly',
+    );
+  }
+  return asyncEnqueuePr(prNo);
+}
+
+async function asyncEnqueuePr(prNo: number): Promise<boolean> {
+  const outcome = await requestAsyncMerge(prNo, {
+    merge_action: 'merge_queue',
+  });
+  if (isString(outcome)) {
+    return false;
+  }
   if (outcome.status === 'failed') {
     logger.debug(
       { pr: prNo, message: outcome.details.message },
-      'GitHub refused the merge',
+      'Failed to add PR to the merge queue',
     );
     return false;
   }
