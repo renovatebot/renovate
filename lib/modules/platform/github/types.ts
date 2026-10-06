@@ -138,6 +138,7 @@ export interface LocalRepoConfig {
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
   mergeQueueEnabled: Record<string, boolean>;
+  mergeQueueRequired: Record<string, boolean>;
 }
 
 export interface GhRepo {
