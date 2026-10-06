@@ -59,7 +59,7 @@ export async function downloadAndExtractPackage(
     } catch (err) {
       logger.debug(
         { baseSuiteUrl, packagePath, err },
-        'Failed to fetch package file',
+        'Failed to parse package info from release file',
       );
     }
   }
@@ -127,6 +127,7 @@ export async function downloadAndExtractPackage(
           },
           'Failed to extract package file from compressed file',
         );
+        throw error;
       } finally {
         await fs.rmCache(downloadedPackageFile);
       }
@@ -174,7 +175,7 @@ export function getPackageFromReleaseFile(
     }
     // 64 --> SHA256
     const regex = regEx(
-      `\\s+(?<hash>[a-f0-9]{64})\\s+\\d+(?:\\s+(${RegExp.escape(packagesFile)}))?\\r?\\n`,
+      `\\s+(?<hash>[a-f0-9]{64})\\s+\\d+\\s+${RegExp.escape(packagesFile)}\\r?\\n`,
     );
 
     const match = regex.exec(releaseFileContent);
