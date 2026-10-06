@@ -122,6 +122,7 @@ import type {
   GithubHost,
   LocalRepoConfig,
   PlatformConfig,
+  PrMergeStatus,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
 import {
@@ -2081,31 +2082,18 @@ export async function isBranchMergeQueueEnabled(
   return result;
 }
 
-export async function isPrInMergeQueue(prNo: number): Promise<boolean> {
-  const status = await getPrMergeStatus(
+function getMergeStatus(prNo: number): Promise<PrMergeStatus | null> {
+  return getPrMergeStatus(
     githubApi,
     config.repositoryOwner,
     config.repositoryName,
     prNo,
   );
-  return status?.isInMergeQueue === true;
 }
 
-async function canMergePrAsAdmin(prNo: number): Promise<boolean> {
-  const status = await getPrMergeStatus(
-    githubApi,
-    config.repositoryOwner,
-    config.repositoryName,
-    prNo,
-  );
-  if (!status) {
-    logger.debug(
-      { pr: prNo },
-      'Could not determine whether the merge queue may be bypassed, assuming it may not',
-    );
-    return false;
-  }
-  return status.viewerCanMergeAsAdmin;
+export async function isPrInMergeQueue(prNo: number): Promise<boolean> {
+  const status = await getMergeStatus(prNo);
+  return status?.isInMergeQueue === true;
 }
 
 export async function assertPrNotInMergeQueue(
@@ -2281,13 +2269,29 @@ async function asyncMergePr(
 
   const queueEnabled =
     !!pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch));
+  const status = await getMergeStatus(prNo);
+  if (!status) {
+    logger.debug(
+      { pr: prNo },
+      'Could not fetch the PR merge status, assuming the merge queue and rules may not be bypassed',
+    );
+  }
+  // Without bypassing rules the merge queue and blocking rules apply
+  const canBypass =
+    bypassRules !== false && status?.viewerCanMergeAsAdmin === true;
   // The merge method is only supported for direct merges, the merge queue uses
-  // its own configured method. Without bypassing rules the merge queue applies.
-  if (
-    queueEnabled &&
-    (bypassRules === false || !(await canMergePrAsAdmin(prNo)))
-  ) {
+  // its own configured method
+  if (queueEnabled && !canBypass) {
     return requestAsyncMerge(prNo, { merge_action: 'merge_queue' });
+  }
+  // This pre-check replaces a merge request GitHub would refuse in the
+  // background. Bypass actors merge regardless of BLOCKED.
+  if (status?.mergeStateStatus === 'BLOCKED' && !canBypass) {
+    logger.info(
+      { pr: prNo, mergeStateStatus: status.mergeStateStatus },
+      'A branch protection or ruleset blocks the merge, not requesting it',
+    );
+    return false;
   }
 
   const body: Record<string, unknown> = {

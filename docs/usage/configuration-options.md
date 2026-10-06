@@ -281,7 +281,7 @@ Renovate merges a PR itself when `automergeType=pr` and either `platformAutomerg
 
 Set `automergeBypassRules` to `false` to have GitHub enforce those rules.
 On branches with a merge queue, Renovate then adds the PR to the merge queue directly.
-On other branches GitHub enforces the rules, and a blocked PR stays open until they are met.
+On other branches Renovate does not request the merge while a branch protection or ruleset blocks the PR, and the PR stays open until the rules are met.
 
 This option has no effect on GitHub's native auto-merge (`platformAutomerge=true`), which never bypasses rules.
 It also has no effect on GitHub Enterprise Server versions without the asynchronous merge API, where the classic merge endpoint always bypasses the rules.

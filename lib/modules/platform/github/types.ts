@@ -193,6 +193,7 @@ export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
 export interface PrMergeStatus {
   isInMergeQueue: boolean;
   viewerCanMergeAsAdmin: boolean;
+  mergeStateStatus: string;
 }
 
 export interface PendingMerge {
