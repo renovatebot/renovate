@@ -381,6 +381,7 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
 
 interface MavenInterimPackageFile extends PackageFile {
   mavenProps?: Record<string, any>;
+  mavenJavaVersion?: string;
   parent?: string;
 }
 
@@ -412,6 +413,7 @@ export function extractPackage(
   }
 
   const propsNode = project.childNamed('properties');
+  result.mavenJavaVersion = propsNode?.childNamed('java.version')?.val.trim();
   const props: Record<string, MavenProp> = {};
   if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
@@ -531,9 +533,11 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages = new Set<string>();
+    let javaVersion: string | undefined;
     let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
+      javaVersion ??= pkg.mavenJavaVersion;
 
       // v8 ignore else -- the extractor always populates this field
       if (pkg.deps) {
@@ -556,6 +560,9 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     }
     propsHierarchy.unshift({});
     extractedProps[name] = Object.assign.apply(null, propsHierarchy as any);
+    if (javaVersion && !containsPlaceholder(javaVersion)) {
+      extractedPackages[name].extractedConstraints = { java: javaVersion };
+    }
   });
 
   // Resolve registryUrls
@@ -607,6 +614,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
 function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
+    delete packageFile.mavenJavaVersion;
     delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
