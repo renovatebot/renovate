@@ -33,6 +33,7 @@ const NONTERM = [
   'SIGWINCH',
 ];
 
+const SIGTERM_RESULT_TIMEOUT_MS = 1000;
 const encoding = 'utf8';
 
 function stringify(list: Buffer[], writer: OutputWriter | undefined): string {
@@ -178,30 +179,46 @@ export function exec(
       if (signal) {
         kill(cp, signal);
         if (signal === 'SIGTERM') {
-          void subprocessResult.then((outcome) => {
-            const result = 'result' in outcome ? outcome.result : outcome.error;
-            const timedOut =
-              isObject(result) &&
-              'timedOut' in result &&
-              result.timedOut === true;
-            const command = cp.spawnargs.join(' ');
-            let message = `Command failed: ${command}\nInterrupted by ${signal}`;
-            if (timedOut) {
-              message =
-                isObject(result) &&
-                'shortMessage' in result &&
-                isString(result.shortMessage)
-                  ? result.shortMessage
-                  : `Command timed out${opts.timeout === undefined ? '' : ` after ${opts.timeout} milliseconds`}: ${command}`;
-            }
-            reject(
-              new ExecError(message, {
-                ...rejectInfo(),
-                signal,
-                timedOut,
-              }),
-            );
+          let resultTimer: NodeJS.Timeout | undefined;
+          const resultTimeout = new Promise<undefined>((resolve) => {
+            resultTimer = setTimeout(resolve, SIGTERM_RESULT_TIMEOUT_MS);
           });
+          void Promise.race([subprocessResult, resultTimeout]).then(
+            (outcome) => {
+              clearTimeout(resultTimer);
+              if (outcome === undefined) {
+                cleanupChildProcess(cp);
+                logger.debug(
+                  { command: cp.spawnargs.join(' ') },
+                  'Timed out waiting for command result after SIGTERM',
+                );
+              }
+              const result =
+                outcome &&
+                ('result' in outcome ? outcome.result : outcome.error);
+              const timedOut =
+                isObject(result) &&
+                'timedOut' in result &&
+                result.timedOut === true;
+              const command = cp.spawnargs.join(' ');
+              let message = `Command failed: ${command}\nInterrupted by ${signal}`;
+              if (timedOut) {
+                message =
+                  isObject(result) &&
+                  'shortMessage' in result &&
+                  isString(result.shortMessage)
+                    ? result.shortMessage
+                    : `Command timed out${opts.timeout === undefined ? '' : ` after ${opts.timeout} milliseconds`}: ${command}`;
+              }
+              reject(
+                new ExecError(message, {
+                  ...rejectInfo(),
+                  signal,
+                  timedOut,
+                }),
+              );
+            },
+          );
           return;
         }
         reject(
@@ -271,6 +288,15 @@ export function exec(
   });
 }
 
+function cleanupChildProcess(cp: ChildProcess): void {
+  // destroying stdio is needed for unref to work
+  // https://nodejs.org/api/child_process.html#subprocessunref
+  // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+  cp.stderr?.destroy();
+  cp.stdout?.destroy();
+  cp.unref();
+}
+
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
     if (cp.pid && getEnv().RENOVATE_X_EXEC_GPID_HANDLE) {
@@ -282,12 +308,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
        */
       return process.kill(-cp.pid, signal);
     }
-    // destroying stdio is needed for unref to work
-    // https://nodejs.org/api/child_process.html#subprocessunref
-    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-    cp.stderr?.destroy();
-    cp.stdout?.destroy();
-    cp.unref();
+    cleanupChildProcess(cp);
     return cp.kill(signal);
   } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,

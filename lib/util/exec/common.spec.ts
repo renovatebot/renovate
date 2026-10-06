@@ -50,6 +50,7 @@ interface StubArgs {
     shortMessage?: string;
     timedOut?: boolean;
   };
+  subprocessResult?: Promise<unknown>;
   pid?: number;
 }
 
@@ -86,6 +87,7 @@ function getSpawnStub(args: StubArgs): any {
     timeout,
     timeoutRejection,
     resolvedResult = { timedOut: false },
+    subprocessResult,
     pid = 31415,
   } = args;
   const listeners: Events = {};
@@ -117,7 +119,7 @@ function getSpawnStub(args: StubArgs): any {
             return normalizedResult.then(...args);
           },
         }
-      : resultPromise;
+      : (subprocessResult ?? resultPromise);
 
   // init listeners
   function on(name: string, cb: Listener) {
@@ -697,6 +699,169 @@ describe('util/exec/common', () => {
       });
     });
 
+    describe('SIGTERM result settlement', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllEnvs();
+      });
+
+      it.each`
+        useProcessGroup | timeout
+        ${false}        | ${undefined}
+        ${false}        | ${60000}
+        ${true}         | ${undefined}
+        ${true}         | ${60000}
+      `(
+        'bounds a pending result with process group handling=$useProcessGroup and timeout=$timeout',
+        async ({ useProcessGroup, timeout }) => {
+          vi.stubEnv(
+            'RENOVATE_X_EXEC_GPID_HANDLE',
+            useProcessGroup ? 'true' : undefined,
+          );
+          const killSpy = vi.spyOn(process, 'kill').mockReturnValue(true);
+          const stub = getSpawnStub({
+            cmd,
+            exitCode: null,
+            exitSignal: 'SIGTERM',
+            subprocessResult: new Promise<never>(() => {
+              // Simulate a surviving helper keeping the output pipes open.
+            }),
+          });
+          const stdoutDestroy = vi.spyOn(
+            stub.nodeChildProcess.stdout,
+            'destroy',
+          );
+          const stderrDestroy = vi.spyOn(
+            stub.nodeChildProcess.stderr,
+            'destroy',
+          );
+          const unref = vi.spyOn(stub.nodeChildProcess, 'unref');
+          execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+          try {
+            const result = exec(cmd, partial<RawExecOptions>({ timeout }));
+            const onRejected = vi.fn();
+            void result.catch(onRejected);
+
+            await vi.advanceTimersByTimeAsync(999);
+
+            expect(onRejected).not.toHaveBeenCalled();
+            expect(stdoutDestroy).toHaveBeenCalledTimes(
+              useProcessGroup ? 0 : 1,
+            );
+            expect(stderrDestroy).toHaveBeenCalledTimes(
+              useProcessGroup ? 0 : 1,
+            );
+
+            await vi.advanceTimersByTimeAsync(1);
+
+            expect(onRejected).toHaveBeenCalledTimes(1);
+            await expect(result).rejects.toMatchObject({
+              cmd,
+              signal: 'SIGTERM',
+              timedOut: undefined,
+              message: `Command failed: ${cmd}\nInterrupted by SIGTERM`,
+            });
+            expect(stdoutDestroy).toHaveBeenCalledTimes(
+              useProcessGroup ? 1 : 2,
+            );
+            expect(stderrDestroy).toHaveBeenCalledTimes(
+              useProcessGroup ? 1 : 2,
+            );
+            expect(unref).toHaveBeenCalledTimes(useProcessGroup ? 1 : 2);
+            expect(vi.getTimerCount()).toBe(0);
+          } finally {
+            killSpy.mockRestore();
+          }
+        },
+      );
+
+      it.each(['resolve', 'reject'])(
+        'preserves timeout metadata when Execa results %s within the grace period',
+        async (settlement) => {
+          let completeResult!: (result: unknown) => void;
+          const delayedResult = new Promise<unknown>((resolve, reject) => {
+            completeResult = settlement === 'resolve' ? resolve : reject;
+          });
+          const stub = getSpawnStub({
+            cmd,
+            exitCode: null,
+            exitSignal: 'SIGTERM',
+            subprocessResult: delayedResult,
+          });
+          execa.mockImplementationOnce((_cmd, _opts) => stub);
+          const result = exec(cmd, partial<RawExecOptions>({ timeout: 5 }));
+          const onRejected = vi.fn();
+          void result.catch(onRejected);
+
+          await vi.advanceTimersByTimeAsync(999);
+
+          expect(onRejected).not.toHaveBeenCalled();
+
+          completeResult({
+            timedOut: true,
+            shortMessage: `Command timed out after 5 milliseconds: ${cmd}`,
+          });
+
+          await expect(result).rejects.toMatchObject({
+            cmd,
+            signal: 'SIGTERM',
+            timedOut: true,
+            message: `Command timed out after 5 milliseconds: ${cmd}`,
+          });
+          expect(onRejected).toHaveBeenCalledTimes(1);
+          expect(vi.getTimerCount()).toBe(0);
+        },
+      );
+
+      it.each(['resolve', 'reject'])(
+        'ignores Execa results that %s after the grace period',
+        async (settlement) => {
+          let completeResult!: (result: unknown) => void;
+          const delayedResult = new Promise<unknown>((resolve, reject) => {
+            completeResult = settlement === 'resolve' ? resolve : reject;
+          });
+          const stub = getSpawnStub({
+            cmd,
+            exitCode: null,
+            exitSignal: 'SIGTERM',
+            subprocessResult: delayedResult,
+          });
+          execa.mockImplementationOnce((_cmd, _opts) => stub);
+          const onRejected = vi.fn();
+          const unhandledRejection = vi.fn();
+          process.on('unhandledRejection', unhandledRejection);
+
+          try {
+            const result = exec(cmd, partial<RawExecOptions>({ timeout: 5 }));
+            void result.catch(onRejected);
+
+            await vi.advanceTimersByTimeAsync(1000);
+
+            expect(onRejected).toHaveBeenCalledTimes(1);
+            await expect(result).rejects.toMatchObject({
+              signal: 'SIGTERM',
+              timedOut: undefined,
+              message: `Command failed: ${cmd}\nInterrupted by SIGTERM`,
+            });
+
+            completeResult({ timedOut: true });
+            await vi.advanceTimersByTimeAsync(0);
+
+            expect(onRejected).toHaveBeenCalledTimes(1);
+            expect(unhandledRejection).not.toHaveBeenCalled();
+            expect(vi.getTimerCount()).toBe(0);
+          } finally {
+            process.off('unhandledRejection', unhandledRejection);
+          }
+        },
+      );
+    });
+
     it('handles a SIGTERM result without timeout metadata', async () => {
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
@@ -1050,7 +1215,9 @@ describe('util/exec/common', () => {
   });
 
   describe('handle gpid', () => {
-    const killSpy = vi.spyOn(process, 'kill');
+    beforeEach(() => {
+      vi.spyOn(process, 'kill');
+    });
 
     afterEach(() => {
       vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', undefined);
@@ -1063,7 +1230,7 @@ describe('util/exec/common', () => {
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       execa.mockImplementationOnce((_cmd, _opts) => stub);
-      killSpy.mockImplementationOnce((_pid, _signal) => true);
+      vi.mocked(process.kill).mockImplementationOnce((_pid, _signal) => true);
       await expect(
         exec(cmd, partial<RawExecOptions>({})),
       ).rejects.toMatchObject({
@@ -1083,7 +1250,7 @@ describe('util/exec/common', () => {
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       execa.mockImplementationOnce((_cmd, _opts) => stub);
-      killSpy.mockImplementationOnce((_pid, _signal) => {
+      vi.mocked(process.kill).mockImplementationOnce((_pid, _signal) => {
         throw new Error();
       });
       await expect(
