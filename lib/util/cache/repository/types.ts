@@ -163,6 +163,7 @@ export interface RepoCacheData {
       pullRequestsCache?: unknown;
       graphqlPageCache?: unknown;
       issuesCache?: Record<number, unknown>;
+      pendingMerges?: Record<number, { uuid: string; requestedAt: string }>;
     };
     bitbucket?: {
       pullRequestsCache?: unknown;

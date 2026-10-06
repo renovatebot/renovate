@@ -194,3 +194,8 @@ export interface PrMergeStatus {
   isInMergeQueue: boolean;
   viewerCanMergeAsAdmin: boolean;
 }
+
+export interface PendingMerge {
+  uuid: string;
+  requestedAt: string;
+}

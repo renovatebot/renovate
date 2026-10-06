@@ -91,6 +91,11 @@ import {
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import {
+  clearPendingMerge,
+  getPendingMerge,
+  setPendingMerge,
+} from './merge-cache.ts';
+import {
   getPrCache,
   getPrMergeStatus,
   resetPrMergeStatusCache,
@@ -2269,6 +2274,11 @@ async function asyncMergePr(
   strategy?: MergeStrategy,
   bypassRules?: boolean,
 ): Promise<MergePrResult | 'unsupported'> {
+  const previous = await checkPreviousAsyncMerge(prNo);
+  if (previous !== null) {
+    return previous;
+  }
+
   const queueEnabled =
     !!pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch));
   // The merge method is only supported for direct merges, the merge queue uses
@@ -2291,17 +2301,78 @@ async function asyncMergePr(
   return requestAsyncMerge(prNo, body);
 }
 
+function asyncMergeUrl(prNo: number): string {
+  return `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}/merge-async`;
+}
+
+function asyncMergeHttpOptions(): GithubHttpOptions {
+  const options: GithubHttpOptions = {};
+  if (config.forkToken) {
+    options.token = config.forkToken;
+  }
+  return options;
+}
+
+/**
+ * Looks up the result of the async merge request sent in an earlier run.
+ * Returns null when a new merge request should be sent.
+ */
+async function checkPreviousAsyncMerge(
+  prNo: number,
+): Promise<MergePrResult | null> {
+  const pendingMerge = getPendingMerge(prNo);
+  if (!pendingMerge) {
+    return null;
+  }
+  const { uuid, requestedAt } = pendingMerge;
+  let result: MergeAsyncResult;
+  try {
+    const res = await githubApi.getJson(
+      `${asyncMergeUrl(prNo)}/${uuid}`,
+      { ...asyncMergeHttpOptions(), memCache: false },
+      MergeAsyncResult,
+    );
+    result = res.body;
+  } catch (err) {
+    clearPendingMerge(prNo);
+    if (err.statusCode === 404) {
+      logger.debug(
+        { pr: prNo, uuid },
+        'The result of the previous merge request has expired',
+      );
+    } else {
+      logger.warn(
+        { err, pr: prNo },
+        'Failed to fetch the result of the previous merge request',
+      );
+    }
+    return null;
+  }
+
+  if (result.status === 'pending') {
+    logger.info(
+      { pr: prNo, uuid, requestedAt },
+      'Previous merge request is still pending, not requesting another merge',
+    );
+    return 'pending';
+  }
+  clearPendingMerge(prNo);
+  if (result.status === 'failed') {
+    logger.info(
+      { pr: prNo, uuid, message: result.details.message },
+      'Previous merge request failed, requesting the merge again',
+    );
+    return null;
+  }
+  return handleAsyncMergeResult(prNo, result);
+}
+
 async function requestAsyncMerge(
   prNo: number,
   body: Record<string, unknown>,
 ): Promise<MergePrResult | 'unsupported'> {
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/pulls/${prNo}/merge-async`;
-  const options: GithubHttpOptions = { body };
-  if (config.forkToken) {
-    options.token = config.forkToken;
-  }
+  const url = asyncMergeUrl(prNo);
+  const options: GithubHttpOptions = { ...asyncMergeHttpOptions(), body };
   logger.debug({ options, url }, 'mergePr');
   let result: MergeAsyncResult;
   try {
@@ -2328,8 +2399,12 @@ function handleAsyncMergeResult(
     return true;
   }
   if (result.status === 'pending') {
+    const uuid = result.details.uuid;
+    if (uuid) {
+      setPendingMerge(prNo, uuid);
+    }
     logger.info(
-      { pr: prNo, uuid: result.details.uuid },
+      { pr: prNo, uuid },
       'Merge requested, GitHub merges the PR in the background',
     );
     return 'pending';
@@ -2348,8 +2423,12 @@ function handleAsyncMergeError(
   const response = err.response?.body;
   if (err.statusCode === 409) {
     platformConfig.asyncMergeSupported = true;
+    const uuid = response?.details?.uuid;
+    if (isNonEmptyString(uuid)) {
+      setPendingMerge(prNo, uuid);
+    }
     logger.debug(
-      { pr: prNo, uuid: response?.details?.uuid },
+      { pr: prNo, uuid },
       'An earlier merge request for this PR is still pending',
     );
     return 'pending';
