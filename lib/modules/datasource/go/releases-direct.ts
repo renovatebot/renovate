@@ -6,6 +6,7 @@ import { Datasource } from '../datasource.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
+import { GithubDigestDatasource } from '../github-digest/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -65,6 +66,7 @@ export class GoDirectDatasource extends Datasource {
   git: GitTagsDatasource;
   readonly gitea = new GiteaTagsDatasource();
   github: GithubTagsDatasource;
+  readonly githubDigest = new GithubDigestDatasource();
   gitlab: GitlabTagsDatasource;
   bitbucket: BitbucketTagsDatasource;
 
