@@ -134,6 +134,9 @@ If GitHub refused the merge, Renovate logs the reason at info level and requests
 While the request is still pending, Renovate does not send a new one.
 Renovate remembers the request in the [repository cache](../../../self-hosted-configuration.md#repositorycache), so this lookup needs `repositoryCache=enabled`.
 
+When no result of an earlier request is known, Renovate asks GitHub whether the PR is blocked by a branch protection or ruleset.
+If it is and Renovate may not bypass the rules, Renovate logs this and does not request the merge, so a blocked PR costs one request per run.
+
 Renovate asks GitHub to bypass the repository rules that Renovate is permitted to bypass, which matches how the classic merge endpoint behaves.
 If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (GitHub's `viewerCanMergeAsAdmin`).
 If it may, Renovate merges the PR directly with the configured merge method.

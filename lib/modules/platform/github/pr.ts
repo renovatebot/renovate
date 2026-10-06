@@ -257,6 +257,7 @@ async function fetchPrMergeStatus(
     return {
       isInMergeQueue: pullRequest.isInMergeQueue === true,
       viewerCanMergeAsAdmin: pullRequest.viewerCanMergeAsAdmin === true,
+      mergeStateStatus: pullRequest.mergeStateStatus ?? 'UNKNOWN',
     };
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
