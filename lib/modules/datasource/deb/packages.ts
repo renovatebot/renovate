@@ -123,7 +123,7 @@ export async function downloadAndExtractPackage(
             downloadedPackageFile,
             componentUrl,
             compression: packageReleaseInfo.compression,
-            error: error.message,
+            err: error,
           },
           'Failed to extract package file from compressed file',
         );
