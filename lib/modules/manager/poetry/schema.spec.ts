@@ -122,11 +122,6 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://some-vcs.com/primary',
         },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
       ]);
     });
 
@@ -180,11 +175,6 @@ describe('modules/manager/poetry/schema', () => {
           priority: 'primary',
           url: 'https://foo.bar/simple/',
         },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
-        },
       ]);
     });
 
@@ -201,11 +191,6 @@ describe('modules/manager/poetry/schema', () => {
           name: 'foo',
           priority: 'primary',
           url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
         },
       ]);
     });
@@ -287,7 +272,7 @@ describe('modules/manager/poetry/schema', () => {
       ]);
     });
 
-    it('unordered sources with implicit PyPI priority="secondary"', () => {
+    it('unordered sources with primary and secondary priorities', () => {
       expect(
         PoetrySources.parse([
           {
@@ -310,11 +295,6 @@ describe('modules/manager/poetry/schema', () => {
           name: 'foo',
           priority: 'secondary',
           url: 'https://foo.bar/simple/',
-        },
-        {
-          name: 'pypi',
-          priority: 'secondary',
-          url: 'https://pypi.org/pypi/',
         },
       ]);
     });

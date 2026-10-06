@@ -27,6 +27,32 @@ const pyproject12toml = Fixtures.get('pyproject.12.toml');
 
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
+    it.each([
+      ['primary', 'priority = "primary"', ['https://example.com/simple/']],
+      ['omitted', '', ['https://example.com/simple/']],
+      [
+        'supplemental',
+        'priority = "supplemental"',
+        ['https://pypi.org/pypi/', 'https://example.com/simple/'],
+      ],
+      ['explicit', 'priority = "explicit"', ['https://pypi.org/pypi/']],
+      [
+        'explicit PyPI',
+        'priority = "primary"\n\n[[tool.poetry.source]]\nname = "PyPI"\npriority = "primary"',
+        ['https://example.com/simple/', 'https://pypi.org/pypi/'],
+      ],
+    ])(
+      'respects Poetry source priority: %s',
+      async (_name, priority, registryUrls) => {
+        const content = `[tool.poetry.dependencies]\nrequests = "^2.32"\n\n[[tool.poetry.source]]\nname = "internal"\nurl = "https://example.com/simple/"\n${priority}\n`;
+        const result = await extractPackageFile(content, 'pyproject.toml');
+        expect(result?.deps).toContainEqual(
+          expect.objectContaining({ depName: 'requests' }),
+        );
+        expect(result?.registryUrls).toEqual(registryUrls);
+      },
+    );
+
     let filename: string;
 
     beforeEach(() => {
@@ -532,7 +558,6 @@ describe('modules/manager/poetry/extract', () => {
         expect(res?.registryUrls).toMatchObject([
           'https://foo.bar/simple/',
           'https://bar.baz/+simple/',
-          'https://pypi.org/pypi/',
         ]);
       });
 
