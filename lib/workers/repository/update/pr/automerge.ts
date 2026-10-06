@@ -18,6 +18,7 @@ export type PrAutomergeBlockReason =
   | 'Conflicted'
   | 'DryRun'
   | 'InMergeQueue'
+  | 'MergePending'
   | 'PlatformNotReady'
   | 'PlatformRejection'
   | 'off schedule';
@@ -150,6 +151,13 @@ export async function checkAutoMerge(
     id: pr.number,
     strategy: automergeStrategy,
   });
+  if (res === 'pending') {
+    logger.info(
+      { pr: pr.number, prTitle: pr.title },
+      'PR merge requested, the platform merges it in the background',
+    );
+    return { automerged: false, prAutomergeBlockReason: 'MergePending' };
+  }
   if (res) {
     if (mergeQueueEnabled) {
       logger.info(

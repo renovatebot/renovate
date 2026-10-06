@@ -125,13 +125,14 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 
 ## Merging pull requests
 
-Renovate merges PRs with GitHub's [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously).
-GitHub processes the merge in the background, so Renovate waits a short time for the result.
-If the merge is not done by then, Renovate checks the PR again on its next run.
+Renovate requests the merge through GitHub's [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) and does not wait for it.
+GitHub completes the merge in the background, and Renovate sees the merged PR on its next run, so Renovate deletes the branch then.
+We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
 By default Renovate asks GitHub to bypass the rules it is permitted to bypass, see [`automergeBypassRules`](../../../configuration-options.md#automergebypassrules).
-If the base branch has a merge queue, Renovate first requests a direct merge, which succeeds when Renovate may bypass the merge queue.
-Otherwise Renovate adds the PR to the merge queue, which merges it with the merge queue's configured merge method; once GitHub has refused a direct merge because of the merge queue, later PRs on that branch are added to the queue directly for the rest of the run.
+If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (GitHub's `viewerCanMergeAsAdmin`).
+If it may, Renovate merges the PR directly with the configured merge method.
+Otherwise Renovate adds the PR to the merge queue, which merges it with the merge queue's configured merge method.
 
 GitHub Enterprise Server versions that do not have the asynchronous merge API yet fall back to the classic merge endpoint.
 

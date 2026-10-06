@@ -15,7 +15,7 @@ import { parseLinkHeader } from '../../../util/url.ts';
 import { ApiCache } from './api-cache.ts';
 import { coerceRestPr } from './common.ts';
 import { prIsInMergeQueueQuery } from './graphql.ts';
-import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
+import type { ApiPageCache, GhPr, GhRestPr, PrMergeStatus } from './types.ts';
 
 function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
@@ -199,20 +199,44 @@ export function updatePrCache(pr: GhPr): void {
   cache.updateItem(pr);
 }
 
+const prMergeStatusCache = new Map<number, PrMergeStatus>();
+
+export function resetPrMergeStatusCache(): void {
+  prMergeStatusCache.clear();
+}
+
 /**
- * Check whether the PR is currently in the merge queue.
- * Fails open: errors are logged at debug level and treated as "not queued".
+ * Fetch whether the PR is in the merge queue and whether the viewer can bypass
+ * branch protections to merge it, memoized per PR until the cache is reset.
+ * Returns null when the status cannot be fetched.
  */
-export async function isPrInMergeQueue(
+export async function getPrMergeStatus(
   http: GithubHttp,
   owner: string,
   name: string,
   prNo: number,
-): Promise<boolean> {
+): Promise<PrMergeStatus | null> {
+  const cached = prMergeStatusCache.get(prNo);
+  if (cached) {
+    return cached;
+  }
+  const status = await fetchPrMergeStatus(http, owner, name, prNo);
+  if (status) {
+    prMergeStatusCache.set(prNo, status);
+  }
+  return status;
+}
+
+async function fetchPrMergeStatus(
+  http: GithubHttp,
+  owner: string,
+  name: string,
+  prNo: number,
+): Promise<PrMergeStatus | null> {
   try {
     const res = await http.requestGraphql<{
       repository: {
-        pullRequest: { isInMergeQueue: boolean } | null;
+        pullRequest: Partial<PrMergeStatus> | null;
       };
     }>(prIsInMergeQueueQuery, {
       variables: { owner, name, number: prNo },
@@ -222,16 +246,23 @@ export async function isPrInMergeQueue(
     if (res?.errors) {
       logger.debug(
         { prNo, errors: res.errors },
-        'Failed to fetch PR merge queue status',
+        'Failed to fetch PR merge status',
       );
-      return false;
+      return null;
     }
-    return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
+    const pullRequest = res?.data?.repository?.pullRequest;
+    if (!pullRequest) {
+      return null;
+    }
+    return {
+      isInMergeQueue: pullRequest.isInMergeQueue === true,
+      viewerCanMergeAsAdmin: pullRequest.viewerCanMergeAsAdmin === true,
+    };
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;
     }
-    logger.debug({ prNo, err }, 'Error fetching PR merge queue status');
-    return false;
+    logger.debug({ prNo, err }, 'Error fetching PR merge status');
+    return null;
   }
 }

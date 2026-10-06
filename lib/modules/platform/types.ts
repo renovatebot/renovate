@@ -176,6 +176,13 @@ export interface FindPRConfig {
   targetBranch?: string | null;
   includeOtherAuthors?: boolean;
 }
+/**
+ * `'pending'` means the platform accepted the merge request and completes it in
+ * the background, so the caller must not treat the PR as merged nor delete its
+ * branch.
+ */
+export type MergePrResult = boolean | 'pending';
+
 export interface MergePRConfig {
   branchName?: string;
   bypassRules?: boolean;
@@ -266,7 +273,7 @@ export interface Platform {
     rebaseLabel?: string,
   ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(config: MergePRConfig): Promise<boolean>;
+  mergePr(config: MergePRConfig): Promise<MergePrResult>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;

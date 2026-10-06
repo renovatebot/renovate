@@ -280,8 +280,8 @@ This matches how GitHub's classic merge endpoint behaves.
 Renovate merges a PR itself when `automergeType=pr` and either `platformAutomerge=false` or the platform automerge was not possible.
 
 Set `automergeBypassRules` to `false` to have GitHub enforce those rules.
-If the base branch has a merge queue, Renovate then adds the PR to the merge queue instead of merging it directly.
-Otherwise a PR that still needs reviews stays open.
+On branches with a merge queue, Renovate then adds the PR to the merge queue directly.
+On other branches GitHub enforces the rules, and a blocked PR stays open until they are met.
 
 This option has no effect on GitHub's native auto-merge (`platformAutomerge=true`), which never bypasses rules.
 It also has no effect on GitHub Enterprise Server versions without the asynchronous merge API, where the classic merge endpoint always bypasses the rules.
@@ -4632,6 +4632,7 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 
 By default Renovate deletes, or "prunes", the branch after automerging.
 Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
+On GitHub the merge completes in the background, so Renovate removes the branch on its next run.
 
 ## `pruneStaleBranches`
 
