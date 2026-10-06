@@ -1,7 +1,7 @@
 import type { PackageDependency } from '../types.ts';
 
 export interface AnsibleGalaxyManagerData {
-  name: string | null;
+  name?: string;
   version: string | null;
   type?: string | null;
   source?: string | null;

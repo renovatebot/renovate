@@ -138,7 +138,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       );
     });
 
-    it('extracts a galaxy collection without a name', () => {
+    it('skips a galaxy collection without a name', () => {
       const yamlFile = codeBlock`collections:
       - type: galaxy
         version: 1.0.0`;
@@ -146,10 +146,8 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps).toEqual([
         {
           currentValue: '1.0.0',
-          datasource: 'galaxy-collection',
-          depName: undefined,
           depType: 'galaxy-collection',
-          registryUrls: [],
+          skipReason: 'invalid-name',
         },
       ]);
     });

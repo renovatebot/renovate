@@ -20,7 +20,7 @@ function getHelmDep(
   repository: string,
   tag: string,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency {
+): PackageDependency<never> {
   const dep = getDep(`${registry}${repository}:${tag}`, {
     specifyReplaceString: false,
     registryAliases,
@@ -37,17 +37,17 @@ function getHelmDep(
  *
  * @param parsedContent
  */
-export function findDependencies(
+export function findDependencies<T = never>(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency[] {
-  return findDependenciesInternal(parsedContent, [], registryAliases);
+): PackageDependency<T>[] {
+  return findDependenciesInternal<T>(parsedContent, [], registryAliases);
 }
-export function findDependenciesInternal(
+export function findDependenciesInternal<T = never>(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
-  packageDependencies: PackageDependency[],
+  packageDependencies: PackageDependency<T>[],
   registryAliases: Record<string, string> | undefined,
-): PackageDependency[] {
+): PackageDependency<T>[] {
   if (!isObject(parsedContent)) {
     return packageDependencies;
   }
