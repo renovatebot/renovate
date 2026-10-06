@@ -6362,7 +6362,7 @@ describe('modules/platform/github/index', () => {
         expect(res).toBeTrue();
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: 1234, uuid: 'uuid-prev', message: 'Blocked' },
-          'Previous merge request failed, requesting the merge again',
+          'Previous merge request failed',
         );
       });
 

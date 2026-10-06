@@ -130,7 +130,7 @@ GitHub completes the merge in the background, and Renovate sees the merged PR on
 We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
 On later runs, Renovate first looks up the result of the merge it requested.
-If GitHub refused the merge, Renovate logs the reason at info level and requests the merge again.
+If GitHub refused the merge, Renovate logs the reason at info level and decides afresh whether to request it again.
 While the request is still pending, Renovate does not send a new one.
 Renovate remembers the request in the [repository cache](../../../self-hosted-configuration.md#repositorycache), so this lookup needs `repositoryCache=enabled`.
 

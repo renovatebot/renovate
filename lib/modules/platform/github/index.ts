@@ -2364,7 +2364,7 @@ async function checkPreviousAsyncMerge(
   if (result.status === 'failed') {
     logger.info(
       { pr: prNo, uuid, message: result.details.message },
-      'Previous merge request failed, requesting the merge again',
+      'Previous merge request failed',
     );
     return null;
   }
