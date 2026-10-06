@@ -34,6 +34,7 @@ import {
   repoInfoQuery,
 } from './graphql.ts';
 import * as github from './index.ts';
+import { getPendingMerge, setPendingMerge } from './merge-cache.ts';
 import type { ApiPageCache, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
@@ -6264,6 +6265,150 @@ describe('modules/platform/github/index', () => {
       const res = await github.mergePr({ id: 1234, branchName: 'somebranch' });
 
       expect(res).toBeTrue();
+    });
+
+    describe('previous merge request', () => {
+      const resultUrl = `${asyncUrl}/uuid-prev`;
+
+      beforeEach(() => {
+        setPendingMerge(1234, 'uuid-prev');
+      });
+
+      it('returns true without a new request if the PR was merged', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.get(resultUrl).reply(200, merged());
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBeTrue();
+        expect(getPendingMerge(1234)).toBeUndefined();
+        await expect(github.getPr(1234)).resolves.toMatchObject({
+          state: 'merged',
+        });
+      });
+
+      it('returns true without a new request if the PR was enqueued', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.get(resultUrl).reply(200, enqueued());
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBeTrue();
+        expect(getPendingMerge(1234)).toBeUndefined();
+      });
+
+      it('returns pending without a new request if the merge is still pending', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.get(resultUrl).reply(200, pending('uuid-prev'));
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBe('pending');
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-prev' });
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: 1234, uuid: 'uuid-prev', requestedAt: expect.any(String) },
+          'Previous merge request is still pending, not requesting another merge',
+        );
+      });
+
+      it('requests the merge again if the previous request failed', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .get(resultUrl)
+          .reply(200, { status: 'failed', details: { message: 'Blocked' } })
+          .put(asyncUrl, directMergeBody)
+          .reply(200, merged());
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBeTrue();
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: 1234, uuid: 'uuid-prev', message: 'Blocked' },
+          'Previous merge request failed, requesting the merge again',
+        );
+      });
+
+      it('requests the merge again if the previous result expired', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .get(resultUrl)
+          .reply(404, { message: 'Not Found' })
+          .put(asyncUrl, directMergeBody)
+          .reply(202, pending('uuid-new'));
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBe('pending');
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-new' });
+      });
+
+      it('requests the merge again if the previous result cannot be fetched', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .get(resultUrl)
+          .reply(422, { message: 'Unprocessable' })
+          .put(asyncUrl, directMergeBody)
+          .reply(200, merged());
+        await initRepoWithPr(scope);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBeTrue();
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error), pr: 1234 },
+          'Failed to fetch the result of the previous merge request',
+        );
+      });
+    });
+
+    describe('pending merge request', () => {
+      it('looks up the stored request on the next merge', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .put(asyncUrl, directMergeBody)
+          .reply(202, pending('uuid-6'))
+          .get(`${asyncUrl}/uuid-6`)
+          .reply(200, merged());
+        await initRepoWithPr(scope);
+
+        const res1 = await github.mergePr({ id: 1234, branchName: 'b' });
+        const res2 = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res1).toBe('pending');
+        expect(res2).toBeTrue();
+      });
+
+      it('stores the uuid of an earlier request from a conflict', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope.put(asyncUrl).reply(409, pending('uuid-7'));
+        await initRepoWithPr(scope);
+
+        await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-7' });
+      });
+
+      it('stores nothing if the response has no uuid', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .put(asyncUrl)
+          .reply(202, pending())
+          .put(asyncUrl)
+          .reply(409, { message: 'Conflict' });
+        await initRepoWithPr(scope);
+
+        const res1 = await github.mergePr({ id: 1234, branchName: 'b' });
+        const res2 = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res1).toBe('pending');
+        expect(res2).toBe('pending');
+        expect(getPendingMerge(1234)).toBeUndefined();
+      });
     });
 
     describe('merge queue branch', () => {

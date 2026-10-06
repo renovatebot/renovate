@@ -129,6 +129,11 @@ Renovate requests the merge through GitHub's [asynchronous merge API](https://do
 GitHub completes the merge in the background, and Renovate sees the merged PR on its next run, so Renovate deletes the branch then.
 We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
+On later runs, Renovate first looks up the result of the merge it requested.
+If GitHub refused the merge, Renovate logs the reason at info level and requests the merge again.
+While the request is still pending, Renovate does not send a new one.
+Renovate remembers the request in the [repository cache](../../../self-hosted-configuration.md#repositorycache), so this lookup needs `repositoryCache=enabled`.
+
 Renovate asks GitHub to bypass the repository rules that Renovate is permitted to bypass, which matches how the classic merge endpoint behaves.
 If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (GitHub's `viewerCanMergeAsAdmin`).
 If it may, Renovate merges the PR directly with the configured merge method.
