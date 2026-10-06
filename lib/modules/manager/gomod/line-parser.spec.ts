@@ -239,14 +239,15 @@ describe('modules/manager/gomod/line-parser', () => {
     });
   });
 
-  it('should ignore the branch marker on a release', () => {
+  it('should pin a release to the branch it follows', () => {
     const line = 'require foo/foo v1.2.3 // renovate: branch=main';
     const res = parseLine(line);
     expect(res).toStrictEqual({
-      currentValue: 'v1.2.3',
+      currentValue: 'main',
       datasource: 'go',
       depName: 'foo/foo',
       depType: 'require',
+      pinDigests: true,
     });
   });
 
