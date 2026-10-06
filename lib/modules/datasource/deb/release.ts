@@ -60,7 +60,7 @@ export async function getReleaseFileContent(
   //
   // worst case are four http requests
   for (const releaseFileName of ReleaseFiles) {
-    let needsDownload = true;
+    let needsDownload = true; // by default assume it is modified
     const releaseUrl = joinUrlParts(baseReleaseUrl, releaseFileName);
 
     // check creation time of release file
@@ -79,7 +79,6 @@ export async function getReleaseFileContent(
           { url: releaseUrl, err },
           'Could not check if release file is modified',
         );
-        needsDownload = true; // assume it is modified
       }
     }
 
@@ -89,12 +88,12 @@ export async function getReleaseFileContent(
         'Downloading Debian release file',
       );
 
-      let res: HttpResponse<string>;
+      let res: HttpResponse;
       try {
         res = await http.getText(releaseUrl);
       } catch (err) {
         logger.debug(
-          { url: releaseUrl, error: err },
+          { url: releaseUrl, err },
           `Could not fetch ${releaseFileName} file`,
         );
         continue;
@@ -104,10 +103,10 @@ export async function getReleaseFileContent(
       await fs.outputCacheFile(downloadedReleaseFile, res.body);
 
       return res.body;
-    } else {
-      // release file is not modified, let's read from cache
-      return fs.readCacheFile(downloadedReleaseFile, 'utf8');
     }
+
+    // release file is not modified, let's read from cache
+    return fs.readCacheFile(downloadedReleaseFile, 'utf8');
   }
 
   throw new Error('Could not fetch InRelease or Release file');
