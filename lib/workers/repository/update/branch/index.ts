@@ -22,8 +22,6 @@ import {
 import { logger, removeMeta } from '../../../../logger/index.ts';
 import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
-import type { NpmManagerData } from '../../../../modules/manager/npm/types.ts';
-import type { PostUpdateConfig } from '../../../../modules/manager/types.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -647,8 +645,7 @@ export async function processBranch(
         logger.debug('No package files need updating');
       }
       const additionalFiles = await getAdditionalFiles(
-        // The branch config carries the manager data of every upgrade untyped; the npm post-update only reads the optional npm fields of it.
-        config as PostUpdateConfig<NpmManagerData>,
+        config,
         branchConfig.packageFiles!,
       );
       config.artifactErrors = coerceArray(config.artifactErrors).concat(

@@ -140,8 +140,15 @@ export async function updateArtifacts(
   let newContents = oldContents;
   const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
-    // the bazel extract sets the rule index on every dependency
-    const idx = upgrade.managerData!.idx;
+    /* v8 ignore next -- defensive handling of upgrades without Bazel manager data */
+    if (!upgrade.managerData) {
+      logger.debug(
+        `Skipping Bazel artifact update for ${upgrade.depName} in ${path}: missing manager data`,
+      );
+      continue;
+    }
+
+    const idx = upgrade.managerData.idx;
 
     // v8 ignore else -- only http rules reach updateArtifacts
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
