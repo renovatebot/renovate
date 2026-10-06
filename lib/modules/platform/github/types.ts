@@ -138,7 +138,6 @@ export interface LocalRepoConfig {
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
   mergeQueueEnabled: Record<string, boolean>;
-  mergeQueueRequired: Record<string, boolean>;
 }
 
 export interface GhRepo {
@@ -189,4 +188,9 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
+}
+
+export interface PrMergeStatus {
+  isInMergeQueue: boolean;
+  viewerCanMergeAsAdmin: boolean;
 }

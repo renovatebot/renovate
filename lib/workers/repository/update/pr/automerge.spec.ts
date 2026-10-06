@@ -98,6 +98,21 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
     });
 
+    it('should not report automerged while the platform merges in the background', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce('pending');
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'MergePending',
+      });
+      expect(scm.deleteBranch).not.toHaveBeenCalled();
+    });
+
     it('should skip a PR which is already in the merge queue', async () => {
       config.automerge = true;
       pr = partial<Pr>({ number: 123 });
