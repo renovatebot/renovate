@@ -502,7 +502,38 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should throw error for when extracting fails', async () => {
-      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(new Error());
+      vi.spyOn(fileUtils, 'extract').mockRejectedValueOnce(
+        new Error('Extraction failed'),
+      );
+
+      const fixturePackagesArchiveHash2 = await computeFileChecksum(
+        fixturePackagesArchivePath2,
+      );
+
+      // return InRelease content
+      mockFetchInReleaseContent(
+        fixturePackagesArchiveHash2,
+        ...packageArgs,
+        false,
+        'gz',
+      );
+
+      // return package file
+      httpMock
+        .scope(debBaseUrl)
+        .get(getPackageUrl('', ...packageArgs, 'gz'))
+        .replyWithFile(200, fixturePackagesArchivePath2);
+
+      await expect(
+        downloadAndExtractPackage(
+          getComponentUrl(debBaseUrl, ...packageArgs),
+          new Http('deb'),
+        ),
+      ).rejects.toThrow('Extraction failed');
+    });
+
+    it('should throw error if extracted file is missing', async () => {
+      vi.spyOn(fileUtils, 'extract').mockResolvedValueOnce();
 
       const fixturePackagesArchiveHash2 = await computeFileChecksum(
         fixturePackagesArchivePath2,

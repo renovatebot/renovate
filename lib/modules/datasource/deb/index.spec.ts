@@ -1,6 +1,6 @@
 import { createReadStream } from 'node:fs';
-import { isNonEmptyString } from '@sindresorhus/is';
 import { copyFile } from 'node:fs/promises';
+import { isNonEmptyString } from '@sindresorhus/is';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
