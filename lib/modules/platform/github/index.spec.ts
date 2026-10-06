@@ -6240,7 +6240,7 @@ describe('modules/platform/github/index', () => {
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { baseBranch: 'master' },
-          'Direct merges require the merge queue, later PRs on this branch are added to the merge queue directly',
+          'Direct merges not allowed, a merge queue has been required, later PRs on this branch are added to the merge queue directly',
         );
       });
 

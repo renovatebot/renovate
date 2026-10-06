@@ -2292,7 +2292,7 @@ async function asyncMergePr(
     config.mergeQueueRequired[baseBranch] = true;
     logger.debug(
       { baseBranch },
-      'Direct merges require the merge queue, later PRs on this branch are added to the merge queue directly',
+      'Direct merges not allowed, a merge queue has been required, later PRs on this branch are added to the merge queue directly',
     );
   }
   return asyncEnqueuePr(prNo);
