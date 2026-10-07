@@ -19,15 +19,16 @@ import {
   BitbucketServerTags,
 } from './schema.ts';
 
-export class BitbucketServerTagsDatasource extends Datasource {
+export class BitbucketServerTagsDatasource extends Datasource<BitbucketServerHttp> {
   static readonly id = 'bitbucket-server-tags';
-
-  override http = new BitbucketServerHttp(BitbucketServerTagsDatasource.id);
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketServerTagsDatasource.id}`;
 
   constructor() {
-    super(BitbucketServerTagsDatasource.id);
+    super(
+      BitbucketServerTagsDatasource.id,
+      new BitbucketServerHttp(BitbucketServerTagsDatasource.id),
+    );
   }
 
   override readonly sourceUrlSupport = 'package';
