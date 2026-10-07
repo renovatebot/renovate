@@ -9,15 +9,15 @@ import { findCommitOfTag } from '../../../util/github/tags.ts';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
-import { Datasource } from '../datasource.ts';
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
-  Release,
+  GitHostTag,
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubTagsDatasource extends Datasource<GithubHttp> {
+export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp> {
   static readonly id = 'github-tags';
 
   /**
@@ -46,7 +46,19 @@ export class GithubTagsDatasource extends Datasource<GithubHttp> {
     super(GithubTagsDatasource.id, new GithubHttp(GithubTagsDatasource.id));
   }
 
-  async getCommit(
+  protected getRegistryUrl(registryUrl?: string): string {
+    return registryUrl ?? this.getDefaultRegistryUrls('')[0];
+  }
+
+  protected fetchTagCommit(
+    registryUrl: string | undefined,
+    repo: string,
+    tag: string,
+  ): Promise<string | null> {
+    return findCommitOfTag(registryUrl, repo, tag, this.http);
+  }
+
+  protected async fetchLatestCommit(
     registryUrl: string | undefined,
     githubRepo: string,
   ): Promise<string | null> {
@@ -73,28 +85,39 @@ export class GithubTagsDatasource extends Datasource<GithubHttp> {
    * The `newValue` supplied here should be a valid tag for the docker image.
    *
    * Returns the latest commit hash for the repository.
+   *
+   * It skips the package cache of the base class: the GraphQL fetcher caches
+   * the tags together with their commits, and the HTTP client caches the latest
+   * commit in memory.
    */
   override getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return newValue
-      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
-      : this.getCommit(registryUrl, repo!);
+    if (newValue) {
+      return this.fetchTagCommit(registryUrl, repo, newValue);
+    }
+
+    return this.fetchLatestCommit(registryUrl, repo);
   }
 
-  override async getReleases(
+  /**
+   * The GraphQL fetcher caches the tags and releases itself, so the result
+   * skips the package cache of the base class.
+   */
+  override getReleases(
     config: GetReleasesConfig,
-  ): Promise<ReleaseResult> {
-    const { registryUrl, packageName: repo } = config;
-    const sourceUrl = getSourceUrl(repo, registryUrl);
+  ): Promise<ReleaseResult | null> {
+    return this.fetchReleases(config);
+  }
+
+  protected async fetchTags(config: GetReleasesConfig): Promise<GitHostTag[]> {
     const tagsResult = await queryTags(config, this.http);
-    const releases: Release[] = tagsResult.map(
-      ({ version, releaseTimestamp, gitRef, hash }) => ({
+    const releases: GitHostTag[] = tagsResult.map(
+      ({ version, releaseTimestamp, hash }) => ({
         newDigest: hash,
         version,
         releaseTimestamp,
-        gitRef,
       }),
     );
 
@@ -127,10 +150,6 @@ export class GithubTagsDatasource extends Datasource<GithubHttp> {
       logger.debug({ err }, `Error fetching additional info for GitHub tags`);
     }
 
-    const dependency: ReleaseResult = {
-      sourceUrl,
-      releases,
-    };
-    return dependency;
+    return releases;
   }
 }
