@@ -1,8 +1,34 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
+import upath from 'upath';
 import { regEx } from '../../util/regex.ts';
 import { isHttpUrl } from '../../util/url.ts';
 import type { ParsedPreset } from './types.ts';
-import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_PATH_TRAVERSAL,
+  PRESET_PROHIBITED_SUBPRESET,
+} from './util.ts';
+
+/**
+ * Ensures that a given preset's `repo` or `presetPath` does not include an attempt to perform path traversal.
+ *
+ * Still allows relative preset references, but blocks cases that attempt to escape the current repository.
+ *
+ * @throws {Error} {@link PRESET_PATH_TRAVERSAL} if the segment normalizes to `..` or above, e.g. `owner/repo//../../other-owner/other-repo`.
+ * @link https://docs.renovatebot.com/config-presets/#relative-preset-references
+ */
+function assertNoPathEscape(value: string): void {
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // not a valid percent-encoding, fall through with the raw value
+  }
+  const normalized = upath.normalize(decoded);
+  if (normalized === '..' || normalized.startsWith('../')) {
+    throw new Error(PRESET_PATH_TRAVERSAL);
+  }
+}
 
 const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<repo>~?[\w\-. /%]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
@@ -204,6 +230,11 @@ export function parsePreset(input: string): ParsedPreset {
     if (!isNonEmptyString(presetName)) {
       presetName = 'default';
     }
+  }
+
+  assertNoPathEscape(repo);
+  if (isNonEmptyString(presetPath)) {
+    assertNoPathEscape(presetPath);
   }
 
   return {

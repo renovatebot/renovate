@@ -9,6 +9,7 @@ export const PRESET_DEP_NOT_FOUND = 'dep not found';
 export const PRESET_INVALID = 'invalid preset';
 export const PRESET_INVALID_JSON = 'invalid preset JSON';
 export const PRESET_NOT_FOUND = 'preset not found';
+export const PRESET_PATH_TRAVERSAL = 'preset path escapes repository';
 export const PRESET_PROHIBITED_SUBPRESET = 'prohibited sub-preset';
 export const PRESET_RELATIVE_NO_PARENT = 'relative preset has no parent';
 export const PRESET_RELATIVE_OUTSIDE_REPO = 'relative preset outside repo';

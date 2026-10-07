@@ -1,5 +1,5 @@
 import { isRelativePresetReference, parsePreset } from './parse.ts';
-import { PRESET_INVALID } from './util.ts';
+import { PRESET_INVALID, PRESET_PATH_TRAVERSAL } from './util.ts';
 
 describe('config/presets/parse', () => {
   describe('parsePreset', () => {
@@ -681,6 +681,35 @@ describe('config/presets/parse', () => {
         tag: undefined,
       });
     });
+
+    it.each`
+      input                                                       | reason
+      ${'github>owner/repo//../../other-owner/other-repo'}        | ${'subdir traversal escapes to a sibling repo'}
+      ${'github>owner/repo//foo/../../../other-owner/other-repo'} | ${'subdir traversal with a leading safe segment'}
+      ${'gitlab>owner/repo//../../other-owner/other-repo'}        | ${'gitlab subdir traversal'}
+      ${'gitea>owner/repo//../../other-owner/other-repo'}         | ${'gitea subdir traversal'}
+      ${'forgejo>owner/repo//../../other-owner/other-repo'}       | ${'forgejo subdir traversal'}
+      ${'local>owner/repo//../../other-owner/other-repo'}         | ${'local subdir traversal'}
+      ${'github>owner/../../other-owner/other-repo'}              | ${'repo identifier traversal without a subdir'}
+      ${'github>%2e%2e/%2e%2e/other-owner/other-repo//default'}   | ${'percent-encoded repo traversal'}
+      ${'github>@owner/../../other-owner//default'}               | ${'scoped namespace traversal'}
+    `('throws for path traversal attempt $input ($reason)', ({ input }) => {
+      expect(() => parsePreset(input as string)).toThrow(PRESET_PATH_TRAVERSAL);
+    });
+
+    it.each`
+      input                                          | presetPath
+      ${'github>owner/repo//sub/../other/file'}      | ${'sub/../other'}
+      ${'github>owner/repo//a/b/../../sibling/file'} | ${'a/b/../../sibling'}
+    `(
+      'still resolves $input within the same repo despite an internal ".."',
+      ({ input, presetPath }) => {
+        expect(parsePreset(input as string)).toMatchObject({
+          repo: 'owner/repo',
+          presetPath,
+        });
+      },
+    );
 
     it.each`
       input           | repo

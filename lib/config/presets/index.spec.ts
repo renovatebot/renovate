@@ -198,6 +198,24 @@ describe('config/presets/index', () => {
       expect(e!.validationMessage).toBeUndefined();
     });
 
+    it('throws if path traversal', async () => {
+      // @ts-expect-error -- invalid config
+      config.foo = 1;
+      config.extends = ['github>owner/repo//../../other-owner/other-repo'];
+      let e: Error | undefined;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBe(
+        'Preset path attempts to escape its repository (github>owner/repo//../../other-owner/other-repo)',
+      );
+      expect(e!.validationMessage).toBeUndefined();
+    });
+
     it('throws if path + sub-preset', async () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
