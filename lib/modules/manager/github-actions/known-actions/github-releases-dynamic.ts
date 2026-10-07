@@ -202,16 +202,16 @@ const TflintWith: ActionSchema = z
     return [parseValue(version)];
   });
 
-// `slsa-framework/actions/{install/verifier,verify/build,verify/source,verify/vsa}`
-// all install slsa-verifier itself, from the same `version`/`repo` pair: the
-// release to install, and the (overridable) repository that publishes it.
+/**
+ * An Action which pins a version of `slsa-framework/verifier`
+ */
 const SlsaVerifierWith: ActionSchema = z
   .object({
     version: z.string().optional(),
-    repo: z.string().optional(),
+    repo: z.string().min(1).catch('slsa-framework/verifier'),
   })
   .transform(({ version, repo }) => [
-    { packageName: repo ?? 'slsa-framework/verifier', ...parseValue(version) },
+    { packageName: repo, ...parseValue(version) },
   ]);
 
 export const githubReleasesDynamicActions: Record<string, KnownActionConfig> = {
