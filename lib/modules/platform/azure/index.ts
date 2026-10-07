@@ -1026,6 +1026,10 @@ export function massageMarkdown(input: string): string {
       // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
       // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
       .replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>')
+      // Azure DevOps reads the `#8203` inside the `&#8203;` entity as a mention of work item 8203,
+      // so every escaped issue reference in a changelog links the PR, and its merge commit, to it.
+      // Emit the zero-width space itself, which still stops issue auto-linking.
+      .replace(regEx(/&#8203;/g), '\u200B')
   );
 }
 

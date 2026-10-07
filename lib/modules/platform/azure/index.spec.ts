@@ -2073,11 +2073,20 @@ describe('modules/platform/azure/index', () => {
       );
     });
 
-    it('does not corrupt HTML entities or URL anchors', () => {
+    it('does not corrupt URL anchors', () => {
       const input =
-        '[#&#8203;32124](https://github.com/org/repo/issues/32124) ' +
         '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
       expect(azure.massageMarkdown(input)).toBe(input);
+    });
+
+    it('replaces zero-width space entities so they do not mention work item 8203', () => {
+      const input =
+        '[#&#8203;32124](https://github.com/org/repo/issues/32124) by @&#8203;someone';
+      const result = azure.massageMarkdown(input);
+      expect(result).toBe(
+        '[#\u200B32124](https://github.com/org/repo/issues/32124) by @\u200Bsomeone',
+      );
+      expect(result).not.toContain('#8203');
     });
   });
 
