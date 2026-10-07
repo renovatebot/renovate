@@ -126,7 +126,10 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 ## Merging pull requests
 
 Renovate requests the merge through GitHub's [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) and does not wait for it.
-GitHub completes the merge in the background, and Renovate sees the merged PR on its next run, so Renovate deletes the branch then.
+GitHub completes the merge in the background.
+After all branches of a repository are processed, Renovate looks up the results of the merges it requested in this run.
+Merged PRs are reported as automerged and their branches are deleted according to `pruneBranchAfterAutomerge`; a refused merge is logged with GitHub's reason.
+A merge that GitHub has not finished by then shows up on the next run.
 We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
 On later runs, Renovate first looks up the result of the merge it requested.
