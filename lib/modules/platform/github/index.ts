@@ -1,5 +1,6 @@
 import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { MergeStrategy } from '../../../config/types.ts';
@@ -141,6 +142,10 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
+
+// In end-to-end tests GitHub finished an async merge about 1.5 s after it was
+// requested, while the end-of-run lookup ran 0.4 s after the request
+const asyncMergeGraceMs = 3000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -2393,12 +2398,37 @@ function rememberRequestedMerge(
   branchName?: string,
 ): void {
   setPendingMerge(prNo, uuid);
-  config.requestedMerges.push({ number: prNo, branchName, uuid });
+  config.requestedMerges.push({
+    number: prNo,
+    branchName,
+    uuid,
+    requestedAt: DateTime.now().toMillis(),
+  });
+}
+
+async function waitForLastRequestedMerge(): Promise<void> {
+  if (!config.requestedMerges.length) {
+    return;
+  }
+  const lastRequestedAt = Math.max(
+    ...config.requestedMerges.map(({ requestedAt }) => requestedAt),
+  );
+  const elapsed = DateTime.now().toMillis() - lastRequestedAt;
+  const remaining = asyncMergeGraceMs - elapsed;
+  if (remaining <= 0) {
+    return;
+  }
+  logger.debug(
+    { remaining },
+    'Waiting for the last requested merge to complete before reading the results',
+  );
+  await setTimeout(remaining);
 }
 
 export async function getRequestedMergeResults(): Promise<
   RequestedMergeResult[]
 > {
+  await waitForLastRequestedMerge();
   const results: RequestedMergeResult[] = [];
   for (const { number, branchName, uuid } of config.requestedMerges) {
     let result: MergeAsyncResult;

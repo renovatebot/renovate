@@ -206,4 +206,6 @@ export interface RequestedMerge {
   number: number;
   branchName?: string;
   uuid: string;
+  /** epoch milliseconds */
+  requestedAt: number;
 }
