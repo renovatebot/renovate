@@ -1,5 +1,3 @@
-import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import {
   queryBranches,
   queryTags,
@@ -15,12 +13,12 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export class GithubDigestDatasource extends Datasource {
+export class GithubDigestDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-digest';
 
-  private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GithubDigestDatasource.id}`;
-
-  override readonly defaultRegistryUrls = ['https://github.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -33,11 +31,8 @@ export class GithubDigestDatasource extends Datasource {
 
   override readonly defaultVersioning = exactVersioning.id;
 
-  override http: GithubHttp;
-
   constructor() {
-    super(GithubDigestDatasource.id);
-    this.http = new GithubHttp(GithubDigestDatasource.id);
+    super(GithubDigestDatasource.id, new GithubHttp(GithubDigestDatasource.id));
   }
 
   private static getCacheKey(
@@ -52,9 +47,8 @@ export class GithubDigestDatasource extends Datasource {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
 
-    return withCache(
+    return this.cached(
       {
-        namespace: GithubDigestDatasource.cacheNamespace,
         key: GithubDigestDatasource.getCacheKey(registryUrl, repo, 'releases'),
       },
       async () => {
@@ -115,9 +109,8 @@ export class GithubDigestDatasource extends Datasource {
       return null;
     }
 
-    return await withCache(
+    return await this.cached(
       {
-        namespace: GithubDigestDatasource.cacheNamespace,
         key: GithubDigestDatasource.getCacheKey(
           registryUrl,
           repo,

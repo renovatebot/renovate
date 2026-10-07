@@ -13,9 +13,9 @@ export class GradleVersionDatasource extends Datasource {
     super(GradleVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://services.gradle.org/versions/all',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://services.gradle.org/versions/all'];
+  }
 
   override readonly defaultVersioning = gradleVersioning.id;
 
@@ -31,34 +31,29 @@ export class GradleVersionDatasource extends Datasource {
   private async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
-    let releases: Release[];
-    try {
-      const response = await this.http.getJson(registryUrl, GradleReleases);
-      releases = response.body
-        .filter((release) => !release.snapshot && !release.nightly)
-        .map((release) => {
-          const { version, buildTime } = release;
+    const body = await this.fetchJson(registryUrl, GradleReleases);
+    const releases = body
+      .filter((release) => !release.snapshot && !release.nightly)
+      .map((release) => {
+        const { version, buildTime } = release;
 
-          const gitRef = GradleVersionDatasource.getGitRef(release.version);
+        const gitRef = GradleVersionDatasource.getGitRef(release.version);
 
-          const releaseTimestamp = asTimestamp(buildTime);
+        const releaseTimestamp = asTimestamp(buildTime);
 
-          const result: Release = { version, gitRef, releaseTimestamp };
+        const result: Release = { version, gitRef, releaseTimestamp };
 
-          if (release.broken) {
-            result.isDeprecated = true;
-          }
+        if (release.broken) {
+          result.isDeprecated = true;
+        }
 
-          return result;
-        });
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+        return result;
+      });
 
     const res: ReleaseResult = {
       releases,
@@ -92,7 +87,7 @@ export class GradleVersionDatasource extends Datasource {
    */
   private static getGitRef(version: string): string {
     const [versionPart, typePart, unstablePart] = version.split(
-      regEx(/-([a-z]+)-/),
+      regEx(/-(?<type>[a-z]+)-/),
     );
 
     let suffix = '';

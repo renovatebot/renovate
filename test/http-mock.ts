@@ -4,18 +4,14 @@ import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 // oxlint-disable-next-line no-restricted-imports
 import nock from 'nock';
-import { makeGraphqlSnapshot } from './graphql-snapshot.ts';
 
 // oxlint-disable-next-line no-restricted-imports
 export type { Body, ReplyHeaders, Scope } from 'nock';
 
 interface RequestLog {
-  headers: Record<string, string>;
   method: string;
   url: string;
   status: number;
-  body?: any;
-  graphql?: any;
 }
 
 interface MissingRequestLog {
@@ -87,31 +83,11 @@ export function clear(check = true): void {
 
 export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   return nock(basePath, options).on('replied', (req) => {
-    const { headers, method } = req;
+    const { method } = req;
     const url = req.options?.href;
     const status = req.response?.statusCode;
-    const result: RequestLog = { headers, method, url, status };
-    const requestBody = req.requestBodyBuffers?.[0]?.toString();
-
-    if (requestBody && headers['content-type'] === 'application/json') {
-      try {
-        const body = JSON.parse(requestBody);
-        const graphql = makeGraphqlSnapshot(body);
-        if (graphql) {
-          result.graphql = graphql;
-        } else {
-          result.body = body;
-        }
-      } catch {
-        result.body = requestBody;
-      }
-    }
-    requestsDone.push(result);
+    requestsDone.push({ method, url, status });
   });
-}
-
-export function getTrace(): RequestLog[] {
-  return requestsDone;
 }
 
 function massageHttpMockStacktrace(err: Error): void {
@@ -149,7 +125,7 @@ function massageHttpMockStacktrace(err: Error): void {
 
   const lines = content.slice(0, idx).split('\n');
   const lineNum = lines.length;
-  const linePos = lines[lines.length - 1].length + 1;
+  const linePos = lines.at(-1)!.length + 1;
 
   const stackLine = `    at <test> (${state.testPath}:${lineNum}:${linePos})`;
   err.stack = err.stack.replace(/\+\+\+.*$/s, stackLine);

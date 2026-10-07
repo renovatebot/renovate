@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { globSync } from 'glob';
+import { glob } from 'glob';
 import { minimatch } from 'minimatch';
 import { testShards } from './test/shards.ts';
 import type { RunsOn, ShardGroup } from './test/types.ts';
@@ -46,7 +46,9 @@ export { TOTAL_SHARDS };
  * Vitest CLI filters are substring/regex matches, not globs.
  * This expands glob patterns (like [a-c]*) into actual paths.
  */
-export function getTestPatternsForShards(shardNames: string[]): string[] {
+export async function getTestPatternsForShards(
+  shardNames: string[],
+): Promise<string[]> {
   const patterns: string[] = [];
   for (const name of shardNames) {
     const shard = testShards[name];
@@ -59,7 +61,7 @@ export function getTestPatternsForShards(shardNames: string[]): string[] {
 
       const isGlobPattern = path.includes('[') || path.includes('*');
       if (isGlobPattern) {
-        const expanded = globSync(path, { nodir: false });
+        const expanded = await glob(path, { nodir: false });
         patterns.push(...expanded);
       } else {
         patterns.push(path);

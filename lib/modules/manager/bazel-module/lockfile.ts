@@ -20,7 +20,8 @@ export async function updateBazelLockfile(
 
     if (!allowlist.includes('bazelModDeps')) {
       logger.once.warn(
-        `Bazel command, \`${command}\`, was requested to run, but \`bazelModDeps\` is not permitted in the allowedUnsafeExecutions`,
+        { command },
+        'Bazel command was requested to run, but `bazelModDeps` is not permitted in the allowedUnsafeExecutions',
       );
       return null;
     }

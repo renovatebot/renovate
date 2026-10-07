@@ -229,15 +229,21 @@ export function updateDependency(
     }
 
     if (depType === 'tasks.command' && parsedContents.tasks) {
-      const hasCommandMatch = (value: unknown): value is { command: string } =>
-        isObject(value) &&
-        'command' in value &&
-        isString(value.command) &&
-        value.command.includes(searchCurrentValue);
+      function hasCommandMatch(
+        value: unknown,
+        currentValue: string,
+      ): value is { command: string } {
+        return (
+          isObject(value) &&
+          'command' in value &&
+          isString(value.command) &&
+          value.command.includes(currentValue)
+        );
+      }
 
       const matches = Object.entries(parsedContents.tasks).filter(
         (entry): entry is [string, { command: string }] =>
-          hasCommandMatch(entry[1]),
+          hasCommandMatch(entry[1], searchCurrentValue),
       );
       for (const [key, task] of matches) {
         task.command = task.command.replace(searchCurrentValue, newString);

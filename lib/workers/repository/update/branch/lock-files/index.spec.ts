@@ -1,18 +1,19 @@
-import { fs, git, hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update/index.ts';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm.ts';
 import * as pnpm from '../../../../../modules/manager/npm/post-update/pnpm.ts';
 import * as yarn from '../../../../../modules/manager/npm/post-update/yarn.ts';
+import type { NpmManagerData } from '../../../../../modules/manager/npm/types.ts';
 import type { PostUpdateConfig } from '../../../../../modules/manager/types.ts';
 
-const config: PostUpdateConfig = {
+const config: PostUpdateConfig<NpmManagerData> = {
   upgrades: [],
   branchName: 'some-branch',
 };
 
 vi.mock('../../../../../util/fs/index.ts');
-vi.mock('../../../../../util/host-rules.ts');
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
@@ -22,9 +23,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
-      hostRules.find.mockImplementation((_) => ({
-        token: 'abc',
-      }));
+      hostRules.add({ token: 'abc' });
     });
 
     it('returns if no updated packageFiles', async () => {

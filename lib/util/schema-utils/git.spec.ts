@@ -17,7 +17,9 @@ describe('util/schema-utils/git', () => {
       ['short sha', 'abc'],
       ['non-hex 40-char string', 'g'.repeat(40)],
     ])('rejects a %s', (_label, value) => {
-      expect(() => LongCommitSha.parse(value)).toThrow();
+      expect(() => LongCommitSha.parse(value)).toThrow(
+        'Invalid string: must match pattern /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u',
+      );
     });
   });
 

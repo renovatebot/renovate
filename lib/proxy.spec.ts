@@ -1,4 +1,7 @@
 import { bootstrap, hasProxy } from './proxy.ts';
+import * as sanitize from './util/sanitize.ts';
+
+const addSecretForSanitizing = vi.spyOn(sanitize, 'addSecretForSanitizing');
 
 describe('proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';
@@ -6,22 +9,22 @@ describe('proxy', () => {
   const noProxy = 'http://example.org/no-proxy';
 
   beforeEach(() => {
-    delete process.env.HTTP_PROXY;
-    delete process.env.http_proxy;
-    delete process.env.HTTPS_PROXY;
-    delete process.env.https_proxy;
-    delete process.env.NO_PROXY;
-    delete process.env.no_proxy;
+    vi.stubEnv('HTTP_PROXY', undefined);
+    vi.stubEnv('http_proxy', undefined);
+    vi.stubEnv('HTTPS_PROXY', undefined);
+    vi.stubEnv('https_proxy', undefined);
+    vi.stubEnv('NO_PROXY', undefined);
+    vi.stubEnv('no_proxy', undefined);
   });
 
   it('respects HTTP_PROXY', () => {
-    process.env.HTTP_PROXY = httpProxy;
+    vi.stubEnv('HTTP_PROXY', httpProxy);
     bootstrap();
     expect(hasProxy()).toBeTrue();
   });
 
   it('copies upper case HTTP_PROXY to http_proxy', () => {
-    process.env.HTTP_PROXY = httpProxy;
+    vi.stubEnv('HTTP_PROXY', httpProxy);
     bootstrap();
     expect(hasProxy()).toBeTrue();
     expect(process.env.HTTP_PROXY).toBeDefined();
@@ -34,13 +37,13 @@ describe('proxy', () => {
   });
 
   it('respects HTTPS_PROXY', () => {
-    process.env.HTTPS_PROXY = httpsProxy;
+    vi.stubEnv('HTTPS_PROXY', httpsProxy);
     bootstrap();
     expect(hasProxy()).toBeTrue();
   });
 
   it('copies upper case HTTPS_PROXY to https_proxy', () => {
-    process.env.HTTPS_PROXY = httpsProxy;
+    vi.stubEnv('HTTPS_PROXY', httpsProxy);
     bootstrap();
     expect(hasProxy()).toBeTrue();
     expect(process.env.HTTPS_PROXY).toBeDefined();
@@ -53,8 +56,38 @@ describe('proxy', () => {
   });
 
   it('does nothing', () => {
-    process.env.no_proxy = noProxy;
+    vi.stubEnv('no_proxy', noProxy);
     bootstrap();
     expect(hasProxy()).toBeFalse();
+  });
+
+  it('sanitizes password from HTTP_PROXY credentials', () => {
+    vi.stubEnv('HTTP_PROXY', 'http://user:s3cr3t@example.org');
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('sanitizes password from HTTPS_PROXY credentials', () => {
+    vi.stubEnv('HTTPS_PROXY', 'http://user:s3cr3t@example.org');
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('does not sanitize username-only proxy credentials', () => {
+    vi.stubEnv('HTTP_PROXY', 'http://user@example.org');
+    bootstrap();
+    expect(addSecretForSanitizing).not.toHaveBeenCalled();
+  });
+
+  it('sanitizes password-only proxy credentials', () => {
+    vi.stubEnv('HTTP_PROXY', 'http://:s3cr3t@example.org');
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('does not sanitize when proxy has no credentials', () => {
+    vi.stubEnv('HTTP_PROXY', httpProxy);
+    bootstrap();
+    expect(addSecretForSanitizing).not.toHaveBeenCalled();
   });
 });

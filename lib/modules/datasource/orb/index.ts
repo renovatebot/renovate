@@ -1,26 +1,9 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { OrbResponse } from './types.ts';
-
-const MAX_VERSIONS = 100;
-
-const query = `
-query($packageName: String!, $maxVersions: Int!) {
-  orb(name: $packageName) {
-    name,
-    homeUrl,
-    isPrivate,
-    versions(count: $maxVersions) {
-      version,
-      createdAt
-    }
-  }
-}
-`;
+import { OrbPackagesResponse } from './schema.ts';
 
 export class OrbDatasource extends Datasource {
   static readonly id = 'orb';
@@ -29,58 +12,59 @@ export class OrbDatasource extends Datasource {
     super(OrbDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = ['https://circleci.com/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://circleci.com/'];
+  }
   override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `createdAt` field in the results.';
+    'The release timestamp is determined from the `created_at` field in the results.';
 
   private async _getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
-    const url = joinUrlParts(registryUrl, 'graphql-unstable');
-    const body = {
-      query,
-      variables: { packageName, maxVersions: MAX_VERSIONS },
-    };
-    const res = (
-      await this.http.postJson<OrbResponse>(url, {
-        body,
-      })
-    ).body;
-    if (!res?.data?.orb) {
-      logger.debug({ res }, `Failed to look up orb ${packageName}`);
+    const url = `${joinUrlParts(
+      registryUrl,
+      'api/v3/orb/packages',
+    )}?${getQueryString({ 'filter[name]': packageName })}`;
+    const body = await this.fetchJson(url, OrbPackagesResponse);
+    const pkg = body.data[0];
+    if (!pkg) {
+      logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
       return null;
     }
 
-    const { orb } = res.data;
-    // Simplify response before caching and returning
-    const homepage = orb.homeUrl?.length
-      ? orb.homeUrl
+    // The homepage fallback uses the requested packageName, which the schema
+    // has no access to, so it is built here rather than in the transform.
+    const homepage = pkg.homeUrl?.length
+      ? pkg.homeUrl
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
-    const releases = orb.versions.map(({ version, createdAt }) => ({
-      version,
-      releaseTimestamp: asTimestamp(createdAt),
-    }));
-
-    const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
+    const dep = {
+      homepage,
+      isPrivate: pkg.isPrivate,
+      releases: pkg.releases,
+    };
     logger.trace({ dep }, 'dep');
     return dep;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  override getReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
     return withCache(
       {
         namespace: `datasource-${OrbDatasource.id}`,
-        key: config.packageName,
+        key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this._getReleases(config),

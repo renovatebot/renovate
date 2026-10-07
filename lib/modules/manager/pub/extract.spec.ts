@@ -27,6 +27,9 @@ describe('modules/manager/pub/extract', () => {
             datasource: 'dart-version',
           },
         ],
+        extractedConstraints: {
+          dart: '^3.0.0',
+        },
       });
     });
 
@@ -80,7 +83,17 @@ describe('modules/manager/pub/extract', () => {
             path: path2
       `;
       const actual = extractPackageFile(content, packageFile);
+      expect(actual).toMatchObject({
+        extractedConstraints: {
+          dart: '^3.0.0',
+          flutter: '2.0.0',
+        },
+      });
       expect(actual).toEqual({
+        extractedConstraints: {
+          dart: '^3.0.0',
+          flutter: '2.0.0',
+        },
         deps: [
           {
             currentValue: '1.0.0',

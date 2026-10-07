@@ -8,7 +8,7 @@ describe('modules/versioning/regex/index', () => {
     );
 
     it('requires a valid configuration to be initialized', () => {
-      expect(() => get('regex:not a regex')).toThrow();
+      expect(() => get('regex:not a regex')).toThrow('config-validation');
     });
 
     it('works without config', () => {
@@ -416,6 +416,133 @@ describe('modules/versioning/regex/index', () => {
       expect(
         re.minSatisfyingVersion(versions, '12.7.0-debian-12-r100'),
       ).toBeNull();
+    });
+  });
+
+  describe('ordered by version precedence, not capture-group position', () => {
+    // Calendar versioning `YYYY.DD.MM` (the day is positionally before the
+    // month): naming the month `minor` and the day `patch` makes comparison
+    // follow year, then month, then day. Versions compare by the
+    // `major`/`minor`/`patch` names in that order of precedence, never by the
+    // left-to-right position of the capture groups, so a larger day (the middle
+    // field here) never outranks a later month.
+    const re = get(
+      'regex:^(?<major>\\d{4})\\.(?<patch>\\d{2})\\.(?<minor>\\d{2})$',
+    );
+
+    it.each`
+      a               | b               | expected
+      ${'2024.05.10'} | ${'2024.10.05'} | ${true}
+      ${'2024.10.05'} | ${'2024.05.10'} | ${false}
+      ${'2024.01.06'} | ${'2024.31.05'} | ${true}
+      ${'2024.10.02'} | ${'2023.10.12'} | ${true}
+    `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
+      expect(re.isGreaterThan(a, b)).toBe(expected);
+    });
+
+    it('sortVersions orders by year, then month, then day', () => {
+      expect(
+        ['2024.10.05', '2024.05.10', '2023.31.12'].sort(
+          re.sortVersions.bind(re),
+        ),
+      ).toEqual(['2023.31.12', '2024.10.05', '2024.05.10']);
+    });
+  });
+
+  describe('comparator ranges', () => {
+    // `-ee.N` is captured as an ordered `build` component (with `-ee` a
+    // literal), so ranges resolve through the inherited `_compare` without any
+    // semver prerelease involved.
+    const re = get(
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-ee\\.(?<build>\\d+)$',
+    );
+    const tags = ['19.0.0-ee.0', '19.1.2-ee.0', '19.2.0-ee.0', '19.5.1-ee.0'];
+
+    it.each`
+      input                | expected
+      ${'19.1.2-ee.0'}     | ${true}
+      ${'<=19.1.2-ee.0'}   | ${true}
+      ${'=19.1.2-ee.0'}    | ${true}
+      ${'<=19.1.2-ee.foo'} | ${false}
+      ${'<=notaversion'}   | ${false}
+      ${'notaversion'}     | ${false}
+      ${''}                | ${false}
+    `('isValid("$input") === $expected', ({ input, expected }) => {
+      expect(re.isValid(input)).toBe(expected);
+    });
+
+    it('isValid is true for a compound range', () => {
+      expect(re.isValid('>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(true);
+    });
+
+    it.each`
+      input              | expected
+      ${'19.1.2-ee.0'}   | ${true}
+      ${'=19.1.2-ee.0'}  | ${true}
+      ${'==19.1.2-ee.0'} | ${true}
+      ${'<=19.1.2-ee.0'} | ${false}
+      ${'notaversion'}   | ${false}
+    `('isSingleVersion("$input") === $expected', ({ input, expected }) => {
+      expect(re.isSingleVersion(input)).toBe(expected);
+    });
+
+    it('isSingleVersion is false for a compound range', () => {
+      expect(re.isSingleVersion('>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(false);
+    });
+
+    it.each`
+      input              | expected
+      ${'19.1.2-ee.0'}   | ${true}
+      ${'<=19.1.2-ee.0'} | ${false}
+      ${'notaversion'}   | ${false}
+    `('isVersion("$input") === $expected', ({ input, expected }) => {
+      expect(re.isVersion(input)).toBe(expected);
+    });
+
+    it.each`
+      version          | range              | expected
+      ${'19.0.0-ee.0'} | ${'<=19.1.2-ee.0'} | ${true}
+      ${'19.1.2-ee.0'} | ${'<=19.1.2-ee.0'} | ${true}
+      ${'19.2.0-ee.0'} | ${'<=19.1.2-ee.0'} | ${false}
+      ${'19.0.0-ee.0'} | ${'<19.1.2-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'<19.1.2-ee.0'}  | ${false}
+      ${'19.2.0-ee.0'} | ${'>=19.1.2-ee.0'} | ${true}
+      ${'19.0.0-ee.0'} | ${'>19.0.0-ee.0'}  | ${false}
+      ${'19.2.0-ee.0'} | ${'>19.0.0-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'=19.1.2-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'==19.1.2-ee.0'} | ${true}
+      ${'19.1.2-ee.0'} | ${'19.1.2-ee.0'}   | ${true}
+      ${'19.1.3-ee.0'} | ${'19.1.2-ee.0'}   | ${false}
+    `(
+      'matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(re.matches(version, range)).toBe(expected);
+      },
+    );
+
+    it('matches compound ranges', () => {
+      expect(re.matches('19.1.0-ee.0', '>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(
+        true,
+      );
+      expect(re.matches('20.1.0-ee.0', '>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(
+        false,
+      );
+    });
+
+    it('getSatisfyingVersion caps at the required stop', () => {
+      expect(re.getSatisfyingVersion(tags, '<=19.1.2-ee.0')).toBe(
+        '19.1.2-ee.0',
+      );
+      expect(re.getSatisfyingVersion(tags, '19.2.0-ee.0')).toBe('19.2.0-ee.0');
+      expect(re.getSatisfyingVersion(tags, '<19.0.0-ee.0')).toBeNull();
+    });
+
+    it('minSatisfyingVersion returns the lowest match', () => {
+      expect(re.minSatisfyingVersion(tags, '>=19.1.2-ee.0')).toBe(
+        '19.1.2-ee.0',
+      );
+      expect(re.minSatisfyingVersion(tags, '19.0.0-ee.0')).toBe('19.0.0-ee.0');
+      expect(re.minSatisfyingVersion(tags, '>99.0.0-ee.0')).toBeNull();
     });
   });
 });

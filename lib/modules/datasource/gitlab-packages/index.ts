@@ -1,4 +1,4 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -9,24 +9,23 @@ import { GitlabPackages } from './schema.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource {
+export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
 
-  protected override http: GitlabHttp;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override caching = true;
-
-  override customRegistrySupport = true;
-
-  override defaultRegistryUrls = ['https://gitlab.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
-    super(datasource);
-    this.http = new GitlabHttp(datasource);
+    super(datasource, new GitlabHttp(datasource));
   }
 
   static getGitlabPackageApiUrl(
@@ -38,18 +37,18 @@ export class GitlabPackagesDatasource extends Datasource {
     const packageNameEncoded = encodeURIComponent(packageName);
 
     return joinUrlParts(
-      registryUrl,
-      `api/v4/projects`,
+      getApiBaseUrl(registryUrl),
+      'projects',
       projectNameEncoded,
       `packages?package_name=${packageNameEncoded}&per_page=100`,
     );
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -87,14 +86,13 @@ export class GitlabPackagesDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
         // TODO: types (#22198)
         key: `${config.registryUrl}-${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

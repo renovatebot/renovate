@@ -1,7 +1,7 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { logger } from '../../../../../logger/index.ts';
-import { escapeRegExp, regEx } from '../../../../../util/regex.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../../util/string.ts';
 import type { UpdateDependencyConfig, Upgrade } from '../../../types.ts';
 import { pnpmWorkspaceOverrides } from '../../dep-types.ts';
@@ -36,10 +36,7 @@ function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
   depType:
-    | NpmDepType
-    | 'dependenciesMeta'
-    | 'packageManager'
-    | 'pnpm.overrides',
+    NpmDepType | 'dependenciesMeta' | 'packageManager' | 'pnpm.overrides',
   depName: string,
   oldValue: string,
   newValue: string,
@@ -83,7 +80,7 @@ function replaceAsString(
   const searchString = `"${oldValue}"`;
   let newString = `"${newValue}"`;
 
-  const escapedDepName = escapeRegExp(depName);
+  const escapedDepName = RegExp.escape(depName);
   const patchRe = regEx(`^(patch:${escapedDepName}@(npm:)?).*#`);
   const match = patchRe.exec(oldValue);
   if (match && depType === 'resolutions') {
@@ -117,11 +114,111 @@ function replaceAsString(
   throw new Error();
 }
 
+function updateDevEnginesDependency({
+  fileContent,
+  upgrade,
+}: Pick<UpdateDependencyConfig<NpmManagerData>, 'fileContent' | 'upgrade'>):
+  string | null {
+  const { depType, depName, newValue, managerData } = upgrade;
+  /* v8 ignore if -- defensive: dispatcher already filtered */
+  if (
+    !depName ||
+    !newValue ||
+    (depType !== 'devEngines.runtime' &&
+      depType !== 'devEngines.packageManager')
+  ) {
+    return null;
+  }
+  const subKey: 'runtime' | 'packageManager' =
+    depType === 'devEngines.runtime' ? 'runtime' : 'packageManager';
+  try {
+    const parsedContents: NpmPackage = JSON.parse(fileContent);
+    const block = parsedContents.devEngines?.[subKey];
+    if (!block) {
+      logger.warn(
+        { depName, depType },
+        'No devEngines block found; this is likely an extraction error.',
+      );
+      return null;
+    }
+    let oldVersion: string | undefined;
+    if (isArray(block)) {
+      const idx = managerData?.devEnginesIndex;
+      if (typeof idx !== 'number') {
+        logger.warn(
+          { depName, depType },
+          'No devEngines index found; this is likely an extraction error.',
+        );
+        return null;
+      }
+      const item = block[idx];
+      if (!item || item.name !== depName) {
+        logger.warn(
+          {
+            actualName: item?.name,
+            depName,
+            depType,
+            devEnginesIndex: idx,
+          },
+          'No matching devEngines dependency found; this is likely an extraction error.',
+        );
+        return null;
+      }
+      oldVersion = item.version;
+      item.version = newValue;
+    } else {
+      if (block.name !== depName) {
+        logger.warn(
+          { actualName: block.name, depName, depType },
+          'No matching devEngines dependency found; this is likely an extraction error.',
+        );
+        return null;
+      }
+      oldVersion = block.version;
+      block.version = newValue;
+    }
+    /* v8 ignore if -- defensive: extract filters out version-less items */
+    if (oldVersion === undefined) {
+      return null;
+    }
+    if (oldVersion === newValue) {
+      return fileContent;
+    }
+    const searchString = JSON.stringify(oldVersion);
+    const newString = JSON.stringify(newValue);
+    const anchor = '"devEngines"';
+    let searchIndex = fileContent.indexOf(anchor);
+    /* v8 ignore if -- defensive: extract verified devEngines presence */
+    if (searchIndex === -1) {
+      return null;
+    }
+    searchIndex += anchor.length;
+    for (; searchIndex < fileContent.length; searchIndex += 1) {
+      if (matchAt(fileContent, searchIndex, searchString)) {
+        const testContent = replaceAt(
+          fileContent,
+          searchIndex,
+          searchString,
+          newString,
+        );
+        if (dequal(parsedContents, JSON.parse(testContent))) {
+          return testContent;
+        }
+      }
+    }
+    /* v8 ignore next -- defensive: oldVersion guaranteed to appear in JSON */
+    return null;
+  } catch (err) {
+    logger.warn({ err }, 'updateDevEnginesDependency error');
+    return null;
+  }
+}
+
 export function updateDependency({
   fileContent,
   packageFile: packageFileName,
   upgrade,
-}: UpdateDependencyConfig): string | null {
+}: UpdateDependencyConfig<NpmManagerData>): string | null {
   if (
     upgrade.depType?.startsWith('pnpm.catalog') ||
     upgrade.depType === pnpmWorkspaceOverrides
@@ -139,9 +236,16 @@ export function updateDependency({
       upgrade,
     });
   }
+  if (
+    upgrade.depType === 'devEngines.runtime' ||
+    upgrade.depType === 'devEngines.packageManager'
+  ) {
+    return updateDevEnginesDependency({ fileContent, upgrade });
+  }
 
   const { depType, managerData } = upgrade;
-  const depName: string = managerData?.key ?? upgrade.depName;
+  // TODO #22198
+  const depName = managerData?.key ?? upgrade.depName!;
   let { newValue } = upgrade;
 
   newValue = getNewGitValue(upgrade) ?? newValue;
@@ -176,7 +280,10 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (oldVersion === newValue) {
+    if (
+      oldVersion === newValue &&
+      (!upgrade.newName || upgrade.newName === depName)
+    ) {
       logger.trace('Version is already updated');
       return fileContent;
     }
@@ -203,7 +310,7 @@ export function updateDependency({
         newValue!,
         overrideDepParents,
       );
-      if (upgrade.newName) {
+      if (upgrade.newName && upgrade.newName !== depName) {
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
@@ -254,7 +361,7 @@ export function updateDependency({
           // TODO #22198
           newValue!,
         );
-        if (upgrade.newName) {
+        if (upgrade.newName && upgrade.newName !== depName) {
           if (depKey === `**/${depName}`) {
             // handles the case where a replacement is in a resolution
             upgrade.newName = `**/${upgrade.newName}`;
@@ -301,7 +408,7 @@ function overrideDepPosition(
   overrideDepName: string;
 } {
   // get override dep position when its nested in an object
-  const lastParent = parents[parents.length - 1];
+  const lastParent = parents.at(-1);
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
     // v8 ignore else -- TODO: add test #40625

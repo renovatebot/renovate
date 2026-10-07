@@ -23,14 +23,14 @@ import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import { DependencyGroup, ProjectSection } from '../pep621/schema.ts';
 import { depTypes, pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { PoetryManagerData } from './types.ts';
 
 const PoetryOptionalDependencyMixin = z
   .object({
     optional: z.boolean().optional().catch(false),
   })
-  .transform(
-    ({ optional }): PackageDependency =>
-      optional ? { depType: 'extras' } : {},
+  .transform(({ optional }): PackageDependency<PoetryManagerData> =>
+    optional ? { depType: 'extras' } : {},
   );
 
 const PoetryPathDependency = z
@@ -38,8 +38,8 @@ const PoetryPathDependency = z
     path: z.string(),
     version: z.string().optional().catch(undefined),
   })
-  .transform(({ version }): PackageDependency => {
-    const dep: PackageDependency = {
+  .transform(({ version }): PackageDependency<PoetryManagerData> => {
+    const dep: PackageDependency<PoetryManagerData> = {
       datasource: PypiDatasource.id,
       skipReason: 'path-dependency',
     };
@@ -60,82 +60,93 @@ const PoetryGitDependency = z
     branch: z.string().optional().catch(undefined),
     rev: z.string().optional().catch(undefined),
   })
-  .transform(({ git, tag, version, branch, rev }): PackageDependency => {
-    if (tag) {
-      const { source, owner, name } = parseGitUrl(git);
-      const repo = `${owner}/${name}`;
-      if (source === 'github.com') {
-        return {
-          datasource: GithubTagsDatasource.id,
-          currentValue: tag,
-          packageName: repo,
-        };
-      } else if (source === 'gitlab.com') {
-        return {
-          datasource: GitlabTagsDatasource.id,
-          currentValue: tag,
-          packageName: repo,
-        };
-      } else {
+  .transform(
+    ({
+      git,
+      tag,
+      version,
+      branch,
+      rev,
+    }): PackageDependency<PoetryManagerData> => {
+      if (tag) {
+        const { source, owner, name } = parseGitUrl(git);
+        const repo = `${owner}/${name}`;
+        if (source === 'github.com') {
+          return {
+            datasource: GithubTagsDatasource.id,
+            currentValue: tag,
+            packageName: repo,
+          };
+        }
+        if (source === 'gitlab.com') {
+          return {
+            datasource: GitlabTagsDatasource.id,
+            currentValue: tag,
+            packageName: repo,
+          };
+        }
         return {
           datasource: GitTagsDatasource.id,
           currentValue: tag,
           packageName: git,
         };
       }
-    }
 
-    if (rev) {
+      if (rev) {
+        return {
+          datasource: GitRefsDatasource.id,
+          currentValue: branch,
+          currentDigest: rev,
+          replaceString: rev,
+          packageName: git,
+        };
+      }
+
       return {
         datasource: GitRefsDatasource.id,
-        currentValue: branch,
-        currentDigest: rev,
-        replaceString: rev,
+        currentValue: version,
         packageName: git,
+        skipReason: 'git-dependency',
       };
-    }
-
-    return {
-      datasource: GitRefsDatasource.id,
-      currentValue: version,
-      packageName: git,
-      skipReason: 'git-dependency',
-    };
-  })
+    },
+  )
   .and(PoetryOptionalDependencyMixin);
 
 const PoetryPypiDependency = z.union([
   z
     .object({ version: z.string().optional(), source: z.string().optional() })
-    .transform(({ version: currentValue, source }): PackageDependency => {
-      const managerData = source ? { sourceName: source.toLowerCase() } : {};
+    .transform(
+      ({
+        version: currentValue,
+        source,
+      }): PackageDependency<PoetryManagerData> => {
+        const managerData = source ? { sourceName: source.toLowerCase() } : {};
 
-      if (!currentValue) {
-        return { datasource: PypiDatasource.id, managerData };
-      }
+        if (!currentValue) {
+          return { datasource: PypiDatasource.id, managerData };
+        }
 
-      return {
-        datasource: PypiDatasource.id,
-        managerData: { ...managerData, nestedVersion: true },
-        currentValue,
-      };
-    })
+        return {
+          datasource: PypiDatasource.id,
+          managerData: { ...managerData, nestedVersion: true },
+          currentValue,
+        };
+      },
+    )
     .and(PoetryOptionalDependencyMixin),
-  z.string().transform(
-    (version): PackageDependency => ({
-      datasource: PypiDatasource.id,
-      currentValue: version,
-      managerData: { nestedVersion: false },
-    }),
-  ),
+  z.string().transform((version): PackageDependency<PoetryManagerData> => ({
+    datasource: PypiDatasource.id,
+    currentValue: version,
+    managerData: { nestedVersion: false },
+  })),
 ]);
 
-const PoetryArrayDependency = z.array(z.unknown()).transform(
-  (): PackageDependency => ({
+const PoetryArrayDependency = z
+  .array(z.unknown())
+  .transform((): PackageDependency<PoetryManagerData> => ({
     datasource: PypiDatasource.id,
     skipReason: 'multiple-constraint-dep',
-  }),
-);
+  }));
 
 const PoetryDependency = z.union([
   PoetryPathDependency,
@@ -176,7 +187,7 @@ export const PoetryDependencies = LooseRecord(
     return dep;
   }),
 ).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<PoetryManagerData>[] = [];
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;
     if (!dep.packageName) {
@@ -196,7 +207,7 @@ export const PoetryGroupDependencies = LooseRecord(
     .object({ dependencies: PoetryDependencies })
     .transform(({ dependencies }) => dependencies),
 ).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<PoetryManagerData>[] = [];
   for (const [name, val] of Object.entries(record)) {
     for (const dep of Object.values(val)) {
       dep.depType = name;
@@ -336,13 +347,16 @@ export const PoetryPyProject = Toml.pipe(
         'dependency-groups': dependencyGroups,
       } = pyproject;
 
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<PoetryManagerData>[] = [];
       const projectDependencies = coerceArray(project?.dependencies);
       const projectOptionalDependencies = coerceArray(
         project?.['optional-dependencies'],
       );
 
-      const projectDepsByName: Record<string, PackageDependency> = {};
+      const projectDepsByName: Record<
+        string,
+        PackageDependency<PoetryManagerData>
+      > = {};
       for (const dep of [
         ...projectDependencies,
         ...dependencyGroups,
@@ -373,7 +387,10 @@ export const PoetryPyProject = Toml.pipe(
         // When the same dep exists in project.dependencies or dependency-groups,
         // Poetry just uses the Poetry dep to enrich the project dependency.
         if (projectDep) {
-          const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
+          const mergedDep = deepmerge<PackageDependency<PoetryManagerData>>(
+            poetryDep,
+            projectDep,
+          );
           // Poetry supports specifying the version in project.dependencies and
           // tool.poetry.dependencies *at the same time* and only errors if both
           // are not compatible - we require a single constraint per dependency.
@@ -398,7 +415,7 @@ export const PoetryPyProject = Toml.pipe(
       deps.push(...Object.values(projectDepsByName));
 
       const packageFileVersion = tool?.poetry?.version;
-      const packageFileContent: PackageFileContent = {
+      const packageFileContent: PackageFileContent<PoetryManagerData> = {
         deps,
         packageFileVersion,
       };

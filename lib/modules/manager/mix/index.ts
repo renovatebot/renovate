@@ -17,6 +17,7 @@ export const defaultConfig = {
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['mix.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitTagsDatasource.id,

@@ -5,10 +5,11 @@ import { logger } from '../../../../logger/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/index.ts';
 import type { PackageDependency } from '../../../../modules/manager/types.ts';
 import { writeLocalFile } from '../../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../util/string.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
@@ -90,17 +91,37 @@ export async function confirmIfDepUpdated(
   }
 
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
-    logger.debug(
-      {
-        depName: upgrade.depName,
-        manager,
-        packageFile,
-        expectedValue: upgrade.newValue,
-        foundValue: newUpgrade.currentValue,
-      },
-      'Value is not updated',
-    );
-    return false;
+    // accept reshaped values produced by autoReplaceStringTemplate
+    let templateMatchesExtractedValue = false;
+    if (upgrade.autoReplaceStringTemplate) {
+      try {
+        const compiledValue = compile(
+          upgrade.autoReplaceStringTemplate,
+          upgrade,
+          false,
+        );
+        templateMatchesExtractedValue =
+          compiledValue === newUpgrade.currentValue;
+      } catch (err) {
+        logger.debug(
+          { err, manager, packageFile },
+          'Failed to compile autoReplaceStringTemplate in confirmIfDepUpdated',
+        );
+      }
+    }
+    if (!templateMatchesExtractedValue) {
+      logger.debug(
+        {
+          depName: upgrade.depName,
+          manager,
+          packageFile,
+          expectedValue: upgrade.newValue,
+          foundValue: newUpgrade.currentValue,
+        },
+        'Value is not updated',
+      );
+      return false;
+    }
   }
 
   if (
@@ -126,13 +147,7 @@ export async function confirmIfDepUpdated(
 
 function getDepsSignature(deps: PackageDependency[]): string {
   // TODO: types (#22198)
-  return deps
-    .map(
-      (dep) =>
-        `${(dep.depName ?? dep.packageName)!}${(dep.packageName ??
-          dep.depName)!}`,
-    )
-    .join(',');
+  return deps.map((dep) => `${dep.depName!}${dep.packageName!}`).join(',');
 }
 
 function firstIndexOf(
@@ -163,6 +178,10 @@ export async function checkBranchDepsMatchBaseDeps(
       upgrade,
     )!;
     const branchDeps = res!.deps;
+    // `baseDeps` were normalized during extraction, so the freshly extracted `branchDeps` need the same treatment before their signatures can be compared
+    for (const dep of branchDeps) {
+      normalizeDepNames(dep);
+    }
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch /* istanbul ignore next */ {
     logger.info(
@@ -280,7 +299,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentValue), autoReplaceRegExpFlag),
           newValue,
         );
       }
@@ -292,7 +311,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(depName), autoReplaceRegExpFlag),
           newName,
         );
       }
@@ -304,7 +323,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigest), autoReplaceRegExpFlag),
           newDigest,
         );
       } else if (
@@ -323,7 +342,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigestShort), autoReplaceRegExpFlag),
           newDigest,
         );
       }

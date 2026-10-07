@@ -4,6 +4,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
@@ -218,14 +219,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
       // there's nothing defined in there anymore that it can match
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -253,11 +251,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
@@ -320,11 +316,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
@@ -1320,11 +1314,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
@@ -1346,11 +1338,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
@@ -1367,11 +1357,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '1.2.4';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1391,11 +1378,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1416,11 +1400,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1440,11 +1421,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1452,6 +1430,175 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
       );
+    });
+
+    it('jsonata: reformats newValue via autoReplaceStringTemplate', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      upgrade.autoReplaceStringTemplate =
+        '{{replace "^(\\d+\\.\\d+\\.\\d+)$" "$1.0" newValue}}';
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe('[ { "version": "27.0.0.0", "package": "foo" } ]');
+    });
+
+    it.each([
+      {
+        description: 'git tag',
+        include:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.2.0',
+        newValue: 'v1.3.0',
+        newDigest: undefined,
+        expected:
+          'git::https://github.com/org/cfg.git//base/mise.toml?ref=v1.3.0',
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        newValue: '1.1',
+        newDigest: undefined,
+        expected: 'oci::ghcr.io/org/base:1.1',
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${'a'.repeat(64)}`,
+        newValue: '1.1',
+        newDigest: `sha256:${'b'.repeat(64)}`,
+        expected: `oci::ghcr.io/org/base:1.1@sha256:${'b'.repeat(64)}`,
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ include, newValue, newDigest, expected }) => {
+        const content = `include = ["${include}"]\n\n[tools]\nnode = "1.0"\n`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find((d) => d.depType === 'include')!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(content.replace(include, expected));
+      },
+    );
+
+    it.each([
+      {
+        description: 'tag bump with a sha and version comment',
+        comment: ' # v0.5.0',
+        newValue: 'v0.6.0',
+        expectedComment: ' # v0.6.0',
+      },
+      {
+        description: 'branch digest bump keeping the comment',
+        comment: ' # main',
+        newValue: 'main',
+        expectedComment: ' # main',
+      },
+    ])(
+      'mise include: updates $description',
+      async ({ comment, newValue, expectedComment }) => {
+        const oldSha = 'a'.repeat(40);
+        const newDigest = 'b'.repeat(40);
+        const entry = `git::https://gitlab.com/org/cfg.git//mise.toml?ref=`;
+        const prefix = `include = [\n  "${entry}`;
+        const suffix = `",${comment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`;
+        const content = `${prefix}${oldSha}${suffix}`;
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps[0];
+        Object.assign(upgrade, dep, { newValue, newDigest, depIndex: 0 });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(
+          `${prefix}${newDigest}",${expectedComment}\n  "oci::ghcr.io/org/base:1.0",\n]\n`,
+        );
+      },
+    );
+
+    it.each([
+      {
+        description: 'a tag',
+        suffix: '',
+        ref: 'v1.0.0',
+        newValue: 'v1.1.0',
+        newDigest: undefined,
+        expectedRef: 'v1.1.0',
+        expectedSuffix: '',
+      },
+      {
+        description: 'a sha with a version comment',
+        suffix: ' # v1.0.0',
+        ref: 'a'.repeat(40),
+        newValue: 'v1.1.0',
+        newDigest: 'b'.repeat(40),
+        expectedRef: 'b'.repeat(40),
+        expectedSuffix: ' # v1.1.0',
+      },
+    ])(
+      'mise task file: updates $description',
+      async ({
+        suffix,
+        ref,
+        newValue,
+        newDigest,
+        expectedRef,
+        expectedSuffix,
+      }) => {
+        const entry =
+          'git::https://github.com/org/tasks.git//scripts/build.sh?ref=';
+        function build(r: string, s: string): string {
+          return `[tasks.build]\nfile = "${entry}${r}"${s}\n\n[tools]\nnode = "1.0"\n`;
+        }
+        const content = build(ref, suffix);
+        upgrade.manager = 'mise';
+        upgrade.packageFile = 'mise.toml';
+        const extracted = await extractMisePackageFile(content, 'mise.toml');
+        const dep = extracted!.deps.find(
+          (d) => d.depType === 'task-build-file',
+        )!;
+        Object.assign(upgrade, dep, {
+          newValue,
+          newDigest,
+          depIndex: extracted!.deps.indexOf(dep),
+        });
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(build(expectedRef, expectedSuffix));
+      },
+    );
+
+    it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.baseDeps = [{ depName: 'foo', packageName: 'foo' }];
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      // invalid handlebars template throws during confirmIfDepUpdated
+      upgrade.autoReplaceStringTemplate = '{{#if}}';
+      reuseExistingBranch = true;
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBeNull();
     });
 
     it('github-actions: updates with newValue only', async () => {

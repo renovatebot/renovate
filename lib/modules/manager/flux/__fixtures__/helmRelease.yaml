@@ -4,6 +4,7 @@ metadata:
   name: sealed-secrets
   namespace: kube-system
 spec:
+  {{- include "template.test" . }}
   releaseName: sealed-secrets-controller
   chart:
     spec:

@@ -1,4 +1,6 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
@@ -17,7 +19,7 @@ function extractDefinition(
   registryAliases: Record<string, string>,
 ): void {
   for (const [key, orb] of Object.entries(definition.orbs)) {
-    if (typeof orb === 'string') {
+    if (isString(orb)) {
       const [packageName, currentValue] = orb.split('@');
 
       deps.push({
@@ -36,10 +38,7 @@ function extractDefinition(
   // extract environments
   const environments = [...definition.executors, ...definition.jobs];
   for (const dockerImage of environments) {
-    deps.push({
-      ...getDep(dockerImage, true, registryAliases),
-      depType: 'docker',
-    });
+    deps.push(getDep(dockerImage, { registryAliases, depType: 'docker' }));
   }
 }
 
@@ -60,15 +59,12 @@ export function extractPackageFile(
     return null;
   }
 
-  const registryAliases = config?.registryAliases ?? {};
+  const registryAliases = coerceObject(config?.registryAliases);
   const deps: PackageDependency[] = [];
   extractDefinition(deps, parsed, registryAliases);
 
   for (const alias of parsed.aliases) {
-    deps.push({
-      ...getDep(alias, true, registryAliases),
-      depType: 'docker',
-    });
+    deps.push(getDep(alias, { registryAliases, depType: 'docker' }));
   }
 
   if (!deps.length) {

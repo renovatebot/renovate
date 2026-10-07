@@ -1,6 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { parse } from '../../../util/html.ts';
 import type { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -18,9 +18,13 @@ export class RubyVersionDatasource extends Datasource {
     super(RubyVersionDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://www.ruby-lang.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://www.ruby-lang.org/'];
+  }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = rubyVersioningId;
 
@@ -31,7 +35,7 @@ export class RubyVersionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'We use the URL: https://github.com/ruby/ruby.';
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const res: ReleaseResult = {
@@ -45,8 +49,9 @@ export class RubyVersionDatasource extends Datasource {
       const response = await this.http.getText(rubyVersionsUrl);
 
       const root = parse(response.body);
-      const rows =
-        root.querySelector('.release-list')?.querySelectorAll('tr') ?? [];
+      const rows = coerceArray(
+        root.querySelector('.release-list')?.querySelectorAll('tr'),
+      );
       rows.forEach((row) => {
         const tds = row.querySelectorAll('td');
         const columns: string[] = [];
@@ -74,13 +79,13 @@ export class RubyVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${RubyVersionDatasource.id}`,
         key: 'all',
+        cacheable: true,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 

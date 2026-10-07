@@ -14,7 +14,9 @@ import { getCustomConfig } from './utils.ts';
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
 
-  override customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   constructor() {
     super(CustomDatasource.id);
@@ -57,8 +59,8 @@ export class CustomDatasource extends Datasource {
 
       if (expression instanceof Error) {
         logger.once.warn(
-          { errorMessage: expression.message },
-          `Invalid JSONata expression: ${transformTemplate}`,
+          { errorMessage: expression.message, transformTemplate },
+          'Invalid JSONata expression',
         );
         return null;
       }
@@ -74,8 +76,8 @@ export class CustomDatasource extends Datasource {
         data = modifiedData;
       } catch (err) {
         logger.once.warn(
-          { err },
-          `Error while evaluating JSONata expression: ${transformTemplate}`,
+          { err, transformTemplate },
+          'Error while evaluating JSONata expression',
         );
         return null;
       }

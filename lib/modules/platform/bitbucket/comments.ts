@@ -4,7 +4,7 @@ import type {
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
 } from '../types.ts';
-import type { Account, Config, PagedResult } from './types.ts';
+import type { Account, CommentsConfig, PagedResult } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
@@ -15,8 +15,6 @@ interface Comment {
   id: number;
   user: Account;
 }
-
-export type CommentsConfig = Pick<Config, 'repository'>;
 
 interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
@@ -125,7 +123,7 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
@@ -142,6 +140,14 @@ export async function reopenComments(
   );
 
   return reopenComments;
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.content.raw.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.content.raw.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -161,19 +167,17 @@ export async function ensureCommentRemoval(
 
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.content.raw.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.content.raw.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }

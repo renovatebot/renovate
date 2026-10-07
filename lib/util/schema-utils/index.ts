@@ -360,10 +360,11 @@ export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   }
 });
 
-export function withDepType<
-  Output extends PackageDependency[],
-  Schema extends z.ZodType<Output>,
->(schema: Schema, depType: string, force = true): z.ZodType<Output> {
+export function withDepType<Output extends PackageDependency[]>(
+  schema: z.ZodType<Output>,
+  depType: string,
+  force = true,
+): z.ZodType<Output> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {
@@ -395,6 +396,7 @@ export function withTraceMessage<Output>(
 }
 
 function isCircular(value: unknown, visited = new Set<unknown>()): boolean {
+  // oxlint-disable-next-line renovate/prefer-is-object -- functions must stay non-circular leaves; isObject() matches functions and would send them into the property walk
   if (value === null || typeof value !== 'object') {
     return false;
   }
@@ -438,7 +440,16 @@ export const NotCircular = z.unknown().superRefine((val, ctx) => {
   }
 });
 
-export const EmailAddress = z.email();
+const StandardEmail = z.email();
+
+// GitHub/Forgejo apps use addresses like `1234+name[bot]@users.noreply.github.com`.
+// The `[bot]` marker is not valid in the local part per RFC 5322, so we strip it before
+export const EmailAddress = z
+  .string()
+  .refine(
+    (value) => StandardEmail.safeParse(value.replace('[bot]@', '@')).success,
+    'Invalid email address',
+  );
 export type EmailAddress = z.infer<typeof EmailAddress>;
 
 export function isEmailAdress(value: string): boolean {

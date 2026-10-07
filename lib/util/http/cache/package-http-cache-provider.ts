@@ -18,13 +18,13 @@ export interface PackageHttpCacheProviderOptions {
   softTtlMinutes?: number;
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
-  writeSchema?: ZodType<unknown>;
+  writeSchema?: ZodType;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
   private defaultTtlMinutes: number;
-  private writeSchema?: ZodType<unknown>;
+  private writeSchema?: ZodType;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -32,8 +32,8 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor({
     namespace,
     softTtlMinutes = 15,
-    checkCacheControlHeader = false,
-    checkAuthorizationHeader = false,
+    checkCacheControlHeader,
+    checkAuthorizationHeader,
     writeSchema,
   }: PackageHttpCacheProviderOptions) {
     super();
@@ -86,10 +86,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return;
     }
 
-    const httpResponse = copyResponse(
-      data.httpResponse as HttpResponse<unknown>,
-      false,
-    );
+    const httpResponse = copyResponse(data.httpResponse, false);
 
     const { data: body, error: err } = this.writeSchema.safeParse(
       httpResponse.body,
@@ -145,14 +142,14 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return true;
     }
 
-    if (
-      this.checkCacheControlHeader &&
-      isString(resp.headers['cache-control'])
-    ) {
-      const isPublic = resp.headers['cache-control']
-        .toLocaleLowerCase()
-        .split(regEx(/\s*,\s*/))
-        .includes('public');
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
 
       if (!isPublic) {
         return false;

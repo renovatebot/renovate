@@ -61,7 +61,9 @@ describe('util/cache/package/codec', () => {
   it('throws for invalid brotli data', async () => {
     const encoded = Buffer.from([0x11, 0x91, 0x01, 0x00, 0, 0, 0, 0, 1]);
 
-    await expect(decodeEntry(encoded)).rejects.toThrow();
+    await expect(decodeEntry(encoded)).rejects.toThrow(
+      'unexpected end of file',
+    );
   });
 
   it.each`

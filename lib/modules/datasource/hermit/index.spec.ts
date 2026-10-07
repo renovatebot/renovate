@@ -127,7 +127,7 @@ describe('modules/datasource/hermit/index', () => {
           packageName: 'go',
           registryUrl,
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('should get null result on non github url given', async () => {

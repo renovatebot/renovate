@@ -35,25 +35,45 @@
       "enabled": false
     },
     {
+      "description": "group base image docker and npm updates, they must stay on the same version",
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
+      "groupName": "renovate-base-image"
+    },
+    {
       "description": "set fix scope for base image",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "semanticCommitType": "fix"
     },
     {
       "description": "set feat scope for base image major and minor",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
     },
     {
       "description": "use `feat` semantic commit scope with breaking change for for base image major",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major"],
       "commitMessagePrefix": "feat(deps)!:"
     },
     {
       "description": "allow prereleases for base image on next branch",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchBaseBranches": ["next"],
       "ignoreUnstable": false
     },
@@ -106,6 +126,25 @@
         "zizmorcore/zizmor-action"
       ],
       "minimumGroupSize": 2
+    },
+    {
+      "description": "Only update the major version constraint for Erlang",
+      "matchFileNames": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchPackageNames": ["containerbase/erlang-prebuild"],
+      "extractVersion": "^(?<version>\\d+)",
+      "separateMultipleMajor": true
+    },
+    {
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchFileNames": ["lib/config/options/index.ts"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Group commander major updates, they depend on each other.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "commander"
     }
   ],
   "customManagers": [
@@ -116,6 +155,21 @@
         "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchStrings": ["const erlangVersion = '(?<currentValue>[\\^0-9]*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "containerbase/erlang-prebuild",
+      "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/config/options/index.ts"],
+      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
     }
   ]
 }

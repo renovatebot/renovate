@@ -10,7 +10,7 @@ Renovate is an automated dependency update tool that scans repositories for depe
 
 The **./docs/development/** directory contains detailed documentation for developers, like style guides, testing guidelines, and configuration options.
 
-ALWAYS READ ./docs/best-practices.md for guidance on code style.
+ALWAYS READ ./docs/development/best-practices.md for guidance on code style.
 
 ## Architecture
 
@@ -92,15 +92,15 @@ Two discussion categories are available:
 
 - PRs require 100% test coverage. Use `/* v8 ignore ... */` sparingly when tests wouldn't prove anything.
 - Do not force push PR branches.
-- Follow the PR template (`.github/pull_request_template.md`).
+- Follow the PR template (`.github/pull_request_template.md`). Before running `gh pr create`, read that file in full and use its exact section structure for the PR body — do not substitute a generic Summary/Test plan format.
+- PRs should be raised as a draft PR, and only marked ready once the CLA has been signed, and the user has confirmed that the changes are ready to go
 
 ### Commands
 
 Use `pnpm` for all commands (NOT npm/npx).
 
 - **Install dependencies:** `pnpm install`
-- **Lint / Test / Autofix:** `pnpm check --all <optional path>`
-- **Full test suite:** `pnpm test` (runs lint + schema validation + all tests)
+- **Lint / Type-check / Test / Autofix:** `pnpm check --all <paths>` for the changed files, `pnpm check --all` without a path for a full verification. It already runs lint, prettier, type-check and the tests of those files, so do not run `pnpm type-check`, `tsc`, a separate lint or extra `pnpm vitest` runs next to it.
 - **Run from source:** `pnpm start` or `node lib/renovate.ts`
 
 Tests use Vitest (invoked via `pnpm vitest`). Test files use `.spec.ts` suffix and are co-located with source. Globals from `jest-extended` and `expect-more-jest` are available in tests.

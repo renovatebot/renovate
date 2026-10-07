@@ -6,7 +6,7 @@ describe('config/migrations/custom/extends-migration', () => {
     await expect(ExtendsMigration).toMigrate(
       {
         extends: ':js-app',
-      } as any,
+      },
       {
         extends: ['config:js-app'],
       },
@@ -15,7 +15,7 @@ describe('config/migrations/custom/extends-migration', () => {
     await expect(ExtendsMigration).toMigrate(
       {
         extends: 'foo',
-      } as any,
+      },
       {
         extends: ['foo'],
       },
@@ -37,7 +37,7 @@ describe('config/migrations/custom/extends-migration', () => {
     await expect(ExtendsMigration).toMigrate(
       {
         extends: [{}],
-      } as any,
+      },
       {
         extends: [],
       },

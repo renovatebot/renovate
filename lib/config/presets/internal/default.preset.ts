@@ -282,7 +282,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   gitSignOff: {
-    commitBody: 'Signed-off-by: {{{gitAuthor}}}',
+    commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
     description: 'Append `Signed-off-by:` to signoff Git commits.',
   },
   gomod: {

@@ -2,11 +2,7 @@ import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import type { DockerHubTag } from './schema.ts';
-
-export interface DockerHubCacheData {
-  items: Record<number, DockerHubTag>;
-  updatedAt: string | null;
-}
+import type { DockerHubCacheData } from './types.ts';
 
 const cacheNamespace = 'datasource-docker-hub-cache';
 
@@ -71,6 +67,7 @@ export class DockerHubCache {
 
     this.cache.updatedAt = updatedAt;
 
+    // v8 ignore else -- needs a cache populated across two sync runs
     if (earliestDate && latestDate) {
       for (const [key, item] of Object.entries(this.cache.items)) {
         const id = parseInt(key, 10);

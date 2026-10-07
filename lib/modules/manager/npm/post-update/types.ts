@@ -1,19 +1,21 @@
+import type { DateTime } from 'luxon';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageFile,
+  NpmrcPackageFile,
 } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
+import type { lazyLoadPackageJson } from './utils.ts';
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
+  pnpmLockFileDirs: string[];
 }
 
 export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile<NpmManagerData>>[];
+  npm?: Partial<NpmrcPackageFile<NpmManagerData>>[];
 }
 
 export interface WriteExistingFilesResult {
@@ -53,3 +55,15 @@ export interface YarnRcYmlFile {
   yarnPath?: string | null;
   npmRegistries: Record<string, YarnRcNpmRegistry>;
 }
+
+export interface HostRulesResult {
+  additionalNpmrcContent: string[];
+  additionalYarnRcYml?: any;
+}
+
+export interface NpmrcCooldownResult {
+  date: DateTime<true>;
+  source: 'before' | 'min-release-age';
+}
+
+export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;

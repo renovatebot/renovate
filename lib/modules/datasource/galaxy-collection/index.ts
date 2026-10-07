@@ -1,7 +1,4 @@
 import { isTruthy } from '@sindresorhus/is';
-import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -26,11 +23,15 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly registryStrategy = 'hunt';
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/api/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://galaxy.ansible.com/api/'];
+  }
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -43,40 +44,25 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The `sourceUrl` is determined from the `repository` field in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const baseUrl = this.constructBaseUrl(registryUrl!, packageName);
 
-    const { val: baseProject, err: baseErr } = await this.http
-      .getJsonSafe(baseUrl, GalaxyV3)
-      .onError((err) => {
-        if (!(err instanceof HttpError && err.response?.statusCode === 404)) {
-          logger.warn(
-            { url: baseUrl, datasource: this.id, packageName, err },
-            'Error fetching from url',
-          );
-        }
-      })
-      .unwrap();
-    if (baseErr) {
-      this.handleGenericErrors(baseErr);
+    const baseProject = await this.fetchJsonOrNull(baseUrl, GalaxyV3);
+    if (!baseProject) {
+      return null;
     }
 
     const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions'));
 
-    const { val: rawReleases, err: versionsErr } = await this.http
-      .getJsonSafe(versionsUrl, GalaxyV3Versions)
-      .onError((err) => {
-        logger.warn(
-          { url: versionsUrl, datasource: this.id, packageName, err },
-          'Error fetching from url',
-        );
-      })
-      .unwrap();
-    if (versionsErr) {
-      this.handleGenericErrors(versionsErr);
+    const rawReleases = await this.fetchJsonOrNull(
+      versionsUrl,
+      GalaxyV3Versions,
+    );
+    if (!rawReleases) {
+      return null;
     }
 
     const releases = rawReleases.map((value) => {
@@ -89,7 +75,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     // asynchronously get release details
     const enrichedReleases = await p.map(
       releases,
-      (release) => this.getVersionDetails(packageName, versionsUrl, release),
+      (release) => this.getVersionDetails(versionsUrl, release),
       { concurrency: 4 },
     );
 
@@ -109,13 +95,12 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
-        key: `getReleases:${config.packageName}`,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
@@ -125,42 +110,32 @@ export class GalaxyCollectionDatasource extends Datasource {
       return ensureTrailingSlash(
         joinUrlParts(registryUrl, 'api/v3/collections', namespace, projectName),
       );
-    } else {
-      const repository =
-        repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
-      return ensureTrailingSlash(
-        joinUrlParts(
-          registryUrl,
-          'v3/plugin/ansible/content',
-          repository,
-          'collections/index',
-          namespace,
-          projectName,
-        ),
-      );
     }
+    const repository =
+      repositoryRegex.exec(registryUrl)?.groups?.repository ?? 'published';
+    return ensureTrailingSlash(
+      joinUrlParts(
+        registryUrl,
+        'v3/plugin/ansible/content',
+        repository,
+        'collections/index',
+        namespace,
+        projectName,
+      ),
+    );
   }
 
-  private async _getVersionDetails(
-    packageName: string,
+  private async fetchVersionDetails(
     versionsUrl: string,
     basicRelease: Release,
   ): Promise<Release> {
     const detailedVersionUrl = ensureTrailingSlash(
       joinUrlParts(versionsUrl, basicRelease.version),
     );
-    const { val: rawDetailedVersion, err: versionsErr } = await this.http
-      .getJsonSafe(detailedVersionUrl, GalaxyV3DetailedVersion)
-      .onError((err) => {
-        logger.warn(
-          { url: versionsUrl, datasource: this.id, packageName, err },
-          'Error fetching from url',
-        );
-      })
-      .unwrap();
-    if (versionsErr) {
-      this.handleGenericErrors(versionsErr);
-    }
+    const rawDetailedVersion = await this.fetchJson(
+      detailedVersionUrl,
+      GalaxyV3DetailedVersion,
+    );
 
     return {
       ...rawDetailedVersion,
@@ -170,17 +145,15 @@ export class GalaxyCollectionDatasource extends Datasource {
   }
 
   getVersionDetails(
-    packageName: string,
     versionsUrl: string,
     basicRelease: Release,
   ): Promise<Release> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${GalaxyCollectionDatasource.id}`,
         key: `getVersionDetails:${versionsUrl}:${basicRelease.version}`,
         ttlMinutes: 10080, // 1 week
       },
-      () => this._getVersionDetails(packageName, versionsUrl, basicRelease),
+      () => this.fetchVersionDetails(versionsUrl, basicRelease),
     );
   }
 }

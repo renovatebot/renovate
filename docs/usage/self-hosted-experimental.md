@@ -7,7 +7,7 @@ The following environment variables are "experimental" because they:
 - can be removed at any time
 - are variables for Renovate's internal use to validate they work as intended
 
-Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate developers.
 
 Use these experimental variables at your own risk.
 We do not follow Semantic Versioning for any experimental variables.
@@ -38,6 +38,16 @@ This includes the following:
 ## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 
 If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
+
+## `RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN`
+
+!!! warning
+  This is an explicit opt-out of a security control.
+
+If set to any value, the `docker` datasource will follow paginated `next` links pointing to a different origin than the registry it is querying.
+
+By default Renovate drops such cross-origin pagination links, so a malicious or compromised registry cannot redirect an authenticated request to an attacker-controlled host and exfiltrate credentials.
+Set this only if you trust the registry and it legitimately paginates across hosts (for example, an absolute `next` link pointing at a CDN or backend host).
 
 ## `RENOVATE_X_ENCRYPTED_STRICT`
 
@@ -99,6 +109,16 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
+## `RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN`
+
+!!! warning
+  This is an explicit opt-out of a security control.
+
+If set to any value, the `nuget` datasource will follow paginated `next` links pointing to a different origin than the feed it is querying.
+
+By default Renovate drops such cross-origin pagination links, so a malicious or compromised feed cannot redirect an authenticated request to an attacker-controlled host and exfiltrate credentials.
+Set this only if you trust the feed and it legitimately paginates across hosts (for example, an absolute `next` link pointing at a backend host).
 
 ## `RENOVATE_X_PGP_RUNTIME`
 

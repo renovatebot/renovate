@@ -1,5 +1,6 @@
 import { CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
+import { GlobalConfig } from '../../../../../config/global.ts';
 import { emojify } from '../../../../../util/emoji.ts';
 import { capitalize } from '../../../../../util/string.ts';
 import type { BranchConfig } from '../../../../types.ts';
@@ -40,7 +41,7 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += `, or you tick the rebase/retry checkbox.\n\n`;
   if (config.recreateClosed) {
     prBody += emojify(
-      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${config.productLinks?.help}) if that's undesired.\n\n`,
+      `:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](${GlobalConfig.get('productLinks').help}) if that's undesired.\n\n`,
     );
   } else {
     prBody += emojify(

@@ -20,8 +20,8 @@ export function bumpPackageVersion(
     return { bumpedContent };
   }
   bumpedContent = content.replace(
-    regEx(/^(version\s*:=\s*).*$/m),
-    `$1"${bumpedVersion}"`,
+    regEx(/^(?<prefix>version\s*:=\s*).*$/m),
+    `$<prefix>"${bumpedVersion}"`,
   );
 
   if (bumpedContent === content) {

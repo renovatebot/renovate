@@ -16,7 +16,7 @@ describe('config/migrations/custom/base-branch-migration', () => {
     await expect(BaseBranchMigration).toMigrate(
       {
         baseBranch: ['test'],
-      } as any,
+      },
       {
         baseBranchPatterns: ['test'],
       },
@@ -28,7 +28,7 @@ describe('config/migrations/custom/base-branch-migration', () => {
       {
         baseBranch: ['test'],
         baseBranchPatterns: ['base'],
-      } as any,
+      },
       {
         baseBranchPatterns: ['base', 'test'],
       },

@@ -7,7 +7,6 @@ import { platform } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { coerceString } from '../../../../util/string.ts';
 import * as template from '../../../../util/template/index.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
 import { getPlatformPrOptions } from '../../update/pr/index.ts';
@@ -23,7 +22,7 @@ export async function ensureConfigMigrationPr(
 ): Promise<Pr | null> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'configuration-options/#configmigration',
   );
   const branchName = getMigrationBranchName(config);
@@ -52,7 +51,7 @@ ${
 :no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
-      config.productLinks?.help
+      GlobalConfig.get('productLinks').help
     }).\n\n`,
   );
 
