@@ -93,7 +93,7 @@ describe('modules/datasource/typst/index', () => {
       await expect(
         packageCache.get(
           'datasource-typst:cache-provider',
-          'get:https://packages.typst.org/preview/index.json',
+          'https://packages.typst.org/preview/index.json',
         ),
       ).resolves.toBeDefined();
     });

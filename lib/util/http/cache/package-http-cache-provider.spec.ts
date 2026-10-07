@@ -28,7 +28,6 @@ const InvalidBody = z.object({
 describe('util/http/cache/package-http-cache-provider', () => {
   const namespace = '_test-namespace';
   const url = 'http://example.com/foo/bar';
-  const getUrl = `get:${url}`;
   const headUrl = `head:${url}`;
   const publicCacheHeaders = {
     etag: 'foobar',
@@ -85,7 +84,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
   it('loads cache correctly', async () => {
     mockTime('2024-06-15T00:00:00.000Z');
 
-    cache[getUrl] = {
+    cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
       httpResponse: { statusCode: 200, headers: {}, body: 'old response' },
@@ -101,7 +100,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
   it('loads cache bypassing server', async () => {
     mockTime('2024-06-15T00:14:59.999Z');
-    cache[getUrl] = {
+    cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
       httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
@@ -133,7 +132,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     expect(res.body).toBe('fetched response');
     expect(cache).toEqual({
-      'get:http://example.com/foo/bar': {
+      'http://example.com/foo/bar': {
         etag: 'foobar',
         httpResponse: {
           statusCode: 200,
@@ -161,7 +160,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
     expect(res.body).toEqual({ message: 'fetched response', extra: 'drop me' });
     expect(cache).toEqual({
-      'get:http://example.com/foo/bar': {
+      'http://example.com/foo/bar': {
         etag: 'foobar',
         httpResponse: {
           statusCode: 200,
@@ -274,7 +273,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
   it('serves stale response during revalidation error', async () => {
     mockTime('2024-06-15T00:15:00.000Z');
-    cache[getUrl] = {
+    cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
       httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
@@ -290,7 +289,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
 
   it('stores a trimmed body when refreshing cache after 304', async () => {
     mockTime('2024-06-15T00:15:00.000Z');
-    cache[getUrl] = {
+    cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
       httpResponse: {
@@ -308,7 +307,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     expect(res.body).toEqual({ message: 'cached response', extra: 'drop me' });
     expect(packageCache.setWithRawTtl).toHaveBeenCalledTimes(1);
     expect(cache).toEqual({
-      'get:http://example.com/foo/bar': {
+      'http://example.com/foo/bar': {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
         httpResponse: {
@@ -424,7 +423,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       await http.head(url, { cacheProvider });
 
       expect(cache).toEqual({
-        'get:http://example.com/foo/bar': {
+        'http://example.com/foo/bar': {
           etag: 'get-etag',
           httpResponse: {
             statusCode: 200,

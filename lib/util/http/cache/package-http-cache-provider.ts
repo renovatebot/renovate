@@ -62,7 +62,10 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   private cacheKey(method: string, url: string): string {
-    return buildCacheKey(method, url);
+    if (method !== 'get') {
+      return buildCacheKey(method, url);
+    }
+    return url;
   }
 
   async load(method: string, url: string): Promise<unknown> {
