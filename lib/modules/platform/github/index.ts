@@ -2362,6 +2362,7 @@ async function checkPreviousAsyncMerge(
     return null;
   }
 
+  result = await resolveLaggingAsyncMergeResult(prNo, result);
   if (result.status === 'pending') {
     logger.info(
       { pr: prNo, uuid, requestedAt },
@@ -2390,6 +2391,42 @@ async function fetchAsyncMergeResult(
     MergeAsyncResult,
   );
   return res.body;
+}
+
+async function isPrMerged(prNo: number): Promise<boolean> {
+  try {
+    await githubApi.head(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}/merge`,
+      { ...asyncMergeHttpOptions(), memCache: false },
+    );
+    return true;
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      logger.warn(
+        { err, pr: prNo },
+        'Failed to check whether the PR is merged',
+      );
+    }
+    return false;
+  }
+}
+
+/**
+ * The async merge result can still be pending after GitHub merged the PR, so
+ * a pending result is checked against the PR's merge state.
+ */
+async function resolveLaggingAsyncMergeResult(
+  prNo: number,
+  result: MergeAsyncResult,
+): Promise<MergeAsyncResult> {
+  if (result.status !== 'pending' || !(await isPrMerged(prNo))) {
+    return result;
+  }
+  logger.debug(
+    { pr: prNo },
+    'The PR state reported the merge before the async merge result did',
+  );
+  return { status: 'merged', details: { message: 'Pull request was merged' } };
 }
 
 function rememberRequestedMerge(
@@ -2449,6 +2486,7 @@ export async function getRequestedMergeResults(): Promise<
       }
       continue;
     }
+    result = await resolveLaggingAsyncMergeResult(number, result);
     if (result.status === 'merged') {
       cacheMergedPr(number);
     }

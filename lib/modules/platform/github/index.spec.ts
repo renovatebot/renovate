@@ -6304,6 +6304,7 @@ describe('modules/platform/github/index', () => {
 
     describe('previous merge request', () => {
       const resultUrl = `${asyncUrl}/uuid-prev`;
+      const mergedUrl = '/repos/some/repo/pulls/1234/merge';
 
       beforeEach(() => {
         setPendingMerge(1234, 'uuid-prev');
@@ -6336,7 +6337,11 @@ describe('modules/platform/github/index', () => {
 
       it('returns pending without a new request if the merge is still pending', async () => {
         const scope = httpMock.scope(githubApiHost);
-        scope.get(resultUrl).reply(200, pending('uuid-prev'));
+        scope
+          .get(resultUrl)
+          .reply(200, pending('uuid-prev'))
+          .head(mergedUrl)
+          .reply(404);
         await initRepoWithPr(scope, null, null);
 
         const res = await github.mergePr({ id: 1234, branchName: 'b' });
@@ -6346,6 +6351,42 @@ describe('modules/platform/github/index', () => {
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: 1234, uuid: 'uuid-prev', requestedAt: expect.any(String) },
           'Previous merge request is still pending, not requesting another merge',
+        );
+      });
+
+      it('returns true without a new request if the PR merged before the result', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .get(resultUrl)
+          .reply(200, pending('uuid-prev'))
+          .head(mergedUrl)
+          .reply(204);
+        await initRepoWithPr(scope, null, null);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBeTrue();
+        expect(getPendingMerge(1234)).toBeUndefined();
+        await expect(github.getPr(1234)).resolves.toMatchObject({
+          state: 'merged',
+        });
+      });
+
+      it('returns pending if the merge state cannot be checked', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .get(resultUrl)
+          .reply(200, pending('uuid-prev'))
+          .head(mergedUrl)
+          .reply(422);
+        await initRepoWithPr(scope, null, null);
+
+        const res = await github.mergePr({ id: 1234, branchName: 'b' });
+
+        expect(res).toBe('pending');
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error), pr: 1234 },
+          'Failed to check whether the PR is merged',
         );
       });
 
@@ -6482,11 +6523,10 @@ describe('modules/platform/github/index', () => {
       });
 
       it.each`
-        status        | reply                                                       | kept
-        ${'enqueued'} | ${{ status: 'enqueued', details: { message: 'In queue' } }} | ${false}
-        ${'failed'}   | ${{ status: 'failed', details: { message: 'Blocked' } }}    | ${false}
-        ${'pending'}  | ${{ status: 'pending', details: { message: 'Waiting' } }}   | ${true}
-      `('reports a $status merge', async ({ status, reply, kept }) => {
+        status        | reply
+        ${'enqueued'} | ${{ status: 'enqueued', details: { message: 'In queue' } }}
+        ${'failed'}   | ${{ status: 'failed', details: { message: 'Blocked' } }}
+      `('reports a $status merge', async ({ status, reply }) => {
         const scope = httpMock.scope(githubApiHost);
         await requestMerge(scope);
         scope.get(`${asyncUrl}/uuid-r`).reply(200, reply);
@@ -6501,10 +6541,80 @@ describe('modules/platform/github/index', () => {
             message: reply.details.message,
           },
         ]);
-        expect(getPendingMerge(1234) !== undefined).toBe(kept);
+        expect(getPendingMerge(1234)).toBeUndefined();
         await expect(github.getPr(1234)).resolves.toMatchObject({
           state: 'open',
         });
+      });
+
+      it('reports a pending merge', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope
+          .get(`${asyncUrl}/uuid-r`)
+          .reply(200, pending('uuid-r'))
+          .head('/repos/some/repo/pulls/1234/merge')
+          .reply(404);
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([
+          {
+            number: 1234,
+            branchName: 'renovate/a',
+            status: 'pending',
+            message: 'Accepted',
+          },
+        ]);
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-r' });
+      });
+
+      it('reports a merge that the PR state shows before the result', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope
+          .get(`${asyncUrl}/uuid-r`)
+          .reply(200, pending('uuid-r'))
+          .head('/repos/some/repo/pulls/1234/merge')
+          .reply(204);
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([
+          {
+            number: 1234,
+            branchName: 'renovate/a',
+            status: 'merged',
+            message: 'Pull request was merged',
+          },
+        ]);
+        expect(getPendingMerge(1234)).toBeUndefined();
+        await expect(github.getPr(1234)).resolves.toMatchObject({
+          state: 'merged',
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { pr: 1234 },
+          'The PR state reported the merge before the async merge result did',
+        );
+      });
+
+      it('reports a pending merge if the merge state cannot be checked', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope
+          .get(`${asyncUrl}/uuid-r`)
+          .reply(200, pending('uuid-r'))
+          .head('/repos/some/repo/pulls/1234/merge')
+          .reply(422);
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toMatchObject([{ number: 1234, status: 'pending' }]);
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-r' });
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error), pr: 1234 },
+          'Failed to check whether the PR is merged',
+        );
       });
 
       it('records a merge request from a conflict', async () => {
