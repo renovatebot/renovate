@@ -90,7 +90,7 @@ export class GoDatasource extends Datasource {
       return null;
     }
 
-    return tagDatasource.api.getDigest(source, tag);
+    return tagDatasource.getDigest(source, tag);
   }
 
   override getDigest(

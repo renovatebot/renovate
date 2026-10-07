@@ -19,7 +19,7 @@ vi.mock('./tag-datasources.ts', () => {
   return {
     getGoTagDatasource: (datasource: string) =>
       datasource in getDigestMocks
-        ? { api: { getDigest: getDigestMocks[datasource] } }
+        ? { getDigest: getDigestMocks[datasource] }
         : undefined,
   };
 });

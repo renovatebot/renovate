@@ -45,6 +45,7 @@ describe('modules/datasource/go/common', () => {
       ${'https://github.com/go-foo/foo'}         | ${'github-tags'}    | ${'go-foo/foo'}
       ${'https://gitlab.com/foo/bar'}            | ${'gitlab-tags'}    | ${'foo/bar'}
       ${undefined}                               | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
+      ${undefined}                               | ${'unknown'}        | ${'foo/bar'}
     `(
       '($datasource, $packageName) => $expected',
       ({ expected, datasource, packageName }) => {

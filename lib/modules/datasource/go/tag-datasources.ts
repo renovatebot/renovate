@@ -2,7 +2,7 @@ import { GitTagsDatasource } from '../git-tags/index.ts';
 import { getPlatformTagsDatasource } from '../git-tags/platforms.ts';
 import type { GoTagDatasource } from './types.ts';
 
-const gitTags: GoTagDatasource = { api: new GitTagsDatasource() };
+const gitTags = new GitTagsDatasource();
 
 /**
  * Looks up how to resolve a module which {@link BaseGoDatasource.getDatasource}

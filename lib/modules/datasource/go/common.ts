@@ -1,6 +1,6 @@
 import { regEx } from '../../../util/regex.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
-
+import { GitTagsDatasource } from '../git-tags/index.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { getGoTagDatasource } from './tag-datasources.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
@@ -60,8 +60,10 @@ export function getSourceUrl(
   }
 
   const { datasource, registryUrl, packageName } = dataSource;
-  return getGoTagDatasource(datasource)?.getSourceUrl?.(
-    packageName,
-    registryUrl,
-  );
+  const tagDatasource = getGoTagDatasource(datasource);
+  if (!tagDatasource || tagDatasource instanceof GitTagsDatasource) {
+    return undefined;
+  }
+
+  return tagDatasource.getSourceUrl(packageName, registryUrl);
 }
