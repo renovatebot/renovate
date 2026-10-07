@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { GithubRestRelease } from '../../../util/github/types.ts';
 import { getApiBaseUrl } from '../../../util/github/url.ts';
@@ -99,7 +100,11 @@ export class HermitDatasource extends Datasource<GithubHttp> {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getReleases:${config.registryUrl ?? ''}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this._getReleases(config),

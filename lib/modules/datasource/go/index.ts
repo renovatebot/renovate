@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -64,14 +65,15 @@ export class GoDatasource extends Datasource {
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const constraintsFilteringKey =
-      config.constraintsFiltering && config.constraintsFiltering !== 'none'
-        ? `:${config.constraintsFiltering}`
-        : '';
+      config.constraintsFiltering === 'none' ? '' : config.constraintsFiltering;
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.packageName}${constraintsFilteringKey}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.packageName,
+          constraintsFilteringKey,
+        ),
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
@@ -147,7 +149,7 @@ export class GoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        key: `getDigest:${config.packageName}:${newValue}`,
+        key: buildCacheKey('getDigest', config.packageName, newValue),
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },

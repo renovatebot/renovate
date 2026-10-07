@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
@@ -150,8 +151,7 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}/${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         cacheable: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
       },
@@ -313,7 +313,7 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
-        key: `${info.rawUrl}/${packageName}`,
+        key: buildCacheKey(info.rawUrl, packageName),
         cacheable: info.flavor === 'crates.io',
         ttlMinutes: 24 * 60, // 24 hours
       },

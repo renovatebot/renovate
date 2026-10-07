@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { parseUrl, trimTrailingSlash } from '../../../util/url.ts';
@@ -94,5 +95,5 @@ function getCacheKey(baseUrl: string, packageName: string): string | null {
   }
 
   const proxy = `${parsedUrl.origin}${trimTrailingSlash(parsedUrl.pathname)}`;
-  return `${proxy}:${packageName}`;
+  return buildCacheKey(proxy, packageName);
 }

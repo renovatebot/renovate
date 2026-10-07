@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -1137,11 +1138,15 @@ export class DockerDatasource extends Datasource {
       config.packageName,
       config.registryUrl!,
     );
-    const digest = config.currentDigest ? `@${config.currentDigest}` : '';
     return withCache(
       {
         namespace: 'datasource-docker-digest',
-        key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
+        key: buildCacheKey(
+          registryHost,
+          dockerRepository,
+          newTag,
+          config.currentDigest,
+        ),
         fallback: true,
         shouldCacheResult: isNonEmptyString,
       },
