@@ -1,5 +1,4 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import upath from 'upath';
 import { regEx } from '../../util/regex.ts';
 import { isHttpUrl } from '../../util/url.ts';
 import type { ParsedPreset } from './types.ts';
@@ -10,22 +9,22 @@ import {
 } from './util.ts';
 
 /**
- * Ensures that a given preset's `repo` or `presetPath` does not include an attempt to perform path traversal.
+ * Throws if any `/`-separated segment of the given preset `repo`, `presetPath` or `tag` is `.` or `..` (after a single percent-decode, so an encoded `%2e%2e` segment is caught too).
  *
- * Still allows relative preset references, but blocks cases that attempt to escape the current repository.
+ * None of these identifiers ever legitimately need a dot segment: a repository identifier is always exactly its own owner/name segments, a subdirectory path only needs to go down from the repository root, and git disallows `..` in ref names outright. Rejecting the segment outright (rather than normalizing the value and only rejecting a net escape) also matters here, because a normalized `owner/repo/../../other-owner/other-repo` collapses to `other-owner/other-repo` with no leading `../`, silently retargeting the request to a different repository without ever looking like an "escape".
  *
- * @throws {Error} {@link PRESET_PATH_TRAVERSAL} if the segment normalizes to `..` or above, e.g. `owner/repo//../../other-owner/other-repo`.
- * @link https://docs.renovatebot.com/config-presets/#relative-preset-references
+ * @throws {Error} {@link PRESET_PATH_TRAVERSAL} if a segment is `.` or `..`, e.g. `owner/repo//../../other-owner/other-repo` or `owner/repo/../../other-owner/other-repo`.
  */
-function assertNoPathEscape(value: string): void {
+function assertNoDotSegment(value: string): void {
   let decoded = value;
   try {
     decoded = decodeURIComponent(value);
   } catch {
     // not a valid percent-encoding, fall through with the raw value
   }
-  const normalized = upath.normalize(decoded);
-  if (normalized === '..' || normalized.startsWith('../')) {
+  if (
+    decoded.split('/').some((segment) => segment === '.' || segment === '..')
+  ) {
     throw new Error(PRESET_PATH_TRAVERSAL);
   }
 }
@@ -232,9 +231,12 @@ export function parsePreset(input: string): ParsedPreset {
     }
   }
 
-  assertNoPathEscape(repo);
+  assertNoDotSegment(repo);
   if (isNonEmptyString(presetPath)) {
-    assertNoPathEscape(presetPath);
+    assertNoDotSegment(presetPath);
+  }
+  if (isNonEmptyString(tag)) {
+    assertNoDotSegment(tag);
   }
 
   return {

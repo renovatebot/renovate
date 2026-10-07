@@ -686,30 +686,21 @@ describe('config/presets/parse', () => {
       input                                                       | reason
       ${'github>owner/repo//../../other-owner/other-repo'}        | ${'subdir traversal escapes to a sibling repo'}
       ${'github>owner/repo//foo/../../../other-owner/other-repo'} | ${'subdir traversal with a leading safe segment'}
+      ${'github>owner/repo//sub/../other/file'}                   | ${'subdir traversal that cancels out to stay in the same repo'}
+      ${'github>owner/repo//a/b/../../sibling/file'}              | ${'subdir traversal that cancels out via two safe segments'}
       ${'gitlab>owner/repo//../../other-owner/other-repo'}        | ${'gitlab subdir traversal'}
       ${'gitea>owner/repo//../../other-owner/other-repo'}         | ${'gitea subdir traversal'}
       ${'forgejo>owner/repo//../../other-owner/other-repo'}       | ${'forgejo subdir traversal'}
       ${'local>owner/repo//../../other-owner/other-repo'}         | ${'local subdir traversal'}
       ${'github>owner/../../other-owner/other-repo'}              | ${'repo identifier traversal without a subdir'}
+      ${'github>owner/repo/../../other-owner/other-repo'}         | ${'repo identifier traversal that cancels out via two safe segments'}
+      ${'github>owner/repo/..'}                                   | ${'trailing ".." segment in the repo identifier'}
       ${'github>%2e%2e/%2e%2e/other-owner/other-repo//default'}   | ${'percent-encoded repo traversal'}
       ${'github>@owner/../../other-owner//default'}               | ${'scoped namespace traversal'}
+      ${'local>a/b//x/default#../../../victim/priv/src/HEAD'}     | ${'tag used as a path segment by bitbucket local>'}
     `('throws for path traversal attempt $input ($reason)', ({ input }) => {
       expect(() => parsePreset(input as string)).toThrow(PRESET_PATH_TRAVERSAL);
     });
-
-    it.each`
-      input                                          | presetPath
-      ${'github>owner/repo//sub/../other/file'}      | ${'sub/../other'}
-      ${'github>owner/repo//a/b/../../sibling/file'} | ${'a/b/../../sibling'}
-    `(
-      'still resolves $input within the same repo despite an internal ".."',
-      ({ input, presetPath }) => {
-        expect(parsePreset(input as string)).toMatchObject({
-          repo: 'owner/repo',
-          presetPath,
-        });
-      },
-    );
 
     it.each`
       input           | repo

@@ -211,7 +211,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset path attempts to escape its repository (github>owner/repo//../../other-owner/other-repo)',
+        'Preset repository, path or tag contains a disallowed "." or ".." segment (github>owner/repo//../../other-owner/other-repo)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });

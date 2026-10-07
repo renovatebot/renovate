@@ -419,7 +419,7 @@ async function fetchPreset(
     } else if (err.message === PRESET_INVALID) {
       error.validationError = `Preset is invalid (${preset})`;
     } else if (err.message === PRESET_PATH_TRAVERSAL) {
-      error.validationError = `Preset path attempts to escape its repository (${preset})`;
+      error.validationError = `Preset repository, path or tag contains a disallowed "." or ".." segment (${preset})`;
     } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
       error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
     } else if (err.message === PRESET_INVALID_JSON) {
