@@ -18,11 +18,14 @@ import {
 import { getDep as getDockerDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
-  PackageDependency,
-  PackageFile,
+  PackageDependency as GenericPackageDependency,
+  PackageFile as GenericPackageFile,
 } from '../types.ts';
-import type { MavenProp } from './types.ts';
+import type { MavenManagerData, MavenProp } from './types.ts';
 import { getXmlPaths } from './xml.ts';
+
+type PackageDependency = GenericPackageDependency<MavenManagerData>;
+type PackageFile = GenericPackageFile<MavenManagerData>;
 
 const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.0.0',
