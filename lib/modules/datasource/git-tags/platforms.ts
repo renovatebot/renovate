@@ -1,5 +1,4 @@
-import type { PlatformFamilyId } from '../../../constants/platforms.ts';
-import type { DatasourceName } from '../../../datasource-list.generated.ts';
+import { PLATFORM_FAMILIES } from '../../../constants/platforms.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
@@ -60,20 +59,6 @@ export function getPlatformTagsDatasource(
 }
 
 /**
- * The platform datasource of each family whose repository URLs map onto a
- * `registryUrl` and a `packageName` by their origin and path alone. Azure
- * DevOps and Bitbucket Data Center lay out their URLs differently, so their
- * repositories are read with `git ls-remote`.
- */
-const familyDatasources: Partial<Record<PlatformFamilyId, DatasourceName>> = {
-  bitbucket: BitbucketTagsDatasource.id,
-  forgejo: ForgejoTagsDatasource.id,
-  gitea: GiteaTagsDatasource.id,
-  github: GithubTagsDatasource.id,
-  gitlab: GitlabTagsDatasource.id,
-};
-
-/**
  * Resolves a repository URL to the platform datasource which can serve it
  * through the platform's API, with the `registryUrl` and `packageName` that
  * datasource expects, or `null` when the host is not a known platform or the
@@ -83,8 +68,13 @@ export function resolvePlatformTagsLookup(
   url: string,
 ): PlatformTagsLookup | null {
   const family = detectPlatform(url);
-  const id = family && familyDatasources[family];
-  if (!id) {
+  // Azure DevOps and Bitbucket Data Center lay out their repository URLs
+  // differently from `<origin>/<owner>/<repo>`, so they have no datasource
+  // instance here and their repositories are read with `git ls-remote`.
+  const datasource =
+    family &&
+    getPlatformTagsDatasource(PLATFORM_FAMILIES[family].tagsDatasource);
+  if (!datasource) {
     return null;
   }
 
@@ -94,9 +84,5 @@ export function resolvePlatformTagsLookup(
     return null;
   }
 
-  return {
-    ...getPlatformTagsDatasource(id)!,
-    registryUrl: `https://${host}`,
-    packageName,
-  };
+  return { ...datasource, registryUrl: `https://${host}`, packageName };
 }
