@@ -137,6 +137,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
           'getDigest',
           getDepHost(config.registryUrl),
           config.packageName,
+          newValue,
         ),
         fallback: true,
       },

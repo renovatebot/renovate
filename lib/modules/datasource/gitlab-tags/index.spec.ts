@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GitlabTagsDatasource } from './index.ts';
 
@@ -184,6 +185,38 @@ describe('modules/datasource/gitlab-tags/index', () => {
         'branch',
       );
       expect(res).toBe(digest);
+    });
+
+    it('caches the digest of a branch separately from the latest commit', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, [
+          { id: 'latest-sha', created_at: '2020-03-04T12:01:37.000-06:00' },
+        ])
+        .get('/api/v4/projects/some%2Fdep2/repository/commits/branch')
+        .reply(200, {
+          id: 'branch-sha',
+          created_at: '2020-03-04T12:01:37.000-06:00',
+        });
+      const config = {
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'some/dep2',
+      };
+
+      await expect(getDigest(config)).resolves.toBe('latest-sha');
+      await expect(getDigest(config, 'branch')).resolves.toBe('branch-sha');
     });
 
     it('returns null from gitlab installation with no commits', async () => {
