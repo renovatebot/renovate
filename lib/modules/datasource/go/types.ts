@@ -1,6 +1,6 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
+import type { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
 import type { GitTagsDatasource } from '../git-tags/index.ts';
-import type { PlatformTagsDatasource } from '../git-tags/types.ts';
 
 export type GoproxyFallback =
   | ',' // WhenNotFoundOrGone
@@ -22,4 +22,4 @@ export interface GoproxyItem {
  * platform's tags datasource, or `git-tags` for any other host, whose package
  * name is already the clone URL and which therefore knows no source URL.
  */
-export type GoTagDatasource = PlatformTagsDatasource | GitTagsDatasource;
+export type GoTagDatasource = GitHostTagsDigestDatasource | GitTagsDatasource;
