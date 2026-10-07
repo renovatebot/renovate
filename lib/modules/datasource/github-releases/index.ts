@@ -1,4 +1,5 @@
 import { isBoolean } from '@sindresorhus/is';
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import { logger } from '../../../logger/index.ts';
 import { queryReleases } from '../../../util/github/graphql/index.ts';
 import { findCommitOfTag } from '../../../util/github/tags.ts';
@@ -12,10 +13,8 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 
-export const cacheNamespace = 'datasource-github-releases';
-
 export class GithubReleasesDatasource extends Datasource<GithubHttp> {
-  static readonly id = 'github-releases';
+  static readonly id: DatasourceName = 'github-releases';
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://github.com'];
@@ -29,11 +28,13 @@ export class GithubReleasesDatasource extends Datasource<GithubHttp> {
   override readonly sourceUrlNote =
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
-  constructor() {
-    super(
-      GithubReleasesDatasource.id,
-      new GithubHttp(GithubReleasesDatasource.id),
-    );
+  /**
+   * A subclass with a different `id` (currently only
+   * `GithubReleaseAttachmentsDatasource`) passes it through here so the base
+   * constructor builds its own `GithubHttp` client keyed to that `id`.
+   */
+  constructor(id: string = GithubReleasesDatasource.id) {
+    super(id, new GithubHttp(id));
   }
 
   /**
