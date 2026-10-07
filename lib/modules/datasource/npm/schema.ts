@@ -1,5 +1,9 @@
 import { z } from 'zod/v4';
-import { DeepNullish, LooseRecord } from '../../../util/schema-utils/index.ts';
+import {
+  DeepNullish,
+  LooseRecord,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
@@ -27,7 +31,7 @@ const Distribution = z.object({
 });
 
 export const NpmResponseVersion = z.object({
-  repository: RepositoryNpmResponse.optional(),
+  repository: Nullish(RepositoryNpmResponse),
   // `.catch()` drops non-string entries instead of invalidating the whole
   // packument, e.g. some old `jsonfile`/`fs-extra` versions have `homepage: [...]`.
   homepage: z.string().optional().catch(undefined),
@@ -69,7 +73,7 @@ export const NpmResponse = z.object({
   _id: z.string().optional(),
   name: z.string().optional(),
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
-  repository: RepositoryNpmResponse.optional(),
+  repository: Nullish(RepositoryNpmResponse),
   homepage: z.string().optional().catch(undefined),
   time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),

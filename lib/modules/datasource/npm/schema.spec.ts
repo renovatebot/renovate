@@ -121,6 +121,14 @@ describe('modules/datasource/npm/schema', () => {
     });
   });
 
+  it('accepts `repository: null` in the cached packument', () => {
+    const result = CachedPackument.parse({
+      repository: null,
+      versions: { '1.0.0': { repository: null } },
+    });
+    expect(result).toEqual({ versions: { '1.0.0': {} } });
+  });
+
   it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
     const result = CachedPackument.parse({
       homepage: null,
@@ -218,6 +226,19 @@ describe('modules/datasource/npm/schema', () => {
         url: undefined,
         directory: 'test',
       });
+    });
+
+    // npm.taskforce.sh returns `"repository": null` for every version
+    it('accepts `repository: null` at the package and version level', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: { '1.0.0': { repository: null } },
+        repository: null,
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.repository).toBeUndefined();
+      expect(result.versions?.['1.0.0']?.repository).toBeUndefined();
     });
 
     it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
