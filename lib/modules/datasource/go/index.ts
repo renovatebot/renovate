@@ -65,13 +65,13 @@ export class GoDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const constraintsFilteringKey =
       config.constraintsFiltering && config.constraintsFiltering !== 'none'
-        ? `@@${config.constraintsFiltering}`
+        ? `:${config.constraintsFiltering}`
         : '';
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
         // TODO: types (#22198)
-        key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        key: `getReleases:${config.packageName}${constraintsFilteringKey}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
