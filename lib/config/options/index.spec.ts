@@ -63,6 +63,16 @@ describe('config/options/index', () => {
       });
   });
 
+  it('every option which a repository can configure says where it can be used', () => {
+    /* our types require this, so this is here to say why, and to catch a self-hosted option which stops being one */
+    const missing = getOptions()
+      .filter((option) => !option.globalOnly)
+      .filter((option) => !option.scopes && !option.parents)
+      .map((option) => option.name);
+
+    expect(missing).toBeEmptyArray();
+  });
+
   it('should not contain duplicate option names', () => {
     const optsNames = getOptions().map((option) => option.name);
     const optsNameSet = new Set(optsNames);
