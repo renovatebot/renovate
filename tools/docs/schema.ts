@@ -28,7 +28,7 @@ const presetsToSuggest = [
   'security:only-security-updates',
 ];
 
-function getOptionDocsUrl(option: RenovateOptions): string {
+export function getOptionDocsUrl(option: RenovateOptions): string {
   const parent = option.parents?.find((parent) => parent !== '.');
   const anchor = parent
     ? `${parent}${option.name}`.toLowerCase()
