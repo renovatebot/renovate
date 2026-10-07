@@ -738,13 +738,14 @@ async function getAdditionalFilesInner(
 }
 
 export async function getAdditionalFiles(
-  config: PostUpdateConfig<NpmManagerData>,
+  config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles,
 ): Promise<WriteExistingFilesResult> {
   const originalNpmrcFiles = new Map<string, string>();
   try {
     return await getAdditionalFilesInner(
-      config,
+      // The branch config carries the manager data of every upgrade untyped; the npm post-update only reads the optional npm fields of it.
+      config as PostUpdateConfig<NpmManagerData>,
       packageFiles,
       originalNpmrcFiles,
     );
