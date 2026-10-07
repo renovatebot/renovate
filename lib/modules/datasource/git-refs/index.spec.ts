@@ -184,6 +184,18 @@ describe('modules/datasource/git-refs/index', () => {
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
 
+    it('returns null if the remote has no HEAD', async () => {
+      gitMock.listRemote.mockResolvedValue(
+        'a9920c014aebc28dc1b23e7efcc006d0455cc710\trefs/heads/master\n',
+      );
+
+      const digest = await new GitRefsDatasource().getDigest(
+        { packageName: 'another tag to look up' },
+        undefined,
+      );
+      expect(digest).toBeNull();
+    });
+
     it('requests authentication for git-refs lookups', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
 
