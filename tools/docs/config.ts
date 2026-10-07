@@ -20,7 +20,7 @@ import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { formatCell, replaceContent } from './utils.ts';
+import { formatCell, indexMarkdown, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -250,25 +250,6 @@ function genDeprecationMsg(el: Record<string, any>): string {
   }
 
   return `${warning}\n`;
-}
-
-function indexMarkdown(lines: string[]): Record<string, [number, number]> {
-  const indexed: Record<string, [number, number]> = {};
-
-  let optionName = '';
-  let start = 0;
-  for (const [i, line] of lines.entries()) {
-    if (line.startsWith('## ') || line.startsWith('### ')) {
-      if (optionName) {
-        indexed[optionName] = [start, i - 1];
-      }
-      start = i;
-      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
-    }
-  }
-  indexed[optionName] = [start, lines.length - 1];
-
-  return indexed;
 }
 
 function generateLockFileTable(): string {
