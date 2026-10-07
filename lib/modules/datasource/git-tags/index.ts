@@ -45,7 +45,7 @@ export class GitTagsDatasource extends GitDatasource {
   private async getTagReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const platform = resolvePlatformTagsLookup(config.packageName);
+    const platform = await resolvePlatformTagsLookup(config.packageName);
     if (!platform) {
       return this.getRefReleases(config);
     }
@@ -68,7 +68,7 @@ export class GitTagsDatasource extends GitDatasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const platform = resolvePlatformTagsLookup(config.packageName);
+    const platform = await resolvePlatformTagsLookup(config.packageName);
     if (!platform) {
       return super.getDigest(config, newValue);
     }

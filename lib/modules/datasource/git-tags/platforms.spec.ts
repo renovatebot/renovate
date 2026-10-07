@@ -1,3 +1,4 @@
+import * as datasources from '../index.ts';
 import {
   getPlatformTagsDatasource,
   resolvePlatformTagsLookup,
@@ -14,8 +15,8 @@ describe('modules/datasource/git-tags/platforms', () => {
       ${'gitlab-tags'}    | ${'g/s/r'}   | ${undefined}                 | ${'https://gitlab.com/g/s/r'}
     `(
       '$id builds the source URL of $packageName',
-      ({ id, packageName, registryUrl, expected }) => {
-        const datasource = getPlatformTagsDatasource(id);
+      async ({ id, packageName, registryUrl, expected }) => {
+        const datasource = await getPlatformTagsDatasource(id);
 
         expect(datasource?.id).toBe(id);
         expect(datasource?.getSourceUrl(packageName, registryUrl)).toBe(
@@ -24,8 +25,13 @@ describe('modules/datasource/git-tags/platforms', () => {
       },
     );
 
-    it('returns undefined for a datasource of no platform', () => {
-      expect(getPlatformTagsDatasource('git-tags')).toBeUndefined();
+    it.each`
+      id              | reason
+      ${'unknown'}    | ${'is not registered'}
+      ${'azure-tags'} | ${'resolves no digests'}
+      ${'docker'}     | ${'builds no source URLs'}
+    `('returns null for $id, which $reason', async ({ id }) => {
+      await expect(getPlatformTagsDatasource(id)).resolves.toBeNull();
     });
   });
 
@@ -37,8 +43,8 @@ describe('modules/datasource/git-tags/platforms', () => {
       ${'ssh://git@bitbucket.org/o/r'} | ${'bitbucket-tags'} | ${'https://bitbucket.org'} | ${'o/r'}
       ${'https://codeberg.org/o/r/'}   | ${'forgejo-tags'}   | ${'https://codeberg.org'}  | ${'o/r'}
       ${'https://gitea.com/o/r'}       | ${'gitea-tags'}     | ${'https://gitea.com'}     | ${'o/r'}
-    `('resolves $url to $id', ({ url, id, registryUrl, packageName }) => {
-      expect(resolvePlatformTagsLookup(url)).toMatchObject({
+    `('resolves $url to $id', async ({ url, id, registryUrl, packageName }) => {
+      await expect(resolvePlatformTagsLookup(url)).resolves.toMatchObject({
         id,
         registryUrl,
         packageName,
@@ -48,10 +54,19 @@ describe('modules/datasource/git-tags/platforms', () => {
     it.each([
       'https://git.example.com/o/r',
       'https://dev.azure.com/org/project/_git/repo',
+      'https://bitbucket.example.com/scm/proj/repo.git',
       'https://github.com/o',
       'not a url',
-    ])('returns null for %s', (url) => {
-      expect(resolvePlatformTagsLookup(url)).toBeNull();
+    ])('returns null for %s', async (url) => {
+      await expect(resolvePlatformTagsLookup(url)).resolves.toBeNull();
+    });
+
+    it('returns null when the platform datasource is not registered', async () => {
+      vi.spyOn(datasources, 'getDatasources').mockReturnValueOnce(new Map());
+
+      await expect(
+        resolvePlatformTagsLookup('https://github.com/o/r'),
+      ).resolves.toBeNull();
     });
   });
 });

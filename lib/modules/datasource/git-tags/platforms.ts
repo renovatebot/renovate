@@ -1,40 +1,37 @@
 import { PLATFORM_FAMILIES } from '../../../constants/platforms.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
-import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
-import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
-import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { DatasourceApi } from '../types.ts';
 import type { PlatformTagsDatasource, PlatformTagsLookup } from './types.ts';
 
-let platformTagsDatasources: Record<string, PlatformTagsDatasource> | undefined;
+function isPlatformTagsDatasource(
+  datasource: DatasourceApi | undefined,
+): datasource is PlatformTagsDatasource {
+  return (
+    datasource instanceof Datasource &&
+    'getDigest' in datasource &&
+    'getSourceUrl' in datasource
+  );
+}
 
 /**
- * The `*-tags` datasource with the given id, or `undefined` when no platform
- * datasource has that id.
- *
- * The datasources are built once and shared by every lookup, so that a
- * Renovate run holds a single instance - and therefore a single HTTP client -
- * per platform.
+ * The registered datasource with the given id, or `null` when no datasource
+ * with that id looks up tags and digests through a platform API.
  */
-export function getPlatformTagsDatasource(
+export async function getPlatformTagsDatasource(
   id: string,
-): PlatformTagsDatasource | undefined {
-  platformTagsDatasources ??= Object.fromEntries(
-    [
-      new BitbucketTagsDatasource(),
-      new ForgejoTagsDatasource(),
-      new GiteaTagsDatasource(),
-      new GithubTagsDatasource(),
-      new GitlabTagsDatasource(),
-    ].map((datasource): [string, PlatformTagsDatasource] => [
-      datasource.id,
-      datasource,
-    ]),
-  );
+): Promise<PlatformTagsDatasource | null> {
+  // the registry instantiates every datasource, this one included, so it can
+  // only be loaded once this module is
+  const { getDatasources } = await import('../index.ts');
 
-  return platformTagsDatasources[id];
+  const datasource = getDatasources().get(id);
+  if (!isPlatformTagsDatasource(datasource)) {
+    return null;
+  }
+
+  return datasource;
 }
 
 /**
@@ -43,9 +40,9 @@ export function getPlatformTagsDatasource(
  * datasource expects, or `null` when the host is not a known platform or the
  * URL does not name a repository.
  */
-export function resolvePlatformTagsLookup(
+export async function resolvePlatformTagsLookup(
   url: string,
-): PlatformTagsLookup | null {
+): Promise<PlatformTagsLookup | null> {
   // `detectPlatform()` reads a URL, which an scp-style `git@host:repo` clone
   // URL is not
   let httpUrl: string;
@@ -62,10 +59,14 @@ export function resolvePlatformTagsLookup(
   }
 
   // Azure DevOps and Bitbucket Data Center lay out their repository URLs
-  // differently from `<origin>/<owner>/<repo>`, so they have no datasource
-  // instance here and their repositories are read with `git ls-remote`.
+  // differently from `<origin>/<owner>/<repo>`, so their repositories are read
+  // with `git ls-remote`.
+  if (family === 'azure' || family === 'bitbucket-server') {
+    return null;
+  }
+
   const id = PLATFORM_FAMILIES[family].tagsDatasource;
-  const datasource = getPlatformTagsDatasource(id);
+  const datasource = await getPlatformTagsDatasource(id);
   if (!datasource) {
     return null;
   }
