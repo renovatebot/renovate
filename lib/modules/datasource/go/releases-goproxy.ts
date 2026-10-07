@@ -568,13 +568,13 @@ export class GoProxyDatasource extends Datasource {
         ? `@@${constraintsFiltering}`
         : '';
     // TODO: types (#22198)
-    return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
+    return `${packageName}@@${goproxy}:${noproxy?.toString()}${constraintsFilteringKey}`;
   }
 
   static getVersionedCacheKey(packageName: string, version: string): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
     // TODO: types (#22198)
-    return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
+    return `${packageName}@@${version}@@${goproxy}:${noproxy?.toString()}`;
   }
 }

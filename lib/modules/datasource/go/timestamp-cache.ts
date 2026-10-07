@@ -94,5 +94,5 @@ function getCacheKey(baseUrl: string, packageName: string): string | null {
   }
 
   const proxy = `${parsedUrl.origin}${trimTrailingSlash(parsedUrl.pathname)}`;
-  return `${proxy}@@${packageName}`;
+  return `${proxy}:${packageName}`;
 }

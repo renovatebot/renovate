@@ -99,7 +99,7 @@ export class HermitDatasource extends Datasource<GithubHttp> {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getReleases:${config.registryUrl ?? ''}-${config.packageName}`,
+        key: `getReleases:${config.registryUrl ?? ''}:${config.packageName}`,
         fallback: true,
       },
       () => this._getReleases(config),

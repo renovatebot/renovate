@@ -92,7 +92,7 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
     return this.cached(
       {
         // TODO: types (#22198)
-        key: `${config.registryUrl}-${config.packageName}`,
+        key: `${config.registryUrl}:${config.packageName}`,
         fallback: true,
       },
       () => this.fetchReleases(config),
