@@ -130,6 +130,7 @@ GitHub completes the merge in the background.
 After all branches of a repository are processed, Renovate looks up the results of the merges it requested in this run.
 Merged PRs are reported as automerged and their branches are deleted according to `pruneBranchAfterAutomerge`; a refused merge is logged with GitHub's reason.
 If the last merge was requested only moments earlier, Renovate waits up to three seconds once before reading the results.
+If GitHub has merged the PR but the result of the merge request is not yet updated, the PR state counts.
 A merge that GitHub has not finished by then shows up on the next run.
 We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
