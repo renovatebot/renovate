@@ -1,3 +1,6 @@
+import type { ValidateFunction } from 'ajv';
+import { Ajv } from 'ajv';
+import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
 import type {
   RenovateOptions,
@@ -6,7 +9,13 @@ import type {
 import { allManagersList } from '../../../lib/modules/manager/index.ts';
 import { partial } from '../../../test/util.ts';
 import type { DocsHeadings } from '../schema.ts';
-import { getOptionDocsUrl, readAllDocsHeadings } from '../schema.ts';
+import {
+  buildSchema,
+  getOptionDocsUrl,
+  readAllDocsHeadings,
+} from '../schema.ts';
+
+const addFormats = _addFormats as unknown as typeof _addFormats.default;
 
 const managers = new Set<string>(allManagersList);
 
@@ -21,6 +30,26 @@ function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
 
 function headings(repo: string[], global: string[] = []): DocsHeadings {
   return { repo: new Set(repo), global: new Set(global) };
+}
+
+async function compileSchema(
+  opts: { isGlobal?: boolean } = {},
+): Promise<ValidateFunction> {
+  const ajv = new Ajv({ schemaId: '$id', strict: false });
+  addFormats(ajv);
+  return ajv.compile(await buildSchema(opts));
+}
+
+/**
+ * Every error a schema reports for a config, so a test can show what someone would be told, rather than only that it was rejected.
+ */
+function schemaErrors(
+  validate: ValidateFunction,
+  config: unknown,
+): string[] | undefined {
+  return validate(config)
+    ? undefined
+    : validate.errors?.map((error) => error.message ?? 'unknown error');
 }
 
 function toAnchors(docsHeadings: Set<string>): Set<string> {
@@ -119,6 +148,73 @@ describe('tools/docs/test/schema', () => {
       ).toBe(
         'https://docs.renovatebot.com/configuration-options/#packagerulesundocumented',
       );
+    });
+  });
+
+  describe('object options', () => {
+    let repoSchema: ValidateFunction;
+    let globalSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+      globalSchema = await compileSchema({ isGlobal: true });
+    });
+
+    it('validates a map of values as if it were a nested config', () => {
+      /* `secrets` is self-hosted only, so is only in the global schema */
+      expect(
+        schemaErrors(globalSchema, { secrets: { enabled: 'a-secret' } }),
+      ).toEqual(['must be boolean']);
+
+      expect(
+        schemaErrors(repoSchema, {
+          registryAliases: { labels: 'https://example.com' },
+        }),
+      ).toEqual(['must be array']);
+
+      expect(schemaErrors(repoSchema, { env: { automerge: 'true' } })).toEqual([
+        'must be boolean',
+      ]);
+    });
+
+    it('does not validate the children of an option which nests a config', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { commands: 'echo hi' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          vulnerabilityAlerts: { vulnerabilityFixStrategy: 'nope' },
+        }),
+      ).toBeUndefined();
+    });
+
+    it('does not validate the children of a map of configs', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          customDatasources: { myDatasource: { format: 'nope' } },
+        }),
+      ).toBeUndefined();
+    });
+
+    it('validates an option which nests a config as a config', () => {
+      expect(
+        schemaErrors(globalSchema, { force: { automerge: true } }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(globalSchema, { force: { automerge: 'nope' } }),
+      ).toEqual(['must be boolean']);
+    });
+
+    it('reports every error when a value matches none of several schemas', () => {
+      expect(schemaErrors(repoSchema, { extends: 123 })).toEqual([
+        'must be array',
+        'must be string',
+        'must match exactly one schema in oneOf',
+      ]);
     });
   });
 
