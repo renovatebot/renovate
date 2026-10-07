@@ -1,19 +1,8 @@
 import { PLATFORM_FAMILIES } from '../../../constants/platforms.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
-import { Datasource } from '../datasource.ts';
-import type { DatasourceApi } from '../types.ts';
-import type { PlatformTagsDatasource, PlatformTagsLookup } from './types.ts';
-
-function isPlatformTagsDatasource(
-  datasource: DatasourceApi | undefined,
-): datasource is PlatformTagsDatasource {
-  return (
-    datasource instanceof Datasource &&
-    'getDigest' in datasource &&
-    'getSourceUrl' in datasource
-  );
-}
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { PlatformTagsLookup } from './types.ts';
 
 /**
  * The registered datasource with the given id, or `null` when no datasource
@@ -21,13 +10,13 @@ function isPlatformTagsDatasource(
  */
 export async function getPlatformTagsDatasource(
   id: string,
-): Promise<PlatformTagsDatasource | null> {
+): Promise<GitHostTagsDigestDatasource | null> {
   // the registry instantiates every datasource, this one included, so it can
   // only be loaded once this module is
   const { getDatasources } = await import('../index.ts');
 
   const datasource = getDatasources().get(id);
-  if (!isPlatformTagsDatasource(datasource)) {
+  if (!(datasource instanceof GitHostTagsDigestDatasource)) {
     return null;
   }
 

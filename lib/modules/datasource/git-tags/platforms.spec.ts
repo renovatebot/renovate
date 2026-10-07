@@ -29,7 +29,7 @@ describe('modules/datasource/git-tags/platforms', () => {
       id              | reason
       ${'unknown'}    | ${'is not registered'}
       ${'azure-tags'} | ${'resolves no digests'}
-      ${'docker'}     | ${'builds no source URLs'}
+      ${'git-tags'}   | ${'reads the tags with git'}
     `('returns null for $id, which $reason', async ({ id }) => {
       await expect(getPlatformTagsDatasource(id)).resolves.toBeNull();
     });
