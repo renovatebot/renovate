@@ -140,6 +140,7 @@ Merge queues also work with `platformAutomerge=false`: once all checks have pass
 In that case the "Allow auto-merge" checkbox is not needed.
 On later runs Renovate first looks up the result of its previous merge request, logs the reason if GitHub refused it, and sends no new request while the previous one is still pending.
 Renovate does not request the merge while a branch protection or ruleset blocks the PR, unless Renovate may bypass the rules.
+At the end of each repository run Renovate looks up the results of the merges it requested, so a PR that GitHub merged by then is reported as automerged in the same run.
 PRs that are already waiting in the merge queue are left untouched on later runs.
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
 

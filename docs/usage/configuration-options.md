@@ -4615,7 +4615,7 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 
 By default Renovate deletes, or "prunes", the branch after automerging.
 Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
-On GitHub the merge completes in the background, so Renovate removes the branch on its next run.
+On GitHub the merge completes in the background, so Renovate removes the branch at the end of the same run if GitHub has finished the merge by then, otherwise on the next run.
 
 ## `pruneStaleBranches`
 

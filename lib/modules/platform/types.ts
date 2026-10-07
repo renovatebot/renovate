@@ -176,6 +176,13 @@ export interface FindPRConfig {
   targetBranch?: string | null;
   includeOtherAuthors?: boolean;
 }
+export interface RequestedMergeResult {
+  number: number;
+  branchName?: string;
+  status: 'merged' | 'enqueued' | 'pending' | 'failed';
+  message?: string;
+}
+
 /**
  * `'pending'` means the platform accepted the merge request and completes it in
  * the background, so the caller must not treat the PR as merged nor delete its
@@ -273,6 +280,11 @@ export interface Platform {
   ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<MergePrResult>;
+  /**
+   * Results of merges this platform requested asynchronously during the
+   * current repository run.
+   */
+  getRequestedMergeResults?(): Promise<RequestedMergeResult[]>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;

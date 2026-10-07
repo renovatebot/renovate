@@ -27,6 +27,7 @@ import {
   getConcurrentPrsCount,
   getPrHourlyCount,
 } from './limits.ts';
+import { reconcileRequestedMerges } from './merge-results.ts';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -241,5 +242,6 @@ export async function writeUpdates(
     }
   }
   removeMeta(['branch', 'baseBranch']);
+  await reconcileRequestedMerges(branches);
   return 'done';
 }

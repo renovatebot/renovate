@@ -74,6 +74,7 @@ import type {
   ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
+  RequestedMergeResult,
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
@@ -562,6 +563,7 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
     mergeQueueEnabled: {},
+    requestedMerges: [],
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -2235,7 +2237,7 @@ export async function mergePr({
 
   const pr = await getPr(prNo);
   if (isAsyncMergeUsable()) {
-    const merged = await asyncMergePr(pr, prNo, strategy);
+    const merged = await asyncMergePr(pr, prNo, branchName, strategy);
     if (merged !== 'unsupported') {
       return merged;
     }
@@ -2253,6 +2255,7 @@ function isAsyncMergeUsable(): boolean {
 async function asyncMergePr(
   pr: GhPr | null,
   prNo: number,
+  branchName: string | undefined,
   strategy?: MergeStrategy,
 ): Promise<MergePrResult | 'unsupported'> {
   const previous = await checkPreviousAsyncMerge(prNo);
@@ -2273,7 +2276,7 @@ async function asyncMergePr(
   // The merge method is only supported for direct merges, the merge queue uses
   // its own configured method
   if (queueEnabled && !canBypass) {
-    return requestAsyncMerge(prNo, { merge_action: 'merge_queue' });
+    return requestAsyncMerge(prNo, branchName, { merge_action: 'merge_queue' });
   }
   // This pre-check replaces a merge request GitHub would refuse in the
   // background. Bypass actors merge regardless of BLOCKED.
@@ -2293,7 +2296,7 @@ async function asyncMergePr(
   if (mergeMethod) {
     body.merge_method = mergeMethod;
   }
-  return requestAsyncMerge(prNo, body);
+  return requestAsyncMerge(prNo, branchName, body);
 }
 
 function asyncMergeUrl(prNo: number): string {
@@ -2322,12 +2325,7 @@ async function checkPreviousAsyncMerge(
   const { uuid, requestedAt } = pendingMerge;
   let result: MergeAsyncResult;
   try {
-    const res = await githubApi.getJson(
-      `${asyncMergeUrl(prNo)}/${uuid}`,
-      { ...asyncMergeHttpOptions(), memCache: false },
-      MergeAsyncResult,
-    );
-    result = res.body;
+    result = await fetchAsyncMergeResult(prNo, uuid);
   } catch (err) {
     clearPendingMerge(prNo);
     if (err.statusCode === 404) {
@@ -2362,8 +2360,69 @@ async function checkPreviousAsyncMerge(
   return handleAsyncMergeResult(prNo, result);
 }
 
+async function fetchAsyncMergeResult(
+  prNo: number,
+  uuid: string,
+): Promise<MergeAsyncResult> {
+  const res = await githubApi.getJson(
+    `${asyncMergeUrl(prNo)}/${uuid}`,
+    { ...asyncMergeHttpOptions(), memCache: false },
+    MergeAsyncResult,
+  );
+  return res.body;
+}
+
+function rememberRequestedMerge(
+  prNo: number,
+  uuid: string,
+  branchName?: string,
+): void {
+  setPendingMerge(prNo, uuid);
+  config.requestedMerges.push({ number: prNo, branchName, uuid });
+}
+
+export async function getRequestedMergeResults(): Promise<
+  RequestedMergeResult[]
+> {
+  const results: RequestedMergeResult[] = [];
+  for (const { number, branchName, uuid } of config.requestedMerges) {
+    let result: MergeAsyncResult;
+    try {
+      result = await fetchAsyncMergeResult(number, uuid);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        logger.debug(
+          { pr: number, uuid },
+          'The result of the requested merge has expired',
+        );
+        clearPendingMerge(number);
+      } else {
+        logger.warn(
+          { err, pr: number },
+          'Failed to fetch the result of the requested merge',
+        );
+      }
+      continue;
+    }
+    if (result.status === 'merged') {
+      cacheMergedPr(number);
+    }
+    if (result.status !== 'pending') {
+      clearPendingMerge(number);
+    }
+    results.push({
+      number,
+      branchName,
+      status: result.status,
+      message: result.details.message,
+    });
+  }
+  return results;
+}
+
 async function requestAsyncMerge(
   prNo: number,
+  branchName: string | undefined,
   body: Record<string, unknown>,
 ): Promise<MergePrResult | 'unsupported'> {
   const url = asyncMergeUrl(prNo);
@@ -2373,15 +2432,16 @@ async function requestAsyncMerge(
   try {
     result = (await githubApi.putJson(url, options, MergeAsyncResult)).body;
   } catch (err) {
-    return handleAsyncMergeError(err, prNo);
+    return handleAsyncMergeError(err, prNo, branchName);
   }
   platformConfig.asyncMergeSupported = true;
-  return handleAsyncMergeResult(prNo, result);
+  return handleAsyncMergeResult(prNo, result, branchName);
 }
 
 function handleAsyncMergeResult(
   prNo: number,
   result: MergeAsyncResult,
+  branchName?: string,
 ): MergePrResult {
   if (result.status === 'merged') {
     logger.debug({ automergeResult: result.details, pr: prNo }, 'PR merged');
@@ -2396,7 +2456,7 @@ function handleAsyncMergeResult(
   if (result.status === 'pending') {
     const uuid = result.details.uuid;
     if (uuid) {
-      setPendingMerge(prNo, uuid);
+      rememberRequestedMerge(prNo, uuid, branchName);
     }
     logger.info(
       { pr: prNo, uuid },
@@ -2414,13 +2474,14 @@ function handleAsyncMergeResult(
 function handleAsyncMergeError(
   err: any,
   prNo: number,
+  branchName: string | undefined,
 ): MergePrResult | 'unsupported' {
   const response = err.response?.body;
   if (err.statusCode === 409) {
     platformConfig.asyncMergeSupported = true;
     const uuid = response?.details?.uuid;
     if (isNonEmptyString(uuid)) {
-      setPendingMerge(prNo, uuid);
+      rememberRequestedMerge(prNo, uuid, branchName);
     }
     logger.debug(
       { pr: prNo, uuid },

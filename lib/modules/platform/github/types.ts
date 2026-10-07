@@ -138,6 +138,7 @@ export interface LocalRepoConfig {
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
   mergeQueueEnabled: Record<string, boolean>;
+  requestedMerges: RequestedMerge[];
 }
 
 export interface GhRepo {
@@ -199,4 +200,10 @@ export interface PrMergeStatus {
 export interface PendingMerge {
   uuid: string;
   requestedAt: string;
+}
+
+export interface RequestedMerge {
+  number: number;
+  branchName?: string;
+  uuid: string;
 }

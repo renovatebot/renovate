@@ -6429,6 +6429,113 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    describe('getRequestedMergeResults', () => {
+      async function requestMerge(scope: httpMock.Scope): Promise<void> {
+        scope.put(asyncUrl).reply(202, pending('uuid-r'));
+        await initRepoWithPr(scope);
+        await github.mergePr({ id: 1234, branchName: 'renovate/a' });
+      }
+
+      it('returns nothing if no merge was requested', async () => {
+        initRepoMock(httpMock.scope(githubApiHost), 'some/repo');
+        await github.initRepo({ repository: 'some/repo' });
+
+        await expect(github.getRequestedMergeResults()).resolves.toEqual([]);
+      });
+
+      it('reports a merged PR and caches it as merged', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope.get(`${asyncUrl}/uuid-r`).reply(200, merged());
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([
+          {
+            number: 1234,
+            branchName: 'renovate/a',
+            status: 'merged',
+            message: 'Merged',
+          },
+        ]);
+        expect(getPendingMerge(1234)).toBeUndefined();
+        await expect(github.getPr(1234)).resolves.toMatchObject({
+          state: 'merged',
+        });
+      });
+
+      it.each`
+        status        | reply                                                       | kept
+        ${'enqueued'} | ${{ status: 'enqueued', details: { message: 'In queue' } }} | ${false}
+        ${'failed'}   | ${{ status: 'failed', details: { message: 'Blocked' } }}    | ${false}
+        ${'pending'}  | ${{ status: 'pending', details: { message: 'Waiting' } }}   | ${true}
+      `('reports a $status merge', async ({ status, reply, kept }) => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope.get(`${asyncUrl}/uuid-r`).reply(200, reply);
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([
+          {
+            number: 1234,
+            branchName: 'renovate/a',
+            status,
+            message: reply.details.message,
+          },
+        ]);
+        expect(getPendingMerge(1234) !== undefined).toBe(kept);
+        await expect(github.getPr(1234)).resolves.toMatchObject({
+          state: 'open',
+        });
+      });
+
+      it('records a merge request from a conflict', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        scope
+          .put(asyncUrl)
+          .reply(409, pending('uuid-c'))
+          .get(`${asyncUrl}/uuid-c`)
+          .reply(200, merged());
+        await initRepoWithPr(scope);
+        await github.mergePr({ id: 1234, branchName: 'renovate/a' });
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toMatchObject([{ number: 1234, status: 'merged' }]);
+      });
+
+      it('reports nothing if the result expired', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope.get(`${asyncUrl}/uuid-r`).reply(404, { message: 'Not Found' });
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([]);
+        expect(getPendingMerge(1234)).toBeUndefined();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { pr: 1234, uuid: 'uuid-r' },
+          'The result of the requested merge has expired',
+        );
+      });
+
+      it('reports nothing if the result cannot be fetched', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        await requestMerge(scope);
+        scope.get(`${asyncUrl}/uuid-r`).reply(422, { message: 'Error' });
+
+        const res = await github.getRequestedMergeResults();
+
+        expect(res).toEqual([]);
+        expect(getPendingMerge(1234)).toMatchObject({ uuid: 'uuid-r' });
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error), pr: 1234 },
+          'Failed to fetch the result of the requested merge',
+        );
+      });
+    });
+
     describe('merge state pre-check', () => {
       it('does not request a merge that a rule blocks', async () => {
         const scope = httpMock.scope(githubApiHost);
