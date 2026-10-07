@@ -805,6 +805,7 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   baseBranch?: string;
   manager?: string;
   datasource?: string;
+  effectiveDatasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: Timestamp | null;
   repository?: string;
