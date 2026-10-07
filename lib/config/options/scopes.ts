@@ -8,6 +8,8 @@ const scopeDescriptions: Record<ConfigScope, string> = {
   packageRule: 'in a `packageRules` entry',
   manager: "in a manager's config",
   updateType: "in an update type's config",
+  vulnerabilityAlert: 'in `vulnerabilityAlerts`',
+  group: 'in `group`',
 };
 
 const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
@@ -15,7 +17,21 @@ const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   packageRule: ['packageRules'],
   manager: AllManagersListLiteral,
   updateType: UpdateTypesOptions,
+  vulnerabilityAlert: ['vulnerabilityAlerts'],
+  group: ['group'],
 };
+
+/**
+ * The scopes of an option which is honoured wherever per-update config is applied, which is most of our options.
+ */
+export const sharedScopes: ConfigScope[] = [
+  'repo',
+  'packageRule',
+  'manager',
+  'updateType',
+  'vulnerabilityAlert',
+  'group',
+];
 
 /**
  * Every object an option can be used in, from the objects it names in `parents` and the kinds of place it names in `scopes`.
