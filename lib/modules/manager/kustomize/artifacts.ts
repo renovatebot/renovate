@@ -14,7 +14,11 @@ import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import { generateHelmEnvs } from '../helmv3/common.ts';
+import {
+  generateHelmEnvs,
+  generateRegistryLoginCmd,
+  helmRepositoryCredentialArgs,
+} from '../helmv3/common.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactError,
@@ -43,7 +47,11 @@ function helmRepositoryArgs(
 ): string {
   switch (datasource) {
     case HelmDatasource.id:
-      return `--repo ${quote(repository)} ${quote(depName)}`;
+      return [
+        `--repo ${quote(repository)}`,
+        ...helmRepositoryCredentialArgs(repository),
+        quote(depName),
+      ].join(' ');
     case DockerDatasource.id:
       return quote(`oci://${repository}`);
     /* v8 ignore next: should never happen */
@@ -103,9 +111,17 @@ async function inflateHelmChart(
     `Pulling helm chart ${depName} version ${versionToPull} to ${untarDir}`,
   );
 
-  const cmd =
+  const cmd: string[] = [];
+  if (datasource === DockerDatasource.id) {
+    const loginCmd = await generateRegistryLoginCmd(depName, repository);
+    if (loginCmd) {
+      cmd.push(loginCmd);
+    }
+  }
+  cmd.push(
     `helm pull --untar --untardir ${quote(untarDir)} ` +
-    `--version ${quote(versionToPull)} ${helmRepositoryArgs(repository, depName, datasource)}`;
+      `--version ${quote(versionToPull)} ${helmRepositoryArgs(repository, depName, datasource)}`,
+  );
 
   await exec(cmd, execOptions);
 }

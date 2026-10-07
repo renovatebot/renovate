@@ -108,6 +108,14 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     // match the bare release tag
     extractVersion: '^v(?<version>\\d+\\..*)$',
   },
+  // https://github.com/denoland/setup-deno
+  'denoland/setup-deno': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'deno',
+    packageName: 'denoland/deno',
+    versioning: npmVersioning.id,
+    withSchema: valSchema('deno-version'),
+  },
   // https://github.com/docker/setup-buildx-action
   'docker/setup-buildx-action': {
     datasource: GithubReleasesDatasource.id,
@@ -138,6 +146,14 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'foundry',
     packageName: 'foundry-rs/foundry',
+  },
+  // https://github.com/github/gh-aw-actions/tree/main/setup-cli
+  'github/gh-aw-actions/setup-cli': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'github/gh-aw',
+    // A major-version channel such as `v1` installs the latest stable
+    // release of that major, so preserve its precision.
+    withSchema: partialValSchema('version'),
   },
   // https://github.com/GitTools/actions (there is no root-level Action, only
   // subpaths are usable; the sibling `GitTools/actions/gitreleasemanager/setup`

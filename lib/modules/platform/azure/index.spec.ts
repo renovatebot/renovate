@@ -1455,6 +1455,112 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
+  describe('reattemptPlatformAutomerge()', () => {
+    const existingPr = {
+      pullRequestId: 456,
+      title: 'The Title',
+      targetRefName: 'refs/heads/dev',
+      createdBy: {
+        id: '123',
+      },
+    };
+
+    it.each`
+      platformPrOptions                                              | mergeStrategy
+      ${{ automergeStrategy: 'squash', usePlatformAutomerge: true }} | ${GitPullRequestMergeStrategy.Squash}
+      ${{ automergeStrategy: 'rebase', usePlatformAutomerge: true }} | ${GitPullRequestMergeStrategy.Rebase}
+      ${undefined}                                                   | ${GitPullRequestMergeStrategy.NoFastForward}
+    `(
+      'should update auto-complete settings with mergeStrategy $mergeStrategy',
+      async ({ platformPrOptions, mergeStrategy }) => {
+        await initRepo({ repository: 'some/repo' });
+        const getFn = vi.fn().mockResolvedValue(existingPr);
+        const updateFn = vi.fn().mockResolvedValue(existingPr);
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getPullRequestById: getFn,
+            updatePullRequest: updateFn,
+          }),
+        );
+
+        await azure.reattemptPlatformAutomerge!({
+          number: 456,
+          platformPrOptions,
+        });
+
+        expect(getFn).toHaveBeenCalledWith(456, 'some');
+        expect(updateFn.mock.calls[0][0]).toEqual({
+          autoCompleteSetBy: { id: '123' },
+          completionOptions: {
+            mergeStrategy,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The Title',
+          },
+        });
+        expect(updateFn.mock.calls[0][2]).toBe(456);
+        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+      },
+    );
+
+    it('should use the policy merge method when automergeStrategy is auto', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureHelper.getMergeMethod.mockResolvedValueOnce(
+        GitPullRequestMergeStrategy.RebaseMerge,
+      );
+      const updateFn = vi.fn().mockResolvedValue(existingPr);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue(existingPr),
+          updatePullRequest: updateFn,
+        }),
+      );
+
+      await azure.reattemptPlatformAutomerge!({
+        number: 456,
+        platformPrOptions: {
+          automergeStrategy: 'auto',
+          usePlatformAutomerge: true,
+        },
+      });
+
+      expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
+      expect(updateFn.mock.calls[0][0]).toEqual({
+        autoCompleteSetBy: { id: '123' },
+        completionOptions: {
+          mergeStrategy: GitPullRequestMergeStrategy.RebaseMerge,
+          deleteSourceBranch: true,
+          mergeCommitMessage: 'The Title',
+        },
+      });
+    });
+
+    it('should log a warning when updating the PR fails', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const err = new Error('unknown');
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue(existingPr),
+          updatePullRequest: vi.fn().mockRejectedValue(err),
+        }),
+      );
+
+      await expect(
+        azure.reattemptPlatformAutomerge!({
+          number: 456,
+          platformPrOptions: {
+            automergeStrategy: 'squash',
+            usePlatformAutomerge: true,
+          },
+        }),
+      ).toResolve();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'Error re-attempting PR platform automerge',
+      );
+    });
+  });
+
   describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });

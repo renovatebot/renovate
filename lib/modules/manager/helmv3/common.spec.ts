@@ -7,9 +7,11 @@ import type {
 import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import {
+  findHelmRepositoryCredentials,
   generateHelmEnvs,
   generateLoginCmd,
   generateRegistryLoginCmd,
+  helmRepositoryCredentialArgs,
 } from './common.ts';
 import type { RepositoryRule } from './types.ts';
 
@@ -142,6 +144,94 @@ describe('modules/manager/helmv3/common', () => {
     ).resolves.toBe(
       "helm registry login --username '' --password testtoken registry.example.com",
     );
+  });
+
+  describe('findHelmRepositoryCredentials', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns username and password from the helm host rule', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      expect(
+        findHelmRepositoryCredentials('https://charts.example.com/stable'),
+      ).toEqual({ username: 'testuser', password: 'testpass' });
+    });
+
+    it('returns null when the host rule lacks a password', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+      });
+
+      expect(
+        findHelmRepositoryCredentials('https://charts.example.com'),
+      ).toBeNull();
+    });
+
+    it('returns null when no helm host rule matches', () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      expect(
+        findHelmRepositoryCredentials('https://charts.example.com'),
+      ).toBeNull();
+    });
+  });
+
+  describe('helmRepositoryCredentialArgs', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns quoted username and password from the helm host rule', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'test user',
+        password: "p@ss w'rd;$HOME",
+      });
+
+      expect(
+        helmRepositoryCredentialArgs('https://charts.example.com/stable'),
+      ).toEqual(["--username 'test user'", `--password 'p@ss w'"'"'rd;$HOME'`]);
+    });
+
+    it('returns no arguments when the host rule lacks a password', () => {
+      hostRules.add({
+        hostType: 'helm',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+      });
+
+      expect(
+        helmRepositoryCredentialArgs('https://charts.example.com'),
+      ).toBeEmptyArray();
+    });
+
+    it('ignores host rules of other host types', () => {
+      hostRules.add({
+        hostType: 'docker',
+        matchHost: 'charts.example.com',
+        username: 'testuser',
+        password: 'testpass',
+      });
+
+      expect(
+        helmRepositoryCredentialArgs('https://charts.example.com'),
+      ).toBeEmptyArray();
+    });
   });
 
   describe('generateHelmEnvs', () => {

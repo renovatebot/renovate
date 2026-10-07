@@ -5,12 +5,13 @@ import {
   excludeBlockStartRegex,
   parseLine,
 } from './line-parser.ts';
+import type { GoModManagerData } from './types.ts';
 
 function findMatchingModule(
-  tool: PackageDependency,
-  deps: PackageDependency[],
-): PackageDependency | undefined {
-  let bestMatch: PackageDependency | undefined;
+  tool: PackageDependency<GoModManagerData>,
+  deps: PackageDependency<GoModManagerData>[],
+): PackageDependency<GoModManagerData> | undefined {
+  let bestMatch: PackageDependency<GoModManagerData> | undefined;
   const normalizedTool = `${tool.depName!}/`;
 
   // Find the longest matching prefix for the tool within the dependencies
@@ -26,9 +27,11 @@ function findMatchingModule(
   return bestMatch;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-  const tools: PackageDependency[] = [];
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<GoModManagerData> | null {
+  const deps: PackageDependency<GoModManagerData>[] = [];
+  const tools: PackageDependency<GoModManagerData>[] = [];
   let inExcludeBlock = false;
 
   const lines = content.split(newlineRegex);
@@ -72,7 +75,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     return null;
   }
 
-  const packageFile: PackageFileContent = {
+  const packageFile: PackageFileContent<GoModManagerData> = {
     deps,
   };
 

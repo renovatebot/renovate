@@ -1,3 +1,4 @@
+import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -8,17 +9,15 @@ import type { GitlabPackage } from './types.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource {
+export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
-
-  protected override http: GitlabHttp;
 
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://gitlab.com'];
+    return [defaultRegistryUrl];
   }
 
   override readonly releaseTimestampSupport = true;
@@ -26,8 +25,7 @@ export class GitlabPackagesDatasource extends Datasource {
     'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
-    super(datasource);
-    this.http = new GitlabHttp(datasource);
+    super(datasource, new GitlabHttp(datasource));
   }
 
   static getGitlabPackageApiUrl(
@@ -39,8 +37,8 @@ export class GitlabPackagesDatasource extends Datasource {
     const packageNameEncoded = encodeURIComponent(packageName);
 
     return joinUrlParts(
-      registryUrl,
-      `api/v4/projects`,
+      getApiBaseUrl(registryUrl),
+      'projects',
       projectNameEncoded,
       `packages?package_name=${packageNameEncoded}&per_page=100`,
     );

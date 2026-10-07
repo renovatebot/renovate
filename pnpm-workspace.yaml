@@ -18,7 +18,7 @@ dedupePeers: true
 catalog:
   esbuild: 0.28.2
   tar: 7.5.22
-  vite: 8.3.0
+  vite: 8.3.1
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
@@ -40,6 +40,8 @@ strictPeerDependencies: true
 # 7 days
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - '@containerbase/base'
+  - '@renovatebot/base-image'
   - '@renovatebot/detect-tools'
   - '@renovatebot/good-enough-parser'
   - '@renovatebot/osv-offline'

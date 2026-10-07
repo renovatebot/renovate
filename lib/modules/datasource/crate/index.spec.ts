@@ -559,6 +559,86 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
+    describe('git authentication', () => {
+      const httpsUrl = 'https://gitlab.corp/group/crates-index.git';
+      const sshUrl = 'ssh://git@gitlab.corp/group/crates-index.git';
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: true,
+        });
+      });
+
+      it('passes crate authentication to git when cloning an http(s) registry', async () => {
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [httpsUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          httpsUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+
+      it('passes crate authentication to git for the crates.io git index without allowCustomCrateGitRegistries', async () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: false,
+        });
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [CRATES_IO_REGISTRY_URL_PARSED],
+        });
+
+        expect(res).toMatchObject({
+          dependencyUrl: 'https://crates.io/crates/mypkg',
+        });
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          'https://index.crates.io',
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+
+      it('does not pass authentication to git for ssh registries', async () => {
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sshUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          sshUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+    });
+
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });

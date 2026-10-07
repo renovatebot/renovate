@@ -68,7 +68,9 @@ A reproduction is compulsory for PRs that do not close an Issue: link a public r
 If this PR closes an Issue, confirm the fix against the Issue's reproduction.
 If you are not adding a reproduction, state your reason here:
 
-<!-- Reason for not adding a reproduction -->
+```markdown
+<!-- Reason for not adding a reproduction, inside the Markdown code block -->
+```
 
 PRs without a reproduction or a stated reason will not be reviewed and may be closed.
 

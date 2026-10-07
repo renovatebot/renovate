@@ -110,7 +110,7 @@ function processDepForAutoReplace(
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
-export function splitImageParts(currentFrom: string): PackageDependency {
+export function splitImageParts(currentFrom: string): PackageDependency<never> {
   let isVariable = false;
   let cleanedCurrentFrom = currentFrom;
 
@@ -144,7 +144,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<never> = {
     depName,
     packageName: depName,
     currentValue,
@@ -171,10 +171,10 @@ const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 /**
  * Extract a Docker dependency from an image reference.
  */
-export function getDep(
+export function getDep<T = never>(
   currentFrom: string | null | undefined,
   options: GetDepOptions = {},
-): PackageDependency {
+): PackageDependency<T> {
   const dep = getDepFromImageRef(
     currentFrom,
     options.specifyReplaceString ?? true,
@@ -192,7 +192,7 @@ function getDepFromImageRef(
   currentFrom: string | null | undefined,
   specifyReplaceString: boolean,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency {
+): PackageDependency<never> {
   if (
     !isString(currentFrom) ||
     !isNonEmptyStringAndNotWhitespace(currentFrom)

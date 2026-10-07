@@ -23,7 +23,7 @@ import {
 } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
 
-const gitExec = withGitEnvironment(['cargo']);
+const gitExec = withGitEnvironment(['cargo', CrateDatasource.id]);
 
 async function cargoUpdate(
   manifestPath: string,

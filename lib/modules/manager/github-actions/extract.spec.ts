@@ -2493,10 +2493,11 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
@@ -2508,10 +2509,11 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '2.4.0',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
@@ -3319,6 +3321,69 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'kindest/node',
           depType: 'uses-with',
           packageName: 'kindest/node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v0.37.18' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.37.18',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v1' },
+      },
+      expected: [
+        {
+          currentValue: 'v1',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // `latest` is already a rolling channel, not a version to update.
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
         },
       ],
     },

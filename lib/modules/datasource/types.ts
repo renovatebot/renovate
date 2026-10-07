@@ -127,6 +127,14 @@ export interface ReleaseResult {
   respectLatest?: boolean;
 }
 
+/**
+ * A single tag as returned by a git hosting provider.
+ *
+ * `gitRef` is filled in by the `*-tags` datasource base class, which always
+ * mirrors the tag name.
+ */
+export type GitHostTag = Omit<Release, 'gitRef'>;
+
 export interface PostprocessReleaseConfig {
   packageName: string;
   registryUrl: string | null;
@@ -165,6 +173,12 @@ export type RegistryStrategy =
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   /** Return registry URLs for package-specific datasource defaults. */
