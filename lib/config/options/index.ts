@@ -79,6 +79,7 @@ function installToolProperties(): Record<string, unknown> {
 const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
+    scopes: sharedScopes,
     description: 'Mode of operation.',
     type: 'string',
     default: 'full',
