@@ -57,7 +57,7 @@ function getDirs(arr: (string | null | undefined)[]): string[] {
 }
 
 export function determineLockFileDirs(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
 ): DetermineLockFileDirsResult {
   const npmLockDirs: (string | undefined)[] = [];
@@ -128,7 +128,7 @@ export function determineLockFileDirs(
 }
 
 export async function writeExistingFiles(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
   originalNpmrcFiles = new Map<string, string>(),
 ): Promise<void> {
