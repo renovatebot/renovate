@@ -155,7 +155,8 @@ export class GoDirectDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoDirectDatasource.id}`,
-        key: config.packageName,
+        // Exclude release results cached before delegation metadata was added.
+        key: `v2:${config.packageName}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
