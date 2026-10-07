@@ -1271,6 +1271,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmrc',
+    scopes: sharedScopes,
     description:
       'String copy of `.npmrc` file. Use `\\n` instead of line breaks.',
     stage: 'branch',
@@ -1278,6 +1279,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmrcMerge',
+    scopes: ['repo', 'manager'],
     description:
       'Whether to merge `config.npmrc` with repo `.npmrc` content if both are found.',
     stage: 'branch',
@@ -1286,6 +1288,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmToken',
+    scopes: ['repo'],
     description: 'npm token used to authenticate with the default registry.',
     stage: 'branch',
     type: 'string',
@@ -1299,6 +1302,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'skipInstalls',
+    scopes: sharedScopes,
     description:
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
@@ -1497,6 +1501,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'registryAliases',
+    scopes: sharedScopes,
     description: 'Aliases for registries.',
     mergeable: true,
     type: 'object',
