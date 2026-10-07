@@ -271,7 +271,6 @@ export class GoProxyDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
-        // Exclude release results cached before delegation metadata was added.
         key: `v2:${GoProxyDatasource.getCacheKey(config)}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
