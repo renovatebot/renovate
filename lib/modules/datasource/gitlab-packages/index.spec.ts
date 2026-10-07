@@ -11,6 +11,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
           version: '1.0.0',
           created_at: '2020-03-04T12:01:37.000-06:00',
           name: 'mypkg',
+          conan_package_name: null,
         },
         {
           version: 'v1.1.0',
