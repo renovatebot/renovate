@@ -533,7 +533,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
 
   packageFile?: string;
 
-  upgrades: Upgrade[];
+  upgrades: Upgrade<T>[];
   npmLock?: string;
   yarnLock?: string;
   branchName: string;

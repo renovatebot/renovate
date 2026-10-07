@@ -53,9 +53,9 @@ export function parseDepName(depType: string, key: string): string {
 export function extractDependency(
   depType: string,
   depName: string,
-  input: string,
-): PackageDependency {
-  const dep: PackageDependency = {};
+  input: unknown,
+): Omit<PackageDependency, 'managerData'> {
+  const dep: Omit<PackageDependency, 'managerData'> = {};
   if (!validateNpmPackageName(depName).validForOldPackages) {
     dep.skipReason = 'invalid-name';
     return dep;

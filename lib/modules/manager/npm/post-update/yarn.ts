@@ -110,7 +110,7 @@ export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = [],
+  upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
