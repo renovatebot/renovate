@@ -8,18 +8,6 @@ import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { PlatformTagsDatasource, PlatformTagsLookup } from './types.ts';
 
-/**
- * The `*-tags` datasources which read the API of a platform, one per family
- * of `PLATFORM_FAMILIES`.
- */
-const platformTagsDatasourceClasses = [
-  BitbucketTagsDatasource,
-  ForgejoTagsDatasource,
-  GiteaTagsDatasource,
-  GithubTagsDatasource,
-  GitlabTagsDatasource,
-];
-
 let platformTagsDatasources: Record<string, PlatformTagsDatasource> | undefined;
 
 /**
@@ -34,15 +22,15 @@ export function getPlatformTagsDatasource(
   id: string,
 ): PlatformTagsDatasource | undefined {
   platformTagsDatasources ??= Object.fromEntries(
-    platformTagsDatasourceClasses.map((TagsDatasource) => [
-      TagsDatasource.id,
-      {
-        id: TagsDatasource.id,
-        api: new TagsDatasource(),
-        // `GiteaDatasource.getSourceUrl()` reads `defaultRegistryUrls` off the
-        // class it is called on, so the reference has to stay bound to it.
-        getSourceUrl: TagsDatasource.getSourceUrl.bind(TagsDatasource),
-      },
+    [
+      new BitbucketTagsDatasource(),
+      new ForgejoTagsDatasource(),
+      new GiteaTagsDatasource(),
+      new GithubTagsDatasource(),
+      new GitlabTagsDatasource(),
+    ].map((datasource): [string, PlatformTagsDatasource] => [
+      datasource.id,
+      datasource,
     ]),
   );
 
@@ -69,12 +57,15 @@ export function resolvePlatformTagsLookup(
   }
 
   const family = detectPlatform(httpUrl);
+  if (!family) {
+    return null;
+  }
+
   // Azure DevOps and Bitbucket Data Center lay out their repository URLs
   // differently from `<origin>/<owner>/<repo>`, so they have no datasource
   // instance here and their repositories are read with `git ls-remote`.
-  const datasource =
-    family &&
-    getPlatformTagsDatasource(PLATFORM_FAMILIES[family].tagsDatasource);
+  const id = PLATFORM_FAMILIES[family].tagsDatasource;
+  const datasource = getPlatformTagsDatasource(id);
   if (!datasource) {
     return null;
   }
@@ -85,5 +76,5 @@ export function resolvePlatformTagsLookup(
     return null;
   }
 
-  return { ...datasource, registryUrl: `https://${host}`, packageName };
+  return { id, datasource, registryUrl: `https://${host}`, packageName };
 }

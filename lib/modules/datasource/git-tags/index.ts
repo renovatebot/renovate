@@ -48,7 +48,7 @@ export class GitTagsDatasource extends GitDatasource {
     const platform = resolvePlatformTagsLookup(config.packageName);
     if (platform) {
       const res = await this.viaPlatform(platform, () =>
-        platform.api.getReleases({
+        platform.datasource.getReleases({
           ...config,
           registryUrl: platform.registryUrl,
           packageName: platform.packageName,
@@ -69,7 +69,7 @@ export class GitTagsDatasource extends GitDatasource {
     const platform = resolvePlatformTagsLookup(config.packageName);
     if (platform) {
       const digest = await this.viaPlatform(platform, () =>
-        platform.api.getDigest(
+        platform.datasource.getDigest(
           {
             ...config,
             registryUrl: platform.registryUrl,

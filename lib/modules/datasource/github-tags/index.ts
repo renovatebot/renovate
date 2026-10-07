@@ -20,8 +20,11 @@ import type {
 export class GithubTagsDatasource extends Datasource<GithubHttp> {
   static readonly id = 'github-tags';
 
-  /** Browser URL of the repository `packageName` on `registryUrl`. */
-  static getSourceUrl(packageName: string, registryUrl?: string): string {
+  /**
+   * Browser URL of the repository `packageName` on `registryUrl`, or on the
+   * default registry.
+   */
+  getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, registryUrl);
   }
 

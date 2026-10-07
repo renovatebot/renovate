@@ -1,26 +1,26 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  ReleaseResult,
-} from '../types.ts';
+import type { Datasource } from '../datasource.ts';
+import type { DigestConfig } from '../types.ts';
 
-/** The part of a `*-tags` datasource which a delegating lookup uses. */
-export interface TagsApi {
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
+/**
+ * A `*-tags` datasource which reads the API of one git hosting platform: it
+ * resolves digests, and it knows the browser URL of a repository without
+ * calling the API.
+ */
+export interface PlatformTagsDatasource extends Datasource {
   getDigest(config: DigestConfig, newValue?: string): Promise<string | null>;
-}
-
-/** A `*-tags` datasource which reads the API of one git hosting platform. */
-export interface PlatformTagsDatasource {
-  readonly id: DatasourceName;
-  readonly api: TagsApi;
-  /** Browser URL of a repository of the platform. */
-  readonly getSourceUrl: (packageName: string, registryUrl?: string) => string;
+  /**
+   * Browser URL of the repository `packageName` on `registryUrl`, or on the
+   * default registry.
+   */
+  getSourceUrl(packageName: string, registryUrl?: string): string;
 }
 
 /** A repository URL, resolved to the platform datasource which can serve it. */
-export interface PlatformTagsLookup extends PlatformTagsDatasource {
+export interface PlatformTagsLookup {
+  /** The id of {@link PlatformTagsLookup.datasource}. */
+  readonly id: DatasourceName;
+  readonly datasource: PlatformTagsDatasource;
   /** The origin of the URL, which is the datasource's `registryUrl`. */
   readonly registryUrl: string;
   /** The repository path, which is the datasource's `packageName`. */
