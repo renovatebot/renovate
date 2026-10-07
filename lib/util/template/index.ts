@@ -182,8 +182,7 @@ export const allowedFields = {
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
-  effectiveDatasource:
-    'The datasource which served the lookup when another one was configured, e.g. `github-tags` for a `go` module hosted on GitHub',
+  effectiveDatasource: 'The datasources used to fetch releases after delegation',
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
   isGroup: 'true if the upgrade is part of a group',
