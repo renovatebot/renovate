@@ -4,6 +4,7 @@ import type { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
+import { buildCacheKey } from '../../cache/package/key.ts';
 import { resolveTtlValues } from '../../cache/package/ttl.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import { regEx } from '../../regex.ts';
@@ -61,10 +62,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   private cacheKey(method: string, url: string): string {
-    if (method !== 'get') {
-      return `${method}:${url}`;
-    }
-    return url;
+    return buildCacheKey(method, url);
   }
 
   async load(method: string, url: string): Promise<unknown> {

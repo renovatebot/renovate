@@ -9,6 +9,7 @@ import {
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as packageCache from '../cache/package/index.ts';
+import { buildCacheKey } from '../cache/package/key.ts';
 import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
 import { Http } from '../http/index.ts';
@@ -173,7 +174,7 @@ async function queryApi(
     currentVersion,
     newVersion,
   );
-  const cacheKey = `${token}:${url}`;
+  const cacheKey = buildCacheKey(token, url);
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
   // istanbul ignore if

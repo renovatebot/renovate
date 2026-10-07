@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import {
   queryBranches,
   queryTags,
@@ -38,9 +39,10 @@ export class GithubDigestDatasource extends Datasource<GithubHttp> {
   private static getCacheKey(
     registryUrl: string | undefined,
     packageName: string,
-    suffix: string,
+    type: string,
+    value?: string,
   ): string {
-    return `${registryUrl}:${packageName}:${suffix}`;
+    return buildCacheKey(registryUrl, packageName, type, value);
   }
 
   override getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
@@ -114,7 +116,8 @@ export class GithubDigestDatasource extends Datasource<GithubHttp> {
         key: GithubDigestDatasource.getCacheKey(
           registryUrl,
           repo,
-          `digest:${newValue}`,
+          'digest',
+          newValue,
         ),
       },
       async () => {

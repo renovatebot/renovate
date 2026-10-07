@@ -657,7 +657,7 @@ describe('modules/datasource/npm/get', () => {
       });
       expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
         'datasource-npm:cache-provider',
-        'https://example.com/some-package',
+        'get:https://example.com/some-package',
         expect.objectContaining({
           httpResponse: expect.objectContaining({
             body: {

@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -143,7 +144,7 @@ export class GolangVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}`,
+        key: buildCacheKey(config.registryUrl),
         fallback: true,
       },
       () => this.fetchReleases(config),

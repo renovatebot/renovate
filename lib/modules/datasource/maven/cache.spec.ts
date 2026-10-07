@@ -16,10 +16,10 @@ const packageCache = vi.mocked(_packageCache);
 
 const packageName = 'org.example:package';
 const registryUrl = 'https://repo.maven.apache.org/maven2';
-const metadataUrl =
-  'https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml';
-const pomUrl =
-  'https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom';
+const metadataKey =
+  'get:https://repo.maven.apache.org/maven2/org/example/package/maven-metadata.xml';
+const pomKey =
+  'get:https://repo.maven.apache.org/maven2/org/example/package/2.0.0/package-2.0.0.pom';
 
 describe('modules/datasource/maven/cache', () => {
   let cache: Record<string, HttpCache>;
@@ -64,7 +64,7 @@ describe('modules/datasource/maven/cache', () => {
       },
     });
 
-    const metadataCache = cache[metadataUrl]!;
+    const metadataCache = cache[metadataKey]!;
     const metadata = new XmlDocument(
       (metadataCache.httpResponse as { body: string }).body,
     );
@@ -76,7 +76,7 @@ describe('modules/datasource/maven/cache', () => {
     expect(metadata.valueWithPath('versioning.latest')).toBe('2.0.0');
     expect(metadata.valueWithPath('versioning.release')).toBe('2.0.0');
 
-    const pomCache = cache[pomUrl]!;
+    const pomCache = cache[pomKey]!;
     const pom = new XmlDocument(
       (pomCache.httpResponse as { body: string }).body,
     );
@@ -88,7 +88,7 @@ describe('modules/datasource/maven/cache', () => {
 
   it('serves cached trimmed XML without refetching', async () => {
     const timestamp = new Date().toISOString();
-    cache[metadataUrl] = {
+    cache[metadataKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -97,7 +97,7 @@ describe('modules/datasource/maven/cache', () => {
       },
       timestamp,
     };
-    cache[pomUrl] = {
+    cache[pomKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -135,7 +135,7 @@ describe('modules/datasource/maven/cache', () => {
     `;
     const timestamp = new Date().toISOString();
 
-    cache[metadataUrl] = {
+    cache[metadataKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -144,7 +144,7 @@ describe('modules/datasource/maven/cache', () => {
       },
       timestamp,
     };
-    cache[pomUrl] = {
+    cache[pomKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -170,7 +170,7 @@ describe('modules/datasource/maven/cache', () => {
   it('revalidates trimmed cached XML after 304 responses', async () => {
     const staleTimestamp = '2024-01-01T00:00:00.000Z';
 
-    cache[metadataUrl] = {
+    cache[metadataKey] = {
       etag: 'metadata-etag',
       lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
       httpResponse: {
@@ -180,7 +180,7 @@ describe('modules/datasource/maven/cache', () => {
       },
       timestamp: staleTimestamp,
     };
-    cache[pomUrl] = {
+    cache[pomKey] = {
       etag: 'pom-etag',
       lastModified: 'Mon, 01 Jan 2024 00:00:00 GMT',
       httpResponse: {
@@ -214,18 +214,18 @@ describe('modules/datasource/maven/cache', () => {
       },
     });
     expect(packageCache.setWithRawTtl).toHaveBeenCalledTimes(2);
-    expect(cache[metadataUrl].timestamp).not.toBe(staleTimestamp);
-    expect(cache[pomUrl].timestamp).not.toBe(staleTimestamp);
+    expect(cache[metadataKey].timestamp).not.toBe(staleTimestamp);
+    expect(cache[pomKey].timestamp).not.toBe(staleTimestamp);
   });
 
   it('serves cached trimmed snapshot XML without refetching', async () => {
     const timestamp = new Date().toISOString();
-    const snapshotMetadataUrl =
-      'https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml';
-    const snapshotPomUrl =
-      'https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/package-1.0.3-20200101.010003-3.pom';
+    const snapshotMetadataKey =
+      'get:https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml';
+    const snapshotPomKey =
+      'get:https://repo.maven.apache.org/maven2/org/example/package/1.0.3-SNAPSHOT/package-1.0.3-20200101.010003-3.pom';
 
-    cache[metadataUrl] = {
+    cache[metadataKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -234,7 +234,7 @@ describe('modules/datasource/maven/cache', () => {
       },
       timestamp,
     };
-    cache[snapshotMetadataUrl] = {
+    cache[snapshotMetadataKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,
@@ -245,7 +245,7 @@ describe('modules/datasource/maven/cache', () => {
       },
       timestamp,
     };
-    cache[snapshotPomUrl] = {
+    cache[snapshotPomKey] = {
       etag: 'etag',
       httpResponse: {
         statusCode: 200,

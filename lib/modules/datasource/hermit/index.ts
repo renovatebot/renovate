@@ -177,7 +177,7 @@ export class HermitDatasource extends Datasource<GithubHttp> {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getHermitSearchManifest:${u.toString()}`,
+        key: buildCacheKey('getHermitSearchManifest', u.toString()),
       },
       () => this._getHermitSearchManifest(u),
     );

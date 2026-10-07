@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/node/index.ts';
@@ -57,8 +58,7 @@ export class NodeVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `${config.registryUrl}`,
+        key: buildCacheKey(config.registryUrl),
         fallback: true,
       },
       () => this.fetchReleases(config),

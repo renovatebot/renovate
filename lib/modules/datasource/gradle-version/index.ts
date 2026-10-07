@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -70,8 +71,7 @@ export class GradleVersionDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GradleVersionDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}`,
+        key: buildCacheKey(config.registryUrl),
         fallback: true,
       },
       () => this._getReleases(config),

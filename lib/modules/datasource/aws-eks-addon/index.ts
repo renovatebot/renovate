@@ -3,6 +3,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -68,7 +69,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey('getReleases', config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

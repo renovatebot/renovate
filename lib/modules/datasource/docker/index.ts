@@ -236,7 +236,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
-        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, configDigest),
         ttlMinutes: 1440 * 28,
       },
       () => this._getImageConfig(registryHost, dockerRepository, configDigest),
@@ -287,7 +287,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
-        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, configDigest),
         ttlMinutes: 1440 * 28,
       },
       () => this._getHelmConfig(registryHost, dockerRepository, configDigest),
@@ -490,7 +490,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-architecture',
-        key: `${registryHost}:${dockerRepository}@${currentDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, currentDigest),
         ttlMinutes: 1440 * 28,
         shouldCacheResult: isNonEmptyString,
       },
@@ -705,7 +705,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-labels',
-        key: `${registryHost}:${dockerRepository}:${tag}`,
+        key: buildCacheKey(registryHost, dockerRepository, tag),
         ttlMinutes: 24 * 60,
       },
       () => this._getLabels(registryHost, dockerRepository, tag),
@@ -935,7 +935,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-tags',
-        key: `${registryHost}:${dockerRepository}`,
+        key: buildCacheKey(registryHost, dockerRepository),
         cacheable: registryHost === DOCKER_HUB,
       },
       () => this._getTags(registryHost, dockerRepository),
@@ -1218,7 +1218,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-hub-tags',
-        key: `${dockerRepository}`,
+        key: dockerRepository,
       },
       () => this._getDockerHubTags(dockerRepository),
     );
@@ -1322,7 +1322,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-releases-v2',
-        key: `${registryHost}:${dockerRepository}`,
+        key: buildCacheKey(registryHost, dockerRepository),
         cacheable: registryHost === DOCKER_HUB,
         fallback: true,
       },

@@ -123,7 +123,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, `tag-${tag}`),
+        key: getCacheKey(resolvedUrl, repo, 'tag', tag),
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
       () => this._getTagCommit(resolvedUrl, repo, tag),

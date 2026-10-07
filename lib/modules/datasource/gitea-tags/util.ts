@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 
@@ -22,6 +23,7 @@ export function getCacheKey(
   registryUrl: string,
   repo: string,
   type: string,
+  tag?: string,
 ): string {
-  return `${registryUrl}:${repo}:${type}`;
+  return buildCacheKey(registryUrl, repo, type, tag);
 }

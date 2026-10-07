@@ -634,7 +634,12 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-crate`,
-        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        key: buildCacheKey(
+          'postprocessRelease',
+          config.registryUrl,
+          config.packageName,
+          release.version,
+        ),
         ttlMinutes: 7 * 24 * 60,
         cacheable: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
       },

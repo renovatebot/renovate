@@ -412,7 +412,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<string[] | null> {
     return this.cached(
       {
-        key: `getProviderPackages:${repository}/${version}`,
+        key: buildCacheKey('getProviderPackages', repository, version),
       },
       () => this.fetchProviderPackages(repository, version),
     );
@@ -446,7 +446,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
     return this.cached(
       {
-        key: `getZipHashes:${zipHashUrl}`,
+        key: buildCacheKey('getZipHashes', zipHashUrl),
       },
       () => this.fetchZipHashes(zipHashUrl),
     );
@@ -470,7 +470,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<VersionDetailResponse> {
     return this.cached(
       {
-        key: `getReleaseBackendIndex:${backendLookUpName}/${version}`,
+        key: buildCacheKey(
+          'getReleaseBackendIndex',
+          backendLookUpName,
+          version,
+        ),
       },
       () => this.fetchReleaseBackendIndex(backendLookUpName, version),
     );
