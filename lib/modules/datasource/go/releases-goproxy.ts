@@ -185,7 +185,7 @@ export async function getGoproxyReleases(
   if (result && !result.sourceUrl) {
     try {
       const datasource = await BaseGoDatasource.getDatasource(packageName);
-      const sourceUrl = getSourceUrl(datasource);
+      const sourceUrl = await getSourceUrl(datasource);
       if (sourceUrl) {
         result.sourceUrl = sourceUrl;
       }

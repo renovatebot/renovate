@@ -48,8 +48,8 @@ describe('modules/datasource/go/common', () => {
       ${undefined}                               | ${'unknown'}        | ${'foo/bar'}
     `(
       '($datasource, $packageName) => $expected',
-      ({ expected, datasource, packageName }) => {
-        const res = getSourceUrl({ datasource, packageName });
+      async ({ expected, datasource, packageName }) => {
+        const res = await getSourceUrl({ datasource, packageName });
         expect(res).toEqual(expected);
       },
     );

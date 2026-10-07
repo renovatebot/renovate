@@ -52,15 +52,15 @@ export function isPublicGoPackage(packageName: string): boolean {
   );
 }
 
-export function getSourceUrl(
+export async function getSourceUrl(
   dataSource?: DataSource | null,
-): string | undefined {
+): Promise<string | undefined> {
   if (!dataSource) {
     return undefined;
   }
 
   const { datasource, registryUrl, packageName } = dataSource;
-  const tagDatasource = getGoTagDatasource(datasource);
+  const tagDatasource = await getGoTagDatasource(datasource);
   if (!tagDatasource || tagDatasource instanceof GitTagsDatasource) {
     return undefined;
   }

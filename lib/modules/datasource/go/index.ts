@@ -84,7 +84,7 @@ export class GoDatasource extends Datasource {
         ? newValue
         : undefined;
 
-    const tagDatasource = getGoTagDatasource(source.datasource);
+    const tagDatasource = await getGoTagDatasource(source.datasource);
     /* v8 ignore next: can never happen, makes lint happy */
     if (!tagDatasource) {
       return null;

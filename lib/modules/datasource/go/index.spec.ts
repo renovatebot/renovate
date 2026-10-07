@@ -18,9 +18,11 @@ const getDigestMocks: Record<string, Mock> = {
 vi.mock('./tag-datasources.ts', () => {
   return {
     getGoTagDatasource: (datasource: string) =>
-      datasource in getDigestMocks
-        ? { getDigest: getDigestMocks[datasource] }
-        : undefined,
+      Promise.resolve(
+        datasource in getDigestMocks
+          ? { getDigest: getDigestMocks[datasource] }
+          : null,
+      ),
   };
 });
 

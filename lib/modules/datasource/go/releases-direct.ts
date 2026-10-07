@@ -75,7 +75,7 @@ export async function getDirectReleases(
     return null;
   }
 
-  const tagDatasource = getGoTagDatasource(source.datasource);
+  const tagDatasource = await getGoTagDatasource(source.datasource);
   /* v8 ignore next -- should never happen */
   if (!tagDatasource) {
     return null;
@@ -87,7 +87,7 @@ export async function getDirectReleases(
     return null;
   }
 
-  const sourceUrl = res.sourceUrl ?? getSourceUrl(source) ?? null;
+  const sourceUrl = res.sourceUrl ?? (await getSourceUrl(source)) ?? null;
 
   return {
     ...res,
