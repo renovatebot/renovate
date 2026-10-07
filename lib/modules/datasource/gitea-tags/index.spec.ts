@@ -309,9 +309,8 @@ describe('modules/datasource/gitea-tags/index', () => {
         .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
         .reply(200, body);
 
-      const res = await new GiteaTagsDatasource().getTagCommit(
-        undefined,
-        'gitea/helm-chart',
+      const res = await new GiteaTagsDatasource().getDigest(
+        { packageName: 'gitea/helm-chart' },
         'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
