@@ -40,6 +40,14 @@ interface PomInfo {
   releaseTimestamp?: Timestamp;
 }
 
+/** Returns the package cache key of the package URLs found for a package. */
+function getPackageUrlsCacheKey(
+  registryUrl: string,
+  packageName: string,
+): string {
+  return buildCacheKey('package-urls', registryUrl, packageName);
+}
+
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
@@ -213,14 +221,9 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     // v8 ignore else -- an empty list returns before reaching here
     if (packageUrls.length > 0) {
-      const packageUrlsKey = buildCacheKey(
-        'package-urls',
-        registryUrl,
-        packageName,
-      );
       await packageCache.set(
         'datasource-sbt-package',
-        packageUrlsKey,
+        getPackageUrlsCacheKey(registryUrl, packageName),
         packageUrls,
         30 * 24 * 60,
       );
@@ -261,17 +264,12 @@ export class SbtPackageDatasource extends MavenDatasource {
     version: string | null,
     pkgUrls?: string[],
   ): Promise<PomInfo | null> {
-    const packageUrlsKey = buildCacheKey(
-      'package-urls',
-      registryUrl,
-      packageName,
-    );
     // istanbul ignore next: will be covered later
     const packageUrls =
       pkgUrls ??
       (await packageCache.get<string[]>(
         'datasource-sbt-package',
-        packageUrlsKey,
+        getPackageUrlsCacheKey(registryUrl, packageName),
       ));
 
     // istanbul ignore if

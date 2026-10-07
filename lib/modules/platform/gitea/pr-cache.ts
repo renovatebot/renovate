@@ -4,7 +4,6 @@ import { DateTime } from 'luxon';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
-import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import {
@@ -18,9 +17,10 @@ import { PRList } from './schema.ts';
 import type { GiteaPlatformKey, PrCacheData } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
-function syncedCacheKey(platform: GiteaPlatformKey): string {
-  return buildCacheKey(platform, 'pr-cache-synced');
-}
+const syncedCacheKeys: Record<GiteaPlatformKey, string> = {
+  gitea: 'gitea:pr-cache-synced',
+  forgejo: 'forgejo:pr-cache-synced',
+};
 
 interface RepoPrCacheOptions {
   repo: string;
@@ -194,7 +194,7 @@ export class GiteaPrCache {
   }
 
   forceSync(): void {
-    memCache.set(syncedCacheKey(this.platform), false);
+    memCache.set(syncedCacheKeys[this.platform], false);
   }
 
   private async open(): Promise<RepoPrCache> {
@@ -207,11 +207,11 @@ export class GiteaPrCache {
       this.repoOptions,
     );
     const isSynced = memCache.get<true | undefined>(
-      syncedCacheKey(this.platform),
+      syncedCacheKeys[this.platform],
     );
     if (!isSynced) {
       await this.repoCache.sync();
-      memCache.set(syncedCacheKey(this.platform), true);
+      memCache.set(syncedCacheKeys[this.platform], true);
     }
     return this.repoCache;
   }

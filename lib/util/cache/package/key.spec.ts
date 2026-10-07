@@ -22,9 +22,13 @@ describe('util/cache/package/key', () => {
       );
     });
 
-    it('distinguishes an empty middle part from fewer parts', () => {
+    it('differs for an empty middle part and a shorter key', () => {
       expect(buildCacheKey('a', '', 'b')).toBe('a::b');
       expect(buildCacheKey('a', '', 'b')).not.toBe(buildCacheKey('a', 'b'));
+    });
+
+    it('keeps colons inside parts as-is', () => {
+      expect(buildCacheKey('a:b', 'c')).toBe(buildCacheKey('a', 'b:c'));
     });
 
     it('returns an empty string without parts', () => {

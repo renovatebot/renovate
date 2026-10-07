@@ -3,6 +3,8 @@ import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
 import * as memCache from '../cache/memory/index.ts';
+import * as packageCache from '../cache/package/index.ts';
+import { toSha256 } from '../hash.ts';
 import * as hostRules from '../host-rules.ts';
 import {
   getMergeConfidenceLevel,
@@ -145,6 +147,28 @@ describe('util/merge-confidence/index', () => {
             'major',
           ),
         ).resolves.toBe('high');
+      });
+
+      it('uses the hashed token in the cache key', async () => {
+        const getCache = vi.spyOn(packageCache, 'get');
+        const url = `${apiBaseUrl}api/mc/json/npm/renovate/24.3.0/25.0.0`;
+        httpMock
+          .scope(apiBaseUrl)
+          .get('/api/mc/json/npm/renovate/24.3.0/25.0.0')
+          .reply(200, { confidence: 'high' });
+
+        await getMergeConfidenceLevel(
+          'npm',
+          'renovate',
+          '24.3.0',
+          '25.0.0',
+          'major',
+        );
+
+        expect(getCache).toHaveBeenCalledWith(
+          'merge-confidence',
+          `${toSha256('some-token')}:${url}`,
+        );
       });
 
       it('returns neutral if the API returns an unknown confidence level', async () => {

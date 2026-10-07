@@ -159,6 +159,16 @@ export class CrateDatasource extends Datasource {
     );
   }
 
+  /** Returns the memory cache key of the registry's config.json. */
+  private static registryConfigCacheKey(rawUrl: string): string {
+    return buildCacheKey('crate-datasource', 'registry-config', rawUrl);
+  }
+
+  /** Returns the memory cache key of the unsupported read API marker. */
+  private static apiUnsupportedCacheKey(api: string): string {
+    return buildCacheKey('crate-datasource', 'registry-api-unsupported', api);
+  }
+
   /**
    * Fetches the registry's config.json which provides the API base URL
    * and download URL template.
@@ -167,7 +177,7 @@ export class CrateDatasource extends Datasource {
   private async fetchRegistryConfig(
     info: RegistryInfo,
   ): Promise<RegistryConfig | null> {
-    const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
+    const cacheKey = CrateDatasource.registryConfigCacheKey(info.rawUrl);
     const cached = memCache.get<RegistryConfig>(cacheKey);
     if (cached) {
       return cached;
@@ -231,7 +241,7 @@ export class CrateDatasource extends Datasource {
       return false;
     }
 
-    const memKey = `crate-datasource/registry-api-unsupported/${api}`;
+    const memKey = CrateDatasource.apiUnsupportedCacheKey(api);
     const cached = memCache.get<boolean>(memKey);
     if (isBoolean(cached)) {
       return cached;
@@ -254,7 +264,7 @@ export class CrateDatasource extends Datasource {
       { registryUrl, api },
       'Registry does not implement the crates.io read API, skipping crate metadata and release timestamp lookups',
     );
-    memCache.set(`crate-datasource/registry-api-unsupported/${api}`, true);
+    memCache.set(CrateDatasource.apiUnsupportedCacheKey(api), true);
     await packageCache.set('datasource-crate-registry-api', api, true, 24 * 60);
   }
 
@@ -443,7 +453,11 @@ export class CrateDatasource extends Datasource {
         );
         return null;
       }
-      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
+      const cacheKey = buildCacheKey(
+        'crate-datasource',
+        'registry-clone-path',
+        registryFetchUrl,
+      );
       const lockKey = registryFetchUrl;
 
       const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
@@ -589,8 +603,9 @@ export class CrateDatasource extends Datasource {
     if (!rawUrl) {
       return release;
     }
-    const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
-    const config = memCache.get<RegistryConfig>(cacheKey);
+    const config = memCache.get<RegistryConfig>(
+      CrateDatasource.registryConfigCacheKey(rawUrl),
+    );
     if (!config?.api) {
       return release;
     }

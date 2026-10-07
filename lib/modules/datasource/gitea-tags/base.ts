@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
@@ -9,7 +10,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { Commits, Tag } from './schema.ts';
-import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
+import { getApiUrl, getSourceUrl } from './util.ts';
 
 /**
  * Shared implementation of the datasources which speak the Gitea API.
@@ -93,7 +94,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, this.cacheKeyType),
+        key: buildCacheKey(resolvedUrl, repo, this.cacheKeyType),
         fallback: true,
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
@@ -123,7 +124,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, 'tag', tag),
+        key: buildCacheKey(resolvedUrl, repo, 'tag', tag),
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
       () => this._getTagCommit(resolvedUrl, repo, tag),
@@ -161,7 +162,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, 'digest'),
+        key: buildCacheKey(resolvedUrl, repo, 'digest'),
         fallback: true,
         cacheable: this.isPublicRegistry(resolvedUrl),
       },

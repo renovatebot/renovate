@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -102,7 +101,7 @@ export class PythonVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: buildCacheKey(config.registryUrl),
+        key: config.registryUrl!,
         fallback: true,
       },
       () => this.fetchReleases(config),

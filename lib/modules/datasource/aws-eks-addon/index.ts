@@ -77,12 +77,12 @@ export class AwsEKSAddonDataSource extends Datasource {
   }
 
   private getClient({ region, profile }: EksAddonsFilter): EKSClient {
-    const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
-    if (!(cacheKey in this.clients)) {
+    const clientKey = `${region ?? 'default'}#${profile ?? 'default'}`;
+    if (!(clientKey in this.clients)) {
       const { password, token, username } = hostRules.find({
         hostType: AwsEKSAddonDataSource.id,
       });
-      this.clients[cacheKey] = new EKSClient({
+      this.clients[clientKey] = new EKSClient({
         ...(region && { region }),
         credentials:
           username && password
@@ -94,6 +94,6 @@ export class AwsEKSAddonDataSource extends Datasource {
             : fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }
-    return this.clients[cacheKey];
+    return this.clients[clientKey];
   }
 }
