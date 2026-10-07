@@ -19,6 +19,11 @@ import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
 
+  /** Browser URL of the repository `packageName` on `registryUrl`. */
+  static getSourceUrl(packageName: string, registryUrl?: string): string {
+    return getSourceUrl(packageName, registryUrl);
+  }
+
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'To get release timestamp we use the `created_at` field from the response.';

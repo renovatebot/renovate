@@ -1,14 +1,24 @@
 import { PLATFORM_FAMILIES } from '../../../constants/platforms.ts';
 import { detectPlatform } from '../../../util/common.ts';
-import { parseGitUrl } from '../../../util/git/url.ts';
-import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
-import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
+import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { PlatformTagsDatasource, PlatformTagsLookup } from './types.ts';
+
+/**
+ * The `*-tags` datasources which read the API of a platform, one per family
+ * of `PLATFORM_FAMILIES`.
+ */
+const platformTagsDatasourceClasses = [
+  BitbucketTagsDatasource,
+  ForgejoTagsDatasource,
+  GiteaTagsDatasource,
+  GithubTagsDatasource,
+  GitlabTagsDatasource,
+];
 
 let platformTagsDatasources: Record<string, PlatformTagsDatasource> | undefined;
 
@@ -23,37 +33,18 @@ let platformTagsDatasources: Record<string, PlatformTagsDatasource> | undefined;
 export function getPlatformTagsDatasource(
   id: string,
 ): PlatformTagsDatasource | undefined {
-  platformTagsDatasources ??= {
-    [BitbucketTagsDatasource.id]: {
-      id: BitbucketTagsDatasource.id,
-      api: new BitbucketTagsDatasource(),
-      getSourceUrl: BitbucketTagsDatasource.getSourceUrl,
-    },
-    [ForgejoTagsDatasource.id]: {
-      id: ForgejoTagsDatasource.id,
-      api: new ForgejoTagsDatasource(),
-      // `GiteaDatasource.getSourceUrl()` reads `defaultRegistryUrls` off the
-      // class it is called on, so the reference has to stay bound to it.
-      getSourceUrl: ForgejoTagsDatasource.getSourceUrl.bind(
-        ForgejoTagsDatasource,
-      ),
-    },
-    [GiteaTagsDatasource.id]: {
-      id: GiteaTagsDatasource.id,
-      api: new GiteaTagsDatasource(),
-      getSourceUrl: GiteaTagsDatasource.getSourceUrl.bind(GiteaTagsDatasource),
-    },
-    [GithubTagsDatasource.id]: {
-      id: GithubTagsDatasource.id,
-      api: new GithubTagsDatasource(),
-      getSourceUrl: githubSourceUrl,
-    },
-    [GitlabTagsDatasource.id]: {
-      id: GitlabTagsDatasource.id,
-      api: new GitlabTagsDatasource(),
-      getSourceUrl: gitlabSourceUrl,
-    },
-  };
+  platformTagsDatasources ??= Object.fromEntries(
+    platformTagsDatasourceClasses.map((TagsDatasource) => [
+      TagsDatasource.id,
+      {
+        id: TagsDatasource.id,
+        api: new TagsDatasource(),
+        // `GiteaDatasource.getSourceUrl()` reads `defaultRegistryUrls` off the
+        // class it is called on, so the reference has to stay bound to it.
+        getSourceUrl: TagsDatasource.getSourceUrl.bind(TagsDatasource),
+      },
+    ]),
+  );
 
   return platformTagsDatasources[id];
 }
@@ -67,7 +58,17 @@ export function getPlatformTagsDatasource(
 export function resolvePlatformTagsLookup(
   url: string,
 ): PlatformTagsLookup | null {
-  const family = detectPlatform(url);
+  // `detectPlatform()` reads a URL, which an scp-style `git@host:repo` clone
+  // URL is not
+  let httpUrl: string;
+  try {
+    httpUrl = getHttpUrl(url);
+  } catch {
+    // not a git URL at all, so no platform either
+    return null;
+  }
+
+  const family = detectPlatform(httpUrl);
   // Azure DevOps and Bitbucket Data Center lay out their repository URLs
   // differently from `<origin>/<owner>/<repo>`, so they have no datasource
   // instance here and their repositories are read with `git ls-remote`.
