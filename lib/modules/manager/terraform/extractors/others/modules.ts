@@ -11,6 +11,7 @@ import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
+import type { TerraformManagerData } from '../../types.ts';
 import { applyOciDependency } from '../../util.ts';
 
 export const githubRefMatchRegex = regEx(
@@ -112,12 +113,12 @@ export class ModuleExtractor extends DependencyExtractor {
   }
 
   private analyseTerraformModule(
-    dep: PackageDependency,
+    dep: PackageDependency<TerraformManagerData>,
     config: ExtractConfig,
     hclRoot: TerraformDefinitionFile,
   ): PackageDependency {
     // TODO #22198
-    const source = dep.managerData!.source as string;
+    const source = dep.managerData!.source!;
 
     if (isOCIRegistry(source)) {
       applyOciDependency(dep, source, config.registryAliases);
