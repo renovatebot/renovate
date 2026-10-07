@@ -46,20 +46,22 @@ export class GitTagsDatasource extends GitDatasource {
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     const platform = resolvePlatformTagsLookup(config.packageName);
-    if (platform) {
-      const res = await this.viaPlatform(platform, () =>
-        platform.datasource.getReleases({
-          ...config,
-          registryUrl: platform.registryUrl,
-          packageName: platform.packageName,
-        }),
-      );
-      if (res) {
-        return { ...res, effectiveDatasource: platform.id };
-      }
+    if (!platform) {
+      return this.getRefReleases(config);
     }
 
-    return this.getRefReleases(config);
+    const res = await this.viaPlatform(platform, () =>
+      platform.datasource.getReleases({
+        ...config,
+        registryUrl: platform.registryUrl,
+        packageName: platform.packageName,
+      }),
+    );
+    if (!res) {
+      return this.getRefReleases(config);
+    }
+
+    return { ...res, effectiveDatasource: platform.id };
   }
 
   override async getDigest(
@@ -67,23 +69,21 @@ export class GitTagsDatasource extends GitDatasource {
     newValue?: string,
   ): Promise<string | null> {
     const platform = resolvePlatformTagsLookup(config.packageName);
-    if (platform) {
-      const digest = await this.viaPlatform(platform, () =>
-        platform.datasource.getDigest(
-          {
-            ...config,
-            registryUrl: platform.registryUrl,
-            packageName: platform.packageName,
-          },
-          newValue,
-        ),
-      );
-      if (digest) {
-        return digest;
-      }
+    if (!platform) {
+      return super.getDigest(config, newValue);
     }
 
-    return super.getDigest(config, newValue);
+    const digest = await this.viaPlatform(platform, () =>
+      platform.datasource.getDigest(
+        {
+          ...config,
+          registryUrl: platform.registryUrl,
+          packageName: platform.packageName,
+        },
+        newValue,
+      ),
+    );
+    return digest ?? super.getDigest(config, newValue);
   }
 
   /**
