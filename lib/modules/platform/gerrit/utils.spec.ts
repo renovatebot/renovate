@@ -113,6 +113,21 @@ describe('modules/platform/gerrit/utils', () => {
         expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
 
+      it('creates a url with an overridden ssh port', () => {
+        hostRules.add({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'ssh',
+          'abc',
+          2501,
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:2501/web/apps');
+      });
+
       it('create a url with trailing slash', () => {
         hostRules.add({
           username: 'abc',

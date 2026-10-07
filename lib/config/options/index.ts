@@ -3458,6 +3458,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'gerritSshPort',
+    description: 'Port used when Renovate clones Gerrit repositories over SSH.',
+    type: 'integer',
+    supportedPlatforms: ['gerrit'],
+    default: 29418,
+    stage: 'repository',
+    globalOnly: true,
+  },
+  {
     name: 'writeDiscoveredRepos',
     description: 'Writes discovered repositories to a JSON file and then exit.',
     type: 'string',

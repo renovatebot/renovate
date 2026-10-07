@@ -252,6 +252,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   executionTimeout?: number;
   exposeAllEnv?: boolean;
   gitTimeout?: number;
+  gerritSshPort?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   inheritConfigTrusted?: boolean;

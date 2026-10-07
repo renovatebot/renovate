@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { hostRules } from '~test/host-rules.ts';
 import { fakeSha, git, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
@@ -187,6 +188,27 @@ describe('modules/platform/gerrit/index', () => {
         url: 'ssh://user@dev.gerrit.com:29418/test/repo',
         virtualBranches: {},
       });
+    });
+
+    it('initRepo() - uses configured ssh port in clone url', async () => {
+      GlobalConfig.set({ gerritSshPort: 2501 });
+      try {
+        clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+        clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+        clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
+
+        await gerrit.initRepo({
+          repository: 'test/repo',
+          gitUrl: 'ssh',
+        });
+
+        expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+          url: 'ssh://user@dev.gerrit.com:2501/test/repo',
+          virtualBranches: {},
+        });
+      } finally {
+        GlobalConfig.reset();
+      }
     });
 
     it('initRepo() - abandon rejected changes', async () => {

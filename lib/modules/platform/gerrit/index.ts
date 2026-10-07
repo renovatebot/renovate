@@ -1,5 +1,6 @@
 import { isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -196,6 +197,7 @@ export async function initRepo({
     baseUrl,
     gitUrl,
     config.gerritUsername!,
+    GlobalConfig.get('gerritSshPort'),
   );
   configureScm(repository, config.labels);
   await git.initRepo({
