@@ -195,6 +195,43 @@ describe('modules/manager/poetry/schema', () => {
       ]);
     });
 
+    it('multiple non-default sources with one primary disable the implicit PyPI source', () => {
+      expect(
+        PoetrySources.parse([
+          {
+            name: 'pypi-mirror',
+            priority: 'primary',
+            url: 'https://example.com/pypi-remote/simple',
+          },
+          {
+            name: 'internal',
+            priority: 'supplemental',
+            url: 'https://example.com/internal/simple',
+          },
+          {
+            name: 'extra',
+            url: 'https://example.com/extra/simple',
+          },
+        ]),
+      ).toEqual([
+        {
+          name: 'pypi-mirror',
+          priority: 'primary',
+          url: 'https://example.com/pypi-remote/simple',
+        },
+        {
+          name: 'extra',
+          priority: 'primary',
+          url: 'https://example.com/extra/simple',
+        },
+        {
+          name: 'internal',
+          priority: 'supplemental',
+          url: 'https://example.com/internal/simple',
+        },
+      ]);
+    });
+
     it('sources with priority="secondary"', () => {
       expect(
         PoetrySources.parse([
