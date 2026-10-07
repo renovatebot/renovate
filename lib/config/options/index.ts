@@ -2,13 +2,80 @@ import { isArray, isObject } from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
+import type { ConstraintDefinition } from '../../util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitions,
+} from '../../util/exec/types.ts';
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
   type RenovateOptions,
   UpdateTypesOptions,
+  allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
 } from '../types.ts';
+
+/**
+ * The constraints which a Containerbase tool defines, as the keys of an object option.
+ */
+function toolConstraintProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const {
+    name,
+    description,
+  } of toolDefinitions as readonly ConstraintDefinition[]) {
+    const base = `A constraint for the \`${name}\` Containerbase tool`;
+    properties[name] = {
+      type: 'string',
+      description: description ? `${base}. ${description}` : base,
+    };
+  }
+
+  return properties;
+}
+
+/**
+ * The constraints which aren't a Containerbase tool, as the keys of an object option.
+ */
+function additionalConstraintProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const {
+    name,
+    description,
+  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    properties[name] = {
+      type: 'string',
+      // prioritise contraint definitions, as they're more useful than the generated one
+      description: description ?? `A constraint for \`${name}\``,
+    };
+  }
+
+  return properties;
+}
+
+/**
+ * The Containerbase tools which can be installed, as the keys of an object option.
+ */
+function installToolProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const {
+    name,
+    description,
+  } of toolDefinitions as readonly ConstraintDefinition[]) {
+    const base = `Install the \`${name}\` Containerbase tool`;
+    properties[name] = {
+      type: 'object',
+      description: description ? `${base}. ${description}` : base,
+      additionalProperties: false,
+    };
+  }
+
+  return properties;
+}
 
 const options: Readonly<RenovateOptions>[] = [
   {
@@ -237,11 +304,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     parents: ['postUpgradeTasks'],
     default: {},
-    additionalProperties: {
-      type: 'object',
-      properties: {},
-      additionalProperties: false,
-    },
+    properties: installToolProperties(),
+    additionalProperties: false,
     mergeable: false,
     freeChoice: true,
     cli: false,
@@ -389,9 +453,13 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     mergeable: true,
     advancedUse: true,
-    additionalProperties: {
-      type: ['string', 'null'],
-    },
+    properties: Object.fromEntries(
+      allowedStatusCheckStrings.map((statusCheck) => [
+        statusCheck,
+        { type: ['string', 'null'] },
+      ]),
+    ),
+    additionalProperties: false,
     default: {
       artifactError: 'renovate/artifacts',
       configValidation: 'renovate/config-validation',
@@ -406,10 +474,13 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     mergeable: true,
     advancedUse: true,
-    additionalProperties: {
-      type: 'string',
-      enum: [...allowedStatusCheckWhenValues],
-    },
+    properties: Object.fromEntries(
+      allowedStatusCheckStrings.map((statusCheck) => [
+        statusCheck,
+        { type: 'string', enum: [...allowedStatusCheckWhenValues] },
+      ]),
+    ),
+    additionalProperties: false,
     default: {
       artifactError: 'failed',
       configValidation: 'always',
@@ -2900,9 +2971,11 @@ const options: Readonly<RenovateOptions>[] = [
       'poetry',
     ],
     freeChoice: true,
-    additionalProperties: {
-      type: 'string',
+    properties: {
+      ...toolConstraintProperties(),
+      ...additionalConstraintProperties(),
     },
+    additionalProperties: false,
   },
   {
     name: 'hostRules',
@@ -3727,9 +3800,8 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     freeChoice: true,
-    additionalProperties: {
-      type: 'string',
-    },
+    properties: additionalConstraintProperties(),
+    additionalProperties: false,
   },
 ];
 
