@@ -61,28 +61,20 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
       packagePart,
     );
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const response = await this.fetchJson(apiUrl, GitlabPackages, {
+      paginate: true,
+    });
 
-    try {
-      const response = (
-        await this.http.getJson(apiUrl, { paginate: true }, GitlabPackages)
-      ).body;
+    const releases = response
+      // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
+      // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
+      .filter((r) => (r.conan_package_name ?? r.name) === packagePart)
+      .map(({ version, created_at }) => ({
+        version,
+        releaseTimestamp: asTimestamp(created_at),
+      }));
 
-      result.releases = response
-        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
-        // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => (r.conan_package_name ?? r.name) === packagePart)
-        .map(({ version, created_at }) => ({
-          version,
-          releaseTimestamp: asTimestamp(created_at),
-        }));
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return result.releases?.length ? result : null;
+    return releases.length ? { releases } : null;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

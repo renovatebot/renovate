@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const GitlabPackage = z.object({
   version: z.string(),
@@ -8,4 +9,4 @@ export const GitlabPackage = z.object({
 });
 export type GitlabPackage = z.infer<typeof GitlabPackage>;
 
-export const GitlabPackages = z.array(GitlabPackage);
+export const GitlabPackages = LooseArray(GitlabPackage);
