@@ -1,6 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { codeBlock } from 'common-tags';
 import { RequestError } from 'got';
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fakeSha, logger } from '~test/util.ts';
@@ -6503,6 +6504,38 @@ describe('modules/platform/github/index', () => {
         const res = await github.getRequestedMergeResults();
 
         expect(res).toMatchObject([{ number: 1234, status: 'merged' }]);
+      });
+
+      describe('waiting for the last merge', () => {
+        const now = Settings.now;
+
+        afterEach(() => {
+          Settings.now = now;
+        });
+
+        it('waits for the rest of the grace period after a recent request', async () => {
+          Settings.now = () => 1_000_000;
+          const scope = httpMock.scope(githubApiHost);
+          await requestMerge(scope);
+          scope.get(`${asyncUrl}/uuid-r`).reply(200, merged());
+          Settings.now = () => 1_001_000;
+
+          await github.getRequestedMergeResults();
+
+          expect(setTimeout).toHaveBeenCalledExactlyOnceWith(2000);
+        });
+
+        it('does not wait if the last request is older than the grace period', async () => {
+          Settings.now = () => 1_000_000;
+          const scope = httpMock.scope(githubApiHost);
+          await requestMerge(scope);
+          scope.get(`${asyncUrl}/uuid-r`).reply(200, merged());
+          Settings.now = () => 1_005_000;
+
+          await github.getRequestedMergeResults();
+
+          expect(setTimeout).not.toHaveBeenCalled();
+        });
       });
 
       it('reports nothing if the result expired', async () => {
