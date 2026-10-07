@@ -382,7 +382,9 @@ export async function resolveConstraint(
 
 // Docker execs run in a fresh `--rm` container each time, so `memoize` must
 // stay false there - only the persistent-host (binarySource=install) path
-// can safely skip a tool it has already installed this run.
+// can safely skip a tool whose requested version is already active.
+// `install-tool` also activates the version it installs, so the memo tracks
+// the active version per tool, not every installed version.
 export async function generateInstallCommands(
   toolConstraints: Opt<ToolConstraint[]>,
   memoize = false,
@@ -393,11 +395,11 @@ export async function generateInstallCommands(
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
       if (memoize) {
-        const cacheKey = `containerbase-installed:${toolName}:${toolVersion}`;
-        if (memCache.get<boolean | undefined>(cacheKey)) {
+        const cacheKey = `containerbase-active:${toolName}`;
+        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
           continue;
         }
-        memCache.set(cacheKey, true);
+        memCache.set(cacheKey, toolVersion);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
