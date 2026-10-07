@@ -173,6 +173,12 @@ export type RegistryStrategy =
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   /** Return registry URLs for package-specific datasource defaults. */
