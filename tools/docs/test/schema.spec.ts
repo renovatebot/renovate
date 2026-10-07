@@ -5,8 +5,8 @@ import type {
 } from '../../../lib/config/types.ts';
 import { allManagersList } from '../../../lib/modules/manager/index.ts';
 import { partial } from '../../../test/util.ts';
-import { readFile } from '../../utils/index.ts';
-import { getOptionDocsUrl } from '../schema.ts';
+import type { DocsHeadings } from '../schema.ts';
+import { getOptionDocsUrl, readAllDocsHeadings } from '../schema.ts';
 
 const managers = new Set<string>(allManagersList);
 
@@ -19,34 +19,30 @@ function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
   });
 }
 
-/**
- * The anchors of the headings which document config options on the given page, e.g. `enabled` or `packagerulesmatchpackagenames`.
- */
-async function readDocsAnchors(configFile: string): Promise<Set<string>> {
-  const content = await readFile(`docs/usage/${configFile}`);
-  const headings = content
-    .split('\n')
-    .filter((line) => line.startsWith('## ') || line.startsWith('### '))
-    .map((line) => line.split(' ')[1].replace(/^`|`$/g, ''));
+function headings(repo: string[], global: string[] = []): DocsHeadings {
+  return { repo: new Set(repo), global: new Set(global) };
+}
 
+function toAnchors(docsHeadings: Set<string>): Set<string> {
   return new Set(
-    headings.map((heading) => heading.replaceAll('.', '').toLowerCase()),
+    [...docsHeadings].map((heading) =>
+      heading.replaceAll('.', '').toLowerCase(),
+    ),
   );
 }
 
 async function getLinksToMissingHeadings(): Promise<string[]> {
+  const docsHeadings = await readAllDocsHeadings();
   const anchors = {
-    'configuration-options': await readDocsAnchors('configuration-options.md'),
-    'self-hosted-configuration': await readDocsAnchors(
-      'self-hosted-configuration.md',
-    ),
+    'configuration-options': toAnchors(docsHeadings.repo),
+    'self-hosted-configuration': toAnchors(docsHeadings.global),
   };
 
   return (
     getOptions()
       /* managers are documented in their own module pages, not in the config pages */
       .filter((o) => !managers.has(o.name))
-      .map((o) => [o.name, getOptionDocsUrl(o)] as const)
+      .map((o) => [o.name, getOptionDocsUrl(o, docsHeadings)] as const)
       .filter(([, url]) => {
         const [page, anchor] = url
           .replace('https://docs.renovatebot.com/', '')
@@ -61,15 +57,19 @@ async function getLinksToMissingHeadings(): Promise<string[]> {
 describe('tools/docs/test/schema', () => {
   describe('getOptionDocsUrl', () => {
     it('links an option with no parents to its own heading', () => {
-      expect(getOptionDocsUrl(option({ name: 'automerge' }))).toBe(
-        'https://docs.renovatebot.com/configuration-options/#automerge',
-      );
+      expect(
+        getOptionDocsUrl(
+          option({ name: 'automerge' }),
+          headings(['automerge']),
+        ),
+      ).toBe('https://docs.renovatebot.com/configuration-options/#automerge');
     });
 
     it('links a child option to the heading under its parent', () => {
       expect(
         getOptionDocsUrl(
           option({ name: 'commands', parents: ['postUpgradeTasks'] }),
+          headings(['postUpgradeTasks.commands']),
         ),
       ).toBe(
         'https://docs.renovatebot.com/configuration-options/#postupgradetaskscommands',
@@ -78,30 +78,53 @@ describe('tools/docs/test/schema', () => {
 
     it('links a global option to the self-hosted page', () => {
       expect(
-        getOptionDocsUrl(option({ name: 'onboarding', globalOnly: true })),
+        getOptionDocsUrl(
+          option({ name: 'onboarding', globalOnly: true }),
+          headings(['onboarding'], ['onboarding']),
+        ),
       ).toBe(
         'https://docs.renovatebot.com/self-hosted-configuration/#onboarding',
       );
     });
 
-    it('links an option which is valid in several places to the first of its parents', () => {
+    it('links an option which is valid in several places to the heading which documents it', () => {
       expect(
         getOptionDocsUrl(
           option({ name: 'enabled', parents: ['.', 'packageRules', 'npm'] }),
+          headings(['enabled']),
+        ),
+      ).toBe('https://docs.renovatebot.com/configuration-options/#enabled');
+    });
+
+    it('skips the parents which do not document the option', () => {
+      expect(
+        getOptionDocsUrl(
+          option({
+            name: 'managerFilePatterns',
+            parents: ['ansible', 'npm'],
+          }),
+          headings(['managerFilePatterns']),
         ),
       ).toBe(
-        'https://docs.renovatebot.com/configuration-options/#packagerulesenabled',
+        'https://docs.renovatebot.com/configuration-options/#managerfilepatterns',
+      );
+    });
+
+    it('falls back to the first parent when the option is undocumented', () => {
+      expect(
+        getOptionDocsUrl(
+          option({ name: 'undocumented', parents: ['.', 'packageRules'] }),
+          headings([]),
+        ),
+      ).toBe(
+        'https://docs.renovatebot.com/configuration-options/#packagerulesundocumented',
       );
     });
   });
 
   describe('documented options', () => {
-    it('links some options to a heading which does not exist', async () => {
-      await expect(getLinksToMissingHeadings()).resolves.toEqual([
-        'enabled -> https://docs.renovatebot.com/configuration-options/#packagerulesenabled',
-        'fetchChangeLogs -> https://docs.renovatebot.com/configuration-options/#packagerulesfetchchangelogs',
-        'managerFilePatterns -> https://docs.renovatebot.com/configuration-options/#ansiblemanagerfilepatterns',
-      ]);
+    it('links every option to a heading which exists', async () => {
+      await expect(getLinksToMissingHeadings()).resolves.toBeEmptyArray();
     });
   });
 });
