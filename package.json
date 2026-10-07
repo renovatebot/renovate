@@ -182,7 +182,7 @@
     "@pnpm/parse-overrides": "1001.0.4",
     "@qnighy/marshal": "0.1.3",
     "@redis/client": "6.3.0",
-    "@renovatebot/base-image": "13.115.1",
+    "@renovatebot/base-image": "13.116.0",
     "@renovatebot/detect-tools": "4.0.21",
     "@renovatebot/good-enough-parser": "2.0.1",
     "@renovatebot/osv-offline": "3.0.12",
