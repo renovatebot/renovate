@@ -2,6 +2,7 @@ import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
 } from '../../config/types.ts';
+import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { ModuleApi } from '../../types/index.ts';
 import type {
   AdditionalConstraintName,
@@ -118,6 +119,11 @@ export interface ReleaseResult {
   sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
+  /**
+   * The datasource which served the lookup when another one was configured,
+   * e.g. `github-tags` for a `go` module hosted on GitHub.
+   */
+  effectiveDatasource?: DatasourceName;
   replacementName?: string;
   replacementVersion?: string;
   lookupName?: string;

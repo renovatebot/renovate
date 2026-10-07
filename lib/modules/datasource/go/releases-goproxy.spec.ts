@@ -125,6 +125,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toEqual({
+        effectiveDatasource: 'github-tags',
         releases: [
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v1.0.1', version: 'v1.0.1' },
@@ -150,6 +151,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toEqual({
+        effectiveDatasource: 'github-tags',
         releases: [
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v1.0.1', version: 'v1.0.1' },
@@ -823,6 +825,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toEqual({
+        effectiveDatasource: 'github-tags',
         releases: [
           { gitRef: 'v1.0.0', version: 'v1.0.0' },
           { gitRef: 'v1.0.1', version: 'v1.0.1' },
