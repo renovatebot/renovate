@@ -151,10 +151,14 @@ export const presets: Record<string, Preset> = {
     ],
   },
   helmDocs: {
-    allowedVersions: '!/^19\\.(0614|0110)$/',
     description: 'Block helm-docs calver-like versions from 2019',
-    matchManagers: ['pre-commit'],
-    matchPackageNames: ['norwoodj/helm-docs'],
+    packageRules: [
+      {
+        allowedVersions: '!/^19\\.(0614|0110)$/',
+        matchManagers: ['pre-commit'],
+        matchPackageNames: ['norwoodj/helm-docs'],
+      },
+    ],
   },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
