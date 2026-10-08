@@ -4170,7 +4170,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.mergePr({
           id: 1,
         }),
-      ).resolves.toBeTrue();
+      ).resolves.toBe('enqueued');
     });
 
     it('returns false if adding the MR to the merge train fails', async () => {

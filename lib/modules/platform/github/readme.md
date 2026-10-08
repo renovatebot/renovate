@@ -125,29 +125,35 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 
 ## Merging pull requests
 
-Renovate requests the merge through GitHub's [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) and does not wait for it.
-GitHub completes the merge in the background.
-After all branches of a repository are processed, Renovate looks up the results of the merges it requested in this run.
-Merged PRs are reported as automerged and their branches are deleted according to `pruneBranchAfterAutomerge`; a refused merge is logged with GitHub's reason.
-If the last merge was requested only moments earlier, Renovate waits up to three seconds once before reading the results.
+Renovate requests the merge through the [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) of GitHub, which completes the merge in the background.
+After requesting a direct merge, Renovate waits up to three seconds once and then looks up the result.
 If GitHub has merged the PR but the result of the merge request is not yet updated, the PR state counts.
+A merged PR is reported as automerged, and its branch is deleted according to `pruneBranchAfterAutomerge`.
+A refused merge is logged at info level with the reason GitHub gave.
+If GitHub has not finished the merge by then, Renovate stops processing further branches and restarts the repository job once, so the remaining branches are checked against the updated base branch.
+After all branches of a repository are processed, Renovate looks up the results of the merges it requested in this run that were still pending.
 A merge that GitHub has not finished by then shows up on the next run.
 We recommend enabling the "Automatically delete head branches" repository setting, so GitHub deletes the branch right after the merge.
 
 On later runs, Renovate first looks up the result of the merge it requested.
 If GitHub refused the merge, Renovate logs the reason at info level and decides afresh whether to request it again.
+If GitHub refused the merge method, Renovate tries the next merge method that the repository allows.
+If a direct merge was refused because changes must go through the merge queue, Renovate adds the PR to the merge queue.
 While the request is still pending, Renovate does not send a new one.
-Renovate remembers the request in the [repository cache](../../../self-hosted-configuration.md#repositorycache), so this lookup needs `repositoryCache=enabled`.
+Renovate remembers the request for 24 hours in the [repository cache](../../../self-hosted-configuration.md#repositorycache), so this lookup needs `repositoryCache=enabled`.
 
 When no result of an earlier request is known, Renovate asks GitHub whether the PR is blocked by a branch protection or ruleset.
-If it is and Renovate may not bypass the rules, Renovate logs this and does not request the merge, so a blocked PR costs one request per run.
+If it is and Renovate may not bypass the rules, Renovate logs this at debug level and does not request the merge, so a blocked PR costs one request per run.
+This check does not apply to branches with a merge queue.
 
 Renovate asks GitHub to bypass the repository rules that Renovate is permitted to bypass, which matches how the classic merge endpoint behaves.
-If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (GitHub's `viewerCanMergeAsAdmin`).
+If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (`viewerCanMergeAsAdmin` in the GitHub GraphQL API).
+This permission check is verified for user tokens, but not for GitHub App installation tokens.
 If it may, Renovate merges the PR directly with the configured merge method.
-Otherwise Renovate adds the PR to the merge queue, which merges it with the merge queue's configured merge method.
+Otherwise Renovate adds the PR to the merge queue, which merges it with the merge method configured for the merge queue.
+If Renovate cannot tell whether the base branch has a merge queue or whether it may bypass it, Renovate leaves that decision to GitHub and sends no merge method.
 
-GitHub Enterprise Server versions that do not have the asynchronous merge API yet fall back to the classic merge endpoint.
+GitHub Enterprise Server does not have the asynchronous merge API, so there Renovate uses the classic merge endpoint, which merges the PR before Renovate continues.
 
 ## Package Registry Credentials
 

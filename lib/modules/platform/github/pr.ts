@@ -14,7 +14,7 @@ import type {
 import { parseLinkHeader } from '../../../util/url.ts';
 import { ApiCache } from './api-cache.ts';
 import { coerceRestPr } from './common.ts';
-import { prIsInMergeQueueQuery } from './graphql.ts';
+import { prIsInMergeQueueQuery, prMergeStatusQuery } from './graphql.ts';
 import type { ApiPageCache, GhPr, GhRestPr, PrMergeStatus } from './types.ts';
 
 function getPrApiCache(): ApiCache<GhPr> {
@@ -199,48 +199,64 @@ export function updatePrCache(pr: GhPr): void {
   cache.updateItem(pr);
 }
 
-const prMergeStatusCache = new Map<number, PrMergeStatus>();
-
-export function resetPrMergeStatusCache(): void {
-  prMergeStatusCache.clear();
+/**
+ * Check whether the PR is currently in the merge queue.
+ * Fails open: errors are logged at debug level and treated as "not queued".
+ */
+export async function isPrInMergeQueue(
+  http: GithubHttp,
+  owner: string,
+  name: string,
+  prNo: number,
+): Promise<boolean> {
+  try {
+    const res = await http.requestGraphql<{
+      repository: {
+        pullRequest: { isInMergeQueue: boolean } | null;
+      };
+    }>(prIsInMergeQueueQuery, {
+      variables: { owner, name, number: prNo },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { prNo, errors: res.errors },
+        'Failed to fetch PR merge queue status',
+      );
+      return false;
+    }
+    return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.debug({ prNo, err }, 'Error fetching PR merge queue status');
+    return false;
+  }
 }
 
 /**
- * Fetch whether the PR is in the merge queue and whether the viewer can bypass
- * branch protections to merge it, memoized per PR until the cache is reset.
+ * Fetch whether the PR is in the merge queue, whether the viewer can bypass
+ * branch protections to merge it and whether a rule blocks the merge. The
+ * viewer is the identity of `token`, or of the default token if unset.
  * Returns null when the status cannot be fetched.
  */
-export async function getPrMergeStatus(
+export async function fetchPrMergeStatus(
   http: GithubHttp,
   owner: string,
   name: string,
   prNo: number,
-): Promise<PrMergeStatus | null> {
-  const cached = prMergeStatusCache.get(prNo);
-  if (cached) {
-    return cached;
-  }
-  const status = await fetchPrMergeStatus(http, owner, name, prNo);
-  if (status) {
-    prMergeStatusCache.set(prNo, status);
-  }
-  return status;
-}
-
-async function fetchPrMergeStatus(
-  http: GithubHttp,
-  owner: string,
-  name: string,
-  prNo: number,
+  token?: string,
 ): Promise<PrMergeStatus | null> {
   try {
     const res = await http.requestGraphql<{
       repository: {
         pullRequest: Partial<PrMergeStatus> | null;
       };
-    }>(prIsInMergeQueueQuery, {
+    }>(prMergeStatusQuery, {
       variables: { owner, name, number: prNo },
-      readOnly: true,
+      token,
       count: 1, // bypass graphql check
     });
     if (res?.errors) {

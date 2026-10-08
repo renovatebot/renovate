@@ -130,6 +130,8 @@ export interface ProcessBranchResult {
   prNo?: number;
   result: BranchResult;
   commitSha?: string | null;
+  /** The platform has not finished merging the PR yet */
+  mergePending?: boolean;
 }
 
 export async function processBranch(
@@ -1169,6 +1171,16 @@ export async function processBranch(
                 branchExists,
                 result: 'automerged',
                 commitSha,
+              };
+            }
+            if (prAutomergeResult?.prAutomergeBlockReason === 'MergePending') {
+              return {
+                branchExists,
+                updatesVerified,
+                prNo: pr.number,
+                result: 'done',
+                commitSha,
+                mergePending: true,
               };
             }
           }

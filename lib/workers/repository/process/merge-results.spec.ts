@@ -9,6 +9,7 @@ describe('workers/repository/process/merge-results', () => {
     branches = [
       partial<BranchConfig>({
         branchName: 'renovate/a',
+        prNo: 1,
         prTitle: 'Update a',
         pruneBranchAfterAutomerge: true,
       }),
@@ -25,28 +26,22 @@ describe('workers/repository/process/merge-results', () => {
     expect(scm.deleteBranch).not.toHaveBeenCalled();
   });
 
-  it('does nothing if the platform has no merge results', async () => {
-    const getRequestedMergeResults = platform.getRequestedMergeResults;
-    // @ts-expect-error -- simulate a platform without the optional hook
-    platform.getRequestedMergeResults = undefined;
+  it('does nothing if the platform returns no results', async () => {
+    platform.getRequestedMergeResults.mockResolvedValueOnce(undefined as never);
 
-    try {
-      await reconcileRequestedMerges(branches);
-    } finally {
-      platform.getRequestedMergeResults = getRequestedMergeResults;
-    }
+    await reconcileRequestedMerges(branches);
 
     expect(scm.deleteBranch).not.toHaveBeenCalled();
   });
 
   it('marks a merged PR as automerged and deletes its branch', async () => {
     platform.getRequestedMergeResults.mockResolvedValueOnce([
-      { number: 1, branchName: 'renovate/a', status: 'merged' },
+      { number: 1, status: 'merged' },
     ]);
 
     await reconcileRequestedMerges(branches);
 
-    expect(branches[0]).toMatchObject({ result: 'automerged', prNo: 1 });
+    expect(branches[0].result).toBe('automerged');
     expect(scm.deleteBranch).toHaveBeenCalledWith('renovate/a');
     expect(logger.logger.info).toHaveBeenCalledWith(
       { pr: 1, prTitle: 'Update a', branchName: 'renovate/a' },
@@ -61,13 +56,13 @@ describe('workers/repository/process/merge-results', () => {
 
     await reconcileRequestedMerges(branches);
 
-    expect(branches[1]).toMatchObject({ result: 'automerged', prNo: 2 });
+    expect(branches[1].result).toBe('automerged');
     expect(scm.deleteBranch).not.toHaveBeenCalled();
   });
 
   it('only warns if deleting the branch fails', async () => {
     platform.getRequestedMergeResults.mockResolvedValueOnce([
-      { number: 1, branchName: 'renovate/a', status: 'merged' },
+      { number: 1, status: 'merged' },
     ]);
     scm.deleteBranch.mockRejectedValueOnce(new Error('fail'));
 
@@ -82,13 +77,13 @@ describe('workers/repository/process/merge-results', () => {
 
   it('logs a merged PR without a matching branch', async () => {
     platform.getRequestedMergeResults.mockResolvedValueOnce([
-      { number: 3, branchName: 'renovate/gone', status: 'merged' },
+      { number: 3, status: 'merged' },
     ]);
 
     await reconcileRequestedMerges(branches);
 
     expect(logger.logger.info).toHaveBeenCalledWith(
-      { pr: 3, prTitle: undefined, branchName: 'renovate/gone' },
+      { pr: 3, prTitle: undefined, branchName: undefined },
       'PR automerged',
     );
     expect(scm.deleteBranch).not.toHaveBeenCalled();
@@ -96,12 +91,7 @@ describe('workers/repository/process/merge-results', () => {
 
   it('logs refused, enqueued and pending merges', async () => {
     platform.getRequestedMergeResults.mockResolvedValueOnce([
-      {
-        number: 1,
-        branchName: 'renovate/a',
-        status: 'failed',
-        message: 'Rule violation',
-      },
+      { number: 1, status: 'failed', message: 'Rule violation' },
       { number: 2, status: 'enqueued' },
       { number: 3, status: 'pending' },
     ]);
@@ -109,16 +99,13 @@ describe('workers/repository/process/merge-results', () => {
     await reconcileRequestedMerges(branches);
 
     expect(logger.logger.info).toHaveBeenCalledWith(
-      { pr: 1, branchName: 'renovate/a', message: 'Rule violation' },
-      'PR merge was refused by the platform',
+      'PR #1 merge was refused by the platform: Rule violation',
     );
     expect(logger.logger.debug).toHaveBeenCalledWith(
-      { pr: 2, branchName: 'renovate/b' },
-      'PR is in the merge queue',
+      'PR #2 is in the merge queue',
     );
     expect(logger.logger.debug).toHaveBeenCalledWith(
-      { pr: 3, branchName: undefined },
-      'Merge still pending at the end of the run',
+      'Merge of PR #3 still pending at the end of the run',
     );
     expect(branches.every((branch) => !branch.result)).toBeTrue();
   });
