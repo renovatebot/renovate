@@ -849,6 +849,12 @@ When provided, Renovate will automatically decrypt the SSH private key during th
 !!! warning
   Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
+## `gerritSshPort`
+
+Port used when Renovate clones Gerrit repositories over SSH.
+
+The default value is `29418`, which matches Gerrit's default SSH port.
+
 ## `gitTimeout`
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.
