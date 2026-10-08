@@ -327,6 +327,14 @@ describe('workers/global/config/parse/env', () => {
       ]);
     });
 
+    it('takes customManagers from env when RENOVATE_CONFIG has none', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CUSTOM_MANAGERS: '[{"customType":"regex"}]',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.customManagers).toEqual([{ customType: 'regex' }]);
+    });
+
     it('massages converted experimental env vars', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
