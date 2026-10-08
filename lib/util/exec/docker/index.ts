@@ -209,19 +209,23 @@ export async function generateDockerCommand(
 
   const bashCommandParts = [];
 
+  function preparePreCommand(command: string): string {
+    return hasInput ? `{ ${command}\n} </dev/null >&2` : command;
+  }
+
   for (const preCommand of preCommands) {
     if (
       isCommandWithOptions(preCommand) &&
       isString(join(preCommand.command))
     ) {
-      const command = `${join(preCommand.command)}${hasInput ? ' </dev/null' : ''}`;
+      const command = preparePreCommand(join(preCommand.command));
       if (preCommand.ignoreFailure) {
         bashCommandParts.push(`${command} || true`);
       } else {
         bashCommandParts.push(command);
       }
     } else if (isString(preCommand)) {
-      bashCommandParts.push(`${preCommand}${hasInput ? ' </dev/null' : ''}`);
+      bashCommandParts.push(preparePreCommand(preCommand));
     }
   }
 

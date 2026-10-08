@@ -397,9 +397,12 @@ export async function generateInstallCommands(
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
+    const resolvedTools: { toolName: ToolName; toolVersion: string }[] = [];
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
-      const { toolName } = toolConstraint;
+      resolvedTools.push({ toolName: toolConstraint.toolName, toolVersion });
+    }
+    for (const { toolName, toolVersion } of resolvedTools) {
       if (memoize) {
         const cacheKey = `containerbase-active:${toolName}`;
         if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
@@ -412,4 +415,12 @@ export async function generateInstallCommands(
     }
   }
   return installCommands;
+}
+
+export function invalidateActiveTools(
+  toolConstraints: Opt<ToolConstraint[]>,
+): void {
+  for (const { toolName } of coerceArray(toolConstraints)) {
+    memCache.set(`containerbase-active:${toolName}`, undefined);
+  }
 }

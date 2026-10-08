@@ -8,7 +8,11 @@ import { coerceArray } from '../array.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
-import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
+import {
+  generateInstallCommands,
+  invalidateActiveTools,
+  isDynamicInstall,
+} from './containerbase.ts';
 import {
   generateDockerCommand,
   removeDockerContainer,
@@ -203,6 +207,9 @@ export async function exec(
     try {
       res = await rawExec(rawCmd, commandOptions);
     } catch (err) {
+      if (isDynamicInstall(opts.toolConstraints)) {
+        invalidateActiveTools(opts.toolConstraints);
+      }
       const durationMs = Math.round(Date.now() - startTime);
       const errorFields = opts.redactOutput ? {} : { err };
       logger.debug({ ...errorFields, durationMs }, 'rawExec err');

@@ -183,14 +183,14 @@ export function exec(
       }
       if (code !== 0) {
         if (ignoreFailure === undefined || ignoreFailure === false) {
+          const message = redactOutput
+            ? `Command failed: ${cp.spawnargs.join(' ')}`
+            : `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`;
           reject(
-            new ExecError(
-              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
-              {
-                ...rejectInfo(),
-                exitCode: code,
-              },
-            ),
+            new ExecError(message, {
+              ...rejectInfo(),
+              exitCode: code,
+            }),
           );
           return;
         }

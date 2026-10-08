@@ -17,6 +17,7 @@ import { setCustomEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -24,6 +25,7 @@ import type {
   ExecOptions,
   ExecResult,
   RawExecOptions,
+  ToolConstraint,
   VolumeOption,
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
@@ -1307,6 +1309,150 @@ describe('util/exec/index', () => {
     await exec('foobar', { toolConstraints });
 
     expect(actualCmds).toEqual([`install-tool npm 1.2.3`, `foobar`, `foobar`]);
+  });
+
+  it('retries a failed tool installation before reusing a successful install', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'vp', constraint: '1.1.0' },
+    ];
+
+    await expect(
+      exec('vp sync-versions --json', { toolConstraints }),
+    ).rejects.toThrow('installation failed');
+    await exec('vp sync-versions --json', { toolConstraints });
+    await exec('vp sync-versions --json', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool vp 1.1.0',
+      'install-tool vp 1.1.0',
+      'vp sync-versions --json',
+      'vp sync-versions --json',
+    ]);
+  });
+
+  it('retries unsupported legacy releases in each workspace', async () => {
+    process.env = processEnv;
+    memCache.init();
+    const marker = 'CONTAINERBASE_VP_SYNC_VERSIONS_UNAVAILABLE:0.3.0';
+    const error = new ExecError('installation failed', {
+      cmd: 'install-tool vp 0.3.0',
+      stdout: '',
+      stderr: marker,
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockImplementation((cmd) => {
+      if (asRawCommand(cmd) === 'install-tool vp 0.3.0') {
+        return Promise.reject(error);
+      }
+      return Promise.reject(new Error('vp is not installed'));
+    });
+    GlobalConfig.set({
+      ...globalConfig,
+      binarySource: 'install',
+      localDir: cwd,
+    });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'vp', constraint: '0.3.0' },
+    ];
+
+    for (const cwdFile of ['apps/a/package.json', 'apps/b/package.json']) {
+      await expect(
+        exec('vp sync-versions --json', {
+          cwdFile,
+          toolConstraints,
+          redactOutput: true,
+        }),
+      ).rejects.toBe(error);
+    }
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool vp 0.3.0',
+      'install-tool vp 0.3.0',
+    ]);
+  });
+
+  it('does not skip an uninstalled tool after another constraint fails to resolve', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockRejectedValueOnce(new Error('lookup failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const npm: ToolConstraint = { toolName: 'npm', constraint: '1.2.3' };
+
+    await expect(
+      exec('foobar', { toolConstraints: [npm, { toolName: 'vp' }] }),
+    ).rejects.toThrow('lookup failed');
+    expect(cpExec).not.toHaveBeenCalled();
+    await exec('foobar', { toolConstraints: [npm] });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.2.3',
+      'foobar',
+    ]);
+  });
+
+  it('retries every requested tool after a partial installation fails', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+    cpExec.mockRejectedValueOnce(new Error('vp installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'node', constraint: '24.21.0' },
+      { toolName: 'vp', constraint: '1.1.0' },
+    ];
+
+    await expect(
+      exec('vp sync-versions --json', { toolConstraints }),
+    ).rejects.toThrow('vp installation failed');
+    await exec('vp sync-versions --json', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool node 24.21.0',
+      'install-tool vp 1.1.0',
+      'install-tool node 24.21.0',
+      'install-tool vp 1.1.0',
+      'vp sync-versions --json',
+    ]);
+  });
+
+  it('reactivates an earlier version after a failed version switch', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'vp', constraint: '1.1.0' },
+    ];
+    await exec('vp sync-versions --json', { toolConstraints });
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+
+    await expect(
+      exec('vp sync-versions --json', {
+        toolConstraints: [{ toolName: 'vp', constraint: '1.2.0' }],
+      }),
+    ).rejects.toThrow('installation failed');
+    await exec('vp sync-versions --json', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool vp 1.1.0',
+      'vp sync-versions --json',
+      'install-tool vp 1.2.0',
+      'install-tool vp 1.1.0',
+      'vp sync-versions --json',
+    ]);
   });
 
   it('installs a tool on every exec for binarySource=docker', async () => {
