@@ -375,22 +375,21 @@ function createSchemaForChildConfigs(
   }
 }
 
-interface GenerateSchemaOpts {
-  filename?: string;
+interface BuildSchemaOpts {
   version?: string;
   isInherit?: boolean;
   isGlobal?: boolean;
 }
 
-export async function generateSchema(
-  dist: string,
-  {
-    filename = 'renovate-schema.json',
-    version = pkg.version,
-    isInherit = false,
-    isGlobal = false,
-  }: GenerateSchemaOpts = {},
-): Promise<void> {
+interface GenerateSchemaOpts extends BuildSchemaOpts {
+  filename?: string;
+}
+
+export async function buildSchema({
+  version = pkg.version,
+  isInherit = false,
+  isGlobal = false,
+}: BuildSchemaOpts = {}): Promise<Record<string, any>> {
   if (isInherit && isGlobal) {
     throw new Error(
       'Generating schema for both `isInherit` and `isGlobal` is not supported. Only use one',
@@ -484,6 +483,16 @@ export async function generateSchema(
   createSchemaForParentConfigs(configurationOptions, properties, definitions);
   addChildrenArrayInParents(configurationOptions, properties, definitions);
   createSchemaForChildConfigs(configurationOptions, properties, definitions);
+
+  return schema;
+}
+
+export async function generateSchema(
+  dist: string,
+  { filename = 'renovate-schema.json', ...opts }: GenerateSchemaOpts = {},
+): Promise<void> {
+  const schema = await buildSchema(opts);
+
   await updateFile(
     `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
