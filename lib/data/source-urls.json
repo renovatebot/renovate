@@ -15,6 +15,7 @@
     "drone/drone-runner-kube": "https://github.com/drone-runners/drone-runner-kube",
     "drone/drone-runner-ssh": "https://github.com/drone-runners/drone-runner-ssh",
     "gcr.io/kaniko-project/executor": "https://github.com/GoogleContainerTools/kaniko",
+    "ghcr.io/netbox-community/netbox": "https://github.com/netbox-community/netbox",
     "gitea/gitea": "https://github.com/go-gitea/gitea",
     "gitlab/gitlab-ce": "https://gitlab.com/gitlab-org/gitlab-foss",
     "gitlab/gitlab-runner": "https://gitlab.com/gitlab-org/gitlab-runner",
