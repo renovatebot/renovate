@@ -81,9 +81,11 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import { getRepoFile } from './files.ts';
 import {
+  disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  prAutoMergeQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
@@ -97,6 +99,7 @@ import {
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
+  GithubPullRequestAutoMerge,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -2154,6 +2157,65 @@ export async function updatePr({
     }
     logger.warn({ err }, 'Error updating PR');
   }
+}
+
+export async function cancelPlatformAutomerge(prNo: number): Promise<boolean> {
+  const res = await githubApi.requestGraphql<{
+    repository: { pullRequest: unknown };
+  }>(prAutoMergeQuery, {
+    variables: {
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      number: prNo,
+    },
+    readOnly: true,
+    count: 1,
+  });
+  if (res?.errors) {
+    logger.debug(
+      { prNo, errors: res.errors },
+      'Failed to fetch PR auto-merge state',
+    );
+    return false;
+  }
+
+  const pr = GithubPullRequestAutoMerge.safeParse(
+    res?.data?.repository?.pullRequest,
+  );
+  if (!pr.success) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
+    return false;
+  }
+  if (pr.data.autoMergeRequest === null) {
+    return true;
+  }
+
+  const cancellation = await githubApi.requestGraphql<{
+    disablePullRequestAutoMerge: { pullRequest: unknown };
+  }>(disableAutoMergeMutation, {
+    variables: { pullRequestId: pr.data.id },
+    count: 1,
+  });
+  if (cancellation?.errors) {
+    logger.debug(
+      { prNo, errors: cancellation.errors },
+      'Failed to cancel PR auto-merge',
+    );
+    return false;
+  }
+
+  const disabledPr = GithubPullRequestAutoMerge.safeParse(
+    cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
+  );
+  if (
+    !disabledPr.success ||
+    disabledPr.data.id !== pr.data.id ||
+    disabledPr.data.autoMergeRequest !== null
+  ) {
+    logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');
+    return false;
+  }
+  return true;
 }
 
 export async function reattemptPlatformAutomerge({

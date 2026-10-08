@@ -190,6 +190,121 @@ function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
   return minimumGroupSize;
 }
 
+function appendCommitBodyTable(config: BranchConfig): void {
+  const tableRows = config.upgrades
+    .map(getTableValues)
+    .filter((x): x is string[] => isArray(x, isString));
+
+  if (tableRows.length) {
+    const table: string[][] = [];
+    table.push(['datasource', 'package', 'from', 'to']);
+
+    const seenRows = new Set<string>();
+
+    for (const row of tableRows) {
+      const key = safeStringify(row);
+      if (seenRows.has(key)) {
+        continue;
+      }
+      seenRows.add(key);
+      table.push(row);
+    }
+    config.commitMessage += `\n\n${markdownTable(table)}\n`;
+  }
+}
+
+export function refreshBranchConfig(
+  config: BranchConfig,
+  previousTargets: ReadonlyMap<
+    BranchUpgradeConfig,
+    Pick<BranchUpgradeConfig, 'newValue' | 'newVersion'>
+  >,
+): boolean {
+  let changed = previousTargets.size !== config.upgrades.length;
+  let targetChanged = false;
+  for (const upgrade of config.upgrades) {
+    const previous = previousTargets.get(upgrade);
+    if (
+      previous?.newValue === upgrade.newValue &&
+      previous?.newVersion === upgrade.newVersion
+    ) {
+      continue;
+    }
+    changed = true;
+    targetChanged = true;
+    config.automerge = false;
+    upgrade.automerge = false;
+    upgrade.isMajor = upgrade.updateType === 'major';
+    upgrade.isMinor = upgrade.updateType === 'minor';
+    upgrade.isPatch = upgrade.updateType === 'patch';
+    upgrade.isPin = upgrade.updateType === 'pin';
+    upgrade.prettyNewVersion = upgrade.newVersion
+      ? prettifyVersion(upgrade.newVersion)
+      : undefined;
+    upgrade.prettyNewMajor =
+      upgrade.newMajor === undefined ? undefined : `v${upgrade.newMajor}`;
+  }
+  if (!changed) {
+    return false;
+  }
+
+  const [firstUpgrade] = config.upgrades;
+  Object.assign(config, {
+    depName: firstUpgrade.depName,
+    packageName: firstUpgrade.packageName,
+    currentValue: firstUpgrade.currentValue,
+    currentVersion: firstUpgrade.currentVersion,
+    newValue: firstUpgrade.newValue,
+    newVersion: firstUpgrade.newVersion,
+    newMajor: firstUpgrade.newMajor,
+    newMinor: firstUpgrade.newMinor,
+    newPatch: firstUpgrade.newPatch,
+    prettyNewVersion: firstUpgrade.prettyNewVersion,
+    prettyNewMajor: firstUpgrade.prettyNewMajor,
+    displayFrom: firstUpgrade.displayFrom,
+    displayTo: firstUpgrade.displayTo,
+    updateType: config.upgrades.some(
+      (upgrade) => upgrade.updateType === 'major',
+    )
+      ? 'major'
+      : firstUpgrade.updateType,
+    isBreaking: config.upgrades.some((upgrade) => upgrade.isBreaking),
+    commitMessage: firstUpgrade.commitMessage,
+    commitMessagePrefix: firstUpgrade.commitMessagePrefix,
+    commitMessageAction: firstUpgrade.commitMessageAction,
+    commitMessageTopic: firstUpgrade.commitMessageTopic,
+    commitMessageExtra: firstUpgrade.commitMessageExtra,
+    prTitle: firstUpgrade.prTitle,
+  } satisfies Partial<BranchConfig>);
+  config.isMajor = config.updateType === 'major';
+  config.isMinor = config.updateType === 'minor';
+  config.isPatch = config.updateType === 'patch';
+  config.isPin = config.updateType === 'pin';
+
+  const versions = new Set(
+    config.upgrades.map((upgrade) => upgrade.newVersion),
+  );
+  const values = new Set(config.upgrades.map((upgrade) => upgrade.newValue));
+  const extras = new Set(
+    config.upgrades.map((upgrade) =>
+      template.compile(upgrade.commitMessageExtra ?? '', upgrade),
+    ),
+  );
+  if (
+    versions.size > 1 &&
+    values.size > 1 &&
+    extras.size > 1 &&
+    !isTypesGroup(config.upgrades)
+  ) {
+    delete config.commitMessageExtra;
+  }
+
+  const commitMessage = compileCommitMessage(config);
+  compilePrTitle(config, commitMessage);
+  appendCommitBodyTable(config);
+  return targetChanged;
+}
+
 // Sorted by priority, from low to high
 const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
@@ -299,7 +414,7 @@ export function generateBranchConfig(
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
-      upgrade.commitMessageExtra = `to v${toVersions[0]}`;
+      upgrade.commitMessageExtra = 'to v{{{newVersion}}}';
     }
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
@@ -536,26 +651,7 @@ export function generateBranchConfig(
     );
   }
 
-  const tableRows = config.upgrades
-    .map(getTableValues)
-    .filter((x): x is string[] => isArray(x, isString));
-
-  if (tableRows.length) {
-    const table: string[][] = [];
-    table.push(['datasource', 'package', 'from', 'to']);
-
-    const seenRows = new Set<string>();
-
-    for (const row of tableRows) {
-      const key = safeStringify(row);
-      if (seenRows.has(key)) {
-        continue;
-      }
-      seenRows.add(key);
-      table.push(row);
-    }
-    config.commitMessage += `\n\n${markdownTable(table)}\n`;
-  }
+  appendCommitBodyTable(config);
   const additionalReviewers = uniq(
     config.upgrades
       .map((upgrade) => upgrade.additionalReviewers)

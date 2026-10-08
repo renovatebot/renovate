@@ -152,6 +152,9 @@ export const toolDefinitions = [
   {
     name: 'vendir',
   },
+  {
+    name: 'vp',
+  },
 ] as const satisfies ConstraintDefinition[];
 
 /**
@@ -320,6 +323,8 @@ type TextExecaOptions = Extract<
 export interface RawExecOptions extends TextExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
+  /** Keep command output available to the caller, but omit it from logs. */
+  redactOutput?: boolean;
   outputListeners?: OutputListeners;
   outputWriters?: OutputWriters;
 }
@@ -347,8 +352,11 @@ export interface ExecOptions {
   toolConstraints?: Opt<ToolConstraint[]>;
   preCommands?: Opt<string[]>;
   ignoreStdout?: boolean;
+  /** Keep command output available to the caller, but omit it from logs. */
+  redactOutput?: boolean;
   // Following are pass-through to child process
   maxBuffer?: number | undefined;
+  input?: string | Buffer | undefined;
   timeout?: number | undefined;
   shell?: boolean | string | undefined;
 }

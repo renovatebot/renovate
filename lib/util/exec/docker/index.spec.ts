@@ -1,5 +1,5 @@
 import { execa } from 'execa';
-import { quote } from 'shlex';
+import { quote, split } from 'shlex';
 import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
@@ -169,6 +169,91 @@ describe('util/exec/docker/index', () => {
         'ghcr.io/renovatebot/base-image',
       );
       expect(res).toBe(command(sideCarName));
+    });
+
+    it('keeps stdin open when the child command receives input', async () => {
+      mockExecAll();
+      const res = await generateDockerCommand(
+        commands,
+        preCommands,
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      expect(res).toContain('docker run --rm -i ');
+      expect(res).toEndWith("bash -l -c '{ foo\n} </dev/null >&2 && bar'");
+    });
+
+    it('separates setup output from the response without consuming input', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['cat'],
+        [
+          'cat',
+          'echo installing',
+          { command: ['echo', 'installed'] },
+          { command: ['echo', 'ignored'], ignoreFailure: true },
+        ],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        {
+          input,
+        },
+      );
+
+      expect(stdout).toBe(input);
+      expect(stderr).toBe('installing\ninstalled\nignored');
+    });
+
+    it('preserves setup failure markers on stderr', async () => {
+      mockExecAll();
+      const marker = 'CONTAINERBASE_VP_SYNC_VERSIONS_UNAVAILABLE:0.3.0';
+      const res = await generateDockerCommand(
+        ['cat'],
+        [`echo ${marker}`, 'false'],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { exitCode, stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input: 'private manifest', reject: false },
+      );
+
+      expect(exitCode).toBe(1);
+      expect(stdout).toBe('');
+      expect(stderr).toBe(marker);
+    });
+
+    it('isolates compound setup commands while preserving shell state', async () => {
+      mockExecAll();
+      const input = '{"private":"manifest"}';
+      const res = await generateDockerCommand(
+        ['printf "%s:%s\\n" "$PWD" "$SETUP_STATE" && cat'],
+        ['echo installing && cat && cd / && export SETUP_STATE=ready; # setup'],
+        dockerOptions,
+        'ghcr.io/renovatebot/base-image',
+        true,
+      );
+
+      const { stdout, stderr } = await execa(
+        'bash',
+        ['-c', split(res).at(-1)!],
+        { input },
+      );
+
+      expect(stdout).toBe(`/:ready\n${input}`);
+      expect(stderr).toBe('installing');
     });
 
     it('keeps shell metacharacters inert in the outer command', async () => {
