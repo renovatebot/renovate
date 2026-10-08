@@ -251,6 +251,19 @@ describe('util/schema-utils/index', () => {
       },
     );
 
+    it('preserves unknown keys of a loose object', () => {
+      const s = DeepNullish(z.object({ a: z.string().optional() }).loose());
+      expect(s.parse({ a: null, extra: { x: 1 } })).toEqual({
+        extra: { x: 1 },
+      });
+    });
+
+    it('preserves strict unknown-key rejection', () => {
+      const s = DeepNullish(z.object({ a: z.string().optional() }).strict());
+      expect(s.parse({ a: null })).toEqual({});
+      expect(s.safeParse({ extra: 1 })).toMatchObject({ success: false });
+    });
+
     describe('recurses into pipe output side', () => {
       const s = DeepNullish(Json.pipe(z.object({ a: z.string().optional() })));
 
