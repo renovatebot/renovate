@@ -287,7 +287,9 @@ describe('logger/index', () => {
 
       stream.write({ level: 30, msg: 'test message' });
 
-      expect(await fs.readFile('file.log', 'utf8')).toContain('test message');
+      await expect(fs.readFile('file.log', 'utf8')).resolves.toContain(
+        'test message',
+      );
     });
 
     it('writes json data synchronously to log file', async () => {
@@ -304,7 +306,9 @@ describe('logger/index', () => {
 
       stream.write('{"level":30,"msg":"json message"}\n');
 
-      expect(await fs.readFile('file.log', 'utf8')).toContain('json message');
+      await expect(fs.readFile('file.log', 'utf8')).resolves.toContain(
+        'json message',
+      );
     });
   });
 

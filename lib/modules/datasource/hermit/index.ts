@@ -17,18 +17,18 @@ import type { HermitSearchResult } from './types.ts';
  * repository. It expects the search manifest to come from an asset `index.json` from
  * a release named index.
  */
-export class HermitDatasource extends Datasource {
+export class HermitDatasource extends Datasource<GithubHttp> {
   static readonly id = 'hermit';
 
-  override readonly customRegistrySupport = true;
-
-  override readonly registryStrategy = 'first';
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = id;
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/cashapp/hermit-packages',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/cashapp/hermit-packages'];
+  }
 
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
@@ -37,8 +37,7 @@ export class HermitDatasource extends Datasource {
   pathRegex: RegExp;
 
   constructor() {
-    super(HermitDatasource.id);
-    this.http = new GithubHttp(id);
+    super(HermitDatasource.id, new GithubHttp(id));
     this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 

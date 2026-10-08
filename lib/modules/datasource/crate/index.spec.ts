@@ -16,6 +16,7 @@ import type {
 } from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
@@ -154,23 +155,23 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(404, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid registry url', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: ['3'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -180,13 +181,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing fields', async () => {
@@ -196,13 +197,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty list', async () => {
@@ -212,13 +213,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/no/n_/non_existent_crate')
         .reply(200, '\n');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -226,13 +227,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -254,13 +255,13 @@ describe('modules/datasource/crate/index', () => {
         .scope(CRATES_IO_REGISTRY_URL_PARSED)
         .get('/so/me/some_crate')
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_crate',
           registryUrls: [CRATES_IO_REGISTRY_URL],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data: libc', async () => {
@@ -442,7 +443,47 @@ describe('modules/datasource/crate/index', () => {
       expect(res2).not.toBeNull();
     });
 
-    it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
+    it('skips crate metadata when config.json cannot be fetched', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(404);
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
+    it('skips crate metadata when config.json has no api URL', async () => {
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/config.json')
+        .reply(200, { dl: DL_BASE_URL });
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'libc',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).not.toBeNull();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
+    it('refuses to clone custom cloudsmith git registry if allowCustomCrateGitRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -455,9 +496,9 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeNull();
     });
 
-    it('clones cloudsmith private registry', async () => {
+    it('clones custom cloudsmith git registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -472,11 +513,24 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
-    it('clones other private registry with explicit gitTimeout', async () => {
+    it('refuses to clone other custom git registry when allowCustomCrateGitRegistries is not true', async () => {
+      const { mockClone } = setupGitMocks();
+
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toBeNull();
+    });
+
+    it('clones other custom git registry with explicit gitTimeout', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({
         ...adminConfig,
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         gitTimeout: 30000,
       });
       const url = 'https://github.com/mcorbin/testregistry';
@@ -489,9 +543,9 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
     });
 
-    it('clones other private registry', async () => {
+    it('clones other custom git registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -505,9 +559,89 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
+    describe('git authentication', () => {
+      const httpsUrl = 'https://gitlab.corp/group/crates-index.git';
+      const sshUrl = 'ssh://git@gitlab.corp/group/crates-index.git';
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: true,
+        });
+      });
+
+      it('passes crate authentication to git when cloning an http(s) registry', async () => {
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [httpsUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          httpsUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+
+      it('passes crate authentication to git for the crates.io git index without allowCustomCrateGitRegistries', async () => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: false,
+        });
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [CRATES_IO_REGISTRY_URL_PARSED],
+        });
+
+        expect(res).toMatchObject({
+          dependencyUrl: 'https://crates.io/crates/mypkg',
+        });
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'] },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          'https://index.crates.io',
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+
+      it('does not pass authentication to git for ssh registries', async () => {
+        const { mockClone } = setupGitMocks();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sshUrl],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          sshUrl,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+      });
+    });
+
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -524,7 +658,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('reads config.json from cloned registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -537,7 +671,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -564,7 +698,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({
@@ -582,8 +716,8 @@ describe('modules/datasource/crate/index', () => {
       expect(result2).toBeNull();
     });
 
-    it('does not clone for sparse registries', async () => {
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+    it('does not use git-clone to fetch content from sparse registries', async () => {
+      GlobalConfig.set({ ...adminConfig });
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/othertestregistry';
@@ -598,6 +732,148 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
       expect(res).toBeNull();
+    });
+
+    describe('registry web API', () => {
+      const registryUrl =
+        'https://example.codeartifact.amazonaws.com/cargo/index';
+      const sparseRegistryUrl = `sparse+${registryUrl}`;
+      const ownApi = 'https://example.codeartifact.amazonaws.com/cargo/index/-';
+      const mypkgReleases = [{ version: '0.1.0' }, { version: '0.1.1' }];
+
+      function mockRegistryConfig(api: string): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/config.json')
+          .reply(200, { dl: `${registryUrl}/dl`, api });
+      }
+
+      function mockIndex(): void {
+        httpMock
+          .scope(registryUrl)
+          .get('/my/pk/mypkg')
+          .reply(200, Fixtures.get('mypkg'));
+      }
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: true,
+        });
+      });
+
+      it('uses the crates.io API for mirrors of the crates.io index', async () => {
+        mockRegistryConfig(API_BASE_URL);
+        mockIndex();
+        mockCratesApiCallFor('mypkg', {
+          crate: { repository: 'https://github.com/example/mypkg' },
+        });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('uses the web API of registries implementing the read endpoints', async () => {
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock
+          .scope(ownApi)
+          .get('/api/v1/crates/mypkg?include=')
+          .reply(200, {
+            crate: { repository: 'https://github.com/example/mypkg' },
+          });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({
+          sourceUrl: 'https://github.com/example/mypkg',
+          releases: mypkgReleases,
+        });
+      });
+
+      it('probes the web API once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(404);
+
+        const res1 = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res1).toEqual({
+          dependencyUrl: `${registryUrl}/mypkg`,
+          registryUrl: sparseRegistryUrl,
+          releases: mypkgReleases,
+        });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          ownApi,
+          true,
+          24 * 60,
+        );
+
+        // Second package: no config.json and no web API request
+        httpMock
+          .scope(registryUrl)
+          .get('/ot/he/otherpkg')
+          .reply(200, Fixtures.get('mypkg'));
+
+        const res2 = await getPkgReleases({
+          datasource,
+          packageName: 'otherpkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res2).toMatchObject({ releases: mypkgReleases });
+        expect(res2?.sourceUrl).toBeUndefined();
+      });
+
+      it('skips the web API when a previous run found it unsupported', async () => {
+        vi.spyOn(packageCache, 'get').mockResolvedValueOnce(true);
+        mockRegistryConfig(ownApi);
+        mockIndex();
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+      });
+
+      it('does not remember other web API errors', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        mockRegistryConfig(ownApi);
+        mockIndex();
+        httpMock.scope(ownApi).get('/api/v1/crates/mypkg?include=').reply(500);
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [sparseRegistryUrl],
+        });
+
+        expect(res).toMatchObject({ releases: mypkgReleases });
+        expect(res?.sourceUrl).toBeUndefined();
+        expect(setCache).not.toHaveBeenCalled();
+      });
     });
 
     it('retries if shallow fails because of dumb http git repo', async () => {
@@ -623,7 +899,7 @@ describe('modules/datasource/crate/index', () => {
         clone: mockClone,
       });
       createSimpleGit.mockReturnValue(gitMock);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -666,7 +942,7 @@ describe('modules/datasource/crate/index', () => {
         clone: mockClone,
       });
       createSimpleGit.mockReturnValue(gitMock);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -756,6 +1032,89 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toEqual({
         version: '4.5.17',
         releaseTimestamp: '2024-09-04T19:16:41.355Z',
+      });
+    });
+
+    it('rethrows errors from crates.io', async () => {
+      memCache.set(
+        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        cratesIoConfig,
+      );
+      httpMock.scope(API_BASE_URL).get('/api/v1/crates/clap/4.5.17').reply(404);
+
+      await expect(
+        datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: CRATES_IO_REGISTRY_URL },
+          { version: '4.5.17' },
+        ),
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
+    });
+
+    describe('other registries', () => {
+      const registryUrl = 'https://example.com/index';
+      const api = 'https://example.com/-';
+
+      beforeEach(() => {
+        memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
+          dl: 'https://example.com/dl',
+          api,
+        });
+      });
+
+      it('fetches releaseTimestamp from registries implementing the read endpoints', async () => {
+        httpMock
+          .scope(api)
+          .get('/api/v1/crates/clap/4.5.17')
+          .reply(200, {
+            version: { created_at: '2024-09-04T19:16:41.355243+00:00' },
+          });
+
+        const res = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.17' },
+        );
+
+        expect(res).toEqual({
+          version: '4.5.17',
+          releaseTimestamp: '2024-09-04T19:16:41.355Z',
+        });
+      });
+
+      it('probes once and remembers registries answering 404', async () => {
+        const setCache = vi.spyOn(packageCache, 'set');
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(404);
+        const releaseOrig = { version: '4.5.17' };
+
+        const res1 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          releaseOrig,
+        );
+        const res2 = await datasource.postprocessRelease(
+          { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+          { version: '4.5.18' },
+        );
+
+        expect(res1).toBe(releaseOrig);
+        expect(res2).toEqual({ version: '4.5.18' });
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-crate-registry-api',
+          api,
+          true,
+          24 * 60,
+        );
+      });
+
+      it('rethrows other errors', async () => {
+        httpMock.scope(api).get('/api/v1/crates/clap/4.5.17').reply(500);
+
+        await expect(
+          datasource.postprocessRelease(
+            { packageName: 'clap', registryUrl: `sparse+${registryUrl}` },
+            { version: '4.5.17' },
+          ),
+        ).rejects.toThrow(
+          'Request failed with status code 500 (Internal Server Error)',
+        );
       });
     });
   });

@@ -1,3 +1,5 @@
+import type { NpmPackage } from './extract/types.ts';
+
 interface LockFilePackage {
   name?: string;
   version?: string;
@@ -80,15 +82,64 @@ export interface NpmLockFiles {
   npmLock?: string;
 }
 
-export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
+export interface NpmManagerData extends NpmLockFiles {
   hasPackageManager?: boolean;
+  key?: string;
+  packageKey?: string;
   packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;
+  workspaces?: NpmPackage['workspaces'];
   workspacesPackages?: string[] | string;
+  devEnginesIndex?: number;
+  npmrcFileName?: string | null;
+}
+
+/** the repository `.npmrc` after sanitizing */
+export interface SanitizedRepoNpmrc {
+  content: string;
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
 }
 
 export interface NpmrcResult {
   npmrc: string | undefined;
   npmrcFileName: string | null;
+}
+
+export interface NpmrcConfig {
+  npmrc?: string;
+  npmrcMerge?: boolean;
+}
+
+export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
+export type DetectedNpmrcLineEnding = Exclude<NpmrcLineEnding, ''>;
+
+interface NpmrcBaseLine {
+  raw: string;
+  lineEnding: NpmrcLineEnding;
+}
+
+export interface NpmrcSettingLine extends NpmrcBaseLine {
+  type: 'setting';
+  section: string | null;
+  key: string;
+  isArray: boolean;
+  value: unknown;
+}
+
+export interface NpmrcSectionLine extends NpmrcBaseLine {
+  type: 'section';
+  name: string;
+}
+
+export interface NpmrcOtherLine extends NpmrcBaseLine {
+  type: 'other';
+}
+
+export type NpmrcLine = NpmrcSettingLine | NpmrcSectionLine | NpmrcOtherLine;
+
+export interface NpmrcDocument {
+  lines: NpmrcLine[];
+  detectedLineEnding: DetectedNpmrcLineEnding | null;
+  trailingLineEnding: NpmrcLineEnding;
 }

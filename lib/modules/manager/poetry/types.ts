@@ -1,3 +1,10 @@
+import type { Pep621ManagerData } from '../pep621/types.ts';
+
+export interface PoetryManagerData extends Pep621ManagerData {
+  nestedVersion?: boolean;
+  sourceName?: string;
+}
+
 export interface PoetrySection {
   dependencies: Record<string, PoetryDependency | string>;
   'dev-dependencies': Record<string, PoetryDependency | string>;

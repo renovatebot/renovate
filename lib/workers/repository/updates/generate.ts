@@ -52,9 +52,8 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   }
   const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = packageName ?? depName;
-  if (datasource && name && currentVersion && newVersion) {
-    return [datasource, name, currentVersion, newVersion];
+  if (datasource && packageName && currentVersion && newVersion) {
+    return [datasource, packageName, currentVersion, newVersion];
   }
   logger.trace(
     {
@@ -499,9 +498,16 @@ export function generateBranchConfig(
   }
 
   config.constraints = {};
+  config.extractedConstraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
+    }
+    if (upgrade.extractedConstraints) {
+      config.extractedConstraints = {
+        ...config.extractedConstraints,
+        ...upgrade.extractedConstraints,
+      };
     }
   }
 

@@ -19,7 +19,9 @@ export function extractPackageFile(
     const match = re.exec(line);
     if (match) {
       const currentFrom = match.groups!.image;
-      const dep = getDep(currentFrom, true, config.registryAliases);
+      const dep = getDep(currentFrom, {
+        registryAliases: config.registryAliases,
+      });
       logger.debug(
         {
           depName: dep.depName,

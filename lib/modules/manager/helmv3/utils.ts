@@ -2,14 +2,14 @@ import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { PackageDependency } from '../types.ts';
-import { removeOCIPrefix } from './oci.ts';
+import { getOciChartDep } from './oci.ts';
 import type { ChartDefinition, Repository } from './types.ts';
 
 export function parseRepository(
   depName: string,
   repositoryURL: string,
+  registryAliases?: Record<string, string>,
 ): PackageDependency {
   const res: PackageDependency = {};
 
@@ -21,12 +21,7 @@ export function parseRepository(
   }
   switch (url.protocol) {
     case 'oci:':
-      res.datasource = DockerDatasource.id;
-      res.packageName = `${removeOCIPrefix(repositoryURL)}/${depName}`;
-      // https://github.com/helm/helm/issues/10312
-      // https://github.com/helm/helm/issues/10678
-      res.pinDigests = false;
-      break;
+      return getOciChartDep(repositoryURL, depName, registryAliases);
     case 'file:':
       res.skipReason = 'local-dependency';
       break;
@@ -81,6 +76,18 @@ export function getRepositories(definitions: ChartDefinition[]): Repository[] {
     dedup.add(el.repository);
     return !duplicate;
   });
+}
+
+/**
+ * Checks whether a chart reference points at a chart in the repository instead
+ * of a remote registry.
+ *
+ * @param path chart reference to check
+ *
+ * @returns `true` if the reference is a relative or absolute local path
+ */
+export function isLocalChartPath(path: string): boolean {
+  return ['./', '../', '/'].some((localPrefix) => path.startsWith(localPrefix));
 }
 
 export function isAlias(repository: string): boolean {

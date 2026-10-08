@@ -1,6 +1,5 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -12,22 +11,20 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
 
-export class BitriseDatasource extends Datasource {
+export class BitriseDatasource extends Datasource<GithubHttp> {
   static readonly id = 'bitrise';
 
-  override readonly http: GithubHttp;
-
   constructor() {
-    super(BitriseDatasource.id);
-
-    this.http = new GithubHttp(this.id);
+    super(BitriseDatasource.id, new GithubHttp(BitriseDatasource.id));
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/bitrise-io/bitrise-steplib.git',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/bitrise-io/bitrise-steplib.git'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -36,7 +33,7 @@ export class BitriseDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `source_code_url` field of the release object in the results.';
 
-  private async _getReleases({
+  private async fetchReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -127,13 +124,12 @@ export class BitriseDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${BitriseDatasource.id}`,
         key: `${config.registryUrl}/${config.packageName}`,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

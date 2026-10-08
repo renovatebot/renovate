@@ -54,9 +54,9 @@ describe('workers/global/config/parse/file', () => {
         './__fixtures__/',
         filePath,
       );
-      expect(
-        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
-      ).toEqual(customConfig);
+      await expect(
+        file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
+      ).resolves.toEqual(customConfig);
     });
 
     it('migrates', async () => {
@@ -67,8 +67,9 @@ describe('workers/global/config/parse/file', () => {
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
-      expect(res).toMatchSnapshot();
-      expect(res.rangeStrategy).toBe('bump');
+      expect(res).toEqual({
+        rangeStrategy: 'bump',
+      });
     });
 
     it('warns if config is invalid', async () => {
@@ -88,7 +89,7 @@ describe('workers/global/config/parse/file', () => {
     });
 
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
+      await expect(file.getConfig({})).resolves.toBeDefined();
     });
 
     it.each([
@@ -178,6 +179,17 @@ describe('workers/global/config/parse/file', () => {
 
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
       await fs.promises.unlink(configFile);
+    });
+
+    it('skips an unreadable default config file', async () => {
+      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
+      const res = await file.getConfig({});
+
+      expect(res).toEqual({});
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Error reading or parsing file - skipping',
+      );
     });
 
     it('exports env variables to environment from processEnv object', async () => {

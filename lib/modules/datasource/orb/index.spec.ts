@@ -91,12 +91,12 @@ describe('modules/datasource/orb/index', () => {
         .get(packagesPath)
         .query(packagesQuery)
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing orb', async () => {
@@ -105,22 +105,22 @@ describe('modules/datasource/orb/index', () => {
         .get(packagesPath)
         .query(packagesQuery)
         .reply(200, { data: [] });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(packagesPath).query(packagesQuery).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error', async () => {
@@ -129,12 +129,12 @@ describe('modules/datasource/orb/index', () => {
         .get(packagesPath)
         .query(packagesQuery)
         .replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'hyper-expanse/library-release-workflows',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {

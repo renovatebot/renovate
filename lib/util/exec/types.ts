@@ -83,9 +83,6 @@ export const toolDefinitions = [
     name: 'java',
   },
   {
-    name: 'java-maven',
-  },
-  {
     name: 'jb',
   },
   {
@@ -317,7 +314,13 @@ export interface OutputWriters {
   stderr?: OutputWriter;
 }
 
-export interface RawExecOptions extends ExecaOptions {
+/** execa options producing text output, which excludes the binary encodings */
+type TextExecaOptions = Extract<
+  ExecaOptions,
+  { readonly encoding?: 'utf8' | 'utf16le' }
+>;
+
+export interface RawExecOptions extends TextExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   /** Keep command output available to the caller, but omit it from logs. */

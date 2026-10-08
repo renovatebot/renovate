@@ -28,40 +28,40 @@ describe('workers/repository/reconfigure/comment', () => {
     });
 
     it('ensures comment', async () => {
-      expect(
-        await ensureReconfigurePrComment(
+      await expect(
+        ensureReconfigurePrComment(
           config,
           packageFiles,
           branches,
           reconfigureBranch,
           reconfigurePr,
         ),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('ensures comment - when no package files detected', async () => {
-      expect(
-        await ensureReconfigurePrComment(
+      await expect(
+        ensureReconfigurePrComment(
           config,
           {},
           branches,
           reconfigureBranch,
           reconfigurePr,
         ),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
     });
 
     it('dryrun', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      expect(
-        await ensureReconfigurePrComment(
+      await expect(
+        ensureReconfigurePrComment(
           config,
           packageFiles,
           branches,
           reconfigureBranch,
           reconfigurePr,
         ),
-      ).toBeTrue();
+      ).resolves.toBeTrue();
 
       expect(logger.logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/reconfigure',

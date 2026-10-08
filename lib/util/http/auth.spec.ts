@@ -6,7 +6,6 @@ describe('util/http/auth', () => {
     it('does nothing', () => {
       const opts: GotOptions = {
         headers: { authorization: 'token' },
-        url: 'https://amazon.com',
       };
 
       applyAuthorization(opts);
@@ -16,7 +15,6 @@ describe('util/http/auth', () => {
           "headers": {
             "authorization": "token",
           },
-          "url": "https://amazon.com",
         }
       `);
     });
@@ -98,7 +96,7 @@ describe('util/http/auth', () => {
       `);
     });
 
-    it('github app token with hostType not in GITHUB_API_USING_HOST_TYPES', () => {
+    it('github app token with hostType not in PLATFORM_FAMILIES.github.apiUsingHostTypes', () => {
       const opts: GotOptions = {
         headers: {},
         token: 'x-access-token:ghs_123test',

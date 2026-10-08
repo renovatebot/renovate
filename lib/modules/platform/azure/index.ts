@@ -1,9 +1,11 @@
 import { setTimeout } from 'node:timers/promises';
 import { isString } from '@sindresorhus/is';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
+  GitPullRequestSearchCriteria,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
@@ -28,6 +30,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -42,8 +45,10 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -73,6 +78,13 @@ interface User {
   isRequired: boolean;
 }
 
+interface GetRepoPullRequestsOptions {
+  gitApi: IGitApi;
+  searchCriteria: GitPullRequestSearchCriteria;
+  skip: number;
+  top: number;
+}
+
 let config: Config = {} as any;
 let issueService: IssueService;
 let renovateUserId: string | undefined;
@@ -83,6 +95,23 @@ const defaults: {
 } = {
   hostType: 'azure',
 };
+
+function getRepoPullRequests({
+  gitApi,
+  searchCriteria,
+  skip,
+  top,
+}: GetRepoPullRequestsOptions): Promise<GitPullRequest[]> {
+  const maxCommentLength = 0;
+  return gitApi.getPullRequests(
+    config.repoId,
+    searchCriteria,
+    config.project,
+    maxCommentLength,
+    skip,
+    top,
+  );
+}
 
 export const id = 'azure';
 
@@ -280,20 +309,18 @@ export async function getPrList(): Promise<AzurePr[]> {
     let fetchedPrs: GitPullRequest[];
     let skip = 0;
     do {
-      fetchedPrs = await azureApiGit.getPullRequests(
-        config.repoId,
-        {
+      fetchedPrs = await getRepoPullRequests({
+        gitApi: azureApiGit,
+        searchCriteria: {
           status: PullRequestStatus.All,
           // fetch only prs directly created on the repo and not by forks
           sourceRepositoryId: config.repoId,
           ...(!config.ignorePrAuthor &&
             renovateUserId && { creatorId: renovateUserId }),
         },
-        config.project,
-        0,
         skip,
-        100,
-      );
+        top: 100,
+      });
       prs = prs.concat(fetchedPrs);
       skip += 100;
     } while (fetchedPrs.length > 0);
@@ -341,9 +368,9 @@ export async function findPr({
   try {
     if (includeOtherAuthors) {
       const azureApiGit = await azureApi.gitApi();
-      const [pr] = await azureApiGit.getPullRequests(
-        config.repoId,
-        {
+      const [pr] = await getRepoPullRequests({
+        gitApi: azureApiGit,
+        searchCriteria: {
           sourceRefName: getNewBranchName(branchName),
           sourceRepositoryId: config.repoId,
           status: PullRequestStatus.Active,
@@ -351,11 +378,9 @@ export async function findPr({
             targetRefName: getNewBranchName(targetBranch),
           }),
         },
-        config.project,
-        0,
-        0,
-        1,
-      );
+        skip: 0,
+        top: 1,
+      });
       return pr ? getRenovatePRFormat(pr) : null;
     }
 
@@ -531,6 +556,66 @@ async function getPendingBlockingPolicyEvaluations(
   );
 }
 
+async function setPlatformAutomerge(
+  azureApiGit: IGitApi,
+  pr: GitPullRequest,
+  platformPrOptions: PlatformPrOptions,
+): Promise<GitPullRequest> {
+  let mergeStrategy: GitPullRequestMergeStrategy;
+  if (platformPrOptions.automergeStrategy === 'auto') {
+    mergeStrategy = await getMergeStrategy(pr.targetRefName!);
+  } else {
+    mergeStrategy = mapMergeStrategy(platformPrOptions.automergeStrategy);
+  }
+  const prOptions: GitPullRequest = {
+    autoCompleteSetBy: {
+      // TODO #22198
+      id: pr.createdBy!.id,
+    },
+    completionOptions: {
+      mergeStrategy,
+      deleteSourceBranch: true,
+      mergeCommitMessage: pr.title,
+    },
+  };
+
+  logger.debug(
+    {
+      prOptions,
+      repoId: config.repoId,
+      pullRequestId: pr.pullRequestId!,
+    },
+    // TODO #22198
+    `Updating PR ${pr.pullRequestId!} to specify platformAutomerge settings`,
+  );
+
+  return await azureApiGit.updatePullRequest(
+    prOptions,
+    config.repoId,
+    // TODO #22198
+    pr.pullRequestId!,
+  );
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    const azureApiGit = await azureApi.gitApi();
+    const pr = await azureApiGit.getPullRequestById(number, config.project);
+    await setPlatformAutomerge(
+      azureApiGit,
+      pr,
+      coerceObject(platformPrOptions),
+    );
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -561,38 +646,7 @@ export async function createPr({
     config.repoId,
   );
   if (platformPrOptions?.usePlatformAutomerge) {
-    const mergeStrategy =
-      platformPrOptions.automergeStrategy === 'auto'
-        ? await getMergeStrategy(pr.targetRefName!)
-        : mapMergeStrategy(platformPrOptions.automergeStrategy);
-    const prOptions: GitPullRequest = {
-      autoCompleteSetBy: {
-        // TODO #22198
-        id: pr.createdBy!.id,
-      },
-      completionOptions: {
-        mergeStrategy,
-        deleteSourceBranch: true,
-        mergeCommitMessage: title,
-      },
-    };
-
-    logger.debug(
-      {
-        prOptions,
-        repoId: config.repoId,
-        pullRequestId: pr.pullRequestId!,
-      },
-      // TODO #22198
-      `Updating PR ${pr.pullRequestId!} to specify platformAutomerge settings`,
-    );
-
-    pr = await azureApiGit.updatePullRequest(
-      prOptions,
-      config.repoId,
-      // TODO #22198
-      pr.pullRequestId!,
-    );
+    pr = await setPlatformAutomerge(azureApiGit, pr, platformPrOptions);
   }
   if (platformPrOptions?.autoApprove) {
     const approver = {

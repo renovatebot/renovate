@@ -17,7 +17,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'allowedHeaders',
     description:
-      'List of allowed patterns for header names in hostRules config.',
+      'List of allowed patterns for header names in repository hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',
@@ -99,6 +99,17 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     globalOnly: true,
+  },
+  {
+    name: 'internalHostAccess',
+    description:
+      'Whether Renovate may make HTTP requests to internal hosts, such as loopback, private-range and link-local addresses. `warn` logs the requests which `block` would refuse.',
+    type: 'string',
+    allowedValues: ['allow', 'warn', 'block'],
+    default: 'warn',
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'useCloudMetadataServices',
@@ -693,7 +704,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.95.6',
+    default: 'ghcr.io/renovatebot/base-image:13.116.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -857,6 +868,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+  },
+  {
+    name: 'inheritConfigTrusted',
+    description:
+      'If `true`, `hostRules` in inherited config may grant access to internal hosts.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'requireConfig',
@@ -1073,8 +1094,9 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
-    name: 'allowCustomCrateRegistries',
-    description: 'Set this to `true` to allow custom crate registries.',
+    name: 'allowCustomCrateGitRegistries',
+    description:
+      'Set this to `true` to allow cloning custom Cargo `git` registries. This only restricts non-sparse registries.',
     globalOnly: true,
     type: 'boolean',
     default: false,
@@ -1348,6 +1370,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'exitCodeForErrors',
+    description:
+      'Exit with an error-specific exit code when a repository run ends in a known error state.',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    globalOnly: true,
+  },
+  {
     name: 'registryAliases',
     description: 'Aliases for registries.',
     mergeable: true,
@@ -1358,6 +1389,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     supportedManagers: [
       'ansible',
+      'argocd',
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
@@ -1369,6 +1401,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gitlabci',
       'helm-requirements',
       'helmfile',
+      'helmsman',
       'helmv3',
       'kubernetes',
       'kustomize',
@@ -1789,6 +1822,16 @@ const options: Readonly<RenovateOptions>[] = [
     patternMatch: true,
   },
   {
+    name: 'matchIsBreaking',
+    description:
+      'Matches only if the update is considered breaking (e.g. major, or minor for 0.x in ecosystems like Cargo) when `true`, or non-breaking when `false`. Valid only within a `packageRules` object.',
+    type: 'boolean',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchFileNames',
     description:
       'List of patterns to match against package and lock file paths. Valid only within a `packageRules` object.',
@@ -2164,6 +2207,13 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default: 'timestamp-required',
     allowedValues: ['timestamp-required', 'timestamp-optional'],
+  },
+  {
+    name: 'minimumReleaseAgeBuffer',
+    description:
+      'Extra time added to `minimumReleaseAge` before an update is considered stable.',
+    type: 'string',
+    default: '30 minutes',
   },
   {
     name: 'abandonmentThreshold',
@@ -2895,6 +2945,19 @@ const options: Readonly<RenovateOptions>[] = [
     advancedUse: true,
   },
   {
+    name: 'allowInternal',
+    description:
+      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration, or from inherited config when `inheritConfigTrusted=true`.",
+    type: 'boolean',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+    globalOnly: true,
+    inheritConfigSupport: true,
+  },
+  {
     name: 'abortOnError',
     description:
       'If enabled, Renovate aborts its run when HTTP request errors occur.',
@@ -3586,6 +3649,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'toolSettings',

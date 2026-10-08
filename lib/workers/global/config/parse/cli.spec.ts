@@ -213,6 +213,16 @@ describe('workers/global/config/parse/cli', () => {
       argv.push('--require-config=false');
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
     });
+
+    it('dryRun keeps a value that is already current', () => {
+      argv.push('--dry-run=extract');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: 'extract' });
+    });
+
+    it('requireConfig keeps a value that is already current', () => {
+      argv.push('--require-config=ignored');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'ignored' });
+    });
   });
 
   describe('.parseEarlyFlags(argv)', () => {

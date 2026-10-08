@@ -24,7 +24,7 @@ import { scm } from '../../../platform/scm.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageFile,
+  NpmrcPackageFile,
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
@@ -39,10 +39,8 @@ import { getZeroInstallPaths } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   composeLockFile,
-  getNpmrcContent,
   parseLockFile,
-  resetNpmrcContent,
-  updateNpmrcContent,
+  withNpmrcHostRules,
 } from '../utils.ts';
 import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
@@ -62,7 +60,7 @@ function getDirs(arr: (string | null | undefined)[]): string[] {
 }
 
 export function determineLockFileDirs(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
 ): DetermineLockFileDirsResult {
   const npmLockDirs: (string | undefined)[] = [];
@@ -98,7 +96,7 @@ export function determineLockFileDirs(
 
   function getPackageFile(
     fileName: string,
-  ): Partial<PackageFile<NpmManagerData>> {
+  ): Partial<NpmrcPackageFile<NpmManagerData>> {
     logger.trace(`Looking for packageFile: ${fileName}`);
 
     for (const packageFile of packageFiles.npm!) {
@@ -133,8 +131,9 @@ export function determineLockFileDirs(
 }
 
 export async function writeExistingFiles(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles = new Map<string, string>(),
 ): Promise<void> {
   if (!packageFiles.npm) {
     return;
@@ -161,6 +160,12 @@ export async function writeExistingFiles(
         !packageFile.managerData.npmrcFileName)
     ) {
       try {
+        if (!originalNpmrcFiles.has(npmrcFilename)) {
+          const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
+          if (isString(originalNpmrc)) {
+            originalNpmrcFiles.set(npmrcFilename, originalNpmrc);
+          }
+        }
         await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
@@ -213,7 +218,14 @@ export async function writeExistingFiles(
                 delete npmLockParsed.packages[packageName];
                 continue;
               }
-              if (!depName || !oldVersion) {
+              if (
+                !depName ||
+                !oldVersion ||
+                // Workspace entries (e.g. `packages/app`) and the root entry
+                // are link targets: `node_modules/<name>` points at them with
+                // `link: true`, so deleting one breaks npm with EMISSINGTARGET.
+                !packageName.startsWith('node_modules/')
+              ) {
                 continue;
               }
               // Lockstep monorepo siblings (e.g. vue -> @vue/server-renderer)
@@ -267,6 +279,18 @@ export async function writeExistingFiles(
   }
 }
 
+async function restoreNpmrcFiles(
+  originalNpmrcFiles: Map<string, string>,
+): Promise<void> {
+  for (const [npmrcFilename, originalNpmrc] of originalNpmrcFiles) {
+    try {
+      await writeLocalFile(npmrcFilename, originalNpmrc);
+    } catch (err) {
+      logger.warn({ npmrcFilename, err }, 'Error restoring .npmrc');
+    }
+  }
+}
+
 export async function writeUpdatedPackageFiles(
   config: PostUpdateConfig,
 ): Promise<void> {
@@ -299,13 +323,11 @@ export async function writeUpdatedPackageFiles(
       await writeLocalFile(packageFile.path, packageFile.contents!);
       continue;
     }
-    if (
-      !(
-        packageFile.path.endsWith('package.json') ||
-        packageFile.path.endsWith('pnpm-workspace.yaml') ||
-        packageFile.path.endsWith('.yarnrc.yml')
-      )
-    ) {
+    if (!(
+      packageFile.path.endsWith('package.json') ||
+      packageFile.path.endsWith('pnpm-workspace.yaml') ||
+      packageFile.path.endsWith('.yarnrc.yml')
+    )) {
       continue;
     }
     const contents =
@@ -421,9 +443,10 @@ export async function updateYarnBinary(
   return existingYarnrcYmlContent && yarnrcYml;
 }
 
-export async function getAdditionalFiles(
+async function getAdditionalFilesInner(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
+  originalNpmrcFiles: Map<string, string>,
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
@@ -470,7 +493,7 @@ export async function getAdditionalFiles(
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');
-  await writeExistingFiles(config, packageFiles);
+  await writeExistingFiles(config, packageFiles, originalNpmrcFiles);
   await writeUpdatedPackageFiles(config);
 
   const { additionalNpmrcContent, additionalYarnRcYml } = processHostRules();
@@ -500,166 +523,176 @@ export async function getAdditionalFiles(
   const tokenRe = regEx(`${token ?? ''}`, 'g', false);
   for (const npmLock of dirs.npmLockDirs) {
     const lockFileDir = upath.dirname(npmLock);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
-    await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
-    const fileName = upath.basename(npmLock);
-    logger.debug(`Generating ${fileName} for ${lockFileDir}`);
-    const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.npmLock === npmLock,
-    );
-    const res = await npm.generateLockFile(
+    await withNpmrcHostRules(
       lockFileDir,
-      env,
-      fileName,
-      config,
-      upgrades,
-      npmrcContent,
-    );
-    if (res.error) {
-      /* v8 ignore next -- needs test */
-      if (res.stderr?.includes('No matching version found for')) {
-        for (const upgrade of config.upgrades) {
-          if (
-            res.stderr.includes(
-              `No matching version found for ${upgrade.depName}`,
-            )
-          ) {
-            logger.debug(
-              { dependency: upgrade.depName, type: 'npm' },
-              'lock file failed for the dependency being updated - skipping branch creation',
-            );
-            const err = new Error(
-              'lock file failed for the dependency being updated - skipping branch creation',
-            );
-            throw new ExternalHostError(err, NpmDatasource.id);
+      additionalNpmrcContent,
+      async (npmrcContent) => {
+        const fileName = upath.basename(npmLock);
+        logger.debug(`Generating ${fileName} for ${lockFileDir}`);
+        const upgrades = config.upgrades.filter(
+          (upgrade) => upgrade.managerData?.npmLock === npmLock,
+        );
+        const res = await npm.generateLockFile(
+          lockFileDir,
+          env,
+          fileName,
+          config,
+          upgrades,
+          npmrcContent,
+        );
+        if (res.error) {
+          /* v8 ignore next -- needs test */
+          if (res.stderr?.includes('No matching version found for')) {
+            for (const upgrade of config.upgrades) {
+              if (
+                res.stderr.includes(
+                  `No matching version found for ${upgrade.depName}`,
+                )
+              ) {
+                logger.debug(
+                  { dependency: upgrade.depName, type: 'npm' },
+                  'lock file failed for the dependency being updated - skipping branch creation',
+                );
+                const err = new Error(
+                  'lock file failed for the dependency being updated - skipping branch creation',
+                );
+                throw new ExternalHostError(err, NpmDatasource.id);
+              }
+            }
+          }
+
+          artifactErrors.push({
+            fileName: npmLock,
+            stderr: res.stderr,
+          });
+        } else if (res.lockFile) {
+          if (res.beforeFallback) {
+            const message =
+              'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.';
+            logger.warn({ npmLock }, message);
+            artifactNotices.push({ file: npmLock, message });
+          }
+          const existingContent = await getFile(
+            npmLock,
+            config.reuseExistingBranch ? config.branchName : config.baseBranch,
+          );
+          if (res.lockFile === existingContent) {
+            logger.debug(`${npmLock} hasn't changed`);
+          } else {
+            logger.debug(`${npmLock} needs updating`);
+            updatedArtifacts.push({
+              type: 'addition',
+              path: npmLock,
+              // TODO: can this be undefined? (#22198)
+
+              contents: res.lockFile.replace(tokenRe, ''),
+            });
           }
         }
-      }
-
-      artifactErrors.push({
-        fileName: npmLock,
-        stderr: res.stderr,
-      });
-    } else if (res.lockFile) {
-      if (res.beforeFallback) {
-        const message =
-          'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.';
-        logger.warn({ npmLock }, message);
-        artifactNotices.push({ file: npmLock, message });
-      }
-      const existingContent = await getFile(
-        npmLock,
-        config.reuseExistingBranch ? config.branchName : config.baseBranch,
-      );
-      if (res.lockFile === existingContent) {
-        logger.debug(`${npmLock} hasn't changed`);
-      } else {
-        logger.debug(`${npmLock} needs updating`);
-        updatedArtifacts.push({
-          type: 'addition',
-          path: npmLock,
-          // TODO: can this be undefined? (#22198)
-
-          contents: res.lockFile.replace(tokenRe, ''),
-        });
-      }
-    }
-    await resetNpmrcContent(lockFileDir, npmrcContent);
+      },
+    );
   }
 
   for (const yarnLock of dirs.yarnLockDirs) {
     const lockFileDir = upath.dirname(yarnLock);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
-    await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     let yarnRcYmlFilename: string | undefined;
     let existingYarnrcYmlContent: string | undefined | null;
-    if (additionalYarnRcYml) {
-      yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
-      existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
-      // v8 ignore else -- TODO: add test #40625
-      if (existingYarnrcYmlContent) {
-        try {
-          // TODO: use schema (#9610)
-          const existingYarnrRcYml = parseSingleYaml<Record<string, unknown>>(
-            existingYarnrcYmlContent,
-          );
+    await withNpmrcHostRules(lockFileDir, additionalNpmrcContent, async () => {
+      if (additionalYarnRcYml) {
+        yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
+        existingYarnrcYmlContent = await readLocalFile(
+          yarnRcYmlFilename,
+          'utf8',
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (existingYarnrcYmlContent) {
+          try {
+            // TODO: use schema (#9610)
+            const existingYarnrRcYml = parseSingleYaml<Record<string, unknown>>(
+              existingYarnrcYmlContent,
+            );
 
-          const updatedYarnYrcYml = deepmerge(
-            existingYarnrRcYml,
-            yarn.fuzzyMatchAdditionalYarnrcYml(
-              additionalYarnRcYml,
+            const updatedYarnYrcYml = deepmerge(
               existingYarnrRcYml,
-            ),
-          );
-
-          await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
-          logger.debug('Added authentication to .yarnrc.yml');
-        } catch (err) {
-          logger.warn({ err }, 'Error appending .yarnrc.yml content');
-        }
-      }
-    }
-    logger.debug(`Generating yarn.lock for ${lockFileDir}`);
-    const lockFileName = upath.join(lockFileDir, 'yarn.lock');
-    const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.yarnLock === yarnLock,
-    );
-    const res = await yarn.generateLockFile(lockFileDir, env, config, upgrades);
-    if (res.error) {
-      /* v8 ignore next -- needs test */
-      if (res.stderr?.includes(`Couldn't find any versions for`)) {
-        for (const upgrade of config.upgrades) {
-          if (
-            res.stderr.includes(
-              `Couldn't find any versions for \\"${upgrade.depName}\\"`,
-            )
-          ) {
-            logger.debug(
-              { dependency: upgrade.depName, type: 'yarn' },
-              'lock file failed for the dependency being updated - skipping branch creation',
-            );
-            throw new ExternalHostError(
-              new Error(
-                'lock file failed for the dependency being updated - skipping branch creation',
+              yarn.fuzzyMatchAdditionalYarnrcYml(
+                additionalYarnRcYml,
+                existingYarnrRcYml,
               ),
-              NpmDatasource.id,
             );
+
+            await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
+            logger.debug('Added authentication to .yarnrc.yml');
+          } catch (err) {
+            logger.warn({ err }, 'Error appending .yarnrc.yml content');
           }
         }
       }
-
-      artifactErrors.push({
-        fileName: yarnLock,
-        stderr: artifactErrorMessageFromExecError(res, ''),
-      });
-    } else {
-      const existingContent = await getFile(
-        lockFileName,
-        config.reuseExistingBranch ? config.branchName : config.baseBranch,
+      logger.debug(`Generating yarn.lock for ${lockFileDir}`);
+      const lockFileName = upath.join(lockFileDir, 'yarn.lock');
+      const upgrades = config.upgrades.filter(
+        (upgrade) => upgrade.managerData?.yarnLock === yarnLock,
       );
-      if (res.lockFile === existingContent) {
-        logger.debug("yarn.lock hasn't changed");
-      } else {
-        logger.debug('yarn.lock needs updating');
-        updatedArtifacts.push({
-          type: 'addition',
-          path: lockFileName,
-          // TODO #22198
-          contents: res.lockFile!,
-        });
-        await updateYarnOffline(lockFileDir, updatedArtifacts);
-      }
+      const res = await yarn.generateLockFile(
+        lockFileDir,
+        env,
+        config,
+        upgrades,
+      );
+      if (res.error) {
+        /* v8 ignore next -- needs test */
+        if (res.stderr?.includes(`Couldn't find any versions for`)) {
+          for (const upgrade of config.upgrades) {
+            if (
+              res.stderr.includes(
+                `Couldn't find any versions for \\"${upgrade.depName}\\"`,
+              )
+            ) {
+              logger.debug(
+                { dependency: upgrade.depName, type: 'yarn' },
+                'lock file failed for the dependency being updated - skipping branch creation',
+              );
+              throw new ExternalHostError(
+                new Error(
+                  'lock file failed for the dependency being updated - skipping branch creation',
+                ),
+                NpmDatasource.id,
+              );
+            }
+          }
+        }
 
-      /* v8 ignore next -- needs test */
-      if (upgrades.some(yarn.isYarnUpdate)) {
-        existingYarnrcYmlContent = await updateYarnBinary(
-          lockFileDir,
-          updatedArtifacts,
-          existingYarnrcYmlContent,
+        artifactErrors.push({
+          fileName: yarnLock,
+          stderr: artifactErrorMessageFromExecError(res, ''),
+        });
+      } else {
+        const existingContent = await getFile(
+          lockFileName,
+          config.reuseExistingBranch ? config.branchName : config.baseBranch,
         );
+        if (res.lockFile === existingContent) {
+          logger.debug("yarn.lock hasn't changed");
+        } else {
+          logger.debug('yarn.lock needs updating');
+          updatedArtifacts.push({
+            type: 'addition',
+            path: lockFileName,
+            // TODO #22198
+            contents: res.lockFile!,
+          });
+          await updateYarnOffline(lockFileDir, updatedArtifacts);
+        }
+
+        /* v8 ignore next -- needs test */
+        if (upgrades.some(yarn.isYarnUpdate)) {
+          existingYarnrcYmlContent = await updateYarnBinary(
+            lockFileDir,
+            updatedArtifacts,
+            existingYarnrcYmlContent,
+          );
+        }
       }
-    }
-    await resetNpmrcContent(lockFileDir, npmrcContent);
+    });
     /* v8 ignore next -- needs test */
     if (existingYarnrcYmlContent) {
       // TODO #22198
@@ -669,59 +702,80 @@ export async function getAdditionalFiles(
 
   for (const pnpmLockFile of dirs.pnpmLockFileDirs) {
     const lockFileDir = upath.dirname(pnpmLockFile);
-    const npmrcContent = await getNpmrcContent(lockFileDir);
-    await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
-    logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
-    const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.pnpmLockFile === pnpmLockFile,
-    );
-    const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
-    if (res.error) {
-      /* v8 ignore next -- needs test */
-      if (res.stdout?.includes(`No compatible version found:`)) {
-        for (const upgrade of config.upgrades) {
-          if (
-            res.stdout.includes(
-              `No compatible version found: ${upgrade.depName}`,
-            )
-          ) {
-            logger.debug(
-              { dependency: upgrade.depName, type: 'pnpm' },
-              'lock file failed for the dependency being updated - skipping branch creation',
-            );
-            throw new ExternalHostError(
-              Error(
+    await withNpmrcHostRules(lockFileDir, additionalNpmrcContent, async () => {
+      logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
+      const upgrades = config.upgrades.filter(
+        (upgrade) => upgrade.managerData?.pnpmLockFile === pnpmLockFile,
+      );
+      const res = await pnpm.generateLockFile(
+        lockFileDir,
+        env,
+        config,
+        upgrades,
+      );
+      if (res.error) {
+        /* v8 ignore next -- needs test */
+        if (res.stdout?.includes(`No compatible version found:`)) {
+          for (const upgrade of config.upgrades) {
+            if (
+              res.stdout.includes(
+                `No compatible version found: ${upgrade.depName}`,
+              )
+            ) {
+              logger.debug(
+                { dependency: upgrade.depName, type: 'pnpm' },
                 'lock file failed for the dependency being updated - skipping branch creation',
-              ),
-              NpmDatasource.id,
-            );
+              );
+              throw new ExternalHostError(
+                Error(
+                  'lock file failed for the dependency being updated - skipping branch creation',
+                ),
+                NpmDatasource.id,
+              );
+            }
           }
         }
-      }
 
-      artifactErrors.push({
-        fileName: pnpmLockFile,
-        stderr: artifactErrorMessageFromExecError(res, ''),
-      });
-    } else {
-      const existingContent = await getFile(
-        pnpmLockFile,
-        config.reuseExistingBranch ? config.branchName : config.baseBranch,
-      );
-      if (res.lockFile === existingContent) {
-        logger.debug("pnpm-lock.yaml hasn't changed");
-      } else {
-        logger.debug('pnpm-lock.yaml needs updating');
-        updatedArtifacts.push({
-          type: 'addition',
-          path: pnpmLockFile,
-          // TODO: can be undefined? (#22198)
-          contents: res.lockFile!,
+        artifactErrors.push({
+          fileName: pnpmLockFile,
+          stderr: artifactErrorMessageFromExecError(res, ''),
         });
+      } else {
+        const existingContent = await getFile(
+          pnpmLockFile,
+          config.reuseExistingBranch ? config.branchName : config.baseBranch,
+        );
+        if (res.lockFile === existingContent) {
+          logger.debug("pnpm-lock.yaml hasn't changed");
+        } else {
+          logger.debug('pnpm-lock.yaml needs updating');
+          updatedArtifacts.push({
+            type: 'addition',
+            path: pnpmLockFile,
+            // TODO: can be undefined? (#22198)
+            contents: res.lockFile!,
+          });
+        }
       }
-    }
-    await resetNpmrcContent(lockFileDir, npmrcContent);
+    });
   }
 
   return { artifactErrors, artifactNotices, updatedArtifacts };
+}
+
+export async function getAdditionalFiles(
+  config: PostUpdateConfig,
+  packageFiles: AdditionalPackageFiles,
+): Promise<WriteExistingFilesResult> {
+  const originalNpmrcFiles = new Map<string, string>();
+  try {
+    return await getAdditionalFilesInner(
+      // The branch config carries the manager data of every upgrade untyped; the npm post-update only reads the optional npm fields of it.
+      config as PostUpdateConfig<NpmManagerData>,
+      packageFiles,
+      originalNpmrcFiles,
+    );
+  } finally {
+    await restoreNpmrcFiles(originalNpmrcFiles);
+  }
 }

@@ -1,6 +1,7 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -69,7 +70,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
@@ -82,8 +85,8 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
-    super(id);
+  constructor(id = MavenDatasource.id, http?: Http) {
+    super(id, http);
   }
 
   async fetchVersionsFromMetadata(
@@ -162,7 +165,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
       result.isPrivate = true;
     }
 

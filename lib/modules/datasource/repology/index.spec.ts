@@ -61,10 +61,6 @@ const fixtureJdk = Fixtures.get(`openjdk.json`);
 const fixturePython = Fixtures.get(`python.json`);
 
 describe('modules/datasource/repology/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
@@ -76,13 +72,13 @@ describe('modules/datasource/repology/index', () => {
         body: '[]',
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing repository or package', async () => {
@@ -93,13 +89,13 @@ describe('modules/datasource/repology/index', () => {
         status: 404,
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'this_should/never-exist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws error on unexpected API response', async () => {
@@ -210,13 +206,13 @@ describe('modules/datasource/repology/index', () => {
         body: '[]',
       });
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'ubuntu_20_04/git',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws without repository and package name', async () => {
@@ -231,13 +227,13 @@ describe('modules/datasource/repology/index', () => {
 
     it('throws on disabled host', async () => {
       hostRules.add({ matchHost: repologyHost, enabled: false });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           versioning,
           packageName: 'debian_stable/nginx',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns correct version for binary package', async () => {
@@ -304,6 +300,20 @@ describe('modules/datasource/repology/index', () => {
           },
         ],
       });
+    });
+
+    it('returns null when the api fallback finds no matching package', async () => {
+      mockResolverCall('debian_stable', 'unknown-package', 'binname', {
+        status: 403,
+      });
+      mockApiCall('unknown-package', { status: 200, body: '[]' });
+
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        packageName: 'debian_stable/unknown-package',
+      });
+      expect(res).toBeNull();
     });
 
     it('returns correct version for multi-package project with same name', async () => {

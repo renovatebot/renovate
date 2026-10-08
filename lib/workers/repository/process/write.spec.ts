@@ -222,7 +222,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'no-work',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
@@ -264,7 +264,7 @@ describe('workers/repository/process/write', () => {
         commitFingerprintConfig: generateCommitFingerprintConfig(branch),
         managers,
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -309,7 +309,7 @@ describe('workers/repository/process/write', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       config.repositoryCache = 'enabled';
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -351,7 +351,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'done',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -392,6 +392,60 @@ describe('workers/repository/process/write', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('generateCommitFingerprintConfig()', () => {
+    it('does not include postUpgradeTasks when not set', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toBeUndefined();
+    });
+
+    it('includes postUpgradeTasks commands and fileFilters', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              fileFilters: ['**/*.txt'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toEqual({
+        commands: ['echo hello'],
+        fileFilters: ['**/*.txt'],
+      });
+    });
+
+    it('changes fingerprint when postUpgradeTasks commands change', () => {
+      const branchWithoutTasks = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const branchWithTasks = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const fingerprintWithoutTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithoutTasks),
+      );
+      const fingerprintWithTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithTasks),
+      );
+      expect(fingerprintWithoutTasks).not.toBe(fingerprintWithTasks);
     });
   });
 

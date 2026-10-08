@@ -12,8 +12,6 @@ describe('util/http/bitbucket', () => {
   beforeEach(() => {
     api = new BitbucketHttp();
 
-    // clean up hostRules
-    hostRules.clear();
     hostRules.add({
       hostType: 'bitbucket',
       matchHost: baseUrl,
@@ -35,7 +33,7 @@ describe('util/http/bitbucket', () => {
     httpMock.scope(baseUrl).post('/some-url').reply(200, {});
     httpMock.scope(customBaseUrl).post('/some-url').reply(200, {});
 
-    expect(await api.postJson('some-url')).toEqual({
+    await expect(api.postJson('some-url')).resolves.toEqual({
       authorization: true,
       body: {},
       headers: {
@@ -45,7 +43,7 @@ describe('util/http/bitbucket', () => {
     });
 
     setBaseUrl(customBaseUrl);
-    expect(await api.postJson('some-url')).toEqual({
+    await expect(api.postJson('some-url')).resolves.toEqual({
       authorization: false,
       body: {},
       headers: {

@@ -20,7 +20,7 @@ import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { formatCell, replaceContent } from './utils.ts';
+import { formatCell, indexMarkdown, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -252,25 +252,6 @@ function genDeprecationMsg(el: Record<string, any>): string {
   return `${warning}\n`;
 }
 
-function indexMarkdown(lines: string[]): Record<string, [number, number]> {
-  const indexed: Record<string, [number, number]> = {};
-
-  let optionName = '';
-  let start = 0;
-  for (const [i, line] of lines.entries()) {
-    if (line.startsWith('## ') || line.startsWith('### ')) {
-      if (optionName) {
-        indexed[optionName] = [start, i - 1];
-      }
-      start = i;
-      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
-    }
-  }
-  indexed[optionName] = [start, lines.length - 1];
-
-  return indexed;
-}
-
 function generateLockFileTable(): string {
   const allManagers = getManagers();
   const rows: { name: string; lockFiles: string[] }[] = [];
@@ -305,6 +286,24 @@ function generateCacheNamespacesList(): string {
   let list = '\n';
   for (const ns of namespaces) {
     list += `- \`${ns}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
+function generateInheritConfigSupportList(): string {
+  const inheritable = options
+    .filter((option) => option.inheritConfigSupport)
+    .map((option) => {
+      const parent = option.parents?.find((p) => p !== '.');
+      return parent ? `${parent}.${option.name}` : option.name;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  let list = '\n';
+  for (const fullName of inheritable) {
+    list += `- \`${fullName}\`\n`;
   }
   list += '\n';
 
@@ -474,6 +473,14 @@ export async function generateConfig(
       content,
       generateCacheNamespacesList(),
       '<!-- Autogenerate cache-namespaces -->',
+    );
+  }
+
+  if (globalOnly) {
+    content = replaceContent(
+      content,
+      generateInheritConfigSupportList(),
+      '<!-- Autogenerate inheritConfigSupport-list -->',
     );
   }
 

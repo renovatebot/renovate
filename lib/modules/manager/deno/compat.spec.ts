@@ -34,6 +34,25 @@ describe('modules/manager/deno/compat', () => {
       const result = await extractDenoCompatiblePackageJson('package.json');
       expect(result).toBeNull();
     });
+
+    it('ignores workspaces given as an object', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'root',
+          workspaces: { packages: ['packages/*'] },
+          dependencies: {
+            dep1: '1.0.0',
+          },
+        }),
+      );
+
+      const result = await extractDenoCompatiblePackageJson('package.json');
+
+      expect(result?.managerData).toEqual({
+        packageName: 'root',
+        workspaces: undefined,
+      });
+    });
   });
 
   describe('collectPackageJson()', () => {
@@ -53,7 +72,48 @@ describe('modules/manager/deno/compat', () => {
           },
         }),
       );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
+        {
+          deps: [
+            {
+              currentValue: '1.0.0',
+              datasource: 'npm',
+              depName: 'dep1',
+              depType: 'dependencies',
+              prettyDepType: 'dependency',
+            },
+          ],
+          extractedConstraints: {},
+          lockFiles: ['deno.lock'],
+          managerData: {
+            workspaces: undefined,
+          },
+          packageFile: 'package.json',
+        },
+      ]);
+    });
+
+    it('skips nested package.json when no workspaces are declared', async () => {
+      vi.mocked(findPackages).mockResolvedValue([
+        { dir: 'sub', manifest: {}, writeProjectManifest: Promise.resolve },
+      ]);
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            dependencies: {
+              dep1: '1.0.0',
+            },
+          }),
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            dependencies: {
+              dep2: '2.0.0',
+            },
+          }),
+        );
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {
@@ -99,7 +159,7 @@ describe('modules/manager/deno/compat', () => {
             },
           }),
         );
-      expect(await collectPackageJson('deno.lock')).toEqual([
+      await expect(collectPackageJson('deno.lock')).resolves.toEqual([
         {
           deps: [
             {
@@ -157,6 +217,7 @@ describe('modules/manager/deno/compat', () => {
       fs.readLocalFile
         .mockResolvedValueOnce(
           JSON.stringify({
+            workspaces: ['workspace'],
             dependencies: {
               dep1: '1.0.0',
             },
@@ -178,7 +239,7 @@ describe('modules/manager/deno/compat', () => {
           extractedConstraints: {},
           lockFiles: ['deno.lock'],
           managerData: {
-            workspaces: undefined,
+            workspaces: ['workspace'],
           },
           packageFile: 'package.json',
         },

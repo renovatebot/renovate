@@ -23,22 +23,22 @@ describe('modules/datasource/flutter-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(baseUrl).get(urlPath).replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(baseUrl).get(urlPath).reply(200, { releases: [] });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName,
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

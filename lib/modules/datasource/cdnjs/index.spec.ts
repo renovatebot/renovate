@@ -39,12 +39,12 @@ describe('modules/datasource/cdnjs/index', () => {
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'foo/bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
@@ -52,12 +52,12 @@ describe('modules/datasource/cdnjs/index', () => {
         .scope(baseUrl)
         .get(pathFor('doesnotexist/doesnotexist'))
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: CdnjsDatasource.id,
           packageName: 'doesnotexist/doesnotexist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 401', async () => {
@@ -98,6 +98,21 @@ describe('modules/datasource/cdnjs/index', () => {
           packageName: 'foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('processes data without homepage and repository', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('d3-force/d3-force.js'))
+        .reply(200, { versions: ['1.0.0', '2.0.0'] });
+      const res = await getPkgReleases({
+        datasource: CdnjsDatasource.id,
+        packageName: 'd3-force/d3-force.js',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://api.cdnjs.com/',
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
     });
 
     it('processes real data', async () => {

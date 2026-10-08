@@ -109,12 +109,12 @@ describe('modules/datasource/hex/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/packages/non_existent_package').reply(200);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_package',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for missing fields', async () => {
@@ -122,26 +122,26 @@ describe('modules/datasource/hex/index', () => {
         .scope(baseUrl)
         .get('/packages/non_existent_package')
         .reply(200, {});
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'non_existent_package',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(404);
-      expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'some_package' }),
+      ).resolves.toBeNull();
     });
 
     it('returns null for 401', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(401);
-      expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'some_package' }),
+      ).resolves.toBeNull();
     });
 
     it('throws for 429', async () => {
@@ -160,9 +160,9 @@ describe('modules/datasource/hex/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').replyWithError('');
-      expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' }),
-      ).toBeNull();
+      await expect(
+        getPkgReleases({ datasource, packageName: 'some_package' }),
+      ).resolves.toBeNull();
     });
 
     it('returns null with wrong auth token', async () => {
@@ -275,6 +275,24 @@ describe('modules/datasource/hex/index', () => {
         packageName: 'certifi',
       });
       expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
+    });
+
+    it('handles a package with no html_url and no github link', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/no_links')
+        .reply(200, {
+          releases: [
+            { version: '1.0.0', inserted_at: '2021-08-04T15:26:26.500Z' },
+          ],
+        });
+      const res = await getPkgReleases({ datasource, packageName: 'no_links' });
+      expect(res).toEqual({
+        registryUrl: 'https://hex.pm',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2021-08-04T15:26:26.500Z' },
+        ],
+      });
     });
 
     it('processes a private repo with auth', async () => {
@@ -527,13 +545,13 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/some_package')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_package',
           registryUrls: [customRegistryUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for network error', async () => {
@@ -542,13 +560,13 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/some_package')
         .replyWithError('connection refused');
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'some_package',
           registryUrls: [customRegistryUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for malformed gzip', async () => {
@@ -557,13 +575,13 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/bad_package')
         .reply(200, Buffer.from('not-gzip-data'));
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'bad_package',
           registryUrls: [customRegistryUrl],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('verifies signature when public key is available', async () => {

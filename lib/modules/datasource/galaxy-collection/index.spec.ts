@@ -28,12 +28,12 @@ describe('modules/datasource/galaxy-collection/index', () => {
   describe('getReleases', () => {
     it('returns null for 404 result', async () => {
       httpMock.scope(baseUrl).get(`/${collectionAPIPath}/foo/bar/`).reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'foo.bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for remote host error', async () => {
@@ -51,12 +51,12 @@ describe('modules/datasource/galaxy-collection/index', () => {
         .scope(baseUrl)
         .get(`/${collectionAPIPath}/community/kubernetes/`)
         .reply(200, '');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'community.kubernetes',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unexpected data at versions', async () => {
@@ -66,12 +66,12 @@ describe('modules/datasource/galaxy-collection/index', () => {
         .reply(200, communityKubernetesBase)
         .get(`/${collectionAPIPath}/community/kubernetes/versions/`)
         .reply(200, '');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'community.kubernetes',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws error for remote host versions error', async () => {
@@ -111,21 +111,21 @@ describe('modules/datasource/galaxy-collection/index', () => {
     });
 
     it('returns null for empty lookup', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: '',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for null packageName', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: '',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error', async () => {
@@ -133,12 +133,12 @@ describe('modules/datasource/galaxy-collection/index', () => {
         .scope(baseUrl)
         .get(`/${collectionAPIPath}/foo/bar/`)
         .replyWithError('some unknown error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'foo.bar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {

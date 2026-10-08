@@ -89,10 +89,6 @@ const addonInfo: AddonInfo = {
 };
 
 describe('modules/datasource/aws-eks-addon/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getPkgReleases()', () => {
     it.each`
       des               | req
@@ -187,7 +183,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
       });
 
       const eks = eksMock.call(0).thisValue as EKSClient;
-      expect(await eks.config.credentials()).toEqual({
+      await expect(eks.config.credentials()).resolves.toEqual({
         accessKeyId: 'access-key-id',
         secretAccessKey: 'secret-access-key',
         sessionToken: 'session-token',

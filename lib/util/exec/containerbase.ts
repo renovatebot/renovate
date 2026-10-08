@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { coerceArray } from '../array.ts';
+import * as memCache from '../cache/memory/index.ts';
 import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
@@ -126,12 +127,6 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'java-version',
     packageName: 'java?system=true',
     versioning: 'npm',
-  },
-  /* not used in Renovate */
-  'java-maven': {
-    datasource: 'java-version',
-    packageName: 'java?system=true',
-    versioning: 'maven',
   },
   jb: {
     datasource: 'github-releases',
@@ -391,14 +386,27 @@ export async function resolveConstraint(
   return highestVersion;
 }
 
+// Docker execs run in a fresh `--rm` container each time, so `memoize` must
+// stay false there - only the persistent-host (binarySource=install) path
+// can safely skip a tool whose requested version is already active.
+// `install-tool` also activates the version it installs, so the memo tracks
+// the active version per tool, not every installed version.
 export async function generateInstallCommands(
   toolConstraints: Opt<ToolConstraint[]>,
+  memoize = false,
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
+      if (memoize) {
+        const cacheKey = `containerbase-active:${toolName}`;
+        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+          continue;
+        }
+        memCache.set(cacheKey, toolVersion);
+      }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
     }

@@ -327,47 +327,32 @@ describe.concurrent('config-validator', () => {
   });
 
   describe('hostRules', () => {
-    it("filters the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
+    it("does not drop the self-hosted admin's own hostRules headers against allowedHeaders when registering them", async () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - `hostRules.add()` no longer filters (and warns about) the admin's own headers
+      //
+      // this does not (yet) extend to the separate, pre-existing top-level config security validation in `lib/config/validation.ts`, which still reports a global config's own `hostRules[].headers` outside its own `allowedHeaders` as a `Config security error` - the same limitation `allowedEnv`/`env` already have there, so `exitCode` is still 1 here
       await withTmpDir(async (dirPath) => {
         const configFile = await writeGlobalConfig(dirPath, 'config.json', {
           allowedHeaders: ['X-*'],
           hostRules: [
             {
               matchHost: 'registry.example.com',
-              headers: { 'X-Allowed': 'yes', Authorization: 'denied' },
+              headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
             },
           ],
         });
 
-        const { all } = await runValidator([], {
+        const { exitCode, all } = await runValidator([], {
           cwd: dirPath,
           env: { RENOVATE_CONFIG_FILE: configFile },
         });
 
-        expect(all).toContain(
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-        );
-        expect(all).toContain('Authorization');
-      });
-    });
-
-    it("honors a CLI-arg global config file's own allowedHeaders", async () => {
-      // a global config file brings its own `allowedHeaders`, and its hostRules should be filtered against those - not the surrounding environment's - as a real run would after parsing it
-      await withTmpDir(async (dirPath) => {
-        const configFile = await writeGlobalConfig(dirPath, 'config.json', {
-          allowedHeaders: ['Authorization'],
-          hostRules: [
-            {
-              matchHost: 'registry.example.com',
-              headers: { Authorization: 'Bearer token' },
-            },
-          ],
-        });
-
-        const { all } = await runValidator([configFile], { cwd: dirPath });
-
         expect(all).not.toContain(
           "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+        expect(exitCode).toBe(1);
+        expect(all).toContain(
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
         );
       });
     });

@@ -75,7 +75,7 @@ async function updateAllLocks(
 }
 
 export function getNewConstraint(
-  dep: Upgrade<Record<string, unknown>>,
+  dep: Upgrade,
   oldConstraint: string | undefined,
 ): string | undefined {
   const {
@@ -192,6 +192,7 @@ export async function updateArtifacts({
             updateLock.constraints,
           );
 
+          // v8 ignore else -- needs a lockfile update that also produces a change
           if (!satisfyingVersion) {
             logger.debug(
               `Skipping. Lockfile update with "${newVersion}" does not statisfy constraints "${updateLock.constraints}" for "${packageName}"`,

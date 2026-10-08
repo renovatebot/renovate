@@ -13,6 +13,36 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(extractPackageFile('', '', {})).toBeNull();
     });
 
+    it('ignores an x- extension that carries no image', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+            x-no-image:
+              command: echo hello
+          `,
+          'docker-compose.yml',
+          {},
+        )?.deps,
+      ).toBeEmpty();
+    });
+
+    it('ignores an x- extension of a modern file that carries no image', () => {
+      expect(
+        extractPackageFile(
+          codeBlock`
+            services:
+              web:
+                image: node:10.0.0
+            x-no-image:
+              command: echo hello
+            x-not-an-object: hello
+          `,
+          'docker-compose.yml',
+          {},
+        )?.deps,
+      ).toMatchObject([{ depName: 'node', currentValue: '10.0.0' }]);
+    });
+
     it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here', '', {})).toBeNull();
     });
@@ -21,21 +51,41 @@ describe('modules/manager/docker-compose/extract', () => {
       expect(extractPackageFile('nothing here\n:::::::', '', {})).toBeNull();
     });
 
+    const expectedDeps = [
+      { depName: 'quay.io/something/redis', currentValue: 'alpine' },
+      { depName: 'node', currentValue: '10.0.0' },
+      { depName: 'postgres', currentValue: '9.4.0' },
+      {
+        depName: 'dockersamples/examplevotingapp_vote',
+        currentValue: 'before',
+      },
+      {
+        depName: 'dockersamples/examplevotingapp_result',
+        currentValue: 'before',
+      },
+      { depName: 'dockersamples/examplevotingapp_worker' },
+      { depName: 'dockersamples/visualizer', currentValue: 'stable' },
+      {
+        replaceString: '${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}',
+        skipReason: 'contains-variable',
+      },
+    ];
+
     it('extracts multiple image lines for version 1', () => {
       const res = extractPackageFile(yamlFile1, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3', () => {
       const res = extractPackageFile(yamlFile3, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3 without set version key', () => {
       const res = extractPackageFile(yamlFile3NoVersion, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject(expectedDeps);
       expect(res?.deps).toHaveLength(8);
     });
 

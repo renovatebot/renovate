@@ -136,7 +136,7 @@ export function exec(
     }
 
     const { redactOutput, ...execaOptions } = opts;
-    const cp = execa(cmd, args, {
+    const subprocess = execa(cmd, args, {
       ...execaOptions,
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
@@ -149,6 +149,7 @@ export function exec(
       // TODO: Refactor to await execa result (#45650)
       reject: false,
     });
+    const cp = subprocess.nodeChildProcess;
 
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {

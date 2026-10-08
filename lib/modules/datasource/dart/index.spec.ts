@@ -12,12 +12,12 @@ describe('modules/datasource/dart/index', () => {
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_sense').reply(200, '}');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'non_sense',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty fields', async () => {
@@ -29,12 +29,12 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutVersions);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
 
       const withoutLatest = {
         ...body,
@@ -44,22 +44,22 @@ describe('modules/datasource/dart/index', () => {
         .scope(baseUrl)
         .get('/shared_preferences')
         .reply(200, withoutLatest);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx', async () => {
@@ -74,12 +74,12 @@ describe('modules/datasource/dart/index', () => {
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/shared_preferences').replyWithError('');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DartDatasource.id,
           packageName: 'shared_preferences',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('processes real data', async () => {
@@ -143,6 +143,28 @@ describe('modules/datasource/dart/index', () => {
             version: '0.5.8',
             releaseTimestamp: '2020-07-08T04:36:43.412Z',
           },
+        ],
+      });
+    });
+
+    it('handles a latest release without a pubspec', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/no_pubspec')
+        .reply(200, {
+          versions: [
+            { version: '1.0.0', published: '2023-01-01T00:00:00.000Z' },
+          ],
+          latest: {},
+        });
+      const res = await getPkgReleases({
+        datasource: DartDatasource.id,
+        packageName: 'no_pubspec',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://pub.dartlang.org',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2023-01-01T00:00:00.000Z' },
         ],
       });
     });
