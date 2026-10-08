@@ -11,6 +11,7 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { isScheduledNow } from '../branch/schedule.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
+import { getPlatformPrOptions } from './index.ts';
 
 export type PrAutomergeBlockReason =
   | 'BranchModified'
@@ -147,6 +148,7 @@ export async function checkAutoMerge(
     branchName,
     id: pr.number,
     strategy: automergeStrategy,
+    platformOptions: getPlatformPrOptions(config),
   });
   if (res) {
     if (mergeQueueEnabled) {
