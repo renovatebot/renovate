@@ -313,6 +313,20 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
 
+    it('appends hostRules from env to the ones in RENOVATE_CONFIG', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG:
+          '{"hostRules":[{"hostType":"merge-confidence","token":"mc-token"}]}',
+        RENOVATE_HOST_RULES:
+          '[{"matchHost":"artifactory.example.com","token":"af-token"}]',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.hostRules).toEqual([
+        { hostType: 'merge-confidence', token: 'mc-token' },
+        { matchHost: 'artifactory.example.com', token: 'af-token' },
+      ]);
+    });
+
     it('massages converted experimental env vars', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted

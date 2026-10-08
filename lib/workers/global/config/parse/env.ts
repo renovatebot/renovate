@@ -163,8 +163,13 @@ export async function getConfig(
       try {
         const parsed = JSON5.parse(envVal);
         if (isArray(parsed)) {
+          // mergeable lists extend the ones from RENOVATE_CONFIG instead of replacing them
+          const existing: unknown = config[option.name as keyof AllConfig];
           // @ts-expect-error -- type can't be narrowed
-          config[option.name] = parsed;
+          config[option.name] =
+            option.mergeable && isArray(existing)
+              ? [...existing, ...parsed]
+              : parsed;
         } else {
           logger.debug(
             { val: envVal, envName },
