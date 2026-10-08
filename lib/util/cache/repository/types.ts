@@ -4,6 +4,7 @@ import type {
   UpdateType,
 } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { MergeRequestRecord } from '../../../modules/platform/github/types.ts';
 import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
 import type { PrBlockedBy } from '../../../workers/types.ts';
 
@@ -163,7 +164,7 @@ export interface RepoCacheData {
       pullRequestsCache?: unknown;
       graphqlPageCache?: unknown;
       issuesCache?: Record<number, unknown>;
-      pendingMerges?: Record<number, { uuid: string; requestedAt: string }>;
+      mergeRequests?: Record<number, MergeRequestRecord>;
     };
     bitbucket?: {
       pullRequestsCache?: unknown;

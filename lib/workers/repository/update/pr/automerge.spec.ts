@@ -97,7 +97,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = true;
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce(true);
+      platform.mergePr.mockResolvedValueOnce('enqueued');
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
       platform.isPrInMergeQueue.mockResolvedValueOnce(false);
 
@@ -109,6 +109,31 @@ describe('workers/repository/update/pr/automerge', () => {
       });
       expect(platform.mergePr).toHaveBeenCalledOnce();
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
+    it('should report automerged if the PR was merged directly on a merge queue branch', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      platform.isPrInMergeQueue.mockResolvedValueOnce(false);
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({ automerged: true, branchRemoved: true });
+    });
+
+    it('should report automerged if deleting the branch fails', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      scm.deleteBranch.mockRejectedValueOnce(new Error('fail'));
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
     });
 
     it('should not report automerged while the platform merges in the background', async () => {

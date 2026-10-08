@@ -178,17 +178,17 @@ export interface FindPRConfig {
 }
 export interface RequestedMergeResult {
   number: number;
-  branchName?: string;
   status: 'merged' | 'enqueued' | 'pending' | 'failed';
   message?: string;
 }
 
 /**
- * `'pending'` means the platform accepted the merge request and completes it in
- * the background, so the caller must not treat the PR as merged nor delete its
- * branch.
+ * `true` means merged and `false` not merged. `'pending'` means the platform
+ * accepted a direct merge and completes it in the background, `'enqueued'`
+ * means the PR was added to the merge queue. In both cases the caller must not
+ * treat the PR as merged nor delete its branch.
  */
-export type MergePrResult = boolean | 'pending';
+export type MergePrResult = boolean | 'pending' | 'enqueued';
 
 export interface MergePRConfig {
   branchName?: string;

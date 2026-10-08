@@ -158,36 +158,50 @@ export async function checkAutoMerge(
     );
     return { automerged: false, prAutomergeBlockReason: 'MergePending' };
   }
+  if (res === 'enqueued') {
+    logger.info(
+      { pr: pr.number, prTitle: pr.title },
+      'PR added to the merge queue',
+    );
+    // The PR is not merged yet and the base branch is unchanged, so this is
+    // not reported as automerged. Deleting the branch would close the PR and
+    // drop the merge queue entry.
+    return {
+      automerged: false,
+      prAutomergeBlockReason: 'InMergeQueue',
+    };
+  }
   if (res) {
-    if (mergeQueueEnabled) {
-      logger.info(
-        { pr: pr.number, prTitle: pr.title },
-        'PR added to the merge queue',
-      );
-      // The PR is not merged yet and the base branch is unchanged, so this is
-      // not reported as automerged. Deleting the branch would close the PR
-      // and drop the merge queue entry.
-      return {
-        automerged: false,
-        prAutomergeBlockReason: 'InMergeQueue',
-      };
-    }
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
-    if (!pruneBranchAfterAutomerge) {
-      logger.info('Skipping pruning of merged branch');
-      return { automerged: true, branchRemoved: false };
-    }
-    let branchRemoved = false;
-    try {
-      await scm.deleteBranch(branchName);
-      branchRemoved = true;
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ branchName, err }, 'Branch auto-remove failed');
-    }
+    const branchRemoved = await pruneAutomergedBranch(
+      branchName,
+      pruneBranchAfterAutomerge,
+    );
     return { automerged: true, branchRemoved };
   }
   return {
     automerged: false,
     prAutomergeBlockReason: 'PlatformRejection',
   };
+}
+
+/**
+ * Deletes the branch of an automerged PR if `pruneBranchAfterAutomerge` is
+ * set. Returns whether the branch was deleted.
+ */
+export async function pruneAutomergedBranch(
+  branchName: string,
+  pruneBranchAfterAutomerge: boolean | undefined,
+): Promise<boolean> {
+  if (!pruneBranchAfterAutomerge) {
+    logger.info('Skipping pruning of merged branch');
+    return false;
+  }
+  try {
+    await scm.deleteBranch(branchName);
+    return true;
+  } catch (err) {
+    logger.warn({ branchName, err }, 'Branch auto-remove failed');
+    return false;
+  }
 }

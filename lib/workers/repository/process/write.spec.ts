@@ -108,6 +108,36 @@ describe('workers/repository/process/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
 
+    it('stops after a merge the platform has not finished yet', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          branchName: 'test_branch',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+        {
+          branchName: 'test_branch2',
+          baseBranch: 'base',
+          manager: 'npm',
+          upgrades: [],
+        },
+      ]);
+      scm.branchExists.mockResolvedValue(true);
+      branchWorker.processBranch.mockResolvedValueOnce({
+        branchExists: true,
+        prNo: 5,
+        result: 'done',
+        mergePending: true,
+      });
+
+      const res = await writeUpdates(config, branches);
+
+      expect(res).toBe('automerged');
+      expect(branches[0].prNo).toBe(5);
+      expect(branchWorker.processBranch).toHaveBeenCalledOnce();
+    });
+
     it('counts vulnerability alert branches separately', async () => {
       const branches = partial<BranchConfig[]>([
         {

@@ -31,6 +31,13 @@ import { reconcileRequestedMerges } from './merge-results.ts';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
+/**
+ * Whether a merge the platform has not finished yet stops processing further
+ * branches and restarts the repository job like a completed automerge, so the
+ * remaining branches are checked against the updated base branch.
+ */
+const restartAfterPendingMerge = true;
+
 export function generateCommitFingerprintConfig(
   branch: BranchConfig,
 ): UpgradeFingerprintConfig[] {
@@ -222,6 +229,10 @@ export async function writeUpdates(
           // Stop processing other branches because base branch has been changed
           return 'automerged';
         }
+        if (res?.mergePending && restartAfterPendingMerge) {
+          // The base branch changes once the platform completes the merge
+          return 'automerged';
+        }
         if (!branchExisted && (await scm.branchExists(branch.branchName))) {
           incCountValue(
             branch.isVulnerabilityAlert ? 'VulnerabilityBranches' : 'Branches',
@@ -238,6 +249,7 @@ export async function writeUpdates(
     );
 
     if (res !== undefined) {
+      await reconcileRequestedMerges(branches);
       return res;
     }
   }

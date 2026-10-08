@@ -137,8 +137,10 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
-  mergeQueueEnabled: Record<string, boolean>;
-  requestedMerges: RequestedMerge[];
+  mergeMethods: ('rebase' | 'squash' | 'merge')[];
+  /** `null` if the merge queue state could not be fetched */
+  mergeQueueEnabled: Record<string, boolean | null>;
+  prMergeStatus: Record<number, PrMergeStatus>;
 }
 
 export interface GhRepo {
@@ -197,15 +199,14 @@ export interface PrMergeStatus {
   mergeStateStatus: string;
 }
 
-export interface PendingMerge {
-  uuid: string;
+/** An async merge request Renovate sent for a PR */
+export interface MergeRequestRecord {
+  /** Missing if GitHub refused the request without a result to look up */
+  uuid?: string;
+  /** ISO timestamp */
   requestedAt: string;
-}
-
-export interface RequestedMerge {
-  number: number;
-  branchName?: string;
-  uuid: string;
-  /** epoch milliseconds */
-  requestedAt: number;
+  mergeAction: string;
+  mergeMethod?: string;
+  /** The reason GitHub gave for refusing the merge */
+  failure?: string;
 }
