@@ -146,7 +146,6 @@ describe('modules/datasource/crate/index', () => {
     afterEach(async () => {
       await tmpDir?.cleanup();
       tmpDir = null;
-      GlobalConfig.reset();
     });
 
     it('returns null for missing registry url', async () => {

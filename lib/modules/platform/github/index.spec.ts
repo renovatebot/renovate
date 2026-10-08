@@ -57,7 +57,6 @@ const branchCommitSha = fakeSha('0d9c7726c3d628b7e28af234595cfd20febdbf8e');
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);
@@ -2362,10 +2361,6 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getBranchPr(branchName)', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('should return null if no PR exists', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

@@ -9,10 +9,6 @@ import { extractPackageFile } from './index.ts';
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/github-actions/extract', () => {
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
       await expect(

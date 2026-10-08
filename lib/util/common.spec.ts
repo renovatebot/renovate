@@ -203,7 +203,6 @@ describe('util/common', () => {
 
   describe('getInheritedOrGlobal', () => {
     beforeEach(() => {
-      GlobalConfig.reset();
       InheritConfig.reset();
     });
 

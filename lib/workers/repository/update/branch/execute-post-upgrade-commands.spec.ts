@@ -28,7 +28,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     let tmpDir: DirectoryResult;
 
     beforeEach(async () => {
-      GlobalConfig.reset();
       gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
         ...env,
       }));

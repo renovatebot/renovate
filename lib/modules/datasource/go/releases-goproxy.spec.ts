@@ -1692,7 +1692,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       afterEach(() => {
         setCache.mockRestore();
-        GlobalConfig.reset();
       });
 
       function mockProxy(url: string): void {
@@ -1752,7 +1751,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       afterEach(async () => {
-        GlobalConfig.reset();
         await packageCache.cleanup({});
         await dirResult.cleanup();
         memCache.reset();

@@ -53,7 +53,6 @@ describe('config/presets/index', () => {
 
     beforeEach(() => {
       config = {};
-      GlobalConfig.reset();
       memCache.init();
       packageCache.get.mockImplementation(
         <T>(namespace: string, key: string): Promise<T> =>

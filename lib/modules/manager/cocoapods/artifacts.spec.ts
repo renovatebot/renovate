@@ -51,10 +51,6 @@ describe('modules/manager/cocoapods/artifacts', () => {
     });
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null if no Podfile.lock found', async () => {
     const execSnapshots = mockExecAll();
     await expect(

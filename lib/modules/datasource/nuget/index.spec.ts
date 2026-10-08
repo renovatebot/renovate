@@ -118,7 +118,6 @@ const configV3Deprecated = {
 
 describe('modules/datasource/nuget/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     vi.stubEnv('RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN', undefined);
   });
 

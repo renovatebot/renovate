@@ -43,7 +43,6 @@ const getIssueSpy = platform.getIssue;
 let config: BranchConfig;
 
 beforeEach(() => {
-  GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig() as BranchConfig;
@@ -370,7 +369,6 @@ describe('workers/repository/dependency-dashboard', () => {
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
-      GlobalConfig.reset();
       logger.getProblems.mockReturnValue([]);
     });
 
@@ -1520,7 +1518,6 @@ None detected
       let config: RenovateConfig;
 
       beforeAll(() => {
-        GlobalConfig.reset();
         config = getConfig();
         config.dependencyDashboard = true;
       });

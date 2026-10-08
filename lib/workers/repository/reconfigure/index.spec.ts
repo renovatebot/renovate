@@ -42,7 +42,6 @@ describe('workers/repository/reconfigure/index', () => {
   const reconfigureBranchSha = fakeSha('sha1');
 
   beforeEach(() => {
-    GlobalConfig.reset();
     scm.branchExists.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(reconfigureBranchSha);
     validate.validateReconfigureBranch.mockResolvedValue(true);

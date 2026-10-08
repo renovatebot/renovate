@@ -7,10 +7,6 @@ import {
 } from './config.ts';
 
 describe('util/git/config', () => {
-  beforeEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('uses "close" events, ignores "exit" events from child processes', () => {
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },

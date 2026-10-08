@@ -24,7 +24,6 @@ describe('workers/repository/reconfigure/comment', () => {
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.ensureComment.mockResolvedValueOnce(true);
-      GlobalConfig.reset();
     });
 
     it('ensures comment', async () => {

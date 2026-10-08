@@ -6,7 +6,6 @@ describe('util/cache/repository/http-cache', () => {
   beforeEach(() => {
     const now = DateTime.fromISO('2024-04-12T12:00:00.000Z').valueOf();
     Settings.now = () => now;
-    GlobalConfig.reset();
   });
 
   const httpResponse = { statusCode: 200, headers: {}, body: 'body' };

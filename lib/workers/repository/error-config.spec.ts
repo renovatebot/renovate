@@ -23,10 +23,6 @@ beforeEach(() => {
 
 describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns if mode is silent', async () => {
       config.mode = 'silent';
 

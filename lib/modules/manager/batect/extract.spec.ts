@@ -37,10 +37,6 @@ describe('modules/manager/batect/extract', () => {
       GlobalConfig.set(adminConfig);
     });
 
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns empty array for empty configuration file', async () => {
       await expect(
         extractAllPackageFiles(config, [`${fixturesDir}/empty/batect.yml`]),

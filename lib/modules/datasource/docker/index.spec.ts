@@ -166,7 +166,6 @@ function mockEcrAuthReject(msg: string) {
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     ecrMock.reset();
     hostRules.add({
       username: 'some-username',

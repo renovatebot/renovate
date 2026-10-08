@@ -42,10 +42,6 @@ describe('modules/manager/mix/artifacts', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null if no mix.lock found', async () => {
     await expect(
       updateArtifacts({
