@@ -171,7 +171,9 @@ function createSingleConfig(
   }
   if (
     (temp.type === 'object' || temp.type?.includes('object')) &&
-    !option.freeChoice
+    !option.freeChoice &&
+    /* an option which describes the shape of its own values, like a map of strings, doesn't nest a Renovate config */
+    temp.additionalProperties === undefined
   ) {
     temp.$ref = '#';
   }
