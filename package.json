@@ -226,7 +226,7 @@
     "google-auth-library": "11.1.0",
     "got": "16.0.0",
     "graph-data-structure": "4.5.0",
-    "handlebars": "4.7.9",
+    "handlebars": "4.7.10",
     "ignore": "7.0.11",
     "ini": "6.0.0",
     "json-dup-key-validator": "1.0.3",
