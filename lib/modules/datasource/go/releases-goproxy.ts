@@ -567,6 +567,7 @@ export class GoProxyDatasource extends Datasource {
     const constraintsFilteringKey =
       constraintsFiltering === 'none' ? '' : constraintsFiltering;
     return buildCacheKey(
+      'getReleases',
       packageName,
       goproxy,
       noproxy?.toString(),
@@ -577,6 +578,12 @@ export class GoProxyDatasource extends Datasource {
   static getVersionedCacheKey(packageName: string, version: string): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
-    return buildCacheKey(packageName, version, goproxy, noproxy?.toString());
+    return buildCacheKey(
+      'goDirective',
+      packageName,
+      version,
+      goproxy,
+      noproxy?.toString(),
+    );
   }
 }
