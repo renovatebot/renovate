@@ -1,5 +1,8 @@
+import { inspect } from 'node:util';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
 import { exec } from '../../../../util/exec/index.ts';
 import { getFile } from '../../../../util/git/index.ts';
@@ -79,6 +82,7 @@ function config(
     upgrades: [
       {
         depName,
+        depType: 'devDependencies',
         packageFile: 'package.json',
         currentVersion: depName === 'vite-plus' ? '0.2.0' : '4.0.0',
         currentValue: depName === 'vite-plus' ? '0.2.0' : '4.0.0',
@@ -161,11 +165,21 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     mockFiles({ 'package.json': base });
     mockPlan((request) => validPlan(request, aligned));
 
-    await reconcileVitePlusVersions(updateConfig, packageFiles());
+    const notices = await reconcileVitePlusVersions(
+      updateConfig,
+      packageFiles(),
+    );
 
     expect(
       additionContents(updateConfig.updatedPackageFiles?.[0] as FileAddition),
     ).toBe(aligned);
+    expect(notices).toEqual([
+      {
+        file: 'package.json',
+        message:
+          'Vite+ aligned @vitest/coverage-v8 to 4.1.11 for compatibility.',
+      },
+    ]);
     expect(execMock).toHaveBeenCalledOnce();
     const [commands, options] = execMock.mock.calls[0];
     const execOptions = options!;
@@ -223,6 +237,131 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     expect(
       additionContents(updateConfig.updatedPackageFiles?.[0] as FileAddition),
     ).toBe(aligned);
+  });
+
+  it('preserves peer updates while aligning selected installation dependencies', async () => {
+    const base = JSON.stringify({
+      devDependencies: { 'vite-plus': '0.3.0', '@vitest/coverage-v8': '4.0.0' },
+      peerDependencies: { vitest: '4.1.11' },
+    });
+    const proposed = base.replace('4.0.0', '4.2.0').replace('4.1.11', '4.2.0');
+    const aligned = proposed.replace(
+      '@vitest/coverage-v8":"4.2.0',
+      '@vitest/coverage-v8":"4.1.11',
+    );
+    const updateConfig = config(proposed, '@vitest/coverage-v8', '4.2.0');
+    updateConfig.upgrades.push({
+      depName: 'vitest',
+      depType: 'peerDependencies',
+      packageFile: 'package.json',
+      currentVersion: '4.1.11',
+      currentValue: '4.1.11',
+      newVersion: '4.2.0',
+      newValue: '4.2.0',
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+    });
+    const files = packageFiles();
+    files.npm![0].deps![0].lockedVersion = '0.3.0';
+    mockFiles({ 'package.json': base });
+    mockPlan((request) => validPlan(request, aligned));
+
+    const notices = await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(updateConfig.upgrades).toHaveLength(2);
+    expect(updateConfig.upgrades[0]).toMatchObject({
+      newVersion: '4.1.11',
+      newValue: '4.1.11',
+    });
+    expect(updateConfig.upgrades[1]).toMatchObject({
+      depType: 'peerDependencies',
+      newVersion: '4.2.0',
+      newValue: '4.2.0',
+    });
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: aligned },
+    ]);
+    expect(notices).toEqual([]);
+  });
+
+  it('isolates independent workspaces selecting different Vite+ releases', async () => {
+    const rootA = 'apps/a/package.json';
+    const rootB = 'apps/b/package.json';
+    const proposedA = packageJson('0.3.0', '4.0.0');
+    const proposedB = packageJson('0.4.0', '4.0.0');
+    const alignedA = packageJson('0.3.0', '4.1.11');
+    const alignedB = packageJson('0.4.0', '4.2.0');
+    const updateConfig = config(proposedA);
+    updateConfig.upgrades[0].packageFile = rootA;
+    updateConfig.upgrades[0].managerData = {
+      pnpmLockFile: 'apps/a/pnpm-lock.yaml',
+    };
+    updateConfig.upgrades.push({
+      ...updateConfig.upgrades[0],
+      packageFile: rootB,
+      newVersion: '0.4.0',
+      newValue: '0.4.0',
+      managerData: { pnpmLockFile: 'apps/b/pnpm-lock.yaml' },
+    });
+    updateConfig.updatedPackageFiles = [
+      { type: 'addition', path: rootA, contents: proposedA },
+      { type: 'addition', path: rootB, contents: proposedB },
+    ];
+    const files: AdditionalPackageFiles = {
+      npm: [
+        {
+          ...packageFiles().npm![0],
+          packageFile: rootA,
+          managerData: { pnpmLockFile: 'apps/a/pnpm-lock.yaml' },
+        },
+        {
+          ...packageFiles().npm![0],
+          packageFile: rootB,
+          managerData: { pnpmLockFile: 'apps/b/pnpm-lock.yaml' },
+        },
+      ],
+    };
+    mockFiles({
+      [rootA]: packageJson('0.2.0', '4.0.0'),
+      [rootB]: packageJson('0.2.0', '4.0.0'),
+    });
+    mockPlan((request) => {
+      expect(request.manifests).toHaveLength(1);
+      const manifest = request.manifests[0];
+      const firstWorkspace = manifest.path === rootA;
+      return {
+        schemaVersion: 1,
+        tool: {
+          name: 'vite-plus',
+          version: firstWorkspace ? '0.3.0' : '0.4.0',
+        },
+        workspace: '.',
+        replacements: [
+          {
+            path: manifest.path,
+            kind: manifest.kind,
+            before: manifest.contents,
+            after: firstWorkspace ? alignedA : alignedB,
+          },
+        ],
+      };
+    });
+
+    await reconcileVitePlusVersions(updateConfig, files);
+
+    expect(
+      execMock.mock.calls.map(([, options]) => options?.toolConstraints?.[1]),
+    ).toEqual([
+      { toolName: 'vp', constraint: '0.3.0' },
+      { toolName: 'vp', constraint: '0.4.0' },
+    ]);
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: rootA, contents: alignedA },
+      { type: 'addition', path: rootB, contents: alignedB },
+    ]);
+    expect(updateConfig.upgrades.map(({ newVersion }) => newVersion)).toEqual([
+      '0.3.0',
+      '0.4.0',
+    ]);
   });
 
   it('does not treat a custom package aliased as vite-plus as Vite+', async () => {
@@ -413,6 +552,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     updateConfig.upgrades[0].managerData = { yarnLock: 'yarn.lock' };
     updateConfig.upgrades.push({
       depName: 'vite',
+      depType: 'yarn.catalog.vite-plus',
       packageName: '@voidzero-dev/vite-plus-core',
       packageFile: '.yarnrc.yml',
       currentVersion: '0.2.0',
@@ -651,6 +791,67 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     ).rejects.toThrow('invalid sync plan JSON');
   });
 
+  it.each([
+    {
+      name: 'schema diagnostics',
+      mutate: (plan: any, secret: string) => {
+        plan[secret] = true;
+      },
+    },
+    {
+      name: 'tool version',
+      mutate: (plan: any, secret: string) => {
+        plan.tool.version = secret;
+      },
+    },
+    {
+      name: 'replacement path',
+      mutate: (plan: any, secret: string) => {
+        plan.replacements[0].path = secret;
+      },
+    },
+  ])('does not expose response values through $name', async ({ mutate }) => {
+    const secret = 'SYNTHETIC_PRIVATE_MANIFEST_VALUE';
+    const proposed = packageJson('0.3.0', '4.0.0');
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': packageJson('0.2.0', '4.0.0') });
+    mockPlan((request) => {
+      const plan = validPlan(request, packageJson('0.3.0', '4.1.11'));
+      mutate(plan, secret);
+      return plan;
+    });
+
+    const error = await reconcileVitePlusVersions(
+      updateConfig,
+      packageFiles(),
+    ).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(inspect(error)).not.toContain(secret);
+    expect(
+      additionContents(updateConfig.updatedPackageFiles?.[0] as FileAddition),
+    ).toBe(proposed);
+  });
+
+  it('does not expose manifest contents through YAML parsing errors', async () => {
+    const secret = 'SYNTHETIC_PRIVATE_MANIFEST_VALUE';
+    const proposed = packageJson('0.3.0', '4.0.0');
+    mockFiles({
+      'package.json': packageJson('0.2.0', '4.0.0'),
+      'pnpm-workspace.yaml': `npmAuthToken: ${secret}\nnpmAuthToken: duplicate\n`,
+    });
+    mockPlan((request) => validPlan(request, packageJson('0.3.0', '4.1.11')));
+
+    const error = await reconcileVitePlusVersions(
+      config(proposed),
+      packageFiles(),
+    ).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(inspect(error)).not.toContain(secret);
+    expect(error).not.toHaveProperty('errors');
+  });
+
   it('rejects a change to an existing non-dependency field', async () => {
     const base = `${JSON.stringify({
       name: 'app',
@@ -663,7 +864,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
-    ).rejects.toThrow('unsupported manifest change at name');
+    ).rejects.toThrow('Vite+ attempted an unsupported manifest change');
   });
 
   it.each([
@@ -708,7 +909,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
-    ).rejects.toThrow('unsupported manifest change at devDependencies.vite');
+    ).rejects.toThrow('Vite+ attempted an unsupported manifest change');
   });
 
   it.each([
@@ -725,9 +926,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
-    ).rejects.toThrow(
-      'unsupported manifest change at devDependencies.@vitest/coverage-v8',
-    );
+    ).rejects.toThrow('Vite+ attempted an unsupported manifest change');
   });
 
   it('rejects an unexpected version inside a managed npm alias', async () => {
@@ -776,7 +975,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     await expect(
       reconcileVitePlusVersions(updateConfig, files),
-    ).rejects.toThrow('unsupported manifest change at packages');
+    ).rejects.toThrow('Vite+ attempted an unsupported manifest change');
   });
 
   it('rejects a change to a non-catalog Yarn setting', async () => {
@@ -808,7 +1007,7 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
 
     await expect(
       reconcileVitePlusVersions(updateConfig, files),
-    ).rejects.toThrow('unsupported manifest change at nodeLinker');
+    ).rejects.toThrow('Vite+ attempted an unsupported manifest change');
   });
 
   it('rejects inconsistent Vitest ecosystem versions', async () => {
@@ -831,6 +1030,181 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
       reconcileVitePlusVersions(updateConfig, packageFiles()),
     ).rejects.toThrow('inconsistent Vitest ecosystem versions');
   });
+
+  it('rejects a partial plan that leaves an inconsistent declaration unchanged', async () => {
+    const proposed = JSON.stringify({
+      devDependencies: {
+        'vite-plus': '0.3.0',
+        vitest: '4.0.0',
+        '@vitest/coverage-v8': '4.0.0',
+      },
+    });
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': proposed });
+    mockPlan((request) =>
+      validPlan(request, proposed.replace('vitest":"4.0.0', 'vitest":"4.1.11')),
+    );
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('inconsistent Vitest ecosystem versions');
+
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: proposed },
+    ]);
+  });
+
+  it('rejects a partial plan that leaves an inconsistent manifest unchanged', async () => {
+    const proposed = packageJson('0.3.0', '4.0.0');
+    const updateConfig = config(proposed);
+    const files = packageFiles();
+    files.npm!.push({
+      packageFile: 'packages/test/package.json',
+      managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+      deps: [],
+    });
+    mockFiles({
+      'package.json': proposed,
+      'packages/test/package.json': JSON.stringify({
+        devDependencies: { vitest: '4.0.0' },
+      }),
+    });
+    mockPlan((request) => validPlan(request, packageJson('0.3.0', '4.1.11')));
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, files),
+    ).rejects.toThrow('inconsistent Vitest ecosystem versions');
+
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: proposed },
+    ]);
+  });
+
+  it.each([
+    { depName: 'vitest', value: '^4.0.0' },
+    { depName: 'vitest', value: '^5.0.0' },
+    { depName: 'test', value: 'npm:vitest@^4.0.0' },
+  ])('rejects a retained managed range $value', async ({ depName, value }) => {
+    const proposed = JSON.stringify({
+      devDependencies: {
+        'vite-plus': '0.3.0',
+        '@vitest/coverage-v8': '4.0.0',
+        [depName]: value,
+      },
+    });
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': proposed });
+    mockPlan((request) =>
+      validPlan(
+        request,
+        proposed.replace('coverage-v8":"4.0.0', 'coverage-v8":"5.0.3'),
+      ),
+    );
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('non-exact managed version');
+
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: proposed },
+    ]);
+  });
+
+  it('rejects a retained managed range in a no-op plan', async () => {
+    const proposed = packageJson('0.3.0', '^4.0.0');
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': proposed });
+    mockPlan(() => ({
+      schemaVersion: 1,
+      tool: { name: 'vite-plus', version: '0.3.0' },
+      workspace: '.',
+      replacements: [],
+    }));
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toThrow('non-exact managed version');
+
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: proposed },
+    ]);
+  });
+
+  it.each([
+    { depName: 'vite-plus', value: '0.2.0' },
+    { depName: 'vite', value: 'npm:@voidzero-dev/vite-plus-core@0.2.0' },
+  ])(
+    'rejects an unchanged $depName declaration for another release',
+    async ({ depName, value }) => {
+      const proposed = packageJson('0.3.0', '4.0.0');
+      const updateConfig = config(proposed);
+      const files = packageFiles();
+      files.npm!.push({
+        packageFile: 'packages/test/package.json',
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        deps: [],
+      });
+      mockFiles({
+        'package.json': proposed,
+        'packages/test/package.json': JSON.stringify({
+          devDependencies: { [depName]: value },
+        }),
+      });
+      mockPlan((request) => validPlan(request, packageJson('0.3.0', '4.1.11')));
+
+      await expect(
+        reconcileVitePlusVersions(updateConfig, files),
+      ).rejects.toThrow('unexpected Vite+ version');
+
+      expect(updateConfig.updatedPackageFiles).toEqual([
+        { type: 'addition', path: 'package.json', contents: proposed },
+      ]);
+    },
+  );
+
+  it.each([true, false])(
+    'accepts consistent final declarations with replacements=%s',
+    async (hasReplacement) => {
+      const proposed = packageJson(
+        '0.3.0',
+        hasReplacement ? '4.0.0' : '4.1.11',
+      );
+      const aligned = packageJson('0.3.0', '4.1.11');
+      const updateConfig = config(proposed);
+      const files = packageFiles();
+      files.npm!.push({
+        packageFile: 'packages/test/package.json',
+        managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
+        deps: [],
+      });
+      mockFiles({
+        'package.json': proposed,
+        'packages/test/package.json': JSON.stringify({
+          devDependencies: {
+            test: 'npm:vitest@4.1.11',
+            '@vitest/eslint-plugin': '1.0.0',
+          },
+          peerDependencies: { vitest: '^3.0.0' },
+        }),
+      });
+      mockPlan((request) =>
+        hasReplacement
+          ? validPlan(request, aligned)
+          : {
+              schemaVersion: 1,
+              tool: { name: 'vite-plus', version: '0.3.0' },
+              workspace: '.',
+              replacements: [],
+            },
+      );
+
+      await reconcileVitePlusVersions(updateConfig, files);
+
+      expect(updateConfig.updatedPackageFiles).toEqual([
+        { type: 'addition', path: 'package.json', contents: aligned },
+      ]);
+    },
+  );
 
   it('requires an exact, unambiguous Vite+ version', async () => {
     const files = packageFiles();
@@ -1166,5 +1540,23 @@ describe('modules/manager/npm/post-update/vite-plus', () => {
     await expect(
       reconcileVitePlusVersions(updateConfig, packageFiles()),
     ).rejects.toThrow('Vite+ planner execution failed');
+  });
+
+  it.each([
+    new Error(TEMPORARY_ERROR),
+    new ExternalHostError(new Error('registry unavailable'), 'npm'),
+  ])('preserves a transient exec failure: %s', async (error) => {
+    const proposed = packageJson('0.3.0', '4.0.0');
+    const updateConfig = config(proposed);
+    mockFiles({ 'package.json': proposed });
+    execMock.mockRejectedValueOnce(error);
+
+    await expect(
+      reconcileVitePlusVersions(updateConfig, packageFiles()),
+    ).rejects.toBe(error);
+
+    expect(updateConfig.updatedPackageFiles).toEqual([
+      { type: 'addition', path: 'package.json', contents: proposed },
+    ]);
   });
 });

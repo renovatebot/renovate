@@ -3,7 +3,9 @@ import { dequal } from 'dequal';
 import upath from 'upath';
 import { z } from 'zod/v4';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { parseJsonc } from '../../../../util/common.ts';
 import { isDynamicInstall } from '../../../../util/exec/containerbase.ts';
@@ -23,6 +25,7 @@ import type {
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
+import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { AdditionalPackageFiles } from './types.ts';
 
@@ -81,7 +84,6 @@ interface WorkspacePackageFiles {
 
 interface ValidationState {
   changedValues: number;
-  vitestVersion?: string;
 }
 
 interface NpmAlias {
@@ -92,6 +94,17 @@ interface NpmAlias {
 interface DependencyVersionChange {
   packageName: string;
   version: string;
+}
+
+interface ManifestDependency extends DependencyVersionChange {
+  file: string;
+  depType: string;
+  changed: boolean;
+}
+
+interface ValidatedPlan {
+  plan: SyncVersionsPlan;
+  dependencies: ManifestDependency[];
 }
 
 interface MutableUpgrade extends Upgrade<NpmManagerData> {
@@ -349,8 +362,13 @@ function parseManifest(
   kind: ManifestKind,
   contents: string,
 ): Record<string, unknown> {
-  const parsed =
-    kind === 'packageJson' ? parseJsonc(contents) : parseSingleYaml(contents);
+  let parsed: unknown;
+  try {
+    parsed =
+      kind === 'packageJson' ? parseJsonc(contents) : parseSingleYaml(contents);
+  } catch {
+    throw new Error(`Vite+ returned an invalid ${kind} manifest`);
+  }
   if (!isRecord(parsed)) {
     throw new Error(`Vite+ returned an invalid ${kind} manifest`);
   }
@@ -445,7 +463,7 @@ function parseNpmAlias(value: string): NpmAlias | undefined {
   };
 }
 
-function dependencyVersionChange(
+function managedDependencyVersion(
   kind: ManifestKind,
   path: readonly string[],
   before: unknown,
@@ -497,11 +515,9 @@ function validateChangedValue(
   vitePlusVersion: string,
   state: ValidationState,
 ): void {
-  const change = dependencyVersionChange(kind, path, before, after);
+  const change = managedDependencyVersion(kind, path, before, after);
   if (!change) {
-    throw new Error(
-      `Vite+ attempted an unsupported manifest change at ${path.join('.')}`,
-    );
+    throw new Error('Vite+ attempted an unsupported manifest change');
   }
   const { packageName, version } = change;
 
@@ -510,17 +526,9 @@ function validateChangedValue(
       packageName === VITE_PLUS_CORE_PACKAGE_NAME) &&
     version !== vitePlusVersion
   ) {
-    throw new Error(
-      `Vite+ returned an unexpected Vite+ version for ${packageName}`,
-    );
+    throw new Error('Vite+ returned an unexpected Vite+ version');
   }
 
-  if (isVitestPackage(packageName)) {
-    state.vitestVersion ??= version;
-    if (state.vitestVersion !== version) {
-      throw new Error('Vite+ returned inconsistent Vitest ecosystem versions');
-    }
-  }
   state.changedValues += 1;
 }
 
@@ -540,9 +548,7 @@ function validateManifestTree(
     const beforeKeys = Object.keys(before).sort();
     const afterKeys = Object.keys(after).sort();
     if (!dequal(beforeKeys, afterKeys)) {
-      throw new Error(
-        `Vite+ attempted to add or remove manifest keys at ${path.join('.')}`,
-      );
+      throw new Error('Vite+ attempted to add or remove manifest keys');
     }
     for (const key of beforeKeys) {
       validateManifestTree(
@@ -560,11 +566,64 @@ function validateManifestTree(
   validateChangedValue(kind, path, before, after, vitePlusVersion, state);
 }
 
+function dependencyTypeForPath(
+  kind: ManifestKind,
+  path: readonly string[],
+): string {
+  if (kind === 'packageJson') {
+    return path[0] === 'pnpm' ? 'pnpm.overrides' : path[0];
+  }
+  if (path[0] === 'overrides') {
+    return pnpmWorkspaceOverrides;
+  }
+  const manager = kind === 'yarnRc' ? 'yarn' : 'pnpm';
+  const catalog = path[0] === 'catalog' ? 'default' : path[1];
+  return `${manager}.catalog.${catalog}`;
+}
+
+function collectManifestDependencies(
+  snapshot: ManifestSnapshot,
+  before: unknown,
+  after: unknown,
+  path: readonly string[],
+): ManifestDependency[] {
+  if (isRecord(before) && isRecord(after)) {
+    return Object.keys(after).flatMap((key) =>
+      collectManifestDependencies(snapshot, before[key], after[key], [
+        ...path,
+        key,
+      ]),
+    );
+  }
+  const declaredPackageName = dependencyNameForPath(snapshot.kind, path);
+  if (!declaredPackageName || !isString(after)) {
+    return [];
+  }
+  const alias = parseNpmAlias(after);
+  const packageName = alias?.packageName ?? declaredPackageName;
+  const version = alias?.version ?? after;
+  if (!isManagedPackage(packageName) || !npmVersioning.isValid(version)) {
+    return [];
+  }
+  if (!npmVersioning.isVersion(version)) {
+    throw new Error('Vite+ returned a non-exact managed version');
+  }
+  return [
+    {
+      packageName,
+      version,
+      file: snapshot.path,
+      depType: dependencyTypeForPath(snapshot.kind, path),
+      changed: before !== after,
+    },
+  ];
+}
+
 function parseAndValidatePlan(
   stdout: string,
   snapshots: ManifestSnapshot[],
   vitePlusVersion: string,
-): { plan: SyncVersionsPlan; vitestVersion?: string } {
+): ValidatedPlan {
   let rawPlan: unknown;
   try {
     rawPlan = JSON.parse(stdout);
@@ -573,14 +632,12 @@ function parseAndValidatePlan(
   }
   const result = SyncVersionsPlan.safeParse(rawPlan);
   if (!result.success) {
-    throw new Error(
-      `Vite+ returned an invalid sync plan: ${result.error.message}`,
-    );
+    throw new Error('Vite+ returned an invalid sync plan');
   }
   const plan = result.data;
   if (plan.tool.version !== vitePlusVersion) {
     throw new Error(
-      `Vite+ sync plan version ${plan.tool.version} does not match ${vitePlusVersion}`,
+      'Vite+ sync plan version does not match the selected release',
     );
   }
 
@@ -591,18 +648,16 @@ function parseAndValidatePlan(
   const state: ValidationState = { changedValues: 0 };
   for (const replacement of plan.replacements) {
     if (replacementPaths.has(replacement.path)) {
-      throw new Error(
-        `Vite+ returned duplicate replacement ${replacement.path}`,
-      );
+      throw new Error('Vite+ returned duplicate replacement');
     }
     replacementPaths.add(replacement.path);
 
     const snapshot = snapshotsByPath.get(replacement.path);
     if (!snapshot || snapshot.kind !== replacement.kind) {
-      throw new Error(`Vite+ returned an unknown manifest ${replacement.path}`);
+      throw new Error('Vite+ returned an unknown manifest');
     }
     if (replacement.before !== snapshot.contents) {
-      throw new Error(`Vite+ sync plan is stale for ${replacement.path}`);
+      throw new Error('Vite+ sync plan is stale');
     }
 
     const changedValuesBefore = state.changedValues;
@@ -621,7 +676,38 @@ function parseAndValidatePlan(
     }
   }
 
-  return { plan, vitestVersion: state.vitestVersion };
+  const replacements = new Map(
+    plan.replacements.map(({ path, after }) => [path, after]),
+  );
+  const dependencies = snapshots.flatMap((snapshot) =>
+    collectManifestDependencies(
+      snapshot,
+      parseManifest(snapshot.kind, snapshot.contents),
+      parseManifest(
+        snapshot.kind,
+        replacements.get(snapshot.path) ?? snapshot.contents,
+      ),
+      [],
+    ),
+  );
+  for (const { packageName, version } of dependencies) {
+    if (
+      (packageName === VITE_PLUS_PACKAGE_NAME ||
+        packageName === VITE_PLUS_CORE_PACKAGE_NAME) &&
+      version !== vitePlusVersion
+    ) {
+      throw new Error('Vite+ returned an unexpected Vite+ version');
+    }
+  }
+  const vitestVersions = new Set(
+    dependencies
+      .filter(({ packageName }) => isVitestPackage(packageName))
+      .map(({ version }) => version),
+  );
+  if (vitestVersions.size > 1) {
+    throw new Error('Vite+ returned inconsistent Vitest ecosystem versions');
+  }
+  return { plan, dependencies };
 }
 
 function removeAddition(files: FileChange[] | undefined, path: string): void {
@@ -678,17 +764,13 @@ function getAlignedUpdateType(
 function updateUpgradeMetadata(
   config: PostUpdateConfig<NpmManagerData>,
   upgrades: Upgrade<NpmManagerData>[],
-  vitePlusVersion: string,
-  vitestVersion: string | undefined,
+  dependencies: ManifestDependency[],
 ): void {
   const noOpUpgrades = new Set<Upgrade<NpmManagerData>>();
   for (const upgrade of upgrades as MutableUpgrade[]) {
-    const packageName = effectivePackageName(upgrade);
-    const version =
-      packageName === VITE_PLUS_PACKAGE_NAME ||
-      packageName === VITE_PLUS_CORE_PACKAGE_NAME
-        ? vitePlusVersion
-        : vitestVersion;
+    const version = dependencies.find((dependency) =>
+      matchesUpgrade(dependency, upgrade),
+    )?.version;
     if (!version) {
       continue;
     }
@@ -730,11 +812,44 @@ function updateUpgradeMetadata(
   }
 }
 
+function matchesUpgrade(
+  dependency: ManifestDependency,
+  upgrade: Upgrade<NpmManagerData>,
+): boolean {
+  return (
+    dependency.file === upgrade.packageFile &&
+    dependency.depType === upgrade.depType &&
+    dependency.packageName === effectivePackageName(upgrade)
+  );
+}
+
+function additionalAlignmentNotices(
+  dependencies: ManifestDependency[],
+  upgrades: Upgrade<NpmManagerData>[],
+): ArtifactNotice[] {
+  const alignments = new Map<string, Set<string>>();
+  for (const dependency of dependencies) {
+    if (
+      !dependency.changed ||
+      upgrades.some((upgrade) => matchesUpgrade(dependency, upgrade))
+    ) {
+      continue;
+    }
+    const changes = alignments.get(dependency.file) ?? new Set<string>();
+    changes.add(`${dependency.packageName} to ${dependency.version}`);
+    alignments.set(dependency.file, changes);
+  }
+  return [...alignments.entries()].map(([file, changes]) => ({
+    file,
+    message: `Vite+ aligned ${[...changes].join(', ')} for compatibility.`,
+  }));
+}
+
 async function runPlanner(
   workspace: WorkspacePackageFiles,
   snapshots: ManifestSnapshot[],
   vitePlusVersion: string,
-): Promise<{ plan: SyncVersionsPlan; vitestVersion?: string } | undefined> {
+): Promise<ValidatedPlan | undefined> {
   const request = JSON.stringify({
     schemaVersion: 1,
     workspace: '.',
@@ -762,6 +877,12 @@ async function runPlanner(
         toolConstraints: plannerToolConstraints(vitePlusVersion),
       },
     ).catch((error: unknown) => {
+      if (
+        error instanceof ExternalHostError ||
+        (error instanceof Error && error.message === TEMPORARY_ERROR)
+      ) {
+        throw error;
+      }
       if (isUnsupportedPlannerError(error, vitePlusVersion)) {
         logger.debug(
           { workspace: workspace.root, vitePlusVersion },
@@ -847,7 +968,7 @@ export async function reconcileVitePlusVersions(
       );
       continue;
     }
-    const { plan, vitestVersion } = result;
+    const { plan, dependencies } = result;
     const snapshotsByPath = new Map(
       snapshots.map((snapshot) => [snapshot.path, snapshot]),
     );
@@ -858,7 +979,8 @@ export async function reconcileVitePlusVersions(
         replacement.after,
       );
     }
-    updateUpgradeMetadata(config, upgrades, vitePlusVersion, vitestVersion);
+    updateUpgradeMetadata(config, upgrades, dependencies);
+    notices.push(...additionalAlignmentNotices(dependencies, upgrades));
     logger.debug(
       {
         workspace: workspace.root,
