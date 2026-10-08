@@ -1,10 +1,17 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import {
+  ensureTrailingSlash,
+  joinUrlParts,
+  trimTrailingSlash,
+} from '../../../util/url.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { GalaxyV1 } from './schema.ts';
+
+const defaultRegistryUrl = 'https://galaxy.ansible.com';
 
 export class GalaxyDatasource extends Datasource {
   static readonly id = 'galaxy';
@@ -14,11 +21,13 @@ export class GalaxyDatasource extends Datasource {
   }
 
   override supportsCustomRegistry(_packageName: string): boolean {
-    return false;
+    return true;
   }
 
+  override readonly registryStrategy = 'hunt';
+
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://galaxy.ansible.com/'];
+    return [defaultRegistryUrl];
   }
 
   override readonly defaultVersioning = pep440Versioning.id;
@@ -38,8 +47,10 @@ export class GalaxyDatasource extends Datasource {
     const userName = lookUp[0];
     const projectName = lookUp[1];
 
-    const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
-    const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
+    const rolesUrl = ensureTrailingSlash(
+      joinUrlParts(registryUrl!, 'api/v1/roles'),
+    );
+    const galaxyAPIUrl = `${rolesUrl}?owner__username=${userName}&name=${projectName}`;
 
     const body = await this.fetchJson(galaxyAPIUrl, GalaxyV1);
 
@@ -69,7 +80,12 @@ export class GalaxyDatasource extends Datasource {
       releases: [],
     };
 
-    result.dependencyUrl = galaxyProjectUrl;
+    // The registry URL is an API base. Only the public Galaxy site serves a
+    // browsable page.
+    if (trimTrailingSlash(registryUrl!) === defaultRegistryUrl) {
+      result.dependencyUrl = joinUrlParts(registryUrl!, userName, projectName);
+    }
+
     const { github_user: user, github_repo: repo } = resultObject;
     if (isNonEmptyString(user) && isNonEmptyString(repo)) {
       result.sourceUrl = `https://github.com/${user}/${repo}`;
@@ -90,7 +106,7 @@ export class GalaxyDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-galaxy',
-        key: config.packageName,
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
         cacheable: true,
         fallback: true,
       },
