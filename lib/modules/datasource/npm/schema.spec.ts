@@ -241,6 +241,24 @@ describe('modules/datasource/npm/schema', () => {
       expect(result.versions?.['1.0.0']?.repository).toBeUndefined();
     });
 
+    it('accepts `null` in optional version fields and keeps unknown version fields', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: {
+          '1.0.0': {
+            gitHead: null,
+            homepage: null,
+            'renovate-config': { default: { rangeStrategy: 'pin' } },
+          },
+        },
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.versions?.['1.0.0']).toEqual({
+        'renovate-config': { default: { rangeStrategy: 'pin' } },
+      });
+    });
+
     it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
       const input = {
         name: 'mypackage',
