@@ -386,17 +386,22 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
-    {
-      manager: config.manager,
-      depName: config.upgrades.map(({ depName }) => depName).join(' '),
-      branchName: config.branchName,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
-    },
-  ];
+  const uniqueBranchTasks = new Map<string, BranchUpgradeConfig>();
+  for (const upgrade of config.upgrades) {
+    if (upgrade.postUpgradeTasks?.executionMode === 'branch') {
+      const key = JSON.stringify(upgrade.postUpgradeTasks);
+      if (!uniqueBranchTasks.has(key)) {
+        uniqueBranchTasks.set(key, {
+          manager: upgrade.manager,
+          depName: upgrade.depName,
+          branchName: config.branchName,
+          postUpgradeTasks: upgrade.postUpgradeTasks,
+        });
+      }
+    }
+  }
+
+  const branchUpgradeCommands = [...uniqueBranchTasks.values()];
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
