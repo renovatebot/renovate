@@ -690,6 +690,36 @@ describe('util/git/index', { timeout: 30000 }, () => {
         ).resolves.toBeNull();
       });
 
+      it('confirms missing files when errors must propagate', async () => {
+        await expect(
+          git.getFile('some-missing-path', defaultBranch, {
+            throwOnError: true,
+          }),
+        ).resolves.toBeNull();
+      });
+
+      it('propagates read failures for existing files and permits retry', async () => {
+        const error = new Error('spawn git EAGAIN');
+        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValueOnce(error);
+
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).rejects.toBe(error);
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).resolves.toBe(defaultBranch);
+      });
+
+      it('propagates failures to verify whether a file exists', async () => {
+        const error = new Error('spawn git EAGAIN');
+        vi.spyOn(SimpleGit.prototype, 'show').mockRejectedValueOnce(error);
+        vi.spyOn(SimpleGit.prototype, 'raw').mockRejectedValueOnce(error);
+
+        await expect(
+          git.getFile('master_file', defaultBranch, { throwOnError: true }),
+        ).rejects.toBe(error);
+      });
+
       it('logs a warning if hidden Unciode characters are found', async () => {
         await git.getFile('Dockerfile', 'renovate/hidden-unicode');
 

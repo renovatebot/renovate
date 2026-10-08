@@ -4288,8 +4288,9 @@ Requests exceeding these limits produce an artifact error.
 When the planner aligns a declaration without a selected dependency upgrade, an artifact notice lists that additional compatibility change.
 
 If reconciliation changes a selected upgrade target, Renovate disables automerge for that update.
-Before updating an existing PR, Renovate must also confirm that platform automerge is disabled.
+Before changing the managed versions in an existing PR, Renovate must also confirm that platform automerge is disabled.
 This confirmation currently supports GitHub; other platforms leave the branch unchanged and report an error for existing PRs whose selected target changes.
+Refreshing or rebasing a PR whose committed manifests already contain the reconciled targets does not require this cancellation.
 
 This option is enabled automatically by the `group:vitePlus` preset.
 

@@ -22,6 +22,7 @@ import {
 import { logger, removeMeta } from '../../../../logger/index.ts';
 import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
+import { hasReconciledVitePlusTargets } from '../../../../modules/manager/npm/post-update/vite-plus.ts';
 import {
   ensureComment,
   ensureCommentRemoval,
@@ -694,7 +695,11 @@ export async function processBranch(
         };
       }
       const targetChanged = refreshBranchConfig(config, previousTargets);
-      if (targetChanged && branchPr) {
+      if (
+        targetChanged &&
+        branchPr &&
+        (!branchExists || !(await hasReconciledVitePlusTargets(config)))
+      ) {
         if (GlobalConfig.get('dryRun')) {
           logger.info(
             `DRY-RUN: Would cancel platform automerge for PR #${branchPr.number}`,

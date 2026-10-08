@@ -1331,12 +1331,12 @@ async function getBranchFilesFromRef(
 export async function getFile(
   filePath: string,
   branchName?: string,
+  options: { throwOnError?: boolean } = {},
 ): Promise<string | null> {
   await syncGit();
+  const ref = `origin/${branchName ?? config.currentBranch}`;
   try {
-    const content = await git.show([
-      `origin/${branchName ?? config.currentBranch}:${filePath}`,
-    ]);
+    const content = await git.show([`${ref}:${filePath}`]);
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
 
@@ -1346,6 +1346,19 @@ export async function getFile(
     /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
       throw errChecked;
+    }
+    if (options.throwOnError) {
+      const files = await git.raw([
+        'ls-tree',
+        '--name-only',
+        '-z',
+        ref,
+        '--',
+        filePath,
+      ]);
+      if (files) {
+        throw err;
+      }
     }
     return null;
   }

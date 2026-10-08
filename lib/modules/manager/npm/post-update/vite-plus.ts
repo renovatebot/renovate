@@ -324,16 +324,25 @@ async function readManifestSnapshot(
   return { path, kind, contents: normalizedContents, baselineContents };
 }
 
+function packageFileKind(path: string | undefined): ManifestKind | undefined {
+  if (path?.endsWith('package.json')) {
+    return 'packageJson';
+  }
+  if (path?.endsWith('.yarnrc.yml')) {
+    return 'yarnRc';
+  }
+  return undefined;
+}
+
 async function collectManifestSnapshots(
   config: PostUpdateConfig<NpmManagerData>,
   workspace: WorkspacePackageFiles,
 ): Promise<ManifestSnapshot[]> {
   const paths = new Map<string, ManifestKind>();
   for (const packageFile of workspace.packageFiles) {
-    if (packageFile.packageFile?.endsWith('package.json')) {
-      paths.set(packageFile.packageFile, 'packageJson');
-    } else if (packageFile.packageFile?.endsWith('.yarnrc.yml')) {
-      paths.set(packageFile.packageFile, 'yarnRc');
+    const kind = packageFileKind(packageFile.packageFile);
+    if (kind && packageFile.packageFile) {
+      paths.set(packageFile.packageFile, kind);
     }
   }
   const pnpmWorkspacePath = upath.join(
@@ -582,7 +591,7 @@ function dependencyTypeForPath(
 }
 
 function collectManifestDependencies(
-  snapshot: ManifestSnapshot,
+  snapshot: Pick<ManifestSnapshot, 'path' | 'kind'>,
   before: unknown,
   after: unknown,
   path: readonly string[],
@@ -814,13 +823,73 @@ function updateUpgradeMetadata(
 
 function matchesUpgrade(
   dependency: ManifestDependency,
-  upgrade: Upgrade<NpmManagerData>,
+  upgrade: Upgrade,
 ): boolean {
   return (
     dependency.file === upgrade.packageFile &&
     dependency.depType === upgrade.depType &&
     dependency.packageName === effectivePackageName(upgrade)
   );
+}
+
+export async function hasReconciledVitePlusTargets({
+  branchName,
+  upgrades,
+}: Pick<PostUpdateConfig, 'branchName' | 'upgrades'>): Promise<boolean> {
+  const dependenciesByFile = new Map<string, ManifestDependency[]>();
+  for (const upgrade of upgrades) {
+    if (
+      upgrade.manager !== 'npm' ||
+      upgrade.depType === 'peerDependencies' ||
+      !isManagedPackage(effectivePackageName(upgrade))
+    ) {
+      continue;
+    }
+    const path = upgrade.packageFile;
+    if (!path) {
+      return false;
+    }
+    let dependencies = dependenciesByFile.get(path);
+    if (!dependencies) {
+      const kind =
+        upath.basename(path) === 'pnpm-workspace.yaml'
+          ? 'pnpmWorkspace'
+          : packageFileKind(path);
+      if (!kind) {
+        continue;
+      }
+      const contents = await getFile(path, branchName, { throwOnError: true });
+      if (!contents || Buffer.byteLength(contents) > MAX_MANIFEST_BYTES) {
+        return false;
+      }
+      try {
+        const manifest = parseManifest(kind, contents);
+        dependencies = collectManifestDependencies(
+          { path, kind },
+          manifest,
+          manifest,
+          [],
+        );
+      } catch {
+        logger.debug(
+          { packageFile: path },
+          'Cannot verify existing Vite+ dependency targets',
+        );
+        return false;
+      }
+      dependenciesByFile.set(path, dependencies);
+    }
+    const matches = dependencies.filter((dependency) =>
+      matchesUpgrade(dependency, upgrade),
+    );
+    if (
+      !matches.length ||
+      matches.some((dependency) => dependency.version !== upgrade.newVersion)
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function additionalAlignmentNotices(

@@ -10,7 +10,10 @@ import type { FileAddition } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { AdditionalPackageFiles } from './types.ts';
-import { reconcileVitePlusVersions } from './vite-plus.ts';
+import {
+  hasReconciledVitePlusTargets,
+  reconcileVitePlusVersions,
+} from './vite-plus.ts';
 
 vi.mock('../../../../util/exec/index.ts');
 vi.mock('../../../../util/git/index.ts');
@@ -81,6 +84,7 @@ function config(
     postUpdateOptions: ['vitePlusSyncVersions'],
     upgrades: [
       {
+        manager: 'npm',
         depName,
         depType: 'devDependencies',
         packageFile: 'package.json',
@@ -142,6 +146,201 @@ function validPlan(
 describe('modules/manager/npm/post-update/vite-plus', () => {
   beforeEach(() => {
     GlobalConfig.set({ binarySource: 'docker' });
+  });
+
+  describe('hasReconciledVitePlusTargets', () => {
+    const branchName = 'renovate/vite-plus';
+
+    it.each`
+      packageFile              | depType                   | contents
+      ${'package.json'}        | ${'devDependencies'}      | ${JSON.stringify({ devDependencies: { '@vitest/coverage-v8': '4.1.11' } })}
+      ${'custom-package.json'} | ${'devDependencies'}      | ${JSON.stringify({ devDependencies: { '@vitest/coverage-v8': '4.1.11' } })}
+      ${'package.json'}        | ${'devDependencies'}      | ${JSON.stringify({ devDependencies: { coverage: 'npm:@vitest/coverage-v8@4.1.11' } })}
+      ${'package.json'}        | ${'catalog'}              | ${JSON.stringify({ catalog: { '@vitest/coverage-v8': '4.1.11' } })}
+      ${'package.json'}        | ${'workspaces'}           | ${JSON.stringify({ workspaces: { catalogs: { test: { '@vitest/coverage-v8': '4.1.11' } } } })}
+      ${'pnpm-workspace.yaml'} | ${'pnpm.catalog.default'} | ${'catalog:\n  "@vitest/coverage-v8": 4.1.11\n'}
+      ${'pnpm-workspace.yaml'} | ${'pnpm.catalog.test'}    | ${'catalogs:\n  test:\n    "@vitest/coverage-v8": 4.1.11\n'}
+      ${'.yarnrc.yml'}         | ${'yarn.catalog.test'}    | ${'catalogs:\n  test:\n    "@vitest/coverage-v8": 4.1.11\n'}
+      ${'custom.yarnrc.yml'}   | ${'yarn.catalog.test'}    | ${'catalogs:\n  test:\n    "@vitest/coverage-v8": 4.1.11\n'}
+    `(
+      'recognizes the existing target in $packageFile $depType: $contents',
+      async ({ packageFile, depType, contents }) => {
+        const updateConfig = config('', '@vitest/coverage-v8', '4.1.11');
+        Object.assign(updateConfig.upgrades[0], { packageFile, depType });
+        getFileMock.mockResolvedValue(contents);
+
+        const result = await hasReconciledVitePlusTargets({
+          branchName,
+          upgrades: updateConfig.upgrades,
+        });
+
+        expect(result).toBeTrue();
+        expect(getFileMock).toHaveBeenCalledExactlyOnceWith(
+          packageFile,
+          branchName,
+          { throwOnError: true },
+        );
+      },
+    );
+
+    it('reads each branch manifest once for multiple targets', async () => {
+      const upgrades = [
+        ...config('', 'vite-plus', '0.3.0').upgrades,
+        ...config('', '@vitest/coverage-v8', '4.1.11').upgrades,
+      ];
+      getFileMock.mockResolvedValue(packageJson('0.3.0', '4.1.11'));
+
+      const result = await hasReconciledVitePlusTargets({
+        branchName,
+        upgrades,
+      });
+
+      expect(result).toBeTrue();
+      expect(getFileMock).toHaveBeenCalledExactlyOnceWith(
+        'package.json',
+        branchName,
+        { throwOnError: true },
+      );
+    });
+
+    it.each`
+      packageFile              | depType                | contents
+      ${'custom-package.json'} | ${'devDependencies'}   | ${JSON.stringify({ devDependencies: { '@vitest/coverage-v8': '4.1.10' } })}
+      ${'custom.yarnrc.yml'}   | ${'yarn.catalog.test'} | ${'catalogs:\n  test:\n    "@vitest/coverage-v8": 4.1.10\n'}
+    `(
+      'does not confirm a different target in $packageFile',
+      async ({ packageFile, depType, contents }) => {
+        const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+        Object.assign(upgrades[0], { packageFile, depType });
+        getFileMock.mockResolvedValue(contents);
+
+        const result = await hasReconciledVitePlusTargets({
+          branchName,
+          upgrades,
+        });
+
+        expect(result).toBeFalse();
+      },
+    );
+
+    it('ignores unrelated upgrades in a mixed group', async () => {
+      const upgrades = [
+        ...config('', '@vitest/coverage-v8', '4.1.11').upgrades,
+        ...config('', 'typescript', '6.0.0').upgrades,
+      ];
+      getFileMock.mockResolvedValue(packageJson('0.3.0', '4.1.11'));
+
+      await expect(
+        hasReconciledVitePlusTargets({ branchName, upgrades }),
+      ).resolves.toBeTrue();
+    });
+
+    it('requires the target in every package file', async () => {
+      const upgrades = [
+        ...config('', '@vitest/coverage-v8', '4.1.11').upgrades,
+        ...config('', '@vitest/coverage-v8', '4.1.11').upgrades.map(
+          (upgrade) => ({ ...upgrade, packageFile: 'other/package.json' }),
+        ),
+      ];
+      mockFiles({
+        'package.json': packageJson('0.3.0', '4.1.11'),
+        'other/package.json': packageJson('0.3.0', '4.1.10'),
+      });
+
+      const result = await hasReconciledVitePlusTargets({
+        branchName,
+        upgrades,
+      });
+
+      expect(result).toBeFalse();
+    });
+
+    it.each`
+      contents
+      ${null}
+      ${''}
+      ${'{"secret":"do-not-log"'}
+      ${'[]'}
+      ${' '.repeat(1024 * 1024 + 1)}
+      ${packageJson('0.3.0', '^4.1.11')}
+      ${packageJson('0.3.0', '4.1.10')}
+      ${JSON.stringify({ peerDependencies: { '@vitest/coverage-v8': '4.1.11' } })}
+      ${JSON.stringify({ devDependencies: { '@vitest/coverage-v8': '4.1.11', other: 'npm:@vitest/coverage-v8@4.1.10' } })}
+    `(
+      'does not confirm missing, invalid or different targets %#',
+      async ({ contents }) => {
+        const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+        getFileMock.mockResolvedValue(contents);
+
+        const result = await hasReconciledVitePlusTargets({
+          branchName,
+          upgrades,
+        });
+
+        expect(result).toBeFalse();
+        expect(inspect(logger.logger.debug.mock.calls)).not.toContain(
+          'do-not-log',
+        );
+      },
+    );
+
+    it('does not confirm a missing package file', async () => {
+      const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+      upgrades[0].packageFile = undefined;
+
+      const result = await hasReconciledVitePlusTargets({
+        branchName,
+        upgrades,
+      });
+
+      expect(result).toBeFalse();
+      expect(getFileMock).not.toHaveBeenCalled();
+    });
+
+    it.each`
+      manager   | depType               | packageFile
+      ${'npm'}  | ${'peerDependencies'} | ${'package.json'}
+      ${'deno'} | ${'imports'}          | ${'deno.json'}
+      ${'npm'}  | ${'devDependencies'}  | ${'custom-manifest.json'}
+    `(
+      'ignores declarations outside the planner: $manager $depType $packageFile',
+      async ({ manager, depType, packageFile }) => {
+        const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+        Object.assign(upgrades[0], { manager, depType, packageFile });
+
+        await expect(
+          hasReconciledVitePlusTargets({ branchName, upgrades }),
+        ).resolves.toBeTrue();
+        expect(getFileMock).not.toHaveBeenCalled();
+      },
+    );
+
+    it('does not match a target in another catalog', async () => {
+      const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+      Object.assign(upgrades[0], {
+        packageFile: 'pnpm-workspace.yaml',
+        depType: 'pnpm.catalog.test',
+      });
+      getFileMock.mockResolvedValue(
+        'catalog:\n  "@vitest/coverage-v8": 4.1.11\n',
+      );
+
+      const result = await hasReconciledVitePlusTargets({
+        branchName,
+        upgrades,
+      });
+
+      expect(result).toBeFalse();
+    });
+
+    it('propagates repository read failures', async () => {
+      const { upgrades } = config('', '@vitest/coverage-v8', '4.1.11');
+      getFileMock.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+
+      await expect(
+        hasReconciledVitePlusTargets({ branchName, upgrades }),
+      ).rejects.toThrow(TEMPORARY_ERROR);
+    });
   });
 
   it('does nothing unless the post-update option is enabled', async () => {
