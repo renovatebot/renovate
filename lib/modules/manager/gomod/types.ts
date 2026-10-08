@@ -15,3 +15,8 @@ export interface ExtraDep {
   currentValue: string;
   newValue: string;
 }
+
+export interface GoModulesTidyPlan {
+  modules: string[];
+  containsCycle: boolean;
+}
