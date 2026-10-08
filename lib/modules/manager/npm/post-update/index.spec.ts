@@ -719,22 +719,27 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
-    it('surfaces Vite+ reconciliation failures as artifact errors', async () => {
-      spyVitePlus.mockRejectedValueOnce(new Error('planner failed validation'));
+    it.each`
+      error                                     | message
+      ${new Error('planner failed validation')} | ${'planner failed validation'}
+      ${'planner failed validation'}            | ${'Unknown Vite+ reconciliation error'}
+    `(
+      'surfaces Vite+ reconciliation failures as artifact errors: $message',
+      async ({ error, message }) => {
+        spyVitePlus.mockRejectedValueOnce(error);
 
-      await expect(
-        getAdditionalFiles({ ...updateConfig }, additionalFiles),
-      ).resolves.toStrictEqual({
-        artifactErrors: [
-          { fileName: 'vite-plus', stderr: 'planner failed validation' },
-        ],
-        artifactNotices: [],
-        updatedArtifacts: [],
-      });
-      expect(spyNpm).not.toHaveBeenCalled();
-      expect(spyYarn).not.toHaveBeenCalled();
-      expect(spyPnpm).not.toHaveBeenCalled();
-    });
+        await expect(
+          getAdditionalFiles({ ...updateConfig }, additionalFiles),
+        ).resolves.toStrictEqual({
+          artifactErrors: [{ fileName: 'vite-plus', stderr: message }],
+          artifactNotices: [],
+          updatedArtifacts: [],
+        });
+        expect(spyNpm).not.toHaveBeenCalled();
+        expect(spyYarn).not.toHaveBeenCalled();
+        expect(spyPnpm).not.toHaveBeenCalled();
+      },
+    );
 
     it.each([
       new Error(TEMPORARY_ERROR),
