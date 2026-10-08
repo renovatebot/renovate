@@ -33,7 +33,10 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import {
+  encodeUrlPathSegments,
+  ensureTrailingSlash,
+} from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -284,7 +287,9 @@ export async function initRepo({
   const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
     projectName,
   )}/_git/${encodeURIComponent(repoName)}`;
-  const url = repo.remoteUrl ?? manualUrl;
+  const url = repo.remoteUrl
+    ? encodeUrlPathSegments(repo.remoteUrl)
+    : manualUrl;
   await git.initRepo({
     ...config,
     url,
