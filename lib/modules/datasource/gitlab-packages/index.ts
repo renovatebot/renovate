@@ -1,6 +1,5 @@
 import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -68,11 +67,8 @@ export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
     const releases = response
       // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
       // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-      .filter((r) => (r.conan_package_name ?? r.name) === packagePart)
-      .map(({ version, created_at }) => ({
-        version,
-        releaseTimestamp: asTimestamp(created_at),
-      }));
+      .filter((pkg) => pkg.packageName === packagePart)
+      .map((pkg) => pkg.release);
 
     return releases.length ? { releases } : null;
   }
