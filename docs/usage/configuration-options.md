@@ -4279,9 +4279,17 @@ Use the exact Vite+ release selected for an update to align existing Vite+, Vite
 Renovate runs Vite+'s non-mutating planner in an isolated temporary directory and validates its proposed manifest changes before applying them.
 Managed version ranges are replaced with the exact versions declared by the selected Vite+ release.
 
-The planner requires Renovate's dynamic tool installation (`binarySource=install` in a Containerbase environment, or `binarySource=docker`).
+The planner requires Containerbase 14.30.0 or later and Renovate's dynamic tool installation (`binarySource=install` in a Containerbase environment, or `binarySource=docker`).
 Other binary sources leave declarations unchanged and add an artifact notice.
 Vite+ releases created before the planner and checksum contract was introduced are also left unchanged with a notice.
+
+Each workspace request supports up to 256 manifests, 1 MiB per manifest, and 16 MiB for the serialized request.
+Requests exceeding these limits produce an artifact error.
+When the planner aligns a declaration without a selected dependency upgrade, an artifact notice lists that additional compatibility change.
+
+If reconciliation changes a selected upgrade target, Renovate disables automerge for that update.
+Before updating an existing PR, Renovate must also confirm that platform automerge is disabled.
+This confirmation currently supports GitHub; other platforms leave the branch unchanged and report an error for existing PRs whose selected target changes.
 
 This option is enabled automatically by the `group:vitePlus` preset.
 

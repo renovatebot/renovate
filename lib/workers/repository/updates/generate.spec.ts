@@ -5,8 +5,8 @@ import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
-import type { BranchUpgradeConfig } from '../../types.ts';
-import { generateBranchConfig } from './generate.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { generateBranchConfig, refreshBranchConfig } from './generate.ts';
 
 const {
   commitMessage,
@@ -28,6 +28,173 @@ beforeEach(() => {
 });
 
 describe('workers/repository/updates/generate', () => {
+  describe('refreshBranchConfig()', () => {
+    let config: BranchConfig;
+    let previousTargets: Map<
+      BranchUpgradeConfig,
+      Pick<BranchUpgradeConfig, 'newValue' | 'newVersion'>
+    >;
+
+    beforeEach(() => {
+      config = generateBranchConfig([
+        {
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          depName: 'vitest',
+          packageName: 'vitest',
+          datasource: 'npm',
+          currentValue: '4.1.0',
+          currentVersion: '4.1.0',
+          newValue: '4.2.0',
+          newVersion: '4.2.0',
+          newMajor: 4,
+          updateType: 'minor',
+          isMinor: true,
+          isSingleVersion: true,
+          automerge: true,
+        },
+      ]);
+      previousTargets = new Map(
+        config.upgrades.map((upgrade) => [upgrade, { ...upgrade }]),
+      );
+    });
+
+    it('leaves an unchanged branch untouched', () => {
+      const original = structuredClone(config);
+
+      const targetChanged = refreshBranchConfig(config, previousTargets);
+
+      expect(targetChanged).toBeFalse();
+      expect(config).toEqual(original);
+    });
+
+    it('recompiles default titles and the commit body table', () => {
+      config.commitBodyTable = true;
+      Object.assign(config.upgrades[0], {
+        newValue: '4.1.11',
+        newVersion: '4.1.11',
+        updateType: 'patch',
+        commitBodyTable: true,
+      });
+
+      const targetChanged = refreshBranchConfig(config, previousTargets);
+
+      expect(targetChanged).toBeTrue();
+      expect(config.prTitle).toBe('Update dependency vitest to v4.1.11');
+      expect(config.commitMessage).toStartWith(
+        'Update dependency vitest to v4.1.11',
+      );
+      expect(config.commitMessage).toContain('| npm');
+      expect(config.commitMessage).toContain('4.1.11');
+      expect(config.commitMessage).not.toContain('4.2.0');
+      expect(config.automerge).toBeFalse();
+    });
+
+    it('refreshes pin classification without a new major', () => {
+      Object.assign(config.upgrades[0], {
+        newValue: '4.1.0',
+        newVersion: undefined,
+        newMajor: undefined,
+        updateType: 'pin',
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config).toMatchObject({
+        isMinor: false,
+        isPin: true,
+        updateType: 'pin',
+        prettyNewVersion: undefined,
+        prettyNewMajor: undefined,
+        automerge: false,
+      });
+    });
+
+    it('preserves a grouped message with no version extra', () => {
+      config.groupName = 'Vitest packages';
+      config.isGroup = true;
+      config.upgrades[0].commitMessageTopic = '{{{groupName}}}';
+      delete config.upgrades[0].commitMessageExtra;
+      config.upgrades[0].newValue = '4.1.11';
+      config.upgrades[0].newVersion = '4.1.11';
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.commitMessage).toBe('Update Vitest packages');
+      expect(config.prTitle).toBe('Update Vitest packages');
+    });
+
+    it('recompiles a synthesized version extra for different ranges', () => {
+      config = generateBranchConfig(
+        ['^4.2.0', '~4.2.0'].map((newValue) => ({
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          depName: 'vitest',
+          newValue,
+          newVersion: '4.2.0',
+          isRange: true,
+        })),
+      );
+      previousTargets = new Map(
+        config.upgrades.map((upgrade) => [upgrade, { ...upgrade }]),
+      );
+      expect(config.commitMessage).toBe('Update dependency vitest to v4.2.0');
+      for (const upgrade of config.upgrades) {
+        upgrade.newValue = '4.1.11';
+        upgrade.newVersion = '4.1.11';
+      }
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config.commitMessage).toBe('Update dependency vitest to v4.1.11');
+      expect(config.prTitle).toBe('Update dependency vitest to v4.1.11');
+    });
+
+    it('omits a shared version when a grouped target diverges', () => {
+      config = generateBranchConfig(
+        ['@vitest/coverage-v8', 'vitest'].map((depName) => ({
+          ...getConfig(),
+          major: undefined,
+          manager: 'npm',
+          branchName: 'renovate/vitest-4.x',
+          depName,
+          groupName: 'Vitest packages',
+          newValue: '4.2.0',
+          newVersion: '4.2.0',
+          newMajor: 4,
+          updateType: 'minor',
+        })),
+      );
+      previousTargets = new Map(
+        config.upgrades.map((upgrade) => [upgrade, { ...upgrade }]),
+      );
+      Object.assign(config.upgrades[1], {
+        newValue: '5.0.0',
+        newVersion: '5.0.0',
+        newMajor: 5,
+        updateType: 'major',
+        isBreaking: true,
+      });
+
+      refreshBranchConfig(config, previousTargets);
+
+      expect(config).toMatchObject({
+        commitMessage: 'Update Vitest packages',
+        prTitle: 'Update Vitest packages (major)',
+        updateType: 'major',
+        isMajor: true,
+        isBreaking: true,
+        automerge: false,
+        isGroup: true,
+        groupName: 'Vitest packages',
+      });
+    });
+  });
+
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade by default', () => {
       const { groupSingleUpdates } = getConfig();

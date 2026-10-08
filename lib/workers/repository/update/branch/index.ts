@@ -48,6 +48,7 @@ import type {
   PrBlockedBy,
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
+import { refreshBranchConfig } from '../../updates/generate.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -622,9 +623,12 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (!(
-      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-    )) {
+    if (
+      !(
+        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
+      ) ||
+      config.postUpdateOptions?.includes('vitePlusSyncVersions')
+    ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
@@ -644,10 +648,71 @@ export async function processBranch(
       } else {
         logger.debug('No package files need updating');
       }
+      config.upgrades = config.upgrades.map((upgrade) => ({ ...upgrade }));
+      const previousTargets = new Map(
+        config.upgrades.map((upgrade) => [
+          upgrade,
+          { newValue: upgrade.newValue, newVersion: upgrade.newVersion },
+        ]),
+      );
       const additionalFiles = await getAdditionalFiles(
         config,
         branchConfig.packageFiles!,
       );
+      if (!config.upgrades.length) {
+        logger.debug('No upgrades remain after updating artifacts');
+        if (branchExists) {
+          const { cleanUpBranches } = await import('../../finalize/prune.ts');
+          await cleanUpBranches(
+            {
+              ...config,
+              baseBranchPatterns: [],
+              baseBranches: [config.baseBranch],
+            },
+            [config.branchName],
+          );
+          branchExists = await scm.branchExists(config.branchName);
+        }
+        return {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'no-work',
+        };
+      }
+      if (
+        !branchExists &&
+        config.minimumGroupSize &&
+        config.minimumGroupSize > config.upgrades.length &&
+        !dependencyDashboardCheck
+      ) {
+        logger.debug(
+          `Skipping branch creation as minimumGroupSize: ${config.minimumGroupSize} is not met`,
+        );
+        return {
+          branchExists: false,
+          result: 'minimum-group-size-not-met',
+        };
+      }
+      const targetChanged = refreshBranchConfig(config, previousTargets);
+      if (targetChanged && branchPr) {
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would cancel platform automerge for PR #${branchPr.number}`,
+          );
+        } else if (
+          !(await platform.cancelPlatformAutomerge?.(branchPr.number))
+        ) {
+          logger.warn(
+            { prNo: branchPr.number },
+            'Cannot confirm platform automerge is disabled after version reconciliation',
+          );
+          return {
+            branchExists,
+            prNo: branchPr.number,
+            result: 'error',
+          };
+        }
+      }
       config.artifactErrors = coerceArray(config.artifactErrors).concat(
         additionalFiles.artifactErrors,
       );
