@@ -25,10 +25,10 @@ runs:
     # To avoid disk space issues when performing a multi-platform docker build, we can clear up some disk space ahead of time
     - name: Free Disk Space
       if: ${{ steps.check.outputs.do-cleanup == 'true' }}
-      uses: jlumbroso/free-disk-space@3f13feab2962a87273d379ebc36ea159527e6cc9 # v1.3.2
+      uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
       with:
         # we're likely already using some of the globally installed tools
-        tool-cache: false
+        preinstalled-runtimes: false
         # there are no images by default
         docker-images: false
         # but we're definitely not using these
