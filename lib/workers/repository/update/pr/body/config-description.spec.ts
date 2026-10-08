@@ -11,6 +11,23 @@ describe('workers/repository/update/pr/body/config-description', () => {
       upgrades: [],
     };
 
+    it('links the configuration heading to the Dependency Dashboard', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        dependencyDashboardIssue: 123,
+      });
+
+      expect(res).toContain(
+        '### [Configuration](../issues/123 "Dependency Dashboard")',
+      );
+    });
+
+    it('renders a plain configuration heading without a dashboard issue', () => {
+      const res = getPrConfigDescription(config);
+
+      expect(res).toContain('### Configuration');
+    });
+
     it('renders stopUpdating=true', () => {
       const res = getPrConfigDescription({
         ...config,
