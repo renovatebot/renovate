@@ -3,6 +3,7 @@ import type { S3ClientConfig } from '@aws-sdk/client-s3';
 import { S3Client } from '@aws-sdk/client-s3';
 import { isString, isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global.ts';
+import { getEnv } from './env.ts';
 import { parseUrl } from './url.ts';
 
 let s3Instance: S3Client | undefined;
@@ -30,10 +31,22 @@ function newS3Client(
   const forcePathStyle = isUndefined(s3PathStyle)
     ? !!GlobalConfig.get('s3PathStyle')
     : s3PathStyle;
+  const env = getEnv();
+  const accessKeyId = env.RENOVATE_S3_AWS_ACCESS_KEY_ID;
+  const secretAccessKey = env.RENOVATE_S3_AWS_SECRET_ACCESS_KEY;
+  const region = env.RENOVATE_S3_AWS_REGION;
+  // Host rule credentials win over the S3-specific environment variables.
+  // If neither is set, the AWS SDK default provider chain is used.
+  const resolvedCredentials =
+    credentials ??
+    (accessKeyId && secretAccessKey
+      ? { accessKeyId, secretAccessKey }
+      : undefined);
   return new S3Client({
     ...(endpoint && { endpoint }),
     ...(forcePathStyle && { forcePathStyle: true }),
-    ...(credentials && { credentials }),
+    ...(region && { region }),
+    ...(resolvedCredentials && { credentials: resolvedCredentials }),
   });
 }
 
