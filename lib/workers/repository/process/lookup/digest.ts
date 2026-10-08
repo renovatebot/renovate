@@ -1,6 +1,7 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import { logger } from '../../../../logger/index.ts';
+import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
 import type {
   GetDigestInputConfig,
   ReleaseResult,
@@ -14,6 +15,7 @@ import {
   resolveUpdateTypeConfig,
 } from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
+import { resolveReplacementNameForAliases } from './utils.ts';
 
 /** The only two `updateType`s that `applyMinimumReleaseAgeToDigestUpdate()` can be called with */
 export type DigestLikeUpdate = LookupUpdate & {
@@ -144,6 +146,18 @@ function getDigestInputConfig(
     delete getDigestConfig.lookupName;
     delete getDigestConfig.currentDigest;
     getDigestConfig.replacementName = update.newName;
+
+    // `update.newName` may itself start with a configured registryAlias (e.g. when set via
+    // `replacementName`/`replacementNameTemplate`), so resolve it before using it for the digest
+    // lookup. The unresolved alias form is still used everywhere else (e.g. the replaced string).
+    // `registryAliases` is repo-level config and its prefix-matching semantics are specific to
+    // registry-prefixed package names, so only apply it for the docker datasource
+    if (config.datasource === DockerDatasource.id) {
+      getDigestConfig.replacementName = resolveReplacementNameForAliases(
+        update.newName,
+        config.registryAliases,
+      );
+    }
   }
 
   return getDigestConfig;
