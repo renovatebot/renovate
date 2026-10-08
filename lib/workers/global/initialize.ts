@@ -8,7 +8,8 @@ import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
-import { validateGitVersion } from '../../util/git/index.ts';
+import { validateGitLfs, validateGitVersion } from '../../util/git/index.ts';
+import { GIT_LFS_MIN_VERSION, toGitLfsMode } from '../../util/git/lfs.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
@@ -50,10 +51,20 @@ function limitCommitsPerRun(config: RenovateConfig): void {
   setMaxLimit('Commits', typeof limit === 'number' && limit > 0 ? limit : null);
 }
 
-async function checkVersions(): Promise<void> {
+async function checkVersions(config: AllConfig): Promise<void> {
   const validGitVersion = await validateGitVersion();
   if (!validGitVersion) {
     throw new Error('Init: git version needs upgrading');
+  }
+  const mode = toGitLfsMode(config.gitLfs);
+  if (mode === 'disabled') {
+    return;
+  }
+  const { ok, version } = await validateGitLfs(mode);
+  if (!ok) {
+    throw new Error(
+      `Init: gitLfs="${mode}" requires git-lfs >= ${GIT_LFS_MIN_VERSION[mode]} on PATH (found: ${version ?? 'none'})`,
+    );
   }
 }
 
@@ -87,7 +98,7 @@ export async function globalInitialize(
 ): Promise<RenovateConfig> {
   let config = config_;
   setHttpRateLimits();
-  await checkVersions();
+  await checkVersions(config);
   setGlobalHostRules(config);
   config = await initPlatform(config);
   config = await setDirectories(config);

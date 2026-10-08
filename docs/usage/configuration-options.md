@@ -2036,6 +2036,43 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## `gitLfsInclude`
+
+Git LFS include patterns for LFS-tracked files whose real content Renovate downloads into its working copy.
+Renovate's managers, lock file updates and `postUpgradeTasks` then see the real files instead of LFS pointers.
+Other LFS-tracked files stay LFS pointers.
+
+This option only has an effect when the self-hosted [`gitLfs`](./self-hosted-configuration.md#gitlfs) option is set to `enabled`.
+If `gitLfs` is `upload`, Renovate ignores `gitLfsInclude` and logs a warning.
+
+The patterns use the [`git-lfs` include syntax](https://github.com/git-lfs/git-lfs/blob/main/docs/man/git-lfs-fetch.adoc#include-and-exclude), which is gitignore-style, and not Renovate's [string pattern matching](./string-pattern-matching.md).
+For example, `*.zip` matches files at any depth.
+Entries must not contain commas, use `?` to match a literal comma.
+
+Examples:
+
+```json title="LFS-tracked npm lock files"
+{
+  "gitLfsInclude": ["package-lock.json", "**/package-lock.json"]
+}
+```
+
+```json title="Yarn zero-installs cache"
+{
+  "gitLfsInclude": [".yarn/cache/**"]
+}
+```
+
+```json title="Gradle wrapper"
+{
+  "gitLfsInclude": ["gradle/wrapper/gradle-wrapper.jar"]
+}
+```
+
+Each matching file costs LFS bandwidth the first time Renovate checks it out during a run.
+If Renovate can't download a matching file, for example because its LFS object is missing on the server, Renovate reports a config problem for the repository.
+Read the [Git LFS guide](./git-lfs.md) to learn more.
+
 ## `goGetDirs`
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.

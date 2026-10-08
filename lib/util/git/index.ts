@@ -39,8 +39,10 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { coerceArray } from '../array.ts';
 import { getCache } from '../cache/repository/index.ts';
-import { getEnv } from '../env.ts';
+import { getCustomEnv, getEnv, getUserEnv } from '../env.ts';
+import { getChildProcessEnv } from '../exec/env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
+import type { ResolvedChildEnv } from '../exec/utils.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { coerceObject } from '../object.ts';
 import { newlineRegex, regEx } from '../regex.ts';
@@ -67,6 +69,25 @@ import {
 } from './error.ts';
 import type { InstrumentedSimpleGit } from './instrument.ts';
 import { instrumentGit } from './instrument.ts';
+import type { GitLfsMode, LfsState } from './lfs.ts';
+import {
+  LfsLsFiles,
+  applyLfsConfig,
+  chunk,
+  findLfsConfigConflict,
+  getGitLfsMode,
+  getLfsAuthEndpoint,
+  getLfsEndpoint,
+  getLfsEndpointHost,
+  isGitLfsError,
+  logWarningIfGitLfsPointer,
+  mapGitLfsError,
+  parseLfsPointer,
+  sanitizeEnvForLfs,
+  selectUploadOids,
+  validateGitLfsVersion,
+} from './lfs.ts';
+import { getLfsState, newLfsState, setLfsState } from './lfs-state.ts';
 import {
   getCachedModifiedResult,
   setCachedModifiedResult,
@@ -98,20 +119,22 @@ const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
 
-interface CreateSimpleGitOptions {
-  config?: Partial<SimpleGitOptions>;
+interface ComputeGitEnvOptions {
   env?: ExtraEnv;
   authentication?: {
     hostTypes?: readonly string[];
   };
+  lfs?: LfsState;
+  /** the child env to start from instead of the current one */
+  childEnv?: ResolvedChildEnv;
 }
 
-export function createSimpleGit({
-  config,
-  env,
-  authentication,
-}: CreateSimpleGitOptions = {}): SimpleGit {
-  const childEnv = getChildEnv({
+interface CreateSimpleGitOptions extends ComputeGitEnvOptions {
+  config?: Partial<SimpleGitOptions>;
+}
+
+function computeChildEnv(env?: ExtraEnv): ResolvedChildEnv {
+  return getChildEnv({
     extraEnv: {
       // Git will prompt for known hosts or passwords, unless we activate BatchMode.
       // Set as extraEnv (lowest priority) so that process.env and
@@ -131,10 +154,45 @@ export function createSimpleGit({
       LC_ALL: 'C.UTF-8',
     },
   });
-  const gitEnv = authentication
-    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+}
+
+function computeGitEnv({
+  env,
+  authentication,
+  lfs,
+  childEnv = computeChildEnv(env),
+}: ComputeGitEnvOptions): ResolvedChildEnv {
+  const baseEnv = lfs?.active
+    ? sanitizeEnvForLfs(childEnv, getUserEnv(), {
+        ...getChildProcessEnv(),
+        ...getCustomEnv(),
+      })
     : childEnv;
-  return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
+  const gitEnv = authentication
+    ? getGitEnvironmentVariables(baseEnv, authentication.hostTypes)
+    : baseEnv;
+  return lfs?.active ? applyLfsConfig(gitEnv, lfs) : gitEnv;
+}
+
+export function createSimpleGit({
+  config,
+  env,
+  authentication,
+  lfs,
+  childEnv,
+}: CreateSimpleGitOptions = {}): SimpleGit {
+  const gitConfig = simpleGitConfig();
+  if (lfs?.active) {
+    // The pinned Git LFS config sets `core.hooksPath` and the `filter.lfs.*` commands
+    gitConfig.unsafe = {
+      ...gitConfig.unsafe,
+      allowUnsafeHooksPath: true,
+      allowUnsafeFilter: true,
+    };
+  }
+  return simpleGit({ ...gitConfig, ...config }).env(
+    computeGitEnv({ env, authentication, lfs, childEnv }),
+  );
 }
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
@@ -234,6 +292,12 @@ let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
+let lfsChecked = false;
+
+// The child env of the repository instance, computed in `initRepo` before the repository env is known.
+// Env rebuilds start from it, so that they do not widen the reach of the repository env.
+let repoChildEnv: ResolvedChildEnv = {};
+
 let platformIgnoredAuthors: string[] = [];
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
@@ -263,6 +327,58 @@ export async function validateGitVersion(): Promise<boolean> {
   }
   logger.debug(`Found valid git version: ${version}`);
   return true;
+}
+
+export async function validateGitLfs(
+  mode: Exclude<GitLfsMode, 'disabled'>,
+): Promise<{ ok: boolean; version: string | null }> {
+  const result = await validateGitLfsVersion(mode, (args) =>
+    createSimpleGit().raw(args),
+  );
+  if (!result.ok) {
+    logger.error(
+      { detectedVersion: result.version, mode },
+      'git-lfs is missing or its version needs upgrading',
+    );
+    return result;
+  }
+  logger.debug(`Found git-lfs version ${result.version}`);
+  return result;
+}
+
+function resolveLfsState({ url, upstreamUrl }: StorageConfig): LfsState {
+  const state = newLfsState();
+  state.mode = getGitLfsMode();
+  if (state.mode === 'disabled') {
+    return state;
+  }
+  if (upstreamUrl) {
+    state.inactiveReason = 'fork';
+    logger.once.warn('Git LFS support is not available in fork mode');
+    return state;
+  }
+  state.endpoint = getLfsEndpoint(url);
+  if (!state.endpoint) {
+    state.inactiveReason = 'ssh';
+    logger.once.warn(
+      'Git LFS support is not available for SSH remotes yet; LFS-tracked files will be committed as regular Git files',
+    );
+    return state;
+  }
+  state.authEndpoint = getLfsAuthEndpoint(url, state.endpoint);
+  state.active = true;
+  logger.debug(
+    `gitLfs: mode=${state.mode} active=true endpointHost=${getLfsEndpointHost(state.endpoint)}`,
+  );
+  return state;
+}
+
+function buildRepoGitEnv({ authentication = false } = {}): ResolvedChildEnv {
+  return computeGitEnv({
+    ...(authentication && { authentication: {} }),
+    lfs: getLfsState(),
+    childEnv: repoChildEnv,
+  });
 }
 
 async function fetchBranchCommits(preferUpstream = true): Promise<void> {
@@ -321,8 +437,16 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.additionalBranches = [];
   config.branchIsModified = {};
   config.virtualBranches ??= {};
+  const lfsState = resolveLfsState(args);
+  setLfsState(lfsState);
+  lfsChecked = false;
+  repoChildEnv = computeChildEnv();
   git = instrumentGit(
-    createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      ...(lfsState.active && { lfs: lfsState }),
+      childEnv: repoChildEnv,
+    }),
   );
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -453,8 +577,12 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitEnv = getGitEnvironmentVariables(getChildEnv());
   await syncGit();
+  const lfsState = getLfsState();
+  // `git.env()` replaces the whole environment, so the Git LFS config has to be kept
+  const gitEnv = lfsState.active
+    ? computeGitEnv({ authentication: {}, lfs: lfsState })
+    : getGitEnvironmentVariables(getChildEnv());
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
     if (!matchRegexOrGlobList(submodule, cloneSubmodulesFilter ?? ['*'])) {
@@ -466,6 +594,7 @@ export async function cloneSubmodules(
     }
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
+      lfsState.authenticated = lfsState.active;
       await gitRetry(() =>
         git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
       );
@@ -473,6 +602,73 @@ export async function cloneSubmodules(
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
     }
   }
+}
+
+export async function initGitLfs(repoConfig: RenovateConfig): Promise<void> {
+  const include = coerceArray(repoConfig.gitLfsInclude);
+  if (!getLfsState().active || !include.length) {
+    return;
+  }
+  if (getLfsState().mode === 'upload') {
+    logger.once.warn(
+      'gitLfsInclude is ignored because gitLfs is set to "upload"',
+    );
+    return;
+  }
+  await syncGit();
+  const lfsState = getLfsState();
+  if (!lfsState.active) {
+    return;
+  }
+  lfsState.include = include;
+  git.env(buildRepoGitEnv({ authentication: lfsState.authenticated }));
+  try {
+    await gitRetry(() => git.raw(['lfs', 'pull']));
+    const files = LfsLsFiles.parse(
+      await git.raw(['lfs', 'ls-files', '--json']),
+    ).filter((file) => file.downloaded);
+    const bytes = files.reduce((sum, file) => sum + file.size, 0);
+    logger.info(
+      `Git LFS: materialized ${files.length} file(s) (${(bytes / 1024 / 1024).toFixed(1)} MiB) matching gitLfsInclude`,
+    );
+  } catch (err) {
+    throw mapGitLfsError(err, 'download');
+  }
+}
+
+async function checkLfsRepo(): Promise<void> {
+  const lfsState = getLfsState();
+  let output: string;
+  try {
+    output = await git.raw([
+      'config',
+      '--no-includes',
+      '--blob',
+      'HEAD:.lfsconfig',
+      '--get-regexp',
+      '^(lfs\\.(url|pushurl)|remote\\..+\\.lfs(push)?url)$',
+    ]);
+  } catch {
+    // no `.lfsconfig` or no matching keys
+    return;
+  }
+  const host = findLfsConfigConflict(output, lfsState.endpoint!);
+  if (host === null) {
+    return;
+  }
+  lfsState.active = false;
+  lfsState.inactiveReason = 'external-lfs-server';
+  logger.once.warn(
+    { host },
+    "Git LFS support is inactive for this repository because .lfsconfig points to a different LFS server. Renovate only uploads to the repository's own LFS storage",
+  );
+  // recreate the instance, so that it no longer allows the unsafe options the Git LFS config needs
+  git = instrumentGit(
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      childEnv: repoChildEnv,
+    }),
+  );
 }
 
 export function isCloned(): boolean {
@@ -589,6 +785,10 @@ export const syncGit = withInstrumenting(
         throw new Error(REPOSITORY_CHANGED);
       }
       throw err;
+    }
+    if (getLfsState().active && !lfsChecked) {
+      lfsChecked = true;
+      await checkLfsRepo();
     }
     // This will only happen now if set in global config
     await instrument('cloneSubmodules', () =>
@@ -1323,14 +1523,37 @@ export async function getFile(
 ): Promise<string | null> {
   await syncGit();
   try {
-    const content = await git.show([
-      `origin/${branchName ?? config.currentBranch}:${filePath}`,
-    ]);
+    const ref = `origin/${branchName ?? config.currentBranch}:${filePath}`;
+    let content = await git.show([ref]);
+
+    if (parseLfsPointer(content)) {
+      const lfsState = getLfsState();
+      if (
+        lfsState.active &&
+        lfsState.mode === 'enabled' &&
+        lfsState.include.length
+      ) {
+        try {
+          content = await git.raw(['cat-file', '--filters', ref]);
+        } catch (err) {
+          throw mapGitLfsError(err, 'download');
+        }
+      }
+      logWarningIfGitLfsPointer(
+        filePath,
+        content,
+        lfsState.mode,
+        lfsState.active,
+      );
+    }
 
     logWarningIfUnicodeHiddenCharactersInPackageFile(filePath, content);
 
     return content;
   } catch (err) {
+    if (isGitLfsError(err)) {
+      throw err;
+    }
     const errChecked = checkForPlatformFailure(err);
     /* v8 ignore if -- TODO: add test #40625 */
     if (errChecked) {
@@ -1384,7 +1607,8 @@ async function handleCommitAuth(localDir: string): Promise<void> {
  * 2. Perform `git add` (respecting mode) and `git remove` for each file
  * 3. Perform commit
  * 4. Check whether resulting commit is empty or not (due to .gitignore)
- * 5. If not empty, return commit info for further processing
+ * 5. When Git LFS is active, upload the LFS objects introduced by the commit (`git lfs push --object-id`) before returning, so that the subsequent push or platform-native commit never references unknown LFS objects
+ * 6. If not empty, return commit info for further processing
  *
  */
 export async function prepareCommit({
@@ -1512,9 +1736,54 @@ export async function prepareCommit({
       }),
     };
 
+    if (getLfsState().active) {
+      await uploadLfsObjects(parentCommitSha, commitSha, branchName);
+    }
+
     return result;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
+    if (isGitLfsError(err)) {
+      throw err;
+    }
     return handleCommitError(err, branchName, files);
+  }
+}
+
+async function uploadLfsObjects(
+  parentCommitSha: LongCommitSha,
+  commitSha: LongCommitSha,
+  branchName: string,
+): Promise<void> {
+  try {
+    const files = LfsLsFiles.parse(
+      await git.raw(['lfs', 'ls-files', '--json', parentCommitSha, commitSha]),
+    );
+    const { oids, skipped, bytes } = selectUploadOids(files);
+    if (skipped.length) {
+      logger.debug(
+        { branchName, skipped },
+        'gitLfs: skipping LFS pointers without a local object',
+      );
+    }
+    if (!oids.length) {
+      return;
+    }
+    logger.debug(
+      {
+        branchName,
+        count: oids.length,
+        bytes,
+        endpointHost: getLfsEndpointHost(getLfsState().endpoint!),
+      },
+      `gitLfs: uploading ${oids.length} object(s) (${bytes} bytes)`,
+    );
+    for (const oidChunk of chunk(oids)) {
+      await gitRetry(() =>
+        git.raw(['lfs', 'push', '--object-id', 'origin', ...oidChunk]),
+      );
+    }
+  } catch (err) {
+    throw mapGitLfsError(err, 'upload');
   }
 }
 

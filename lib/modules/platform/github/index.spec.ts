@@ -6593,6 +6593,56 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe(fetchedSha);
     });
 
+    it('prepares the commit before pushing the ref and creating the tree', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      let prepareCalledBeforeTree = false;
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, () => {
+          prepareCalledBeforeTree = git.prepareCommit.mock.calls.length === 1;
+          return { sha: '111' };
+        })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+
+      await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(prepareCalledBeforeTree).toBeTrue();
+      expect(git.prepareCommit.mock.invocationCallOrder[0]).toBeLessThan(
+        git.pushCommitToRenovateRef.mock.invocationCallOrder[0],
+      );
+    });
+
+    it('propagates Git LFS upload errors from the pre-commit phase', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      const err = new Error('git-lfs push failed: boom');
+      git.prepareCommit.mockRejectedValueOnce(err);
+
+      await expect(
+        github.commitFiles({
+          branchName: 'foo/bar',
+          files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+          message: 'Foobar',
+        }),
+      ).rejects.toBe(err);
+      expect(git.pushCommitToRenovateRef).not.toHaveBeenCalled();
+    });
+
     it('includes commit trailers in the platform-native commit message', async () => {
       const scope = httpMock.scope(githubApiHost);
 

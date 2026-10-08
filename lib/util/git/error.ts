@@ -2,7 +2,14 @@ import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { getEnv } from '../env.ts';
+import { isGitLfsActive } from './lfs-state.ts';
 import type { FileChange } from './types.ts';
+
+export const GH008_LFS_INACTIVE_MESSAGE =
+  'The push was rejected because it references Git LFS objects that are not on the server (GH008). This repository uses Git LFS; ask your Renovate administrator to set `gitLfs` (see docs).';
+
+export const GH008_LFS_ACTIVE_MESSAGE =
+  'The push was rejected (GH008) although Renovate uploaded its Git LFS objects. Check that Git LFS is enabled for this repository and that its LFS storage quota is not exhausted.';
 
 export function checkForPlatformFailure(err: Error): Error | null {
   if (getEnv().NODE_ENV === 'test') {
@@ -110,6 +117,18 @@ export function handleCommitError(
       `ruleset - or grant Renovate a bypass actor - so Renovate can ` +
       `proceed. Original error: \`${err.message.replaceAll('`', "'")}\``;
     throw error;
+  }
+  if (err.message.includes('GH008')) {
+    logger.debug({ err }, 'GitHub rejected push with unknown Git LFS objects');
+    if (isGitLfsActive()) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = branchName;
+      error.validationError = 'Git LFS objects missing';
+      error.validationMessage = GH008_LFS_ACTIVE_MESSAGE;
+      throw error;
+    }
+    // without Git LFS only this branch is affected, so keep the branch error handling below
+    logger.warn({ branchName }, GH008_LFS_INACTIVE_MESSAGE);
   }
   if (
     (err.message.includes('remote rejected') || err.message.includes('403')) &&

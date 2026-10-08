@@ -1,4 +1,5 @@
 import { GlobalConfig } from './global.ts';
+import { getOptions } from './options/index.ts';
 import type { InternalGlobalConfigOptions, RepoGlobalConfig } from './types.ts';
 
 describe('config/global', () => {
@@ -10,6 +11,19 @@ describe('config/global', () => {
     expectTypeOf<(typeof GlobalConfig.OPTIONS)[number]>().toEqualTypeOf<
       keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions
     >();
+  });
+
+  it('OPTIONS survive filtering to the repository stage', () => {
+    // `filterConfig(config, 'repository')` drops `stage: 'global'` options before the repository worker calls `GlobalConfig.set()`
+    const globalStage = getOptions()
+      .filter(
+        (option) =>
+          option.stage === 'global' &&
+          (GlobalConfig.OPTIONS as readonly string[]).includes(option.name),
+      )
+      .map((option) => option.name);
+
+    expect(globalStage).toEqual([]);
   });
 
   it('all values in OPTIONS are sorted', () => {

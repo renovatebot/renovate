@@ -1,6 +1,13 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
-import { bulkChangesDisallowed, handleCommitError } from './error.ts';
+import {
+  GH008_LFS_ACTIVE_MESSAGE,
+  GH008_LFS_INACTIVE_MESSAGE,
+  bulkChangesDisallowed,
+  handleCommitError,
+} from './error.ts';
+import { newLfsState, setLfsState } from './lfs-state.ts';
 import type { FileChange } from './types.ts';
 
 const workflowFile: FileChange = {
@@ -71,6 +78,47 @@ describe('util/git/errors', () => {
       );
       expect(thrown.validationMessage).toContain('GH013');
       expect(thrown.validationMessage).toContain('renovate/go-1.x');
+    });
+
+    describe('GH008', () => {
+      const err = new Error(codeBlock`
+        remote: error: GH008: Your push referenced at least 1 unknown Git LFS object:
+        remote:     ${'a'.repeat(64)}
+        remote: Try to push them with 'git lfs push --all'.
+        To https://github.com/the-org/example.git
+         ! [remote rejected] renovate/foo -> renovate/foo (pre-receive hook declined)
+      `);
+
+      afterEach(() => {
+        setLfsState(newLfsState());
+      });
+
+      it('suggests gitLfs and fails only the branch when Git LFS is not active', () => {
+        expect(() => handleCommitError(err, 'renovate/foo')).toThrow(err);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { branchName: 'renovate/foo' },
+          GH008_LFS_INACTIVE_MESSAGE,
+        );
+      });
+
+      it('keeps aborting a workflow change when Git LFS is not active', () => {
+        expect(
+          handleCommitError(err, 'renovate/foo', [workflowFile]),
+        ).toBeNull();
+      });
+
+      it('throws a config error when Git LFS is active', () => {
+        setLfsState({ ...newLfsState(), mode: 'upload', active: true });
+
+        expect(() => handleCommitError(err, 'renovate/foo')).toThrow(
+          expect.objectContaining({
+            message: CONFIG_VALIDATION,
+            validationSource: 'renovate/foo',
+            validationError: 'Git LFS objects missing',
+            validationMessage: GH008_LFS_ACTIVE_MESSAGE,
+          }),
+        );
+      });
     });
 
     it('still silently aborts on generic workflow-file push rejection', () => {

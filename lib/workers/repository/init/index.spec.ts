@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { logger, partial } from '~test/util.ts';
+import { git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _secrets from '../../../config/secrets.ts';
 import * as _onboarding from '../onboarding/branch/index.ts';
@@ -47,6 +47,27 @@ describe('workers/repository/init/index', () => {
       );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
+    });
+
+    it('initializes Git LFS after the repository config and before submodules', async () => {
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      config.getRepoConfig.mockResolvedValueOnce({});
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>({ gitLfsInclude: ['package-lock.json'] }),
+      );
+
+      await initRepo({});
+
+      expect(git.initGitLfs).toHaveBeenCalledExactlyOnceWith({
+        gitLfsInclude: ['package-lock.json'],
+      });
+      const [setUserRepoConfigOrder] =
+        git.setUserRepoConfig.mock.invocationCallOrder;
+      const [initGitLfsOrder] = git.initGitLfs.mock.invocationCallOrder;
+      const [cloneSubmodulesOrder] =
+        git.cloneSubmodules.mock.invocationCallOrder;
+      expect(initGitLfsOrder).toBeGreaterThan(setUserRepoConfigOrder);
+      expect(cloneSubmodulesOrder).toBeGreaterThan(initGitLfsOrder);
     });
 
     it('warns on unsupported options', async () => {

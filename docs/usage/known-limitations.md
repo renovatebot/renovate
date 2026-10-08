@@ -46,3 +46,9 @@ The limitation to only automerge branches which are up-to-date is a decision due
 - The PR for `alice@2.0.0` is automerged
 - The PR for `bob@2.0.0` remains open, does not have conflicts, and has all tests passing
 - But `alice@2.0.0` and `bob@2.0.0` are incompatible so merging the PR without rebasing and retesting it first would result in a broken base branch
+
+## Git LFS limitations
+
+By default, Renovate does not handle files stored in Git LFS: it reads their LFS pointers, and commits changed LFS-tracked files as regular Git files.
+Self-hosted administrators can turn on the experimental [`gitLfs`](./self-hosted-configuration.md#gitlfs) option.
+Read the [Git LFS guide](./git-lfs.md) to learn more, including its current limitations.

@@ -40,6 +40,7 @@ import { clone } from '../../../util/clone.ts';
 import { getInheritedOrGlobal, parseJson } from '../../../util/common.ts';
 import { setUserEnv } from '../../../util/env.ts';
 import { readLocalFile, readSystemFile } from '../../../util/fs/index.ts';
+import { isLfsPointer } from '../../../util/git/lfs.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
@@ -164,6 +165,16 @@ export async function detectRepoFileConfig(
     // istanbul ignore if
     if (!configFileRaw.length) {
       configFileRaw = '{}';
+    }
+
+    if (isLfsPointer(configFileRaw)) {
+      return {
+        configFileName,
+        configFileParseError: {
+          validationError: 'Renovate config file is stored in Git LFS',
+          validationMessage: `Renovate cannot read its config file from Git LFS. Store \`${configFileName}\` as a regular Git file.`,
+        },
+      };
     }
 
     const parseResult = parseFileConfig(configFileName, configFileRaw);

@@ -201,6 +201,48 @@ function initOptions(): void {
   optionsInitialized = true;
 }
 
+function getGitLfsIncludeEntryError(entry: unknown): string | null {
+  if (!isString(entry) || entry.length === 0) {
+    return 'must be a non-empty string';
+  }
+  if (entry !== entry.trim()) {
+    return 'must not have leading or trailing whitespace';
+  }
+  if (regEx(/[,\r\n\0]/).test(entry)) {
+    return 'must not contain commas or control characters';
+  }
+  if (regEx(/^[-!]/).test(entry)) {
+    return 'must not start with `-` or `!`';
+  }
+  if (entry.split('/').includes('..')) {
+    return 'must not contain `..` path segments';
+  }
+  return null;
+}
+
+function validateGitLfsInclude(
+  val: unknown[],
+  currentPath: string,
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+  if (val.length > 100) {
+    errors.push({
+      topic: ConfigValidationTopic.Error,
+      message: `${currentPath}: must not contain more than 100 entries`,
+    });
+  }
+  for (const entry of val) {
+    const error = getGitLfsIncludeEntryError(entry);
+    if (error) {
+      errors.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Invalid gitLfsInclude entry "${String(entry)}": ${error}`,
+      });
+    }
+  }
+  return errors;
+}
+
 /**
  * Removes every relative preset reference from a deep copy of the given
  * `packageRules` entry, at any nesting depth.
@@ -531,6 +573,10 @@ export async function validateConfig(
                       });
                     }
                   }
+                }
+
+                if (key === 'gitLfsInclude') {
+                  errors.push(...validateGitLfsInclude(val, currentPath));
                 }
 
                 if (key === 'commitTrailers') {
@@ -1227,6 +1273,14 @@ async function validateGlobalConfig(
           warnings.push({
             topic: ConfigValidationTopic.Error,
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          });
+        } else if (
+          key === 'gitLfs' &&
+          !['disabled', 'upload', 'enabled'].includes(val)
+        ) {
+          warnings.push({
+            topic: ConfigValidationTopic.Error,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['disabled', 'upload', 'enabled'].join(', ')}.`,
           });
         }
 
