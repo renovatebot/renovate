@@ -242,6 +242,158 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it.each`
+      options
+      ${'--mount=source=README.md,target=/README.md --mount=from=ghcr.io/astral-sh/uv:0.7,source=/uv,target=/bin/uv'}
+      ${'--mount=type=cache,target=/cache --network=none --mount=source=/uv,target=/bin/uv,from=ghcr.io/astral-sh/uv:0.7'}
+      ${'--mount=type=cache,target=/cache --mount=type=tmpfs,target=/tmp --mount=source=/uv,from=ghcr.io/astral-sh/uv:0.7,target=/bin/uv'}
+    `('extracts an image after other RUN options: $options', ({ options }) => {
+      const res = extractPackageFile(`RUN ${options} uv --version`, '', {});
+
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'ghcr.io/astral-sh/uv',
+          currentValue: '0.7',
+          replaceString: 'ghcr.io/astral-sh/uv:0.7',
+        }),
+      ]);
+    });
+
+    it.each`
+      stageMount
+      ${''}
+      ${'--mount=from=build,target=/build'}
+    `('extracts every external image after "$stageMount"', ({ stageMount }) => {
+      const res = extractPackageFile(
+        codeBlock`
+          FROM scratch AS build
+          RUN ${stageMount} \\
+              --mount=from=ghcr.io/astral-sh/uv:0.7,target=/uv \\
+              --mount=target=/node,from=node:22 \\
+              echo ready
+        `,
+        '',
+        {},
+      );
+
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'ghcr.io/astral-sh/uv',
+          currentValue: '0.7',
+          replaceString: 'ghcr.io/astral-sh/uv:0.7',
+        }),
+        expect.objectContaining({
+          depName: 'node',
+          currentValue: '22',
+          replaceString: 'node:22',
+        }),
+      ]);
+    });
+
+    it.each`
+      lineEnding
+      ${'\n'}
+      ${'\r\n'}
+    `(
+      'ignores comments between RUN mounts with $lineEnding',
+      ({ lineEnding }) => {
+        const res = extractPackageFile(
+          codeBlock`
+          RUN --mount=type=cache,target=/cache \\
+              # --mount=from=not-an-image:1
+              --mount=target=/node,from=node:22 \\
+              node --version
+        `.replaceAll('\n', lineEnding),
+          '',
+          {},
+        );
+
+        expect(res?.deps).toEqual([
+          expect.objectContaining({
+            depName: 'node',
+            currentValue: '22',
+            replaceString: 'node:22',
+          }),
+        ]);
+      },
+    );
+
+    it.each`
+      escape  | lineEnding | mount
+      ${'\\'} | ${'\n'}    | ${'from=node:22,target=/node'}
+      ${'\\'} | ${'\r\n'}  | ${'from=node:22,target=/node'}
+      ${'\\'} | ${'\n'}    | ${'target=/node,from=node:22'}
+      ${'`'}  | ${'\n'}    | ${'target=/node,from=node:22'}
+    `(
+      'handles a RUN mount immediately followed by $escape and $lineEnding: $mount',
+      ({ escape, lineEnding, mount }) => {
+        const res = extractPackageFile(
+          codeBlock`
+          # escape=${escape}
+          FROM scratch
+          RUN --mount=${mount}${escape}
+              node --version
+        `.replaceAll('\n', lineEnding),
+          '',
+          {},
+        );
+
+        expect(res?.deps).toEqual([
+          expect.objectContaining({
+            depName: 'node',
+            currentValue: '22',
+            replaceString: 'node:22',
+          }),
+        ]);
+      },
+    );
+
+    it('handles RUN mounts with a backtick continuation', () => {
+      const res = extractPackageFile(
+        '# escape=`\nRUN --mount=type=cache,target=/cache `\n    --mount=target=/node,from=node:22 node --version',
+        '',
+        {},
+      );
+
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'node',
+          currentValue: '22',
+          replaceString: 'node:22',
+        }),
+      ]);
+    });
+
+    it.each`
+      instruction
+      ${'RUN echo "--mount=from=node:22"'}
+      ${'RUN echo --mount=from=node:22'}
+      ${'RUN --network=none echo --mount=from=node:22'}
+      ${'RUN --mount=type=cache,target=/cache echo --mount=from=node:22'}
+      ${'RUN --mount=type=cache,target=/cache true'}
+    `(
+      'ignores mount-like command arguments: $instruction',
+      ({ instruction }) => {
+        expect(extractPackageFile(instruction, '', {})).toBeNull();
+      },
+    );
+
+    it('stops extracting mounts when the RUN command begins', () => {
+      const res = extractPackageFile(
+        'RUN --mount=from=node:22,target=/node echo --mount=from=alpine:3.21',
+        '',
+        {},
+      );
+
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'node',
+          currentValue: '22',
+          replaceString: 'node:22',
+        }),
+      ]);
+    });
+
     it('is case insensitive', () => {
       const res = extractPackageFile('From node\n', '', {})?.deps;
       expect(res).toEqual([
