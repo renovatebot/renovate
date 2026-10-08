@@ -66,6 +66,24 @@ describe('modules/manager/npm/extract/npm', () => {
       });
     });
 
+    it('extracts npm 12 lockfile', async () => {
+      const npm12Lock = Fixtures.get('npm12/package-lock.json', '..');
+      fs.readLocalFile.mockResolvedValueOnce(npm12Lock);
+      const res = await getNpmLock('package.json');
+      expect(res).toEqual({
+        lockedVersions: {
+          'ansi-styles': '3.2.1',
+          chalk: '2.4.2',
+          'color-convert': '1.9.3',
+          'color-name': '1.1.3',
+          'escape-string-regexp': '1.0.5',
+          'has-flag': '3.0.0',
+          'supports-color': '5.5.0',
+        },
+        lockfileVersion: 4,
+      });
+    });
+
     it('returns null if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getNpmLock('package.json');

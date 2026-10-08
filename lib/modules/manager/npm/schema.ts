@@ -162,7 +162,7 @@ export const PackageJson = Json.pipe(
 export type PackageJson = z.infer<typeof PackageJson>;
 
 export const PackageLockV3 = z.object({
-  lockfileVersion: z.literal(3),
+  lockfileVersion: z.union([z.literal(3), z.literal(4)]),
   packages: LooseRecord(
     z
       .string()
