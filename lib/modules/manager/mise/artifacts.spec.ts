@@ -407,6 +407,10 @@ describe('modules/manager/mise/artifacts', () => {
     if (lockedUpdate.status !== 'updated') {
       throw new Error('Expected Mise lockfile update to succeed');
     }
+    const updateFiles = lockedUpdate.files;
+    if (!updateFiles) {
+      throw new Error('Expected Mise lockfile update to return files');
+    }
 
     fs.readLocalFile
       .mockResolvedValueOnce(originalLockFile)
@@ -424,8 +428,8 @@ describe('modules/manager/mise/artifacts', () => {
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'npm:renovate' }],
-      newPackageFileContent: lockedUpdate.files['mise.toml'],
-      newLockFileContent: lockedUpdate.files['mise.lock'],
+      newPackageFileContent: updateFiles['mise.toml'],
+      newLockFileContent: updateFiles['mise.lock'],
       config,
     });
 
@@ -451,7 +455,7 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
     expect(fs.writeLocalFile).toHaveBeenCalledWith(
       'mise.lock',
-      lockedUpdate.files['mise.lock'],
+      updateFiles['mise.lock'],
     );
   });
 
