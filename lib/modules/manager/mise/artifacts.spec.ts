@@ -388,6 +388,73 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('updates mise.lock and its sidecars together for a dependency update', async () => {
+    const originalPackageFile = '[tools]\n"npm:renovate" = "latest"\n';
+    const originalLockFile =
+      '[[tools."npm:renovate"]]\nversion = "44.133.0"\naube = { path = ".mise/locks/npm-renovate/44.132.2~aa673d8d", digest = "sha256:old" }\n';
+    const updatedLockFile =
+      '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.132.2~aa673d8d", digest = "sha256:new" }\n';
+    const lockedUpdate = updateLockedDependency({
+      packageFile: 'mise.toml',
+      packageFileContent: originalPackageFile,
+      lockFile: 'mise.lock',
+      lockFileContent: originalLockFile,
+      depName: 'npm:renovate',
+      currentVersion: '44.133.0',
+      newVersion: '44.134.1',
+    });
+    expect(lockedUpdate.status).toBe('updated');
+    if (lockedUpdate.status !== 'updated') {
+      throw new Error('Expected Mise lockfile update to succeed');
+    }
+
+    fs.readLocalFile
+      .mockResolvedValueOnce(originalLockFile)
+      .mockResolvedValueOnce(updatedLockFile)
+      .mockResolvedValueOnce('updated generated package manifest');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'npm:renovate' }],
+      newPackageFileContent: lockedUpdate.files['mise.toml'],
+      newLockFileContent: lockedUpdate.files['mise.lock'],
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: updatedLockFile,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: '.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json',
+          contents: 'updated generated package manifest',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: 'mise lock npm:renovate' },
+    ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      lockedUpdate.files['mise.lock'],
+    );
+  });
+
   it('returns regenerated content that matches the in-memory update', async () => {
     const originalLockFile = '[[tools.node]]\nversion = "20.0.0"\n';
     const updatedLockFile = '[[tools.node]]\nversion = "22.0.0"\n';
