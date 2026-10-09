@@ -105,11 +105,9 @@ async function updateWrapperFile(
   };
 }
 
-/**
- * Auto-replace has bumped the working tree; artifact errors still allow commits.
- * Restore the base-branch script to keep its version and checksum in sync.
- * Omit isExecutable: prepareCommit stages a mode change for a 100644 wrapper.
- */
+// Auto-replace has bumped the working tree; artifact errors still allow commits.
+// Restore the base-branch script to keep its version and checksum in sync.
+// Omit isExecutable: prepareCommit stages a mode change for a 100644 wrapper.
 async function restorePackageFile(
   packageFileName: string,
   existing: ExistingWrapper[],
@@ -122,8 +120,7 @@ async function restorePackageFile(
   const contents = await getFile(packageFileName);
   if (!contents) {
     logger.debug(
-      { packageFileName },
-      'Kotlin Toolchain wrapper script is not on the base branch, nothing to restore',
+      `Kotlin Toolchain wrapper script ${packageFileName} is not on the base branch, nothing to restore`,
     );
     return [];
   }
@@ -202,8 +199,7 @@ export async function updateArtifacts({
   }
 
   logger.debug(
-    { packageFileName },
-    'Keeping the Kotlin Toolchain wrapper scripts unchanged after a failed update',
+    `Keeping the Kotlin Toolchain wrapper scripts for ${packageFileName} unchanged after a failed update`,
   );
   return [...errors, ...(await restorePackageFile(packageFileName, existing))];
 }

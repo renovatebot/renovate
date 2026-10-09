@@ -87,7 +87,8 @@ export function withDownloadRoot(
 
   return content.replace(
     regex,
-    (...args) => (args.at(-1) as Record<string, string>).prefix + downloadRoot,
+    (...args) =>
+      `${(args.at(-1) as Record<string, string>).prefix}${downloadRoot}`,
   );
 }
 
