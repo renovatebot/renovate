@@ -10,7 +10,10 @@ import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-export const allToolConfig: Record<ToolName, ToolConfig> = {
+/**
+ * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
+ */
+export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   apm: {
     datasource: 'github-releases',
     packageName: 'microsoft/apm',
@@ -247,6 +250,18 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   },
 } as const;
 
+/**
+ * A Containerbase `tool` that Renovate supports configuring the version of.
+ */
+export type SupportedToolNames = keyof typeof allToolConfig;
+
+/**
+ * All Containerbase `tool`s that Renovate supports configuring the version of.
+ */
+export function getSupportedToolNames(): readonly ToolName[] {
+  return Object.keys(allToolConfig) as readonly ToolName[];
+}
+
 let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
@@ -259,7 +274,7 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
-export function getToolConfig(toolName: ToolName): ToolConfig {
+export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
   return allToolConfig[toolName];
 }
 
