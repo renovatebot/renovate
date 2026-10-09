@@ -149,7 +149,9 @@ export class PackageFiles {
                 dep.updates?.map((update) => {
                   const value = update.isLockfileUpdate
                     ? formatVersionWithLockedVersion(
-                        update.newValue ?? update.newVersion,
+                        update.newValue ??
+                          update.newVersion ??
+                          'unknown version',
                         update.newVersion,
                       )
                     : update.newValue;
