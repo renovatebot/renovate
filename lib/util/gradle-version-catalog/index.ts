@@ -246,12 +246,16 @@ function extractDependency({
 
 export function parseCatalog(
   packageFile: string,
-  content: string,
+  rawContent: string,
 ): {
   vars: VersionCatalogVariables;
   deps: PackageDependency<VersionCatalogManagerData>[];
 } {
-  const tomlContent = parseToml(massage(content)) as GradleCatalog;
+  const tomlContent = parseToml(massage(rawContent)) as GradleCatalog;
+  // Ignore commented declarations while preserving offsets into the original file.
+  const content = rawContent.replace(regEx(/^[ \t]*#[^\r\n]*/gm), (comment) =>
+    ' '.repeat(comment.length),
+  );
   const versions = coerceObject(tomlContent.versions);
   const libs = coerceObject(tomlContent.libraries);
   const libStartIndex = content.indexOf('libraries');
