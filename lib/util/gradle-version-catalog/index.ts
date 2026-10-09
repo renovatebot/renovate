@@ -81,6 +81,12 @@ interface VersionExtract {
   skipReason?: SkipReason;
 }
 
+interface CatalogOptions {
+  includePlugins?: boolean;
+  allowRichVersions?: boolean;
+  includeLibraryAliases?: boolean;
+}
+
 function extractVersion({
   version,
   versions,
@@ -89,6 +95,7 @@ function extractVersion({
   depName,
   versionStartIndex,
   versionSubContent,
+  allowRichVersions,
 }: {
   version: GradleVersionCatalogVersion | undefined;
   versions: Record<string, GradleVersionPointerTarget>;
@@ -97,6 +104,7 @@ function extractVersion({
   depName: string;
   versionStartIndex: number;
   versionSubContent: string;
+  allowRichVersions: boolean;
 }): VersionExtract {
   if (isVersionPointer(version)) {
     const originalAlias = findOriginalAlias(versions, version.ref);
@@ -105,6 +113,7 @@ function extractVersion({
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
       sectionKey: originalAlias,
+      allowRichVersions,
     });
   }
   return extractLiteralVersion({
@@ -112,6 +121,7 @@ function extractVersion({
     depStartIndex,
     depSubContent,
     sectionKey: depName,
+    allowRichVersions,
   });
 }
 
@@ -120,11 +130,13 @@ function extractLiteralVersion({
   depStartIndex,
   depSubContent,
   sectionKey,
+  allowRichVersions,
 }: {
   version: GradleVersionPointerTarget | undefined;
   depStartIndex: number;
   depSubContent: string;
   sectionKey: string;
+  allowRichVersions: boolean;
 }): VersionExtract {
   if (!version) {
     return { skipReason: 'unspecified-version' };
@@ -136,6 +148,9 @@ function extractLiteralVersion({
   }
   // v8 ignore else -- a version is either a string, handled above, or a table
   if (isPlainObject(version)) {
+    if (!allowRichVersions) {
+      return { skipReason: 'unsupported-version' };
+    }
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html
     // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
@@ -179,6 +194,7 @@ function extractDependency({
   depName,
   versionStartIndex,
   versionSubContent,
+  allowRichVersions,
 }: {
   descriptor:
     string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
@@ -188,6 +204,7 @@ function extractDependency({
   depName: string;
   versionStartIndex: number;
   versionSubContent: string;
+  allowRichVersions: boolean;
 }): PackageDependency<VersionCatalogManagerData> {
   if (isString(descriptor)) {
     const [group, name, currentValue] = descriptor.split(':');
@@ -215,6 +232,7 @@ function extractDependency({
     depName,
     versionStartIndex,
     versionSubContent,
+    allowRichVersions,
   });
 
   if (skipReason) {
@@ -247,6 +265,11 @@ function extractDependency({
 export function parseCatalog(
   packageFile: string,
   content: string,
+  {
+    includePlugins = true,
+    allowRichVersions = true,
+    includeLibraryAliases = false,
+  }: CatalogOptions = {},
 ): {
   vars: VersionCatalogVariables;
   deps: PackageDependency<VersionCatalogManagerData>[];
@@ -267,6 +290,7 @@ export function parseCatalog(
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
       sectionKey: key,
+      allowRichVersions,
     });
     if (currentValue && fileReplacePosition !== undefined) {
       vars[normalizeAlias(key)] = {
@@ -288,11 +312,18 @@ export function parseCatalog(
       depName: libraryName,
       versionStartIndex,
       versionSubContent,
+      allowRichVersions,
     });
+    if (includeLibraryAliases) {
+      dependency.managerData = {
+        ...dependency.managerData,
+        libraryAlias: libraryName,
+      };
+    }
     extractedDeps.push(dependency);
   }
 
-  const plugins = coerceObject(tomlContent.plugins);
+  const plugins = includePlugins ? coerceObject(tomlContent.plugins) : {};
   const pluginsStartIndex = content.indexOf('[plugins]');
   const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
@@ -308,6 +339,7 @@ export function parseCatalog(
       depName,
       versionStartIndex,
       versionSubContent,
+      allowRichVersions,
     });
 
     const dependency: PackageDependency<VersionCatalogManagerData> = {

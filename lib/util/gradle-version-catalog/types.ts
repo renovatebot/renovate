@@ -1,6 +1,7 @@
 export interface VersionCatalogManagerData {
   fileReplacePosition?: number;
   packageFile?: string;
+  libraryAlias?: string;
 }
 
 export interface VersionCatalogVariable extends VersionCatalogManagerData {
