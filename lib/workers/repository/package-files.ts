@@ -128,7 +128,12 @@ export class PackageFiles {
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
-                dep.updates?.map((update) => `\`${update.newValue}\``),
+                dep.updates?.map((update) => {
+                  const value = update.isLockfileUpdate
+                    ? (update.newVersion ?? update.newValue)
+                    : update.newValue;
+                  return `\`${value}\``;
+                }),
               ),
             ];
             if (uniqueUpdates.length > 0) {

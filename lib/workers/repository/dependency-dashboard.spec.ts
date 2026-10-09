@@ -2061,6 +2061,33 @@ None detected
           PackageFiles.clear();
         });
 
+        it('uses resolved versions for lockfile-only updates', () => {
+          PackageFiles.add('main', {
+            mise: [
+              {
+                packageFile: 'mise.toml',
+                deps: [
+                  {
+                    depName: 'node',
+                    currentValue: 'latest',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newValue: 'latest',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `node latest` → [Updates: `22.16.0`]',
+          );
+        });
+
         it('does not truncates as there is enough space to fit', () => {
           PackageFiles.add('main', packageFiles);
           const nonTruncated = PackageFiles.getDashboardMarkdown(Infinity);
