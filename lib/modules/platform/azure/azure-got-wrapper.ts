@@ -103,3 +103,7 @@ export async function isHosted(): Promise<boolean> {
 export function setEndpoint(e: string): void {
   endpoint = e;
 }
+
+export function getEndpoint(): string | undefined {
+  return endpoint;
+}

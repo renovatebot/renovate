@@ -42,6 +42,16 @@ const validJsoncString = `
 
 describe('util/common', () => {
   describe('detectPlatform', () => {
+    it('recognizes self-hosted Azure through an azure-changelog host rule', () => {
+      hostRules.add({
+        hostType: 'azure-changelog',
+        matchHost: 'az.example.com',
+      });
+
+      expect(
+        detectPlatform('https://az.example.com/org/project/_git/repo'),
+      ).toBe('azure');
+    });
     it.each`
       url                                                                    | hostType
       ${'some-invalid@url:::'}                                               | ${null}

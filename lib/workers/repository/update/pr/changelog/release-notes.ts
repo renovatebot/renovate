@@ -85,6 +85,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
 ): string {
+  const baseUrlForRegex = RegExp.escape(baseUrl);
   let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
@@ -92,7 +93,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrlForRegex}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false,
     ),
@@ -100,7 +101,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrlForRegex}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n',
   );
   // Reduce headings size
@@ -486,11 +487,9 @@ export async function addReleaseNotes(
       hasReleaseNotes: false,
     };
 
-    const { repository, sourceDirectory, type: projectType } = input.project;
+    const { repository, type: projectType } = input.project;
     const cacheNamespace: PackageCacheNamespace = `changelog-${projectType}-notes@v2`;
-    const cacheKeyPrefix = sourceDirectory
-      ? `${repository}:${sourceDirectory}`
-      : `${repository}`;
+    const cacheKeyPrefix = source.getNotesCacheKey(input.project);
 
     const shouldTruncateToPlatformLimit = config.fetchChangeLogs === 'pr';
     const maxBodyLength = shouldTruncateToPlatformLimit

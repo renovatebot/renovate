@@ -16,6 +16,13 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
   });
 
   describe('gitApi', () => {
+    it('exposes the configured endpoint without creating a client', () => {
+      expect(azure.getEndpoint()).toBeUndefined();
+
+      azure.setEndpoint('https://dev.azure.com/org/');
+
+      expect(azure.getEndpoint()).toBe('https://dev.azure.com/org/');
+    });
     it('should throw an error if no config found', () => {
       expect(azure.gitApi).toThrow('No config found for azure');
       expect(azure.coreApi).toThrow('No config found for azure');

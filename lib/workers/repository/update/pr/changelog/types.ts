@@ -24,7 +24,13 @@ export interface ChangeLogRelease {
 }
 
 export type ChangeLogPlatform =
-  'bitbucket' | 'bitbucket-server' | 'forgejo' | 'gitea' | 'github' | 'gitlab';
+  | 'azure'
+  | 'bitbucket'
+  | 'bitbucket-server'
+  | 'forgejo'
+  | 'gitea'
+  | 'github'
+  | 'gitlab';
 
 export interface ChangeLogProject {
   packageName?: string;
