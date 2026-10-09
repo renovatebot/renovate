@@ -157,50 +157,57 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
-  it('performs lock file updates retaining the package.json counterparts in lockfileVersion 4', async () => {
-    const execSnapshots = mockExecAll();
-    // package.json
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    const packageLockContents = JSON.stringify({
-      lockfileVersion: 4,
-      packages: {
-        '': { dependencies: { postcss: '^8.0.0' } },
-        'node_modules/postcss': { version: '8.4.8' },
-      },
-    });
-    fs.readLocalFile
-      .mockResolvedValueOnce(packageLockContents)
-      .mockResolvedValueOnce(packageLockContents);
-    const skipInstalls = true;
-    const updates = [
-      {
-        packageName: 'postcss',
-        depType: 'dependencies',
-        newVersion: '8.4.8',
-        newValue: '~8.4.0',
-        isLockfileUpdate: true,
-      },
-    ];
-    const res = await npmHelper.generateLockFile(
-      'some-dir',
-      {},
-      'package-lock.json',
-      { skipInstalls },
-      updates,
-    );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
-    expect(res.error).toBeFalse();
-    const lockFile = JSON.parse(res.lockFile!);
-    expect(lockFile.packages['']).toEqual({
-      dependencies: { postcss: '~8.4.0' },
-    });
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8',
-        options: { cwd: 'some-dir' },
-      },
-    ]);
-  });
+  it.each`
+    lockfileVersion
+    ${3}
+    ${4}
+  `(
+    'performs lock file updates retaining the package.json counterparts in lockfileVersion $lockfileVersion',
+    async ({ lockfileVersion }: { lockfileVersion: number }) => {
+      const execSnapshots = mockExecAll();
+      // package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}');
+      const packageLockContents = JSON.stringify({
+        lockfileVersion,
+        packages: {
+          '': { dependencies: { postcss: '^8.0.0' } },
+          'node_modules/postcss': { version: '8.4.8' },
+        },
+      });
+      fs.readLocalFile
+        .mockResolvedValueOnce(packageLockContents)
+        .mockResolvedValueOnce(packageLockContents);
+      const skipInstalls = true;
+      const updates = [
+        {
+          packageName: 'postcss',
+          depType: 'dependencies',
+          newVersion: '8.4.8',
+          newValue: '~8.4.0',
+          isLockfileUpdate: true,
+        },
+      ];
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        updates,
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      expect(res.error).toBeFalse();
+      const lockFile = JSON.parse(res.lockFile!);
+      expect(lockFile.packages['']).toEqual({
+        dependencies: { postcss: '~8.4.0' },
+      });
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8',
+          options: { cwd: 'some-dir' },
+        },
+      ]);
+    },
+  );
 
   it('performs npm-shrinkwrap.json updates', async () => {
     const execSnapshots = mockExecAll();

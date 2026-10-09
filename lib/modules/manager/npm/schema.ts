@@ -161,7 +161,11 @@ export const PackageJson = Json.pipe(
 
 export type PackageJson = z.infer<typeof PackageJson>;
 
-export const PackageLockV3 = z.object({
+/**
+ * npm lockfile v3 and v4: npm 12 writes v4 when `patchedDependencies` or
+ * `packageExtensions` are used, with the same `packages` layout as v3.
+ */
+export const PackageLockV3Plus = z.object({
   lockfileVersion: z.union([z.literal(3), z.literal(4)]),
   packages: LooseRecord(
     z
@@ -183,7 +187,7 @@ export const PackageLockPreV3 = z
   }));
 
 export const PackageLock = Json.pipe(
-  z.union([PackageLockV3, PackageLockPreV3]),
+  z.union([PackageLockV3Plus, PackageLockPreV3]),
 ).transform(({ packages, lockfileVersion }) => {
   const lockedVersions: Record<string, string> = {};
   for (const [entry, val] of Object.entries(packages)) {
