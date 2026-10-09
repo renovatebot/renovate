@@ -54,8 +54,8 @@ function isKotlinToolchainFile(keys: string[], packageFile: string): boolean {
 function coordinateDeps(
   coordinates: string[],
   depType: string,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+): PackageDependency<KotlinToolchainManagerData>[] {
+  const deps: PackageDependency<KotlinToolchainManagerData>[] = [];
   for (const coordinate of coordinates) {
     const dep = parseCoordinate(coordinate);
     if (dep) {
@@ -74,7 +74,7 @@ function coordinatesFrom(
   schema: ZodType<string[]>,
   value: unknown,
   depType: string,
-): PackageDependency[] {
+): PackageDependency<KotlinToolchainManagerData>[] {
   const coordinates = schema.safeParse(value);
   return coordinates.success ? coordinateDeps(coordinates.data, depType) : [];
 }
@@ -93,8 +93,8 @@ function digSetting(settings: unknown, path: string[]): unknown {
 function builtInVersionDeps(
   sectionKey: string,
   settings: unknown,
-): PackageDependency[] {
-  const deps: PackageDependency[] = [];
+): PackageDependency<KotlinToolchainManagerData>[] {
+  const deps: PackageDependency<KotlinToolchainManagerData>[] = [];
   for (const builtIn of builtInVersions) {
     const value = digSetting(settings, builtIn.path);
     const settingPath = [sectionKey, ...builtIn.path].join('.');
@@ -128,7 +128,7 @@ function builtInVersionDeps(
 function extractSettingsSection(
   sectionKey: string,
   section: unknown,
-): PackageDependency[] {
+): PackageDependency<KotlinToolchainManagerData>[] {
   if (!isPlainObject(section)) {
     return [];
   }
@@ -197,7 +197,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<KotlinToolchainManagerData>[] = [];
   for (const [key, value] of Object.entries(file.data)) {
     if (dependenciesSectionRegex.test(key)) {
       deps.push(...coordinatesFrom(KotlinToolchainDependencies, value, key));

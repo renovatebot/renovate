@@ -1,11 +1,14 @@
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency } from '../types.ts';
+import type { KotlinToolchainManagerData } from './types.ts';
 
 const bomPrefix = 'bom:';
 const localPrefixes = ['//', './', '../'];
 const coordinatePartRegex = regEx(/^[A-Za-z0-9_.-]+$/);
 
-export function parseCoordinate(value: string): PackageDependency | null {
+export function parseCoordinate(
+  value: string,
+): PackageDependency<KotlinToolchainManagerData> | null {
   let coordinate = value.trim();
   if (coordinate.startsWith(bomPrefix)) {
     coordinate = coordinate.slice(bomPrefix.length).trim();
