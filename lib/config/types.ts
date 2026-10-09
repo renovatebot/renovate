@@ -20,7 +20,10 @@ import type {
   ConstraintName,
   ToolName,
 } from '../util/exec/types.ts';
-import type { GitNoVerifyOption } from '../util/git/types.ts';
+import type {
+  GitCredentialPassingOption,
+  GitNoVerifyOption,
+} from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
@@ -251,6 +254,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  gitCredentialPassing?: GitCredentialPassingOption;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
