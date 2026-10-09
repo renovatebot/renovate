@@ -59,12 +59,14 @@ function coordinateDeps(
   for (const coordinate of coordinates) {
     const dep = parseCoordinate(coordinate);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType,
-        datasource: MavenDatasource.id,
-        replaceString: coordinate,
-      });
+      dep.depType = depType;
+      dep.datasource = MavenDatasource.id;
+      dep.replaceString = coordinate;
+      if (dep.currentValue) {
+        dep.replaceString = `${dep.depName}:${dep.currentValue}`;
+        dep.autoReplaceStringTemplate = '{{{depName}}}:{{{newValue}}}';
+      }
+      deps.push(dep);
     }
   }
   return deps;

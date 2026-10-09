@@ -1823,6 +1823,52 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it.each`
+      coordinate                        | expected
+      ${'com.acme:client:8:jdk8'}       | ${'com.acme:client:9:jdk8'}
+      ${'com.acme8:client8:8:jdk8@jar'} | ${'com.acme8:client8:9:jdk8@jar'}
+      ${'com.acme:client:8@zip'}        | ${'com.acme:client:9@zip'}
+      ${'bom: com.acme:client:8:jdk8'}  | ${'bom: com.acme:client:9:jdk8'}
+      ${'  com.acme:client:8:jdk8  '}   | ${'  com.acme:client:9:jdk8  '}
+    `(
+      'updates only the version in Kotlin Toolchain coordinate $coordinate',
+      async ({
+        coordinate,
+        expected,
+      }: {
+        coordinate: string;
+        expected: string;
+      }) => {
+        const content = codeBlock`
+          product: jvm/app
+          dependencies:
+            - "${coordinate}" # Keep JDK 8
+        `;
+        const baseDeps = extractKotlinToolchain(content, 'module.yaml')!.deps;
+        for (const dep of baseDeps) {
+          normalizeDepNames(dep);
+        }
+        Object.assign(upgrade, baseDeps[0], {
+          manager: 'kotlin-toolchain',
+          packageFile: 'module.yaml',
+          depIndex: 0,
+          newValue: '9',
+          baseDeps,
+        });
+
+        const updated = await doAutoReplace(upgrade, content, false);
+
+        expect(updated).toBe(codeBlock`
+          product: jvm/app
+          dependencies:
+            - "${expected}" # Keep JDK 8
+        `);
+        await expect(doAutoReplace(upgrade, updated!, true)).resolves.toBe(
+          updated,
+        );
+      },
+    );
+
     it('updates a Kotlin Toolchain settings version without a replaceString', async () => {
       const moduleYaml = codeBlock`
         product: jvm/app
