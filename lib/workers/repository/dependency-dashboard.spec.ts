@@ -2113,6 +2113,12 @@ None detected
                       },
                     ],
                   },
+                  {
+                    depName: 'unknown-version-node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [{ isLockfileUpdate: true }],
+                  },
                 ],
               },
             ],
@@ -2129,6 +2135,9 @@ None detected
           );
           expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
             ' - `version-only-node latest (locked: 22.15.0)` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `unknown-version-node latest (locked: 22.15.0)` → [Updates: `unknown version`]',
           );
         });
 
