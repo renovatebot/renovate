@@ -270,9 +270,7 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     withSchema: valSchema('hugo-version'),
   },
   // https://github.com/prefix-dev/setup-pixi
-  // `pixi-version` only accepts `latest` or `vX.Y.Z`. Conda versioning cannot
-  // determine a major for a `v`-prefixed version, so every release would be
-  // dropped from the update buckets
+  // pixi tags are v-prefixed, which conda versioning cannot bucket
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,
     versioning: semverVersioning.id,
