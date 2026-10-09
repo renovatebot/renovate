@@ -69,6 +69,14 @@ describe('modules/manager/mix/extract', () => {
           packageName: 'also_secret:acme',
         },
         {
+          currentValue: '~> 1.7',
+          datasource: 'hex',
+          depName: 'oban_pro',
+          depType: 'prod',
+          packageName: 'oban_pro',
+          skipReason: 'unknown-registry',
+        },
+        {
           currentValue: '>0.2.0 and <=1.0.0',
           datasource: 'hex',
           depName: 'metrics',
@@ -201,6 +209,15 @@ describe('modules/manager/mix/extract', () => {
           lockedVersion: '1.3.4',
         },
         {
+          currentValue: '~> 1.7',
+          datasource: 'hex',
+          depName: 'oban_pro',
+          depType: 'prod',
+          packageName: 'oban_pro',
+          lockedVersion: '1.7.2',
+          skipReason: 'unknown-registry',
+        },
+        {
           currentValue: '>0.2.0 and <=1.0.0',
           datasource: 'hex',
           depName: 'metrics',
@@ -273,6 +290,72 @@ describe('modules/manager/mix/extract', () => {
           depType: 'dev',
           lockedVersion: '0.37.0',
           packageName: 'floki',
+        },
+      ]);
+    });
+
+    it('resolves a repo dependency through registryAliases', async () => {
+      const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs', {
+        registryAliases: { oban: 'https://repo.oban.pro' },
+      });
+
+      expect(res?.deps).toContainEqual({
+        currentValue: '~> 1.7',
+        datasource: 'hex',
+        depName: 'oban_pro',
+        depType: 'prod',
+        packageName: 'oban_pro',
+        registryUrls: ['https://repo.oban.pro'],
+      });
+      expect(res?.deps).not.toContainEqual(
+        expect.objectContaining({ skipReason: 'unknown-registry' }),
+      );
+    });
+
+    it('skips a repo dependency missing from registryAliases', async () => {
+      const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs', {
+        registryAliases: { other: 'https://example.com' },
+      });
+
+      expect(res?.deps).toContainEqual({
+        currentValue: '~> 1.7',
+        datasource: 'hex',
+        depName: 'oban_pro',
+        depType: 'prod',
+        packageName: 'oban_pro',
+        skipReason: 'unknown-registry',
+      });
+      expect(res?.deps).not.toContainEqual(
+        expect.objectContaining({ registryUrls: expect.anything() }),
+      );
+    });
+
+    it('treats hexpm repos as hex.pm itself', async () => {
+      const content = [
+        'defp deps do',
+        '  [',
+        '    {:plug, "~> 1.0", repo: "hexpm"},',
+        '    {:secret, "~> 1.0", repo: "hexpm:acme"}',
+        '  ]',
+        'end',
+      ].join('\n');
+
+      const res = await extractPackageFile(content, 'mix.exs', {});
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '~> 1.0',
+          datasource: 'hex',
+          depName: 'plug',
+          depType: 'prod',
+          packageName: 'plug',
+        },
+        {
+          currentValue: '~> 1.0',
+          datasource: 'hex',
+          depName: 'secret',
+          depType: 'prod',
+          packageName: 'secret:acme',
         },
       ]);
     });
