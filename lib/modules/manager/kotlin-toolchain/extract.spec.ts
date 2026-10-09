@@ -195,45 +195,38 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
       });
     });
 
-    it('marks a local module as a local dependency', () => {
-      const content = codeBlock`
-        dependencies:
-          - //ui/utils
-      `;
+    it.each`
+      coordinate                                   | skipReason
+      ${'//ui/utils'}                              | ${'local-dependency'}
+      ${'io.ktor:ktor-serialization-kotlinx-json'} | ${'unspecified-version'}
+    `(
+      'reports $skipReason for $coordinate',
+      ({
+        coordinate,
+        skipReason,
+      }: {
+        coordinate: string;
+        skipReason: string;
+      }) => {
+        const content = codeBlock`
+          dependencies:
+            - ${coordinate}
+        `;
 
-      expect(extractPackageFile(content, 'module.yaml')).toEqual({
-        deps: [
-          {
-            depName: '//ui/utils',
-            skipReason: 'local-dependency',
-            depType: 'dependencies',
-            datasource: 'maven',
-            replaceString: '//ui/utils',
-            registryUrls,
-          },
-        ],
-      });
-    });
-
-    it('marks a coordinate without a version as unspecified', () => {
-      const content = codeBlock`
-        dependencies:
-          - io.ktor:ktor-serialization-kotlinx-json
-      `;
-
-      expect(extractPackageFile(content, 'module.yaml')).toEqual({
-        deps: [
-          {
-            depName: 'io.ktor:ktor-serialization-kotlinx-json',
-            skipReason: 'unspecified-version',
-            depType: 'dependencies',
-            datasource: 'maven',
-            replaceString: 'io.ktor:ktor-serialization-kotlinx-json',
-            registryUrls,
-          },
-        ],
-      });
-    });
+        expect(extractPackageFile(content, 'module.yaml')).toEqual({
+          deps: [
+            {
+              depName: coordinate,
+              skipReason,
+              depType: 'dependencies',
+              datasource: 'maven',
+              replaceString: coordinate,
+              registryUrls,
+            },
+          ],
+        });
+      },
+    );
 
     it('returns the dependencies in document order', () => {
       const content = codeBlock`
@@ -329,58 +322,38 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
           {
             depName: 'org.jetbrains.kotlin:kotlin-stdlib',
             currentValue: '2.2.20',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.kotlin.version' },
-            registryUrls,
           },
           {
             depName: 'org.jetbrains.kotlinx:kotlinx-serialization-core',
             currentValue: '1.7.3',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: {
               settingPath: 'settings.kotlin.serialization.version',
             },
-            registryUrls,
           },
           {
             depName: 'org.jetbrains.kotlinx:kotlinx-rpc-bom',
             currentValue: '0.10.2',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.kotlin.rpc.version' },
-            registryUrls,
           },
           {
             depName: 'com.google.devtools.ksp:symbol-processing-api',
             currentValue: '2.2.20-2.0.2',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.kotlin.ksp.version' },
-            registryUrls,
           },
           {
             depName: 'org.jetbrains.kotlinx:dataframe-core',
             currentValue: '0.15.0',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.kotlin.dataframe.version' },
-            registryUrls,
           },
           {
             depName: 'org.jetbrains.compose.runtime:runtime',
             currentValue: '1.7.0',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.compose.version' },
-            registryUrls,
           },
           {
             depName: 'org.jetbrains.compose.hot-reload:hot-reload-runtime-api',
             currentValue: '1.0.0-beta05',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: {
               settingPath: 'settings.compose.experimental.hotReload.version',
             },
@@ -392,40 +365,33 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
           {
             depName: 'org.junit.platform:junit-platform-console-standalone',
             currentValue: '6.0.3',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: {
               settingPath: 'settings.jvm.test.junitPlatformVersion',
             },
-            registryUrls,
           },
           {
             depName: 'io.ktor:ktor-bom',
             currentValue: '3.4.3',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.ktor.version' },
-            registryUrls,
           },
           {
             depName: 'org.projectlombok:lombok',
             currentValue: '1.18.46',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.lombok.version' },
-            registryUrls,
           },
           {
             depName: 'org.springframework.boot:spring-boot-dependencies',
             currentValue: '4.0.6',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: {
               settingPath: 'settings.springBoot.version',
             },
-            registryUrls,
           },
-        ],
+        ].map((dep) => ({
+          depType: 'settings',
+          datasource: 'maven',
+          registryUrls,
+          ...dep,
+        })),
       });
     });
 
@@ -443,66 +409,66 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
       expect(res?.deps[0]).not.toHaveProperty('replaceString');
     });
 
-    it('reports a version that YAML parses as a number', () => {
-      const content = codeBlock`
-        settings:
-          ktor:
-            version: 3.5
-          jvm:
-            test:
-              junitPlatformVersion: 6.0
-      `;
-
-      expect(extractPackageFile(content, 'module.yaml')).toEqual({
-        deps: [
+    it.each([
+      {
+        type: 'number',
+        content: codeBlock`
+          settings:
+            ktor:
+              version: 3.5
+            jvm:
+              test:
+                junitPlatformVersion: 6.0
+        `,
+        dependencies: [
           {
             depName: 'org.junit.platform:junit-platform-console-standalone',
             currentValue: '6',
-            skipReason: 'invalid-value',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: {
               settingPath: 'settings.jvm.test.junitPlatformVersion',
             },
-            registryUrls,
           },
           {
             depName: 'io.ktor:ktor-bom',
             currentValue: '3.5',
-            skipReason: 'invalid-value',
-            depType: 'settings',
-            datasource: 'maven',
             managerData: { settingPath: 'settings.ktor.version' },
-            registryUrls,
           },
         ],
-      });
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Kotlin Toolchain version at settings.ktor.version is not a string: 3.5',
-      );
-    });
-
-    it('reports a version that YAML parses as a boolean', () => {
-      const content = codeBlock`
-        settings:
-          lombok:
-            version: true
-      `;
-
-      expect(extractPackageFile(content, 'module.yaml')).toEqual({
-        deps: [
+      },
+      {
+        type: 'boolean',
+        content: codeBlock`
+          settings:
+            lombok:
+              version: true
+        `,
+        dependencies: [
           {
             depName: 'org.projectlombok:lombok',
             currentValue: 'true',
+            managerData: { settingPath: 'settings.lombok.version' },
+          },
+        ],
+      },
+    ])(
+      'reports versions that YAML parses as $type',
+      ({ content, dependencies }) => {
+        expect(extractPackageFile(content, 'module.yaml')).toEqual({
+          deps: dependencies.map((dep) => ({
+            ...dep,
             skipReason: 'invalid-value',
             depType: 'settings',
             datasource: 'maven',
-            managerData: { settingPath: 'settings.lombok.version' },
             registryUrls,
-          },
-        ],
-      });
-    });
+          })),
+        });
+        for (const dep of dependencies) {
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            `Kotlin Toolchain version at ${dep.managerData.settingPath} is not a string: ${dep.currentValue}`,
+          );
+        }
+      },
+    );
 
     it('ignores a technology given as a scalar', () => {
       const content = codeBlock`
@@ -1024,47 +990,33 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
       ).toEqual({ deps: [] });
     });
 
-    it('keeps a module file that declares only Maven plugins', () => {
-      const content = codeBlock`
-        mavenPlugins:
-          - org.apache.maven.plugins:maven-surefire-plugin:3.5.3
-      `;
+    it.each`
+      packageFile
+      ${'module.yaml'}
+      ${'project.yaml'}
+    `(
+      'keeps $packageFile with only Maven plugins',
+      ({ packageFile }: { packageFile: string }) => {
+        const content = codeBlock`
+          mavenPlugins:
+            - org.apache.maven.plugins:maven-surefire-plugin:3.5.3
+        `;
 
-      expect(extractPackageFile(content, 'module.yaml')).toEqual({
-        deps: [
-          {
-            depName: 'org.apache.maven.plugins:maven-surefire-plugin',
-            currentValue: '3.5.3',
-            depType: 'mavenPlugins',
-            datasource: 'maven',
-            replaceString:
-              'org.apache.maven.plugins:maven-surefire-plugin:3.5.3',
-            registryUrls,
-          },
-        ],
-      });
-    });
-
-    it('keeps a project file that declares only Maven plugins', () => {
-      const content = codeBlock`
-        mavenPlugins:
-          - org.apache.maven.plugins:maven-surefire-plugin:3.5.3
-      `;
-
-      expect(extractPackageFile(content, 'project.yaml')).toEqual({
-        deps: [
-          {
-            depName: 'org.apache.maven.plugins:maven-surefire-plugin',
-            currentValue: '3.5.3',
-            depType: 'mavenPlugins',
-            datasource: 'maven',
-            replaceString:
-              'org.apache.maven.plugins:maven-surefire-plugin:3.5.3',
-            registryUrls,
-          },
-        ],
-      });
-    });
+        expect(extractPackageFile(content, packageFile)).toEqual({
+          deps: [
+            {
+              depName: 'org.apache.maven.plugins:maven-surefire-plugin',
+              currentValue: '3.5.3',
+              depType: 'mavenPlugins',
+              datasource: 'maven',
+              replaceString:
+                'org.apache.maven.plugins:maven-surefire-plugin:3.5.3',
+              registryUrls,
+            },
+          ],
+        });
+      },
+    );
 
     it('keeps a foreign file that carries a dependencies section', () => {
       const content = codeBlock`
@@ -1082,27 +1034,26 @@ describe('modules/manager/kotlin-toolchain/extract', () => {
       });
     });
 
-    it('returns null for a YAML file without Kotlin Toolchain keys', () => {
-      const content = codeBlock`
+    it.each`
+      packageFile | content
+      ${'module.yaml'} | ${codeBlock`
         name: my-module
         version: 1.0.0
         main: index.js
-      `;
-
-      expect(extractPackageFile(content, 'module.yaml')).toBeNull();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Not a Kotlin Toolchain file: module.yaml',
-      );
-    });
-
-    it('returns null for a project file without modules', () => {
-      const content = codeBlock`
+      `}
+      ${'nested/project.yaml'} | ${codeBlock`
         name: my-project
         product: jvm/app
-      `;
-
-      expect(extractPackageFile(content, 'nested/project.yaml')).toBeNull();
-    });
+      `}
+    `(
+      'returns null for unrecognized $packageFile',
+      ({ content, packageFile }: { content: string; packageFile: string }) => {
+        expect(extractPackageFile(content, packageFile)).toBeNull();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          `Not a Kotlin Toolchain file: ${packageFile}`,
+        );
+      },
+    );
 
     it('returns null for an empty file', () => {
       expect(extractPackageFile('', 'module.yaml')).toBeNull();
