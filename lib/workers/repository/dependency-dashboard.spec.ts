@@ -2061,7 +2061,7 @@ None detected
           PackageFiles.clear();
         });
 
-        it('uses resolved versions for lockfile-only updates', () => {
+        it('shows selectors and resolved versions for lockfile updates', () => {
           PackageFiles.add('main', {
             mise: [
               {
@@ -2079,13 +2079,42 @@ None detected
                       },
                     ],
                   },
+                  {
+                    depName: 'concrete-node',
+                    currentValue: '22.15.0',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        isLockfileUpdate: true,
+                        newValue: '22.16.0',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: 'non-lockfile-node',
+                    currentValue: 'latest',
+                    lockedVersion: '22.15.0',
+                    updates: [
+                      {
+                        newValue: '22.16.0',
+                        newVersion: '22.16.0',
+                      },
+                    ],
+                  },
                 ],
               },
             ],
           });
 
           expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
-            ' - `node latest (locked: 22.15.0)` → [Updates: `22.16.0`]',
+            ' - `node latest (locked: 22.15.0)` → [Updates: `latest (locked: 22.16.0)`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `concrete-node 22.15.0` → [Updates: `22.16.0`]',
+          );
+          expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
+            ' - `non-lockfile-node latest` → [Updates: `22.16.0`]',
           );
         });
 
