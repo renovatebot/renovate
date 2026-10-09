@@ -87,7 +87,7 @@ describe('modules/datasource/pod/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null for 404 Github enterprise', async () => {
+    it('returns null for 404 from GHES', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -108,7 +108,7 @@ describe('modules/datasource/pod/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null for 404 Github enterprise with different url style', async () => {
+    it('returns null for 404 from GHES with different URL style', async () => {
       httpMock
         .scope(githubEntApiHost2)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -266,7 +266,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with shard with specs', async () => {
+    it('processes real data from GHES with shard with specs', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -285,7 +285,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with shard without specs', async () => {
+    it('processes real data from GHES with shard without specs', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -306,7 +306,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise with specs without shard', async () => {
+    it('processes real data from GHES with specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')
@@ -329,7 +329,7 @@ describe('modules/datasource/pod/index', () => {
       });
     });
 
-    it('processes real data from Github Enterprise without specs without shard', async () => {
+    it('processes real data from GHES without specs without shard', async () => {
       httpMock
         .scope(githubEntApiHost)
         .get('/api/v3/repos/foo/bar/contents/Specs/a/c/b/foo')

@@ -134,7 +134,7 @@ export class BaseGoDatasource {
       return goSourceHeader;
     }
 
-    // GitHub Enterprise only returns a go-import meta
+    // GHES only returns a go-import meta
     const goImport = BaseGoDatasource.goImportHeader(html, goModule);
     if (goImport) {
       return goImport;
