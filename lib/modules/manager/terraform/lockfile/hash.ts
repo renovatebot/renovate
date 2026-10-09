@@ -161,6 +161,24 @@ export class TerraformProviderHash {
     });
   }
 
+  private static async getZhHashes(
+    shaUrls: (string | undefined)[],
+  ): Promise<string[]> {
+    // check if the publisher uses one shasum file for all builds or separate ones
+    // we deduplicate to reduce the number of API calls
+    const uniqueShaUrls = deduplicateArray(
+      shaUrls.filter(isNotNullOrUndefined),
+    );
+
+    const zhHashes: string[] = [];
+    for (const shaUrl of uniqueShaUrls) {
+      const hashes =
+        await TerraformProviderHash.terraformDatasource.getZipHashes(shaUrl);
+      zhHashes.push(...coerceArray(hashes));
+    }
+    return zhHashes.map((hash) => `zh:${hash}`);
+  }
+
   static async createHashes(
     registryURL: string,
     repository: string,
@@ -174,17 +192,20 @@ export class TerraformProviderHash {
       registryURL === TerraformProviderDatasource.openTofuRegistryUrl ||
       registryURL === TerraformProviderDatasource.openTofuApiUrl
     ) {
-      const packagesHashes =
+      const packages =
         await TerraformProviderHash.terraformDatasource.getProviderPackages(
           repository,
           version,
         );
-      if (packagesHashes?.length) {
+      if (packages) {
         logger.debug(
           `Using OpenTofu packages API for ${repository}@${version}`,
         );
+        const zhHashes = await TerraformProviderHash.getZhHashes([
+          packages.shasumsUrl,
+        ]);
         // hashes are a logical set which Terraform deduplicates and sorts
-        return deduplicateArray(packagesHashes).sort();
+        return deduplicateArray([...packages.hashes, ...zhHashes]).sort();
       }
       logger.debug(
         `OpenTofu packages field unavailable for ${repository}@${version}, falling back to zip download`,
@@ -200,23 +221,9 @@ export class TerraformProviderHash {
       return null;
     }
 
-    // check if the publisher uses one shasum file for all builds or separate ones
-    // we deduplicate to reduce the number of API calls
-    const shaUrls = deduplicateArray(
-      builds.map((build) => build.shasums_url).filter(isNotNullOrUndefined),
+    const zhHashes = await TerraformProviderHash.getZhHashes(
+      builds.map((build) => build.shasums_url),
     );
-
-    logger.debug(
-      `Getting zip hashes for ${shaUrls.length} shasum URL(s) for ${repository}@${version}`,
-    );
-
-    const zhHashes: string[] = [];
-    for (const shaUrl of shaUrls) {
-      const hashes =
-        await TerraformProviderHash.terraformDatasource.getZipHashes(shaUrl);
-
-      zhHashes.push(...coerceArray(hashes));
-    }
 
     logger.debug(
       `Got ${zhHashes.length} zip hashes for ${repository}@${version}`,
@@ -227,7 +234,7 @@ export class TerraformProviderHash {
 
     const hashes = [];
     hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));
-    hashes.push(...zhHashes.map((hash) => `zh:${hash}`));
+    hashes.push(...zhHashes);
 
     // hashes are a logical set which Terraform deduplicates and sorts
     return deduplicateArray(hashes).sort();

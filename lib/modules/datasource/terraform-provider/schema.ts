@@ -144,10 +144,11 @@ const OpenTofuProviderPackage = z.object({
 export const OpenTofuProviderPackagesResponse = z
   .object({
     packages: LooseRecord(OpenTofuProviderPackage).catch({}),
+    shasums_url: z.string().optional().catch(undefined),
   })
-  .transform(({ packages }): string[] | null => {
-    const allHashes = Object.values(packages).flatMap(({ hashes }) => hashes);
-    return allHashes.length ? allHashes : null;
+  .transform(({ packages, shasums_url }) => {
+    const hashes = Object.values(packages).flatMap(({ hashes }) => hashes);
+    return hashes.length ? { hashes, shasumsUrl: shasums_url } : null;
   });
 
 export type OpenTofuProviderPackagesResponse = z.infer<
