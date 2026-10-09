@@ -1,4 +1,4 @@
-import { partial, platform, scm } from '~test/util.ts';
+import { logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import type { BranchConfig } from '../../../types.ts';
@@ -20,6 +20,7 @@ describe('workers/repository/update/pr/automerge', () => {
       } satisfies BranchConfig;
       pr = partial<Pr>();
       spy.mockReturnValue(true);
+      prAutomerge.resetPendingMerge();
     });
 
     it('should not automerge if not configured', async () => {
@@ -149,6 +150,42 @@ describe('workers/repository/update/pr/automerge', () => {
         prAutomergeBlockReason: 'MergePending',
       });
       expect(scm.deleteBranch).not.toHaveBeenCalled();
+    });
+
+    it('skips further automerges while a merge is pending', async () => {
+      config.automerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce('pending');
+      await prAutomerge.checkAutoMerge(partial<Pr>({ number: 1 }), config);
+
+      const res = await prAutomerge.checkAutoMerge(
+        partial<Pr>({ number: 2 }),
+        config,
+      );
+
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'MergePending',
+      });
+      expect(platform.mergePr).toHaveBeenCalledOnce();
+      expect(prAutomerge.getPendingMergePr()).toBe(1);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping automerge of PR #2 because the merge of PR #1 is still pending',
+      );
+
+      prAutomerge.resetPendingMerge();
+
+      expect(prAutomerge.getPendingMergePr()).toBeUndefined();
+    });
+
+    it('does not skip further automerges after adding a PR to the merge queue', async () => {
+      config.automerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce('enqueued');
+
+      await prAutomerge.checkAutoMerge(partial<Pr>({ number: 1 }), config);
+
+      expect(prAutomerge.getPendingMergePr()).toBeUndefined();
     });
 
     it('should skip a PR which is already in the merge queue', async () => {

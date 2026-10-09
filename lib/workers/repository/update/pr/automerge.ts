@@ -29,11 +29,36 @@ export interface AutomergePrResult {
   prAutomergeBlockReason?: PrAutomergeBlockReason;
 }
 
+// The PR whose merge the platform has not finished yet in this repository run
+let pendingMergePr: number | undefined;
+
+export function resetPendingMerge(): void {
+  pendingMergePr = undefined;
+}
+
+/**
+ * Returns the PR whose merge the platform has not finished yet in this
+ * repository run. Further automerges are skipped until the next run, because
+ * the base branch is about to change.
+ */
+export function getPendingMergePr(): number | undefined {
+  return pendingMergePr;
+}
+
 export async function checkAutoMerge(
   pr: Pr,
   config: BranchConfig,
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
+  if (pendingMergePr !== undefined) {
+    logger.debug(
+      `Skipping automerge of PR #${pr.number} because the merge of PR #${pendingMergePr} is still pending`,
+    );
+    return {
+      automerged: false,
+      prAutomergeBlockReason: 'MergePending',
+    };
+  }
   const {
     branchName,
     baseBranch,
@@ -152,6 +177,7 @@ export async function checkAutoMerge(
     strategy: automergeStrategy,
   });
   if (res === 'pending') {
+    pendingMergePr = pr.number;
     logger.info(
       { pr: pr.number, prTitle: pr.title },
       'PR merge requested, the platform merges it in the background',

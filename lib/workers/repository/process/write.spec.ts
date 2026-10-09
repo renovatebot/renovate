@@ -15,6 +15,7 @@ import { fingerprint } from '../../../util/fingerprint.ts';
 import { counts } from '../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import * as _branchWorker from '../update/branch/index.ts';
+import * as prAutomerge from '../update/pr/automerge.ts';
 import * as _limits from './limits.ts';
 import {
   compareCacheFingerprint,
@@ -108,34 +109,12 @@ describe('workers/repository/process/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
 
-    it('stops after a merge the platform has not finished yet', async () => {
-      const branches = partial<BranchConfig[]>([
-        {
-          branchName: 'test_branch',
-          baseBranch: 'base',
-          manager: 'npm',
-          upgrades: [],
-        },
-        {
-          branchName: 'test_branch2',
-          baseBranch: 'base',
-          manager: 'npm',
-          upgrades: [],
-        },
-      ]);
-      scm.branchExists.mockResolvedValue(true);
-      branchWorker.processBranch.mockResolvedValueOnce({
-        branchExists: true,
-        prNo: 5,
-        result: 'done',
-        mergePending: true,
-      });
+    it('forgets a pending merge of an earlier repository run', async () => {
+      const resetPendingMerge = vi.spyOn(prAutomerge, 'resetPendingMerge');
 
-      const res = await writeUpdates(config, branches);
+      await writeUpdates(config, []);
 
-      expect(res).toBe('automerged');
-      expect(branches[0].prNo).toBe(5);
-      expect(branchWorker.processBranch).toHaveBeenCalledOnce();
+      expect(resetPendingMerge).toHaveBeenCalledOnce();
     });
 
     it('counts vulnerability alert branches separately', async () => {

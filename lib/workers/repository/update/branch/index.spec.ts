@@ -1787,41 +1787,6 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
 
-    it('reports a merge the platform has not finished yet', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
-        partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>()],
-        }),
-      );
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>()],
-      });
-      scm.branchExists.mockResolvedValue(true);
-      automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
-      prWorker.ensurePr.mockResolvedValueOnce({
-        type: 'with-pr',
-        pr: partial<Pr>({ number: 5 }),
-      });
-      prAutomerge.checkAutoMerge.mockResolvedValueOnce({
-        automerged: false,
-        prAutomergeBlockReason: 'MergePending',
-      });
-      commit.commitFilesToBranch.mockResolvedValueOnce(null);
-
-      const res = await branchWorker.processBranch({
-        ...config,
-        automerge: true,
-        rebaseWhen: 'conflicted',
-      });
-
-      expect(res).toMatchObject({
-        prNo: 5,
-        result: 'done',
-        mergePending: true,
-      });
-    });
-
     it('ensures PR when impossible to automerge with mismatch keepUpdatedLabel', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({

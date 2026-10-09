@@ -20,6 +20,7 @@ import type {
   UpgradeFingerprintConfig,
 } from '../../types.ts';
 import { processBranch } from '../update/branch/index.ts';
+import { resetPendingMerge } from '../update/pr/automerge.ts';
 import { upgradeFingerprintFields } from './fingerprint-fields.ts';
 import {
   getCommitsHourlyCount,
@@ -30,13 +31,6 @@ import {
 import { reconcileRequestedMerges } from './merge-results.ts';
 
 export type WriteUpdateResult = 'done' | 'automerged';
-
-/**
- * Whether a merge the platform has not finished yet stops processing further
- * branches and restarts the repository job like a completed automerge, so the
- * remaining branches are checked against the updated base branch.
- */
-const restartAfterPendingMerge = true;
 
 export function generateCommitFingerprintConfig(
   branch: BranchConfig,
@@ -148,6 +142,7 @@ export async function writeUpdates(
   config: RenovateConfig,
   allBranches: BranchConfig[],
 ): Promise<WriteUpdateResult> {
+  resetPendingMerge();
   const branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
@@ -227,10 +222,6 @@ export async function writeUpdates(
           branch.automergeType !== 'pr-comment'
         ) {
           // Stop processing other branches because base branch has been changed
-          return 'automerged';
-        }
-        if (res?.mergePending && restartAfterPendingMerge) {
-          // The base branch changes once the platform completes the merge
           return 'automerged';
         }
         if (!branchExisted && (await scm.branchExists(branch.branchName))) {
