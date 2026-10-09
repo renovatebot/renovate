@@ -1,4 +1,7 @@
-import type { ToolName as ContainerbaseToolName } from '@renovatebot/base-image';
+import {
+  type ToolName as ContainerbaseToolName,
+  toolNames,
+} from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 import type { VersioningName } from '../../versioning-list.generated.ts';
@@ -9,163 +12,25 @@ export interface ConstraintDefinition {
 }
 
 /**
- * A `tool` that Containerbase supports.
+ * Additional documentation for `tool`s that Containerbase supports.
  */
-export const toolDefinitions = [
-  {
-    name: 'apm',
-  },
-  {
-    name: 'bazelisk',
-  },
-  {
-    name: 'bun',
-  },
-  {
-    name: 'bundler',
-  },
-  {
-    name: 'cocoapods',
-  },
-  {
-    name: 'composer',
-  },
-  {
-    name: 'conan',
-  },
-  {
-    name: 'copier',
-  },
-  {
-    name: 'corepack',
-  },
-  {
-    name: 'deno',
-  },
-  {
-    name: 'devbox',
-  },
-  {
-    name: 'dotnet',
-  },
-  {
-    name: 'erlang',
-  },
-  {
-    name: 'elixir',
-  },
-  {
-    name: 'flux',
-  },
-  {
-    name: 'gh',
-  },
-  {
-    name: 'gleam',
-  },
-  {
-    name: 'golang',
-  },
-  {
-    name: 'gradle',
-  },
-  {
-    name: 'hashin',
-  },
-  {
-    name: 'helm',
-  },
-  {
-    name: 'helmfile',
-  },
-  {
-    name: 'java',
-  },
-  {
-    name: 'jb',
-  },
-  {
-    name: 'kustomize',
-  },
-  {
-    name: 'maven',
-  },
-  {
-    name: 'mise',
-  },
-  {
-    name: 'nix',
-  },
-  {
-    name: 'node',
-  },
-  {
-    name: 'npm',
-  },
-  {
-    name: 'pdm',
-  },
-  {
-    name: 'php',
-  },
-  {
-    name: 'pip-tools',
-  },
-  {
-    name: 'pipenv',
-  },
-  {
-    name: 'pnpm',
-  },
-  {
-    name: 'pixi',
-  },
-  {
-    name: 'poetry',
-  },
-  {
-    name: 'python',
-  },
+export const toolDefinitionDocumentation = [
   {
     name: 'ruby',
     description: 'Also used in the `rubygems` Datasource',
-  },
-  {
-    name: 'rust',
-  },
-  {
-    name: 'uv',
-  },
-  {
-    name: 'yarn',
-  },
-  {
-    name: 'yarn-slim',
-  },
-  {
-    name: 'dart',
-  },
-  {
-    name: 'flutter',
-  },
-  {
-    name: 'vendir',
   },
 ] as const satisfies readonly (ConstraintDefinition & {
   name: ContainerbaseToolName;
 })[];
 
 /**
- * A `tool` that Containerbase supports.
+ * A `tool` that Containerbase supports, but may not be supported by Renovate.
+ *
+ * @see SupportedToolNames
  */
-export type ToolName = (typeof toolDefinitions)[number]['name'];
+export type ToolName = (typeof toolNames)[number];
 
-/**
- * A `tool` that Containerbase supports.
- */
-export const toolNames: ToolName[] = toolDefinitions.map((t) => t.name);
-
-export function isToolName(value: unknown): value is ToolName {
+export function isToolName(value: unknown): value is ContainerbaseToolName {
   return isString(value) && (toolNames as readonly string[]).includes(value);
 }
 
@@ -267,14 +132,14 @@ export function isAdditionalConstraintName(
 /**
  * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
  */
-export type ConstraintName = ToolName | AdditionalConstraintName;
+export type ConstraintName = ContainerbaseToolName | AdditionalConstraintName;
 
 export function isConstraintName(value: unknown): value is ConstraintName {
   return isToolName(value) || isAdditionalConstraintName(value);
 }
 
 export interface ToolConstraint {
-  toolName: ToolName;
+  toolName: ContainerbaseToolName;
   constraint?: string | null;
 }
 

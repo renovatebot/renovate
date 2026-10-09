@@ -9,12 +9,14 @@ import {
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
-import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
-  toolNames,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
 import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
@@ -372,15 +374,15 @@ function generateConfigFileNames(): string {
 function generateToolsForConstraints(): string {
   let output = '| Tool | Additional Information | Versioning | Datasource |\n';
   output += '| --- | --- | --- | --- |\n';
-  for (const toolDef of toolDefinitions) {
-    const toolConfig = getToolConfig(toolDef.name);
+  for (const toolName of getSupportedToolNames()) {
+    const toolConfig = getToolConfig(toolName);
     if (!toolConfig) {
       continue;
     }
-    const def: ConstraintDefinition = toolDef;
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
-    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
   return output;
@@ -403,7 +405,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of toolNames) {
+  for (const tool of getSupportedToolNames()) {
     output += `- \`${tool}\`\n`;
   }
 

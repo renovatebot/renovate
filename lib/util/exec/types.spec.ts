@@ -1,9 +1,9 @@
 import { tools as containerbaseTools } from '@renovatebot/base-image';
-import { toolDefinitions } from './types.ts';
+import { toolDefinitionDocumentation } from './types.ts';
 
 describe('util/exec/types', () => {
   it('only defines tools that Containerbase actually supports', () => {
-    const unsupported = toolDefinitions
+    const unsupported = toolDefinitionDocumentation
       .map(({ name }) => name)
       .filter((name) => !(name in containerbaseTools));
 

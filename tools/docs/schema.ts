@@ -4,10 +4,14 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
@@ -163,12 +167,17 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const {
-      name,
-      description,
-    } of toolDefinitions as readonly ConstraintDefinition[]) {
-      const base = `A constraint for the \`${name}\` Containerbase tool`;
-      temp.properties[name] = {
+    for (const toolName of getSupportedToolNames()) {
+      const toolConfig = getToolConfig(toolName);
+      if (!toolConfig) {
+        continue;
+      }
+
+      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+      const description = def?.description ?? '';
+
+      const base = `A constraint for the \`${toolName}\` Containerbase tool`;
+      temp.properties[toolName] = {
         type: 'string',
         description: description ? `${base}. ${description}` : base,
       };
@@ -209,7 +218,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     for (const {
       name,
       description,
-    } of toolDefinitions as readonly ConstraintDefinition[]) {
+    } of toolDefinitionDocumentation as readonly ConstraintDefinition[]) {
       const base = `Install the \`${name}\` Containerbase tool`;
       temp.properties[name] = {
         type: 'object',
