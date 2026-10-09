@@ -31,6 +31,7 @@ import {
 import type { logger as _logger } from '../../../logger/index.ts';
 import type * as _git from '../../../util/git/index.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
+import { hashBody } from '../pr-body.ts';
 import type { Platform, RepoParams } from '../types.ts';
 import { AzurePrVote } from './types.ts';
 
@@ -738,6 +739,7 @@ describe('modules/platform/azure/index', () => {
               },
             ])
             .mockResolvedValueOnce([]),
+          getPullRequestById: vi.fn().mockResolvedValue({}),
           getPullRequestLabels: vi.fn().mockResolvedValue([]),
         }),
       );
@@ -1064,6 +1066,8 @@ describe('modules/platform/azure/index', () => {
               },
             ]),
 
+          getPullRequestById: vi.fn().mockResolvedValue({}),
+
           getPullRequestLabels: vi
             .fn()
             .mockReturnValue([{ active: true, name: 'renovate' }]),
@@ -1087,6 +1091,29 @@ describe('modules/platform/azure/index', () => {
         pullRequestId: 1234,
         state: 'open',
       });
+    });
+
+    it('hashes the full description instead of the truncated list one', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const description = 'a'.repeat(1000);
+      const getPullRequestById = vi.fn().mockResolvedValue({ description });
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              { pullRequestId: 1234, description: description.slice(0, 400) },
+            ]),
+          getPullRequestById,
+          getPullRequestLabels: vi.fn().mockReturnValue([]),
+        }),
+      );
+
+      const pr = await azure.getPr(1234);
+
+      expect(getPullRequestById).toHaveBeenCalledWith(1234, 'some');
+      expect(pr?.bodyStruct?.hash).toBe(hashBody(description));
     });
   });
 
