@@ -783,7 +783,7 @@
 
     Please check one of the boxes in the "Reproduction" section of the PR description:
      1. Link a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) that shows the bug or the new behavior
-     2. If a public reproduction is not possible, for example because it needs a private registry or a self-hosted platform, state the reason
+     2. If a public reproduction is not possible, for example because it needs a private registry or a self-hosted platform, state the reason in the Markdown code block below it
 
 
     PRs without a reproduction or a stated reason will not be reviewed and may be closed.

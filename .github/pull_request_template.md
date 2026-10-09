@@ -68,7 +68,11 @@ A reproduction is compulsory for PRs that do not close an Issue.
 If this PR closes an Issue, confirm the fix against the Issue's reproduction instead.
 
 - [ ] Reproduction repository that shows the bug or the new behavior: <URL>
-- [ ] A public reproduction is not possible, because: <reason>
+- [ ] A public reproduction is not possible, and I have stated the reason below
+
+```markdown
+<!-- Reason for not adding a reproduction, inside the Markdown code block -->
+```
 
 PRs without a reproduction or a stated reason will not be reviewed and may be closed.
 
