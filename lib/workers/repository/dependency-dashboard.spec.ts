@@ -2070,6 +2070,7 @@ None detected
                   {
                     depName: 'node',
                     currentValue: 'latest',
+                    lockedVersion: '22.15.0',
                     updates: [
                       {
                         isLockfileUpdate: true,
@@ -2084,7 +2085,7 @@ None detected
           });
 
           expect(PackageFiles.getDashboardMarkdown(Infinity, false)).toContain(
-            ' - `node latest` → [Updates: `22.16.0`]',
+            ' - `node latest (locked: 22.15.0)` → [Updates: `22.16.0`]',
           );
         });
 

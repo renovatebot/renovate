@@ -125,6 +125,13 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            if (
+              lock &&
+              (ver || digest) &&
+              dep.updates?.some((update) => update.isLockfileUpdate)
+            ) {
+              version = `${version} (locked: ${lock})`;
+            }
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
