@@ -269,7 +269,7 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
-            versioning,
+            versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
