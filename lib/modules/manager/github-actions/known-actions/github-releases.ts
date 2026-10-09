@@ -1,7 +1,7 @@
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
-import * as condaVersioning from '../../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../../versioning/node/index.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
+import * as semverVersioning from '../../../versioning/semver/index.ts';
 import type { KnownActionConfig } from '../types.ts';
 import {
   actionsVersionsExtractVersion,
@@ -269,9 +269,13 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'gohugoio/hugo',
     withSchema: valSchema('hugo-version'),
   },
+  // https://github.com/prefix-dev/setup-pixi
+  // `pixi-version` only accepts `latest` or `vX.Y.Z`. Conda versioning cannot
+  // determine a major for a `v`-prefixed version, so every release would be
+  // dropped from the update buckets
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,
-    versioning: condaVersioning.id,
+    versioning: semverVersioning.id,
     packageName: 'prefix-dev/pixi',
     withSchema: valSchema('pixi-version'),
   },
