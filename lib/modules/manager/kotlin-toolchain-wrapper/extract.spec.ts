@@ -84,6 +84,31 @@ describe('modules/manager/kotlin-toolchain-wrapper/extract', () => {
       ]);
     });
 
+    it.each`
+      packageFile
+      ${'kotlin'}
+      ${'kotlin.bat'}
+    `(
+      'keeps $packageFile as primary when its consistent sibling is excluded',
+      async ({ packageFile }: { packageFile: string }) => {
+        mockFiles({ kotlin: shWrapper, 'kotlin.bat': batWrapper });
+
+        const res = await extractAllPackageFiles(config, [packageFile]);
+
+        expect(res).toMatchObject([
+          { packageFile, deps: [{ currentValue: '0.12.0' }] },
+        ]);
+      },
+    );
+
+    it('does not extract an excluded wrapper when the matched file is not a wrapper', async () => {
+      mockFiles({ kotlin: shWrapper, 'kotlin.bat': '@echo off' });
+
+      await expect(
+        extractAllPackageFiles(config, ['kotlin.bat']),
+      ).resolves.toBeNull();
+    });
+
     it('falls back to the batch script when it is alone', async () => {
       mockFiles({ 'kotlin.bat': batWrapper });
 
@@ -181,66 +206,106 @@ describe('modules/manager/kotlin-toolchain-wrapper/extract', () => {
       ).resolves.toBeNull();
     });
 
-    it('skips a pair that declares different versions', async () => {
-      mockFiles({
-        kotlin: shWrapper,
-        'kotlin.bat': batWrapper.replace('0.12.0', '0.11.1'),
-      });
+    it.each`
+      packageFiles
+      ${['kotlin', 'kotlin.bat']}
+      ${['kotlin']}
+      ${['kotlin.bat']}
+    `(
+      'skips a pair that declares different versions when matching $packageFiles',
+      async ({ packageFiles }: { packageFiles: string[] }) => {
+        mockFiles({
+          kotlin: shWrapper,
+          'kotlin.bat': batWrapper.replace('0.12.0', '0.11.1'),
+        });
 
-      await expect(
-        extractAllPackageFiles(config, ['kotlin', 'kotlin.bat']),
-      ).resolves.toBeNull();
-    });
+        await expect(
+          extractAllPackageFiles(config, packageFiles),
+        ).resolves.toBeNull();
+      },
+    );
 
-    it('skips a pair that declares different checksums', async () => {
-      mockFiles({
-        kotlin: shWrapper,
-        'kotlin.bat': batWrapper.replace(
-          '442cf2ea77c4c3c2228c3d256d6bd48fb7a319df4a16abbd57dbc2fc9a944d42',
-          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        ),
-      });
+    it.each`
+      packageFiles
+      ${['kotlin', 'kotlin.bat']}
+      ${['kotlin']}
+      ${['kotlin.bat']}
+    `(
+      'skips a pair that declares different checksums when matching $packageFiles',
+      async ({ packageFiles }: { packageFiles: string[] }) => {
+        mockFiles({
+          kotlin: shWrapper,
+          'kotlin.bat': batWrapper.replace(
+            '442cf2ea77c4c3c2228c3d256d6bd48fb7a319df4a16abbd57dbc2fc9a944d42',
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+          ),
+        });
 
-      await expect(
-        extractAllPackageFiles(config, ['kotlin', 'kotlin.bat']),
-      ).resolves.toBeNull();
-    });
+        await expect(
+          extractAllPackageFiles(config, packageFiles),
+        ).resolves.toBeNull();
+      },
+    );
 
-    it('skips a pair where only the batch script lacks a checksum', async () => {
-      mockFiles({
-        kotlin: shWrapper,
-        'kotlin.bat': '@echo off\r\nset kotlin_cli_version=0.12.0\r\n',
-      });
+    it.each`
+      packageFiles
+      ${['kotlin', 'kotlin.bat']}
+      ${['kotlin']}
+      ${['kotlin.bat']}
+    `(
+      'skips a pair where only the batch script lacks a checksum when matching $packageFiles',
+      async ({ packageFiles }: { packageFiles: string[] }) => {
+        mockFiles({
+          kotlin: shWrapper,
+          'kotlin.bat': '@echo off\r\nset kotlin_cli_version=0.12.0\r\n',
+        });
 
-      await expect(
-        extractAllPackageFiles(config, ['kotlin', 'kotlin.bat']),
-      ).resolves.toBeNull();
-    });
+        await expect(
+          extractAllPackageFiles(config, packageFiles),
+        ).resolves.toBeNull();
+      },
+    );
 
-    it('skips a pair where only the shell script lacks a checksum', async () => {
-      mockFiles({
-        kotlin: '#!/bin/sh\nkotlin_cli_version=0.12.0\n',
-        'kotlin.bat': batWrapper,
-      });
+    it.each`
+      packageFiles
+      ${['kotlin', 'kotlin.bat']}
+      ${['kotlin']}
+      ${['kotlin.bat']}
+    `(
+      'skips a pair where only the shell script lacks a checksum when matching $packageFiles',
+      async ({ packageFiles }: { packageFiles: string[] }) => {
+        mockFiles({
+          kotlin: '#!/bin/sh\nkotlin_cli_version=0.12.0\n',
+          'kotlin.bat': batWrapper,
+        });
 
-      await expect(
-        extractAllPackageFiles(config, ['kotlin', 'kotlin.bat']),
-      ).resolves.toBeNull();
-    });
+        await expect(
+          extractAllPackageFiles(config, packageFiles),
+        ).resolves.toBeNull();
+      },
+    );
 
-    it('skips a pair that declares different download roots', async () => {
-      mockFiles({
-        kotlin: codeBlock`
+    it.each`
+      packageFiles
+      ${['kotlin', 'kotlin.bat']}
+      ${['kotlin']}
+      ${['kotlin.bat']}
+    `(
+      'skips a pair that declares different download roots when matching $packageFiles',
+      async ({ packageFiles }: { packageFiles: string[] }) => {
+        mockFiles({
+          kotlin: codeBlock`
           ${shWrapper}
           KOTLIN_CLI_DOWNLOAD_ROOT="\${KOTLIN_CLI_DOWNLOAD_ROOT:-https://maven.example.com/mirror}"
         `,
-        'kotlin.bat': batWrapper,
-      });
+          'kotlin.bat': batWrapper,
+        });
 
-      await expect(
-        extractAllPackageFiles(config, ['kotlin', 'kotlin.bat']),
-      ).resolves.toBeNull();
-    });
+        await expect(
+          extractAllPackageFiles(config, packageFiles),
+        ).resolves.toBeNull();
+      },
+    );
 
     it('accepts a pair whose checksums differ only in case', async () => {
       mockFiles({

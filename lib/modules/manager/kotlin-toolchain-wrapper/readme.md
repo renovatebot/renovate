@@ -6,6 +6,7 @@ A wrapper that does not set `KOTLIN_CLI_DOWNLOAD_ROOT` is looked up on the publi
 
 The `kotlin` and `kotlin.bat` scripts in the same directory describe one and the same version, so Renovate reports a single dependency for the pair and updates both scripts together.
 If the two scripts disagree on the version, the checksum or the download root, Renovate skips the directory instead of rewriting one script from the metadata of the other.
+This consistency check includes both existing scripts even when `ignorePaths` or `managerFilePatterns` excludes one of them from extraction, because artifact updates replace both scripts.
 
 Both scripts also pin a checksum of the CLI distribution, which Renovate cannot compute on its own.
 Renovate therefore downloads the official wrapper scripts of the new version from `<download root>/org/jetbrains/kotlin/kotlin-cli/<version>/` and replaces the local ones in full, instead of editing the version line in place.

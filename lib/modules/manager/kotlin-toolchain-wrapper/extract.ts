@@ -49,11 +49,12 @@ function groupByDirectory(packageFiles: string[]): Map<string, string[]> {
 
 async function extractDirectory(group: string[]): Promise<PackageFile | null> {
   const wrappers: { packageFile: string; wrapper: ParsedWrapper }[] = [];
+  const dir = upath.dirname(group[0]);
+  // Artifact updates include both scripts, even if only one matched extraction.
   for (const name of wrapperNames) {
-    const packageFile = group.find((file) => upath.basename(file) === name);
-    if (!packageFile) {
-      continue;
-    }
+    const packageFile =
+      group.find((file) => upath.basename(file) === name) ??
+      upath.join(dir, name);
 
     const content = await readLocalFile(packageFile, 'utf8');
     const wrapper = content ? parseWrapper(content) : null;
@@ -62,12 +63,12 @@ async function extractDirectory(group: string[]): Promise<PackageFile | null> {
     }
   }
 
-  const [first, ...siblings] = wrappers;
+  const first = wrappers.find(({ packageFile }) => group.includes(packageFile));
   if (!first) {
     return null;
   }
 
-  for (const sibling of siblings) {
+  for (const sibling of wrappers.filter((entry) => entry !== first)) {
     const difference = disagreement(first.wrapper, sibling.wrapper);
     if (difference) {
       logger.info(
