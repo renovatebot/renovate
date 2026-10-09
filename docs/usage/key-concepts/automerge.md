@@ -144,7 +144,8 @@ PRs that are already waiting in the merge queue are left untouched on later runs
 
 On github.com, Renovate merges through the asynchronous merge API, so GitHub completes a direct merge in the background.
 Renovate waits up to three seconds once for that merge, then reports the PR as automerged and continues like after any other automerge.
-If GitHub has not finished the merge by then, Renovate stops processing further branches and restarts the repository job once, like after a completed automerge, so the remaining branches are checked against the updated base branch.
+If GitHub has not finished the merge by then, Renovate keeps processing the remaining branches but skips all further PR and branch automerges in that run, because the base branch is about to change.
+Adding a PR to the merge queue does not skip further automerges.
 On later runs Renovate first looks up the result of its previous merge request, logs the reason if GitHub refused it, and sends no new request while the previous one is still pending.
 This lookup across runs needs `repositoryCache=enabled`, which is disabled by default for self-hosted Renovate.
 Renovate does not request a direct merge while a branch protection or ruleset blocks the PR, unless Renovate may bypass the rules.

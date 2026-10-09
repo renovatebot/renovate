@@ -258,6 +258,10 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
   In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 !!! note
+  On github.com, GitHub completes a direct merge in the background.
+  If GitHub has not finished the merge after a few seconds, Renovate keeps processing the remaining branches but skips all further automerges in that run, because the base branch is about to change.
+
+!!! note
   By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
   By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 

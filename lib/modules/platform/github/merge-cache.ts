@@ -6,8 +6,9 @@ import type { MergeRequestRecord } from './types.ts';
 // GitHub keeps the result of an async merge request for 24 hours
 const retentionHours = 24;
 
-// After an automerge the repository job restarts with a freshly loaded
-// repository cache, so the requests of the current job are also kept here
+// After a completed automerge the repository job restarts with a freshly
+// loaded repository cache, so the requests of the current job, such as refused
+// ones that decide the next merge method, are also kept here
 let jobRepository: string | undefined;
 let jobRequests: Record<number, MergeRequestRecord> = {};
 
