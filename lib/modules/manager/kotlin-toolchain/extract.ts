@@ -191,14 +191,26 @@ export function extractPackageFile(
     return null;
   }
 
-  const keys = Object.keys(file.data);
+  return extractYamlFile(
+    file.data,
+    packageFile,
+    extractRegistryUrls(file.data),
+  );
+}
+
+export function extractYamlFile(
+  file: KotlinToolchainFile,
+  packageFile: string,
+  registryUrls: string[],
+): PackageFileContent<KotlinToolchainManagerData> | null {
+  const keys = Object.keys(file);
   if (!isKotlinToolchainFile(keys, packageFile)) {
     logger.debug(`Not a Kotlin Toolchain file: ${packageFile}`);
     return null;
   }
 
   const deps: PackageDependency<KotlinToolchainManagerData>[] = [];
-  for (const [key, value] of Object.entries(file.data)) {
+  for (const [key, value] of Object.entries(file)) {
     if (dependenciesSectionRegex.test(key)) {
       deps.push(...coordinatesFrom(KotlinToolchainDependencies, value, key));
     } else if (settingsSectionRegex.test(key)) {
@@ -210,7 +222,6 @@ export function extractPackageFile(
     }
   }
 
-  const registryUrls = extractRegistryUrls(file.data);
   for (const dep of deps) {
     dep.registryUrls = [
       ...new Set([...registryUrls, ...coerceArray(dep.registryUrls)]),

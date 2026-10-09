@@ -4,7 +4,11 @@ import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
 import { normalizeCatalogAlias } from './catalog.ts';
-import { extractPackageFile, extractRegistryUrls } from './extract.ts';
+import {
+  extractPackageFile,
+  extractRegistryUrls,
+  extractYamlFile,
+} from './extract.ts';
 import { KotlinToolchainFile } from './schema.ts';
 import type { KotlinToolchainManagerData } from './types.ts';
 
@@ -62,13 +66,14 @@ export async function extractAllPackageFiles(
     if (!file.success) {
       continue;
     }
-    const result = extractPackageFile(content, packageFile);
+    const registryUrls = extractRegistryUrls(file.data);
+    const result = extractYamlFile(file.data, packageFile, registryUrls);
     if (!result) {
       continue;
     }
     yamlFiles.push({
       result: { ...result, packageFile },
-      registryUrls: extractRegistryUrls(file.data),
+      registryUrls,
     });
     const name = upath.basename(packageFile);
     if (name === 'project.yaml') {
