@@ -252,8 +252,8 @@ importers:
         specifier: 4.7.10
         version: 4.7.10
       ignore:
-        specifier: 7.0.11
-        version: 7.0.11
+        specifier: 7.0.12
+        version: 7.0.12
       ini:
         specifier: 6.0.0
         version: 6.0.0
@@ -3674,8 +3674,8 @@ packages:
     resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
     engines: {node: '>=10.18'}
 
-  ignore@7.0.11:
-    resolution: {integrity: sha512-YChdK5txDjwGUvgR7oCJcLGkwi3LDh8Zx8tS7ndYciLEg/oOCL26VUBSUEtgS7EjiybcBqFxh5j0rAdDX7/bbg==}
+  ignore@7.0.12:
+    resolution: {integrity: sha512-/8UvqAPU9DGTI9k4mxtf49U37Isfwr8Uts96+SBHIkFxPJnHS0Ew4f00sM4Scd8V8EjM0jUNtVDdv1kPdt35lg==}
     engines: {node: '>= 4'}
 
   import-fresh@3.3.1:
@@ -8783,7 +8783,7 @@ snapshots:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       fast-glob: 3.3.3
-      ignore: 7.0.11
+      ignore: 7.0.12
       is-path-inside: 4.0.0
       micromatch: 4.0.8
       slash: 5.1.0
@@ -8953,7 +8953,7 @@ snapshots:
 
   hyperdyperid@1.2.0: {}
 
-  ignore@7.0.11: {}
+  ignore@7.0.12: {}
 
   import-fresh@3.3.1:
     dependencies:
