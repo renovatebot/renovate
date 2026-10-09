@@ -152,6 +152,32 @@ describe('util/interpolator', () => {
       });
     });
 
+    it('does not resolve secrets in customPresets', () => {
+      const res = replaceInterpolatedValuesInObject(
+        {
+          // @ts-expect-error as we are using secrets to pass the value
+          mode: '{{ secrets.SECRET_MODE }}',
+          customPresets: {
+            myPreset: {
+              npmrc: '//registry.npmjs.org/:_authToken={{ secrets.NPM_TOKEN }}',
+            },
+          },
+        },
+        { SECRET_MODE: 'silent' },
+        options.secrets,
+        false,
+      );
+
+      expect(res).toEqual({
+        mode: 'silent',
+        customPresets: {
+          myPreset: {
+            npmrc: '//registry.npmjs.org/:_authToken={{ secrets.NPM_TOKEN }}',
+          },
+        },
+      });
+    });
+
     it('throws error if secrets are used in disallowed options', () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';

@@ -135,7 +135,9 @@ function checkEnv(): void {
 export async function validatePresets(config: AllConfig): Promise<void> {
   logger.debug('validatePresets()');
   try {
-    await resolveConfigPresets(config);
+    // Pass config as baseConfig so nested extends (e.g. repositories[] object
+    // entries) can resolve customPresets defined on the global config.
+    await resolveConfigPresets(config, config);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, CONFIG_PRESETS_INVALID);
     throw new Error(CONFIG_PRESETS_INVALID);
