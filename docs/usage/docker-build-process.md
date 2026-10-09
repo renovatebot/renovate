@@ -35,15 +35,13 @@ The full flow can be seen below:
 flowchart TD
     Ubuntu               --> ContainerbaseUbuntu
     ContainerbaseUbuntu  --> ContainerbaseBase
-    ContainerbaseBase    --> ContainerbaseSidecar
-    ContainerbaseSidecar --> RenovatebotBaseImage
+    ContainerbaseBase    --> RenovatebotBaseImage
     RenovatebotBaseImage --> RenovateSlim
     RenovatebotBaseImage --> RenovateFull
 
     Ubuntu[<code>docker.io/library/ubuntu</code>]
     ContainerbaseUbuntu[<a href="https://github.com/containerbase/ubuntu"><code>ghcr.io/containerbase/ubuntu</code></a>]
     ContainerbaseBase[<a href="https://github.com/containerbase/base"><code>ghcr.io/containerbase/base</code></a>]
-    ContainerbaseSidecar[<a href="https://github.com/containerbase/sidecar"><code>ghcr.io/containerbase/sidecar</code></a>]
     RenovatebotBaseImage[<a href="https://github.com/renovatebot/base-image"><code>ghcr.io/renovatebot/base-image</code></a>]
     RenovateSlim[<code>ghcr.io/renovatebot/renovate</code><br><code>docker.io/renovate/renovate</code>]
     RenovateFull[<code>ghcr.io/renovatebot/renovate:full</code><br><code>docker.io/renovate/renovate:full</code>]
