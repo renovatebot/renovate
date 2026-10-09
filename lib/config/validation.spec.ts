@@ -3043,7 +3043,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           message:
-            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit, mise.',
           topic: 'Configuration Error',
         },
       ]);
@@ -3062,7 +3062,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit, mise.',
             topic: 'Configuration Error',
           },
         ]);
@@ -3357,7 +3357,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit, mise.',
         },
       ]);
     });

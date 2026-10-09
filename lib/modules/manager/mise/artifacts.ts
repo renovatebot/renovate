@@ -7,6 +7,11 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
+import {
+  MISE_SAFE_MODE_MIN_VERSION,
+  parseMiseVersion,
+  supportsSafeMode,
+} from '../../../util/exec/mise.ts';
 import type {
   ExecOptions,
   ExtraEnv,
@@ -16,8 +21,6 @@ import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { regEx } from '../../../util/regex.ts';
-import { api as miseVersioning } from '../../versioning/semver/index.ts';
 import type {
   ToolConstraintsConfig,
   UpdateArtifact,
@@ -30,20 +33,6 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
-
-/**
- * First mise release that supports the features this manager relies on:
- * `MISE_SAFE=1` safe mode (a hard boundary against project config executing
- * code during `mise lock`) and `mise lock --bump` (advancing fuzzy selectors).
- *
- * Safe mode (jdx/mise#11146) and lockfile bumping (jdx/mise#11145) merged after
- * v2026.7.11 and first shipped in v2026.7.12.
- *
- * @see https://github.com/jdx/mise/pull/11146
- * @see https://github.com/jdx/mise/pull/11145
- * @see https://mise.jdx.dev/configuration/settings.html#safe
- */
-const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 
 /**
  * Detects the mise version that will actually run, by executing `mise version`.
@@ -59,25 +48,15 @@ async function detectMiseVersion(
 ): Promise<string | null> {
   try {
     const { stdout } = await exec('mise version', execOptions);
-    const version = regEx(/\d+\.\d+\.\d+/).exec(stdout)?.[0];
-    if (version && miseVersioning.isVersion(version)) {
-      return version;
+    const version = parseMiseVersion(stdout);
+    if (!version) {
+      logger.debug({ stdout }, 'Could not parse mise version output');
     }
-    logger.debug({ stdout }, 'Could not parse mise version output');
-    return null;
+    return version;
   } catch (err) {
     logger.debug({ err }, 'Failed to determine mise version');
     return null;
   }
-}
-
-/** True when `version` is at or above the safe-mode / `--bump` release. */
-function versionSupportsSafeFeatures(version: string | null): boolean {
-  return (
-    !!version &&
-    (miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
-      miseVersioning.isGreaterThan(version, MISE_SAFE_MODE_MIN_VERSION))
-  );
 }
 
 /**
@@ -181,7 +160,7 @@ export async function updateArtifacts({
       toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
       docker: {},
     });
-    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
+    miseSupportsSafeFeatures = supportsSafeMode(miseVersion);
   }
 
   const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;

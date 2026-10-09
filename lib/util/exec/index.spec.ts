@@ -19,6 +19,7 @@ import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
+import { getMiseEnvs } from './mise.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -29,10 +30,15 @@ import type {
 import { asRawCommand } from './utils.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
+const getMiseEnvsMock = vi.mocked(getMiseEnvs);
 
 vi.mock('./hermit.ts', async () => ({
   ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
   getHermitEnvs: vi.fn(),
+}));
+vi.mock('./mise.ts', async () => ({
+  ...(await vi.importActual<typeof import('./mise.ts')>('./mise.ts')),
+  getMiseEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
 const datasource = vi.mocked(_datasource);
@@ -45,6 +51,7 @@ interface TestInput {
   outOpts: RawExecOptions[];
   adminConfig?: Partial<RepoGlobalConfig>;
   hermitEnvs?: Record<string, string>;
+  miseEnvs?: Record<string, string>;
 }
 
 describe('util/exec/index', () => {
@@ -952,6 +959,45 @@ describe('util/exec/index', () => {
         },
       },
     ],
+
+    [
+      'Mise',
+      {
+        processEnv: {
+          ...envMock.basic,
+          CUSTOM_KEY: 'CUSTOM_VALUE',
+        },
+        inCmd,
+        inOpts: {
+          cwd,
+        },
+        outCmd: [inCmd],
+        outOpts: [
+          {
+            cwd,
+            env: {
+              ...envMock.basic,
+              CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+              PATH: '/home/user-a/.local/share/mise/installs/go/1.25.0/bin:/usr/local/bin',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+        miseEnvs: {
+          PATH: '/home/user-a/.local/share/mise/installs/go/1.25.0/bin:/usr/local/bin',
+        },
+        adminConfig: {
+          customEnvVariables: {
+            CUSTOM_KEY: 'CUSTOM_OVERRIDEN_VALUE',
+          },
+          binarySource: 'mise',
+        },
+      },
+    ],
   ];
 
   it.each(testInputs)('%s', async (_msg, testOpts) => {
@@ -963,6 +1009,7 @@ describe('util/exec/index', () => {
       outOpts,
       adminConfig = {},
       hermitEnvs,
+      miseEnvs,
     } = testOpts;
 
     process.env = procEnv;
@@ -979,6 +1026,9 @@ describe('util/exec/index', () => {
     setCustomEnv(coerceObject(adminConfig.customEnvVariables));
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
+    }
+    if (miseEnvs !== undefined) {
+      getMiseEnvsMock.mockResolvedValue(miseEnvs);
     }
 
     await exec(cmd, inOpts);

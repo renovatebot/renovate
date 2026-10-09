@@ -46,7 +46,7 @@ export type RecreateWhen = 'auto' | 'never' | 'always';
 export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
-export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
+export type BinarySource = 'docker' | 'global' | 'install' | 'hermit' | 'mise';
 
 // TODO: Proper typings
 /**
