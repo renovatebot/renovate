@@ -3,6 +3,7 @@ import {
   isArray,
   isEmptyArray,
   isNonEmptyArray,
+  isNonEmptyString,
   isString,
 } from '@sindresorhus/is';
 import pMap from 'p-map';
@@ -691,8 +692,8 @@ async function tryPrAutomerge(
         // Right after a push the MR can still point to the pipeline of the previous commit.
         // Merged results pipelines run on a merge ref, so their sha legitimately differs.
         isPipelineOutdated =
-          !!body.sha &&
-          !!body.pipeline?.sha &&
+          isNonEmptyString(body.sha) &&
+          isNonEmptyString(body.pipeline?.sha) &&
           body.pipeline.sha !== body.sha &&
           body.pipeline.source !== 'merge_request_event';
 
