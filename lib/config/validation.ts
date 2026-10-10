@@ -974,7 +974,7 @@ export async function validateConfig(
                       });
                     } else if (isToolName(k)) {
                       // TODO: #31831
-                      const versioningId = getToolConfig(k).versioning;
+                      const versioningId = getToolConfig(k)?.versioning;
                       const versioning = getVersioning(versioningId);
                       if (!versioning.isValid(v)) {
                         warnings.push({

@@ -165,6 +165,18 @@ describe('modules/datasource/gitlab-tags/index', () => {
       expect(res).toBe(digest);
     });
 
+    it('returns commits from the default registry without a registry URL', async () => {
+      const digest = 'abcd00001234';
+      httpMock
+        .scope('https://gitlab.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, [{ id: digest, created_at: '2020-03-04T12:01:37.000Z' }]);
+      const res = await new GitlabTagsDatasource().getDigest({
+        packageName: 'some/dep2',
+      });
+      expect(res).toBe(digest);
+    });
+
     it('returns commits from gitlab installation for a specific branch', async () => {
       const digest = 'abcd00001234';
       const body = {
