@@ -22,10 +22,13 @@ export abstract class GitHostTagsDatasource<
   H extends Http = Http,
 > extends Datasource<H> {
   /**
-   * Normalizes the registry URL, applying the datasource default and stripping
-   * any API path suffix.
+   * The registry URL the lookups run against: `registryUrl`, or the first
+   * default registry URL when none is configured. A subclass overrides it to
+   * normalize the URL, for example to strip an API path suffix.
    */
-  protected abstract getRegistryUrl(registryUrl?: string): string;
+  protected getRegistryUrl(registryUrl?: string): string {
+    return registryUrl ?? this.getDefaultRegistryUrls('')![0];
+  }
 
   /** Browser URL of the repository. */
   protected abstract getSourceUrl(
@@ -39,12 +42,22 @@ export abstract class GitHostTagsDatasource<
   ): Promise<GitHostTag[] | null>;
 
   /**
-   * Whether the lookups against `registryUrl`, as returned by
-   * {@link GitHostTagsDatasource.getRegistryUrl}, may be stored in the package
-   * cache.
+   * Whether the lookups against `registryUrl` may be stored in the package
+   * cache. The base class only calls it through
+   * {@link GitHostTagsDatasource.isCacheableFor}, so `registryUrl` is always
+   * the URL returned by {@link GitHostTagsDatasource.getRegistryUrl}.
    */
   protected isCacheable(_registryUrl: string): boolean {
     return true;
+  }
+
+  /**
+   * Resolves `registryUrl` with {@link GitHostTagsDatasource.getRegistryUrl}
+   * and passes it to {@link GitHostTagsDatasource.isCacheable}. Every cache site
+   * uses it, so subclasses must not override it.
+   */
+  protected isCacheableFor(registryUrl: string | undefined): boolean {
+    return this.isCacheable(this.getRegistryUrl(registryUrl));
   }
 
   protected getCacheKey(
@@ -61,7 +74,7 @@ export abstract class GitHostTagsDatasource<
       {
         key: this.getCacheKey(config.registryUrl, config.packageName, 'tags'),
         fallback: true,
-        cacheable: this.isCacheable(this.getRegistryUrl(config.registryUrl)),
+        cacheable: this.isCacheableFor(config.registryUrl),
       },
       () => this.fetchReleases(config),
     );
@@ -114,7 +127,7 @@ export abstract class GitHostTagsDigestDatasource<
     return this.cached(
       {
         key: this.getCacheKey(registryUrl, repo, 'tag', tag),
-        cacheable: this.isCacheable(this.getRegistryUrl(registryUrl)),
+        cacheable: this.isCacheableFor(registryUrl),
       },
       () => this.fetchTagCommit(registryUrl, repo, tag),
     );
@@ -133,7 +146,7 @@ export abstract class GitHostTagsDigestDatasource<
           newValue,
         ),
         fallback: true,
-        cacheable: this.isCacheable(this.getRegistryUrl(config.registryUrl)),
+        cacheable: this.isCacheableFor(config.registryUrl),
       },
       () => this.fetchDigest(config, newValue),
     );

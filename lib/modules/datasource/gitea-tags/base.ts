@@ -60,11 +60,6 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
     return getSourceUrl(packageName, this.getRegistryUrl(registryUrl));
   }
 
-  /** Falls back to the default registry URL when none is configured. */
-  protected getRegistryUrl(registryUrl?: string): string {
-    return registryUrl ?? this.getDefaultRegistryUrls('')[0];
-  }
-
   /**
    * Only results from the public default instance may be written to the
    * shared package cache; a self-hosted instance may serve private

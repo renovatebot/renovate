@@ -46,10 +46,6 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
     super(GithubTagsDatasource.id, new GithubHttp(GithubTagsDatasource.id));
   }
 
-  protected getRegistryUrl(registryUrl?: string): string {
-    return registryUrl ?? this.getDefaultRegistryUrls('')[0];
-  }
-
   protected fetchTagCommit(
     registryUrl: string | undefined,
     repo: string,
