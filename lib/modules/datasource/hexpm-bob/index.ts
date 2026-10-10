@@ -1,6 +1,7 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -84,7 +85,7 @@ export class HexpmBobDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import {
   defaultRegistryUrl,
   getApiBaseUrl,
@@ -70,7 +71,11 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          getDepHost(config.registryUrl),
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this.fetchReleases(config),
@@ -128,7 +133,11 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   ): Promise<string | null> {
     return this.cached(
       {
-        key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        key: buildCacheKey(
+          'getDigest',
+          getDepHost(config.registryUrl),
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this.fetchDigest(config, newValue),

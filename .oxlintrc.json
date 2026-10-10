@@ -262,6 +262,7 @@
       "files": ["lib/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
+        "renovate/require-build-cache-key": "error",
         "renovate/require-cacheable": "error"
       }
     },

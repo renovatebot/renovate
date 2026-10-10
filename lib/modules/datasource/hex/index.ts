@@ -2,6 +2,7 @@ import { verify as verifySignature } from 'node:crypto';
 import { promisify } from 'node:util';
 import { gunzip } from 'node:zlib';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
@@ -264,14 +265,12 @@ export class HexDatasource extends Datasource {
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const isDefault = HexDatasource.isDefaultRegistry(config.registryUrl);
-    const key = isDefault
-      ? config.packageName
-      : `${config.registryUrl}:${config.packageName}`;
+    const registryUrl = isDefault ? defaultRegistryUrl : config.registryUrl;
 
     return withCache(
       {
         namespace: `datasource-${HexDatasource.id}`,
-        key,
+        key: buildCacheKey(registryUrl, config.packageName),
         cacheable: isDefault,
         fallback: true,
       },
