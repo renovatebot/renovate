@@ -16,6 +16,7 @@ export async function embedChangelog(
   } else {
     upgrade.logJSON = {
       hasReleaseNotes: true,
+      perDependencyNotes: true,
       project: {
         packageName: upgrade.packageName,
         depName: upgrade.depName,
