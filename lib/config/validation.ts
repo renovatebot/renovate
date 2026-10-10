@@ -1206,11 +1206,11 @@ async function validateGlobalConfig(
           });
         } else if (
           key === 'binarySource' &&
-          !['docker', 'global', 'install', 'hermit'].includes(val)
+          !['docker', 'global', 'install', 'hermit', 'mise'].includes(val)
         ) {
           warnings.push({
             topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit', 'mise'].join(', ')}.`,
           });
         } else if (
           key === 'requireConfig' &&
