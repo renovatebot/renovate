@@ -162,7 +162,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: buildCacheKey(resolvedUrl, repo, 'digest'),
+        key: buildCacheKey(resolvedUrl, repo, 'digest', newValue),
         fallback: true,
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
