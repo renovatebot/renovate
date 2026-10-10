@@ -28,6 +28,15 @@ export interface AutomergePrResult {
   prAutomergeBlockReason?: PrAutomergeBlockReason;
 }
 
+/**
+ * Returns whether the platform reports the PR as merged. A token that may
+ * bypass the merge queue gets the PR merged directly instead of enqueued.
+ */
+async function isPrMerged(prNo: number): Promise<boolean> {
+  const pr = await platform.getPr(prNo);
+  return pr?.state === 'merged';
+}
+
 export async function checkAutoMerge(
   pr: Pr,
   config: BranchConfig,
@@ -151,7 +160,7 @@ export async function checkAutoMerge(
     strategy: automergeStrategy,
   });
   if (res) {
-    if (mergeQueueEnabled) {
+    if (mergeQueueEnabled && !(await isPrMerged(pr.number))) {
       logger.info(
         { pr: pr.number, prTitle: pr.title },
         'PR added to the merge queue',
