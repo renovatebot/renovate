@@ -18,7 +18,7 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
    * Browser URL of the repository `packageName` on `registryUrl`, or on the
    * default registry.
    */
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, registryUrl);
   }
 

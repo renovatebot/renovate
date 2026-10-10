@@ -44,7 +44,7 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
     return BitbucketTagsDatasource.getRegistryURL(registryUrl);
   }
 
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     return BitbucketTagsDatasource.getSourceUrl(packageName, registryUrl);
   }
 
@@ -89,7 +89,6 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
       {
         key: this.getCacheKey(registryUrl, repo, 'mainbranch'),
         ttlMinutes: 60,
-        cacheable: this.isCacheable(registryUrl),
       },
       () => this._getMainBranch(registryUrl, repo),
     );
