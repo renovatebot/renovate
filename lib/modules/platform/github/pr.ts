@@ -438,6 +438,9 @@ function resolveAsyncMerge(
         `GitHub has not merged PR #${prNo} within ${asyncMergePollTimeoutMs / 1000} s, the next run picks up the result`,
       );
       return false;
+    case 'unknown':
+      logger.debug(`GitHub returned an unknown merge status for PR #${prNo}`);
+      return false;
     default:
       // The result could not be fetched, which has been logged
       return false;
