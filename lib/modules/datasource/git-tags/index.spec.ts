@@ -4,12 +4,15 @@ import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { clearEnv } from '~test/util.ts';
 import * as git from '../../../util/git/index.ts';
+import { GithubTagsDatasource } from '../github-tags/index.ts';
+import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
 
 const createSimpleGit = vi.mocked(git.createSimpleGit);
 
-const packageName = 'https://github.com/example/example.git';
+// a host which is no git hosting platform, so the tags come from `git ls-remote`
+const packageName = 'https://git.example.com/example/example.git';
 
 const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
 
@@ -91,7 +94,7 @@ describe('modules/datasource/git-tags/index', () => {
             version: 'v1.0.5',
           },
         ],
-        sourceUrl: 'https://github.com/example/example',
+        sourceUrl: 'https://git.example.com/example/example',
       });
     });
   });
@@ -158,6 +161,134 @@ describe('modules/datasource/git-tags/index', () => {
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
         authentication: { hostTypes: ['git-tags'] },
       });
+    });
+  });
+
+  describe('platform API', () => {
+    const githubPackageName = 'https://github.com/example/example.git';
+    const githubGetReleases = vi.spyOn(
+      GithubTagsDatasource.prototype,
+      'getReleases',
+    );
+    const githubGetDigest = vi.spyOn(
+      GithubTagsDatasource.prototype,
+      'getDigest',
+    );
+    const gitlabGetReleases = vi.spyOn(
+      GitlabTagsDatasource.prototype,
+      'getReleases',
+    );
+
+    it('reads a GitHub repository through github-tags', async () => {
+      githubGetReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0', gitRef: 'v1.0.0', newDigest: 'abc' }],
+        sourceUrl: 'https://github.com/example/example',
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: githubPackageName,
+      });
+
+      expect(res).toMatchObject({
+        effectiveDatasource: 'github-tags',
+        sourceUrl: 'https://github.com/example/example',
+        releases: [{ version: 'v1.0.0', newDigest: 'abc' }],
+      });
+      expect(githubGetReleases).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageName: 'example/example',
+          registryUrl: 'https://github.com',
+        }),
+      );
+      expect(gitMock.listRemote).not.toHaveBeenCalled();
+    });
+
+    it('falls back to git ls-remote when the platform API finds nothing', async () => {
+      gitlabGetReleases.mockResolvedValueOnce(null);
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'https://gitlab.com/example/example.git',
+      });
+
+      expect(gitlabGetReleases).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          packageName: 'example/example',
+          registryUrl: 'https://gitlab.com',
+        }),
+      );
+      expect(res?.effectiveDatasource).toBeUndefined();
+      expect(res?.sourceUrl).toBe('https://gitlab.com/example/example');
+      expect(res?.releases).toHaveLength(6);
+    });
+
+    it('falls back to git ls-remote when the platform API fails', async () => {
+      githubGetReleases.mockRejectedValueOnce(new Error('rate limited'));
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: githubPackageName,
+      });
+
+      expect(res?.effectiveDatasource).toBeUndefined();
+      expect(res?.releases).toHaveLength(6);
+    });
+
+    it('reads a URL of a known host which names no repository with git ls-remote', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'https://github.com/example',
+      });
+
+      expect(res?.releases).toHaveLength(6);
+      expect(githubGetReleases).not.toHaveBeenCalled();
+    });
+
+    it('reads a platform without a tags datasource with git ls-remote', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'https://dev.azure.com/org/project/_git/repo',
+      });
+
+      expect(res?.releases).toHaveLength(6);
+      expect(res?.effectiveDatasource).toBeUndefined();
+    });
+
+    it('resolves a digest through github-tags', async () => {
+      githubGetDigest.mockResolvedValueOnce(
+        '3936a6bced3587dc9fd464b0a910e0dfd4cfe10d',
+      );
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: githubPackageName },
+        'v1.0.2',
+      );
+
+      expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
+      expect(githubGetDigest).toHaveBeenCalledExactlyOnceWith(
+        { packageName: 'example/example', registryUrl: 'https://github.com' },
+        'v1.0.2',
+      );
+      expect(gitMock.listRemote).not.toHaveBeenCalled();
+    });
+
+    it('falls back to git ls-remote for a digest the platform API lacks', async () => {
+      githubGetDigest.mockResolvedValueOnce(null);
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: githubPackageName },
+        'v1.0.2',
+      );
+
+      expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
     });
   });
 });

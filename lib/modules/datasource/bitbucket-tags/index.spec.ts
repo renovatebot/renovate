@@ -1,4 +1,6 @@
+import type { MockInstance } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { BitbucketTagsDatasource } from './index.ts';
@@ -198,6 +200,41 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         'v1.0.0',
       );
       expect(res).toBeNull();
+    });
+  });
+
+  describe('package cache', () => {
+    let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+    beforeEach(() => {
+      setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/some/dep2/refs/tags?pagelen=100')
+        .reply(200, { pagelen: 1, values: [{ name: 'v1.0.0' }], page: 1 });
+    });
+
+    afterEach(() => {
+      setCache.mockRestore();
+      GlobalConfig.reset();
+    });
+
+    it('does not cache the tags of a repository which may be private', async () => {
+      await new BitbucketTagsDatasource().getReleases({
+        packageName: 'some/dep2',
+      });
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('caches the tags if cachePrivatePackages is enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+
+      await new BitbucketTagsDatasource().getReleases({
+        packageName: 'some/dep2',
+      });
+
+      expect(setCache).toHaveBeenCalledOnce();
     });
   });
 });
