@@ -4,6 +4,8 @@ export interface TerraformDefinitionFile {
   resource?: TerraformResources;
   data?: Record<string, unknown>; // generic docker data sources
   provider?: Record<string, TerraformProvider[]>;
+  locals?: Record<string, unknown>[];
+  variable?: Record<string, TerraformVariable[]>;
 }
 
 export interface TerraformBlock {
@@ -24,6 +26,14 @@ export interface TerraformRequiredProvider {
 export interface TerraformModule {
   source?: string;
   version?: string;
+}
+
+export interface TerraformVariable {
+  default?: unknown;
+  type?: string;
+  const?: boolean;
+  description?: string;
+  sensitive?: boolean;
 }
 
 export interface TerraformResources {

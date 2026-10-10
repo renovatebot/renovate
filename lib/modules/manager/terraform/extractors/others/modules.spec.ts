@@ -5,6 +5,8 @@ import {
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
   hostnameMatchRegex,
+  localOrVariableRefRegex,
+  resolveLocalOrVariableValue,
 } from './modules.ts';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
@@ -337,6 +339,128 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       expect(host2).toEqual({
         hostname: 'example.com',
       });
+    });
+  });
+
+  describe('localOrVariableRefRegex', () => {
+    it('matches local and var references', () => {
+      expect(localOrVariableRefRegex.exec('${local.tag}')?.groups).toEqual({
+        kind: 'local',
+        name: 'tag',
+      });
+      expect(localOrVariableRefRegex.exec('${var.tag}')?.groups).toEqual({
+        kind: 'var',
+        name: 'tag',
+      });
+      expect(localOrVariableRefRegex.exec('${ var.tag }')?.groups).toEqual({
+        kind: 'var',
+        name: 'tag',
+      });
+    });
+
+    it('does not match plain values or partial interpolations', () => {
+      expect(localOrVariableRefRegex.exec('v1.0.0')).toBeNull();
+      expect(localOrVariableRefRegex.exec('v1-${local.suffix}')).toBeNull();
+      expect(localOrVariableRefRegex.exec('${module.foo.tag}')).toBeNull();
+    });
+  });
+
+  describe('resolveLocalOrVariableValue', () => {
+    it('resolves a local value', () => {
+      const res = resolveLocalOrVariableValue('${local.tag}', {
+        locals: [{ tag: 'v1.0.0' }],
+      });
+      expect(res).toBe('v1.0.0');
+    });
+
+    it('resolves a variable default value', () => {
+      const res = resolveLocalOrVariableValue('${var.tag}', {
+        variable: { tag: [{ default: 'v1.0.0', const: true }] },
+      });
+      expect(res).toBe('v1.0.0');
+    });
+
+    it('returns undefined when the value is not a reference', () => {
+      expect(resolveLocalOrVariableValue('v1.0.0', {})).toBeUndefined();
+    });
+
+    it('returns undefined when the local is not declared', () => {
+      expect(
+        resolveLocalOrVariableValue('${local.tag}', { locals: [{}] }),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the variable has no default', () => {
+      expect(
+        resolveLocalOrVariableValue('${var.tag}', {
+          variable: { tag: [{ const: true }] },
+        }),
+      ).toBeUndefined();
+    });
+  });
+
+  describe('extract modules using local/variable refs', () => {
+    it('resolves a local value used as a github ref', () => {
+      const res = extractor.extract(
+        {
+          locals: [{ tag: 'v1.0.0' }],
+          module: {
+            foo: [{ source: 'github.com/hashicorp/example?ref=${local.tag}' }],
+          },
+        },
+        [],
+        {},
+      );
+      expect(res).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+      ]);
+    });
+
+    it('resolves a const variable default used as a module version', () => {
+      const res = extractor.extract(
+        {
+          variable: { ver: [{ default: '1.0.0', const: true }] },
+          module: {
+            foo: [
+              {
+                source: 'hashicorp/consul/aws',
+                version: '${var.ver}',
+              },
+            ],
+          },
+        },
+        [],
+        {},
+      );
+      expect(res).toMatchObject([
+        {
+          depName: 'hashicorp/consul/aws',
+          currentValue: '1.0.0',
+          datasource: 'terraform-module',
+        },
+      ]);
+    });
+
+    it('skips with contains-variable reason when the reference cannot be resolved', () => {
+      const res = extractor.extract(
+        {
+          module: {
+            foo: [{ source: 'github.com/hashicorp/example?ref=${local.tag}' }],
+          },
+        },
+        [],
+        {},
+      );
+      expect(res).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          skipReason: 'contains-variable',
+        },
+      ]);
     });
   });
 
