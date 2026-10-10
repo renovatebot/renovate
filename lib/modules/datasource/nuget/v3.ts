@@ -7,6 +7,7 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as fs from '../../../util/fs/index.ts';
@@ -37,7 +38,7 @@ export class NugetV3Api {
     resourceType = 'RegistrationsBaseUrl',
   ): Promise<string | null> {
     // https://learn.microsoft.com/nuget/api/service-index
-    const resultCacheKey = `${url}:${resourceType}`;
+    const resultCacheKey = buildCacheKey(url, resourceType);
     const cachedResult = await packageCache.get<string>(
       NugetV3Api.cacheNamespace,
       resultCacheKey,
@@ -353,7 +354,7 @@ export class NugetV3Api {
     return withCache(
       {
         namespace: NugetV3Api.cacheNamespace,
-        key: `source-url:${registryUrl}:${packageName}`,
+        key: buildCacheKey('source-url', registryUrl, packageName),
         ttlMinutes: 10080, // 1 week
       },
       () =>

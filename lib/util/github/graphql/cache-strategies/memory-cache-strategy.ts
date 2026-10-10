@@ -1,4 +1,5 @@
 import * as memCache from '../../../cache/memory/index.ts';
+import { buildCacheKey } from '../../../cache/package/key.ts';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
@@ -13,7 +14,7 @@ export class GithubGraphqlMemoryCacheStrategy<
   GithubItem extends GithubDatasourceItem,
 > extends AbstractGithubGraphqlCacheStrategy<GithubItem> {
   private fullKey(): string {
-    return `github-graphql-cache:${this.cacheNs}:${this.cacheKey}`;
+    return buildCacheKey('github-graphql-cache', this.cacheNs, this.cacheKey);
   }
 
   load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined> {

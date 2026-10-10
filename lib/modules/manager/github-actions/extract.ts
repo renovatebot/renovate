@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -340,7 +341,7 @@ async function readLockfile(): Promise<LockfileState> {
  * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
  */
 function getLockfile(): Promise<LockfileState> {
-  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cacheKey = buildCacheKey('github-actions', actionsLockFile);
   const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
   if (cached !== undefined) {
     return cached;

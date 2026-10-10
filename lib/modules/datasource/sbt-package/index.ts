@@ -2,6 +2,7 @@ import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -39,6 +40,14 @@ interface PomInfo {
   releaseTimestamp?: Timestamp;
 }
 
+/** Returns the package cache key of the package URLs found for a package. */
+function getPackageUrlsCacheKey(
+  registryUrl: string,
+  packageName: string,
+): string {
+  return buildCacheKey('package-urls', registryUrl, packageName);
+}
+
 export class SbtPackageDatasource extends MavenDatasource {
   static override readonly id = 'sbt-package';
 
@@ -74,7 +83,11 @@ export class SbtPackageDatasource extends MavenDatasource {
     const groupIdSplit = groupId.split('.');
     const repoRootUrl = ensureTrailingSlash(registryUrl);
 
-    const validRootUrlKey = `valid-root-url:${registryUrl}:${packageName}`;
+    const validRootUrlKey = buildCacheKey(
+      'valid-root-url',
+      registryUrl,
+      packageName,
+    );
     const validRootUrl = await packageCache.get<string>(
       'datasource-sbt-package',
       validRootUrlKey,
@@ -154,7 +167,11 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
-    const invalidPackageUrlsKey = `invalid-package-urls:${registryUrl}:${packageName}`;
+    const invalidPackageUrlsKey = buildCacheKey(
+      'invalid-package-urls',
+      registryUrl,
+      packageName,
+    );
     const invalidPackageUrls = new Set(
       await packageCache.get<string[]>(
         'datasource-sbt-package',
@@ -204,10 +221,9 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     // v8 ignore else -- an empty list returns before reaching here
     if (packageUrls.length > 0) {
-      const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
       await packageCache.set(
         'datasource-sbt-package',
-        packageUrlsKey,
+        getPackageUrlsCacheKey(registryUrl, packageName),
         packageUrls,
         30 * 24 * 60,
       );
@@ -248,13 +264,12 @@ export class SbtPackageDatasource extends MavenDatasource {
     version: string | null,
     pkgUrls?: string[],
   ): Promise<PomInfo | null> {
-    const packageUrlsKey = `package-urls:${registryUrl}:${packageName}`;
     // istanbul ignore next: will be covered later
     const packageUrls =
       pkgUrls ??
       (await packageCache.get<string[]>(
         'datasource-sbt-package',
-        packageUrlsKey,
+        getPackageUrlsCacheKey(registryUrl, packageName),
       ));
 
     // istanbul ignore if
@@ -267,7 +282,12 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
-    const invalidPomFilesKey = `invalid-pom-files:${registryUrl}:${packageName}:${version}`;
+    const invalidPomFilesKey = buildCacheKey(
+      'invalid-pom-files',
+      registryUrl,
+      packageName,
+      version,
+    );
     const invalidPomFiles = new Set(
       await packageCache.get<string[]>(
         'datasource-sbt-package',
@@ -392,7 +412,12 @@ export class SbtPackageDatasource extends MavenDatasource {
     return withCache(
       {
         namespace: 'datasource-sbt-package',
-        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        key: buildCacheKey(
+          'postprocessRelease',
+          config.registryUrl,
+          config.packageName,
+          release.version,
+        ),
         ttlMinutes: 30 * 24 * 60,
       },
       () => this._postprocessRelease(config, release),

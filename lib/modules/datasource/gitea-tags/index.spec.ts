@@ -298,6 +298,34 @@ describe('modules/datasource/gitea-tags/index', () => {
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });
 
+    it('caches the digest of a tag separately from the latest commit', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitea.com')
+        .get(
+          '/api/v1/repos/gitea/helm-chart/commits?stat=false&verification=false&files=false&page=1&limit=1',
+        )
+        .reply(200, [{ sha: 'latest-sha', created: '2023-08-25T08:26:28Z' }])
+        .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
+        .reply(200, {
+          name: 'v9.0.1',
+          commit: { sha: 'tag-sha', created: '2023-07-19T08:42:55+02:00' },
+        });
+      const config = { datasource, packageName: 'gitea/helm-chart' };
+
+      await expect(getDigest(config)).resolves.toBe('latest-sha');
+      await expect(getDigest(config, 'v9.0.1')).resolves.toBe('tag-sha');
+    });
+
     it('falls back to the default registry when none is given', async () => {
       const body = {
         name: 'v9.0.1',

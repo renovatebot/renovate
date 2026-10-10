@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type {
   GithubDigestFile,
@@ -60,7 +61,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-        key: `findDigestFile:${release.html_url}:${digest}`,
+        key: buildCacheKey('findDigestFile', release.html_url, digest),
       },
       () => this._findDigestFile(release, digest),
     );
@@ -83,7 +84,11 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
       {
         ttlMinutes: 1440,
         namespace: `datasource-${GithubReleaseAttachmentsDatasource.id}`,
-        key: `downloadAndDigest:${asset.browser_download_url}:${algorithm}`,
+        key: buildCacheKey(
+          'downloadAndDigest',
+          asset.browser_download_url,
+          algorithm,
+        ),
       },
       () => this._downloadAndDigest(asset, algorithm),
     );

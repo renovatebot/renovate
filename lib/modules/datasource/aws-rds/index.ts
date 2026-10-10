@@ -3,6 +3,7 @@ import {
   RDSClient,
 } from '@aws-sdk/client-rds';
 import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -38,7 +39,7 @@ export class AwsRdsDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey('getReleases', config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),
