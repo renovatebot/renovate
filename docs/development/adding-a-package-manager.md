@@ -147,6 +147,8 @@ Use `updateDependency` if _both_ conditions apply:
 - the manager can't be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
 
+Return the updated package file content as a string, or return `null` when the dependency cannot be updated.
+
 ### `updateLockedDependency` (optional)
 
 Use `updateLockedDependency` to directly update dependencies in lock files.
