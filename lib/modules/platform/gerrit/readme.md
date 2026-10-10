@@ -25,6 +25,8 @@ The Gerrit user account must be allowed to assign the Code-Review label with "+2
 
 You must set `platform=gerrit` in your Renovate config file.
 
+If your Gerrit SSH server does not listen on the default port `29418`, set `gerritSshPort` to override the SSH clone port used by Renovate.
+
 ## Renovate PR/Branch-Model with Gerrit and needed permissions
 
 If you use the "Code-Review" label and want to get `automerge` working then you must set `autoApprove=true` in your Renovate config.

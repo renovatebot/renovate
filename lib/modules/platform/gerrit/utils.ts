@@ -36,6 +36,7 @@ export function getGerritRepoUrl(
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
   username: string,
+  sshPort?: number,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -44,15 +45,21 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository, username)
+      ? createSshUrl(endpointUrl, repository, username, sshPort)
       : createHttpUrl(endpointUrl, endpoint, repository);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string, username: string): string {
-  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(
+  url: URL,
+  repository: string,
+  username: string,
+  sshPort?: number,
+): string {
+  const port = sshPort ?? parseInt(DEFAULT_SSH_PORT, 10);
+  return `ssh://${username}@${url.hostname}:${port}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
