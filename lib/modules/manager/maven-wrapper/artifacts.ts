@@ -28,6 +28,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
+import { isPublicArtifactUrl } from './url.ts';
 
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
@@ -36,6 +37,7 @@ function getChecksumFromUrl(url: string): Promise<string> {
   return withCache(
     {
       namespace: 'url-sha256',
+      cacheable: isPublicArtifactUrl(url),
       key: url,
       ttlMinutes: 3 * 24 * 60, // 3 days
     },
