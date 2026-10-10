@@ -81,5 +81,20 @@ describe('modules/datasource/github-runners/index', () => {
 
       expect(res).toBeNull();
     });
+
+    it.each(['ubuntu', 'macos', 'windows'])(
+      'every %s release has a releaseTimestamp',
+      async (packageName) => {
+        const res = await getPkgReleases({
+          datasource: GithubRunnersDatasource.id,
+          packageName,
+        });
+
+        expect(res?.releases.length).toBeGreaterThan(0);
+        for (const release of res!.releases) {
+          expect(release.releaseTimestamp).toBeString();
+        }
+      },
+    );
   });
 });
