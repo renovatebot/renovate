@@ -62,11 +62,13 @@ I have verified these changes via:
 - [ ] No unit tests, but ran on a real repository, or
 - [ ] Both unit tests + ran on a real repository
 
-The public repository: <URL>
+## Reproduction (please check one with an [x])
 
-A reproduction is compulsory for PRs that do not close an Issue: link a public repository above that reproduces the bug or shows the new behavior.
-If this PR closes an Issue, confirm the fix against the Issue's reproduction.
-If you are not adding a reproduction, state your reason here:
+A reproduction is compulsory for PRs that do not close an Issue.
+If this PR closes an Issue, confirm the fix against the Issue's reproduction instead.
+
+- [ ] Reproduction repository that shows the bug or the new behavior: <URL>
+- [ ] A public reproduction is not possible, and I have stated the reason below
 
 ```markdown
 <!-- Reason for not adding a reproduction, inside the Markdown code block -->

@@ -769,6 +769,28 @@
 
     Thanks, the Renovate team
 
+'auto:pr-reproduction':
+  comment: >
+    Hi there,
+
+
+    This Pull Request does not close an Issue, and it does not link a reproduction repository or state why a reproduction is not possible.
+
+
+    For PRs without an Issue, a reproduction is how maintainers confirm that the problem is real and that your change fixes it.
+    Without one, a maintainer must recreate the problem before they can review your change.
+
+
+    Please check one of the boxes in the "Reproduction" section of the PR description:
+     1. Link a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) that shows the bug or the new behavior
+     2. If a public reproduction is not possible, for example because it needs a private registry or a self-hosted platform, state the reason in the Markdown code block below it
+
+
+    PRs without a reproduction or a stated reason will not be reviewed and may be closed.
+
+
+    Thanks, the Renovate team
+
 'auto:cla':
   comment: >
     Hi there,
