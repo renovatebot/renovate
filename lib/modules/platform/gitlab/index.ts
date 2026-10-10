@@ -49,7 +49,6 @@ import type {
   FindPRConfig,
   Issue,
   MergePRConfig,
-  MergePrResult,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
@@ -904,10 +903,9 @@ async function tryAddPrToMergeTrain(id: number): Promise<boolean> {
   }
 }
 
-export async function mergePr({ id }: MergePRConfig): Promise<MergePrResult> {
+export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   if (config.mergeTrainsEnabled) {
-    const added = await tryAddPrToMergeTrain(id);
-    return added ? 'enqueued' : false;
+    return tryAddPrToMergeTrain(id);
   }
 
   try {

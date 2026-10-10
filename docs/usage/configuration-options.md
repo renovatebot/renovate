@@ -258,10 +258,6 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
   In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
 !!! note
-  On github.com, GitHub completes a direct merge in the background.
-  If GitHub has not finished the merge after a few seconds, Renovate keeps processing the remaining branches but skips all further automerges in that run, because the base branch is about to change.
-
-!!! note
   By default, Renovate will not assign reviewers and assignees to an automerge-enabled PR unless it fails status checks.
   By configuring [`assignAutomerge`](#assignautomerge) setting to `true`, Renovate will instead always assign reviewers and assignees for automerging PRs at time of creation.
 
@@ -319,7 +315,7 @@ You may choose from these values:
 - `squash`, flatten the commits that are being merged into a single new commit
 
 Platforms may only support _some_ of these merge strategies.
-On GitHub branches with a merge queue, `automergeStrategy` applies only when Renovate may bypass the merge queue and merges the PR directly; PRs merged through the merge queue use the merge method configured for the merge queue.
+On GitHub, `automergeStrategy` applies only to direct merges, because a merge queue merges with its own configured merge method.
 
 If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
 In that case you'll have to set a supported automerge strategy.
@@ -4619,7 +4615,6 @@ e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved c
 
 By default Renovate deletes, or "prunes", the branch after automerging.
 Set `pruneBranchAfterAutomerge` to `false` to keep the branch after automerging.
-On github.com the merge completes in the background: Renovate removes the branch right away if GitHub finishes the merge within a few seconds, otherwise at the end of the same run or on a later run once GitHub has merged the PR.
 
 ## `pruneStaleBranches`
 

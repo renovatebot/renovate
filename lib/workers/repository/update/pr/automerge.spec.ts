@@ -1,4 +1,4 @@
-import { logger, partial, platform, scm } from '~test/util.ts';
+import { partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import type { BranchConfig } from '../../../types.ts';
@@ -20,7 +20,6 @@ describe('workers/repository/update/pr/automerge', () => {
       } satisfies BranchConfig;
       pr = partial<Pr>();
       spy.mockReturnValue(true);
-      prAutomerge.resetPendingMerge();
     });
 
     it('should not automerge if not configured', async () => {
@@ -85,7 +84,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = true;
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce('enqueued');
+      platform.mergePr.mockResolvedValueOnce(true);
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
       platform.isPrInMergeQueue.mockResolvedValueOnce(false);
 
@@ -97,82 +96,6 @@ describe('workers/repository/update/pr/automerge', () => {
       });
       expect(platform.mergePr).toHaveBeenCalledOnce();
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
-    });
-
-    it('should report automerged if the PR was merged directly on a merge queue branch', async () => {
-      config.automerge = true;
-      config.pruneBranchAfterAutomerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce(true);
-      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
-      platform.isPrInMergeQueue.mockResolvedValueOnce(false);
-
-      const res = await prAutomerge.checkAutoMerge(pr, config);
-
-      expect(res).toEqual({ automerged: true, branchRemoved: true });
-    });
-
-    it('should report automerged if deleting the branch fails', async () => {
-      config.automerge = true;
-      config.pruneBranchAfterAutomerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce(true);
-      scm.deleteBranch.mockRejectedValueOnce(new Error('fail'));
-
-      const res = await prAutomerge.checkAutoMerge(pr, config);
-
-      expect(res).toEqual({ automerged: true, branchRemoved: false });
-    });
-
-    it('should not report automerged while the platform merges in the background', async () => {
-      config.automerge = true;
-      config.pruneBranchAfterAutomerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce('pending');
-
-      const res = await prAutomerge.checkAutoMerge(pr, config);
-
-      expect(res).toEqual({
-        automerged: false,
-        prAutomergeBlockReason: 'MergePending',
-      });
-      expect(scm.deleteBranch).not.toHaveBeenCalled();
-    });
-
-    it('skips further automerges while a merge is pending', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce('pending');
-      await prAutomerge.checkAutoMerge(partial<Pr>({ number: 1 }), config);
-
-      const res = await prAutomerge.checkAutoMerge(
-        partial<Pr>({ number: 2 }),
-        config,
-      );
-
-      expect(res).toEqual({
-        automerged: false,
-        prAutomergeBlockReason: 'MergePending',
-      });
-      expect(platform.mergePr).toHaveBeenCalledOnce();
-      expect(prAutomerge.getPendingMergePr()).toBe(1);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Skipping automerge of PR #2 because the merge of PR #1 is still pending',
-      );
-
-      prAutomerge.resetPendingMerge();
-
-      expect(prAutomerge.getPendingMergePr()).toBeUndefined();
-    });
-
-    it('does not skip further automerges after adding a PR to the merge queue', async () => {
-      config.automerge = true;
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      platform.mergePr.mockResolvedValueOnce('enqueued');
-
-      await prAutomerge.checkAutoMerge(partial<Pr>({ number: 1 }), config);
-
-      expect(prAutomerge.getPendingMergePr()).toBeUndefined();
     });
 
     it('should skip a PR which is already in the merge queue', async () => {

@@ -136,22 +136,9 @@ The steps to enable GitHub's Merge Queue differ based on whether you use GitHub 
 With `platformAutomerge` enabled (which is the default), GitHub's auto-merge takes care of adding the PR to the merge queue.
 This requires the "Allow auto-merge" checkbox in the repository settings to be enabled, as described in the steps below.
 
-Merge queues also work with `platformAutomerge=false`: once all checks have passed, Renovate merges the PR directly if it may bypass the merge queue, and otherwise adds the PR to the merge queue, configured via classic branch protection or repository rulesets.
-If Renovate cannot tell whether the base branch has a merge queue or whether it may bypass it, Renovate leaves that decision to GitHub.
+Merge queues, configured via classic branch protection or repository rulesets, also work with `platformAutomerge=false`: once all checks have passed, Renovate merges the PR directly if Renovate is on the bypass list of the merge queue, and otherwise adds the PR to the merge queue itself.
 In that case the "Allow auto-merge" checkbox is not needed.
-Renovate keeps adding PRs to the merge queue for every PR that is ready in the same run.
 PRs that are already waiting in the merge queue are left untouched on later runs.
-
-On github.com, Renovate merges through the asynchronous merge API, so GitHub completes a direct merge in the background.
-Renovate waits up to three seconds once for that merge, then reports the PR as automerged and continues like after any other automerge.
-If GitHub has not finished the merge by then, Renovate keeps processing the remaining branches but skips all further PR and branch automerges in that run, because the base branch is about to change.
-Adding a PR to the merge queue does not skip further automerges.
-On later runs Renovate first looks up the result of its previous merge request, logs the reason if GitHub refused it, and sends no new request while the previous one is still pending.
-This lookup across runs needs `repositoryCache=enabled`, which is disabled by default for self-hosted Renovate.
-Renovate does not request a direct merge while a branch protection or ruleset blocks the PR, unless Renovate may bypass the rules.
-This check does not apply to branches with a merge queue, where Renovate adds the PR to the merge queue instead.
-At the end of each repository run Renovate looks up the results of the merges it requested, so a PR that GitHub merged by then is reported as automerged in the same run.
-GitHub Enterprise Server does not have the asynchronous merge API, so there Renovate uses the classic merge endpoint and the merge completes before Renovate continues.
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
 
 !!! warning

@@ -15,7 +15,6 @@ import { fingerprint } from '../../../util/fingerprint.ts';
 import { counts } from '../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import * as _branchWorker from '../update/branch/index.ts';
-import * as prAutomerge from '../update/pr/automerge.ts';
 import * as _limits from './limits.ts';
 import {
   compareCacheFingerprint,
@@ -107,14 +106,6 @@ describe('workers/repository/process/write', () => {
       const res = await writeUpdates(config, branches);
       expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
-    });
-
-    it('forgets a pending merge of an earlier repository run', async () => {
-      const resetPendingMerge = vi.spyOn(prAutomerge, 'resetPendingMerge');
-
-      await writeUpdates(config, []);
-
-      expect(resetPendingMerge).toHaveBeenCalledOnce();
     });
 
     it('counts vulnerability alert branches separately', async () => {

@@ -176,20 +176,6 @@ export interface FindPRConfig {
   targetBranch?: string | null;
   includeOtherAuthors?: boolean;
 }
-export interface RequestedMergeResult {
-  number: number;
-  status: 'merged' | 'enqueued' | 'pending' | 'failed';
-  message?: string;
-}
-
-/**
- * `true` means merged and `false` not merged. `'pending'` means the platform
- * accepted a direct merge and completes it in the background, `'enqueued'`
- * means the PR was added to the merge queue. In both cases the caller must not
- * treat the PR as merged nor delete its branch.
- */
-export type MergePrResult = boolean | 'pending' | 'enqueued';
-
 export interface MergePRConfig {
   branchName?: string;
   id: number;
@@ -279,12 +265,7 @@ export interface Platform {
     rebaseLabel?: string,
   ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
-  mergePr(config: MergePRConfig): Promise<MergePrResult>;
-  /**
-   * Results of merges this platform requested asynchronously during the
-   * current repository run.
-   */
-  getRequestedMergeResults?(): Promise<RequestedMergeResult[]>;
+  mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;

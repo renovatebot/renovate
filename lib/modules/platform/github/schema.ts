@@ -189,7 +189,6 @@ export const MergeAsyncResult = z.object({
   details: z.object({
     message: z.string(),
     uuid: z.string().optional(),
-    sha: z.string().optional(),
   }),
 });
 export type MergeAsyncResult = z.infer<typeof MergeAsyncResult>;
