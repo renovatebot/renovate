@@ -84,13 +84,13 @@ import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
-  prViewerCanMergeAsAdminQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import {
+  asyncMergePr,
   isPrInMergeQueue as checkPrInMergeQueue,
   getPrCache,
   updatePrCache,
@@ -100,7 +100,6 @@ import {
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
-  MergeAsyncResult,
 } from './schema.ts';
 import type {
   AggregatedVulnerabilities,
@@ -133,11 +132,6 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
-
-// GitHub completes async merges in the background, usually within a few
-// seconds
-const asyncMergePollIntervalMs = 1000;
-const asyncMergePollTimeoutMs = 20_000;
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -2217,6 +2211,13 @@ async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
   }
 }
 
+function cacheMergedPrFromList(prNo: number): void {
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    cachePr({ ...cachedPr, state: 'merged' });
+  }
+}
+
 export async function mergePr({
   branchName,
   bypassRules = true,
@@ -2227,10 +2228,27 @@ export async function mergePr({
 
   const pr = await getPr(prNo);
   if (platformConfig.asyncMergeSupported !== false) {
-    const merged = await asyncMergePr(pr, prNo, strategy, bypassRules);
+    let queueEnabled = false;
+    if (pr?.targetBranch) {
+      queueEnabled = await isBranchMergeQueueEnabled(pr.targetBranch);
+    }
+    const merged = await asyncMergePr(githubApi, {
+      repository: config.parentRepo ?? config.repository!,
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      token: config.forkToken,
+      mergeMethod: config.mergeMethod,
+      prNo,
+      strategy,
+      bypassRules,
+      queueEnabled,
+      isGhes: isGithubEnterpriseServer(platformConfig.host),
+      cacheMergedPr: cacheMergedPrFromList,
+    });
     if (merged !== 'unsupported') {
       return merged;
     }
+    platformConfig.asyncMergeSupported = false;
   }
   if (!bypassRules) {
     logger.debug(
@@ -2246,224 +2264,6 @@ export async function mergePr({
     return tryEnqueuePr(pr);
   }
   return false;
-}
-
-interface AsyncMergeRequest {
-  merge_action: 'direct_merge' | 'merge_queue';
-  merge_method?: string;
-  bypass_rules?: boolean;
-}
-
-/**
- * Merges the PR through the async merge API and polls the result. Returns
- * `'unsupported'` if the GitHub host lacks the async merge API.
- */
-async function asyncMergePr(
-  pr: GhPr | null,
-  prNo: number,
-  strategy: MergeStrategy | undefined,
-  bypassRules: boolean,
-): Promise<boolean | 'unsupported'> {
-  const request = await chooseAsyncMergeRequest(
-    pr,
-    prNo,
-    strategy,
-    bypassRules,
-  );
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/pulls/${prNo}/merge-async`;
-  const options: GithubHttpOptions = { body: request, token: config.forkToken };
-  logger.debug({ url, request }, 'mergePr');
-  let result: MergeAsyncResult | null;
-  try {
-    result = (await githubApi.putJson(url, options, MergeAsyncResult)).body;
-  } catch (err) {
-    if (
-      err instanceof ExternalHostError ||
-      err.message === PLATFORM_RATE_LIMIT_EXCEEDED
-    ) {
-      throw err;
-    }
-    const parsed = MergeAsyncResult.safeParse(err.response?.body);
-    const pendingUuid = parsed.data?.details.uuid;
-    if (err.statusCode === 409 && pendingUuid) {
-      logger.debug(`An earlier merge request for PR #${prNo} is still pending`);
-      result = await pollAsyncMerge(url, pendingUuid);
-      return resolveAsyncMerge(prNo, result);
-    }
-    if (err.statusCode === 400) {
-      logger.debug(
-        `GitHub refused the merge request for PR #${prNo}: ${err.response?.body?.message}`,
-      );
-      return false;
-    }
-    if (
-      err.statusCode === 404 &&
-      isGithubEnterpriseServer(platformConfig.host)
-    ) {
-      logger.debug(
-        'Async merge API not available on this GitHub host, falling back to the merge endpoint',
-      );
-      platformConfig.asyncMergeSupported = false;
-      return 'unsupported';
-    }
-    logger.warn({ err }, 'Failed to merge PR');
-    return false;
-  }
-  const uuid = result.details.uuid;
-  if (result.status === 'pending' && uuid) {
-    result = await pollAsyncMerge(url, uuid);
-  }
-  return resolveAsyncMerge(prNo, result);
-}
-
-/**
- * Merges directly, bypassing the branch rules the token may bypass like the
- * classic merge endpoint unless `bypassRules` is false. On a branch with a
- * merge queue, the PR is added to the merge queue unless the token may and
- * should bypass it. The merge queue merges with its own configured merge
- * method.
- */
-async function chooseAsyncMergeRequest(
-  pr: GhPr | null,
-  prNo: number,
-  strategy: MergeStrategy | undefined,
-  bypassRules: boolean,
-): Promise<AsyncMergeRequest> {
-  const targetBranch = pr?.targetBranch;
-  let queueEnabled = false;
-  if (targetBranch) {
-    queueEnabled = await isBranchMergeQueueEnabled(targetBranch);
-  }
-  // Without bypassing rules the merge queue applies
-  if (queueEnabled && !bypassRules) {
-    return { merge_action: 'merge_queue' };
-  }
-  if (queueEnabled) {
-    // viewerCanMergeAsAdmin was verified for user tokens, but not for GitHub
-    // App installation tokens
-    const canBypass = await canMergeAsAdmin(prNo);
-    if (!canBypass) {
-      return { merge_action: 'merge_queue' };
-    }
-  }
-  return {
-    merge_action: 'direct_merge',
-    merge_method: mapMergeStartegy(strategy) ?? config.mergeMethod,
-    bypass_rules: bypassRules,
-  };
-}
-
-/**
- * Returns whether the token that sends the merge request may bypass the
- * branch rules, including the merge queue, to merge the PR.
- */
-async function canMergeAsAdmin(prNo: number): Promise<boolean> {
-  try {
-    const res = await githubApi.requestGraphql<{
-      repository: {
-        pullRequest: { viewerCanMergeAsAdmin: boolean } | null;
-      };
-    }>(prViewerCanMergeAsAdminQuery, {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        number: prNo,
-      },
-      token: config.forkToken,
-      count: 1, // bypass graphql check
-    });
-    if (res?.errors) {
-      logger.debug(
-        { prNo, errors: res.errors },
-        'Failed to fetch whether the PR may be merged as admin',
-      );
-      return false;
-    }
-    return res?.data?.repository?.pullRequest?.viewerCanMergeAsAdmin === true;
-  } catch (err) {
-    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-      throw err;
-    }
-    logger.debug(
-      { prNo, err },
-      'Error fetching whether the PR may be merged as admin',
-    );
-    return false;
-  }
-}
-
-/**
- * Polls the result of the async merge request until it is no longer pending
- * or the timeout is reached. Returns null if the result cannot be fetched.
- */
-async function pollAsyncMerge(
-  url: string,
-  uuid: string,
-): Promise<MergeAsyncResult | null> {
-  const options: GithubHttpOptions = {
-    memCache: false,
-    token: config.forkToken,
-  };
-  let result: MergeAsyncResult | null = null;
-  for (
-    let waited = 0;
-    waited < asyncMergePollTimeoutMs;
-    waited += asyncMergePollIntervalMs
-  ) {
-    await setTimeout(asyncMergePollIntervalMs);
-    try {
-      result = (
-        await githubApi.getJson(`${url}/${uuid}`, options, MergeAsyncResult)
-      ).body;
-    } catch (err) {
-      if (
-        err instanceof ExternalHostError ||
-        err.message === PLATFORM_RATE_LIMIT_EXCEEDED
-      ) {
-        throw err;
-      }
-      logger.warn({ err }, 'Failed to fetch the async merge result');
-      return null;
-    }
-    if (result.status !== 'pending') {
-      return result;
-    }
-  }
-  return result;
-}
-
-function resolveAsyncMerge(
-  prNo: number,
-  result: MergeAsyncResult | null,
-): boolean {
-  switch (result?.status) {
-    case 'merged': {
-      logger.debug(`PR #${prNo} merged`);
-      const cachedPr = config.prList?.find(({ number }) => number === prNo);
-      if (cachedPr) {
-        cachePr({ ...cachedPr, state: 'merged' });
-      }
-      return true;
-    }
-    case 'enqueued':
-      logger.debug(`PR #${prNo} added to the merge queue`);
-      return true;
-    case 'failed':
-      logger.info(
-        `GitHub refused to merge PR #${prNo}: ${result.details.message}`,
-      );
-      return false;
-    case 'pending':
-      logger.debug(
-        `GitHub has not merged PR #${prNo} within ${asyncMergePollTimeoutMs / 1000} s, the next run picks up the result`,
-      );
-      return false;
-    default:
-      // The result could not be fetched, which has been logged
-      return false;
-  }
 }
 
 async function directMergePr(

@@ -6281,16 +6281,16 @@ describe('modules/platform/github/index', () => {
         .put(asyncUrl, directMerge)
         .reply(202, pending)
         .get(`${asyncUrl}/uuid-1`)
-        .times(20)
+        .times(10)
         .reply(200, pending);
       await initRepoWithPr(scope);
 
       const res = await github.mergePr({ id: 1234, branchName: 'somebranch' });
 
       expect(res).toBeFalse();
-      expect(setTimeout).toHaveBeenCalledTimes(20);
+      expect(setTimeout).toHaveBeenCalledTimes(10);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'GitHub has not merged PR #1234 within 20 s, the next run picks up the result',
+        'GitHub has not merged PR #1234 within 10 s, the next run picks up the result',
       );
     });
 

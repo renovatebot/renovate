@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../../../config/types.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import type { Pr, PrBodyStruct } from '../types.ts';
@@ -189,4 +190,24 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
+}
+
+export interface AsyncMergeParams {
+  /** The repository to merge in, which is the parent repository of a fork */
+  repository: string;
+  owner: string;
+  name: string;
+  token?: string;
+  /** The merge method configured for the repository */
+  mergeMethod: string;
+  prNo: number;
+  strategy?: MergeStrategy;
+  /** Whether to bypass the branch rules the token may bypass */
+  bypassRules: boolean;
+  /** Whether the base branch of the PR has a merge queue */
+  queueEnabled: boolean;
+  /** Whether the host is a GitHub Enterprise Server */
+  isGhes: boolean;
+  /** Caches the PR with the state merged */
+  cacheMergedPr: (prNo: number) => void;
 }

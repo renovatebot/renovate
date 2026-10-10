@@ -126,9 +126,9 @@ A way to get the user id of a GitHub app is to [query the user API](https://docs
 ## Merging pull requests
 
 When Renovate merges a PR itself instead of using GitHub auto-merge, it uses the [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) of GitHub.
-GitHub completes the merge in the background, so Renovate checks the result once per second for up to 20 seconds.
+GitHub completes the merge in the background, so Renovate checks the result once per second for up to 10 seconds.
 If GitHub refuses the merge, Renovate logs the reason GitHub gave.
-If the merge is still pending after 20 seconds, Renovate continues and the next run sees the merged PR.
+If the merge is still pending after 10 seconds, Renovate continues and the next run sees the merged PR.
 
 By default Renovate asks GitHub to bypass the rules that Renovate is permitted to bypass, like the classic merge endpoint does, see [`automergeBypassRules`](../../../configuration-options.md#automergebypassrules).
 With `automergeBypassRules=false`, Renovate adds the PR to the merge queue on branches with a merge queue, and GitHub enforces the rules on other branches.
