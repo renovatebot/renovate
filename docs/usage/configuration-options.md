@@ -273,8 +273,6 @@ If you don't select any status check, and you use platform automerge, then GitHu
 
 ## `automergeBypassRules`
 
-This option only works on GitHub.
-
 When Renovate merges a PR itself, it asks GitHub to bypass the branch protections and repository rules that the Renovate account or app is permitted to bypass.
 This matches how the classic GitHub merge endpoint behaves.
 Renovate merges a PR itself when `automergeType=pr` and either `platformAutomerge=false` or the platform automerge was not possible.
