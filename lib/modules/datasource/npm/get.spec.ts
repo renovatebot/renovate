@@ -395,6 +395,33 @@ describe('modules/datasource/npm/get', () => {
     expect(dep?.sourceDirectory).toBeUndefined();
   });
 
+  it('returns releases when `repository` is `null`', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/some-package')
+      .reply(200, {
+        name: 'some-package',
+        'dist-tags': { latest: '1.1.0' },
+        repository: null,
+        versions: {
+          '1.0.0': { repository: null },
+          '1.1.0': { repository: null },
+        },
+      });
+
+    const dep = await getDependency(
+      http,
+      'https://example.com',
+      'some-package',
+    );
+
+    expect(dep?.sourceUrl).toBeUndefined();
+    expect(dep?.releases.map(({ version }) => version)).toEqual([
+      '1.0.0',
+      '1.1.0',
+    ]);
+  });
+
   it('handles mixed sourceUrls in releases', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 

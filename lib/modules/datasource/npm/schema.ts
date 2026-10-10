@@ -65,14 +65,16 @@ export const CachedPackument = DeepNullish(
  */
 const NpmResponseVersionLoose = NpmResponseVersion.loose();
 
-export const NpmResponse = z.object({
-  _id: z.string().optional(),
-  name: z.string().optional(),
-  versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
-  repository: RepositoryNpmResponse.optional(),
-  homepage: z.string().optional().catch(undefined),
-  time: LooseRecord(z.string()).optional(),
-  'dist-tags': z.record(z.string(), z.string()).optional(),
-});
+export const NpmResponse = DeepNullish(
+  z.object({
+    _id: z.string().optional(),
+    name: z.string().optional(),
+    versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
+    repository: RepositoryNpmResponse.optional(),
+    homepage: z.string().optional().catch(undefined),
+    time: LooseRecord(z.string()).optional(),
+    'dist-tags': z.record(z.string(), z.string()).optional(),
+  }),
+);
 
 export type NpmResponse = z.infer<typeof NpmResponse>;

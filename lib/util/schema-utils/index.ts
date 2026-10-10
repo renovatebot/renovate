@@ -210,7 +210,9 @@ function deepNullishRewrite(node: z.ZodTypeAny): z.ZodTypeAny {
     for (const [key, value] of Object.entries(node.shape)) {
       shape[key] = deepNullishRewrite(value as z.ZodTypeAny);
     }
-    return z.object(shape);
+    const rebuilt = z.object(shape);
+    const { catchall } = node.def;
+    return catchall ? rebuilt.catchall(catchall) : rebuilt;
   }
   if (node instanceof z.ZodArray) {
     return z.array(deepNullishRewrite(node.element as z.ZodTypeAny));
@@ -263,8 +265,9 @@ function deepNullishRewrite(node: z.ZodTypeAny): z.ZodTypeAny {
  * captured in a closure — wrap the inner schema directly for those
  * (e.g. `LooseArray(DeepNullish(Inner))`).
  *
- * Object modifiers (`.strict()`/`.catchall()`/`.passthrough()`/object-level
- * `.refine()`) are dropped by the `z.object(shape)` rebuild.
+ * Unknown-key handling (`.loose()`/`.passthrough()`/`.strict()`/`.catchall()`)
+ * is preserved; the catchall schema itself is not rewritten. Object-level
+ * `.refine()` is dropped by the `z.object(shape)` rebuild.
  */
 export function DeepNullish<Schema extends z.ZodTypeAny>(
   schema: Schema,
