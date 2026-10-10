@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GitlabTagsDatasource } from './index.ts';
@@ -6,6 +7,10 @@ import { GitlabTagsDatasource } from './index.ts';
 const datasource = GitlabTagsDatasource.id;
 
 describe('modules/datasource/gitlab-tags/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('getReleases', () => {
     it('returns tags from custom registry', async () => {
       const body = [
@@ -116,6 +121,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
     });
 
     it('shares the cache between the instance URL and the API URL', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
       const cache = new Map<string, unknown>();
       vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
         Promise.resolve(cache.get(`${ns}|${key}`)),
