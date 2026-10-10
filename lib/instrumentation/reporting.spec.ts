@@ -1,14 +1,17 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '~test/s3.ts';
-import { fs, logger } from '~test/util.ts';
+import { fs, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
+import type { Pr } from '../modules/platform/index.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import {
   addBranchStats,
   addExtractionStats,
   addLibYears,
+  addRepositoryMetadata,
   exportStats,
   finalizeReport,
   getReport,
@@ -23,6 +26,7 @@ vi.mock('../logger/index.ts', () => mockDeep());
 describe('instrumentation/reporting', () => {
   beforeEach(() => {
     resetReport();
+    GlobalConfig.reset();
   });
 
   const branchInformation: Partial<BranchCache>[] = [
@@ -83,11 +87,120 @@ describe('instrumentation/reporting', () => {
       libYears: { managers: {}, total: 0 },
       dependencyStatus: { outdated: 0, total: 0 },
     });
+    addRepositoryMetadata(config, 'renovate.json', []);
 
     expect(getReport()).toEqual({
       problems: [],
       repositories: {},
     });
+  });
+
+  it('adds repository metadata to the report', () => {
+    GlobalConfig.set({ platform: 'github' });
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      defaultBranch: 'main',
+      dependencyDashboardIssue: 42,
+    };
+
+    addRepositoryMetadata(config, '.github/renovate.json5', []);
+
+    expect(getReport()).toEqual({
+      problems: [],
+      repositories: {
+        'myOrg/myRepo': {
+          problems: [],
+          branches: [],
+          packageFiles: {},
+          platform: 'github',
+          defaultBranch: 'main',
+          dependencyDashboardIssue: 42,
+          configFileName: '.github/renovate.json5',
+          onboardingPrNumber: null,
+        },
+      },
+    });
+  });
+
+  it('sets dependencyDashboardIssue to null when there is no dashboard', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      defaultBranch: 'main',
+    };
+
+    addRepositoryMetadata(config, undefined, []);
+
+    expect(
+      getReport().repositories['myOrg/myRepo'].dependencyDashboardIssue,
+    ).toBeNull();
+  });
+
+  it('omits configFileName when the repo has no in-repo config file', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      defaultBranch: 'main',
+    };
+
+    addRepositoryMetadata(config, '', []);
+
+    expect(getReport().repositories['myOrg/myRepo']).not.toHaveProperty(
+      'configFileName',
+    );
+  });
+
+  it('adds onboarding status with an open onboarding PR', () => {
+    GlobalConfig.set({ onboardingBranch: 'renovate/configure' });
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      repoIsOnboarded: false,
+    };
+    const prList: Pr[] = [
+      partial<Pr>({
+        number: 7,
+        sourceBranch: 'renovate/configure',
+        state: 'open',
+        title: 'Configure Renovate',
+      }),
+      partial<Pr>({
+        number: 8,
+        sourceBranch: 'renovate/some-dep',
+        state: 'open',
+        title: 'Update dep',
+      }),
+    ];
+
+    addRepositoryMetadata(config, undefined, prList);
+
+    const repoReport = getReport().repositories['myOrg/myRepo'];
+    expect(repoReport.repoIsOnboarded).toBe(false);
+    expect(repoReport.onboardingPrNumber).toBe(7);
+  });
+
+  it('sets onboardingPrNumber to null when the onboarding PR is not open', () => {
+    GlobalConfig.set({ onboardingBranch: 'renovate/configure' });
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      repoIsOnboarded: true,
+    };
+    const prList: Pr[] = [
+      partial<Pr>({
+        number: 7,
+        sourceBranch: 'renovate/configure',
+        state: 'merged',
+        title: 'Configure Renovate',
+      }),
+    ];
+
+    addRepositoryMetadata(config, undefined, prList);
+
+    const repoReport = getReport().repositories['myOrg/myRepo'];
+    expect(repoReport.repoIsOnboarded).toBe(true);
+    expect(repoReport.onboardingPrNumber).toBeNull();
   });
 
   it('return report if reportType is set to logging', () => {
