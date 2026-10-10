@@ -337,6 +337,27 @@ describe('util/exec/containerbase', () => {
           generateInstallCommands(toolConstraints, true),
         ).resolves.toEqual(['install-tool composer 2.2.0']);
       });
+
+      it('re-issues the install command when switching back to an earlier version', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.2.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.2.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.1.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+      });
     });
   });
 });
