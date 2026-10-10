@@ -10,12 +10,7 @@ import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  GitHostTag,
-  ReleaseResult,
-} from '../types.ts';
+import type { GetReleasesConfig, GitHostTag } from '../types.ts';
 
 export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp> {
   static readonly id = 'github-tags';
@@ -33,6 +28,10 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
   }
 
   override readonly registryStrategy = 'hunt';
+
+  // the GraphQL fetcher caches the tags and releases itself, and the latest
+  // commit lookup uses the HTTP memory cache
+  protected override readonly usePackageCache = false;
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
@@ -73,34 +72,6 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
       );
     }
     return digest;
-  }
-
-  /**
-   * github.getDigest
-   *
-   * The `newValue` supplied here should be a valid tag for the docker image.
-   *
-   * Returns the latest commit hash for the repository.
-   */
-  override getDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    if (newValue) {
-      return this.fetchTagCommit(registryUrl, repo, newValue);
-    }
-
-    return this.fetchLatestCommit(registryUrl, repo);
-  }
-
-  /**
-   * The GraphQL fetcher caches the tags and releases itself, so the result
-   * skips the package cache of the base class.
-   */
-  override getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    return this.fetchReleases(config);
   }
 
   protected async fetchTags(config: GetReleasesConfig): Promise<GitHostTag[]> {

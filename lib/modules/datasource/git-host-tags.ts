@@ -60,6 +60,32 @@ export abstract class GitHostTagsDatasource<
     return this.isCacheable(this.getRegistryUrl(registryUrl));
   }
 
+  /**
+   * Whether the releases and digests are stored in the package cache. `false`
+   * skips the package cache entirely, whatever
+   * {@link GitHostTagsDatasource.isCacheable} and `cachePrivatePackages` say.
+   */
+  protected readonly usePackageCache: boolean = true;
+
+  /**
+   * Returns the result of `fn`, stored in the package cache under `key` unless
+   * {@link GitHostTagsDatasource.usePackageCache} is `false`.
+   */
+  protected cachedLookup<T>(
+    registryUrl: string | undefined,
+    key: string,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    if (!this.usePackageCache) {
+      return fn();
+    }
+
+    return this.cached(
+      { key, fallback: true, cacheable: this.isCacheableFor(registryUrl) },
+      fn,
+    );
+  }
+
   protected getCacheKey(
     registryUrl: string | undefined,
     repo: string,
@@ -70,12 +96,9 @@ export abstract class GitHostTagsDatasource<
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return this.cached(
-      {
-        key: this.getCacheKey(config.registryUrl, config.packageName, 'tags'),
-        fallback: true,
-        cacheable: this.isCacheableFor(config.registryUrl),
-      },
+    return this.cachedLookup(
+      config.registryUrl,
+      this.getCacheKey(config.registryUrl, config.packageName, 'tags'),
       () => this.fetchReleases(config),
     );
   }
@@ -123,17 +146,14 @@ export abstract class GitHostTagsDigestDatasource<
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return this.cached(
-      {
-        key: this.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          'digest',
-          newValue,
-        ),
-        fallback: true,
-        cacheable: this.isCacheableFor(config.registryUrl),
-      },
+    return this.cachedLookup(
+      config.registryUrl,
+      this.getCacheKey(
+        config.registryUrl,
+        config.packageName,
+        'digest',
+        newValue,
+      ),
       () => this.fetchDigest(config, newValue),
     );
   }
