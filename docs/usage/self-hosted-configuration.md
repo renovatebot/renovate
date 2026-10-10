@@ -1546,7 +1546,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## `repositoryCacheForceLocal`
 
-If set to `true`, Renovate will persist repository cache locally after uploading to S3.
+If set to `true`, Renovate will persist repository cache locally after uploading to the remote repository cache.
 
 This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
 
@@ -1558,16 +1558,27 @@ This is useful if you want to keep a local copy of the cache for debugging purpo
 }
 ```
 
-Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
-Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+```ts title="Set repositoryCacheType to a GCS URI to enable GCS backed repository cache"
+{
+  repositoryCacheType: 'gs://bucket-name';
+}
+```
+
+S3 backed caches use the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) and therefore support all the authentication methods supported by the AWS SDK.
 Read more about [the default credential provider chain for AWS SDK for JavaScript V3](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
+GCS backed caches use the [Google Cloud Storage Node.js Client](https://www.npmjs.com/package/@google-cloud/storage).
+Credentials come from [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials), such as Workload Identity Federation, an attached service account, or the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+Read more about the [Google Auth Library](https://www.npmjs.com/package/google-auth-library).
+
+If Renovate cannot resolve credentials, it logs a warning and skips the remote repository cache.
+
 !!! tip
-  If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
-  For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+  If you're storing the repository cache on Amazon S3 or Google Cloud Storage then you may set a folder hierarchy as part of `repositoryCacheType`.
+  For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'` or `repositoryCacheType: 'gs://bucket-name/dir1/.../dirN/'`.
 
 !!! note
-  S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
+  The remote repository cache is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## `requireConfig`
 
