@@ -80,7 +80,7 @@ export class BitbucketTagsDatasource extends GitHostTagsDigestDatasource<Bitbuck
       {
         key: this.getCacheKey(registryUrl, repo, 'mainbranch'),
         ttlMinutes: 60,
-        cacheable: this.isCacheable(registryUrl),
+        cacheable: this.isCacheableFor(registryUrl),
       },
       () => this._getMainBranch(registryUrl, repo),
     );
