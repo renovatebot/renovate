@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
@@ -338,9 +339,8 @@ describe('modules/datasource/gitea-tags/index', () => {
         .get('/api/v1/repos/gitea/helm-chart/tags/v9.0.1')
         .reply(200, body);
 
-      const res = await new GiteaTagsDatasource().getTagCommit(
-        undefined,
-        'gitea/helm-chart',
+      const res = await new GiteaTagsDatasource().getDigest(
+        { packageName: 'gitea/helm-chart' },
         'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
@@ -361,6 +361,45 @@ describe('modules/datasource/gitea-tags/index', () => {
           'https://git.example.com',
         ),
       ).toBe('https://git.example.com/gitea/helm-chart');
+    });
+  });
+
+  describe('package cache', () => {
+    let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+    beforeEach(() => {
+      setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+    });
+
+    afterEach(() => {
+      setCache.mockRestore();
+    });
+
+    it('caches the tags of the public instance', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/gitea/helm-chart/tags')
+        .reply(200, []);
+
+      await new GiteaTagsDatasource().getReleases({
+        packageName: 'gitea/helm-chart',
+      });
+
+      expect(setCache).toHaveBeenCalledOnce();
+    });
+
+    it('does not cache the tags of a self-hosted instance', async () => {
+      httpMock
+        .scope('https://gitea.example.com')
+        .get('/api/v1/repos/gitea/helm-chart/tags')
+        .reply(200, []);
+
+      await new GiteaTagsDatasource().getReleases({
+        registryUrl: 'https://gitea.example.com',
+        packageName: 'gitea/helm-chart',
+      });
+
+      expect(setCache).not.toHaveBeenCalled();
     });
   });
 });

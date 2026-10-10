@@ -38,6 +38,15 @@ export abstract class GitHostTagsDatasource<
     config: GetReleasesConfig,
   ): Promise<GitHostTag[] | null>;
 
+  /**
+   * Whether the lookups against `registryUrl`, as returned by
+   * {@link GitHostTagsDatasource.getRegistryUrl}, may be stored in the package
+   * cache.
+   */
+  protected isCacheable(_registryUrl: string): boolean {
+    return true;
+  }
+
   protected getCacheKey(
     registryUrl: string | undefined,
     repo: string,
@@ -52,6 +61,7 @@ export abstract class GitHostTagsDatasource<
       {
         key: this.getCacheKey(config.registryUrl, config.packageName, 'tags'),
         fallback: true,
+        cacheable: this.isCacheable(this.getRegistryUrl(config.registryUrl)),
       },
       () => this.fetchReleases(config),
     );
@@ -102,7 +112,10 @@ export abstract class GitHostTagsDigestDatasource<
     tag: string,
   ): Promise<string | null> {
     return this.cached(
-      { key: this.getCacheKey(registryUrl, repo, 'tag', tag) },
+      {
+        key: this.getCacheKey(registryUrl, repo, 'tag', tag),
+        cacheable: this.isCacheable(this.getRegistryUrl(registryUrl)),
+      },
       () => this.fetchTagCommit(registryUrl, repo, tag),
     );
   }
@@ -120,6 +133,7 @@ export abstract class GitHostTagsDigestDatasource<
           newValue,
         ),
         fallback: true,
+        cacheable: this.isCacheable(this.getRegistryUrl(config.registryUrl)),
       },
       () => this.fetchDigest(config, newValue),
     );
