@@ -70,4 +70,51 @@ describe('util/http/cache/memory-http-cache-provider', () => {
     expect(res3.statusCode).toBe(200);
     expect(res3.body).toMatchObject([{ msg: 'Hello, world!' }]);
   });
+
+  it('shares concurrent identical requests', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .reply(200, [{ msg: 'Hello, world!' }]);
+
+    const [res1, res2] = await Promise.all([
+      http.getJsonUnchecked<[]>('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+      http.getJsonUnchecked<[]>('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+    ]);
+
+    expect(res1.body).toEqual([{ msg: 'Hello, world!' }]);
+    expect(res2.body).toEqual([{ msg: 'Hello, world!' }]);
+    expect(res2.body).not.toBe(res1.body);
+  });
+
+  it('does not keep failed concurrent requests', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .reply(500)
+      .get('/foo/bar')
+      .reply(200, { msg: 'Hello, world!' });
+
+    const results = await Promise.allSettled([
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+    ]);
+    expect(results.map(({ status }) => status)).toEqual([
+      'rejected',
+      'rejected',
+    ]);
+
+    const res = await http.getJsonUnchecked('https://example.com/foo/bar', {
+      cacheProvider: memCacheProvider,
+    });
+    expect(res.body).toEqual({ msg: 'Hello, world!' });
+  });
 });
