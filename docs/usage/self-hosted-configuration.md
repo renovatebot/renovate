@@ -810,6 +810,35 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
   Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
+## `gitCredentialPassing`
+
+Controls how Renovate passes the platform credentials to Git.
+
+Possible values:
+
+- `url` (default): embed the credentials in the Git remote URL
+- `store`: keep the credentials out of the Git remote URL and pass them via the [Git credential store](https://git-scm.com/docs/git-credential-store)
+
+Use `store` if your GitLab instance has Kerberos authentication enabled.
+When the credentials are part of the URL, Git tries Kerberos (`Negotiate`) authentication and can not fall back to Basic authentication with the token, so Git operations fail with `HTTP Basic: Access denied`.
+Read the [GitLab docs about HTTP Git access with Kerberos](https://docs.gitlab.com/integration/kerberos/#http-git-access) to learn more.
+
+When set to `store`, Renovate will, during platform initialization:
+
+1. Add `store` to the `credential.<endpoint>.helper` setting in the global Git configuration (`~/.gitconfig`), if it is not already there
+1. Create or update the entry for the GitLab endpoint in the `~/.git-credentials` file, if the file does not already have the current username and token
+
+Both files must be writable by Renovate.
+Renovate does not revert these changes when it finishes.
+
+!!! note
+  The credential store only has an entry for the host of your `endpoint`.
+  If GitLab returns repository URLs with a different host, also set `gitUrl` to `endpoint`.
+
+!!! warning
+  The Git credential store saves the token unencrypted in `~/.git-credentials`.
+  Make sure that only Renovate can read the home directory.
+
 ## `gitNoVerify`
 
 Controls when Renovate passes the `--no-verify` flag to `git`.

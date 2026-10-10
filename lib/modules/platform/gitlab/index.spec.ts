@@ -17,16 +17,19 @@ import {
 import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
+import * as _credentialStore from '../../../util/git/credential-store.ts';
 import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
 
 vi.mock('../../../util/git/index.ts', () => mockDeep());
+vi.mock('../../../util/git/credential-store.ts');
 vi.mock('timers/promises');
 vi.mock('../utils/pr-body.ts', { spy: true });
 
 const timers = vi.mocked(_timers);
+const credentialStore = vi.mocked(_credentialStore);
 
 const gitlabApiHost = 'https://gitlab.com';
 
@@ -154,6 +157,82 @@ describe('modules/platform/gitlab/index', () => {
           gitAuthor: 'somebody',
         }),
       ).resolves.toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+    });
+
+    describe('gitCredentialPassing', () => {
+      const endpoint = 'https://gitlab.renovatebot.com:8443/gitlab/api/v4';
+
+      beforeEach(() => {
+        httpMock
+          .scope('https://gitlab.renovatebot.com:8443/gitlab/api/v4')
+          .get('/version')
+          .reply(200, {
+            version: '13.3.6-ee',
+          });
+      });
+
+      it.each`
+        gitCredentialPassing
+        ${undefined}
+        ${'url'}
+      `(
+        'does not set up the Git credential store for gitCredentialPassing=$gitCredentialPassing',
+        async ({ gitCredentialPassing }) => {
+          await gitlab.initPlatform({
+            endpoint,
+            token: 'some-token',
+            gitAuthor: 'somebody',
+            gitCredentialPassing,
+          });
+
+          expect(
+            credentialStore.enableGitCredentialStore,
+          ).not.toHaveBeenCalled();
+          expect(
+            credentialStore.updateGitCredentialStore,
+          ).not.toHaveBeenCalled();
+        },
+      );
+
+      it('sets up the Git credential store for the endpoint', async () => {
+        await expect(
+          gitlab.initPlatform({
+            endpoint,
+            token: 'some-token',
+            gitAuthor: 'somebody',
+            gitCredentialPassing: 'store',
+          }),
+        ).resolves.toEqual({ endpoint: `${endpoint}/` });
+
+        expect(
+          credentialStore.enableGitCredentialStore,
+        ).toHaveBeenCalledExactlyOnceWith(`${endpoint}/`);
+        expect(
+          credentialStore.updateGitCredentialStore,
+        ).toHaveBeenCalledExactlyOnceWith(
+          `${endpoint}/`,
+          'oauth2',
+          'some-token',
+        );
+      });
+
+      it('throws if the Git credential store cannot be set up', async () => {
+        const err = new Error('Cannot write the Git credential store file');
+        credentialStore.updateGitCredentialStore.mockRejectedValueOnce(err);
+
+        await expect(
+          gitlab.initPlatform({
+            endpoint,
+            token: 'some-token',
+            gitAuthor: 'somebody',
+            gitCredentialPassing: 'store',
+          }),
+        ).rejects.toThrow('Init: Cannot set up the Git credential store');
+        expect(logger.logger.error).toHaveBeenCalledWith(
+          { err },
+          'Failed to set up the Git credential store',
+        );
+      });
     });
   });
 
@@ -525,6 +604,25 @@ describe('modules/platform/gitlab/index', () => {
           gitUrl: 'ssh',
         }),
       ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
+    });
+
+    it('should not embed credentials in the URL if gitCredentialPassing is store', async () => {
+      GlobalConfig.set({ gitCredentialPassing: 'store' });
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/some%2Frepo%2Fproject')
+        .reply(200, {
+          default_branch: 'master',
+          http_url_to_repo: `https://gitlab.com/some/repo/project.git`,
+        });
+
+      await gitlab.initRepo({
+        repository: 'some/repo/project',
+      });
+
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [{ url: 'https://gitlab.com/some/repo/project.git' }],
+      ]);
     });
 
     it('should fall back respecting when GITLAB_IGNORE_REPO_URL is set', async () => {

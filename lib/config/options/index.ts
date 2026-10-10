@@ -3458,6 +3458,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'gitCredentialPassing',
+    description:
+      'Controls how Renovate passes the platform credentials to Git: embedded in the remote URL or via the Git credential store.',
+    type: 'string',
+    supportedPlatforms: ['gitlab'],
+    allowedValues: ['url', 'store'],
+    default: 'url',
+    stage: 'repository',
+    globalOnly: true,
+  },
+  {
     name: 'writeDiscoveredRepos',
     description: 'Writes discovered repositories to a JSON file and then exit.',
     type: 'string',

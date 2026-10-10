@@ -78,6 +78,11 @@ Let Renovate use your access token by doing _one_ of the following:
 - Set your access token as an environment variable `RENOVATE_TOKEN`
 - Set your access token when you run Renovate in the CLI with `--token=`
 
+#### Using Renovate with a Kerberos-enabled GitLab instance
+
+If your GitLab instance has [Kerberos authentication](https://docs.gitlab.com/integration/kerberos/) enabled, then Git can not authenticate with the access token when Renovate puts the token in the Git remote URL.
+Set [`gitCredentialPassing`](../../../self-hosted-configuration.md#gitcredentialpassing) to `store` so that Renovate passes the token via the Git credential store instead.
+
 #### Set `platform=gitlab` in your Renovate config file
 
 Remember to set `platform=gitlab` somewhere in your Renovate config file.
