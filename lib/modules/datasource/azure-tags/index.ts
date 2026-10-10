@@ -16,7 +16,7 @@ export class AzureTagsDatasource extends GitHostTagsDatasource {
     return registryUrl!;
   }
 
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     const normalizedUrl = ensureTrailingSlash(this.getRegistryUrl(registryUrl));
     return `${normalizedUrl}_git/${packageName}`;
   }

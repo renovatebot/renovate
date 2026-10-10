@@ -56,7 +56,7 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
    * Browser URL of the repository `packageName` on `registryUrl`, or on the
    * default registry.
    */
-  getSourceUrl(packageName: string, registryUrl?: string): string {
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, this.getRegistryUrl(registryUrl));
   }
 

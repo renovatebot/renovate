@@ -27,7 +27,10 @@ export abstract class GitHostTagsDatasource<
   protected abstract getRegistryUrl(registryUrl?: string): string;
 
   /** Browser URL of the repository. */
-  abstract getSourceUrl(packageName: string, registryUrl?: string): string;
+  protected abstract getSourceUrl(
+    packageName: string,
+    registryUrl?: string,
+  ): string;
 
   /** Fetches the tags of the repository. */
   protected abstract fetchTags(
