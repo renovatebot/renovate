@@ -4068,6 +4068,86 @@ describe('modules/platform/gitlab/index', () => {
         'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
       );
     });
+
+    it('should not set automatic merge while the pipeline belongs to a previous commit', async () => {
+      await initPlatform('13.3.6-ee');
+      const reply_body = {
+        merge_status: 'can_be_merged',
+        sha: 'new-sha',
+        pipeline: {
+          status: 'failed',
+          sha: 'old-sha',
+          source: 'push',
+        },
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body);
+      vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', '2');
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping platform automerge - MR pipeline is not for the latest commit',
+      );
+    });
+
+    it('should wait for the pipeline of the latest commit before setting automatic merge', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          sha: 'new-sha',
+          pipeline: {
+            status: 'failed',
+            sha: 'old-sha',
+            source: 'push',
+          },
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          sha: 'new-sha',
+          pipeline: {
+            status: 'running',
+            sha: 'new-sha',
+            source: 'push',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 1',
+      );
+    });
+
+    it('should set automatic merge for merged results pipelines', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          sha: 'head-sha',
+          pipeline: {
+            status: 'running',
+            sha: 'merge-ref-sha',
+            source: 'merge_request_event',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+    });
   });
 
   describe('isPrInMergeQueue', () => {
