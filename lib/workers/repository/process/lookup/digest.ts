@@ -29,13 +29,6 @@ export function couldApplyMinimumReleaseAgeToDigest(
   config: LookupUpdateConfig,
   updateType: DigestLikeUpdate['updateType'],
 ): boolean {
-  // Match filterInternalChecks(): under `none` the user opted out of internal
-  // checks entirely, so do no merging, no package rules, no age check and no
-  // logging claiming an age check ran.
-  if (config.internalChecksFilter === 'none') {
-    return false;
-  }
-
   return (
     isNonEmptyString(config.minimumReleaseAge) ||
     isNonEmptyString(config[updateType]?.minimumReleaseAge) ||
@@ -56,6 +49,15 @@ export async function applyMinimumReleaseAgeToDigestUpdate(
   newestMatchingVersionTimestamp: Timestamp | null | undefined,
 ): Promise<void> {
   if (!couldApplyMinimumReleaseAgeToDigest(config, update.updateType)) {
+    return;
+  }
+
+  if (update.updateType === 'pinDigest' && !currentVersionWasResolved) {
+    res.currentValueTimestamp = null;
+  }
+
+  // Filtering can be disabled while branch stability still needs the timestamp.
+  if (config.internalChecksFilter === 'none') {
     return;
   }
 
