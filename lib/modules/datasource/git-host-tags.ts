@@ -113,7 +113,12 @@ export abstract class GitHostTagsDigestDatasource<
   ): Promise<string | null> {
     return this.cached(
       {
-        key: this.getCacheKey(config.registryUrl, config.packageName, 'digest'),
+        key: this.getCacheKey(
+          config.registryUrl,
+          config.packageName,
+          'digest',
+          newValue,
+        ),
         fallback: true,
       },
       () => this.fetchDigest(config, newValue),
