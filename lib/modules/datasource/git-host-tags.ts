@@ -119,20 +119,6 @@ export abstract class GitHostTagsDigestDatasource<
     repo: string,
   ): Promise<string | null>;
 
-  protected getTagCommit(
-    registryUrl: string | undefined,
-    repo: string,
-    tag: string,
-  ): Promise<string | null> {
-    return this.cached(
-      {
-        key: this.getCacheKey(registryUrl, repo, 'tag', tag),
-        cacheable: this.isCacheableFor(registryUrl),
-      },
-      () => this.fetchTagCommit(registryUrl, repo, tag),
-    );
-  }
-
   override getDigest(
     config: DigestConfig,
     newValue?: string,
@@ -159,7 +145,7 @@ export abstract class GitHostTagsDigestDatasource<
     const { packageName: repo, registryUrl } = config;
 
     if (newValue?.length) {
-      return this.getTagCommit(registryUrl, repo, newValue);
+      return this.fetchTagCommit(registryUrl, repo, newValue);
     }
 
     return this.fetchLatestCommit(registryUrl, repo);
