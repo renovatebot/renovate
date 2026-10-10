@@ -18,10 +18,11 @@ dedupePeers: true
 catalog:
   esbuild: 0.28.2
   tar: 7.5.22
-  vite: 8.3.1
+  vite: 8.3.2
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
+  '@simple-git/argv-parser@2.0.0': 2.0.1
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   # GHSA-w5hq-g745-h8pq: uuid <11.1.1 via @google-cloud/storage > gaxios
   # https://github.com/googleapis/google-cloud-node/pull/9289
@@ -43,6 +44,8 @@ strictPeerDependencies: true
 # 7 days
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - '@containerbase/base'
+  - '@renovatebot/base-image'
   - '@renovatebot/detect-tools'
   - '@renovatebot/good-enough-parser'
   - '@renovatebot/osv-offline'
@@ -55,5 +58,9 @@ minimumReleaseAgeExclude:
   - '@containerbase/semantic-release-pnpm'
   # Renovate security update: tar@7.5.21
   - tar@7.5.21
+  # Renovate security update: simple-git@4.0.1
+  - simple-git@4.0.1
+  # Renovate security update: handlebars@4.7.10
+  - handlebars@4.7.10
 
 provenance: true

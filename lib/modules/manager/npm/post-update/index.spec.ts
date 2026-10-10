@@ -4,6 +4,7 @@ import { fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import {
   determineLockFileDirs,
   getAdditionalFiles,
@@ -23,8 +24,8 @@ vi.mock('./yarn.ts');
 vi.mock('./pnpm.ts');
 
 describe('modules/manager/npm/post-update/index', () => {
-  let baseConfig: PostUpdateConfig;
-  let updateConfig: PostUpdateConfig;
+  let baseConfig: PostUpdateConfig<NpmManagerData>;
+  let updateConfig: PostUpdateConfig<NpmManagerData>;
   const additionalFiles: AdditionalPackageFiles = {
     npm: [
       { packageFile: 'dummy.txt' },
@@ -58,7 +59,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
   beforeEach(() => {
     GlobalConfig.set({ localDir: '' });
-    baseConfig = partial<PostUpdateConfig>({
+    baseConfig = partial<PostUpdateConfig<NpmManagerData>>({
       upgrades: [],
     });
     updateConfig = {
@@ -654,7 +655,7 @@ describe('modules/manager/npm/post-update/index', () => {
           });
           return Promise.resolve({ lockFile: 'lock contents' });
         });
-        const config = partial<PostUpdateConfig>({
+        const config = partial<PostUpdateConfig<NpmManagerData>>({
           upgrades: [
             {
               depName: 'yarn',
@@ -774,7 +775,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
         ],
       };
-      const config = partial<PostUpdateConfig>({
+      const config = partial<PostUpdateConfig<NpmManagerData>>({
         upgrades: [{}],
         updatedPackageFiles: [
           {
@@ -828,7 +829,7 @@ describe('modules/manager/npm/post-update/index', () => {
           },
         ],
       };
-      const config = partial<PostUpdateConfig>({
+      const config = partial<PostUpdateConfig<NpmManagerData>>({
         upgrades: [{}],
         updatedPackageFiles: [
           {
@@ -857,15 +858,18 @@ describe('modules/manager/npm/post-update/index', () => {
       fs.writeLocalFile.mockResolvedValueOnce().mockRejectedValueOnce(err);
 
       await expect(
-        getAdditionalFiles(partial<PostUpdateConfig>({ upgrades: [] }), {
-          npm: [
-            {
-              packageFile: 'package.json',
-              npmrc: '',
-              managerData: { npmrcFileName: npmrcFilename },
-            },
-          ],
-        }),
+        getAdditionalFiles(
+          partial<PostUpdateConfig<NpmManagerData>>({ upgrades: [] }),
+          {
+            npm: [
+              {
+                packageFile: 'package.json',
+                npmrc: '',
+                managerData: { npmrcFileName: npmrcFilename },
+              },
+            ],
+          },
+        ),
       ).toResolve();
 
       expect(fs.writeLocalFile).toHaveBeenNthCalledWith(1, npmrcFilename, '\n');

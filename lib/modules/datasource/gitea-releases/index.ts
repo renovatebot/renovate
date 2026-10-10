@@ -1,5 +1,6 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import { GiteaDatasource } from '../gitea-tags/base.ts';
 import { getApiUrl, getSourceUrl } from '../gitea-tags/util.ts';
 import type { ReleaseResult } from '../types.ts';
@@ -11,12 +12,13 @@ export class GiteaReleasesDatasource extends GiteaDatasource {
   protected readonly cacheNamespace: PackageCacheNamespace =
     'datasource-gitea-releases';
 
-  /** Subclasses for other Gitea-compatible hosts pass their own id. */
-  constructor(id: string = GiteaReleasesDatasource.id) {
-    super(id, {
-      cacheKeyType: 'releases',
-      releaseTimestampField: 'published_at',
-    });
+  /** Subclasses for other Gitea-compatible hosts pass their own id and client. */
+  constructor(id: string = GiteaReleasesDatasource.id, http?: GiteaHttp) {
+    super(
+      id,
+      { cacheKeyType: 'releases', releaseTimestampField: 'published_at' },
+      http,
+    );
   }
 
   // _getReleases fetches list of releases for the repository

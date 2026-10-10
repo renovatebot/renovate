@@ -1,3 +1,5 @@
+import type { NpmPackage } from './extract/types.ts';
+
 interface LockFilePackage {
   name?: string;
   version?: string;
@@ -80,11 +82,14 @@ export interface NpmLockFiles {
   npmLock?: string;
 }
 
-export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
+export interface NpmManagerData extends NpmLockFiles {
   hasPackageManager?: boolean;
+  key?: string;
+  packageKey?: string;
   packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;
+  workspaces?: NpmPackage['workspaces'];
   workspacesPackages?: string[] | string;
   devEnginesIndex?: number;
   npmrcFileName?: string | null;

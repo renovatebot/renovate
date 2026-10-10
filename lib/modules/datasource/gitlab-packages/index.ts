@@ -1,24 +1,22 @@
+import { defaultRegistryUrl, getApiBaseUrl } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
-import type { GitlabPackage } from './types.ts';
+import { GitlabPackages } from './schema.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
-export class GitlabPackagesDatasource extends Datasource {
+export class GitlabPackagesDatasource extends Datasource<GitlabHttp> {
   static readonly id = datasource;
-
-  protected override http: GitlabHttp;
 
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://gitlab.com'];
+    return [defaultRegistryUrl];
   }
 
   override readonly releaseTimestampSupport = true;
@@ -26,8 +24,7 @@ export class GitlabPackagesDatasource extends Datasource {
     'The release timestamp is determined from the `created_at` field in the results.';
 
   constructor() {
-    super(datasource);
-    this.http = new GitlabHttp(datasource);
+    super(datasource, new GitlabHttp(datasource));
   }
 
   static getGitlabPackageApiUrl(
@@ -39,8 +36,8 @@ export class GitlabPackagesDatasource extends Datasource {
     const packageNameEncoded = encodeURIComponent(packageName);
 
     return joinUrlParts(
-      registryUrl,
-      `api/v4/projects`,
+      getApiBaseUrl(registryUrl),
+      'projects',
       projectNameEncoded,
       `packages?package_name=${packageNameEncoded}&per_page=100`,
     );
@@ -63,31 +60,17 @@ export class GitlabPackagesDatasource extends Datasource {
       packagePart,
     );
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const response = await this.fetchJson(apiUrl, GitlabPackages, {
+      paginate: true,
+    });
 
-    let response: GitlabPackage[];
-    try {
-      response = (
-        await this.http.getJsonUnchecked<GitlabPackage[]>(apiUrl, {
-          paginate: true,
-        })
-      ).body;
+    const releases = response
+      // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
+      // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
+      .filter((pkg) => pkg.packageName === packagePart)
+      .map((pkg) => pkg.release);
 
-      result.releases = response
-        // Setting the package_name option when calling the GitLab API isn't enough to filter information about other packages
-        // because this option is only implemented on GitLab > 12.9 and it only does a fuzzy search.
-        .filter((r) => (r.conan_package_name ?? r.name) === packagePart)
-        .map(({ version, created_at }) => ({
-          version,
-          releaseTimestamp: asTimestamp(created_at),
-        }));
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return result.releases?.length ? result : null;
+    return releases.length ? { releases } : null;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {

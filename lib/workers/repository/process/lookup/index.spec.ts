@@ -2983,6 +2983,25 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('copies effectiveDatasource from the datasource result', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'github.com/foo/bar';
+      config.datasource = GoDatasource.id;
+      config.versioning = npmVersioningId;
+      vi.spyOn(GoDatasource.prototype, 'getReleases').mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+        sourceUrl: 'https://github.com/foo/bar',
+        effectiveDatasource: 'github-tags',
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.effectiveDatasource).toBe('github-tags');
+      expect(res.updates).toHaveLength(1);
+    });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';

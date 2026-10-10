@@ -93,8 +93,7 @@ const GraalvmSetupWith: ActionSchema = z
   });
 
 // Runtimes installable by `pnpm/setup`, keyed by the name used in its
-// `runtime:` input. `bun` and `deno` reuse the datasources of their respective
-// `setup-*` actions below.
+// `runtime:` input. `bun` and `deno` versions are resolved through npm.
 const pnpmRuntimes: Record<string, PackageDependency | undefined> = {
   node: { datasource: NodeVersionDatasource.id, packageName: 'node' },
   bun: { datasource: NpmDatasource.id, packageName: 'bun' },
