@@ -428,6 +428,7 @@ export interface RenovateConfig
   dependencyDashboardLabels?: string[];
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   dependencyDashboardReportAbandonment?: boolean;
+  dependencyDashboardReportSchedules?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
