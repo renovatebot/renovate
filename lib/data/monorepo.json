@@ -550,6 +550,7 @@
     "linkifyjs": "https://github.com/nfrasser/linkifyjs",
     "log4j2": "https://github.com/apache/logging-log4j2",
     "logback": "https://github.com/qos-ch/logback",
+    "logtape": "https://github.com/dahlia/logtape",
     "loopback": [
       "https://github.com/strongloop/loopback-next",
       "https://github.com/loopbackio/loopback-next"
