@@ -130,8 +130,9 @@ GitHub completes the merge in the background, so Renovate checks the result once
 If GitHub refuses the merge, Renovate logs the reason GitHub gave.
 If the merge is still pending after 10 seconds, Renovate continues and the next run sees the merged PR.
 
-Renovate asks GitHub to bypass the rules that Renovate is permitted to bypass, like the classic merge endpoint does.
-If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (`viewerCanMergeAsAdmin` in the GraphQL API).
+By default Renovate asks GitHub to bypass the rules that Renovate is permitted to bypass, like the classic merge endpoint does, see [`automergeBypassRules`](../../../configuration-options.md#automergebypassrules).
+With `automergeBypassRules=false`, Renovate adds the PR to the merge queue on branches with a merge queue, and GitHub enforces the rules on other branches.
+Otherwise, if the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (`viewerCanMergeAsAdmin` in the GraphQL API).
 If it may, Renovate merges the PR directly with the configured `automergeStrategy`.
 Otherwise Renovate adds the PR to the merge queue, which merges it with the merge method configured for the merge queue.
 

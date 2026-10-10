@@ -47,6 +47,7 @@ export async function checkAutoMerge(
     baseBranch,
     automergeType,
     automergeStrategy,
+    automergeBypassRules,
     pruneBranchAfterAutomerge,
     automergeComment,
     ignoreTests,
@@ -154,6 +155,7 @@ export async function checkAutoMerge(
   logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
   const res = await platform.mergePr({
     branchName,
+    bypassRules: automergeBypassRules,
     id: pr.number,
     strategy: automergeStrategy,
   });

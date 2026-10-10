@@ -6174,6 +6174,38 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('asks GitHub to enforce the rules if bypassRules is false', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      scope
+        .put(asyncUrl, { ...directMerge, bypass_rules: false })
+        .reply(200, mergeResult('merged'));
+      await initRepoWithPr(scope);
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        bypassRules: false,
+      });
+
+      expect(res).toBeTrue();
+    });
+
+    it('adds the PR to the merge queue without the bypass permission query if bypassRules is false', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      scope
+        .put(asyncUrl, { merge_action: 'merge_queue' })
+        .reply(200, mergeResult('enqueued'));
+      await initRepoWithPr(scope, { id: 'MQ_kwDOBJLedM0dmQ' });
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        bypassRules: false,
+      });
+
+      expect(res).toBeTrue();
+    });
+
     it('adds the PR to the merge queue if the bypass permission query returns errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       scope
@@ -6369,6 +6401,37 @@ describe('modules/platform/github/index', () => {
 
       expect(first).toBeTrue();
       expect(second).toBeTrue();
+    });
+
+    it('logs that the classic merge endpoint cannot honour bypassRules=false', async () => {
+      httpMock
+        .scope(gheApiHost)
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.22.0' });
+      await github.initPlatform({
+        endpoint: gheApiHost,
+        token: '123test',
+        username: 'renovate-bot',
+        gitAuthor: 'Renovate Bot <bot@example.com>',
+      });
+      const scope = httpMock.scope(gheApiHost);
+      scope
+        .put(asyncUrl, { ...directMerge, bypass_rules: false })
+        .reply(404, { message: 'Not Found' })
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(200);
+      await initRepoWithPr(scope);
+
+      const res = await github.mergePr({
+        id: 1234,
+        branchName: 'somebranch',
+        bypassRules: false,
+      });
+
+      expect(res).toBeTrue();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'The classic merge endpoint cannot honour automergeBypassRules=false',
+      );
     });
 
     it.each`
