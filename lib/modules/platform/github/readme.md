@@ -83,7 +83,10 @@ When creating the GitHub App give it the following permissions:
 | Workflows         | `read` + `write` |
 | Administration    | `read`           |
 | Dependabot alerts | `read`           |
+| Merge queues      | `read` + `write` |
 | Metadata          | `read`           |
+
+The `Merge queues` permission is needed to enqueue pull requests when the repository uses a merge queue.
 
 **Organization permissions**
 
