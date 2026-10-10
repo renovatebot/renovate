@@ -110,7 +110,7 @@ export class CpanDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CpanDatasource.id}`,
-        key: `${config.packageName}`,
+        key: config.packageName,
         cacheable: true,
         fallback: true,
       },

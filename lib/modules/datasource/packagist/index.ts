@@ -2,6 +2,7 @@ import { isNumber, isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
@@ -104,7 +105,7 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getRegistryMeta:${regUrl}`,
+        key: buildCacheKey('getRegistryMeta', regUrl),
       },
       () => this._getRegistryMeta(regUrl),
     );
@@ -143,7 +144,10 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
+        key: buildCacheKey(
+          'getPackagistFile',
+          PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+        ),
         ttlMinutes: 1440,
         cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
       },
@@ -208,7 +212,12 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
+        key: buildCacheKey(
+          'packagistV2Lookup',
+          registryUrl,
+          metadataUrl,
+          packageName,
+        ),
         ttlMinutes: 10,
       },
       () => this._packagistV2Lookup(registryUrl, metadataUrl, packageName),

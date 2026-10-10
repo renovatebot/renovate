@@ -1308,7 +1308,7 @@ describe('modules/platform/gitea/index', () => {
       const res1 = await gitea.getPrList();
       expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
-      memCache.set('gitea-pr-cache-synced', false);
+      memCache.set('gitea:pr-cache-synced', false);
 
       const res2 = await gitea.getPrList();
       expect(res2).toMatchObject([
@@ -1603,7 +1603,7 @@ describe('modules/platform/gitea/index', () => {
   describe('createPr', () => {
     beforeEach(() => {
       vi.restoreAllMocks();
-      memCache.set('gitea-pr-cache-synced', true);
+      memCache.set('gitea:pr-cache-synced', true);
     });
 
     const mockNewPR: MockPr = {
@@ -1911,7 +1911,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('continues if platform automerge is not supported', async () => {
-      memCache.set('gitea-pr-cache-synced', true);
+      memCache.set('gitea:pr-cache-synced', true);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')

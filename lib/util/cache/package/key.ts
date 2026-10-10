@@ -9,3 +9,13 @@ export function getCombinedKey(
 ): CombinedKey {
   return `datasource-mem:pkg-fetch:${namespace}:${key}`;
 }
+
+/**
+ * Joins all given parts with `:`, using an empty string for `undefined` and `null` parts.
+ * Parts are joined as-is, without escaping `:` inside a part.
+ */
+export function buildCacheKey(
+  ...parts: (string | number | null | undefined)[]
+): string {
+  return parts.map((part) => part ?? '').join(':');
+}

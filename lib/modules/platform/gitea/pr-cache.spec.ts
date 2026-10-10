@@ -94,7 +94,7 @@ describe('modules/platform/gitea/pr-cache', () => {
     expect(res1).toMatchObject([{ number: 1 }]);
     expect(res2).toMatchObject([{ number: 2 }, { number: 1 }]);
 
-    memCache.set('gitea-pr-cache-synced', false);
+    memCache.set('gitea:pr-cache-synced', false);
     prCache.initRepo('SOME/repo', ignorePrAuthor, 'some-author');
     const res3 = await prCache.getPrs();
 

@@ -1008,7 +1008,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('fetches releaseTimestamp', async () => {
       memCache.set(
-        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        `crate-datasource:registry-config:${CRATES_IO_REGISTRY_URL_PARSED}`,
         cratesIoConfig,
       );
 
@@ -1037,7 +1037,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('rethrows errors from crates.io', async () => {
       memCache.set(
-        `crate-datasource/registry-config/${CRATES_IO_REGISTRY_URL_PARSED}`,
+        `crate-datasource:registry-config:${CRATES_IO_REGISTRY_URL_PARSED}`,
         cratesIoConfig,
       );
       httpMock.scope(API_BASE_URL).get('/api/v1/crates/clap/4.5.17').reply(404);
@@ -1055,7 +1055,7 @@ describe('modules/datasource/crate/index', () => {
       const api = 'https://example.com/-';
 
       beforeEach(() => {
-        memCache.set(`crate-datasource/registry-config/${registryUrl}`, {
+        memCache.set(`crate-datasource:registry-config:${registryUrl}`, {
           dl: 'https://example.com/dl',
           api,
         });
