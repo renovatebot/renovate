@@ -30,7 +30,10 @@ export abstract class GitHostTagsDatasource<
     return registryUrl ?? this.getDefaultRegistryUrls('')![0];
   }
 
-  /** Browser URL of the repository. */
+  /**
+   * Browser URL of the repository `packageName` on `registryUrl`, or on the
+   * default registry.
+   */
   protected abstract getSourceUrl(
     packageName: string,
     registryUrl?: string,

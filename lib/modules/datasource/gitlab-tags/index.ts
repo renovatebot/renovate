@@ -15,10 +15,6 @@ import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
 
-  /**
-   * Browser URL of the repository `packageName` on `registryUrl`, or on the
-   * default registry.
-   */
   protected getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, registryUrl);
   }
