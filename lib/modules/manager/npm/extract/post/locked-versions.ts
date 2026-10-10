@@ -101,6 +101,10 @@ export async function getLockedVersions(
         if (!packageFile.extractedConstraints?.npm) {
           npm = '>=7';
         }
+      } else if (lockfileVersion === 4) {
+        if (!packageFile.extractedConstraints?.npm) {
+          npm = '>=12';
+        }
       } else {
         logger.warn(
           { lockfileVersion, npmLock },

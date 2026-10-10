@@ -59,7 +59,12 @@ interface LockFile3 extends LockFileBase {
   packages: Record<string, LockFilePackage>;
 }
 
-export type LockFile = LockFile1 | LockFile2 | LockFile3;
+interface LockFile4 extends LockFileBase {
+  lockfileVersion: 4;
+  packages: Record<string, LockFilePackage>;
+}
+
+export type LockFile = LockFile1 | LockFile2 | LockFile3 | LockFile4;
 
 export interface ParseLockFileResult {
   detectedIndent: string;
