@@ -62,6 +62,14 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     );
   }
 
+  /**
+   * Browser URL of the repository `packageName` on `registryUrl`, or on the
+   * default registry.
+   */
+  getSourceUrl(packageName: string, registryUrl?: string): string {
+    return getSourceUrl(packageName, this.getRegistryUrl(registryUrl));
+  }
+
   /** Falls back to the default registry URL when none is configured. */
   protected getRegistryUrl(registryUrl?: string): string {
     return registryUrl ?? this.getDefaultRegistryUrls('')[0];
