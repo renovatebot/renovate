@@ -41,7 +41,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
         packageName: 'some/dep2',
       });
       expect(res).toEqual({
-        registryUrl: 'https://gitlab.company.com/api/v4',
+        registryUrl: 'https://gitlab.company.com',
         releases: [
           {
             gitRef: 'v1.0.0',
@@ -113,6 +113,47 @@ describe('modules/datasource/gitlab-tags/index', () => {
         ],
         sourceUrl: 'https://my.company.com/gitlab/some/dep2',
       });
+    });
+
+    it('shares the cache between the instance URL and the API URL', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'abc100', created_at: '' } },
+        ]);
+      const expected = {
+        registryUrl: 'https://gitlab.company.com',
+        releases: [{ gitRef: 'v1.0.0', version: 'v1.0.0' }],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      };
+
+      const viaApiUrl = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4'],
+        packageName: 'some/dep2',
+      });
+      const viaInstanceUrl = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://gitlab.company.com'],
+        packageName: 'some/dep2',
+      });
+
+      expect(viaApiUrl).toEqual(expected);
+      expect(viaInstanceUrl).toEqual(expected);
+      expect([...cache.keys()]).toEqual([
+        'datasource-gitlab-tags|cache-decorator:https://gitlab.company.com:some/dep2:tags:',
+      ]);
     });
 
     it('returns tags with default registry', async () => {

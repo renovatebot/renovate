@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import {
   defaultRegistryUrl,
   getApiBaseUrl,
+  getDepHost,
   getSourceUrl,
 } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
@@ -14,10 +15,6 @@ import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
 
-  /**
-   * Browser URL of the repository `packageName` on `registryUrl`, or on the
-   * default registry.
-   */
   getSourceUrl(packageName: string, registryUrl?: string): string {
     return getSourceUrl(packageName, registryUrl);
   }
@@ -37,10 +34,9 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
     return [defaultRegistryUrl];
   }
 
-  // the registry URL is kept as configured, the helpers of `util/gitlab/url.ts`
-  // read it with or without the `/api/v4` suffix
-  protected getRegistryUrl(registryUrl?: string): string {
-    return registryUrl ?? defaultRegistryUrl;
+  /** Strips the `/api/v4` suffix, so both spellings share a cache key. */
+  protected override getRegistryUrl(registryUrl?: string): string {
+    return getDepHost(registryUrl);
   }
 
   protected async fetchTags({
