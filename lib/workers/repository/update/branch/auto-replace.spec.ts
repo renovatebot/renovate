@@ -4,8 +4,10 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractKotlinToolchain } from '../../../../modules/manager/kotlin-toolchain/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
 const sampleHtml = Fixtures.get(
@@ -1819,6 +1821,172 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM docker.io/library/redis:8.2.1@sha256:5fa2edb1e408fa8235e6db8fab01d1afaaae96c9403ba67b70feceb8661e8621 AS base
         `,
       );
+    });
+
+    it.each`
+      coordinate                        | expected
+      ${'com.acme:client:8:jdk8'}       | ${'com.acme:client:9:jdk8'}
+      ${'com.acme8:client8:8:jdk8@jar'} | ${'com.acme8:client8:9:jdk8@jar'}
+      ${'com.acme:client:8@zip'}        | ${'com.acme:client:9@zip'}
+      ${'bom: com.acme:client:8:jdk8'}  | ${'bom: com.acme:client:9:jdk8'}
+      ${'  com.acme:client:8:jdk8  '}   | ${'  com.acme:client:9:jdk8  '}
+    `(
+      'updates only the version in Kotlin Toolchain coordinate $coordinate',
+      async ({
+        coordinate,
+        expected,
+      }: {
+        coordinate: string;
+        expected: string;
+      }) => {
+        const content = codeBlock`
+          product: jvm/app
+          dependencies:
+            - "${coordinate}" # Keep JDK 8
+        `;
+        const baseDeps = extractKotlinToolchain(content, 'module.yaml')!.deps;
+        for (const dep of baseDeps) {
+          normalizeDepNames(dep);
+        }
+        Object.assign(upgrade, baseDeps[0], {
+          manager: 'kotlin-toolchain',
+          packageFile: 'module.yaml',
+          depIndex: 0,
+          newValue: '9',
+          baseDeps,
+        });
+
+        const updated = await doAutoReplace(upgrade, content, false);
+
+        expect(updated).toBe(codeBlock`
+          product: jvm/app
+          dependencies:
+            - "${expected}" # Keep JDK 8
+        `);
+        await expect(doAutoReplace(upgrade, updated!, true)).resolves.toBe(
+          updated,
+        );
+      },
+    );
+
+    it('updates a Kotlin Toolchain settings version without a replaceString', async () => {
+      const moduleYaml = codeBlock`
+        product: jvm/app
+
+        dependencies:
+          - org.example:lib:2.2.0
+
+        settings:
+          kotlin:
+            version: 2.2.0
+      `;
+      upgrade.manager = 'kotlin-toolchain';
+      upgrade.packageFile = 'module.yaml';
+      upgrade.autoReplaceStringTemplate = undefined;
+      upgrade.depName = 'org.jetbrains.kotlin:kotlin-stdlib';
+      upgrade.currentValue = '2.2.0';
+      upgrade.newValue = '2.2.30';
+      upgrade.depIndex = 1;
+      upgrade.replaceString = undefined;
+      upgrade.newName = undefined;
+
+      const res = await doAutoReplace(upgrade, moduleYaml, reuseExistingBranch);
+
+      expect(res).toBe(
+        codeBlock`
+          product: jvm/app
+
+          dependencies:
+            - org.example:lib:2.2.0
+
+          settings:
+            kotlin:
+              version: 2.2.30
+        `,
+      );
+    });
+
+    it('updates a shared Kotlin Toolchain catalog version without changing equal literals', async () => {
+      const content = codeBlock`
+        [versions]
+        # Keep this comment at 1.0.0
+        unrelated = "1.0.0"
+        shared = "1.0.0" # Keep this comment at 1.0.0
+
+        [libraries]
+        first = { module = "org.example:first", version.ref = "shared" }
+        second = { module = "org.example:second", version.ref = "shared" }
+        unrelated = { module = "org.example:unrelated", version.ref = "unrelated" }
+      `;
+      const baseDeps = extractKotlinToolchain(
+        content,
+        'libs.versions.toml',
+      )!.deps;
+      for (const dep of baseDeps) {
+        normalizeDepNames(dep);
+      }
+      Object.assign(upgrade, baseDeps[0], {
+        manager: 'kotlin-toolchain',
+        packageFile: 'libs.versions.toml',
+        depIndex: 0,
+        newValue: '1.10.0',
+        baseDeps,
+      });
+
+      const updated = await doAutoReplace(upgrade, content, false);
+
+      expect(updated).toBe(
+        content.replace('shared = "1.0.0"', 'shared = "1.10.0"'),
+      );
+      expect(
+        extractKotlinToolchain(updated!, 'libs.versions.toml')!.deps.map(
+          ({ currentValue }) => currentValue,
+        ),
+      ).toEqual(['1.10.0', '1.10.0', '1.0.0']);
+      await expect(doAutoReplace(upgrade, updated!, true)).resolves.toBe(
+        updated,
+      );
+      Object.assign(upgrade, baseDeps[1], { depIndex: 1, newValue: '1.10.0' });
+      await expect(
+        doAutoReplace(upgrade, updated!, false, false),
+      ).resolves.toBe(updated);
+    });
+
+    it('updates successive Kotlin Toolchain catalog entries after a value changes length', async () => {
+      const content = codeBlock`
+        [libraries]
+        first = "org.example:first:1.0.0"
+        second = { module = "org.example:second", version = "1.0.0" } # Keep 1.0.0
+      `;
+      const baseDeps = extractKotlinToolchain(
+        content,
+        'libs.versions.toml',
+      )!.deps;
+      for (const dep of baseDeps) {
+        normalizeDepNames(dep);
+      }
+      Object.assign(upgrade, baseDeps[0], {
+        manager: 'kotlin-toolchain',
+        packageFile: 'libs.versions.toml',
+        depIndex: 0,
+        newValue: '1.100.0',
+        baseDeps,
+      });
+
+      const firstUpdate = await doAutoReplace(upgrade, content, false);
+      Object.assign(upgrade, baseDeps[1], { depIndex: 1, newValue: '1.200.0' });
+      const secondUpdate = await doAutoReplace(
+        upgrade,
+        firstUpdate!,
+        false,
+        false,
+      );
+
+      expect(secondUpdate).toBe(codeBlock`
+        [libraries]
+        first = "org.example:first:1.100.0"
+        second = { module = "org.example:second", version = "1.200.0" } # Keep 1.0.0
+      `);
     });
 
     it('updates only digest', async () => {
