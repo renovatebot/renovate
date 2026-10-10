@@ -18,7 +18,6 @@ export type PrAutomergeBlockReason =
   | 'Conflicted'
   | 'DryRun'
   | 'InMergeQueue'
-  | 'MergePending'
   | 'PlatformNotReady'
   | 'PlatformRejection'
   | 'off schedule';
@@ -29,36 +28,11 @@ export interface AutomergePrResult {
   prAutomergeBlockReason?: PrAutomergeBlockReason;
 }
 
-// The PR whose merge the platform has not finished yet in this repository run
-let pendingMergePr: number | undefined;
-
-export function resetPendingMerge(): void {
-  pendingMergePr = undefined;
-}
-
-/**
- * Returns the PR whose merge the platform has not finished yet in this
- * repository run. Further automerges are skipped until the next run, because
- * the base branch is about to change.
- */
-export function getPendingMergePr(): number | undefined {
-  return pendingMergePr;
-}
-
 export async function checkAutoMerge(
   pr: Pr,
   config: BranchConfig,
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
-  if (pendingMergePr !== undefined) {
-    logger.debug(
-      `Skipping automerge of PR #${pr.number} because the merge of PR #${pendingMergePr} is still pending`,
-    );
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'MergePending',
-    };
-  }
   const {
     branchName,
     baseBranch,
@@ -176,58 +150,36 @@ export async function checkAutoMerge(
     id: pr.number,
     strategy: automergeStrategy,
   });
-  if (res === 'pending') {
-    pendingMergePr = pr.number;
-    logger.info(
-      { pr: pr.number, prTitle: pr.title },
-      'PR merge requested, the platform merges it in the background',
-    );
-    return { automerged: false, prAutomergeBlockReason: 'MergePending' };
-  }
-  if (res === 'enqueued') {
-    logger.info(
-      { pr: pr.number, prTitle: pr.title },
-      'PR added to the merge queue',
-    );
-    // The PR is not merged yet and the base branch is unchanged, so this is
-    // not reported as automerged. Deleting the branch would close the PR and
-    // drop the merge queue entry.
-    return {
-      automerged: false,
-      prAutomergeBlockReason: 'InMergeQueue',
-    };
-  }
   if (res) {
+    if (mergeQueueEnabled) {
+      logger.info(
+        { pr: pr.number, prTitle: pr.title },
+        'PR added to the merge queue',
+      );
+      // The PR is not merged yet and the base branch is unchanged, so this is
+      // not reported as automerged. Deleting the branch would close the PR
+      // and drop the merge queue entry.
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      };
+    }
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
-    const branchRemoved = await pruneAutomergedBranch(
-      branchName,
-      pruneBranchAfterAutomerge,
-    );
+    if (!pruneBranchAfterAutomerge) {
+      logger.info('Skipping pruning of merged branch');
+      return { automerged: true, branchRemoved: false };
+    }
+    let branchRemoved = false;
+    try {
+      await scm.deleteBranch(branchName);
+      branchRemoved = true;
+    } catch (err) /* istanbul ignore next */ {
+      logger.warn({ branchName, err }, 'Branch auto-remove failed');
+    }
     return { automerged: true, branchRemoved };
   }
   return {
     automerged: false,
     prAutomergeBlockReason: 'PlatformRejection',
   };
-}
-
-/**
- * Deletes the branch of an automerged PR if `pruneBranchAfterAutomerge` is
- * set. Returns whether the branch was deleted.
- */
-export async function pruneAutomergedBranch(
-  branchName: string,
-  pruneBranchAfterAutomerge: boolean | undefined,
-): Promise<boolean> {
-  if (!pruneBranchAfterAutomerge) {
-    logger.info('Skipping pruning of merged branch');
-    return false;
-  }
-  try {
-    await scm.deleteBranch(branchName);
-    return true;
-  } catch (err) {
-    logger.warn({ branchName, err }, 'Branch auto-remove failed');
-    return false;
-  }
 }

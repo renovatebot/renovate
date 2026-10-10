@@ -90,13 +90,11 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
-export const prMergeStatusQuery = `
+export const prViewerCanMergeAsAdminQuery = `
 query($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
-      isInMergeQueue
       viewerCanMergeAsAdmin
-      mergeStateStatus
     }
   }
 }

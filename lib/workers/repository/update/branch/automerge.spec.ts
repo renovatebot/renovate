@@ -3,7 +3,6 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as schedule from '../branch/schedule.ts';
-import * as prAutomerge from '../pr/automerge.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 
 describe('workers/repository/update/branch/automerge', () => {
@@ -122,21 +121,6 @@ describe('workers/repository/update/branch/automerge', () => {
 
       expect(res).toBe('automerged');
       expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith('test-branch');
-    });
-
-    it('skips the merge while the merge of a PR is still pending', async () => {
-      config.automerge = true;
-      config.automergeType = 'branch';
-      platform.getBranchStatus.mockResolvedValueOnce('green');
-      vi.spyOn(prAutomerge, 'getPendingMergePr').mockReturnValueOnce(5);
-
-      const res = await tryBranchAutomerge(config);
-
-      expect(res).toBe('not ready');
-      expect(scm.mergeAndPush).not.toHaveBeenCalled();
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Skipping branch automerge because the merge of PR #5 is still pending',
-      );
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {

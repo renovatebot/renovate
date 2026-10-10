@@ -113,6 +113,7 @@ export interface PlatformConfig {
   existingRepos?: string[];
   userDetails?: UserDetails;
   userEmail?: EmailAddress | null;
+  /** `false` once the async merge endpoint turned out to be missing */
   asyncMergeSupported?: boolean;
 }
 
@@ -137,10 +138,7 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
-  mergeMethods: ('rebase' | 'squash' | 'merge')[];
-  /** `null` if the merge queue state could not be fetched */
-  mergeQueueEnabled: Record<string, boolean | null>;
-  prMergeStatus: Record<number, PrMergeStatus>;
+  mergeQueueEnabled: Record<string, boolean>;
 }
 
 export interface GhRepo {
@@ -191,22 +189,4 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
-}
-
-export interface PrMergeStatus {
-  isInMergeQueue: boolean;
-  viewerCanMergeAsAdmin: boolean;
-  mergeStateStatus: string;
-}
-
-/** An async merge request Renovate sent for a PR */
-export interface MergeRequestRecord {
-  /** Missing if GitHub refused the request without a result to look up */
-  uuid?: string;
-  /** ISO timestamp */
-  requestedAt: string;
-  mergeAction: string;
-  mergeMethod?: string;
-  /** The reason GitHub gave for refusing the merge */
-  failure?: string;
 }

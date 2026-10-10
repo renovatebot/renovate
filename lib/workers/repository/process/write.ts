@@ -20,7 +20,6 @@ import type {
   UpgradeFingerprintConfig,
 } from '../../types.ts';
 import { processBranch } from '../update/branch/index.ts';
-import { resetPendingMerge } from '../update/pr/automerge.ts';
 import { upgradeFingerprintFields } from './fingerprint-fields.ts';
 import {
   getCommitsHourlyCount,
@@ -28,7 +27,6 @@ import {
   getConcurrentPrsCount,
   getPrHourlyCount,
 } from './limits.ts';
-import { reconcileRequestedMerges } from './merge-results.ts';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -142,7 +140,6 @@ export async function writeUpdates(
   config: RenovateConfig,
   allBranches: BranchConfig[],
 ): Promise<WriteUpdateResult> {
-  resetPendingMerge();
   const branches = allBranches;
   logger.debug(
     `Processing ${branches.length} branch${
@@ -240,11 +237,9 @@ export async function writeUpdates(
     );
 
     if (res !== undefined) {
-      await reconcileRequestedMerges(branches);
       return res;
     }
   }
   removeMeta(['branch', 'baseBranch']);
-  await reconcileRequestedMerges(branches);
   return 'done';
 }
