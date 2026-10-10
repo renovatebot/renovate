@@ -372,4 +372,19 @@ describe('config/presets/internal/workarounds', () => {
       });
     });
   });
+
+  describe('helmDocs', () => {
+    const preset = presets.helmDocs;
+
+    const allowedVersions = preset.packageRules![0].allowedVersions!;
+    it.each`
+      input        | expected
+      ${'19.0614'} | ${false}
+      ${'19.0110'} | ${false}
+      ${'v0.1.0'}  | ${true}
+      ${'v1.13.1'} | ${true}
+    `('allowedVersisons("$input") == "$expected"', ({ input, expected }) => {
+      expect(matchRegexOrGlob(input, allowedVersions)).toEqual(expected);
+    });
+  });
 });

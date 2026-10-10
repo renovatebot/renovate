@@ -24,6 +24,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
       'workarounds:groupings',
+      'workarounds:helmDocs',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -146,6 +147,16 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['@commander-js/extra-typings', 'commander'],
         matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  helmDocs: {
+    description: 'Block helm-docs calver-like versions from 2019',
+    packageRules: [
+      {
+        allowedVersions: '!/^19\\.(0614|0110)$/',
+        matchManagers: ['pre-commit'],
+        matchPackageNames: ['norwoodj/helm-docs'],
       },
     ],
   },
