@@ -31,6 +31,7 @@ import {
   PRESET_INVALID,
   PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
+  PRESET_PATH_TRAVERSAL,
   PRESET_PROHIBITED_SUBPRESET,
   PRESET_RELATIVE_NO_PARENT,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
@@ -417,6 +418,8 @@ async function fetchPreset(
       error.validationError = `Preset name not found within published preset config (${preset})`;
     } else if (err.message === PRESET_INVALID) {
       error.validationError = `Preset is invalid (${preset})`;
+    } else if (err.message === PRESET_PATH_TRAVERSAL) {
+      error.validationError = `Preset repository, path or tag contains a disallowed "." or ".." segment (${preset})`;
     } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
       error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
     } else if (err.message === PRESET_INVALID_JSON) {
