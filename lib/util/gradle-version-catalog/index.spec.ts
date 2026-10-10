@@ -2,6 +2,24 @@ import { codeBlock } from 'common-tags';
 import { parseCatalog } from './index.ts';
 
 describe('util/gradle-version-catalog/index', () => {
+  it.each`
+    declaration
+    ${'demo = "org.example:demo:1.0.0:classifier"'}
+    ${'demo = { module = "org.example:demo", version = "\\u0031.0.0" }'}
+    ${'demo = { module = "org.example:demo", version = "1.{{ minor }}0.0" }'}
+    ${'demo = { module = "org.example:demo", version = { strictly = "\\u0031.0.0" } }'}
+    ${'demo = { module = "org.example:demo", version = { strictly = 1 } }'}
+  `(
+    'skips versions without an editable literal: $declaration',
+    ({ declaration }) => {
+      const input = `[libraries]\n${declaration}`;
+
+      const { deps } = parseCatalog('libs.versions.toml', input);
+
+      expect(deps).toMatchObject([{ skipReason: 'unsupported-version' }]);
+    },
+  );
+
   it('supports versions declared as single string', () => {
     const input = codeBlock`
       [versions]

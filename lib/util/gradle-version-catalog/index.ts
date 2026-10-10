@@ -1,10 +1,11 @@
 import { isPlainObject, isString } from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
+import { type AST, getStaticTOMLValue } from 'toml-eslint-parser';
 import type { PackageDependency } from '../../modules/manager/types.ts';
 import type { SkipReason } from '../../types/index.ts';
 import { coerceObject, hasKey } from '../object.ts';
 import { regEx } from '../regex.ts';
-import { massage, parse as parseToml } from '../toml.ts';
+import { massageWithSourceMap, parseTOMLDocument } from '../toml.ts';
 import type {
   GradleCatalog,
   GradleCatalogArtifactDescriptor,
@@ -16,33 +17,29 @@ import type {
   VersionPointer,
 } from './types.ts';
 
-function findVersionIndex(
-  content: string,
-  depName: string,
-  version: string,
-): number {
-  const eDn = RegExp.escape(depName);
-  const eVer = RegExp.escape(version);
-  const re = regEx(
-    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`,
-  );
-  const match = re.exec(content);
-  // v8 ignore else -- the fallback below is already marked unreachable
-  if (match) {
-    return match.index + content.slice(match.index).indexOf(version);
-  }
-  // ignoring Fallback because I can't reach it in tests, and code is not supposed to reach it but just in case.
-  /* istanbul ignore next */
-  return findIndexAfter(content, depName, version);
+interface CatalogContext {
+  versions: Record<string, GradleVersionPointerTarget>;
+  getPosition: (path: string[], version: string) => number | undefined;
 }
 
-function findIndexAfter(
-  content: string,
-  sliceAfter: string,
-  find: string,
-): number {
-  const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
-  return slicePoint + content.slice(slicePoint).indexOf(find);
+function collectStringNodes(
+  entries: (AST.TOMLKeyValue | AST.TOMLTable)[],
+  path: string[],
+  nodes: Map<string, AST.TOMLStringValue>,
+): void {
+  for (const entry of entries) {
+    if (entry.type === 'TOMLTable') {
+      collectStringNodes(entry.body, entry.resolvedKey.map(String), nodes);
+    } else {
+      const key = [...path, ...getStaticTOMLValue(entry.key)];
+      const { value } = entry;
+      if (value.type === 'TOMLInlineTable') {
+        collectStringNodes(value.body, key, nodes);
+      } else if (value.type === 'TOMLValue' && value.kind === 'string') {
+        nodes.set(JSON.stringify(key), value);
+      }
+    }
+  }
 }
 
 function isArtifactDescriptor(
@@ -81,57 +78,35 @@ interface VersionExtract {
   skipReason?: SkipReason;
 }
 
-function extractVersion({
-  version,
-  versions,
-  depStartIndex,
-  depSubContent,
-  depName,
-  versionStartIndex,
-  versionSubContent,
-}: {
-  version: GradleVersionCatalogVersion | undefined;
-  versions: Record<string, GradleVersionPointerTarget>;
-  depStartIndex: number;
-  depSubContent: string;
-  depName: string;
-  versionStartIndex: number;
-  versionSubContent: string;
-}): VersionExtract {
+function extractVersion(
+  version: GradleVersionCatalogVersion | undefined,
+  path: string[],
+  context: CatalogContext,
+): VersionExtract {
   if (isVersionPointer(version)) {
-    const originalAlias = findOriginalAlias(versions, version.ref);
-    return extractLiteralVersion({
-      version: versions[originalAlias],
-      depStartIndex: versionStartIndex,
-      depSubContent: versionSubContent,
-      sectionKey: originalAlias,
-    });
+    const originalAlias = findOriginalAlias(context.versions, version.ref);
+    return extractLiteralVersion(
+      context.versions[originalAlias],
+      ['versions', originalAlias],
+      context,
+    );
   }
-  return extractLiteralVersion({
-    version,
-    depStartIndex,
-    depSubContent,
-    sectionKey: depName,
-  });
+  return extractLiteralVersion(version, path, context);
 }
 
-function extractLiteralVersion({
-  version,
-  depStartIndex,
-  depSubContent,
-  sectionKey,
-}: {
-  version: GradleVersionPointerTarget | undefined;
-  depStartIndex: number;
-  depSubContent: string;
-  sectionKey: string;
-}): VersionExtract {
+function extractLiteralVersion(
+  version: GradleVersionPointerTarget | undefined,
+  path: string[],
+  context: CatalogContext,
+): VersionExtract {
   if (!version) {
     return { skipReason: 'unspecified-version' };
   }
   if (isString(version)) {
-    const fileReplacePosition =
-      depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
+    const fileReplacePosition = context.getPosition(path, version);
+    if (fileReplacePosition === undefined) {
+      return { skipReason: 'unsupported-version' };
+    }
     return { currentValue: version, fileReplacePosition };
   }
   // v8 ignore else -- a version is either a string, handled above, or a table
@@ -157,13 +132,14 @@ function extractLiteralVersion({
         found = true;
 
         currentValue = version[key] as string;
-        fileReplacePosition =
-          depStartIndex +
-          findIndexAfter(depSubContent, sectionKey, currentValue);
+        fileReplacePosition = context.getPosition([...path, key], currentValue);
       }
     }
 
     if (found) {
+      if (fileReplacePosition === undefined) {
+        return { skipReason: 'unsupported-version' };
+      }
       return { currentValue, fileReplacePosition };
     }
   }
@@ -173,21 +149,13 @@ function extractLiteralVersion({
 
 function extractDependency({
   descriptor,
-  versions,
-  depStartIndex,
-  depSubContent,
   depName,
-  versionStartIndex,
-  versionSubContent,
+  context,
 }: {
   descriptor:
     string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
-  versions: Record<string, GradleVersionPointerTarget>;
-  depStartIndex: number;
-  depSubContent: string;
   depName: string;
-  versionStartIndex: number;
-  versionSubContent: string;
+  context: CatalogContext;
 }): PackageDependency<VersionCatalogManagerData> {
   if (isString(descriptor)) {
     const [group, name, currentValue] = descriptor.split(':');
@@ -197,25 +165,23 @@ function extractDependency({
         skipReason: 'unspecified-version',
       };
     }
+    const { fileReplacePosition, ...extracted } = extractLiteralVersion(
+      currentValue,
+      ['libraries', depName],
+      context,
+    );
     return {
       depName: `${group}:${name}`,
-      currentValue,
-      managerData: {
-        fileReplacePosition:
-          depStartIndex + findIndexAfter(depSubContent, depName, currentValue),
-      },
+      ...extracted,
+      managerData: { fileReplacePosition },
     };
   }
 
-  const { currentValue, fileReplacePosition, skipReason } = extractVersion({
-    version: descriptor.version,
-    versions,
-    depStartIndex,
-    depSubContent,
-    depName,
-    versionStartIndex,
-    versionSubContent,
-  });
+  const { currentValue, fileReplacePosition, skipReason } = extractVersion(
+    descriptor.version,
+    ['libraries', depName, 'version'],
+    context,
+  );
 
   if (skipReason) {
     return {
@@ -251,23 +217,49 @@ export function parseCatalog(
   vars: VersionCatalogVariables;
   deps: PackageDependency<VersionCatalogManagerData>[];
 } {
-  const tomlContent = parseToml(massage(content)) as GradleCatalog;
+  const { content: massaged, toOriginalOffset } = massageWithSourceMap(content);
+  const document = parseTOMLDocument(massaged);
+  const tomlContent = getStaticTOMLValue(document) as GradleCatalog;
+  const nodes = new Map<string, AST.TOMLStringValue>();
+  collectStringNodes(document.body[0].body, [], nodes);
   const versions = coerceObject(tomlContent.versions);
   const libs = coerceObject(tomlContent.libraries);
-  const libStartIndex = content.indexOf('libraries');
-  const libSubContent = content.slice(libStartIndex);
-  const versionStartIndex = content.indexOf('versions');
-  const versionSubContent = content.slice(versionStartIndex);
+  const context: CatalogContext = {
+    versions,
+    getPosition(path, version) {
+      const node = nodes.get(JSON.stringify(path));
+      if (!node) {
+        return undefined;
+      }
+      const closingQuotes = node.multiline ? 3 : 1;
+      const rawValue = massaged.slice(
+        node.range[0] + closingQuotes,
+        node.range[1] - closingQuotes,
+      );
+      const literalValue = node.multiline
+        ? rawValue.replace(regEx(/^\r?\n/), '')
+        : rawValue;
+      if (literalValue !== node.value || !node.value.endsWith(version)) {
+        return undefined;
+      }
+      const offset = toOriginalOffset(
+        node.range[1] - closingQuotes - version.length,
+      );
+      if (content.slice(offset, offset + version.length) !== version) {
+        return undefined;
+      }
+      return offset;
+    },
+  };
   const extractedDeps: PackageDependency<VersionCatalogManagerData>[] = [];
   const vars: VersionCatalogVariables = {};
 
   for (const [key, version] of Object.entries(versions)) {
-    const { currentValue, fileReplacePosition } = extractLiteralVersion({
+    const { currentValue, fileReplacePosition } = extractLiteralVersion(
       version,
-      depStartIndex: versionStartIndex,
-      depSubContent: versionSubContent,
-      sectionKey: key,
-    });
+      ['versions', key],
+      context,
+    );
     if (currentValue && fileReplacePosition !== undefined) {
       vars[normalizeAlias(key)] = {
         key: normalizeAlias(key),
@@ -282,33 +274,27 @@ export function parseCatalog(
     const libDescriptor = libs[libraryName];
     const dependency = extractDependency({
       descriptor: libDescriptor,
-      versions,
-      depStartIndex: libStartIndex,
-      depSubContent: libSubContent,
       depName: libraryName,
-      versionStartIndex,
-      versionSubContent,
+      context,
     });
     extractedDeps.push(dependency);
   }
 
   const plugins = coerceObject(tomlContent.plugins);
-  const pluginsStartIndex = content.indexOf('[plugins]');
-  const pluginsSubContent = content.slice(pluginsStartIndex);
   for (const pluginName of Object.keys(plugins)) {
     const pluginDescriptor = plugins[pluginName];
     const [depName, version] = isString(pluginDescriptor)
       ? pluginDescriptor.split(':')
       : [pluginDescriptor.id, pluginDescriptor.version];
-    const { currentValue, fileReplacePosition, skipReason } = extractVersion({
+    const path = ['plugins', pluginName];
+    if (!isString(pluginDescriptor)) {
+      path.push('version');
+    }
+    const { currentValue, fileReplacePosition, skipReason } = extractVersion(
       version,
-      versions,
-      depStartIndex: pluginsStartIndex,
-      depSubContent: pluginsSubContent,
-      depName,
-      versionStartIndex,
-      versionSubContent,
-    });
+      path,
+      context,
+    );
 
     const dependency: PackageDependency<VersionCatalogManagerData> = {
       depType: 'plugin',
