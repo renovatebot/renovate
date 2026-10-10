@@ -40,10 +40,12 @@ export abstract class GitHostTagsDatasource<
   /**
    * Whether the lookups against `registryUrl`, as returned by
    * {@link GitHostTagsDatasource.getRegistryUrl}, may be stored in the package
-   * cache.
+   * cache. They may read a private repository, so they are cached only for a
+   * registry which a subclass knows to be public, or with
+   * `cachePrivatePackages`.
    */
   protected isCacheable(_registryUrl: string): boolean {
-    return true;
+    return false;
   }
 
   protected getCacheKey(
