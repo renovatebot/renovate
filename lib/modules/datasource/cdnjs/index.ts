@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
@@ -71,7 +72,7 @@ export class CdnjsDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
-        key: `getReleases:${library}`,
+        key: buildCacheKey('getReleases', library),
         cacheable: true,
         fallback: true,
       },
@@ -106,7 +107,12 @@ export class CdnjsDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
-        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
         cacheable: true,
         fallback: true,
       },

@@ -1,6 +1,7 @@
 import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import * as memCache from './cache/memory/index.ts';
+import { buildCacheKey } from './cache/package/key.ts';
 import { detectPlatform } from './common.ts';
 import { toSha256 } from './hash.ts';
 import {
@@ -35,7 +36,7 @@ export function matchRegexOrGlob(input: unknown, patterns: unknown): boolean {
 }
 
 export function getExpression(input: string): JsonataExpression | Error {
-  const cacheKey = `jsonata:${toSha256(input)}`;
+  const cacheKey = buildCacheKey('jsonata', toSha256(input));
   const cachedExpression = memCache.get<jsonata.Expression | Error>(cacheKey);
   // istanbul ignore if: cannot test
   if (cachedExpression) {

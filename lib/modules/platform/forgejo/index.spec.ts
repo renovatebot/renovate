@@ -1309,7 +1309,7 @@ describe('modules/platform/forgejo/index', () => {
       const res1 = await forgejo.getPrList();
       expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
-      memCache.set('forgejo-pr-cache-synced', false);
+      memCache.set('forgejo:pr-cache-synced', false);
 
       const res2 = await forgejo.getPrList();
       expect(res2).toMatchObject([
@@ -1604,7 +1604,7 @@ describe('modules/platform/forgejo/index', () => {
   describe('createPr', () => {
     beforeEach(() => {
       vi.restoreAllMocks();
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
     });
 
     const mockNewPR: MockPr = {
@@ -1936,7 +1936,7 @@ describe('modules/platform/forgejo/index', () => {
     });
 
     it('continues if platform automerge is not supported', async () => {
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')

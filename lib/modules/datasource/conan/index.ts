@@ -1,5 +1,6 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -91,8 +92,12 @@ export class ConanDatasource extends Datasource {
   ): Promise<string | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `getDigest:${config.registryUrl!}:${config.packageName}:${newValue!}`,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
         fallback: true,
       },
       () => this.fetchDigest(config, newValue),
@@ -203,8 +208,11 @@ export class ConanDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this.fetchReleases(config),

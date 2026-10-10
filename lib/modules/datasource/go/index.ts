@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getEnv } from '../../../util/env.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -43,7 +44,7 @@ export class GoDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${getReleasesCacheKey(config)}`,
+        key: getReleasesCacheKey(config),
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
@@ -99,7 +100,7 @@ export class GoDatasource extends Datasource {
   ): Promise<string | null> {
     return this.cached(
       {
-        key: `getDigest:${config.packageName}:${newValue}`,
+        key: buildCacheKey('getDigest', config.packageName, newValue),
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },

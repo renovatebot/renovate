@@ -6,6 +6,7 @@ import {
 import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -555,16 +556,24 @@ export function getReleasesCacheKey({
   const goproxy = getEnv().GOPROXY;
   const noproxy = parseNoproxy();
   const constraintsFilteringKey =
-    constraintsFiltering && constraintsFiltering !== 'none'
-      ? `@@${constraintsFiltering}`
-      : '';
-  // TODO: types (#22198)
-  return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
+    constraintsFiltering === 'none' ? '' : constraintsFiltering;
+  return buildCacheKey(
+    'getReleases',
+    packageName,
+    goproxy,
+    noproxy?.toString(),
+    constraintsFilteringKey,
+  );
 }
 
 function getVersionedCacheKey(packageName: string, version: string): string {
   const goproxy = getEnv().GOPROXY;
   const noproxy = parseNoproxy();
-  // TODO: types (#22198)
-  return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
+  return buildCacheKey(
+    'goDirective',
+    packageName,
+    version,
+    goproxy,
+    noproxy?.toString(),
+  );
 }

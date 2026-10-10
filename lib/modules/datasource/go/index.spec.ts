@@ -327,6 +327,30 @@ describe('modules/datasource/go/index', () => {
       expect(setCache).toHaveBeenCalledOnce();
     });
 
+    it.each`
+      constraintsFiltering | suffix
+      ${undefined}         | ${''}
+      ${'none'}            | ${''}
+      ${'strict'}          | ${'strict'}
+    `(
+      'keys releases by GOPROXY, GONOPROXY and constraintsFiltering=$constraintsFiltering',
+      async ({ constraintsFiltering, suffix }) => {
+        vi.stubEnv('GOPROXY', publicProxyUrl);
+
+        await datasource.getReleases({
+          packageName: 'golang.org/foo/bar',
+          constraintsFiltering,
+        });
+
+        expect(setCache).toHaveBeenCalledExactlyOnceWith(
+          'datasource-go',
+          `cache-decorator:getReleases:golang.org/foo/bar:${publicProxyUrl}::${suffix}`,
+          expect.anything(),
+          expect.any(Number),
+        );
+      },
+    );
+
     it('does not cache releases for modules matching GOPRIVATE', async () => {
       vi.stubEnv('GOPRIVATE', 'golang.org/foo/*');
 
