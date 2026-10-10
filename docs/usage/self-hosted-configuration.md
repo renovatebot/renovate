@@ -1571,7 +1571,7 @@ GCS backed caches use the [Google Cloud Storage Node.js Client](https://www.npmj
 Credentials come from [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials), such as Workload Identity Federation, an attached service account, or the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 Read more about the [Google Auth Library](https://www.npmjs.com/package/google-auth-library).
 
-If Renovate cannot resolve credentials, it logs a warning and skips writes to the remote repository cache.
+If Renovate cannot resolve credentials, it logs a warning and skips the remote repository cache.
 
 !!! tip
   If you're storing the repository cache on Amazon S3 or Google Cloud Storage then you may set a folder hierarchy as part of `repositoryCacheType`.

@@ -1,6 +1,7 @@
 import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import { getGCSClient } from '../../../gcs.ts';
 import type { RepoCacheRecord } from '../schema.ts';
 import { CacheFactory } from './cache-factory.ts';
 import { RepoCacheGCS } from './gcs.ts';
@@ -18,7 +19,7 @@ vi.mock('../../../gcs.ts', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../../gcs.ts')>();
   return {
     ...actual,
-    getGCSClient: vi.fn(() => gcsMock.gcsClient),
+    getGCSClient: vi.fn(() => Promise.resolve(gcsMock.gcsClient)),
   };
 });
 
@@ -60,6 +61,16 @@ describe('util/cache/repository/impl/gcs', () => {
     );
   });
 
+  it('returns null and warns when the GCS client cannot be created on read', async () => {
+    vi.mocked(getGCSClient).mockRejectedValueOnce(err);
+
+    await expect(gcsCache.read()).resolves.toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err },
+      'RepoCacheGCS.read() - failure',
+    );
+  });
+
   it('successfully writes to gcs', async () => {
     await gcsCache.write(repoCache);
 
@@ -81,11 +92,30 @@ describe('util/cache/repository/impl/gcs', () => {
     );
   });
 
-  it('uses the folder prefix from the url', () => {
+  it('warns when the GCS client cannot be created on write', async () => {
+    vi.mocked(getGCSClient).mockRejectedValueOnce(err);
+
+    await expect(gcsCache.write(repoCache)).toResolve();
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err },
+      'RepoCacheGCS.write() - failure',
+    );
+  });
+
+  it('uses the folder prefix from the url', async () => {
+    gcsMock.fileApi.download.mockResolvedValue([Buffer.from('data')]);
+
+    await gcsCache.read();
+
     expect(gcsMock.bucket).toHaveBeenCalledWith('bucket-name');
     expect(gcsMock.file).toHaveBeenLastCalledWith('github/org/repo/cache.json');
 
-    new RepoCacheGCS(repository, '0123456789abcdef', 'gs://bucket-name/dir/');
+    const folderCache = new RepoCacheGCS(
+      repository,
+      '0123456789abcdef',
+      'gs://bucket-name/dir/',
+    );
+    await folderCache.read();
 
     expect(gcsMock.file).toHaveBeenLastCalledWith(
       'dir/github/org/repo/cache.json',
@@ -93,13 +123,21 @@ describe('util/cache/repository/impl/gcs', () => {
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
-  it('warns and appends a missing trailing slash', () => {
-    new RepoCacheGCS(repository, '0123456789abcdef', 'gs://bucket-name/dir');
+  it('warns and appends a missing trailing slash', async () => {
+    const cache = new RepoCacheGCS(
+      repository,
+      '0123456789abcdef',
+      'gs://bucket-name/dir',
+    );
 
     expect(logger.warn).toHaveBeenCalledWith(
       { pathname: 'dir' },
       'RepoCacheGCS.getCacheFolder() - appending missing trailing slash to pathname',
     );
+
+    gcsMock.fileApi.download.mockResolvedValue([Buffer.from('data')]);
+    await cache.read();
+
     expect(gcsMock.file).toHaveBeenLastCalledWith(
       'dir/github/org/repo/cache.json',
     );
@@ -177,6 +215,19 @@ describe('util/cache/repository/impl/gcs', () => {
       );
     },
   );
+
+  it('does not load the GCS client until first use', async () => {
+    const getGCSClientMock = vi.mocked(getGCSClient);
+
+    const cache = new RepoCacheGCS(repository, '0123456789abcdef', url);
+
+    expect(getGCSClientMock).not.toHaveBeenCalled();
+
+    gcsMock.fileApi.download.mockResolvedValue([Buffer.from('data')]);
+    await cache.read();
+
+    expect(getGCSClientMock).toHaveBeenCalledOnce();
+  });
 
   it.each`
     cacheType

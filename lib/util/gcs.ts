@@ -1,11 +1,14 @@
-import { Storage } from '@google-cloud/storage';
+import type { Storage } from '@google-cloud/storage';
 import { isString } from '@sindresorhus/is';
 import { parseUrl } from './url.ts';
 
 let gcsInstance: Storage | undefined;
 
-export function getGCSClient(): Storage {
-  gcsInstance ??= new Storage();
+export async function getGCSClient(): Promise<Storage> {
+  if (!gcsInstance) {
+    const { Storage: GCSStorage } = await import('@google-cloud/storage');
+    gcsInstance ??= new GCSStorage();
+  }
   return gcsInstance;
 }
 

@@ -8,7 +8,8 @@ import type { RepoCacheRecord } from '../schema.ts';
 import { RepoCacheBase } from './base.ts';
 
 export class RepoCacheGCS extends RepoCacheBase {
-  private readonly cacheFile?: GCSFile;
+  private readonly bucket?: string;
+  private readonly objectPath: string;
 
   constructor(repository: string, fingerprint: string, url: string) {
     super(repository, fingerprint);
@@ -16,22 +17,31 @@ export class RepoCacheGCS extends RepoCacheBase {
     const parts = parseGCSUrl(url);
     if (!parts?.bucket) {
       logger.warn({ url }, 'RepoCacheGCS() - invalid GCS URL');
+      this.objectPath = '';
       return;
     }
 
-    const dir = this.getCacheFolder(parts.pathname);
-    this.cacheFile = getGCSClient()
-      .bucket(parts.bucket)
-      .file(`${dir}${this.platform}/${this.repository}/cache.json`);
+    this.bucket = parts.bucket;
+    this.objectPath = `${this.getCacheFolder(parts.pathname)}${this.platform}/${this.repository}/cache.json`;
+  }
+
+  private async getCacheFile(): Promise<GCSFile | undefined> {
+    if (!this.bucket) {
+      return undefined;
+    }
+
+    const client = await getGCSClient();
+    return client.bucket(this.bucket).file(this.objectPath);
   }
 
   async read(): Promise<string | null> {
-    if (!this.cacheFile) {
-      return null;
-    }
-
     try {
-      const [res] = await this.cacheFile.download();
+      const cacheFile = await this.getCacheFile();
+      if (!cacheFile) {
+        return null;
+      }
+
+      const [res] = await cacheFile.download();
       logger.debug('RepoCacheGCS.read() - success');
       return res.toString('utf8');
     } catch (err) {
@@ -46,14 +56,15 @@ export class RepoCacheGCS extends RepoCacheBase {
   }
 
   async write(data: RepoCacheRecord): Promise<void> {
-    if (!this.cacheFile) {
-      logger.warn('RepoCacheGCS.write() - invalid GCS URL');
-      return;
-    }
-
     const stringifiedCache = JSON.stringify(data);
     try {
-      await this.cacheFile.save(stringifiedCache, {
+      const cacheFile = await this.getCacheFile();
+      if (!cacheFile) {
+        logger.warn('RepoCacheGCS.write() - invalid GCS URL');
+        return;
+      }
+
+      await cacheFile.save(stringifiedCache, {
         contentType: 'application/json',
         resumable: false,
       });
