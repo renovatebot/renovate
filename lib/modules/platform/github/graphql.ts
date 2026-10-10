@@ -90,6 +90,16 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
+export const prViewerCanMergeAsAdminQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      viewerCanMergeAsAdmin
+    }
+  }
+}
+`;
+
 export const enqueuePullRequestMutation = `
 mutation EnqueuePullRequest(
   $pullRequestId: ID!,

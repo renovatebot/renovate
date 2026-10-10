@@ -90,6 +90,7 @@ import {
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import {
+  asyncMergePr,
   isPrInMergeQueue as checkPrInMergeQueue,
   getPrCache,
   updatePrCache,
@@ -2210,6 +2211,13 @@ async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
   }
 }
 
+function cacheMergedPrFromList(prNo: number): void {
+  const cachedPr = config.prList?.find(({ number }) => number === prNo);
+  if (cachedPr) {
+    cachePr({ ...cachedPr, state: 'merged' });
+  }
+}
+
 export async function mergePr({
   branchName,
   id: prNo,
@@ -2218,6 +2226,28 @@ export async function mergePr({
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   const pr = await getPr(prNo);
+  if (platformConfig.asyncMergeSupported !== false) {
+    let queueEnabled = false;
+    if (pr?.targetBranch) {
+      queueEnabled = await isBranchMergeQueueEnabled(pr.targetBranch);
+    }
+    const merged = await asyncMergePr(githubApi, {
+      repository: config.parentRepo ?? config.repository!,
+      owner: config.repositoryOwner,
+      name: config.repositoryName,
+      token: config.forkToken,
+      mergeMethod: config.mergeMethod,
+      prNo,
+      strategy,
+      queueEnabled,
+      isGhes: isGithubEnterpriseServer(platformConfig.host),
+      cacheMergedPr: cacheMergedPrFromList,
+    });
+    if (merged !== 'unsupported') {
+      return merged;
+    }
+    platformConfig.asyncMergeSupported = false;
+  }
   if (await directMergePr(prNo, strategy)) {
     return true;
   }

@@ -183,3 +183,16 @@ const GithubRestIssue = GithubIssueBase.extend({
 
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 export type GithubIssue = z.infer<typeof GithubIssue>;
+
+export const MergeAsyncResult = DeepNullish(
+  z.object({
+    status: z
+      .enum(['pending', 'merged', 'enqueued', 'failed', 'unknown'])
+      .catch('unknown'),
+    details: z.object({
+      message: z.string(),
+      uuid: z.string().optional(),
+    }),
+  }),
+);
+export type MergeAsyncResult = z.infer<typeof MergeAsyncResult>;

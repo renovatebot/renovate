@@ -123,6 +123,20 @@ The [GitHub App associated email](https://github.community/t/logging-into-git-as
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
 A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
+## Merging pull requests
+
+When Renovate merges a PR itself instead of using GitHub auto-merge, it uses the [asynchronous merge API](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request-asynchronously) of GitHub.
+GitHub completes the merge in the background, so Renovate checks the result once per second for up to 10 seconds.
+If GitHub refuses the merge, Renovate logs the reason GitHub gave.
+If the merge is still pending after 10 seconds, Renovate continues and the next run sees the merged PR.
+
+Renovate asks GitHub to bypass the rules that Renovate is permitted to bypass, like the classic merge endpoint does.
+If the base branch has a merge queue, Renovate checks whether it may bypass the merge queue (`viewerCanMergeAsAdmin` in the GraphQL API).
+If it may, Renovate merges the PR directly with the configured `automergeStrategy`.
+Otherwise Renovate adds the PR to the merge queue, which merges it with the merge method configured for the merge queue.
+
+GitHub Enterprise Server does not have the asynchronous merge API, so there Renovate uses the classic merge endpoint.
+
 ## Package Registry Credentials
 
 When Renovate runs against repositories on `github.com`, and the environment variable `RENOVATE_X_GITHUB_HOST_RULES` is set, then Renovate automatically provisions `hostRules` for these GitHub Packages registries using the platform token:
