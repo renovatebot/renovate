@@ -1,4 +1,5 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { DEFAULT_PACKAGE_CACHE_MEMORY_LIMIT } from '../../constants/cache.ts';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
@@ -647,6 +648,15 @@ const options: Readonly<RenovateOptions>[] = [
       'The directory where Renovate stores its cache. If left empty, Renovate creates a subdirectory within the `baseDir`.',
     globalOnly: true,
     type: 'string',
+  },
+  {
+    name: 'packageCacheMemoryLimit',
+    description:
+      'Estimated size limit in MiB for the in-memory package cache. Set to 0 to disable this layer.',
+    type: 'integer',
+    stage: 'global',
+    globalOnly: true,
+    default: DEFAULT_PACKAGE_CACHE_MEMORY_LIMIT,
   },
   {
     name: 'containerbaseDir',
