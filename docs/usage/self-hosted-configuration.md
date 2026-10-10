@@ -726,6 +726,9 @@ If set to a string value, Renovate will log warnings with the `encryptedWarning`
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+After a child process exits due to `SIGTERM`, Renovate waits up to one additional second for its final result.
+If a surviving helper keeps stdout or stderr open, Renovate closes its output streams and reports the command failure instead of waiting indefinitely.
+
 ## `exitCodeForErrors`
 
 Set `exitCodeForErrors` to `true` to exit with a code that says _which_ kind of error ended the repository run.
