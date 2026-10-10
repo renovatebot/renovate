@@ -4,7 +4,6 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
@@ -13,9 +12,13 @@ import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GoProxyDatasource, getTagPrefix } from './releases-goproxy.ts';
-
-const datasource = new GoProxyDatasource();
+import {
+  encodeCase,
+  getGoproxyReleases,
+  getTagPrefix,
+  listVersions,
+  versionInfo,
+} from './releases-goproxy.ts';
 
 describe('modules/datasource/go/releases-goproxy', () => {
   const githubGetReleases = vi.spyOn(
@@ -26,9 +29,9 @@ describe('modules/datasource/go/releases-goproxy', () => {
   const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
 
   it('encodeCase', () => {
-    expect(datasource.encodeCase('foo')).toBe('foo');
-    expect(datasource.encodeCase('Foo')).toBe('!foo');
-    expect(datasource.encodeCase('FOO')).toBe('!f!o!o');
+    expect(encodeCase('foo')).toBe('foo');
+    expect(encodeCase('Foo')).toBe('!foo');
+    expect(encodeCase('FOO')).toBe('!f!o!o');
   });
 
   it.each`
@@ -71,7 +74,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/github.com/go-kit/kit/@v/list')
         .reply(200, Fixtures.get('go-kit.list.txt'));
 
-      const versions = await datasource.listVersions(baseUrl, packageName);
+      const versions = await listVersions(baseUrl, packageName);
 
       expect(versions).not.toBeEmpty();
       expect(versions).toHaveLength(10);
@@ -83,11 +86,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/github.com/go-kit/kit/@v/v0.5.0.info')
         .reply(200, { Version: 'v0.5.0', Time: '2017-06-08T17:28:36Z' });
 
-      const release = await datasource.versionInfo(
-        baseUrl,
-        packageName,
-        'v0.5.0',
-      );
+      const release = await versionInfo(baseUrl, packageName, 'v0.5.0');
 
       expect(release).toEqual({
         version: 'v0.5.0',
@@ -120,7 +119,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
       githubGetReleases.mockResolvedValueOnce({ releases: [] });
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -146,7 +145,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
       githubGetReleases.mockResolvedValueOnce({ releases: [] });
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -179,7 +178,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -229,7 +228,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'k8s.io/api',
       });
 
@@ -275,7 +274,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/stretchr/testify',
       });
 
@@ -324,7 +323,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -362,7 +361,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
       });
 
@@ -398,7 +397,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/docker/docker',
       });
 
@@ -426,7 +425,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'bitbucket.org/library/go-lib',
       });
 
@@ -457,7 +456,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       githubQueryReleases.mockRejectedValueOnce(new Error('unknown'));
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -500,7 +499,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/kr/pretty',
       });
 
@@ -552,7 +551,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         },
       ]);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/stretchr/testify',
       });
 
@@ -582,7 +581,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       githubQueryTags.mockRejectedValueOnce(new Error('unknown'));
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -620,7 +619,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -665,7 +664,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .get('/v2/@v/list')
           .reply(404);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
@@ -699,7 +698,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -749,7 +748,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -790,7 +789,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .replyWithError('unknown');
 
       await expect(
-        datasource.getReleases({ packageName: 'github.com/foo/bar' }),
+        getGoproxyReleases({ packageName: 'github.com/foo/bar' }),
       ).rejects.toThrow(HttpError);
       expect(githubGetTags).not.toHaveBeenCalled();
       expect(githubGetReleases).not.toHaveBeenCalled();
@@ -820,7 +819,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
       githubGetReleases.mockResolvedValueOnce({ releases: [] });
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/foo/bar',
       });
 
@@ -850,7 +849,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@v/list')
         .reply(410);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/foo/bar',
       });
 
@@ -866,7 +865,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .reply(500);
 
       await expect(
-        datasource.getReleases({ packageName: 'github.com/google/btree' }),
+        getGoproxyReleases({ packageName: 'github.com/google/btree' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(githubGetTags).not.toHaveBeenCalled();
       expect(githubGetReleases).not.toHaveBeenCalled();
@@ -881,7 +880,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
 
       await expect(
-        datasource.getReleases({ packageName: 'github.com/google/btree' }),
+        getGoproxyReleases({ packageName: 'github.com/google/btree' }),
       ).rejects.toThrow(HttpError);
       expect(githubGetTags).not.toHaveBeenCalled();
       expect(githubGetReleases).not.toHaveBeenCalled();
@@ -905,7 +904,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('?go-get=1')
         .reply(500);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'custom.com/lib/btree',
       });
 
@@ -958,7 +957,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .get('/v3/@v/list')
           .reply(404);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
@@ -1007,7 +1006,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v3/@v/list')
         .reply(403);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -1049,7 +1048,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('.v4/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'gopkg.in/yaml.v2',
       });
 
@@ -1087,7 +1086,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('.v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'gopkg.in/foo.v0',
       });
 
@@ -1124,7 +1123,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('.v2/@v/list')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'gopkg.in/foo.v0',
       });
 
@@ -1149,7 +1148,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@latest')
         .reply(404);
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -1166,7 +1165,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/@latest')
         .reply(200, { Version: 'v0.0.0-20230905200255-921286631fa9' });
 
-      const res = await datasource.getReleases({
+      const res = await getGoproxyReleases({
         packageName: 'github.com/google/btree',
       });
 
@@ -1241,7 +1240,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://golang.org/x/mod').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'golang.org/x/mod',
           constraintsFiltering: 'strict',
         });
@@ -1354,7 +1353,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
         httpMock.scope('https://golang.org/x/mod').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'golang.org/x/mod',
           constraintsFiltering: 'strict',
         });
@@ -1428,7 +1427,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://golang.org/x/mod').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'golang.org/x/mod',
           constraintsFiltering: 'strict',
         });
@@ -1476,7 +1475,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://golang.org/x/mod').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'golang.org/x/mod',
           constraintsFiltering: 'strict',
         });
@@ -1528,7 +1527,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
             .get('?go-get=1')
             .reply(200);
 
-          const res = await datasource.getReleases({
+          const res = await getGoproxyReleases({
             packageName: 'golang.org/x/mod',
             constraintsFiltering: 'strict',
           });
@@ -1575,7 +1574,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://example.org/pkg').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'example.org/pkg',
           constraintsFiltering: 'strict',
         });
@@ -1624,7 +1623,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://example.org/pkg').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'example.org/pkg',
           constraintsFiltering: 'strict',
         });
@@ -1661,7 +1660,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .reply(404);
         httpMock.scope('https://example.org/pkg').get('?go-get=1').reply(200);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'example.org/pkg',
           constraints: {
             ['%goMod']: '1.24.0',
@@ -1682,8 +1681,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     describe('package cache', () => {
-      const privateUrl = 'https://artifactory.example.com/api/go/go';
-
       let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
 
       beforeEach(() => {
@@ -1692,52 +1689,24 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       afterEach(() => {
         setCache.mockRestore();
-        GlobalConfig.reset();
       });
 
-      function mockProxy(url: string): void {
+      it('leaves caching of the releases to the `go` datasource', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
         httpMock
-          .scope(`${url}/github.com/google/btree`)
+          .scope(`${baseUrl}/github.com/google/btree`)
           .get('/@v/list')
           .reply(200, 'v1.0.0 2018-01-01T00:00:00Z\n')
           .get('/@latest')
           .reply(200, { Version: 'v1.0.0' })
           .get('/v2/@v/list')
           .reply(404);
-      }
 
-      it('caches modules served by the public proxy', async () => {
-        vi.stubEnv('GOPROXY', baseUrl);
-        mockProxy(baseUrl);
-
-        await datasource.getReleases({
-          packageName: 'github.com/google/btree',
-        });
-
-        expect(setCache).toHaveBeenCalledOnce();
-      });
-
-      it('does not cache modules served by a private proxy', async () => {
-        vi.stubEnv('GOPROXY', privateUrl);
-        mockProxy(privateUrl);
-
-        await datasource.getReleases({
+        await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
         expect(setCache).not.toHaveBeenCalled();
-      });
-
-      it('caches modules served by a private proxy if cachePrivatePackages is enabled', async () => {
-        GlobalConfig.set({ cachePrivatePackages: true });
-        vi.stubEnv('GOPROXY', privateUrl);
-        mockProxy(privateUrl);
-
-        await datasource.getReleases({
-          packageName: 'github.com/google/btree',
-        });
-
-        expect(setCache).toHaveBeenCalledOnce();
       });
     });
 
@@ -1752,7 +1721,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       afterEach(async () => {
-        GlobalConfig.reset();
         await packageCache.cleanup({});
         await dirResult.cleanup();
         memCache.reset();
@@ -1790,16 +1758,16 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .get('/@v/v1.0.0.info')
           .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' });
 
-        const first = await datasource.getReleases({
+        const first = await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
-        // a new run, against the same persistent cache, once the `datasource-go-proxy` cache has expired
+        // a new run, against the same persistent cache
         memCache.init();
         vi.advanceTimersByTime(31 * 60 * 1000);
 
         setHttpMock();
-        const second = await datasource.getReleases({
+        const second = await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
@@ -1807,13 +1775,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       it('does not store a version which has no publication time', async () => {
-        GlobalConfig.set({
-          cacheTtlOverride: {
-            'datasource-go-proxy':
-              // 0 means "expired as soon as it's written to cache", and allows us to show what happens if the cache has expired between the runs, as if the default `cacheTtl` has passed on `datasource-go-proxy`
-              0,
-          },
-        });
         vi.stubEnv('GOPROXY', baseUrl);
 
         httpMock
@@ -1827,7 +1788,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .get('/v2/@v/list')
           .reply(404);
 
-        const res = await datasource.getReleases({
+        const res = await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 
@@ -1856,7 +1817,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           .get('/v2/@v/list')
           .reply(404);
 
-        await datasource.getReleases({
+        await getGoproxyReleases({
           packageName: 'github.com/google/btree',
         });
 

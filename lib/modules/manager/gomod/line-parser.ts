@@ -1,5 +1,6 @@
 import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
+import { pseudoVersionRegex } from '../../datasource/go/common.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
@@ -27,8 +28,6 @@ const toolRegex = regEx(/^(?<keyword>tool)?\s+(?<module>[^\s]+\/?[^\s]+)\s*$/);
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
-
-const pseudoVersionRegex = regEx(GoDatasource.pversionRegexp);
 
 // Go writes this version for a module whose `replace` directive points to a
 // local path, with the major version of the module path, such as
