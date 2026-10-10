@@ -71,7 +71,7 @@ export class GoDatasource extends Datasource {
       {
         namespace: `datasource-${GoDatasource.id}`,
         // TODO: types (#22198)
-        key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        key: `v2:getReleases:${config.packageName}@@${constraintsFilteringKey}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },

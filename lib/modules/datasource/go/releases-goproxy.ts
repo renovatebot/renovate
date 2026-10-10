@@ -271,7 +271,7 @@ export class GoProxyDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
-        key: GoProxyDatasource.getCacheKey(config),
+        key: `v2:${GoProxyDatasource.getCacheKey(config)}`,
         cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
