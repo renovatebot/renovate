@@ -2,10 +2,13 @@ import upath from 'upath';
 import * as httpMock from '~test/http-mock.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import * as _decrypt from '../../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { getCustomEnv } from '../../../../util/env.ts';
 import { getParentDir, readSystemFile } from '../../../../util/fs/index.ts';
+import * as hostRules from '../../../../util/host-rules.ts';
+import { toBase64 } from '../../../../util/string.ts';
 import getArgv from './__fixtures__/argv.ts';
 import * as _fileConfigParser from './file.ts';
 import * as _hostRulesFromEnv from './host-rules-from-env.ts';
@@ -398,6 +401,252 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig.configFileNames).toBeUndefined();
       expect(getConfigFileNames()[0]).toBe('myrenovate.json');
       expect(getConfigFileNames()[1]).toBe('.github/myrenovate.json');
+    });
+
+    describe('when resolving `globalExtends`', () => {
+      // an IP literal, as the HTTP mock bypasses DNS resolution, so a hostname would never be judged as internal
+      const presetHost = 'http://127.0.0.1:18088';
+      const presetUrl = `${presetHost}/preset.json`;
+
+      it('warns about an internal preset host by default', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(logger.once.warn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            hostname: '127.0.0.1',
+            hostType: 'preset',
+          }),
+          expect.stringContaining('internalHostAccess=block'),
+        );
+      });
+
+      it('applies the administrator scoped `hostRules` grant', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          hostRules: [{ matchHost: presetHost, allowInternal: true }],
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(logger.once.warn).not.toHaveBeenCalled();
+        expect(logger.once.info).toHaveBeenCalledWith(
+          'Internal host 127.0.0.1 permitted by configuration',
+        );
+      });
+
+      it('refuses an internal preset host under `internalHostAccess=block` without a grant', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          internalHostAccess: 'block',
+        });
+
+        await expect(
+          configParser.parseConfigs(defaultEnv, defaultArgv),
+        ).rejects.toThrow(CONFIG_PRESETS_INVALID);
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          { url: presetUrl, hostType: 'preset' },
+          'Blocked HTTP request to an internal host - a self-hosted administrator can permit it via `hostRules`, or with `internalHostAccess=allow`',
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({ preset: presetUrl }),
+          'Preset host is blocked by this Renovate instance',
+        );
+        expect(hostRules.getAll()).toEqual([]);
+        expect(GlobalConfig.get()).toEqual({});
+      });
+
+      it('does not warn under `internalHostAccess=allow`', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          internalHostAccess: 'allow',
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(logger.once.warn).not.toHaveBeenCalled();
+      });
+
+      it('permits a preset served from the platform `endpoint`', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          endpoint: `${presetHost}/`,
+          internalHostAccess: 'block',
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(logger.once.warn).not.toHaveBeenCalled();
+      });
+
+      it('authenticates with the administrator `hostRules`, with secrets applied', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          hostRules: [
+            {
+              matchHost: presetHost,
+              allowInternal: true,
+              token: '{{ secrets.PRESET_TOKEN }}',
+            },
+          ],
+          secrets: { PRESET_TOKEN: 'abc' },
+        });
+        httpMock
+          .scope(presetHost, { reqheaders: { authorization: 'Bearer abc' } })
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/r1']);
+        expect(parsedConfig.hostRules).toEqual([
+          { matchHost: presetHost, allowInternal: true, token: 'abc' },
+        ]);
+        // the administrator config is not rewritten in place, so it still holds the template until the secrets are applied to the whole config
+        expect(logger.debug).toHaveBeenCalledWith(
+          {
+            config: expect.objectContaining({
+              hostRules: [
+                expect.objectContaining({
+                  token: '{{ secrets.PRESET_TOKEN }}',
+                }),
+              ],
+            }),
+          },
+          'Combined config',
+        );
+      });
+
+      it('does not use `hostRules` whose secrets are not available yet', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: ['http://example.com/config.json'],
+          hostRules: [
+            {
+              matchHost: 'http://example.com',
+              token: '{{ secrets.FROM_PRESET }}',
+            },
+          ],
+        });
+        httpMock
+          .scope('http://example.com', { badheaders: ['authorization'] })
+          .get('/config.json')
+          .reply(200, { secrets: { FROM_PRESET: 'x' } });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.hostRules).toEqual([
+          { matchHost: 'http://example.com', token: 'x' },
+        ]);
+        expect(logger.debug).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Not applying hostRules to globalExtends, as their secrets or variables cannot be resolved yet',
+        );
+      });
+
+      it('does not leave `hostRules` or `GlobalConfig` set afterwards', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          hostRules: [{ matchHost: presetHost, allowInternal: true }],
+          internalHostAccess: 'block',
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { repositories: ['g/r1'] });
+
+        await configParser.parseConfigs(defaultEnv, defaultArgv);
+
+        expect(hostRules.getAll()).toEqual([]);
+        expect(GlobalConfig.get()).toEqual({});
+      });
+
+      it('resolves `local>` presets against the administrator platform `endpoint`, with its `hostRules`', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: ['local>group/presets'],
+          platform: 'gitlab',
+          endpoint: 'https://gitlab.example.com/api/v4',
+          hostRules: [
+            { matchHost: 'gitlab.example.com', token: 'glpat-123456' },
+          ],
+        });
+        httpMock
+          .scope('https://gitlab.example.com', {
+            reqheaders: { authorization: 'Bearer glpat-123456' },
+          })
+          .get(
+            '/api/v4/projects/group%2Fpresets/repository/files/default.json?ref=HEAD',
+          )
+          .reply(200, {
+            content: toBase64(JSON.stringify({ repositories: ['g/local'] })),
+          });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.repositories).toEqual(['g/local']);
+      });
+
+      it('does not let a `globalExtends` preset grant its own nested presets', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: ['http://example.com/config.json'],
+          internalHostAccess: 'block',
+        });
+        httpMock
+          .scope('http://example.com')
+          .get('/config.json')
+          .reply(200, {
+            extends: [`${presetHost}/nested.json`],
+            hostRules: [{ matchHost: presetHost, allowInternal: true }],
+          });
+
+        await expect(
+          configParser.parseConfigs(defaultEnv, defaultArgv),
+        ).rejects.toThrow(CONFIG_PRESETS_INVALID);
+      });
     });
 
     // TODO #41551
