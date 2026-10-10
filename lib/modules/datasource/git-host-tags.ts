@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../util/cache/package/key.ts';
 import type { Http } from '../../util/http/index.ts';
 import { Datasource } from './datasource.ts';
 import type {
@@ -10,7 +11,7 @@ import type {
 /**
  * Base class for the `*-tags` datasources of git hosting providers.
  *
- * It owns the package cache wrappers and the `<registryUrl>:<repo>:<type>`
+ * It owns the package cache wrappers and the `<registryUrl>:<repo>:<type>:<tag>`
  * cache key convention shared by all of them, so that subclasses only have to
  * implement the provider specific API calls.
  *
@@ -41,8 +42,9 @@ export abstract class GitHostTagsDatasource<
     registryUrl: string | undefined,
     repo: string,
     type: string,
+    tag?: string,
   ): string {
-    return `${this.getRegistryUrl(registryUrl)}:${repo}:${type}`;
+    return buildCacheKey(this.getRegistryUrl(registryUrl), repo, type, tag);
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -100,7 +102,7 @@ export abstract class GitHostTagsDigestDatasource<
     tag: string,
   ): Promise<string | null> {
     return this.cached(
-      { key: this.getCacheKey(registryUrl, repo, `tag-${tag}`) },
+      { key: this.getCacheKey(registryUrl, repo, 'tag', tag) },
       () => this.fetchTagCommit(registryUrl, repo, tag),
     );
   }

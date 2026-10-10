@@ -1,16 +1,5 @@
-import type { ESTree } from '@oxlint/plugins';
 import { defineRule } from '@oxlint/plugins';
-
-function getPropertyName(node: ESTree.ObjectProperty): string | undefined {
-  const { key } = node;
-  if (key.type === 'Identifier' && !node.computed) {
-    return key.name;
-  }
-  if (key.type === 'Literal' && typeof key.value === 'string') {
-    return key.value;
-  }
-  return undefined;
-}
+import { getPropertyName } from '../utils/property-name.ts';
 
 /**
  * Requires every `withCache()` call to say whether its result may be cached.

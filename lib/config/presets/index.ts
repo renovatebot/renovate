@@ -13,6 +13,7 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../util/cache/package/key.ts';
 import { clone } from '../../util/clone.ts';
 import { regEx } from '../../util/regex.ts';
 import * as template from '../../util/template/index.ts';
@@ -141,7 +142,7 @@ export async function getPreset(
       tag,
     });
   } else {
-    const cacheKey = `preset:${preset}`;
+    const cacheKey = buildCacheKey('preset', preset);
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
 
     const packageCache = presetCachePersistence

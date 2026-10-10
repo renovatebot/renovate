@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getQueryString, isHttpUrl, joinUrlParts } from '../../../util/url.ts';
 import * as hashicorpVersioning from '../../versioning/hashicorp/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -218,6 +219,6 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       packageName,
       registryUrl,
     );
-    return `${registry}/${repository}`;
+    return buildCacheKey(registry, repository);
   }
 }
