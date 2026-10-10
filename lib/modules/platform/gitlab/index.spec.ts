@@ -47,6 +47,7 @@ describe('modules/platform/gitlab/index', () => {
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', undefined);
     vi.stubEnv('RENOVATE_X_PLATFORM_VERSION', undefined);
 
@@ -2352,7 +2353,7 @@ describe('modules/platform/gitlab/index', () => {
       vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', '100');
     });
 
-    it('returns the PR', async () => {
+    it('returns the PR without delay (default setting)', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
@@ -2382,6 +2383,41 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         targetBranch: 'master',
       });
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0]]);
+    });
+
+    it('returns the PR with delay', async () => {
+      vi.stubEnv('RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY', '10');
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: null,
+      });
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
+      expect(timers.setTimeout.mock.calls).toMatchObject([[10000]]);
     });
 
     it('uses default branch', async () => {
@@ -2520,7 +2556,7 @@ describe('modules/platform/gitlab/index', () => {
         title: 'some title',
       });
 
-      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0], [100], [400]]);
     });
 
     it('adds the MR to a merge train when merge trains are enabled on the project', async () => {
@@ -2737,6 +2773,7 @@ describe('modules/platform/gitlab/index', () => {
         'PR not yet in mergeable state. Retrying 3',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
         [100],
         [400],
         [900],
@@ -2799,7 +2836,12 @@ describe('modules/platform/gitlab/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
+        [100],
+        [400],
+        [900],
+      ]);
     });
 
     it('should retry auto merge creation on 405 method not allowed', async () => {
@@ -2872,6 +2914,7 @@ describe('modules/platform/gitlab/index', () => {
         'Automerge on PR creation failed. Retrying 2',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
         [100],
         [400],
         [900],
@@ -2921,7 +2964,7 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(timers.setTimeout.mock.calls).toMatchObject([]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0]]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
