@@ -6243,6 +6243,23 @@ describe('modules/platform/github/index', () => {
       );
     });
 
+    it('returns false if GitHub returns an unknown merge status', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      scope
+        .put(asyncUrl, directMerge)
+        .reply(202, pending)
+        .get(`${asyncUrl}/uuid-1`)
+        .reply(200, { status: 'cancelled', details: { message: 'Cancelled' } });
+      await initRepoWithPr(scope);
+
+      const res = await github.mergePr({ id: 1234, branchName: 'somebranch' });
+
+      expect(res).toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'GitHub returned an unknown merge status for PR #1234',
+      );
+    });
+
     it('returns false if the merge is still pending after the timeout', async () => {
       const scope = httpMock.scope(githubApiHost);
       scope
