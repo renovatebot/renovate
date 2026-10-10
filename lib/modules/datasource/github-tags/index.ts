@@ -85,10 +85,6 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
    * The `newValue` supplied here should be a valid tag for the docker image.
    *
    * Returns the latest commit hash for the repository.
-   *
-   * It skips the package cache of the base class: the GraphQL fetcher caches
-   * the tags together with their commits, and the HTTP client caches the latest
-   * commit in memory.
    */
   override getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
