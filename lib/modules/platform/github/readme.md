@@ -71,7 +71,9 @@ Instead of a dedicated account with a Personal Access Token you can run `renovat
 
 When creating the GitHub App give it the following permissions:
 
-| Permission        | Scope            |
+**Repository permissions**
+
+| Permission        | Access           |
 | ----------------- | ---------------- |
 | Checks            | `read` + `write` |
 | Commit statuses   | `read` + `write` |
@@ -81,8 +83,13 @@ When creating the GitHub App give it the following permissions:
 | Workflows         | `read` + `write` |
 | Administration    | `read`           |
 | Dependabot alerts | `read`           |
-| Members           | `read`           |
 | Metadata          | `read`           |
+
+**Organization permissions**
+
+| Permission | Access |
+| ---------- | ------ |
+| Members    | `read` |
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 
