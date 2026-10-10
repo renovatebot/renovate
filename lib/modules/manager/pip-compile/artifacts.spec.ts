@@ -3,7 +3,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -170,7 +170,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
     expect(logger.trace).toHaveBeenCalledWith(
       expect.objectContaining({
         cmd: 'pip-compile requirements.in',
-        registryCredVars: [],
       }),
       'pip-compile command',
     );
@@ -353,6 +352,41 @@ describe('modules/manager/pip-compile/artifacts', () => {
       },
     ]);
   });
+
+  it.each(['pip-compile', 'uv pip compile'])(
+    'uses source and command-header indexes for %s authentication',
+    async (command) => {
+      const cmd = `${command} --index-url=https://primary.example.com/simple --extra-index-url=https://extra.example.com/simple requirements.in`;
+      const header =
+        command === 'pip-compile'
+          ? getCommandInHeader(cmd)
+          : getCommandInUvHeader(cmd);
+      fs.readLocalFile.mockResolvedValueOnce(header);
+      fs.readLocalFile.mockResolvedValueOnce(
+        '--index-url https://source.example.com/simple\n',
+      );
+      const findHostRule = vi.spyOn(hostRules, 'find');
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        newPackageFileContent:
+          '--index-url https://source.example.com/simple\n',
+        updatedDeps: [],
+        config: { lockFiles: ['requirements.txt'] },
+      });
+
+      for (const url of [
+        'https://source.example.com/simple',
+        'https://primary.example.com/simple',
+        'https://extra.example.com/simple',
+      ]) {
+        expect(findHostRule).toHaveBeenCalledWith({ hostType: 'pypi', url });
+      }
+      expect(execSnapshots).toMatchObject([{ cmd }]);
+      findHostRule.mockRestore();
+    },
+  );
 
   it('install uv tools without constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
