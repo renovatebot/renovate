@@ -1,8 +1,9 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../util/exec/types.ts';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   getSiblingFileName,
@@ -11,12 +12,27 @@ import {
 } from '../../../util/fs/index.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
+
+/**
+ * Returns the github.com token that the `github-tags` lookups use as
+ * `GITHUB_APM_PAT`: a `github-tags` host rule's, or else the `github` one's.
+ */
+function getGithubTokenEnv(): ExtraEnv {
+  const url = 'https://api.github.com/';
+  const lookupRule = hostRules.find({ hostType: GithubTagsDatasource.id, url });
+  const token = findGithubToken(
+    lookupRule.token ? lookupRule : hostRules.find({ hostType: 'github', url }),
+  );
+  return token ? { GITHUB_APM_PAT: token } : {};
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -47,6 +63,10 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      // APM reads a token for private github.com dependencies from its own
+      // environment variables only: it drops the `GIT_CONFIG_*` URL rewrites
+      // that `withGitEnvironment()` would pass.
+      extraEnv: getGithubTokenEnv(),
       docker: {},
       toolConstraints: [
         {
