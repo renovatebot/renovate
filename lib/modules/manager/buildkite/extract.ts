@@ -91,8 +91,11 @@ function extractKnownPluginDeps(
   if (!depName) {
     return [];
   }
-  const extractDeps = knownPlugins[depName];
-  return extractDeps ? extractDeps(config, registryAliases) : [];
+  const known = knownPlugins[depName];
+  if (!known || known.enabled === false) {
+    return [];
+  }
+  return known.extract(config, registryAliases);
 }
 
 /**
