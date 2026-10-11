@@ -1,11 +1,7 @@
 import { z } from 'zod/v4';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
-
-type KnownPluginExtractor = (
-  config: unknown,
-  registryAliases: Record<string, string>,
-) => PackageDependency[];
+import type { KnownPlugin } from './types.ts';
 
 // https://github.com/buildkite-plugins/docker-buildkite-plugin
 const DockerPluginConfig = z.object({ image: z.string().optional() });
@@ -24,12 +20,13 @@ function extractDockerPluginDeps(
 /**
  * Buildkite plugins whose own configuration embeds a further dependency (for
  * example the `docker` plugin's `image` key), keyed by the plugin's bare
- * (unscoped) name as written in the pipeline, e.g. `docker#v5.14.0`. A
- * namespaced/third-party reference such as `myorg/docker#v1.0.0` is a
- * different plugin and deliberately doesn't match here.
+ * (unscoped) name as written in the pipeline, e.g. `docker#v5.14.0`, or by
+ * `org/name` for a third-party plugin, e.g. `seek-oss/aws-sm#v2.3.1`. A
+ * fork/rename not listed here is a different plugin and deliberately
+ * doesn't match.
  *
  * Modelled on ../github-actions/known-actions.
  */
-export const knownPlugins: Record<string, KnownPluginExtractor> = {
-  docker: extractDockerPluginDeps,
+export const knownPlugins: Record<string, KnownPlugin> = {
+  docker: { extract: extractDockerPluginDeps },
 };
