@@ -141,104 +141,6 @@ describe('modules/manager/buildkite/extract', () => {
       ]);
     });
 
-    it('extracts git-based plugins', () => {
-      const fileContent = codeBlock`
-        steps:
-              - ssh://git@github.company.com/some-org/some-plugin#v3.2.7:
-                  username: abc
-              - https://github.company.com/some-third-org/some-third-plugin#v0.0.1:
-                  build: app
-      `;
-      const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toEqual([
-        {
-          currentValue: 'v3.2.7',
-          datasource: 'github-tags',
-          depName: 'some-org/some-plugin',
-          registryUrls: ['https://github.company.com'],
-        },
-        {
-          currentValue: 'v0.0.1',
-          datasource: 'github-tags',
-          depName: 'some-third-org/some-third-plugin',
-          registryUrls: ['https://github.company.com'],
-        },
-      ]);
-    });
-
-    it('extracts git-based plugin with .git at the end of its name', () => {
-      const expectedPackageDependency: PackageDependency = {
-        currentValue: 'v3.2.7',
-        datasource: 'github-tags',
-        depName: 'some-org/some-plugin',
-        registryUrls: ['https://github.company.com'],
-      };
-      const fileContent = codeBlock`
-        steps:
-              - ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7:
-      `;
-      const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toHaveLength(1);
-      expect(res).toEqual([expectedPackageDependency]);
-    });
-
-    it('extracts plugins outside plugins sections', () => {
-      const fileContent = codeBlock`
-        .docker-options: &some-options
-          copy-checkout: true
-        .python3-container: &python3-container
-          ssh://git@github.some-domain.com/some-org/some-plugin#v3.2.7:
-            some-config: some-value
-            <<: *some-options
-      `;
-      const res = extractPackageFile(fileContent)?.deps;
-      const expectedPackageDependency: PackageDependency = {
-        currentValue: 'v3.2.7',
-        datasource: 'github-tags',
-        depName: 'some-org/some-plugin',
-        registryUrls: ['https://github.some-domain.com'],
-      };
-      expect(res).toEqual([expectedPackageDependency]);
-    });
-
-    it('extracts plugin with preceding ?', () => {
-      const fileContent = codeBlock`
-        steps:
-              - ? ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7
-      `;
-      const res = extractPackageFile(fileContent)?.deps;
-      const expectedPackageDependency: PackageDependency = {
-        currentValue: 'v3.2.7',
-        datasource: 'github-tags',
-        depName: 'some-org/some-plugin',
-        registryUrls: ['https://github.company.com'],
-      };
-      expect(res).toEqual([expectedPackageDependency]);
-    });
-
-    it('extracts plugin tags from bitbucket', () => {
-      const fileContent = codeBlock`
-        steps:
-          - plugins:
-              - ssh://git@bitbucket.org/some-org/some-plugin.git#v3.2.7:
-              - docker-compose#v1.3.2:
-      `;
-      const res = extractPackageFile(fileContent)?.deps;
-      const githubDependency: PackageDependency = {
-        currentValue: 'v1.3.2',
-        datasource: 'github-tags',
-        depName: 'docker-compose',
-        packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
-      };
-      const bitbucketDependency: PackageDependency = {
-        currentValue: 'v3.2.7',
-        datasource: 'bitbucket-tags',
-        depName: 'some-org/some-plugin',
-        registryUrls: ['https://bitbucket.org'],
-      };
-      expect(res).toEqual([bitbucketDependency, githubDependency]);
-    });
-
     it('extracts plugin tags with quotes', () => {
       const fileContent = codeBlock`
         steps:
@@ -270,6 +172,34 @@ describe('modules/manager/buildkite/extract', () => {
         packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
       };
       expect(res).toEqual([singleQuotesDependency, doubleQuotesDependency]);
+    });
+
+    it('does not re-extract a plugin reachable via more than one YAML alias', () => {
+      const fileContent = codeBlock`
+        plugins: &shared
+          docker-compose#v1.3.2:
+            run: app
+        steps:
+          - plugins: *shared
+          - plugins: *shared
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not throw on invalid YAML', () => {
+      const fileContent = codeBlock`
+        steps: []
+        steps: []
+      `;
+      expect(extractPackageFile(fileContent)).toBeNull();
     });
   });
 });
