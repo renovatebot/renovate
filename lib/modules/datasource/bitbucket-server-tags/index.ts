@@ -1,33 +1,23 @@
-import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server.ts';
 import { regEx } from '../../../util/regex.ts';
-import { Result } from '../../../util/result.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
-import { DigestsConfig, ReleasesConfig } from '../schema.ts';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  ReleaseResult,
-} from '../types.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { DigestConfig, GetReleasesConfig, GitHostTag } from '../types.ts';
 import {
   BitbucketServerCommits,
   BitbucketServerTag,
   BitbucketServerTags,
 } from './schema.ts';
 
-export class BitbucketServerTagsDatasource extends Datasource {
+export class BitbucketServerTagsDatasource extends GitHostTagsDigestDatasource<BitbucketServerHttp> {
   static readonly id = 'bitbucket-server-tags';
 
-  override http = new BitbucketServerHttp(BitbucketServerTagsDatasource.id);
-
-  static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketServerTagsDatasource.id}`;
-
   constructor() {
-    super(BitbucketServerTagsDatasource.id);
+    super(
+      BitbucketServerTagsDatasource.id,
+      new BitbucketServerHttp(BitbucketServerTagsDatasource.id),
+    );
   }
 
   override readonly sourceUrlSupport = 'package';
@@ -38,193 +28,105 @@ export class BitbucketServerTagsDatasource extends Datasource {
     return registryUrl?.replace(regEx(/\/rest\/api\/1.0$/), '');
   }
 
-  static getSourceUrl(
-    projectKey: string,
-    repositorySlug: string,
-    registryUrl: string,
-  ): string {
-    const url = BitbucketServerTagsDatasource.getRegistryURL(registryUrl);
-    return `${ensureTrailingSlash(url)}projects/${projectKey}/repos/${repositorySlug}`;
-  }
-
   static getApiUrl(registryUrl: string): string {
     const res = BitbucketServerTagsDatasource.getRegistryURL(registryUrl);
     return `${ensureTrailingSlash(res)}rest/api/1.0/`;
   }
 
-  static getCacheKey(
-    registryUrl: string | undefined,
-    repo: string,
-    type: string,
-  ): string {
-    return `${BitbucketServerTagsDatasource.getRegistryURL(registryUrl ?? '')}:${repo}:${type}`;
+  protected getRegistryUrl(registryUrl?: string): string {
+    return BitbucketServerTagsDatasource.getRegistryURL(registryUrl ?? '');
   }
 
-  // getReleases fetches list of tags for the repository
-  private async _getReleases(
-    config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    const { registryUrl, packageName } = config;
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
     const [projectKey, repositorySlug] = packageName.split('/');
+    const url = this.getRegistryUrl(registryUrl);
+    return joinUrlParts(url, 'projects', projectKey, 'repos', repositorySlug);
+  }
+
+  /** REST API base URL of the repository. */
+  private getRepoApiUrl(registryUrl: string, packageName: string): string {
+    const [projectKey, repositorySlug] = packageName.split('/');
+    return joinUrlParts(
+      BitbucketServerTagsDatasource.getApiUrl(registryUrl),
+      'projects',
+      projectKey,
+      'repos',
+      repositorySlug,
+    );
+  }
+
+  // fetchTags fetches list of tags for the repository
+  protected async fetchTags(
+    config: GetReleasesConfig,
+  ): Promise<GitHostTag[] | null> {
+    const { registryUrl, packageName } = config;
     if (!registryUrl) {
       logger.debug('Missing registryUrl');
       return null;
     }
 
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ registryUrl }) => {
-        const url = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}/tags`;
+    const url = joinUrlParts(
+      this.getRepoApiUrl(registryUrl, packageName),
+      'tags',
+    );
 
-        return this.http.getJsonSafe(
-          url,
-          { paginate: true },
-          BitbucketServerTags,
-        );
-      })
-      .transform((tags) =>
-        tags.map(({ displayId, hash }) => ({
-          version: displayId,
-          gitRef: displayId,
-          newDigest: hash ?? undefined,
-        })),
-      )
-      .transform((versions): ReleaseResult => {
-        return {
-          sourceUrl: BitbucketServerTagsDatasource.getSourceUrl(
-            projectKey,
-            repositorySlug,
-            registryUrl,
-          ),
-          registryUrl:
-            BitbucketServerTagsDatasource.getRegistryURL(registryUrl),
-          releases: versions,
-        };
-      });
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'bitbucket-server-tags: validation error');
+    const tags = await this.fetchJsonOrNull(url, BitbucketServerTags, {
+      paginate: true,
+    });
+    if (!tags) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
+    return tags.map(({ displayId, hash }) => ({
+      version: displayId,
+      newDigest: hash ?? undefined,
+    }));
+  }
+
+  protected override fetchDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    if (!config.registryUrl) {
+      logger.debug('Missing registryUrl');
+      return Promise.resolve(null);
     }
 
-    return val;
+    return super.fetchDigest(config, newValue);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: BitbucketServerTagsDatasource.cacheNamespace,
-        key: BitbucketServerTagsDatasource.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          'tags',
-        ),
-        fallback: true,
-      },
-      () => this._getReleases(config),
-    );
-  }
-
-  // getTagCommit fetches the commit hash for the specified tag
-  private async _getTagCommit(
-    baseUrl: string,
+  // fetchTagCommit fetches the commit hash for the specified tag
+  protected async fetchTagCommit(
+    registryUrl: string | undefined,
+    repo: string,
     tag: string,
   ): Promise<string | null> {
+    const baseUrl = this.getRepoApiUrl(registryUrl!, repo);
     const bitbucketServerTag = (
-      await this.http.getJson(`${baseUrl}/tags/${tag}`, BitbucketServerTag)
+      await this.http.getJson(
+        joinUrlParts(baseUrl, 'tags', tag),
+        BitbucketServerTag,
+      )
     ).body;
 
     return bitbucketServerTag.hash ?? null;
   }
 
-  getTagCommit(
-    baseUrl: string,
-    tag: string,
-    config: DigestConfig,
+  // fetchLatestCommit fetches the latest commit for the repository main branch
+  protected async fetchLatestCommit(
+    registryUrl: string | undefined,
+    repo: string,
   ): Promise<string | null> {
-    return withCache(
-      {
-        namespace: BitbucketServerTagsDatasource.cacheNamespace,
-        key: BitbucketServerTagsDatasource.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          `tag-${tag}`,
-        ),
-      },
-      () => this._getTagCommit(baseUrl, tag),
-    );
-  }
+    const baseUrl = this.getRepoApiUrl(registryUrl!, repo);
 
-  // getDigest fetches the latest commit for repository main branch.
-  // If newValue is provided, then getTagCommit is called
-  private async _getDigest(
-    config: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    const { registryUrl, packageName } = config;
-    const [projectKey, repositorySlug] = packageName.split('/');
-    if (!registryUrl) {
-      logger.debug('Missing registryUrl');
-      return null;
-    }
+    const url = joinUrlParts(baseUrl, 'commits?ignoreMissing=true');
 
-    const baseUrl = `${BitbucketServerTagsDatasource.getApiUrl(registryUrl)}projects/${projectKey}/repos/${repositorySlug}`;
+    const commits = await this.fetchJsonOrNull(url, BitbucketServerCommits, {
+      paginate: true,
+      limit: 1,
+      maxPages: 1,
+    });
 
-    if (newValue?.length) {
-      return this.getTagCommit(baseUrl, newValue, config);
-    }
-
-    const result = Result.parse(config, DigestsConfig)
-      .transform(() => {
-        const url = `${baseUrl}/commits?ignoreMissing=true`;
-
-        return this.http.getJsonSafe(
-          url,
-          {
-            paginate: true,
-            limit: 1,
-            maxPages: 1,
-          },
-          BitbucketServerCommits,
-        );
-      })
-      .transform((commits) => {
-        return commits[0]?.id;
-      });
-
-    const { val = null, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'bitbucket-server-tags: validation error');
-      return null;
-    }
-
-    if (err) {
-      this.handleGenericErrors(err);
-    }
-
-    return val;
-  }
-
-  override getDigest(
-    config: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    return withCache(
-      {
-        namespace: BitbucketServerTagsDatasource.cacheNamespace,
-        key: BitbucketServerTagsDatasource.getCacheKey(
-          config.registryUrl,
-          config.packageName,
-          'digest',
-        ),
-        fallback: true,
-      },
-      () => this._getDigest(config, newValue),
-    );
+    return commits?.[0]?.id ?? null;
   }
 }

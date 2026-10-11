@@ -8,6 +8,7 @@ import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/maven/index.ts';
 import type { Release, ReleaseResult } from '../index.ts';
@@ -190,6 +191,83 @@ describe('modules/datasource/maven/index', () => {
         { version: '1.0.0' },
         { version: '3.0.0' },
       ]);
+    });
+
+    describe('cached Java constraints', () => {
+      beforeEach(() => memCache.init());
+      afterEach(() => memCache.reset());
+
+      it.each`
+        constraintsFiltering | constraints
+        ${undefined}         | ${{ java: '17' }}
+        ${'none'}            | ${{ java: '17' }}
+        ${'strict'}          | ${undefined}
+        ${'strict'}          | ${{ java: '' }}
+        ${'strict'}          | ${{ java: '   ' }}
+      `(
+        'isolates cached Java constraints from $constraintsFiltering with $constraints',
+        async ({ constraintsFiltering, constraints }) => {
+          httpMock
+            .scope(baseUrl)
+            .get(`${packagePath}/maven-metadata.xml`)
+            .twice()
+            .reply(200, metadata)
+            .get(`${packagePath}/3.0.0/java-constraints-3.0.0.pom`)
+            .thrice()
+            .reply(200, '<project />')
+            .get(`${packagePath}/1.0.0/java-constraints-1.0.0.pom`)
+            .reply(
+              200,
+              '<project><properties><java.version>17</java.version></properties></project>',
+            )
+            .get(`${packagePath}/2.0.0/java-constraints-2.0.0.pom`)
+            .reply(
+              200,
+              '<project><properties><java.version>21</java.version></properties></project>',
+            );
+
+          const config = {
+            datasource,
+            packageName,
+            registryUrls: [baseUrl],
+            versioning,
+          };
+          const unfilteredConfig = {
+            ...config,
+            constraintsFiltering,
+            constraints,
+          };
+          const unfiltered = await getPkgReleases(unfilteredConfig);
+          expect(unfiltered?.releases).toEqual([
+            { version: '1.0.0' },
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+          ]);
+
+          const java17 = await getPkgReleases({
+            ...config,
+            constraintsFiltering: 'strict',
+            constraints: { java: '17' },
+          });
+          expect(java17?.releases).toEqual([
+            { version: '1.0.0' },
+            { version: '3.0.0' },
+          ]);
+
+          const java21 = await getPkgReleases({
+            ...config,
+            constraintsFiltering: 'strict',
+            constraints: { java: '21' },
+          });
+          expect(java21?.releases).toEqual([
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+          ]);
+          await expect(getPkgReleases(unfilteredConfig)).resolves.toEqual(
+            unfiltered,
+          );
+        },
+      );
     });
 
     it.each`

@@ -2983,6 +2983,25 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('copies effectiveDatasource from the datasource result', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'github.com/foo/bar';
+      config.datasource = GoDatasource.id;
+      config.versioning = npmVersioningId;
+      vi.spyOn(GoDatasource.prototype, 'getReleases').mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+        sourceUrl: 'https://github.com/foo/bar',
+        effectiveDatasource: 'github-tags',
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.effectiveDatasource).toBe('github-tags');
+      expect(res.updates).toHaveLength(1);
+    });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
@@ -3645,6 +3664,41 @@ describe('workers/repository/process/lookup/index', () => {
           packageName: 'my-package',
           compareValue: '1.5.0',
         }),
+        'Unexpected downgrade detected: skipping',
+      );
+    });
+
+    it('keeps an update when the versioning cannot order the values', async () => {
+      // aws-machine-image reports every AMI as greater than any other and
+      // relies on the datasource order instead.
+      config.currentValue = 'ami-0de8f6a2a6d5f4b3c';
+      config.packageName = 'my-ami';
+      config.datasource = CustomDatasource.id;
+      config.versioning = 'aws-machine-image';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'ami-0fe327797e6857051',
+            releaseTimestamp: '2026-01-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-0de8f6a2a6d5f4b3c',
+            releaseTimestamp: '2026-02-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-09903cd4fe0670a06',
+            releaseTimestamp: '2026-03-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([{ newValue: 'ami-09903cd4fe0670a06' }]);
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
         'Unexpected downgrade detected: skipping',
       );
     });

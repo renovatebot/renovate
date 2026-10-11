@@ -19,6 +19,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
@@ -59,12 +60,12 @@ export function getDatasourceList(): string[] {
   return Array.from(datasources.keys());
 }
 
-function getMavenConstraintCacheKey(config: GetReleasesConfig): string {
+function getMavenConstraintCacheKeyParts(config: GetReleasesConfig): string[] {
   return config.datasource === 'maven' &&
     config.constraintsFiltering === 'strict' &&
     isNonEmptyStringAndNotWhitespace(config.constraints?.java)
-    ? ':java.version'
-    : '';
+    ? ['java.version']
+    : [];
 }
 
 /**
@@ -119,7 +120,11 @@ async function getRegistryReleases(
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
-  const cacheKey = `${registryUrl}:${config.packageName}${getMavenConstraintCacheKey(config)}`;
+  const cacheKey = buildCacheKey(
+    registryUrl,
+    config.packageName,
+    ...getMavenConstraintCacheKeyParts(config),
+  );
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
   const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
@@ -497,9 +502,19 @@ function fetchCachedReleases(
   config: GetPkgReleasesConfig,
 ): Promise<ReleaseResult | null> {
   const { datasource, packageName, registryUrls } = config;
-  const cacheKey = `datasource-mem:releases:${datasource}:${packageName}:${config.registryStrategy}:${safeStringify(
-    [registryUrls, config.defaultRegistryUrls, config.additionalRegistryUrls],
-  )}${getMavenConstraintCacheKey(config)}`;
+  const cacheKey = buildCacheKey(
+    'datasource-mem',
+    'releases',
+    datasource,
+    packageName,
+    config.registryStrategy,
+    safeStringify([
+      registryUrls,
+      config.defaultRegistryUrls,
+      config.additionalRegistryUrls,
+    ]),
+    ...getMavenConstraintCacheKeyParts(config),
+  );
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
   // istanbul ignore if

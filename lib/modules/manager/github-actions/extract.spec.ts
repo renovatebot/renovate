@@ -2493,10 +2493,11 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
@@ -2508,10 +2509,11 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '2.4.0',
-          datasource: 'npm',
+          datasource: 'github-releases',
           depName: 'deno',
           depType: 'uses-with',
-          packageName: 'deno',
+          packageName: 'denoland/deno',
+          versioning: 'npm',
         },
       ],
     },
@@ -3009,6 +3011,128 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'slsa-framework/actions/attest/actions@v0.1.0',
+        with: { version: 'v0.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/attester',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/attester',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/install/verifier@v0.1.0',
+        with: { version: 'v0.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/verifier',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/verifier',
+        },
+      ],
+    },
+    {
+      // the `repo` input overrides which repository's releases are tracked
+      step: {
+        uses: 'slsa-framework/actions/install/verifier@v0.1.0',
+        with: { version: 'v1.2.3', repo: 'other-org/other-verifier' },
+      },
+      expected: [
+        {
+          currentValue: 'v1.2.3',
+          datasource: 'github-releases',
+          depName: 'other-org/other-verifier',
+          depType: 'uses-with',
+          packageName: 'other-org/other-verifier',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/install/verifier@v0.1.0',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/verifier',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/verifier',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/slsa_with_provenance@v0.1.0',
+        with: { version: 'v0.7.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.7.1',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/source-tool',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/source-tool',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/verify/build@v0.1.0',
+        with: { version: 'v0.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/verifier',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/verifier',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/verify/source@v0.1.0',
+        with: { version: 'v0.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/verifier',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/verifier',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'slsa-framework/actions/verify/vsa@v0.1.0',
+        with: { version: 'v0.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          depName: 'slsa-framework/verifier',
+          depType: 'uses-with',
+          packageName: 'slsa-framework/verifier',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'renovatebot/github-action@v43.0.0',
         with: { 'renovate-version': '43.100.0' },
       },
@@ -3319,6 +3443,69 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'kindest/node',
           depType: 'uses-with',
           packageName: 'kindest/node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v0.37.18' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.37.18',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'v1' },
+      },
+      expected: [
+        {
+          currentValue: 'v1',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // `latest` is already a rolling channel, not a version to update.
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: { version: 'latest' },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'github/gh-aw-actions/setup-cli@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'github/gh-aw',
+          depType: 'uses-with',
+          packageName: 'github/gh-aw',
         },
       ],
     },

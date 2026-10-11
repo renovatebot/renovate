@@ -22,6 +22,8 @@ export async function generateLoginCmd(
   const { hostRule, repository } = repositoryRule;
   const { username, password, token } = hostRule;
   const loginCMD = 'helm registry login';
+  // Split off any path as it's not valid for the helm registry login command
+  const hostPart = repository.split('/')[0];
   if (username !== 'AWS' && ecrRegex.test(repository)) {
     logger.trace({ repository }, `Using ecr auth for Helm registry`);
     const [, region] = coerceArray(ecrRegex.exec(repository));
@@ -37,12 +39,10 @@ export async function generateLoginCmd(
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
-    )} ${quote(repository)}`;
+    )} ${quote(hostPart)}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
-    // Split off any path as it's not valid for the helm registry login command
-    const hostPart = repository.split('/')[0];
     const cmd = `${loginCMD} --username ${quote(username)} --password ${quote(
       password,
     )} ${quote(hostPart)}`;
@@ -51,7 +51,6 @@ export async function generateLoginCmd(
     return cmd;
   }
   if (token) {
-    const hostPart = repository.split('/')[0];
     return `${loginCMD} --username '' --password ${quote(token)} ${quote(hostPart)}`;
   }
   return null;

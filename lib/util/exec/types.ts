@@ -1,3 +1,7 @@
+import {
+  type ToolName as ContainerbaseToolName,
+  toolNames,
+} from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import type { Options as ExecaOptions } from 'execa';
 import type { VersioningName } from '../../versioning-list.generated.ts';
@@ -8,185 +12,60 @@ export interface ConstraintDefinition {
 }
 
 /**
- * A `tool` that Containerbase supports.
- *
- * TODO #41849 replace with upstream types
+ * Additional documentation for `tool`s that Containerbase supports.
  */
-export const toolDefinitions = [
-  {
-    name: 'apm',
-  },
-  {
-    name: 'bazelisk',
-  },
-  {
-    name: 'bun',
-  },
-  {
-    name: 'bundler',
-  },
-  {
-    name: 'cocoapods',
-  },
-  {
-    name: 'composer',
-  },
-  {
-    name: 'conan',
-  },
-  {
-    name: 'copier',
-  },
-  {
-    name: 'corepack',
-  },
-  {
-    name: 'deno',
-  },
-  {
-    name: 'devbox',
-  },
-  {
-    name: 'dotnet',
-  },
-  {
-    name: 'erlang',
-  },
-  {
-    name: 'elixir',
-  },
-  {
-    name: 'flux',
-  },
-  {
-    name: 'gh',
-  },
-  {
-    name: 'gleam',
-  },
-  {
-    name: 'golang',
-  },
-  {
-    name: 'gradle',
-  },
-  {
-    name: 'hashin',
-  },
-  {
-    name: 'helm',
-  },
-  {
-    name: 'helmfile',
-  },
-  {
-    name: 'java',
-  },
-  {
-    name: 'java-maven',
-  },
-  {
-    name: 'jb',
-  },
-  {
-    name: 'kustomize',
-  },
-  {
-    name: 'maven',
-  },
-  {
-    name: 'mise',
-  },
-  {
-    name: 'nix',
-  },
-  {
-    name: 'node',
-  },
-  {
-    name: 'npm',
-  },
-  {
-    name: 'pdm',
-  },
-  {
-    name: 'php',
-  },
-  {
-    name: 'pip-tools',
-  },
-  {
-    name: 'pipenv',
-  },
-  {
-    name: 'pnpm',
-  },
-  {
-    name: 'pixi',
-  },
-  {
-    name: 'poetry',
-  },
-  {
-    name: 'python',
-  },
+export const toolDefinitionDocumentation = [
   {
     name: 'ruby',
     description: 'Also used in the `rubygems` Datasource',
   },
-  {
-    name: 'rust',
-  },
-  {
-    name: 'uv',
-  },
-  {
-    name: 'yarn',
-  },
-  {
-    name: 'yarn-slim',
-  },
-  {
-    name: 'dart',
-  },
-  {
-    name: 'flutter',
-  },
-  {
-    name: 'vendir',
-  },
-] as const satisfies ConstraintDefinition[];
+] as const satisfies readonly (ConstraintDefinition & {
+  name: ContainerbaseToolName;
+})[];
 
 /**
- * A `tool` that Containerbase supports.
+ * A `tool` that Containerbase supports, but may not be supported by Renovate.
+ *
+ * @see SupportedToolNames
  */
-export type ToolName = (typeof toolDefinitions)[number]['name'];
+export type ToolName = (typeof toolNames)[number];
 
-/**
- * A `tool` that Containerbase supports.
- */
-export const toolNames: ToolName[] = toolDefinitions.map((t) => t.name);
-
-export function isToolName(value: unknown): value is ToolName {
+export function isToolName(value: unknown): value is ContainerbaseToolName {
   return isString(value) && (toolNames as readonly string[]).includes(value);
+}
+
+type NotContainerbaseToolName<Name extends string> =
+  Name extends ContainerbaseToolName
+    ? `Name "${Name}" must not be a Containerbase tool name - see 'ContainerbaseToolName'`
+    : Name;
+
+function constrainAdditionalConstraintDefinitions<
+  const T extends readonly (ConstraintDefinition & { name: string })[],
+>(defs: {
+  [K in keyof T]: T[K] extends { name: infer Name extends string }
+    ? Omit<T[K], 'name'> & { name: NotContainerbaseToolName<Name> }
+    : T[K];
+}): T {
+  return defs as unknown as T;
 }
 
 /**
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports, with optional description.
  */
-export const additionalConstraintDefinitions = [
-  {
-    name: 'ghActionsLock',
-    description: `Used in the \`github-actions\` manager to specify a release tag for the [\`github/gh-actions-lock\`](https://github.com/github/gh-actions-lock) \`gh\` CLI extension, which regenerates \`.github/workflows/actions.lock\`.
+export const additionalConstraintDefinitions =
+  constrainAdditionalConstraintDefinitions([
+    {
+      name: 'ghActionsLock',
+      description: `Used in the \`github-actions\` manager to specify a release tag for the [\`github/gh-actions-lock\`](https://github.com/github/gh-actions-lock) \`gh\` CLI extension, which regenerates \`.github/workflows/actions.lock\`.
 
 Must be a full release tag, prefixed with \`v\`, such as \`v0.1.7\`. Set it to an empty string to always install the latest release.`,
-  },
-  /**
-   * @deprecated TODO remove in #42600
-   */
-  {
-    name: 'go',
-    description: `Used in the \`gomod\` manager to specify the version of the Go toolchain to use.
+    },
+    /**
+     * @deprecated TODO remove in #42600
+     */
+    {
+      name: 'go',
+      description: `Used in the \`gomod\` manager to specify the version of the Go toolchain to use.
 
 In precedence order:
 
@@ -196,54 +75,54 @@ In precedence order:
 
 NOTE that the \`constraints.golang\` is not used (https://github.com/renovatebot/renovate/issues/42601)
   `,
-  },
-  {
-    name: 'gomodMod',
-    description: `Used in the \`gomod\` manager to specify a tag for [\`github.com/marwan-at-work/mod\`](https://github.com/marwan-at-work/mod).
+    },
+    {
+      name: 'gomodMod',
+      description: `Used in the \`gomod\` manager to specify a tag for [\`github.com/marwan-at-work/mod\`](https://github.com/marwan-at-work/mod).
 
 Must be prefixed with \`v\`.`,
-  },
-  {
-    name: 'jenkins',
-    description:
-      'Used in the `jenkins-plugins` datasource to specify a minimum version of Jenkins that a plugin must support.',
-  },
-  {
-    name: 'pipTools',
-    description:
-      'Used in the `pip-compile` manager to specify a version of `pip-tools` to use. @deprecated TODO remove in #42599',
-  },
-  {
-    name: 'platform',
-    description:
-      'Used in the `rubygems` datasource to specify the `platform` that the Gem dependency supports.',
-  },
-  {
-    name: 'rubygems',
-    description:
-      'Used in the `rubygems` datasource to specify the version of the `rubygems` tool that is needed to use this Gem.',
-  },
-  {
-    name: 'vscode',
-    description:
-      'Used in the `npm` manager to track the version of VSCode that the package is compatible with.',
-  },
-  {
-    name: 'dotnet-sdk',
-    description:
-      'Used in the `nuget` manager to track .NET SDK version required.',
-  },
-  {
-    name: 'perl',
-    description:
-      'Used in the `cpanfile` manager to track Perl version required.',
-  },
-  {
-    name: '%goMod',
-    description:
-      'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicitly note that this is not a tool that Containerbase knows.',
-  },
-] as const satisfies ConstraintDefinition[];
+    },
+    {
+      name: 'jenkins',
+      description:
+        'Used in the `jenkins-plugins` datasource to specify a minimum version of Jenkins that a plugin must support.',
+    },
+    {
+      name: 'pipTools',
+      description:
+        'Used in the `pip-compile` manager to specify a version of `pip-tools` to use. @deprecated TODO remove in #42599',
+    },
+    {
+      name: 'platform',
+      description:
+        'Used in the `rubygems` datasource to specify the `platform` that the Gem dependency supports.',
+    },
+    {
+      name: 'rubygems',
+      description:
+        'Used in the `rubygems` datasource to specify the version of the `rubygems` tool that is needed to use this Gem.',
+    },
+    {
+      name: 'vscode',
+      description:
+        'Used in the `npm` manager to track the version of VSCode that the package is compatible with.',
+    },
+    {
+      name: 'dotnet-sdk',
+      description:
+        'Used in the `nuget` manager to track .NET SDK version required.',
+    },
+    {
+      name: 'perl',
+      description:
+        'Used in the `cpanfile` manager to track Perl version required.',
+    },
+    {
+      name: '%goMod',
+      description:
+        'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicitly note that this is not a tool that Containerbase knows.',
+    },
+  ] as const);
 
 /**
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports.
@@ -269,14 +148,14 @@ export function isAdditionalConstraintName(
 /**
  * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
  */
-export type ConstraintName = ToolName | AdditionalConstraintName;
+export type ConstraintName = ContainerbaseToolName | AdditionalConstraintName;
 
 export function isConstraintName(value: unknown): value is ConstraintName {
   return isToolName(value) || isAdditionalConstraintName(value);
 }
 
 export interface ToolConstraint {
-  toolName: ToolName;
+  toolName: ContainerbaseToolName;
   constraint?: string | null;
 }
 

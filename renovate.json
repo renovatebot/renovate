@@ -35,25 +35,45 @@
       "enabled": false
     },
     {
+      "description": "group base image docker and npm updates, they must stay on the same version",
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
+      "groupName": "renovate-base-image"
+    },
+    {
       "description": "set fix scope for base image",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "semanticCommitType": "fix"
     },
     {
       "description": "set feat scope for base image major and minor",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
     },
     {
       "description": "use `feat` semantic commit scope with breaking change for for base image major",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major"],
       "commitMessagePrefix": "feat(deps)!:"
     },
     {
       "description": "allow prereleases for base image on next branch",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchBaseBranches": ["next"],
       "ignoreUnstable": false
     },

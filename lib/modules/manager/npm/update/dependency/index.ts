@@ -117,7 +117,8 @@ function replaceAsString(
 function updateDevEnginesDependency({
   fileContent,
   upgrade,
-}: Pick<UpdateDependencyConfig, 'fileContent' | 'upgrade'>): string | null {
+}: Pick<UpdateDependencyConfig<NpmManagerData>, 'fileContent' | 'upgrade'>):
+  string | null {
   const { depType, depName, newValue, managerData } = upgrade;
   /* v8 ignore if -- defensive: dispatcher already filtered */
   if (
@@ -217,7 +218,7 @@ export function updateDependency({
   fileContent,
   packageFile: packageFileName,
   upgrade,
-}: UpdateDependencyConfig): string | null {
+}: UpdateDependencyConfig<NpmManagerData>): string | null {
   if (
     upgrade.depType?.startsWith('pnpm.catalog') ||
     upgrade.depType === pnpmWorkspaceOverrides
@@ -243,7 +244,8 @@ export function updateDependency({
   }
 
   const { depType, managerData } = upgrade;
-  const depName: string = managerData?.key ?? upgrade.depName;
+  // TODO #22198
+  const depName = managerData?.key ?? upgrade.depName!;
   let { newValue } = upgrade;
 
   newValue = getNewGitValue(upgrade) ?? newValue;

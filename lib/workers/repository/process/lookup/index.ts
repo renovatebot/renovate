@@ -197,6 +197,7 @@ export async function lookupUpdates(
         'deprecationMessage',
         'sourceUrl',
         'registryUrl',
+        'effectiveDatasource',
         'sourceDirectory',
         'homepage',
         'changelogUrl',
@@ -235,7 +236,11 @@ export async function lookupUpdates(
       }
       // Reapply package rules in case we missed something from sourceUrl
       config = await applyPackageRules(
-        { ...config, sourceUrl: res.sourceUrl },
+        {
+          ...config,
+          sourceUrl: res.sourceUrl,
+          effectiveDatasource: res.effectiveDatasource,
+        },
         'source-url',
       );
       if (config.followTag) {
@@ -506,14 +511,19 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           isString(update.newValue) &&
           versioningApi.isSingleVersion(update.newValue);
-        // Nothing but a rollback should ever propose a lower version, so a downgrade means the lookup went wrong and the update is dropped - see #29921
+        // Nothing but a rollback should ever propose a lower version, so a
+        // downgrade means the lookup went wrong and the update is dropped - see
+        // #29921. A versioning which reports each value as greater than the
+        // other has no order between them (e.g. aws-machine-image relies on the
+        // datasource order), so no downgrade can be claimed.
         if (
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioningApi.isVersion(update.newValue) &&
           compareValue &&
           versioningApi.isVersion(compareValue) &&
-          versioningApi.isGreaterThan(compareValue, update.newValue)
+          versioningApi.isGreaterThan(compareValue, update.newValue) &&
+          !versioningApi.isGreaterThan(update.newValue, compareValue)
         ) {
           logger.warn(
             {

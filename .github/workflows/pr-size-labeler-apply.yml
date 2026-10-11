@@ -23,7 +23,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Download pull request number
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: pr-number
           path: ${{ runner.temp }}/pr-number
@@ -60,7 +60,7 @@ jobs:
 
       - name: Label PR based on size
         if: steps.pr.outputs.number
-        uses: cbrgm/pr-size-labeler-action@dde44ebdc37889cb56322a38a0b880aeaa462337 # v1.3.14
+        uses: cbrgm/pr-size-labeler-action@503e76dd1fa75f044f303a7d1460f5e2f396df01 # v1.4.0
         with:
           github_token: ${{ github.token }} # Pass the GitHub token for authentication
           github_repository: ${{ github.repository }} # Pass the repository name
