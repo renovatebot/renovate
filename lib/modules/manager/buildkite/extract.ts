@@ -2,11 +2,16 @@ import { isObject } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const pluginKeyRegex = regEx(/^(?<depName>[^#\s]+)#(?<currentValue>[^:]+)$/);
+const gitPluginRegex = regEx(
+  /(?:ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/,
+);
+const gitSuffixRegex = regEx('\\.git$');
 
 function extractPluginDep(key: string): PackageDependency | null {
   const match = pluginKeyRegex.exec(key);
@@ -15,6 +20,23 @@ function extractPluginDep(key: string): PackageDependency | null {
   }
   const { depName, currentValue } = match.groups;
   logger.trace(`Found Buildkite plugin ${depName}`);
+
+  // Plugins may simply be git repos. If so, we need to parse out the registry.
+  const gitPluginMatch = gitPluginRegex.exec(depName);
+  if (gitPluginMatch?.groups) {
+    const { registry, gitPluginName } = gitPluginMatch.groups;
+    const gitDepName = gitPluginName.replace(gitSuffixRegex, '');
+    const datasource =
+      registry === 'bitbucket.org'
+        ? BitbucketTagsDatasource.id
+        : GithubTagsDatasource.id;
+    return {
+      depName: gitDepName,
+      currentValue,
+      registryUrls: [`https://${registry}`],
+      datasource,
+    };
+  }
 
   if (!isVersion(currentValue)) {
     logger.debug(
