@@ -491,5 +491,103 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the docker plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              - docker#v5.14.0:
+                  image: "golang"
+              - docker#v5.14.0:
+                  image: "goreleaser/goreleaser:v2.17.1"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+          replaceString: 'golang',
+        },
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v2.17.1',
+          datasource: 'docker',
+          depName: 'goreleaser/goreleaser',
+          packageName: 'goreleaser/goreleaser',
+          depType: 'docker',
+          replaceString: 'goreleaser/goreleaser:v2.17.1',
+        },
+      ]);
+    });
+
+    it('does not extract an image from the docker plugin when none is configured', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker#v5.14.0:
+                workdir: /app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not treat a namespaced docker plugin as the known docker plugin', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              myorg/docker#v1.0.0:
+                image: "golang"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'myorg/docker',
+          packageName: 'myorg/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not look up a known plugin for an empty depName from a malformed git plugin', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.company.com/#v3.2.7:
+              image: "golang"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.2.7',
+          datasource: 'github-tags',
+          depName: '',
+          registryUrls: ['https://github.company.com'],
+        },
+      ]);
+    });
   });
 });

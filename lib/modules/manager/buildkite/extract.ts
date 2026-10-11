@@ -13,6 +13,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { knownPlugins } from './known-plugins.ts';
 import { BuildkiteFile, type BuildkiteStep } from './schema.ts';
 
 const pluginKeyRegex = regEx(/^(?<depName>[^#\s]+)#(?<currentValue>[^:]+)$/);
@@ -82,16 +83,32 @@ function extractPluginDep(key: string): PackageDependency | null {
   };
 }
 
+function extractKnownPluginDeps(
+  depName: string | undefined,
+  config: unknown,
+  registryAliases: Record<string, string>,
+): PackageDependency[] {
+  if (!depName) {
+    return [];
+  }
+  const extractDeps = knownPlugins[depName];
+  return extractDeps ? extractDeps(config, registryAliases) : [];
+}
+
 /**
  * Plugin refs are object keys of the form `name#version`, and can appear
  * anywhere in the document (including outside any `plugins:` block, e.g.
  * behind a YAML anchor), so this walks every key of the raw parsed YAML
- * value rather than relying on a fixed schema shape.
+ * value rather than relying on a fixed schema shape. For a known plugin
+ * (see ./known-plugins.ts), the plugin's own config (the key's value) is
+ * also checked for a further embedded dependency, e.g. the `docker`
+ * plugin's `image` key.
  */
 function extractPluginDeps(
   node: unknown,
   deps: PackageDependency[],
   visited: WeakSet<object>,
+  registryAliases: Record<string, string>,
 ): void {
   if (!isObject(node)) {
     return;
@@ -103,7 +120,7 @@ function extractPluginDeps(
 
   if (Array.isArray(node)) {
     for (const item of node) {
-      extractPluginDeps(item, deps, visited);
+      extractPluginDeps(item, deps, visited, registryAliases);
     }
     return;
   }
@@ -112,8 +129,9 @@ function extractPluginDeps(
     const dep = extractPluginDep(key);
     if (dep) {
       deps.push(dep);
+      deps.push(...extractKnownPluginDeps(dep.depName, value, registryAliases));
     }
-    extractPluginDeps(value, deps, visited);
+    extractPluginDeps(value, deps, visited, registryAliases);
   }
 }
 
@@ -145,6 +163,7 @@ export function extractPackageFile(
   config?: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
+  const registryAliases = coerceObject(config?.registryAliases);
 
   let raw: unknown;
   try {
@@ -160,13 +179,12 @@ export function extractPackageFile(
   if (err) {
     logger.debug({ err, packageFile }, 'Error extracting Buildkite images');
   } else {
-    const registryAliases = coerceObject(config?.registryAliases);
     extractImage(parsed.image, deps, registryAliases);
     extractImage(parsed.agentsImage, deps, registryAliases);
     extractStepImages(parsed.steps, deps, registryAliases);
   }
 
-  extractPluginDeps(raw, deps, new WeakSet());
+  extractPluginDeps(raw, deps, new WeakSet(), registryAliases);
 
   if (!deps.length) {
     return null;
