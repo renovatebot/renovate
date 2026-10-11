@@ -489,7 +489,6 @@
     "tools/mkdocs/docs",
     "tools/mkdocs/site",
     ".worktrees/**/*",
-    ".markdownlint-cli2.mjs",
     "tools/mkdocs/.cache",
     "**/.agents/**",
     "**/.claude/**",

@@ -285,7 +285,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        run: pnpm markdown-lint
+        run: pnpm markdown-lint --output-format github
 
       - name: Generate JSON schema
         run: pnpm create-json-schema

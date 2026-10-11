@@ -1,0 +1,97 @@
+[global]
+# Keep the enabled markdownlint rules; adopt additional rumdl rules separately.
+# Rules disabled in the previous configuration remain omitted:
+# MD013: Allow long lines without enforcing a line-length limit.
+# MD025: Allow multiple top-level headings in a document.
+# MD033: Allow inline HTML.
+# MD036: Allow emphasis where a heading might otherwise be expected.
+# MD040: Allow fenced code blocks without a language tag.
+# MD041: Allow documents that do not start with a top-level heading.
+enable = [
+  "MD001", # Heading levels must not skip a level when increasing.
+  "MD003", # Use a consistent heading style (ATX or Setext).
+  "MD004", # Use a consistent unordered-list marker.
+  "MD005", # Align list items at the same nesting level.
+  "MD007", # Use consistent indentation for nested unordered lists.
+  "MD009", # Remove trailing spaces except permitted hard line breaks.
+  "MD010", # Do not use hard tabs.
+  "MD011", # Catch reversed link syntax: (text)[URL] instead of [text](URL).
+  "MD012", # Do not use multiple consecutive blank lines.
+  "MD014", # Omit shell prompt markers when command examples have no output.
+  "MD018", # Require a space after opening hashes in ATX headings.
+  "MD019", # Use only one space after opening hashes in ATX headings.
+  "MD020", # Require spaces inside the hashes of closed ATX headings.
+  "MD021", # Use only one space inside the hashes of closed ATX headings.
+  "MD022", # Surround headings with blank lines.
+  "MD023", # Start headings at the beginning of the line.
+  "MD024", # Do not repeat the same heading text within a document.
+  "MD026", # Do not end headings with disallowed punctuation.
+  "MD027", # Do not use multiple spaces after blockquote markers.
+  "MD028", # Do not separate blocks of a blockquote with unmarked blank lines.
+  "MD029", # Use consistent ordered-list numbering.
+  "MD030", # Use consistent spacing after list markers.
+  "MD031", # Surround fenced code blocks with blank lines.
+  "MD032", # Surround lists with blank lines.
+  "MD034", # Wrap bare URLs in angle brackets or Markdown links.
+  "MD035", # Use a consistent horizontal-rule style.
+  "MD037", # Do not put spaces inside emphasis markers.
+  "MD038", # Do not put unnecessary spaces inside inline code spans.
+  "MD039", # Do not put spaces at the edges of link text.
+  "MD042", # Do not use links with empty destinations.
+  "MD043", # Enforce a required heading structure when configured.
+  "MD044", # Enforce capitalization of proper names when configured.
+  "MD045", # Give images alternative text.
+  "MD046", # Use a consistent code-block style (fenced or indented).
+  "MD047", # End files with exactly one newline.
+  "MD048", # Use a consistent code-fence marker (backticks or tildes).
+  "MD049", # Use a consistent emphasis marker (asterisks or underscores).
+  "MD050", # Use a consistent strong-emphasis marker.
+  "MD051", # Link fragments must reference existing anchors.
+  "MD052", # Reference-style links and images must have definitions.
+  "MD053", # Do not keep unused or duplicate link-reference definitions.
+  "MD054", # Restrict link and image styles when configured.
+  "MD055", # Use consistent leading and trailing pipes in tables.
+  "MD056", # Keep the number of columns consistent across table rows.
+  "MD058", # Surround tables with blank lines.
+  "MD059", # Use descriptive link text instead of generic text like "click here".
+  "MD060", # Keep table columns consistently aligned in the Markdown source.
+]
+include = ["**/*.md"]
+exclude = [
+  "**/__fixtures__/*",
+  "**/node_modules/**",
+  "tmp/**",
+  "**/.cache/**",
+  ".venv/**",
+  "tools/mkdocs/docs/**",
+  "tools/mkdocs/site/**",
+  ".agents/**",
+  ".claude/**",
+  ".opencode/**",
+  "AGENTS.md",
+  "CLAUDE.md",
+  ".worktrees/**/*",
+]
+# Match the previous explicit globs instead of inheriting user Git exclusions.
+respect-gitignore = false
+cache-dir = ".cache/rumdl"
+# MkDocs flavor assumes four-space indentation, but this site uses two spaces.
+flavor = "standard"
+
+# Preserve markdownlint defaults where rumdl differs.
+[MD010]
+# Check tabs inside code blocks as well as prose.
+code-blocks = true
+
+[MD027]
+# Check spacing in blockquoted list items as well as other blockquote content.
+list-items = true
+
+[MD051]
+# Require fragments to match anchor capitalization exactly.
+ignore-case = false
+
+[MD060]
+# Explicitly enable this opt-in rule and retain Prettier-aligned tables.
+enabled = true
+style = "aligned"
