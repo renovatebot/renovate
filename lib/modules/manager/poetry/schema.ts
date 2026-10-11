@@ -263,10 +263,15 @@ export const PoetrySources = LooseArray(PoetrySource, {
       result.push(source);
     }
 
-    if (sources.length && !hasDefaultSource && !overridesPyPi) {
+    if (
+      sources.length &&
+      !hasDefaultSource &&
+      !hasPrimarySource &&
+      !overridesPyPi
+    ) {
       result.push({
         name: 'pypi',
-        priority: hasPrimarySource ? 'secondary' : 'default',
+        priority: 'default',
         url: pypiUrl,
       });
     }
