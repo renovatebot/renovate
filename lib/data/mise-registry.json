@@ -1,15 +1,15 @@
 {
   "meta": {
-    "version": "2026.10.1 linux-x64 (2026-10-03)"
+    "version": "2026.10.7 linux-x64 (2026-10-09)"
   },
   "tools": {
     "1password": {
       "aqua": "1password/cli",
-      "vfox": "mise-plugins/vfox-1password"
+      "vfox": "jdx/vfox-1password"
     },
     "1password-cli": {
       "aqua": "1password/cli",
-      "vfox": "mise-plugins/vfox-1password"
+      "vfox": "jdx/vfox-1password"
     },
     "7z": {
       "aqua": "ip7z/7zip",
@@ -20,7 +20,7 @@
       "github": "ip7z/7zip"
     },
     "aapt2": {
-      "vfox": "mise-plugins/vfox-aapt2"
+      "vfox": "jdx/vfox-aapt2"
     },
     "acli": {
       "aqua": "atlassian.com/acli"
@@ -45,7 +45,7 @@
     },
     "ag": {
       "asdf": "mise-plugins/mise-ag",
-      "vfox": "mise-plugins/vfox-ag"
+      "vfox": "jdx/vfox-ag"
     },
     "age": {
       "aqua": "FiloSottile/age",
@@ -110,7 +110,7 @@
       "http": "android-cli"
     },
     "android-sdk": {
-      "vfox": "mise-plugins/vfox-android-sdk"
+      "vfox": "jdx/vfox-android-sdk"
     },
     "ansible": {
       "pypi": "ansible"
@@ -122,7 +122,7 @@
       "pypi": "ansible-core"
     },
     "ant": {
-      "vfox": "mise-plugins/vfox-ant"
+      "vfox": "jdx/vfox-ant"
     },
     "antigravity-cli": {
       "aqua": "google-antigravity/antigravity-cli"
@@ -175,7 +175,7 @@
     },
     "asciidoctorj": {
       "asdf": "mise-plugins/mise-asciidoctorj",
-      "vfox": "mise-plugins/vfox-asciidoctorj"
+      "vfox": "jdx/vfox-asciidoctorj"
     },
     "aspire": {
       "github": "microsoft/aspire"
@@ -295,7 +295,7 @@
     },
     "azure-functions-core-tools": {
       "asdf": "mise-plugins/mise-azure-functions-core-tools",
-      "vfox": "mise-plugins/vfox-azure-functions-core-tools"
+      "vfox": "jdx/vfox-azure-functions-core-tools"
     },
     "azure-kubelogin": {
       "aqua": "Azure/kubelogin",
@@ -358,7 +358,7 @@
     },
     "bfs": {
       "asdf": "mise-plugins/mise-bfs",
-      "vfox": "mise-plugins/vfox-bfs"
+      "vfox": "jdx/vfox-bfs"
     },
     "bibtex-tidy": {
       "npm": "bibtex-tidy"
@@ -416,7 +416,7 @@
     },
     "bpkg": {
       "asdf": "mise-plugins/mise-bpkg",
-      "vfox": "mise-plugins/vfox-bpkg"
+      "vfox": "jdx/vfox-bpkg"
     },
     "broot": {
       "github": "canop/broot"
@@ -497,7 +497,7 @@
     },
     "carthage": {
       "asdf": "mise-plugins/mise-carthage",
-      "vfox": "mise-plugins/vfox-carthage"
+      "vfox": "jdx/vfox-carthage"
     },
     "ccache": {
       "asdf": "asdf-community/asdf-ccache",
@@ -552,10 +552,10 @@
     },
     "chezscheme": {
       "asdf": "mise-plugins/mise-chezscheme",
-      "vfox": "mise-plugins/vfox-chezscheme"
+      "vfox": "jdx/vfox-chezscheme"
     },
     "chicken": {
-      "vfox": "mise-plugins/vfox-chicken"
+      "vfox": "jdx/vfox-chicken"
     },
     "chisel": {
       "aqua": "jpillora/chisel",
@@ -569,7 +569,7 @@
     },
     "chromedriver": {
       "asdf": "mise-plugins/mise-chromedriver",
-      "vfox": "mise-plugins/vfox-chromedriver"
+      "vfox": "jdx/vfox-chromedriver"
     },
     "cidr-merger": {
       "asdf": "ORCID/asdf-cidr-merger",
@@ -599,7 +599,7 @@
     "clang": {
       "asdf": "mise-plugins/mise-llvm",
       "conda": "clang",
-      "vfox": "mise-plugins/vfox-clang"
+      "vfox": "jdx/vfox-clang"
     },
     "clang-format": {
       "asdf": "mise-plugins/mise-llvm",
@@ -624,7 +624,7 @@
     },
     "clickhouse": {
       "asdf": "mise-plugins/mise-clickhouse",
-      "vfox": "mise-plugins/vfox-clickhouse"
+      "vfox": "jdx/vfox-clickhouse"
     },
     "clipboard": {
       "github": "Slackadays/Clipboard"
@@ -666,7 +666,7 @@
     "cmake": {
       "aqua": "Kitware/CMake",
       "asdf": "mise-plugins/mise-cmake",
-      "vfox": "mise-plugins/vfox-cmake"
+      "vfox": "jdx/vfox-cmake"
     },
     "cmctl": {
       "aqua": "cert-manager/cmctl",
@@ -817,7 +817,7 @@
     "crystal": {
       "asdf": "mise-plugins/mise-crystal",
       "github": "crystal-lang/crystal",
-      "vfox": "mise-plugins/vfox-crystal"
+      "vfox": "jdx/vfox-crystal"
     },
     "cspell": {
       "npm": "cspell"
@@ -856,7 +856,8 @@
       "asdf": "virtualstaticvoid/asdf-dagger"
     },
     "dagu": {
-      "aqua": "dagucloud/dagu"
+      "aqua": "dagucloud/dagu",
+      "packslip": "github.com/dagucloud/dagu"
     },
     "danger-js": {
       "npm": "danger"
@@ -871,7 +872,7 @@
     "dart": {
       "asdf": "mise-plugins/mise-dart",
       "http": "dart",
-      "vfox": "mise-plugins/vfox-dart"
+      "vfox": "jdx/vfox-dart"
     },
     "dasel": {
       "aqua": "TomWright/dasel",
@@ -895,6 +896,9 @@
     "deck": {
       "aqua": "Kong/deck",
       "asdf": "nutellinoit/asdf-deck"
+    },
+    "dekit": {
+      "aqua": "pvolok/dekit"
     },
     "delta": {
       "aqua": "dandavison/delta",
@@ -1113,7 +1117,7 @@
     "etcd": {
       "aqua": "etcd-io/etcd",
       "asdf": "particledecay/asdf-etcd",
-      "vfox": "mise-plugins/vfox-etcd"
+      "vfox": "jdx/vfox-etcd"
     },
     "evans": {
       "aqua": "ktr0731/evans",
@@ -1171,7 +1175,7 @@
     "flutter": {
       "asdf": "mise-plugins/mise-flutter",
       "http": "flutter",
-      "vfox": "mise-plugins/vfox-flutter"
+      "vfox": "jdx/vfox-flutter"
     },
     "fluttergen": {
       "asdf": "FlutterGen/asdf-fluttergen",
@@ -1239,7 +1243,7 @@
     },
     "gcloud": {
       "asdf": "mise-plugins/mise-gcloud",
-      "vfox": "mise-plugins/vfox-gcloud"
+      "vfox": "jdx/vfox-gcloud"
     },
     "gdu": {
       "aqua": "dundee/gdu"
@@ -1346,7 +1350,7 @@
       "aqua": "gittools/gitversion"
     },
     "glab": {
-      "asdf": "mise-plugins/mise-glab",
+      "asdf": "jdx/mise-glab",
       "gitlab": "gitlab-org/cli"
     },
     "gleam": {
@@ -1460,7 +1464,7 @@
     },
     "gradle": {
       "aqua": "gradle/gradle-distributions",
-      "vfox": "mise-plugins/vfox-gradle"
+      "vfox": "jdx/vfox-gradle"
     },
     "grafana-kubernetes-plugin": {
       "aqua": "ricoberger/grafana-kubernetes-plugin"
@@ -1576,7 +1580,8 @@
     },
     "helmfile": {
       "aqua": "helmfile/helmfile",
-      "asdf": "feniix/asdf-helmfile"
+      "asdf": "feniix/asdf-helmfile",
+      "packslip": "github.com/helmfile/helmfile"
     },
     "helmsman": {
       "aqua": "mkubaczyk/helmsman",
@@ -1716,6 +1721,9 @@
       "aqua": "istio/istio/istioctl",
       "asdf": "virtualstaticvoid/asdf-istioctl"
     },
+    "jactionlint": {
+      "github": "jdx/jactionlint"
+    },
     "janet": {
       "github": "janet-lang/janet"
     },
@@ -1807,7 +1815,7 @@
       "npm": "@google/jules"
     },
     "julia": {
-      "asdf": "mise-plugins/mise-julia",
+      "asdf": "jdx/mise-julia",
       "http": "julia"
     },
     "just": {
@@ -1921,7 +1929,7 @@
     "kotlin": {
       "asdf": "mise-plugins/mise-kotlin",
       "github": "JetBrains/kotlin",
-      "vfox": "mise-plugins/vfox-kotlin"
+      "vfox": "jdx/vfox-kotlin"
     },
     "kpt": {
       "aqua": "kptdev/kpt",
@@ -2090,7 +2098,7 @@
     },
     "leiningen": {
       "asdf": "mise-plugins/mise-lein",
-      "vfox": "mise-plugins/vfox-leiningen"
+      "vfox": "jdx/vfox-leiningen"
     },
     "libsql-server": {
       "asdf": "jonasb/asdf-libsql-server",
@@ -2159,7 +2167,7 @@
     },
     "lua": {
       "asdf": "mise-plugins/mise-lua",
-      "vfox": "mise-plugins/vfox-lua"
+      "vfox": "jdx/vfox-lua"
     },
     "lua-language-server": {
       "aqua": "LuaLS/lua-language-server",
@@ -2231,7 +2239,7 @@
     "maven": {
       "aqua": "apache/maven",
       "asdf": "mise-plugins/mise-maven",
-      "vfox": "mise-plugins/vfox-maven"
+      "vfox": "jdx/vfox-maven"
     },
     "mbx": {
       "github": "jdx/mr-boxington",
@@ -2410,7 +2418,7 @@
     },
     "neovim": {
       "aqua": "neovim/neovim",
-      "vfox": "mise-plugins/vfox-neovim"
+      "vfox": "jdx/vfox-neovim"
     },
     "nerdctl": {
       "aqua": "containerd/nerdctl",
@@ -2558,7 +2566,7 @@
     },
     "op": {
       "aqua": "1password/cli",
-      "vfox": "mise-plugins/vfox-1password"
+      "vfox": "jdx/vfox-1password"
     },
     "opa": {
       "aqua": "open-policy-agent/opa",
@@ -2704,7 +2712,7 @@
     },
     "pipenv": {
       "pypi": "pipenv",
-      "vfox": "mise-plugins/vfox-pipenv"
+      "vfox": "jdx/vfox-pipenv"
     },
     "pipx": {
       "aqua": "pypa/pipx",
@@ -2761,7 +2769,7 @@
     },
     "poetry": {
       "pypi": "poetry",
-      "vfox": "mise-plugins/vfox-poetry"
+      "vfox": "jdx/vfox-poetry"
     },
     "polaris": {
       "aqua": "FairwindsOps/polaris",
@@ -2784,7 +2792,7 @@
     "postgres": {
       "asdf": "mise-plugins/mise-postgres",
       "conda": "postgresql",
-      "vfox": "mise-plugins/vfox-postgres"
+      "vfox": "jdx/vfox-postgres"
     },
     "powerline-go": {
       "aqua": "justjanne/powerline-go",
@@ -2921,7 +2929,7 @@
     "redis": {
       "asdf": "mise-plugins/mise-redis",
       "conda": "redis-server",
-      "vfox": "mise-plugins/vfox-redis"
+      "vfox": "jdx/vfox-redis"
     },
     "redpanda-connect": {
       "aqua": "redpanda-data/connect",
@@ -3059,7 +3067,7 @@
     },
     "scala": {
       "asdf": "mise-plugins/mise-scala",
-      "vfox": "mise-plugins/vfox-scala"
+      "vfox": "jdx/vfox-scala"
     },
     "scala-cli": {
       "asdf": "mise-plugins/mise-scala-cli",
@@ -3114,7 +3122,7 @@
     "semver": {
       "aqua": "fsaintjacques/semver-tool",
       "asdf": "mathew-fleisch/asdf-semver",
-      "vfox": "mise-plugins/vfox-semver"
+      "vfox": "jdx/vfox-semver"
     },
     "sentinel": {
       "asdf": "mise-plugins/mise-hashicorp",
@@ -3127,7 +3135,7 @@
       "aqua": "getsentry/sentry-cli"
     },
     "serverless": {
-      "asdf": "mise-plugins/mise-serverless",
+      "asdf": "jdx/mise-serverless",
       "npm": "serverless"
     },
     "setup-envtest": {
@@ -3487,7 +3495,7 @@
     "terraform": {
       "aqua": "hashicorp/terraform",
       "asdf": "mise-plugins/mise-hashicorp",
-      "vfox": "mise-plugins/vfox-terraform"
+      "vfox": "jdx/vfox-terraform"
     },
     "terraform-docs": {
       "aqua": "terraform-docs/terraform-docs",
@@ -3962,7 +3970,7 @@
       "aqua": "yarnpkg/berry",
       "asdf": "mise-plugins/mise-yarn",
       "npm": "@yarnpkg/cli-dist",
-      "vfox": "mise-plugins/vfox-yarn"
+      "vfox": "jdx/vfox-yarn"
     },
     "yazi": {
       "aqua": "sxyazi/yazi",
