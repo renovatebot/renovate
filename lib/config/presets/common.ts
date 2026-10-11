@@ -32,6 +32,7 @@ export const removedPresets: Record<string, string | null> = {
   'group:kubernetes': 'group:kubernetesMonorepo',
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'npm:unpublishSafe': 'security:minimumReleaseAgeNpm',
+  'preview:buildkite': null,
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
     'replacements:messageFormat-to-scoped',
   'replacements:ojdbc10-to-ojdbc11': 'replacements:ojdbc-to-ojdbc11',
