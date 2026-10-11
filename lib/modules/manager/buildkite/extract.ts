@@ -1,11 +1,19 @@
 import { isObject } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import { BuildkiteFile, type BuildkiteStep } from './schema.ts';
 
 const pluginKeyRegex = regEx(/^(?<depName>[^#\s]+)#(?<currentValue>[^:]+)$/);
 const gitPluginRegex = regEx(
@@ -109,9 +117,32 @@ function extractPluginDeps(
   }
 }
 
+function extractImage(
+  image: string | undefined,
+  deps: PackageDependency[],
+  registryAliases: Record<string, string>,
+): void {
+  if (image) {
+    deps.push(getDep(image, { registryAliases, depType: 'docker' }));
+  }
+}
+
+function extractStepImages(
+  steps: BuildkiteStep[],
+  deps: PackageDependency[],
+  registryAliases: Record<string, string>,
+): void {
+  for (const step of steps) {
+    extractImage(step.image, deps, registryAliases);
+    extractImage(step.agentsImage, deps, registryAliases);
+    extractStepImages(step.steps, deps, registryAliases);
+  }
+}
+
 export function extractPackageFile(
   content: string,
   packageFile?: string,
+  config?: ExtractConfig,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -121,6 +152,18 @@ export function extractPackageFile(
     raw = parseSingleYaml(content, { version: '1.1' });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Buildkite pipeline YAML');
+  }
+
+  const { val: parsed, err } = Result.wrap(() =>
+    BuildkiteFile.parse(raw),
+  ).unwrap();
+  if (err) {
+    logger.debug({ err, packageFile }, 'Error extracting Buildkite images');
+  } else {
+    const registryAliases = coerceObject(config?.registryAliases);
+    extractImage(parsed.image, deps, registryAliases);
+    extractImage(parsed.agentsImage, deps, registryAliases);
+    extractStepImages(parsed.steps, deps, registryAliases);
   }
 
   extractPluginDeps(raw, deps, new WeakSet());
