@@ -1513,5 +1513,30 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the markdownlint image from the johnsyweb/markdownlint plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              johnsyweb/markdownlint#v2.1.0:
+                version: "0.37.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'johnsyweb/markdownlint',
+          packageName: 'johnsyweb/markdownlint-buildkite-plugin',
+        },
+        {
+          currentValue: '0.37.0',
+          datasource: 'docker',
+          depName: 'markdownlint/markdownlint',
+          packageName: 'markdownlint/markdownlint',
+          depType: 'docker',
+        },
+      ]);
+    });
   });
 });
