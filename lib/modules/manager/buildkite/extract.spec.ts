@@ -1232,5 +1232,49 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image for grapl-security/codecov when image and tag are set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/codecov#v1.0.0:
+                image: "myorg/myapp"
+                tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/codecov',
+          packageName: 'grapl-security/codecov-buildkite-plugin',
+        },
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for grapl-security/codecov when tag is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/codecov#v1.0.0:
+                image: "myorg/myapp"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/codecov',
+          packageName: 'grapl-security/codecov-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
