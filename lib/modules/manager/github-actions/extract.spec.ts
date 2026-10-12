@@ -3236,9 +3236,6 @@ describe('modules/manager/github-actions/extract', () => {
     {
       // `renovate-image` tag- and digest-pinned, with no `renovate-version`
       // set: https://github.com/renovatebot/renovate/discussions/46969
-      //
-      // This currently (incorrectly) leaves the tag stuck inside
-      // `packageName`/`depName`, and is skipped entirely as a result.
       step: {
         uses: 'renovatebot/github-action@v43.0.0',
         with: {
@@ -3248,14 +3245,13 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [
         {
+          currentValue: '44.104.2',
           currentDigest:
             'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
           datasource: 'docker',
-          depName: 'ghcr.io/renovatebot/renovate:44.104.2',
+          depName: 'ghcr.io/renovatebot/renovate',
           depType: 'uses-with',
-          packageName: 'ghcr.io/renovatebot/renovate:44.104.2',
-          skipStage: 'extract',
-          skipReason: 'unspecified-version',
+          packageName: 'ghcr.io/renovatebot/renovate',
         },
       ],
     },
