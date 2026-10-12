@@ -43,7 +43,12 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
-export type StatusCheckWhen = 'always' | 'never' | 'failed';
+export const allowedStatusCheckWhenValues = [
+  'always',
+  'never',
+  'failed',
+] as const;
+export type StatusCheckWhen = (typeof allowedStatusCheckWhenValues)[number];
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
