@@ -765,5 +765,60 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the jameslnewell/docker-run plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              jameslnewell/docker-run#v1.2.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.2.0',
+          datasource: 'github-tags',
+          depName: 'jameslnewell/docker-run',
+          packageName: 'jameslnewell/docker-run-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('recognises a known third-party plugin referenced via a git URL', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.com/jameslnewell/docker-run-buildkite-plugin#v1.2.0:
+              image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.2.0',
+          datasource: 'github-tags',
+          depName: 'jameslnewell/docker-run-buildkite-plugin',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
   });
 });
