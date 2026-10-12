@@ -2675,6 +2675,11 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
           message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
       ]);
       expect(errors).toMatchObject([
         {
@@ -2706,7 +2711,13 @@ describe('config/validation', () => {
         config,
       );
 
-      expect(warnings).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
+      ]);
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
