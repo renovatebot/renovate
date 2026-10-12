@@ -6043,11 +6043,16 @@ describe('modules/platform/github/index', () => {
       expect(github.massageMarkdown(input)).toBe(expected);
     });
 
-    it('converts the note added by smartTruncate() to GitHub alert syntax', () => {
+    it('converts the notices added by smartTruncate() to GitHub alert syntax', () => {
       const input = 'x'.repeat(github.maxBodyLength() + 1000);
+
       const result = github.massageMarkdown(input);
+
       expect(result).toContain(
         '> [!NOTE]\n> This PR body was truncated due to platform limits.\n\n',
+      );
+      expect(result).toContain(
+        '> [!IMPORTANT]\n> ✂ PR body was truncated to here.',
       );
     });
 
