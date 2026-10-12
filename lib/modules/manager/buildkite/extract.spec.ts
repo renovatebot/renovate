@@ -968,5 +968,70 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts an explicit image for golangci-lint', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golangci-lint when docker_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                version: v1.55.2
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golangci-lint when use_docker is false', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golangci-lint#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+                use_docker: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golangci-lint',
+          packageName: 'buildkite-plugins/golangci-lint-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });

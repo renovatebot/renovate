@@ -36,6 +36,25 @@ function extractSingleImageField(field: string): KnownPluginExtractor {
 }
 
 /**
+ * Wraps `inner` so it only runs when the given boolean config field is
+ * (explicitly or by its own default) `true` - for a plugin whose image field
+ * is only meaningful behind a boolean "use Docker for this" toggle.
+ */
+function whenTrue(
+  gateField: string,
+  gateDefault: boolean,
+  inner: KnownPluginExtractor,
+): KnownPluginExtractor {
+  const schema = z.object({ [gateField]: z.boolean().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const enabled =
+      (parsed.success ? parsed.data[gateField] : undefined) ?? gateDefault;
+    return enabled ? inner(config, registryAliases) : [];
+  };
+}
+
+/**
  * Buildkite plugins whose own configuration embeds a further dependency (for
  * example the `docker` plugin's `image` key), keyed by the plugin's bare
  * (unscoped) name as written in the pipeline, e.g. `docker#v5.14.0`, or by
@@ -96,5 +115,18 @@ export const knownPlugins: Record<string, KnownPlugin> = {
   'joscha/codecov': {
     extract: extractSingleImageField('docker_image'),
     fields: ['docker_image'],
+  },
+  // https://github.com/buildkite-plugins/golangci-lint-buildkite-plugin
+  // `docker_image` is only used when `use_docker` is true (the default) -
+  // verified against `plugin.yml`/`hooks/command`. The plugin's own default
+  // image value (`golangci/golangci-lint:latest`) isn't literal text in the
+  // file when `docker_image` is unset, so we don't report it.
+  'golangci-lint': {
+    extract: whenTrue(
+      'use_docker',
+      true,
+      extractSingleImageField('docker_image'),
+    ),
+    fields: ['docker_image', 'use_docker'],
   },
 };
