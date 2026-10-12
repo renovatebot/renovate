@@ -1893,5 +1893,98 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts a string-form image from the forumone/extract plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts an object-form image with repository and tag from forumone/extract', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image:
+                  repository: "myorg/myapp"
+                  tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+        {
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image from forumone/extract object form without a tag', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                image:
+                  repository: "myorg/myapp"
+                  service: "web"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image from forumone/extract when image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              forumone/extract#v2.0.0:
+                from: "/src"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'forumone/extract',
+          packageName: 'forumone/extract-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
