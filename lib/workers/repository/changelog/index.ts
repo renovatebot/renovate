@@ -75,6 +75,22 @@ export async function embedChangelog(
   const releaseChangelog = getReleaseChangelog(upgrade);
   if (releaseChangelog) {
     upgrade.logJSON = releaseChangelog;
+    const versioning = allVersioning.get(upgrade.versioning);
+    if (
+      isNonEmptyString(upgrade.sourceUrl) &&
+      !releaseChangelog.versions!.some((release) =>
+        versioning.equals(release.version, upgrade.newVersion!),
+      )
+    ) {
+      const repositoryChangelog = await getChangeLogJSON(upgrade);
+      if (
+        repositoryChangelog?.versions?.some((release) =>
+          isNonEmptyString(release.releaseNotes?.body),
+        )
+      ) {
+        upgrade.logJSON = repositoryChangelog;
+      }
+    }
     return;
   }
 

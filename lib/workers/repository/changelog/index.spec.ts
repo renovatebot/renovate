@@ -2,6 +2,10 @@ import { partial } from '~test/util.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
+import type {
+  ChangeLogRelease,
+  ChangeLogResult,
+} from '../update/pr/changelog/types.ts';
 import { embedChangelogs } from './index.ts';
 
 vi.mock('../update/pr/changelog/index.ts');
@@ -159,6 +163,7 @@ describe('workers/repository/changelog/index', () => {
         fetchChangeLogs: 'pr',
         newVersion: '1.3.0',
         packageName: 'example',
+        sourceUrl: 'https://github.com/example/repo',
         versioning: 'npm',
       }),
     ];
@@ -176,7 +181,7 @@ describe('workers/repository/changelog/index', () => {
         packageName: 'example',
         repository: undefined,
         sourceDirectory: undefined,
-        sourceUrl: undefined,
+        sourceUrl: 'https://github.com/example/repo',
         type: undefined,
       },
       versions: [
@@ -209,7 +214,7 @@ describe('workers/repository/changelog/index', () => {
     });
   });
 
-  it('uses intermediate content when the target release has no content', async () => {
+  it('uses intermediate content without repository retrieval when no source URL is available', async () => {
     const upgrades = [
       partial<BranchUpgradeConfig>({
         changelogReleases: [
@@ -241,6 +246,83 @@ describe('workers/repository/changelog/index', () => {
     ]);
   });
 
+  it.each`
+    versioning
+    ${'semver'}
+    ${'unity3d-packages'}
+  `(
+    'prefers repository content when the target has no embedded notes with $versioning versioning',
+    async ({ versioning }) => {
+      const repositoryChangelog: ChangeLogResult = {
+        hasReleaseNotes: true,
+        versions: [
+          partial<ChangeLogRelease>({ version: '1.1.0' }),
+          partial<ChangeLogRelease>({
+            version: '1.2.0',
+            releaseNotes: {
+              body: 'target repository notes',
+              notesSourceUrl: 'https://github.com/example/repo/releases',
+              url: 'https://github.com/example/repo/releases/tag/1.2.0',
+            },
+          }),
+        ],
+      };
+      vi.mocked(getChangeLogJSON).mockResolvedValueOnce(repositoryChangelog);
+      const upgrade = partial<BranchUpgradeConfig>({
+        changelogContent: 'intermediateContent',
+        changelogReleases: [
+          { changelogContent: 'intermediateContent', version: '1.1.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning,
+      });
+
+      await embedChangelogs({ upgrades: [upgrade], stage: 'pr' });
+
+      expect(getChangeLogJSON).toHaveBeenCalledExactlyOnceWith(upgrade);
+      expect(upgrade.logJSON).toBe(repositoryChangelog);
+    },
+  );
+
+  it.each`
+    result                  | repositoryChangelog
+    ${'null'}               | ${null}
+    ${'missing token'}      | ${{ error: 'MissingGithubToken' }}
+    ${'no versions'}        | ${{ hasReleaseNotes: false }}
+    ${'empty versions'}     | ${{ hasReleaseNotes: false, versions: [] }}
+    ${'compare-only notes'} | ${{ hasReleaseNotes: true, versions: [partial<ChangeLogRelease>({ version: '1.2.0', releaseNotes: { notesSourceUrl: '', url: 'https://github.com/example/repo/compare/1.0.0...1.2.0' } })] }}
+    ${'empty content'}      | ${{ hasReleaseNotes: true, versions: [partial<ChangeLogRelease>({ version: '1.2.0', releaseNotes: { body: '', notesSourceUrl: '', url: 'https://github.com/example/repo/releases/tag/1.2.0' } })] }}
+  `(
+    'retains intermediate embedded notes when repository retrieval returns $result',
+    async ({ repositoryChangelog }) => {
+      vi.mocked(getChangeLogJSON).mockResolvedValueOnce(repositoryChangelog);
+      const upgrade = partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          { changelogContent: 'intermediateContent', version: '1.1.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning: 'semver',
+      });
+
+      await embedChangelogs({ upgrades: [upgrade], stage: 'pr' });
+
+      expect(getChangeLogJSON).toHaveBeenCalledExactlyOnceWith(upgrade);
+      expect(upgrade.logJSON).toMatchObject({
+        hasReleaseNotes: true,
+        perDependencyNotes: true,
+        versions: [
+          { version: '1.1.0', releaseNotes: { body: 'intermediateContent' } },
+        ],
+      });
+    },
+  );
+
   it('normalizes versions and excludes incompatible release content', async () => {
     const upgrades = [
       partial<BranchUpgradeConfig>({
@@ -262,12 +344,14 @@ describe('workers/repository/changelog/index', () => {
         currentVersion: '1.0.0',
         fetchChangeLogs: 'pr',
         newVersion: '1.0.3',
+        sourceUrl: 'https://github.com/example/repo',
         versioning: 'docker',
       }),
     ];
 
     await embedChangelogs({ upgrades, stage: 'pr' });
 
+    expect(getChangeLogJSON).not.toHaveBeenCalled();
     expect(upgrades[0].logJSON?.versions).toEqual([
       expect.objectContaining({
         releaseNotes: expect.objectContaining({ body: 'targetContent' }),

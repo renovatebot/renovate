@@ -80,8 +80,9 @@ export interface Release {
   name?: string;
   /**
    * Markdown for this release only, not cumulative history. Applicable entries
-   * are combined for the update range and take precedence over repository
-   * changelog retrieval; missing entries are not fetched separately.
+   * are combined for the update range. Target release notes take precedence
+   * over repository retrieval; otherwise repository notes are preferred when
+   * available. Missing entries are not fetched separately.
    * Omit this field from all releases to allow normal repository retrieval.
    */
   changelogContent?: string;

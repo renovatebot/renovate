@@ -100,8 +100,11 @@ It applies the configured versioning's compatibility and prerelease rules, order
 For example, an update from `1.0.0` to `1.3.0` can display notes for `1.3.0`, `1.2.0`, and `1.1.0`, but not `1.0.0` or `1.4.0`.
 Only releases returned by the datasource can contribute embedded notes.
 
-If any applicable entries contain notes, these take precedence over normal repository changelog retrieval, even when `sourceUrl` points to GitHub or GitLab.
-Renovate does not fetch missing entries from those platforms to complete a partially supplied changelog.
+If the selected target has embedded notes, the combined entries take precedence over normal repository changelog retrieval, even when `sourceUrl` points to GitHub or GitLab.
+If only intermediate releases have embedded notes and a `sourceUrl` is available, Renovate attempts normal repository changelog retrieval.
+Repository notes containing Markdown replace the embedded notes; if retrieval fails or returns no content, the intermediate embedded notes are retained.
+Without a `sourceUrl`, the intermediate embedded notes are used directly.
+Renovate does not merge fetched and embedded notes to complete a partially supplied changelog.
 If no applicable embedded entries are available, Renovate falls back to the selected target's supplied content, when present, and otherwise to normal changelog retrieval.
 Omitted or empty `changelogContent` does not, by itself, suppress normal changelog retrieval.
 
