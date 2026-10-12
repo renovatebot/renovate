@@ -1538,5 +1538,82 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts a golang image per target with a version, skipping targets without one', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0:
+                targets:
+                  - version: "1.21"
+                    goos: linux
+                  - goos: darwin
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not let one non-string target version drop the other targets', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0:
+                targets:
+                  - version: 1.20
+                    goos: linux
+                  - version: "1.21"
+                    goos: darwin
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image from golang-cross-compile when targets is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang-cross-compile#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang-cross-compile',
+          packageName:
+            'buildkite-plugins/golang-cross-compile-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });

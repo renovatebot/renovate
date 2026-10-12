@@ -1,5 +1,7 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 import type { KnownPlugin, KnownPluginExtractor } from './types.ts';
@@ -314,5 +316,33 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractFixedImageVersion('markdownlint/markdownlint', 'version'),
     fields: ['version'],
     dependency: 'markdownlint/markdownlint',
+  },
+  // https://github.com/buildkite-plugins/golang-cross-compile-buildkite-plugin
+  // Doesn't run Docker directly itself - it generates a pipeline with one
+  // step per `targets[]` entry, each delegating to the `golang` plugin
+  // pinned at `golang#v2.0.0`, passing through `version`. So this is the
+  // same `golang:${version}` image as that plugin, just indirectly. Uses
+  // `LooseArray` so one target with a non-string (e.g. unquoted numeric)
+  // `version` doesn't drop every other target in the list.
+  'golang-cross-compile': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          targets: LooseArray(
+            z.object({ version: z.string().optional() }),
+          ).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success) {
+        return [];
+      }
+      return coerceArray(parsed.data.targets)
+        .filter((target) => target.version)
+        .map((target) =>
+          depWithVersion('golang', target.version!, registryAliases),
+        );
+    },
+    fields: ['targets[].version'],
+    dependency: 'golang',
   },
 };
