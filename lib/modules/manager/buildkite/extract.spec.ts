@@ -922,5 +922,51 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the joscha/codecov plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              joscha/codecov#v1.0.0:
+                docker_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'joscha/codecov',
+          packageName: 'joscha/codecov-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image for joscha/codecov when docker_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              joscha/codecov#v1.0.0:
+                token: xyz
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'joscha/codecov',
+          packageName: 'joscha/codecov-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
