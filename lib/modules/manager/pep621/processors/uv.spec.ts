@@ -508,6 +508,20 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('returns deps unchanged if lock file cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [...deps],
+        'pyproject.toml',
+      );
+      expect(result).toEqual(deps);
+    });
+
     it('logs debug and returns deps unchanged if lock file fails to parse', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('not valid toml [[[');
