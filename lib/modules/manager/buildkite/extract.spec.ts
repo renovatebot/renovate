@@ -701,5 +701,51 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the docker-compose plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-compose#v4.16.0:
+                run-image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v4.16.0',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image from docker-compose when run-image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-compose#v4.16.0:
+                run: app
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v4.16.0',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
