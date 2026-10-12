@@ -43,6 +43,7 @@ describe('modules/platform/gerrit/index', () => {
   const currentRevision = '0123456789abcdef0123456789abcdef01234567';
 
   beforeEach(async () => {
+    GlobalConfig.reset();
     hostRules.add({
       username: 'user',
       password: 'pass',
@@ -57,6 +58,10 @@ describe('modules/platform/gerrit/index', () => {
       username: 'user',
       password: 'pass',
     });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
   });
 
   describe('initPlatform()', () => {
@@ -192,23 +197,19 @@ describe('modules/platform/gerrit/index', () => {
 
     it('initRepo() - uses configured ssh port in clone url', async () => {
       GlobalConfig.set({ gerritSshPort: 2501 });
-      try {
-        clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
-        clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
-        clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
 
-        await gerrit.initRepo({
-          repository: 'test/repo',
-          gitUrl: 'ssh',
-        });
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        gitUrl: 'ssh',
+      });
 
-        expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-          url: 'ssh://user@dev.gerrit.com:2501/test/repo',
-          virtualBranches: {},
-        });
-      } finally {
-        GlobalConfig.reset();
-      }
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'ssh://user@dev.gerrit.com:2501/test/repo',
+        virtualBranches: {},
+      });
     });
 
     it('initRepo() - abandon rejected changes', async () => {

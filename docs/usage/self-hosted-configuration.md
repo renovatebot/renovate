@@ -821,7 +821,7 @@ The default value is `29418`, which matches Gerrit's default SSH port.
 Controls when Renovate passes the `--no-verify` flag to `git`.
 The flag can be passed to `git commit` and/or `git push`.
 Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify) and [git push --no-verify](https://git-scm.com/docs/git-push#Documentation/git-push.txt---no-verify) to learn exactly what each flag does.
-To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git/Git-Hooks).
+To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
 
 ## `gitPrivateKey`
 

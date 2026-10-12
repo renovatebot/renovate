@@ -15,7 +15,7 @@ export const MIN_GERRIT_VERSION = '3.0.0';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
-const DEFAULT_SSH_PORT = `29418`;
+const DEFAULT_SSH_PORT = 29418;
 
 /**
  * Max comment size in Gerrit (16kiB by default)
@@ -58,7 +58,7 @@ function createSshUrl(
   username: string,
   sshPort?: number,
 ): string {
-  const port = sshPort ?? parseInt(DEFAULT_SSH_PORT, 10);
+  const port = sshPort ?? DEFAULT_SSH_PORT;
   return `ssh://${username}@${url.hostname}:${port}/${repository}`;
 }
 
