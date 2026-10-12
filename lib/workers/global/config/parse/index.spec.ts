@@ -581,9 +581,73 @@ describe('workers/global/config/parse/index', () => {
         ]);
         expect(logger.debug).toHaveBeenCalledWith(
           { err: expect.any(Error) },
-          'Not applying hostRules to globalExtends, as their secrets or variables cannot be resolved yet',
+          'Not applying a hostRule to globalExtends, as its secrets or variables cannot be resolved yet',
         );
       });
+
+      it('still applies the `hostRules` which resolve when another one does not', async () => {
+        fileConfigParser.getConfig.mockResolvedValue({
+          globalExtends: [presetUrl],
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com',
+              token: '{{ secrets.FROM_PRESET }}',
+            },
+            { matchHost: presetHost, allowInternal: true },
+          ],
+          internalHostAccess: 'block',
+        });
+        httpMock
+          .scope(presetHost)
+          .get('/preset.json')
+          .reply(200, { secrets: { FROM_PRESET: 'x' } });
+
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+
+        expect(parsedConfig.hostRules).toEqual([
+          { matchHost: 'https://registry.example.com', token: 'x' },
+          { matchHost: presetHost, allowInternal: true },
+        ]);
+        expect(logger.once.warn).not.toHaveBeenCalled();
+      });
+
+      it.each`
+        restriction
+        ${{ allowInternal: false }}
+        ${{ enabled: false }}
+      `(
+        'applies no `hostRules` when a rule with $restriction cannot be resolved yet',
+        async ({ restriction }) => {
+          fileConfigParser.getConfig.mockResolvedValue({
+            globalExtends: [presetUrl],
+            hostRules: [
+              { matchHost: presetHost, allowInternal: true },
+              {
+                matchHost: presetUrl,
+                ...restriction,
+                token: '{{ secrets.FROM_PRESET }}',
+              },
+            ],
+            internalHostAccess: 'block',
+          });
+
+          await expect(
+            configParser.parseConfigs(defaultEnv, defaultArgv),
+          ).rejects.toThrow(CONFIG_PRESETS_INVALID);
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            { err: expect.any(Error) },
+            'Not applying hostRules to globalExtends, as a rule which restricts access cannot be resolved yet',
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            { url: presetUrl, hostType: 'preset' },
+            'Blocked HTTP request to an internal host - a self-hosted administrator can permit it via `hostRules`, or with `internalHostAccess=allow`',
+          );
+        },
+      );
 
       it('does not leave `hostRules` or `GlobalConfig` set afterwards', async () => {
         fileConfigParser.getConfig.mockResolvedValue({

@@ -2,7 +2,10 @@ import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
 import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
-import { GlobalConfig } from '../../../../config/global.ts';
+import {
+  GlobalConfig,
+  setHttpGlobalConfig,
+} from '../../../../config/global.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
 import type { AllConfig } from '../../../../config/types.ts';
@@ -42,25 +45,36 @@ export async function resolveGlobalExtends(
 }
 
 /**
- * Returns the administrator's `hostRules` with secrets and variables applied, or none if they cannot all be applied yet.
+ * Returns the administrator's `hostRules` whose secrets and variables can be applied yet, or none if a rule which restricts access cannot.
  */
 function getInterpolatedHostRules(config: AllConfig): HostRule[] {
-  try {
-    const { hostRules } = applySecretsAndVariablesToConfig({
-      config: { hostRules: clone(coerceArray(config.hostRules)) },
-      secrets: config.secrets,
-      variables: config.variables,
-      deleteSecrets: true,
-      deleteVariables: true,
-    });
-    return coerceArray(hostRules);
-  } catch (err) {
-    logger.debug(
-      { err },
-      'Not applying hostRules to globalExtends, as their secrets or variables cannot be resolved yet',
-    );
-    return [];
+  const interpolated: HostRule[] = [];
+  for (const rule of coerceArray(config.hostRules)) {
+    try {
+      const { hostRules } = applySecretsAndVariablesToConfig({
+        config: { hostRules: [clone(rule)] },
+        secrets: config.secrets,
+        variables: config.variables,
+        deleteSecrets: true,
+        deleteVariables: true,
+      });
+      interpolated.push(...coerceArray(hostRules));
+    } catch (err) {
+      // skipping only this rule would let a broader rule apply where it was meant to restrict, so apply none of them, as before admin `hostRules` were applied here
+      if (rule.allowInternal === false || rule.enabled === false) {
+        logger.debug(
+          { err },
+          'Not applying hostRules to globalExtends, as a rule which restricts access cannot be resolved yet',
+        );
+        return [];
+      }
+      logger.debug(
+        { err },
+        'Not applying a hostRule to globalExtends, as its secrets or variables cannot be resolved yet',
+      );
+    }
   }
+  return interpolated;
 }
 
 /**
@@ -72,13 +86,7 @@ async function resolveGlobalExtendsAsAdmin(
 ): Promise<AllConfig> {
   // `globalExtends` is fetched before `start()` sets `GlobalConfig` and `globalInitialize()` registers `hostRules`, so the administrator's own `internalHostAccess`, `endpoint` and `hostRules` are applied for the duration of that fetch only - `globalInitialize()` then registers the final, merged `hostRules`
   try {
-    GlobalConfig.set({
-      allowedHeaders: config.allowedHeaders,
-      endpoint: config.endpoint,
-      internalHostAccess: config.internalHostAccess,
-      platform: config.platform,
-      userAgent: config.userAgent,
-    });
+    setHttpGlobalConfig(config);
     for (const rule of getInterpolatedHostRules(config)) {
       // the same `trusted` tier as `setGlobalHostRules()`, so that `allowInternal` is kept and can grant
       addHostRule(rule, { trusted: true });
