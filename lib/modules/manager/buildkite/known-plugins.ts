@@ -128,6 +128,27 @@ function extractImageTagJoin(
 }
 
 /**
+ * A plugin with a hardcoded backing Docker image, where the user only
+ * supplies a version/tag via `versionField`. The field being absent means
+ * there's no version text to anchor a replace to (even where the plugin's
+ * own hook falls back to a default like `latest`), so nothing is reported.
+ */
+function extractFixedImageVersion(
+  imageName: string,
+  versionField: string,
+): KnownPluginExtractor {
+  const schema = z.object({ [versionField]: z.string().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const version = parsed.success ? parsed.data[versionField] : undefined;
+    if (!version) {
+      return [];
+    }
+    return [depWithVersion(imageName, version, registryAliases)];
+  };
+}
+
+/**
  * Buildkite plugins whose own configuration embeds a further dependency (for
  * example the `docker` plugin's `image` key), keyed by the plugin's bare
  * (unscoped) name as written in the pipeline, e.g. `docker#v5.14.0`, or by
@@ -251,5 +272,11 @@ export const knownPlugins: Record<string, KnownPlugin> = {
   'grapl-security/vault-env': {
     extract: extractImageTagJoin('image', 'tag', 'hashicorp/envconsul'),
     fields: ['image', 'tag'],
+  },
+  // https://github.com/buildkite-plugins/golang-buildkite-plugin
+  golang: {
+    extract: extractFixedImageVersion('golang', 'version'),
+    fields: ['version'],
+    dependency: 'golang',
   },
 };
