@@ -405,6 +405,7 @@ describe('modules/manager/apm/extract', () => {
       ${'foo--v1.0.0'}
       ${'documentation-plugin-v1.12.0'}
       ${'release-2024'}
+      ${'release/2024'}
     `(
       'keeps $ref, which the default versioning reads, on github-tags',
       ({ ref }) => {

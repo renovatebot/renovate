@@ -25,6 +25,7 @@ A SHA pin without a tag comment is skipped, as there is no version to track.
 A ref that Renovate's default versioning can't read as a version, such as a branch (`owner/repo#main`, or `owner/repo#<sha> # main`), is followed by its commit instead.
 On GitHub hosts this uses the `github-digest` datasource, as `github-actions` does for `uses: owner/action@main`, and on other hosts it uses `git-refs`, both with `exact` versioning.
 Renovate then updates the SHA of a branch-pinned commit as the branch moves, and with `pinDigests` it pins a plain branch ref to its commit, keeping the branch as the comment.
+A branch whose name the default versioning reads as a version, such as `release/2024`, is still looked up as a tag.
 
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
