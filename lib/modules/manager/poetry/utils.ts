@@ -9,7 +9,7 @@ import { Lockfile } from './schema.ts';
 export function getLockfilePoetryVersion(
   lockContents: string,
 ): string | undefined {
-  const firstLine = lockContents.split('\n')[0] ?? '';
+  const firstLine = lockContents.split('\n')[0];
   const headerVersion = regEx(/by Poetry (?<version>[\d\\.]+)/).exec(firstLine)
     ?.groups?.version;
   if (headerVersion) {
