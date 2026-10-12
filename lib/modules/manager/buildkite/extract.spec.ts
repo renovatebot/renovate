@@ -1344,5 +1344,48 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the golang image from the golang plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang#v1.0.0:
+                version: "1.21"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang',
+          packageName: 'buildkite-plugins/golang-buildkite-plugin',
+        },
+        {
+          currentValue: '1.21',
+          datasource: 'docker',
+          depName: 'golang',
+          packageName: 'golang',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for golang when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              golang#v1.0.0:
+                flags: "-v"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'golang',
+          packageName: 'buildkite-plugins/golang-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
