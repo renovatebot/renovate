@@ -61,4 +61,9 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     enabled: false,
     fields: ['image'],
   },
+  // https://github.com/jameslnewell/docker-run-buildkite-plugin
+  'jameslnewell/docker-run': {
+    extract: extractSingleImageField('image'),
+    fields: ['image'],
+  },
 };
