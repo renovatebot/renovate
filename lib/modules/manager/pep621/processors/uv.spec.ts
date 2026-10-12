@@ -779,6 +779,48 @@ describe('modules/manager/pep621/processors/uv', () => {
       const dep = result[0];
       expect(dep.lockedVersion).toBe('8.4.2');
     });
+
+    it('adds indirect dep listed twice only once with lowest version', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.9"
+
+        [[package]]
+        name = "iniconfig"
+        version = "2.3.0"
+        source = { registry = "https://pypi.org/simple" }
+        resolution-markers = [
+            "python_full_version >= '3.10'",
+        ]
+
+        [[package]]
+        name = "iniconfig"
+        version = "2.1.0"
+        source = { registry = "https://example.com/simple" }
+        resolution-markers = [
+            "python_full_version < '3.10'",
+        ]
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'iniconfig',
+          depName: 'iniconfig',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+          lockedVersion: '2.1.0',
+          depType: depTypes.indirect,
+          enabled: false,
+        },
+      ]);
+    });
   });
 
   describe('updateArtifacts()', () => {
