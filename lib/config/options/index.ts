@@ -4,7 +4,11 @@ import { managerDefaultConfigs } from '../../manager-default-configs.generated.t
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
-import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
+import {
+  type RenovateOptions,
+  UpdateTypesOptions,
+  allowedStatusCheckWhenValues,
+} from '../types.ts';
 
 const options: Readonly<RenovateOptions>[] = [
   {
@@ -385,6 +389,9 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     mergeable: true,
     advancedUse: true,
+    additionalProperties: {
+      type: ['string', 'null'],
+    },
     default: {
       artifactError: 'renovate/artifacts',
       configValidation: 'renovate/config-validation',
@@ -399,6 +406,10 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     mergeable: true,
     advancedUse: true,
+    additionalProperties: {
+      type: 'string',
+      enum: [...allowedStatusCheckWhenValues],
+    },
     default: {
       artifactError: 'failed',
       configValidation: 'always',
@@ -662,6 +673,9 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     type: 'object',
     default: {},
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'env',
@@ -669,6 +683,9 @@ const options: Readonly<RenovateOptions>[] = [
       'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
     default: {},
+    additionalProperties: {
+      type: 'string',
+    },
     requiresCheckAtTrustBoundary: true,
   },
   {
@@ -1015,6 +1032,9 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
     type: 'object',
     default: null,
+    additionalProperties: {
+      type: 'string',
+    },
   },
   // Scheduling
   {
@@ -3048,6 +3068,9 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Put fields to be forwarded to the HTTP request headers in the headers config option.',
     type: 'object',
+    additionalProperties: {
+      type: 'string',
+    },
     parents: ['hostRules'],
     cli: false,
     env: false,
@@ -3112,6 +3135,9 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     stage: 'repository',
     default: {},
+    additionalProperties: {
+      type: 'number',
+    },
     globalOnly: true,
     experimental: true,
     advancedUse: true,
