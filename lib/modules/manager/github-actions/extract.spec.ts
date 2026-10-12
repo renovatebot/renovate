@@ -2430,12 +2430,12 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
     {
-      // `'latest'` is the default `pixi-version`, and is a valid version according to Conda versioning, but not one that can be used to bump the verson
+      // `'latest'` is the default `pixi-version`, which is not a version that can be bumped
       step: {
         uses: 'prefix-dev/setup-pixi@v0.8.3',
         with: {
@@ -2449,7 +2449,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
