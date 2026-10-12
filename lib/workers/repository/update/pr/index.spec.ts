@@ -1012,6 +1012,67 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
+      it('renders embedded release notes in the PR body without a source URL', async () => {
+        const { embedChangelogs: actualEmbedChangelogs } =
+          await vi.importActual<typeof import('../../changelog/index.ts')>(
+            '../../changelog/index.ts',
+          );
+        const { getPrBody } =
+          await vi.importActual<typeof import('./body/index.ts')>(
+            './body/index.ts',
+          );
+        const { massageMarkdown } = await vi.importActual<
+          typeof import('../../../../modules/platform/github/index.ts')
+        >('../../../../modules/platform/github/index.ts');
+        vi.mocked(embedChangelogs).mockImplementationOnce(
+          actualEmbedChangelogs,
+        );
+        prBody.getPrBody.mockImplementationOnce(getPrBody);
+        platform.massageMarkdown.mockImplementationOnce(massageMarkdown);
+        platform.createPr.mockResolvedValueOnce(pr);
+        const changelogContent = codeBlock`
+          ### Catalog upgrade notes
+
+          - Replaces \`example.v1.0.0\` on the **stable** channel.
+        `;
+        const changelogUrl = 'https://example.com/catalog/releases/1.1.0';
+        const upgrade = partial<BranchUpgradeConfig>({
+          depName: 'catalog',
+          packageName: 'catalog',
+          manager: 'regex',
+          datasource: 'custom.catalog',
+          repository: 'some/repo',
+          versioning: 'semver',
+          currentVersion: '1.0.0',
+          newVersion: '1.1.0',
+          fetchChangeLogs: 'pr',
+          changelogReleases: [
+            {
+              version: '1.1.0',
+              name: 'Catalog 1.1',
+              changelogContent,
+              changelogUrl,
+            },
+          ],
+        });
+
+        const res = await ensurePr({
+          ...config,
+          repository: 'some/repo',
+          upgrades: [upgrade],
+          prBodyTemplate: '{{{changelogs}}}',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        const [{ prBody: renderedBody }] = platform.createPr.mock.calls[0];
+        expect(renderedBody).toContain('### Release Notes');
+        expect(renderedBody).toContain(
+          `### [\`v1.1.0\`](${changelogUrl}): Catalog 1.1`,
+        );
+        expect(renderedBody).toContain(changelogContent);
+      });
+
       it('retains distinct embedded changelogs sharing a release URL', async () => {
         const { embedChangelogs: actualEmbedChangelogs } =
           await vi.importActual<typeof import('../../changelog/index.ts')>(
