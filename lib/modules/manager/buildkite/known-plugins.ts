@@ -232,4 +232,12 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     enabled: false,
     fields: ['image', 'tag'],
   },
+  // https://github.com/grapl-security/codecov-buildkite-plugin (archived)
+  // `image` has no real fallback in code (its `plugin.yml`'s stated default
+  // is stale documentation); `tag` defaults to `latest` but that default
+  // isn't literal file text, so only an explicit `tag` is reported.
+  'grapl-security/codecov': {
+    extract: extractImageTagJoin('image', 'tag'),
+    fields: ['image', 'tag'],
+  },
 };
