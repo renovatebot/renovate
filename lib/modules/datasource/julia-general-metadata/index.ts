@@ -1,5 +1,6 @@
 import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -13,11 +14,13 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
     super(JuliaGeneralMetadataDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = [
-    'https://juliaregistries.github.io/GeneralMetadata.jl/',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://juliaregistries.github.io/GeneralMetadata.jl/'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -71,7 +74,7 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey(config.packageName),
         fallback: true,
         cacheable: true,
       },
