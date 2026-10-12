@@ -532,7 +532,6 @@ describe('modules/manager/poetry/extract', () => {
         expect(res?.registryUrls).toMatchObject([
           'https://foo.bar/simple/',
           'https://bar.baz/+simple/',
-          'https://pypi.org/pypi/',
         ]);
       });
 
