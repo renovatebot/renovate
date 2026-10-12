@@ -52,4 +52,13 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractSingleImageField('run-image'),
     fields: ['run-image'],
   },
+  // https://github.com/buildkite-plugins/docker-cache-buildkite-plugin
+  // `image` is the name of the image this plugin *builds and caches*
+  // (`lib/shared.bash` pushes it as `<registry>/<image>:<cache-key>`), not
+  // something it pulls - it's an output, not a dependency. Left disabled.
+  'docker-cache': {
+    extract: extractSingleImageField('image'),
+    enabled: false,
+    fields: ['image'],
+  },
 };

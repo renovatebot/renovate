@@ -747,5 +747,23 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it("does not extract the docker-cache image, since it is the plugin's own build output", () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-cache#v1.6.0:
+                image: "myorg/myapp"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.6.0',
+          datasource: 'github-tags',
+          depName: 'docker-cache',
+          packageName: 'buildkite-plugins/docker-cache-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
