@@ -88,4 +88,13 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractSingleImageField('custom_image'),
     fields: ['custom_image'],
   },
+  // https://github.com/joscha/codecov-buildkite-plugin
+  // Verified against `hooks/post-command` - the plugin's own default
+  // (`buildpack-deps:jessie-scm`, used when `docker_image` is unset) isn't
+  // literal text in the file, so it isn't reported; only an explicit value
+  // is.
+  'joscha/codecov': {
+    extract: extractSingleImageField('docker_image'),
+    fields: ['docker_image'],
+  },
 };
