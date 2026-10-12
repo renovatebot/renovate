@@ -1033,5 +1033,70 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts an explicit ruby-image for junit-annotate', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                ruby-image: "ruby:3.2-alpine"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '3.2-alpine',
+          datasource: 'docker',
+          depName: 'ruby',
+          packageName: 'ruby',
+          depType: 'docker',
+          replaceString: 'ruby:3.2-alpine',
+        },
+      ]);
+    });
+
+    it('does not extract an image for junit-annotate when ruby-image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                artifacts: "junit-*.xml"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image for junit-annotate when run-in-docker is false', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              junit-annotate#v2.7.0:
+                ruby-image: "ruby:3.2-alpine"
+                run-in-docker: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.7.0',
+          datasource: 'github-tags',
+          depName: 'junit-annotate',
+          packageName: 'buildkite-plugins/junit-annotate-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
