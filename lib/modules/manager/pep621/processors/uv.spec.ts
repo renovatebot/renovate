@@ -971,7 +971,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('includes indirect deps in upgrade command', async () => {
+    it('pins indirect deps to the new version in upgrade command', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
@@ -988,7 +988,11 @@ describe('modules/manager/pep621/processors/uv', () => {
 
       const updatedDeps = [
         { packageName: 'dep1', depType: depTypes.dependencies },
-        { packageName: 'mako', depType: 'indirect' },
+        {
+          packageName: 'mako',
+          depType: depTypes.indirect,
+          newVersion: '1.2.2',
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -1010,7 +1014,7 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako',
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako==1.2.2',
         },
       ]);
     });
