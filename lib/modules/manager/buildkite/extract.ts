@@ -1,4 +1,4 @@
-import { isObject } from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -21,8 +21,41 @@ const gitPluginRegex = regEx(
   /(?:ssh:\/\/git@|https:\/\/)(?<registry>[^/]+)\/(?<gitPluginName>.*)/,
 );
 const gitSuffixRegex = regEx('\\.git$');
+const pluginRepoSuffix = '-buildkite-plugin';
+const officialPluginRepoOrg = 'buildkite-plugins';
+const officialPluginRepoPrefix = `${officialPluginRepoOrg}/`;
 
-function extractPluginDep(key: string): PackageDependency | null {
+interface ExtractedPlugin {
+  dep: PackageDependency;
+  /**
+   * The key `knownPlugins` should be looked up by, e.g. `docker` or
+   * `myorg/docker`, however the plugin was referenced in the pipeline -
+   * `undefined` when the reference can't be mapped to one, e.g. a git-based
+   * reference not ending in the conventional `-buildkite-plugin` repo
+   * name suffix.
+   */
+  knownPluginKey: string | undefined;
+}
+
+/**
+ * A git-hosted plugin is referenced by its repo path rather than the short
+ * `name`/`org/name` form `knownPlugins` is keyed by, e.g.
+ * `buildkite-plugins/docker-buildkite-plugin` or
+ * `myorg/docker-buildkite-plugin`. This derives the equivalent short key
+ * from that repo path, so a known plugin is still recognised when it's
+ * referenced by git URL instead.
+ */
+function knownPluginKeyFromRepo(repo: string): string | undefined {
+  if (!repo.endsWith(pluginRepoSuffix)) {
+    return undefined;
+  }
+  const withoutSuffix = repo.slice(0, -pluginRepoSuffix.length);
+  return withoutSuffix.startsWith(officialPluginRepoPrefix)
+    ? withoutSuffix.slice(officialPluginRepoPrefix.length)
+    : withoutSuffix;
+}
+
+function extractPluginDep(key: string): ExtractedPlugin | null {
   const match = pluginKeyRegex.exec(key);
   if (!match?.groups) {
     return null;
@@ -40,10 +73,13 @@ function extractPluginDep(key: string): PackageDependency | null {
         ? BitbucketTagsDatasource.id
         : GithubTagsDatasource.id;
     return {
-      depName: gitDepName,
-      currentValue,
-      registryUrls: [`https://${registry}`],
-      datasource,
+      dep: {
+        depName: gitDepName,
+        currentValue,
+        registryUrls: [`https://${registry}`],
+        datasource,
+      },
+      knownPluginKey: knownPluginKeyFromRepo(gitDepName),
     };
   }
 
@@ -51,24 +87,37 @@ function extractPluginDep(key: string): PackageDependency | null {
     logger.debug(
       `Skipping non-pinned Buildkite current version ${currentValue}`,
     );
-    return { depName, currentValue, skipReason: 'invalid-version' };
+    return {
+      dep: { depName, currentValue, skipReason: 'invalid-version' },
+      knownPluginKey: depName,
+    };
   }
 
   const splitName = depName.split('/');
   if (splitName.length === 1) {
     return {
-      depName,
-      currentValue,
-      datasource: GithubTagsDatasource.id,
-      packageName: `buildkite-plugins/${depName}-buildkite-plugin`,
+      dep: {
+        depName,
+        currentValue,
+        datasource: GithubTagsDatasource.id,
+        packageName: `buildkite-plugins/${depName}-buildkite-plugin`,
+      },
+      knownPluginKey: depName,
     };
   }
   if (splitName.length === 2) {
+    const [org, name] = splitName;
     return {
-      depName,
-      currentValue,
-      datasource: GithubTagsDatasource.id,
-      packageName: `${depName}-buildkite-plugin`,
+      dep: {
+        depName,
+        currentValue,
+        datasource: GithubTagsDatasource.id,
+        packageName: `${depName}-buildkite-plugin`,
+      },
+      // `buildkite-plugins/docker#v5.14.0` names the same plugin as the
+      // bare short form `docker#v5.14.0` - normalise so both match the same
+      // `knownPlugins` entry.
+      knownPluginKey: org === officialPluginRepoOrg ? name : depName,
     };
   }
 
@@ -77,9 +126,12 @@ function extractPluginDep(key: string): PackageDependency | null {
     'Something is wrong with Buildkite plugin name',
   );
   return {
-    depName,
-    currentValue,
-    skipReason: 'invalid-dependency-specification',
+    dep: {
+      depName,
+      currentValue,
+      skipReason: 'invalid-dependency-specification',
+    },
+    knownPluginKey: depName,
   };
 }
 
@@ -99,12 +151,16 @@ function extractKnownPluginDeps(
 }
 
 /**
- * Plugin refs are object keys of the form `name#version`, and can appear
- * anywhere in the document (including outside any `plugins:` block, e.g.
- * behind a YAML anchor), so this walks every key of the raw parsed YAML
- * value rather than relying on a fixed schema shape. For a known plugin
- * (see ./known-plugins.ts), the plugin's own config (the key's value) is
- * also checked for a further embedded dependency, e.g. the `docker`
+ * Plugin refs are usually object keys of the form `name#version`, but a
+ * plugin with no config can also be written as a bare array string, e.g.
+ * `plugins: [docker-login#v2.0.1]` - valid per Buildkite's own pipeline
+ * schema (`pluginsList` is `oneOf: [string, object(maxProperties: 1)]`).
+ * A match can appear anywhere in the document (including outside any
+ * `plugins:` block, e.g. behind a YAML anchor), so this walks every key
+ * (and every bare string) of the raw parsed YAML value rather than relying
+ * on a fixed schema shape. For a known plugin (see ./known-plugins.ts), the
+ * plugin's own config (the key's value, or `undefined` for a bare string)
+ * is also checked for a further embedded dependency, e.g. the `docker`
  * plugin's `image` key.
  */
 function extractPluginDeps(
@@ -113,6 +169,21 @@ function extractPluginDeps(
   visited: WeakSet<object>,
   registryAliases: Record<string, string>,
 ): void {
+  if (isString(node)) {
+    const extracted = extractPluginDep(node);
+    if (extracted) {
+      deps.push(extracted.dep);
+      deps.push(
+        ...extractKnownPluginDeps(
+          extracted.knownPluginKey,
+          undefined,
+          registryAliases,
+        ),
+      );
+    }
+    return;
+  }
+
   if (!isObject(node)) {
     return;
   }
@@ -129,10 +200,16 @@ function extractPluginDeps(
   }
 
   for (const [key, value] of Object.entries(node)) {
-    const dep = extractPluginDep(key);
-    if (dep) {
-      deps.push(dep);
-      deps.push(...extractKnownPluginDeps(dep.depName, value, registryAliases));
+    const extracted = extractPluginDep(key);
+    if (extracted) {
+      deps.push(extracted.dep);
+      deps.push(
+        ...extractKnownPluginDeps(
+          extracted.knownPluginKey,
+          value,
+          registryAliases,
+        ),
+      );
     }
     extractPluginDeps(value, deps, visited, registryAliases);
   }
