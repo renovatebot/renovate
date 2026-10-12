@@ -3234,6 +3234,28 @@ describe('modules/manager/github-actions/extract', () => {
       ],
     },
     {
+      // `renovate-image` tag- and digest-pinned, with no `renovate-version`
+      // set: https://github.com/renovatebot/renovate/discussions/46969
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate:44.104.2@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '44.104.2',
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
+        },
+      ],
+    },
+    {
       step: {
         uses: 'erlef/setup-beam@v1',
         with: {
