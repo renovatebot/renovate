@@ -486,4 +486,33 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     enabled: false,
     fields: ['image-ref'],
   },
+  // https://github.com/buildkite-plugins/github-actions-buildkite-plugin
+  // `runners` is an array of `{runs-on, queue, image?, cache?}` objects -
+  // not a map, despite how it might read at a glance - and isn't declared
+  // in `plugin.yml`'s own schema at all (it's passed through and validated
+  // by the downstream `buildkite-gha` runtime instead). An explicit
+  // `image` only applies to the matching Linux x86-64 label and must be an
+  // immutable `@sha256:` reference; there's no default to fall back to.
+  // Verified against the plugin's README and the `buildkite-gha`
+  // compatibility docs it links to.
+  'github-actions': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          runners: LooseArray(
+            z.object({ image: z.string().optional() }),
+          ).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success) {
+        return [];
+      }
+      return coerceArray(parsed.data.runners)
+        .filter((runner) => runner.image)
+        .map((runner) =>
+          getDep(runner.image, { registryAliases, depType: 'docker' }),
+        );
+    },
+    fields: ['runners[].image'],
+  },
 };

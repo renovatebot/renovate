@@ -2022,5 +2022,76 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts an immutable image override from a runners entry in github-actions plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0:
+                workflow: ".github/workflows/ci.yml"
+                runners:
+                  - runs-on: ubuntu-latest
+                    queue: hosted
+                    image: "buildkite.namespace-images.com/agent-base@sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24"
+                  - runs-on: macos-14
+                    queue: macos-sonoma-arm64
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24',
+          datasource: 'docker',
+          depName: 'buildkite.namespace-images.com/agent-base',
+          packageName: 'buildkite.namespace-images.com/agent-base',
+          depType: 'docker',
+          replaceString:
+            'buildkite.namespace-images.com/agent-base@sha256:62a45683afffaae9edfd669c16d2fee23b5a571679f31715e1063dada667ea24',
+        },
+      ]);
+    });
+
+    it('does not extract an image from github-actions plugin config when runners is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0:
+                workflow: ".github/workflows/ci.yml"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract an image from github-actions plugin config when it is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              github-actions#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'github-actions',
+          packageName: 'buildkite-plugins/github-actions-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
