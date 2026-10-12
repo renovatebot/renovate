@@ -2224,6 +2224,7 @@ const options: Readonly<RenovateOptions>[] = [
     description: 'Commit scope to use if Semantic Commits are enabled.',
     type: 'string',
     default: 'deps',
+    nullable: true,
     supportsTemplating: true,
   },
   {
@@ -2315,6 +2316,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Extra time added to `minimumReleaseAge` before an update is considered stable.',
     type: 'string',
     default: '30 minutes',
+    nullable: true,
   },
   {
     name: 'abandonmentThreshold',
