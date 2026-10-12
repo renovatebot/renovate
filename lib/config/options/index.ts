@@ -1636,6 +1636,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     stage: 'package',
+    supportedManagers: ['npm'],
   },
   {
     name: 'packageRules',
