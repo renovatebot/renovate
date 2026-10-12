@@ -1,7 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -9,7 +11,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import { ApmManifest } from './schema.ts';
+import { ApmLockFile, ApmManifest } from './schema.ts';
 
 interface DatasourceResult {
   datasource: string;
@@ -249,10 +251,52 @@ function extractSection(
   );
 }
 
-export function extractPackageFile(
+async function readDeployedFiles(lockFileName: string): Promise<Set<string>> {
+  const parsed = ApmLockFile.safeParse(
+    await readLocalFile(lockFileName, 'utf8'),
+  );
+  if (!parsed.success) {
+    return new Set();
+  }
+  return new Set(
+    parsed.data.dependencies.flatMap(({ deployed_files }) => deployed_files),
+  );
+}
+
+/**
+ * Returns the `apm.lock.yaml` in a parent directory that lists `packageFile`
+ * as a deployed file, or `null` if there is none.
+ */
+async function findDeployingLockFile(
+  packageFile: string,
+): Promise<string | null> {
+  let dir = upath.dirname(packageFile);
+  while (dir !== '.') {
+    dir = upath.dirname(dir);
+    const lockFileName = upath.join(dir, 'apm.lock.yaml');
+    const deployedFiles = await readDeployedFiles(lockFileName);
+    if (deployedFiles.has(upath.relative(dir, packageFile))) {
+      return lockFileName;
+    }
+  }
+  return null;
+}
+
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
+  // `apm install` copies a dependency's own `apm.yml` into the harness
+  // directories (`.claude/skills/<name>/`, ...), and the next install
+  // overwrites any change to the copy.
+  const lockFileName = await findDeployingLockFile(packageFile);
+  if (lockFileName) {
+    logger.debug(
+      `apm: skipping ${packageFile}, which ${lockFileName} lists as deployed`,
+    );
+    return null;
+  }
+
   let manifest: ApmManifest;
   try {
     manifest = parseSingleYaml(content, { customSchema: ApmManifest });
