@@ -6,7 +6,7 @@ If you need to change the versioning format, read the [versioning](../../version
 
 ### Plugin configuration
 
-Docker images referenced inside a plugin's own configuration are also extracted for a known set of plugins whose config embeds a further dependency, whether the plugin is referenced in short form (`docker#v5.14.0`) or by a git URL.
+Docker images referenced inside a plugin's own configuration are also extracted for a known set of plugins whose config embeds a further dependency (for example the `docker` plugin's `image` key, or `github-actions`'s per-runner `image` overrides), whether the plugin is referenced in short form (`docker#v5.14.0`) or by a git URL.
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 
