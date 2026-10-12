@@ -1781,6 +1781,20 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('does not warn about an option with a restricted parent when encrypted at the top level', async () => {
+      const config = {
+        encrypted: {
+          hostType: 'npm',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
     it('validates preset values', async () => {
       const config = {
         extends: ['foo', 'bar', 42] as never,

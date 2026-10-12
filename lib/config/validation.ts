@@ -390,6 +390,7 @@ export async function validateConfig(
               : getParentName(parentPath);
           if (
             !isPreset &&
+            parentName &&
             optionParents[key] &&
             !optionParents[key].includes(parentName as AllowedParents)
           ) {
