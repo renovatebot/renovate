@@ -263,6 +263,11 @@ export interface Platform {
      * way, e.g. for Gerrit.
      */
     rebaseLabel?: string,
+    /**
+     * Length to truncate to instead of `maxBodyLength()`, e.g. for issue
+     * bodies on platforms which implement `maxIssueBodyLength()`.
+     */
+    maxLength?: number,
   ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
@@ -330,6 +335,11 @@ export interface Platform {
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
+  /**
+   * Maximum issue body length, for platforms where it differs from the PR
+   * body limit of `maxBodyLength()`.
+   */
+  maxIssueBodyLength?(): number;
   labelCharLimit?(): number;
 }
 

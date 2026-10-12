@@ -1015,10 +1015,14 @@ export async function mergePr({
   }
 }
 
-export function massageMarkdown(input: string): string {
+export function massageMarkdown(
+  input: string,
+  _rebaseLabel?: string,
+  maxLength = maxBodyLength(),
+): string {
   // Remove any HTML we use
   return (
-    smartTruncate(readOnlyIssueBody(input), maxBodyLength())
+    smartTruncate(readOnlyIssueBody(input), maxLength)
       .replace(
         'you tick the rebase/retry checkbox',
         'PR is renamed to start with "rebase!"',
@@ -1040,6 +1044,14 @@ export function massageMarkdown(input: string): string {
 
 export function maxBodyLength(): number {
   return 4000;
+}
+
+/**
+ * The 4000 characters limit only applies to PR descriptions. Work item
+ * descriptions are long text fields, which hold up to 1M characters.
+ */
+export function maxIssueBodyLength(): number {
+  return 60000;
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {

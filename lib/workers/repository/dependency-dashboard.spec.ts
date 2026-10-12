@@ -2003,6 +2003,29 @@ None detected
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
+
+        it('uses the platform issue body limit if available', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.clear();
+          PackageFiles.add('main', packageFilesBigRepo);
+          platform.maxBodyLength.mockReturnValue(4000);
+          platform.maxIssueBodyLength.mockReturnValue(20000);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            {},
+            { result: 'no-migration' },
+          );
+          expect(platform.massageMarkdown).toHaveBeenCalledWith(
+            expect.any(String),
+            config.rebaseLabel,
+            20000,
+          );
+          const { body } = platform.ensureIssue.mock.calls[0][0];
+          expect(body.length).toBeGreaterThan(4000);
+          expect(body.length).toBeLessThan(20000);
+        });
       });
 
       describe('dependency dashboard lookup warnings', () => {

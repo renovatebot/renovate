@@ -2106,6 +2106,22 @@ describe('modules/platform/azure/index', () => {
         '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
       expect(azure.massageMarkdown(input)).toBe(input);
     });
+
+    it('truncates to the PR body limit by default', () => {
+      const input = 'a'.repeat(5000);
+      expect(azure.massageMarkdown(input)).toHaveLength(azure.maxBodyLength());
+    });
+
+    it('truncates to the given max length', () => {
+      const input = 'a'.repeat(5000);
+      expect(azure.massageMarkdown(input, undefined, 10000)).toBe(input);
+    });
+  });
+
+  describe('maxIssueBodyLength()', () => {
+    it('allows longer issue bodies than PR bodies', () => {
+      expect(azure.maxIssueBodyLength?.()).toBe(60000);
+    });
   });
 
   describe('setBranchStatus', () => {
