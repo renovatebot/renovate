@@ -96,6 +96,12 @@ function getPinnedValue(newVersion: string): string {
   return `=${newVersion}`;
 }
 
+// Components of the last specifier; a union like `0.10, 0.11` must not be
+// counted as one value.
+function componentCount(value: string): number {
+  return value.split(',').at(-1)!.trim().split('.').length;
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -139,18 +145,18 @@ function getNewValue({
   if (
     (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
     rangeStrategy === 'replace' &&
-    newJulia.split('.').length > currentValue.split('.').length
+    newJulia.split('.').length > componentCount(currentValue)
   ) {
     newJulia = newJulia
       .split('.')
-      .slice(0, currentValue.split('.').length)
+      .slice(0, componentCount(currentValue))
       .join('.');
   }
   // Reverse any caret npm added that the original didn't have, restoring
   // Julia's bare-version-is-caret default.
   if (newJulia.startsWith('^') && !currentValue.startsWith('^')) {
     const withoutCaret = newJulia.substring(1);
-    const components = currentValue.split('.').length;
+    const components = componentCount(currentValue);
     newJulia = withoutCaret.split('.').slice(0, components).join('.');
   }
 

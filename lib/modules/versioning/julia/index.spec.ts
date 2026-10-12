@@ -7,7 +7,7 @@ describe('modules/versioning/julia/index', () => {
     ${'1.2'}   | ${false}
     ${'1.2.3'} | ${true}
   `('isVersion("$version") === $expected', ({ version, expected }) => {
-    expect(!!julia.isVersion(version)).toBe(expected);
+    expect(julia.isVersion(version)).toBe(expected);
   });
 
   it.each`
@@ -194,15 +194,16 @@ describe('modules/versioning/julia/index', () => {
   });
 
   it.each`
-    currentValue | rangeStrategy | currentVersion | newVersion | expected
-    ${'1.2.3'}   | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'} | ${'1.2.4'}
-    ${'^1.2.3'}  | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'} | ${'^1.2.4'}
-    ${'^1.2.3'}  | ${'replace'}  | ${'1.2.3'}     | ${'1.5.0'} | ${'^1.2.3'}
-    ${'^1.2.3'}  | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'} | ${'^2.0.0'}
-    ${'^1.2'}    | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'} | ${'^2.0'}
-    ${'1.2.3'}   | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'} | ${'2.0.0'}
-    ${'=1.2.3'}  | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'} | ${'=2.0.0'}
-    ${'= 1.2.3'} | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'} | ${'= 2.0.0'}
+    currentValue    | rangeStrategy | currentVersion | newVersion  | expected
+    ${'1.2.3'}      | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'^1.2.4'}
+    ${'^1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'1.5.0'}  | ${'^1.2.3'}
+    ${'^1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'^2.0.0'}
+    ${'^1.2'}       | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'^2.0'}
+    ${'1.2.3'}      | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'2.0.0'}
+    ${'=1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'=2.0.0'}
+    ${'= 1.2.3'}    | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'= 2.0.0'}
+    ${'0.10, 0.11'} | ${'replace'}  | ${'0.11.0'}    | ${'0.12.1'} | ${'0.12'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
