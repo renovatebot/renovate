@@ -848,5 +848,33 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the improbable-eng/docker-service plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              improbable-eng/docker-service#v2.1.0:
+                container: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'improbable-eng/docker-service',
+          packageName: 'improbable-eng/docker-service-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
   });
 });
