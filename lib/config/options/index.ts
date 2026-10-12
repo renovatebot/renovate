@@ -768,6 +768,9 @@ const options: Readonly<RenovateOptions>[] = [
     experimental: true,
     experimentalIssues: [23286],
     default: {},
+    additionalProperties: {
+      type: 'object',
+    },
     mergeable: true,
   },
   {
