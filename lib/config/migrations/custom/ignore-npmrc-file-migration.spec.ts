@@ -29,7 +29,7 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
       {
         ignoreNpmrcFile: true,
         npmrc: true,
-      } as any,
+      },
       {
         npmrc: '',
       },

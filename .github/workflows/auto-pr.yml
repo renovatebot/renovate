@@ -16,7 +16,7 @@ jobs:
         (github.event.action == 'opened' && !github.event.pull_request.draft) ||
         github.event.action == 'ready_for_review'
       )
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     permissions:
       pull-requests: write
     steps:
@@ -32,7 +32,7 @@ jobs:
         github.event.action == 'converted_to_draft' ||
         (github.event.action == 'labeled' && github.event.label.name == 'auto:cla')
       )
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     permissions:
       pull-requests: write
     steps:

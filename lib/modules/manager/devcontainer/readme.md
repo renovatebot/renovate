@@ -2,6 +2,7 @@ Extracts all Docker images from the `image` and `features` properties in these f
 
 - `.devcontainer.json`
 - `.devcontainer/devcontainer.json`
+- `.devcontainer/<folder>/devcontainer.json`
 
 It extracts some known versions of the `features`, like `node` and `python`.
 

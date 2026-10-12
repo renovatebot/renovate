@@ -1,13 +1,10 @@
-import { mockDeep } from 'vitest-mock-extended';
+import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import type { ReleaseResult } from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GoDatasource } from './index.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
 
@@ -56,15 +53,6 @@ const datasource = new GoDatasource();
 
 describe('modules/datasource/go/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      delete process.env.GOPROXY;
-    });
-
     it('fetches releases', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       getReleasesProxyMock.mockResolvedValue(expected);
@@ -81,11 +69,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('getDigest', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
     it('returns null for no go-source tag', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -226,12 +209,8 @@ describe('modules/datasource/go/index', () => {
     });
 
     describe('GOPROXY', () => {
-      afterEach(() => {
-        delete process.env.GOPROXY;
-      });
-
       it('returns null when GOPROXY contains off', async () => {
-        process.env.GOPROXY = 'https://proxy.golang.org,off';
+        vi.stubEnv('GOPROXY', 'https://proxy.golang.org,off');
         const res = await datasource.getDigest(
           { packageName: 'golang.org/x/text' },
           'v1.2.3',
@@ -242,15 +221,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('using getPkgReleases', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      delete process.env.GOPROXY;
-    });
-
     describe('constraints', () => {
       // TODO deprecated #42600
       it('are respected based on an exact match on the `go` constraint', async () => {
@@ -339,6 +309,58 @@ describe('modules/datasource/go/index', () => {
         expect(res?.releases[0].version).toEqual('v0.32.0');
         expect(res?.releases[1].version).toEqual('v0.33.0');
       });
+    });
+  });
+
+  describe('package cache', () => {
+    let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
+
+    beforeEach(() => {
+      setCache = vi.spyOn(packageCache, 'setWithRawTtl');
+    });
+
+    afterEach(() => {
+      setCache.mockRestore();
+    });
+
+    it('does not cache releases for modules matching GOPRIVATE', async () => {
+      vi.stubEnv('GOPRIVATE', 'golang.org/foo/*');
+      getReleasesProxyMock.mockResolvedValue({ releases: [] });
+
+      await datasource.getReleases({ packageName: 'golang.org/foo/bar' });
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('does not cache digests for modules matching GOPRIVATE', async () => {
+      vi.stubEnv('GOPRIVATE', 'gitlab.com/group/*');
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
+      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+
+      await datasource.getDigest(
+        { packageName: 'gitlab.com/group/subgroup' },
+        undefined,
+      );
+
+      expect(setCache).not.toHaveBeenCalled();
+    });
+
+    it('caches digests for public modules', async () => {
+      httpMock
+        .scope('https://gitlab.com/')
+        .get('/group/subgroup?go-get=1')
+        .reply(200, Fixtures.get('go-get-gitlab.html'));
+      getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+
+      await datasource.getDigest(
+        { packageName: 'gitlab.com/group/subgroup' },
+        undefined,
+      );
+
+      expect(setCache).toHaveBeenCalledOnce();
     });
   });
 });

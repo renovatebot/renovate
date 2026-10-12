@@ -1,4 +1,4 @@
-import { isPlainObject } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { HttpCacheStats } from '../../stats.ts';
 import type { GotOptions, HttpResponse } from '../types.ts';
@@ -21,11 +21,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return null;
     }
 
-    // v8 ignore else -- TODO: add test #40625
-    if (isPlainObject(httpCache.httpResponse)) {
-      httpCache.httpResponse.cached = true;
-    }
-
+    httpCache.httpResponse.cached = true;
     return httpCache;
   }
 
@@ -71,7 +67,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       HttpCacheStats.incRemoteMisses(url);
 
       const httpResponse = copyResponse(resp, true);
-      const timestamp = new Date().toISOString();
+      const timestamp = DateTime.utc().toISO();
 
       const newHttpCache = HttpCache.parse({
         etag,
@@ -89,7 +85,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: saving ${url} (etag=${etag}, lastModified=${lastModified})`,
       );
-      await this.persist(method, url, newHttpCache as HttpCache);
+      await this.persist(method, url, newHttpCache);
       return resp;
     }
 
@@ -103,7 +99,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       logger.debug(
         `http cache: Using cached response: ${url} from ${timestamp}`,
       );
-      httpCache.timestamp = new Date().toISOString();
+      httpCache.timestamp = DateTime.utc().toISO();
       await this.persist(method, url, httpCache);
 
       HttpCacheStats.incRemoteHits(url);

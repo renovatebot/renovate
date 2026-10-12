@@ -108,10 +108,8 @@ function getManagerLibYears(deps: DepInfo[]): Record<string, number> {
     const depKey = `${dep.depName}@${dep.version}@${dep.datasource}`;
     const manager = dep.manager;
     managerLibYears[manager] ??= {};
-    if (dep.libYear) {
-      if (!managerLibYears[manager][depKey]) {
-        managerLibYears[manager][depKey] = dep.libYear;
-      }
+    if (dep.libYear && !managerLibYears[manager][depKey]) {
+      managerLibYears[manager][depKey] = dep.libYear;
     }
   }
 

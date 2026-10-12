@@ -7,6 +7,7 @@ export interface Vulnerability {
   packageFileConfig: RenovateConfig & PackageFile;
   packageName: string;
   osvPackageName: string;
+  depType?: string;
   depVersion: string;
   fixedVersion: string | null;
   datasource: string;

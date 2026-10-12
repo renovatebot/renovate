@@ -19,7 +19,7 @@ describe('modules/manager/nix/extract', () => {
       inputs = {};
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
+    await expect(extractPackageFile(flakeNix, 'flake.nix')).resolves.toBeNull();
   });
 
   it('does not include nixpkgs input with no explicit ref', async () => {
@@ -36,7 +36,7 @@ describe('modules/manager/nix/extract', () => {
       };
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
+    await expect(extractPackageFile(flakeNix, 'flake.nix')).resolves.toBeNull();
   });
 
   it('includes nixpkgs input with only ref', async () => {
@@ -53,7 +53,7 @@ describe('modules/manager/nix/extract', () => {
       };
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toBeNull();
+    await expect(extractPackageFile(flakeNix, 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when no inputs', async () => {
@@ -65,7 +65,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when inputs are missing locked', async () => {
@@ -89,7 +89,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when inputs are missing original', async () => {
@@ -115,7 +115,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when original inputs are from local path', async () => {
@@ -147,7 +147,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when locked inputs are indirect', async () => {
@@ -179,7 +179,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when locked inputs are from local path', async () => {
@@ -211,7 +211,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns nixpkgs input', async () => {
@@ -243,7 +243,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toEqual({
       deps: [
         {
           currentValue: 'nixos-unstable',
@@ -285,7 +285,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -343,7 +343,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -384,7 +384,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -425,7 +425,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -446,7 +446,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 6
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('includes nixpkgs with ref and shallow arguments', async () => {
@@ -479,7 +479,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -518,7 +518,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('includes nixpkgs but using indirect type and path locked type that cannot be updated', async () => {
@@ -547,7 +547,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('includes flake from GitHub Enterprise', async () => {
@@ -633,7 +633,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -735,7 +735,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -775,7 +775,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -812,7 +812,7 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('includes flake with nixpkgs-lib as tarball type', async () => {
@@ -875,7 +875,7 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -894,8 +894,14 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
-  it('includes flake with nixpkgs channel as tarball type', async () => {
-    const flakeLock = codeBlock`{
+  it.each`
+    extension
+    ${'xz'}
+    ${'zst'}
+  `(
+    'extracts nixpkgs channel from .tar.$extension URL',
+    async ({ extension }) => {
+      const flakeLock = codeBlock`{
     "nodes": {
       "nixpkgs": {
         "locked": {
@@ -903,11 +909,11 @@ describe('modules/manager/nix/extract', () => {
           "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
           "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
           "type": "tarball",
-          "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+          "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.${extension}"
         },
         "original": {
           "type": "tarball",
-          "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+          "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.${extension}"
         }
       },
       "root": {
@@ -919,20 +925,21 @@ describe('modules/manager/nix/extract', () => {
     "root": "root",
     "version": 7
   }`;
-    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
-      deps: [
-        {
-          currentValue: 'nixpkgs-unstable',
-          datasource: 'git-refs',
-          depName: 'nixpkgs',
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
-          versioning: 'nixpkgs',
-        },
-      ],
-    });
-  });
+      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+      await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
+        deps: [
+          {
+            currentValue: 'nixpkgs-unstable',
+            datasource: 'git-refs',
+            depName: 'nixpkgs',
+            packageName: 'https://github.com/NixOS/nixpkgs',
+            lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
+            versioning: 'nixpkgs',
+          },
+        ],
+      });
+    },
+  );
 
   it('finds currentDigest correctly when input sha is pinned', async () => {
     const flakeNix = codeBlock`{
@@ -968,7 +975,9 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toMatchObject({
+    await expect(
+      extractPackageFile(flakeNix, 'flake.nix'),
+    ).resolves.toMatchObject({
       deps: [
         {
           currentDigest: '76c0a6dba345490508f36c1aa3c7ba5b6b460989',
@@ -1011,7 +1020,7 @@ describe('modules/manager/nix/extract', () => {
       };
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile(flakeNix, 'flake.nix')).toEqual({
+    await expect(extractPackageFile(flakeNix, 'flake.nix')).resolves.toEqual({
       deps: [
         {
           currentValue: 'nixpkgs-unstable',
@@ -1027,7 +1036,7 @@ describe('modules/manager/nix/extract', () => {
 
   it('returns null when flake.lock file cannot be read', async () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when flake.nix file cannot be read', async () => {
@@ -1040,12 +1049,12 @@ describe('modules/manager/nix/extract', () => {
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     fs.readLocalFile.mockResolvedValueOnce(null);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns null when flake.lock has invalid JSON', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{ invalid json');
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('returns deps when no root inputs but deps exist', async () => {
@@ -1139,7 +1148,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'nixos-unstable',
@@ -1181,7 +1190,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'main',
@@ -1223,7 +1232,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -1265,7 +1274,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -1305,7 +1314,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'main',
@@ -1342,7 +1351,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toBeNull();
   });
 
   it('ignores unsupported file type and still extracts other inputs', async () => {

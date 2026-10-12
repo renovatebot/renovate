@@ -18,7 +18,7 @@ const lockableHTTPTarballProtocol = regEx(
 );
 
 const lockableChannelOriginalUrl = regEx(
-  '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.xz$',
+  '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.(?:xz|zst)$',
 );
 
 export async function extractPackageFile(
@@ -36,7 +36,7 @@ export async function extractPackageFile(
   const flakeLockParsed = NixFlakeLock.safeParse(flakeLockContents);
   if (!flakeLockParsed.success) {
     logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
+      { flakeLockFile, err: flakeLockParsed.error },
       `invalid flake.lock file`,
     );
     return null;
@@ -47,7 +47,7 @@ export async function extractPackageFile(
 
   if (!rootInputs) {
     logger.debug(
-      { flakeLockFile, error: flakeLockParsed.error },
+      { flakeLockFile, err: flakeLockParsed.error },
       `flake.lock is missing "root" node`,
     );
     return null;

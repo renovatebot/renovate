@@ -12,12 +12,14 @@ jobs:
     if: >
       (github.event.action == 'created' && contains(github.event.discussion.labels.*.name, 'mend-app')) ||
       (github.event.action == 'labeled' && github.event.label.name == 'mend-app')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Calculate time ago
         id: timeago
+        env:
+          CREATED_AT: ${{ github.event.discussion.created_at }}
         run: |
-          created_at="${{ github.event.discussion.created_at }}"
+          created_at="$CREATED_AT"
           created_epoch=$(date -d "$created_at" "+%s")
           now_epoch=$(date +%s)
           diff=$((now_epoch - created_epoch))
@@ -32,7 +34,7 @@ jobs:
 
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           method: chat.postMessage
           payload: |

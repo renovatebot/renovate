@@ -4,10 +4,23 @@ import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
+import { coerceArray } from '../array.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { buildCacheKey } from '../cache/package/key.ts';
 import { getEnv } from '../env.ts';
+import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-export const allToolConfig: Record<ToolName, ToolConfig> = {
+/**
+ * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
+ */
+export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
+  apm: {
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
@@ -79,6 +92,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: 'semver',
   },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
+    versioning: 'semver',
+  },
   gleam: {
     datasource: 'github-releases',
     packageName: 'gleam-lang/gleam',
@@ -113,12 +131,6 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'java-version',
     packageName: 'java?system=true',
     versioning: 'npm',
-  },
-  /* not used in Renovate */
-  'java-maven': {
-    datasource: 'java-version',
-    packageName: 'java?system=true',
-    versioning: 'maven',
   },
   jb: {
     datasource: 'github-releases',
@@ -239,6 +251,18 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   },
 } as const;
 
+/**
+ * A Containerbase `tool` that Renovate supports configuring the version of.
+ */
+export type SupportedToolNames = keyof typeof allToolConfig;
+
+/**
+ * All Containerbase `tool`s that Renovate supports configuring the version of.
+ */
+export function getSupportedToolNames(): readonly ToolName[] {
+  return Object.keys(allToolConfig) as readonly ToolName[];
+}
+
 let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
@@ -251,7 +275,7 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
-export function getToolConfig(toolName: ToolName): ToolConfig {
+export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
   return allToolConfig[toolName];
 }
 
@@ -289,10 +313,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }
@@ -313,7 +335,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint.replace(/^=+/, '').trim();
+        return constraint.replace(regEx(/^=+/), '').trim();
       }
     } else {
       logger.warn(
@@ -325,7 +347,7 @@ export async function resolveConstraint(
   }
 
   const pkgReleases = await getPkgReleases(toolConfig);
-  const releases = pkgReleases?.releases ?? [];
+  const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
     logger.warn({ toolConfig }, 'No tool releases found.');
@@ -374,14 +396,27 @@ export async function resolveConstraint(
   return highestVersion;
 }
 
+// Docker execs run in a fresh `--rm` container each time, so `memoize` must
+// stay false there - only the persistent-host (binarySource=install) path
+// can safely skip a tool whose requested version is already active.
+// `install-tool` also activates the version it installs, so the memo tracks
+// the active version per tool, not every installed version.
 export async function generateInstallCommands(
   toolConstraints: Opt<ToolConstraint[]>,
+  memoize = false,
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
     for (const toolConstraint of toolConstraints) {
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
+      if (memoize) {
+        const cacheKey = buildCacheKey('containerbase-active', toolName);
+        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+          continue;
+        }
+        memCache.set(cacheKey, toolVersion);
+      }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
     }

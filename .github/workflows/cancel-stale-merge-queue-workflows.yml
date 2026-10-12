@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   cancel-previous-runs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Cancel Previous Runs
         uses: pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89 # 1.11

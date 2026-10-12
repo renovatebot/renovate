@@ -4,8 +4,8 @@ Renovate supports [Forgejo](https://forgejo.org).
 
 ## Authentication
 
-First, [create a Personal Access Token (PAT)](https://forgejo.org/docs/latest/user/api-usage/#authentication) for the bot account.
-The bot account should have full name and email address configured.
+First, [create a Personal Access Token (PAT)](https://forgejo.org/docs/latest/user/api-usage/#authentication) for the Renovate account.
+The Renovate account should have full name and email address configured.
 Then let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file

@@ -11,31 +11,27 @@ const config: FetchPresetConfig = {
 const fetch = vi.fn(() => Promise.resolve<Preset | null>({}));
 
 describe('config/presets/util', () => {
-  beforeEach(() => {
-    fetch.mockReset();
-  });
-
   it('works', async () => {
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
-    expect(await fetchPreset({ ...config, fetch })).toEqual({
+    await expect(fetchPreset({ ...config, fetch })).resolves.toEqual({
       sub: { preset: { foo: true } },
     });
 
     fetch.mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND));
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
-    expect(await fetchPreset({ ...config, fetch })).toEqual({
+    await expect(fetchPreset({ ...config, fetch })).resolves.toEqual({
       sub: { preset: { foo: true } },
     });
 
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
-    expect(
-      await fetchPreset({ ...config, filePreset: 'some/sub', fetch }),
-    ).toEqual({ preset: { foo: true } });
+    await expect(
+      fetchPreset({ ...config, filePreset: 'some/sub', fetch }),
+    ).resolves.toEqual({ preset: { foo: true } });
 
     fetch.mockResolvedValueOnce({ sub: { preset: { foo: true } } });
-    expect(
-      await fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch }),
-    ).toEqual({ foo: true });
+    await expect(
+      fetchPreset({ ...config, filePreset: 'some/sub/preset', fetch }),
+    ).resolves.toEqual({ foo: true });
   });
 
   describe('handles different filenames', () => {

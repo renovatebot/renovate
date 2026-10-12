@@ -162,7 +162,6 @@ function getDepPath({
 }): string[] {
   if (catalogName === 'default' && usesImplicitDefaultCatalog) {
     return ['catalog', depName];
-  } else {
-    return ['catalogs', catalogName, depName];
   }
+  return ['catalogs', catalogName, depName];
 }

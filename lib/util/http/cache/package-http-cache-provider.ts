@@ -4,6 +4,7 @@ import type { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
+import { buildCacheKey } from '../../cache/package/key.ts';
 import { resolveTtlValues } from '../../cache/package/ttl.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import { regEx } from '../../regex.ts';
@@ -18,13 +19,13 @@ export interface PackageHttpCacheProviderOptions {
   softTtlMinutes?: number;
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
-  writeSchema?: ZodType<unknown>;
+  writeSchema?: ZodType;
 }
 
 export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   private namespace: PackageCacheNamespace;
   private defaultTtlMinutes: number;
-  private writeSchema?: ZodType<unknown>;
+  private writeSchema?: ZodType;
 
   checkCacheControlHeader: boolean;
   checkAuthorizationHeader: boolean;
@@ -62,7 +63,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
   private cacheKey(method: string, url: string): string {
     if (method !== 'get') {
-      return `${method}:${url}`;
+      return buildCacheKey(method, url);
     }
     return url;
   }
@@ -86,10 +87,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return;
     }
 
-    const httpResponse = copyResponse(
-      data.httpResponse as HttpResponse<unknown>,
-      false,
-    );
+    const httpResponse = copyResponse(data.httpResponse, false);
 
     const { data: body, error: err } = this.writeSchema.safeParse(
       httpResponse.body,

@@ -125,7 +125,7 @@ describe('modules/datasource/span-processor', () => {
       },
     ];
 
-    test.each(noWriteTestCases)(
+    it.each(noWriteTestCases)(
       'does not write span datapoints to GetDatasourceReleasesStats if $name',
       ({ span }) => {
         const writeMock = vi.mocked(stats.GetDatasourceReleasesStats.write);

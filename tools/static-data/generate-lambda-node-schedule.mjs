@@ -25,7 +25,7 @@ await (async () => {
     return RuntimesArray.parseAsync(await response.json());
   });
 
-  /** @type {Record<string, z.infer<Runtimes>>} */
+  /** @type {Record<string, z.infer<typeof Runtimes>>} */
   const nodeRuntimes = {};
   for (const lambda of lambdas) {
     if (!lambda.cycle.startsWith('nodejs')) {
@@ -36,13 +36,13 @@ await (async () => {
       continue;
     }
 
-    const versionMatch = /^nodejs([0-9]+)\.x$/.exec(lambda.cycle);
+    const versionMatch = /^nodejs(?<version>[0-9]+)\.x$/.exec(lambda.cycle);
 
-    if (!versionMatch?.[1]) {
+    if (!versionMatch?.groups?.version) {
       continue;
     }
 
-    nodeRuntimes[versionMatch[1]] = lambda;
+    nodeRuntimes[versionMatch.groups.version] = lambda;
   }
 
   await updateJsonFile(

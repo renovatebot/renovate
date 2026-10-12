@@ -29,7 +29,8 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
       const matchResult = platfromRe.exec(filename);
       if (!matchResult) {
         return true;
-      } else if (matchResult?.groups?.platform === platform) {
+      }
+      if (matchResult?.groups?.platform === platform) {
         return true;
       }
 

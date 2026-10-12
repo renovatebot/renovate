@@ -1,10 +1,9 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { git, logger, partial, platform, scm } from '~test/util.ts';
+import { fakeSha, git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { type AllConfig } from '../../../config/types.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import * as _cache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../types.ts';
 import * as _inherited from '../init/inherited.ts';
 import * as _merge from '../init/merge.ts';
@@ -40,11 +39,12 @@ describe('workers/repository/reconfigure/index', () => {
     }),
   });
   const repoConfig: AllConfig = {};
+  const reconfigureBranchSha = fakeSha('sha1');
 
   beforeEach(() => {
     GlobalConfig.reset();
     scm.branchExists.mockResolvedValue(true);
-    git.getBranchCommit.mockReturnValue('sha1' as LongCommitSha);
+    git.getBranchCommit.mockReturnValue(reconfigureBranchSha);
     validate.validateReconfigureBranch.mockResolvedValue(true);
     platform.findPr.mockResolvedValue(partial<Pr>({ number: 1 }));
     utils.getReconfigureConfig.mockResolvedValue({
@@ -85,19 +85,35 @@ describe('workers/repository/reconfigure/index', () => {
   it('skips if reconfigure branch unchanged', async () => {
     cache.getCache.mockReturnValue({
       reconfigureBranchCache: {
-        reconfigureBranchSha: 'sha1',
+        reconfigureBranchSha,
         isConfigValid: true,
-        extractResult: {
-          branches: [partial<BranchConfig>()],
-          branchList: ['some-branch'],
-          packageFiles: {},
-        },
+        extractionSucceeded: true,
       },
     });
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
     expect(
       validate.validateReconfigureBranch,
     ).not.toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('migrates the extract result persisted by earlier versions', async () => {
+    const repoCache = {
+      reconfigureBranchCache: {
+        reconfigureBranchSha,
+        isConfigValid: true,
+        extractResult: { packageFiles: {} },
+      },
+    };
+    cache.getCache.mockReturnValue(repoCache);
+
+    await checkReconfigureBranch(config, repoConfig);
+
+    expect(repoCache.reconfigureBranchCache).toEqual({
+      reconfigureBranchSha,
+      isConfigValid: true,
+      extractionSucceeded: true,
+    });
+    expect(validate.validateReconfigureBranch).not.toHaveBeenCalled();
   });
 
   it('skips if error while finding reconfigure config', async () => {
@@ -133,7 +149,7 @@ describe('workers/repository/reconfigure/index', () => {
   it('extracts deps and adds comment when branch and reconfigure pr both exist', async () => {
     cache.getCache.mockReturnValue({
       reconfigureBranchCache: {
-        reconfigureBranchSha: 'sha1',
+        reconfigureBranchSha,
         isConfigValid: true,
       },
     });

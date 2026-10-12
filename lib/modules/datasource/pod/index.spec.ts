@@ -19,33 +19,29 @@ const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('modules/datasource/pod/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('returns null for invalid inputs', async () => {
       // FIXME: why get request?
       httpMock
         .scope(cocoapodsHost)
         .get('/all_pods_versions_3_8_5.txt')
         .reply(404);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: PodDatasource.id,
           packageName: 'foobar',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null disabled host', async () => {
       hostRules.add({ matchHost: cocoapodsHost, enabled: false });
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: PodDatasource.id,
           packageName: 'foobar',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty result', async () => {
@@ -54,7 +50,23 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(404);
-      expect(await getPkgReleases(config)).toBeNull();
+      await expect(getPkgReleases(config)).resolves.toBeNull();
+    });
+
+    it('returns null for an empty CDN body', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(200, '');
+      await expect(getPkgReleases(config)).resolves.toBeNull();
+    });
+
+    it('returns null when the CDN lists no matching pod', async () => {
+      httpMock
+        .scope(cocoapodsHost)
+        .get('/all_pods_versions_a_c_b.txt')
+        .reply(200, 'bar/1.0.0/2.0.0');
+      await expect(getPkgReleases(config)).resolves.toBeNull();
     });
 
     it('returns null for 404', async () => {
@@ -119,7 +131,7 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(401);
-      expect(await getPkgReleases(config)).toBeNull();
+      await expect(getPkgReleases(config)).resolves.toBeNull();
     });
 
     it('throws for 429', async () => {
@@ -143,7 +155,7 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .replyWithError('foobar');
-      expect(await getPkgReleases(config)).toBeNull();
+      await expect(getPkgReleases(config)).resolves.toBeNull();
     });
 
     it('processes real data from CDN', async () => {
@@ -151,12 +163,12 @@ describe('modules/datasource/pod/index', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(200, 'foo/1.2.3');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           ...config,
           registryUrls: ['https://github.com/CocoaPods/Specs'],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         registryUrl: 'https://github.com/CocoaPods/Specs',
         releases: [
           {
