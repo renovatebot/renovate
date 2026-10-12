@@ -1986,5 +1986,41 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('does not extract the wiz scan-target image, since it is disabled', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              wiz#v1.0.0:
+                image-address: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'wiz',
+          packageName: 'buildkite-plugins/wiz-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('does not extract the equinixmetal-buildkite/trivy scan-target image, since it is disabled', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/trivy#v1.0.0:
+                image-ref: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/trivy',
+          packageName: 'equinixmetal-buildkite/trivy-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
