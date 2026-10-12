@@ -246,6 +246,9 @@ export function parseApmDependency(
   }
   const currentValue = tail?.currentValue ?? ref;
 
+  // This checks Renovate's default versioning, not the dependency's effective
+  // one, on purpose: extraction runs before packageRules are applied, so a
+  // `versioning` set for this dependency isn't known yet.
   const { datasource, packageName, registryUrls, versioning } =
     semverCoerced.api.isValid(currentValue)
       ? determineDatasource(host, platform, repoPath)
