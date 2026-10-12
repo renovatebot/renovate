@@ -241,24 +241,12 @@ describe('modules/manager/nix/extract', () => {
             "type": "indirect"
           }
         },
-        "home-manager": {
-          "locked": {
-            "lastModified": 1720031269,
-            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
-            "owner": "nix-community",
-            "repo": "home-manager",
-            "rev": "abc123def456abc123def456abc123def456abc1",
-            "type": "github"
-          },
-          "original": {
-            "id": "home-manager",
-            "type": "indirect"
-          }
-        },
         "root": {
           "inputs": {
-            "nixpkgs": "nixpkgs",
-            "home-manager": "home-manager"
+            "home-manager": [
+              "nixpkgs"
+            ],
+            "nixpkgs": "nixpkgs"
           }
         }
       },
