@@ -344,6 +344,8 @@ async function getUvExtraIndexUrl(
 ): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
+    // indirect deps take their registry from uv.lock, uv already knows it
+    .filter((dep) => dep.depType !== depTypes.indirect)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
