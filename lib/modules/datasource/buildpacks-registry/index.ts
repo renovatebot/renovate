@@ -1,4 +1,5 @@
 import urlJoin from 'url-join';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -58,7 +59,7 @@ export class BuildpacksRegistryDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${BuildpacksRegistryDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         cacheable: true,
         fallback: true,
       },

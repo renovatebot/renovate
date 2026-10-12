@@ -57,8 +57,7 @@ export class NodeVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `${config.registryUrl}`,
+        key: config.registryUrl!,
         fallback: true,
       },
       () => this.fetchReleases(config),

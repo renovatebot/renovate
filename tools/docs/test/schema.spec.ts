@@ -2,6 +2,7 @@ import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
+import { groups } from '../../../lib/config/presets/internal/index.ts';
 import type {
   RenovateOptions,
   RenovateStringOption,
@@ -183,32 +184,76 @@ describe('tools/docs/test/schema', () => {
       ).toEqual(['must be string']);
     });
 
-    it('validates a map which does not declare its values as a nested config', () => {
-      expect(schemaErrors(repoSchema, { env: { automerge: 'true' } })).toEqual([
-        'must be boolean',
+    it('allows an environment variable named after a config option', () => {
+      expect(
+        schemaErrors(repoSchema, { env: { automerge: 'true' } }),
+      ).toBeUndefined();
+
+      expect(schemaErrors(repoSchema, { env: { GOPROXY: 123 } })).toEqual([
+        'must be string',
       ]);
     });
 
-    it('does not validate the children of an option which nests a config', () => {
+    it('validates the keys of an object whose keys are a known set', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckNames: { artifactError: 'renovate/artifacts' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, { statusCheckNames: { bogusCheck: 'x' } }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
+    it('validates the values of a map against their allowed values', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckWhen: { artifactError: 'failed' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckWhen: { artifactError: 'sometimes' },
+        }),
+      ).toEqual(['must be equal to one of the allowed values']);
+    });
+
+    it('validates the children of an option which nests a config', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { commands: ['echo hi'], executionMode: 'branch' },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaErrors(repoSchema, {
           postUpgradeTasks: { commands: 'echo hi' },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be array']);
 
       expect(
         schemaErrors(repoSchema, {
           vulnerabilityAlerts: { vulnerabilityFixStrategy: 'nope' },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be equal to one of the allowed values']);
     });
 
-    it('does not validate the children of a map of configs', () => {
+    it('validates the children of a map of configs', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          customDatasources: {
+            myDatasource: { format: 'json', transformTemplates: ['{}'] },
+          },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaErrors(repoSchema, {
           customDatasources: { myDatasource: { format: 'nope' } },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be equal to one of the allowed values']);
     });
 
     it('validates an option which nests a config as a config', () => {
@@ -227,6 +272,39 @@ describe('tools/docs/test/schema', () => {
         'must be string',
         'must match exactly one schema in oneOf',
       ]);
+    });
+  });
+
+  describe('internal presets', () => {
+    let repoSchema: ValidateFunction;
+    let globalSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+      globalSchema = await compileSchema({ isGlobal: true });
+    });
+
+    function getPresetsRejectedBySchema(): string[] {
+      const rejected: string[] = [];
+
+      for (const [group, presets] of Object.entries(groups)) {
+        /* the `global:` presets configure the Renovate instance, so are only valid in a global config */
+        const validate = group === 'global' ? globalSchema : repoSchema;
+
+        for (const [name, preset] of Object.entries(presets)) {
+          if (!validate(preset)) {
+            rejected.push(
+              `${group}:${name} -> ${validate.errors?.[0]?.message}`,
+            );
+          }
+        }
+      }
+
+      return rejected;
+    }
+
+    it('accepts every preset we ship', () => {
+      expect(getPresetsRejectedBySchema()).toBeEmptyArray();
     });
   });
 
