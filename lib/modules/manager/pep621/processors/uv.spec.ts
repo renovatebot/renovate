@@ -633,6 +633,88 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('does not add direct deps of workspace members as indirect deps of the workspace root', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [manifest]
+        members = [
+            "member",
+            "root",
+        ]
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
+        dependencies = [
+            { name = "markupsafe" },
+        ]
+
+        [[package]]
+        name = "markupsafe"
+        version = "2.1.5"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "member"
+        version = "0.1.0"
+        source = { editable = "packages/member" }
+        dependencies = [
+            { name = "mako" },
+        ]
+
+        [package.dev-dependencies]
+        dev = [
+            { name = "pytest" },
+        ]
+
+        [package.metadata]
+        requires-dist = [{ name = "mako", specifier = ">=1.3.0" }]
+
+        [package.metadata.requires-dev]
+        dev = [{ name = "pytest", specifier = ">=8.0.0" }]
+
+        [[package]]
+        name = "pytest"
+        version = "8.4.2"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "root"
+        version = "0.1.0"
+        source = { editable = "." }
+        dependencies = [
+            { name = "member" },
+        ]
+
+        [package.metadata]
+        requires-dist = [{ name = "member", editable = "packages/member" }]
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      // mako and pytest are direct deps of the member, so only markupsafe is
+      // an indirect dep of the workspace
+      expect(result).toEqual([
+        {
+          packageName: 'markupsafe',
+          depName: 'markupsafe',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          lockedVersion: '2.1.5',
+          depType: depTypes.indirect,
+          enabled: false,
+        },
+      ]);
+    });
+
     it('only adds indirect deps with a registry source', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
