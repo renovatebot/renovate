@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
 import type { KnownPlugin, KnownPluginExtractor } from './types.ts';
@@ -51,6 +52,78 @@ function whenTrue(
     const enabled =
       (parsed.success ? parsed.data[gateField] : undefined) ?? gateDefault;
     return enabled ? inner(config, registryAliases) : [];
+  };
+}
+
+/**
+ * A plugin's own config field is rarely the *complete* text Renovate needs
+ * to replace on update - e.g. a version/tag field is just `1.21`, while the
+ * full dependency is conceptually `golang:1.21`. `getDep()` (built for
+ * Dockerfile `FROM` lines) always sets `replaceString` to the *entire*
+ * string passed in, which is wrong here: that joined/synthesised string
+ * never appears literally in the YAML, so Renovate's auto-replace can never
+ * find it and the update silently never applies.
+ *
+ * Instead, this derives `depName`/`packageName` via `getDep()` (so
+ * registry-alias resolution, `quay.io`/`library/` prefix handling etc.
+ * still apply to the image-name portion), but sets `currentValue` itself to
+ * the literal field text and leaves `replaceString`/`autoReplaceStringTemplate`
+ * unset - Renovate's own auto-replace fallback then uses `currentValue` as
+ * the replace target (`lib/workers/repository/update/branch/auto-replace.ts`),
+ * which *is* a literal substring of the file. This mirrors how
+ * ../github-actions/known-actions's `parseValue`/`parseImageValue` handle a
+ * `with:` input - they never set `replaceString` either.
+ */
+function depWithVersion(
+  imageName: string,
+  currentValue: string,
+  registryAliases: Record<string, string>,
+): PackageDependency {
+  const dep = getDep(imageName, {
+    registryAliases,
+    depType: 'docker',
+    specifyReplaceString: false,
+  });
+  dep.currentValue = currentValue;
+  return dep;
+}
+
+/**
+ * A plugin whose config has separate image-name and tag/version fields. If
+ * the user's own `image` value already carries a tag/digest (`myorg/app:1`),
+ * it's a complete, literal reference on its own - handled like
+ * `extractSingleImageField`, ignoring `tagField` (joining a second tag onto
+ * an already-tagged image would produce `myorg/app:1:2`, not a real
+ * reference). Otherwise, `imageField` (or `defaultImage`, for a plugin with
+ * a real, known default image name) names the dependency and `tagField`'s
+ * literal text becomes `currentValue` (see `depWithVersion`) - `tagField`
+ * absent means there's no version text to anchor a replace to, so nothing
+ * is reported, even if the plugin has its own default tag.
+ */
+function extractImageTagJoin(
+  imageField: string,
+  tagField: string,
+  defaultImage?: string,
+): KnownPluginExtractor {
+  const schema = z.object({
+    [imageField]: z.string().optional(),
+    [tagField]: z.string().optional(),
+  });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    if (!parsed.success) {
+      return [];
+    }
+    const rawImage = parsed.data[imageField];
+    if (rawImage && regEx(/[:@]/).test(rawImage)) {
+      return [getDep(rawImage, { registryAliases, depType: 'docker' })];
+    }
+    const image = rawImage ?? defaultImage;
+    const tag = parsed.data[tagField];
+    if (!image || !tag) {
+      return [];
+    }
+    return [depWithVersion(image, tag, registryAliases)];
   };
 }
 
@@ -138,5 +211,16 @@ export const knownPlugins: Record<string, KnownPlugin> = {
       extractSingleImageField('ruby-image'),
     ),
     fields: ['ruby-image', 'run-in-docker'],
+  },
+  // https://github.com/buildkite-plugins/shellcheck-buildkite-plugin
+  // `image` defaults to `koalaman/shellcheck` (a known, fixed name) when
+  // unset; `version` must be present as literal text to report anything.
+  // Verified against `hooks/command` - the README's stated `version`
+  // default of `latest` is stale; the real fallback is `stable`, but that
+  // default isn't literal file text either, so we only report an explicit
+  // `version`.
+  shellcheck: {
+    extract: extractImageTagJoin('image', 'version', 'koalaman/shellcheck'),
+    fields: ['image', 'version'],
   },
 };
