@@ -1276,5 +1276,73 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the default image for grapl-security/vault-login when only tag is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-login#v1.0.0:
+                tag: "1.10.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-login',
+          packageName: 'grapl-security/vault-login-buildkite-plugin',
+        },
+        {
+          currentValue: '1.10.0',
+          datasource: 'docker',
+          depName: 'hashicorp/vault',
+          packageName: 'hashicorp/vault',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for grapl-security/vault-login when tag is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-login#v1.0.0:
+                role: deploy
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-login',
+          packageName: 'grapl-security/vault-login-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the default image for grapl-security/vault-env when only tag is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              grapl-security/vault-env#v1.0.0:
+                tag: "1.10.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'grapl-security/vault-env',
+          packageName: 'grapl-security/vault-env-buildkite-plugin',
+        },
+        {
+          currentValue: '1.10.0',
+          datasource: 'docker',
+          depName: 'hashicorp/envconsul',
+          packageName: 'hashicorp/envconsul',
+          depType: 'docker',
+        },
+      ]);
+    });
   });
 });
