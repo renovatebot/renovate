@@ -218,13 +218,17 @@ export const PoetrySource = z.object({
 });
 export type PoetrySource = z.infer<typeof PoetrySource>;
 
+export function getPypiUrl(): string {
+  return getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+}
+
 export const PoetrySources = LooseArray(PoetrySource, {
   onError: ({ error: err }) => {
     logger.debug({ err }, 'Poetry: error parsing sources array');
   },
 })
   .transform((sources) => {
-    const pypiUrl = getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+    const pypiUrl = getPypiUrl();
     const result: PoetrySource[] = [];
 
     let overridesPyPi = false;
@@ -430,6 +434,7 @@ export const PoetryPyProject = Toml.pipe(
 
       return {
         packageFileContent,
+        poetrySources: sourceUrls,
         poetryRequirement: buildSystem?.poetryRequirement,
       };
     }),
