@@ -177,11 +177,13 @@ export class UvProcessor extends BasePyProjectProcessor {
             }
           }
 
-          for (const [name, { version, virtual }] of Object.entries(
+          for (const [name, { version, registry }] of Object.entries(
             lockFileMapping,
           )) {
-            if (!virtual && !deps.find((dep) => dep.packageName === name)) {
-              deps.push(indirectDep(name, version));
+            // only registry sourced packages can be looked up, others are
+            // local, git or url sources (including the project itself)
+            if (registry && !deps.find((dep) => dep.packageName === name)) {
+              deps.push(indirectDep(name, version, registry));
             }
           }
         }
@@ -308,11 +310,16 @@ function generateCMD(updatedDeps: Upgrade[]): string {
  * They are disabled by default to avoid noise. When a vulnerability alert
  * matches one of them, the alert system force-enables the update.
  */
-function indirectDep(name: string, version: string): PackageDependency {
+function indirectDep(
+  name: string,
+  version: string,
+  registry: string,
+): PackageDependency {
   return {
     packageName: name,
     depName: name,
     datasource: PypiDatasource.id,
+    registryUrls: [registry],
     lockedVersion: version,
     depType: depTypes.indirect,
     enabled: false,

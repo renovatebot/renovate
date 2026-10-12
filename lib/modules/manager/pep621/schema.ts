@@ -1,5 +1,4 @@
 import { z } from 'zod/v4';
-import { coerceObject } from '../../../util/object.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -258,19 +257,19 @@ export const UvLockfile = Toml.pipe(
       z.object({
         name: z.string(),
         version: z.string(),
-        source: z.record(z.string(), z.unknown()).optional(),
+        source: z.object({ registry: z.string().optional() }).optional(),
       }),
     ),
   }),
 ).transform(({ package: pkgs }) => {
-  const pkgMap: Record<string, { version: string; virtual: boolean }> = {};
+  const pkgMap: Record<string, { version: string; registry?: string }> = {};
 
   for (const { name, version, source } of pkgs) {
     if (
       !(name in pkgMap) ||
       pep440.isGreaterThan(pkgMap[name].version, version)
     ) {
-      pkgMap[name] = { version, virtual: 'virtual' in coerceObject(source) };
+      pkgMap[name] = { version, registry: source?.registry };
     }
   }
 
