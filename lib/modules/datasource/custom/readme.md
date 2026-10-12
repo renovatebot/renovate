@@ -103,7 +103,7 @@ Only releases returned by the datasource can contribute embedded notes.
 If any applicable entries contain notes, these take precedence over normal repository changelog retrieval, even when `sourceUrl` points to GitHub or GitLab.
 Renovate does not fetch missing entries from those platforms to complete a partially supplied changelog.
 If no applicable embedded entries are available, Renovate falls back to the selected target's supplied content, when present, and otherwise to normal changelog retrieval.
-Omit `changelogContent` to use normal retrieval; an empty string on the selected target still counts as supplied content in that fallback.
+Omitted or empty `changelogContent` does not, by itself, suppress normal changelog retrieval.
 
 Missing, empty, or non-string content is excluded from the combined release notes without removing the release from update consideration.
 Non-string content is discarded during custom datasource validation.
