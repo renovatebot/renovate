@@ -18,6 +18,7 @@ export const depTypes = {
   uvDevDependencies: 'tool.uv.dev-dependencies',
   uvSources: 'tool.uv.sources',
   buildSystemRequires: 'build-system.requires',
+  indirect: 'indirect',
 };
 
 export function parsePEP508(

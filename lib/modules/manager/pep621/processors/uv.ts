@@ -309,7 +309,7 @@ function indirectDep(name: string, version: string): PackageDependency {
     depName: name,
     datasource: PypiDatasource.id,
     lockedVersion: version,
-    depType: 'indirect',
+    depType: depTypes.indirect,
     enabled: false,
   };
 }
