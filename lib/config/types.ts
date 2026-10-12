@@ -693,6 +693,13 @@ export interface RenovateOptionBase {
 
   allowedValues?: string[];
 
+  /**
+   * A subset of suggested values for the user, which are some (but not all) of the possible `allowedValues`.
+   *
+   * This provides editor autocomplete (i.e. via our JSON Schema) but makes it possible to not be an exhaustive list, which is required by `allowedValues`, and may be further complicated by `patternMatch`.
+   */
+  suggestedValues?: string[];
+
   allowString?: boolean;
 
   cli?: boolean;

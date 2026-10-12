@@ -503,6 +503,18 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues:
+      /* These are sorted in priority order, but editors may not suggest in that order */
+      [
+        'config:best-practices',
+        'config:recommended',
+        'mergeConfidence:all-badges',
+        'abandonments:recommended',
+        'group:all',
+        'replacements:all',
+        'security:minimumReleaseAgeNpm',
+        'security:only-security-updates',
+      ],
     cli: false,
   },
   {
