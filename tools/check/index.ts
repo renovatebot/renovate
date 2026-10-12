@@ -152,7 +152,7 @@ function toSourcePath(target: string): string | null {
 }
 
 async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
-  const coverageData = await loadCoverage('./coverage');
+  const coverageData = await loadCoverage(args.coverageDir);
   if (!coverageData) {
     return [];
   }
@@ -184,11 +184,17 @@ function parseCliArgs(): CliArgs {
     .option('--all', 'run fixers first, then all lint checks and tests')
     .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
     .option('--no-test', 'skip tests')
+    .option(
+      '--coverage-dir <dir>',
+      'directory the tests write their coverage report to',
+      'coverage',
+    )
     .action((targets, opts) => {
       args = {
         all: opts.all ?? false,
         fix: opts.fix ?? false,
         noTest: !opts.test,
+        coverageDir: opts.coverageDir,
         targets,
       };
     })
@@ -202,8 +208,10 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
     return [];
   }
 
+  const coverageArg = `--coverage.reportsDirectory=${args.coverageDir}`;
+
   if (args.targets.length === 0) {
-    return [{ name: 'test', cmd: 'pnpm', args: ['vitest'] }];
+    return [{ name: 'test', cmd: 'pnpm', args: ['vitest', coverageArg] }];
   }
 
   const patterns = [
@@ -225,7 +233,11 @@ async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   }
   const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
   return [
-    { name, cmd: 'pnpm', args: ['vitest', '--passWithNoTests', ...patterns] },
+    {
+      name,
+      cmd: 'pnpm',
+      args: ['vitest', '--passWithNoTests', coverageArg, ...patterns],
+    },
   ];
 }
 

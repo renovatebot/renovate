@@ -14,7 +14,7 @@ name: renovate-otel-demo
 services:
   # Jaeger for storing traces
   jaeger:
-    image: jaegertracing/jaeger:2.21.0
+    image: jaegertracing/jaeger:2.22.0
     ports:
       - '16686:16686' # Web UI
       - '4317' # OTLP gRPC
@@ -22,7 +22,7 @@ services:
 
   # Prometheus for storing metrics
   prometheus:
-    image: prom/prometheus:v3.14.0
+    image: prom/prometheus:v3.15.0
     ports:
       - '9090:9090' # Web UI
       - '4318' # OTLP HTTP

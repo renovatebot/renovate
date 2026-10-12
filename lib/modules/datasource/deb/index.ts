@@ -1,5 +1,6 @@
 import readline from 'node:readline';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -24,7 +25,9 @@ export class DebDatasource extends Datasource {
    * the Debian package repository format as specified here
    * @see{https://wiki.debian.org/DebianRepository/Format}
    */
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   /**
    * Users can specify multiple upstream repositories and the datasource will aggregate the release
@@ -46,9 +49,11 @@ export class DebDatasource extends Datasource {
    * - suite: stable, oldstable or other alias for a release, either this or release must be given like buster
    * - binaryArch: e.g. amd64 resolves to http://deb.debian.org/debian/dists/stable/non-free/binary-amd64/
    */
-  override readonly defaultRegistryUrls = [
-    'https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [
+      'https://deb.debian.org/debian?suite=stable&components=main,contrib,non-free&binaryArch=amd64',
+    ];
+  }
 
   override readonly defaultVersioning = 'deb';
 
@@ -113,7 +118,7 @@ export class DebDatasource extends Datasource {
   ): Promise<Record<string, PackageDescription[]>> {
     return this.cached(
       {
-        key: `${extractedFile}:${lastTimestamp.getTime()}`,
+        key: buildCacheKey(extractedFile, lastTimestamp.getTime()),
         ttlMinutes: 24 * 60,
       },
       () => this.readExtractedPackageIndex(extractedFile, lastTimestamp),
@@ -193,7 +198,7 @@ export class DebDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),
