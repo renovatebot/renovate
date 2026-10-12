@@ -171,14 +171,10 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
-          const directPackageNames = new Set<string>();
           for (const dep of deps) {
             const packageName = dep.packageName;
-            if (packageName) {
-              directPackageNames.add(packageName);
-              if (packageName in lockFileMapping) {
-                dep.lockedVersion = lockFileMapping[packageName].version;
-              }
+            if (packageName && packageName in lockFileMapping) {
+              dep.lockedVersion = lockFileMapping[packageName].version;
             }
           }
 
@@ -186,6 +182,9 @@ export class UvProcessor extends BasePyProjectProcessor {
           // workspace root. Only add indirect deps for the package file next
           // to the lock file to avoid duplicating them for every member.
           if (upath.dirname(lockFileName) === upath.dirname(packageFile)) {
+            const directPackageNames = new Set(
+              deps.map((dep) => dep.packageName),
+            );
             for (const [name, { version, registry }] of Object.entries(
               lockFileMapping,
             )) {
