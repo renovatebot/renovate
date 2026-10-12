@@ -1615,5 +1615,91 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts a single image from the ecs-deploy plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts one image per entry when ecs-deploy image is an array', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                image:
+                  - "myorg/app-one:1.0.0"
+                  - "myorg/app-two:2.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'myorg/app-one',
+          packageName: 'myorg/app-one',
+          depType: 'docker',
+          replaceString: 'myorg/app-one:1.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '2.0.0',
+          datasource: 'docker',
+          depName: 'myorg/app-two',
+          packageName: 'myorg/app-two',
+          depType: 'docker',
+          replaceString: 'myorg/app-two:2.0.0',
+        },
+      ]);
+    });
+
+    it('does not extract an image for ecs-deploy when image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ecs-deploy#v3.3.0:
+                cluster: my-cluster
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'ecs-deploy',
+          packageName: 'buildkite-plugins/ecs-deploy-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
