@@ -1387,5 +1387,47 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the ossf/scorecard image from the ossf-scorecard plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ossf-scorecard#v1.0.0:
+                version: "v5.4.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'ossf-scorecard',
+          packageName: 'buildkite-plugins/ossf-scorecard-buildkite-plugin',
+        },
+        {
+          currentValue: 'v5.4.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard',
+          packageName: 'ghcr.io/ossf/scorecard',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('does not extract an image for ossf-scorecard when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              ossf-scorecard#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'ossf-scorecard',
+          packageName: 'buildkite-plugins/ossf-scorecard-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
