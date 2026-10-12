@@ -469,4 +469,21 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     },
     fields: ['image', 'image.repository', 'image.tag'],
   },
+  // https://github.com/buildkite-plugins/wiz-buildkite-plugin
+  // `image-address` is a scan *target* the user points at their own build
+  // output, not a pinned dependency - confirmed via the README and
+  // `hooks/post-command`. Implemented so the shape is on record, but left
+  // disabled.
+  wiz: {
+    extract: extractSingleImageField('image-address'),
+    enabled: false,
+    fields: ['image-address'],
+  },
+  // https://github.com/equinixmetal-buildkite/trivy-buildkite-plugin
+  // Same scan-target caveat as `wiz` above - confirmed via the README.
+  'equinixmetal-buildkite/trivy': {
+    extract: extractSingleImageField('image-ref'),
+    enabled: false,
+    fields: ['image-ref'],
+  },
 };
