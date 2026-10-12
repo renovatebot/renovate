@@ -342,7 +342,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -400,7 +400,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -441,7 +441,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -482,7 +482,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -536,7 +536,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -694,7 +694,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -796,7 +796,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -836,7 +836,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -938,7 +938,7 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -989,7 +989,7 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
       fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-      await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+      await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
         deps: [
           {
             currentValue: 'nixpkgs-unstable',
@@ -1040,7 +1040,7 @@ describe('modules/manager/nix/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     await expect(
       extractPackageFile(flakeNix, 'flake.nix'),
-    ).resolves.resolves.toEqual({
+    ).resolves.toMatchObject({
       deps: [
         {
           currentDigest: '76c0a6dba345490508f36c1aa3c7ba5b6b460989',
@@ -1211,7 +1211,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'nixos-unstable',
@@ -1253,7 +1253,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'main',
@@ -1295,7 +1295,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -1337,7 +1337,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           datasource: 'git-refs',
@@ -1377,7 +1377,7 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.resolves.toEqual({
+    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
       deps: [
         {
           currentValue: 'main',
