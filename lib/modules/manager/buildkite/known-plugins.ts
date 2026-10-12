@@ -66,4 +66,11 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractSingleImageField('image'),
     fields: ['image'],
   },
+  // https://github.com/oasislabs/docker-buildkite-plugin - a fork of the
+  // official `docker` plugin, pinned to an older upstream snapshot that
+  // predates the `chown`/`chown-image` feature, so only `image` applies.
+  'oasislabs/docker': {
+    extract: extractSingleImageField('image'),
+    fields: ['image'],
+  },
 };
