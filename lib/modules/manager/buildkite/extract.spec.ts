@@ -1098,5 +1098,120 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('does not extract an image for shellcheck when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                files: ["*.sh"]
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the default shellcheck image name when only version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                version: "stable"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          currentValue: 'stable',
+          datasource: 'docker',
+          depName: 'koalaman/shellcheck',
+          packageName: 'koalaman/shellcheck',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('extracts an explicit image and version for shellcheck', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                image: "myorg/shellcheck"
+                version: "v0.9.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          currentValue: 'v0.9.0',
+          datasource: 'docker',
+          depName: 'myorg/shellcheck',
+          packageName: 'myorg/shellcheck',
+          depType: 'docker',
+        },
+      ]);
+    });
+
+    it('treats an already-tagged shellcheck image as complete, ignoring version', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0:
+                image: "myorg/shellcheck:v0.8.0"
+                version: "v0.9.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: 'v0.8.0',
+          datasource: 'docker',
+          depName: 'myorg/shellcheck',
+          packageName: 'myorg/shellcheck',
+          depType: 'docker',
+          replaceString: 'myorg/shellcheck:v0.8.0',
+        },
+      ]);
+    });
+
+    it('does not extract an image for shellcheck when its config is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              shellcheck#v1.4.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.4.0',
+          datasource: 'github-tags',
+          depName: 'shellcheck',
+          packageName: 'buildkite-plugins/shellcheck-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
