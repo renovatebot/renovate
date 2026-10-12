@@ -240,4 +240,16 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractImageTagJoin('image', 'tag'),
     fields: ['image', 'tag'],
   },
+  // https://github.com/grapl-security/vault-login-buildkite-plugin (archived)
+  // `image` defaults to `hashicorp/vault` - verified against `lib/vault.sh`.
+  'grapl-security/vault-login': {
+    extract: extractImageTagJoin('image', 'tag', 'hashicorp/vault'),
+    fields: ['image', 'tag'],
+  },
+  // https://github.com/grapl-security/vault-env-buildkite-plugin (archived)
+  // Same pattern as vault-login, verified against `hooks/environment`.
+  'grapl-security/vault-env': {
+    extract: extractImageTagJoin('image', 'tag', 'hashicorp/envconsul'),
+    fields: ['image', 'tag'],
+  },
 };
