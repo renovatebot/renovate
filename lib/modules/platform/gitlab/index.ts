@@ -656,6 +656,12 @@ async function tryPrAutomerge(
       );
 
       let isPipelineOutdated = false;
+      let mrSha: string | undefined;
+      let pipelineSha: string | undefined;
+      const mergedResultsRefs = [
+        `refs/merge-requests/${pr}/merge`,
+        `refs/merge-requests/${pr}/train`,
+      ];
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
@@ -666,9 +672,9 @@ async function tryPrAutomerge(
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
             sha?: string;
-            source?: string;
+            ref: string;
             status: string;
-          };
+          } | null;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
@@ -690,12 +696,14 @@ async function tryPrAutomerge(
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Right after a push the MR can still point to the pipeline of the previous commit.
-        // Merged results pipelines run on a merge ref, so their sha legitimately differs.
+        // Merged results and merge train pipelines run on a merge ref, so their sha legitimately differs.
+        mrSha = body.sha;
+        pipelineSha = body.pipeline?.sha;
         isPipelineOutdated =
           isNonEmptyString(body.sha) &&
           isNonEmptyString(body.pipeline?.sha) &&
           body.pipeline.sha !== body.sha &&
-          body.pipeline.source !== 'merge_request_event';
+          !mergedResultsRefs.includes(body.pipeline.ref);
 
         // Only continue if the merge request can be merged and has a pipeline for its latest commit.
         if (
@@ -713,6 +721,7 @@ async function tryPrAutomerge(
       // Enabling auto-merge now could merge immediately without any pipeline for the latest commit.
       if (isPipelineOutdated) {
         logger.debug(
+          { mrSha, pipelineSha },
           'Skipping platform automerge - MR pipeline is not for the latest commit',
         );
         return;
