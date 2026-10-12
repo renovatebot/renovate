@@ -28,5 +28,5 @@ function extractDockerPluginDeps(
  * Modelled on ../github-actions/known-actions.
  */
 export const knownPlugins: Record<string, KnownPlugin> = {
-  docker: { extract: extractDockerPluginDeps },
+  docker: { extract: extractDockerPluginDeps, fields: ['image'] },
 };
