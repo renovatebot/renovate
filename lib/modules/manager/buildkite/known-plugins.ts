@@ -58,6 +58,26 @@ function whenTrue(
 }
 
 /**
+ * Wraps `inner` so it only runs when the given string config field equals
+ * `expected` (explicitly, or by its own default) - for a plugin whose image
+ * field is only meaningful behind a mode/type toggle.
+ */
+function whenEquals(
+  gateField: string,
+  expected: string,
+  gateDefault: string,
+  inner: KnownPluginExtractor,
+): KnownPluginExtractor {
+  const schema = z.object({ [gateField]: z.string().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const value =
+      (parsed.success ? parsed.data[gateField] : undefined) ?? gateDefault;
+    return value === expected ? inner(config, registryAliases) : [];
+  };
+}
+
+/**
  * A plugin's own config field is rarely the *complete* text Renovate needs
  * to replace on update - e.g. a version/tag field is just `1.21`, while the
  * full dependency is conceptually `golang:1.21`. `getDep()` (built for
@@ -368,5 +388,18 @@ export const knownPlugins: Record<string, KnownPlugin> = {
       );
     },
     fields: ['image'],
+  },
+  // https://github.com/buildkite-plugins/aws-lambda-deploy-buildkite-plugin
+  // `image-uri` is only meaningful when `package-type` is `Image` (it
+  // defaults to `Zip`) - verified against `hooks/post-command`, which only
+  // requires/validates `image-uri` in that case.
+  'aws-lambda-deploy': {
+    extract: whenEquals(
+      'package-type',
+      'Image',
+      'Zip',
+      extractSingleImageField('image-uri'),
+    ),
+    fields: ['image-uri', 'package-type'],
   },
 };
