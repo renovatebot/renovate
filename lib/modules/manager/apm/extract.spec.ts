@@ -375,6 +375,28 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
+    it('follows a SHA pinned to a branch with git-refs on other hosts', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/team/project#b0cbd3df1533b396d281a6886d5132f623393a9c # main
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toEqual([
+        {
+          depName: 'gitlab.com/team/project',
+          depType: 'apm',
+          packageName: 'https://gitlab.com/team/project',
+          datasource: GitRefsDatasource.id,
+          currentValue: 'main',
+          currentDigest: 'b0cbd3df1533b396d281a6886d5132f623393a9c',
+          replaceString:
+            'gitlab.com/team/project#b0cbd3df1533b396d281a6886d5132f623393a9c # main',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+        },
+      ]);
+    });
+
     it.each`
       ref
       ${'^1.0.0'}
