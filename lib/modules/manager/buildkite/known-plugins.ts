@@ -223,4 +223,13 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractImageTagJoin('image', 'version', 'koalaman/shellcheck'),
     fields: ['image', 'version'],
   },
+  // https://github.com/buildkite-plugins/docker-image-push-buildkite-plugin
+  // `image`/`tag` name a *local* image this plugin pushes to a registry
+  // (README: "pushes an image that already exists in the local Docker
+  // daemon") - an output, not a dependency. Left disabled.
+  'docker-image-push': {
+    extract: extractImageTagJoin('image', 'tag'),
+    enabled: false,
+    fields: ['image', 'tag'],
+  },
 };
