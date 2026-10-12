@@ -170,10 +170,14 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
+          const directPackageNames = new Set<string>();
           for (const dep of deps) {
             const packageName = dep.packageName;
-            if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName].version;
+            if (packageName) {
+              directPackageNames.add(packageName);
+              if (packageName in lockFileMapping) {
+                dep.lockedVersion = lockFileMapping[packageName].version;
+              }
             }
           }
 
@@ -182,7 +186,7 @@ export class UvProcessor extends BasePyProjectProcessor {
           )) {
             // only registry sourced packages can be looked up, others are
             // local, git or url sources (including the project itself)
-            if (registry && !deps.find((dep) => dep.packageName === name)) {
+            if (registry && !directPackageNames.has(name)) {
               deps.push(indirectDep(name, version, registry));
             }
           }
