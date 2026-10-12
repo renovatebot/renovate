@@ -1213,5 +1213,24 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('does not extract the docker-image-push image, since it is a local image being pushed, not a dependency', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              docker-image-push#v2.8.0:
+                image: "myorg/myapp"
+                tag: "1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.8.0',
+          datasource: 'github-tags',
+          depName: 'docker-image-push',
+          packageName: 'buildkite-plugins/docker-image-push-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
