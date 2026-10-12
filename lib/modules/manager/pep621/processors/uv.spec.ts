@@ -597,6 +597,42 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('does not add indirect deps for workspace members using a parent lock file', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'packages/member/pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          lockedVersion: '1.2.3',
+        },
+      ]);
+    });
+
     it('only adds indirect deps with a registry source', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
