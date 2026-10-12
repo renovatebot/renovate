@@ -279,4 +279,12 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     fields: ['version'],
     dependency: 'golang',
   },
+  // https://github.com/buildkite-plugins/ossf-scorecard-buildkite-plugin
+  // Backing image is on GHCR, not Docker Hub - verified against
+  // `hooks/command`.
+  'ossf-scorecard': {
+    extract: extractFixedImageVersion('ghcr.io/ossf/scorecard', 'version'),
+    fields: ['version'],
+    dependency: 'ghcr.io/ossf/scorecard',
+  },
 };
