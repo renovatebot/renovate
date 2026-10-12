@@ -163,7 +163,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     if (lockFileName) {
       const lockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (lockFileContent) {
-        const { val: lockFileMapping, err } = Result.parse(
+        const { val: lockFile, err } = Result.parse(
           lockFileContent,
           UvLockfile,
         ).unwrap();
@@ -171,6 +171,7 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
+          const lockFileMapping = lockFile.packages;
           for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in lockFileMapping) {
@@ -182,9 +183,11 @@ export class UvProcessor extends BasePyProjectProcessor {
           // workspace root. Only add indirect deps for the package file next
           // to the lock file to avoid duplicating them for every member.
           if (upath.dirname(lockFileName) === upath.dirname(packageFile)) {
-            const directPackageNames = new Set(
-              deps.map((dep) => dep.packageName),
-            );
+            // direct deps of other workspace members are not indirect either
+            const directPackageNames = new Set([
+              ...deps.map((dep) => dep.packageName),
+              ...lockFile.workspaceDeps,
+            ]);
             for (const [name, { version, registry }] of Object.entries(
               lockFileMapping,
             )) {

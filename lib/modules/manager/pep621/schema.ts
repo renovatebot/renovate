@@ -251,27 +251,53 @@ export const PdmLockfile = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
+const UvLockfileRequirement = z.object({ name: z.string() });
+
 export const UvLockfile = Toml.pipe(
   z.object({
+    manifest: z
+      .object({ members: LooseArray(z.string()).catch([]) })
+      .optional(),
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
         source: z.object({ registry: z.string().optional() }).optional(),
+        metadata: z
+          .object({
+            'requires-dist': LooseArray(UvLockfileRequirement).catch([]),
+            'requires-dev': LooseRecord(
+              LooseArray(UvLockfileRequirement),
+            ).catch({}),
+          })
+          .optional(),
       }),
     ),
   }),
-).transform(({ package: pkgs }) => {
-  const pkgMap: Record<string, { version: string; registry?: string }> = {};
+).transform(({ manifest, package: pkgs }) => {
+  const packages: Record<string, { version: string; registry?: string }> = {};
+  const workspaceMembers = new Set(manifest?.members);
+  const workspaceDeps = new Set<string>();
 
-  for (const { name, version, source } of pkgs) {
+  for (const { name, version, source, metadata } of pkgs) {
     if (
-      !(name in pkgMap) ||
-      pep440.isGreaterThan(pkgMap[name].version, version)
+      !(name in packages) ||
+      pep440.isGreaterThan(packages[name].version, version)
     ) {
-      pkgMap[name] = { version, registry: source?.registry };
+      packages[name] = { version, registry: source?.registry };
+    }
+
+    if (metadata && workspaceMembers.has(name)) {
+      for (const req of metadata['requires-dist']) {
+        workspaceDeps.add(req.name);
+      }
+      for (const reqs of Object.values(metadata['requires-dev'])) {
+        for (const req of reqs) {
+          workspaceDeps.add(req.name);
+        }
+      }
     }
   }
 
-  return pkgMap;
+  return { packages, workspaceDeps };
 });
