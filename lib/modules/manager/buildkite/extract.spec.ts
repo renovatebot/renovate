@@ -1701,5 +1701,52 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image-uri for aws-lambda-deploy when package-type is Image', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              aws-lambda-deploy#v2.1.0:
+                package-type: Image
+                image-uri: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'aws-lambda-deploy',
+          packageName: 'buildkite-plugins/aws-lambda-deploy-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract image-uri for aws-lambda-deploy when package-type defaults to Zip', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              aws-lambda-deploy#v2.1.0:
+                function-name: my-function
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.1.0',
+          datasource: 'github-tags',
+          depName: 'aws-lambda-deploy',
+          packageName: 'buildkite-plugins/aws-lambda-deploy-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
