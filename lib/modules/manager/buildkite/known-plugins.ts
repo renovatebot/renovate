@@ -7,17 +7,41 @@ import type { PackageDependency } from '../types.ts';
 import type { KnownPlugin, KnownPluginExtractor } from './types.ts';
 
 // https://github.com/buildkite-plugins/docker-buildkite-plugin
-const DockerPluginConfig = z.object({ image: z.string().optional() });
+// `chown`/`chown-image`/`mount-checkout` are also present on the
+// (unmodified fork) `affirm/docker` plugin below - shared here.
+const DockerPluginConfig = z.object({
+  image: z.string().optional(),
+  chown: z.boolean().optional(),
+  'chown-image': z.string().optional(),
+  'mount-checkout': z.boolean().optional(),
+});
 
 function extractDockerPluginDeps(
   config: unknown,
   registryAliases: Record<string, string>,
 ): PackageDependency[] {
   const parsed = DockerPluginConfig.safeParse(config);
-  if (!parsed.success || !parsed.data.image) {
+  if (!parsed.success) {
     return [];
   }
-  return [getDep(parsed.data.image, { registryAliases, depType: 'docker' })];
+  const deps: PackageDependency[] = [];
+  if (parsed.data.image) {
+    deps.push(
+      getDep(parsed.data.image, { registryAliases, depType: 'docker' }),
+    );
+  }
+  // `hooks/pre-exit`: the chown step only runs when `chown` is true (default
+  // false) AND `mount-checkout` is not false (default true).
+  const mountCheckout = parsed.data['mount-checkout'] ?? true;
+  if (parsed.data.chown && mountCheckout && parsed.data['chown-image']) {
+    deps.push(
+      getDep(parsed.data['chown-image'], {
+        registryAliases,
+        depType: 'docker',
+      }),
+    );
+  }
+  return deps;
 }
 
 /**
@@ -181,7 +205,10 @@ function extractFixedImageVersion(
  * Modelled on ../github-actions/known-actions.
  */
 export const knownPlugins: Record<string, KnownPlugin> = {
-  docker: { extract: extractDockerPluginDeps, fields: ['image'] },
+  docker: {
+    extract: extractDockerPluginDeps,
+    fields: ['image', 'chown', 'chown-image', 'mount-checkout'],
+  },
   // https://github.com/buildkite-plugins/docker-compose-buildkite-plugin
   'docker-compose': {
     extract: extractSingleImageField('run-image'),
@@ -401,5 +428,12 @@ export const knownPlugins: Record<string, KnownPlugin> = {
       extractSingleImageField('image-uri'),
     ),
     fields: ['image-uri', 'package-type'],
+  },
+  // https://github.com/affirm/docker-buildkite-plugin - an unmodified fork
+  // of the official `docker` plugin (0 commits ahead, 27 behind upstream),
+  // so it shares the exact same extractor/shape.
+  'affirm/docker': {
+    extract: extractDockerPluginDeps,
+    fields: ['image', 'chown', 'chown-image', 'mount-checkout'],
   },
 };

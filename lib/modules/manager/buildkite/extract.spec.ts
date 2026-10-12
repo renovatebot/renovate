@@ -1748,5 +1748,150 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image for affirm/docker, without a chown image by default', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract a chown image for affirm/docker when chown-image is absent, even if chown is true', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract a chown image for affirm/docker when mount-checkout is false, even if chown is true', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+                chown-image: "myorg/chowner:1.0.0"
+                mount-checkout: false
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('extracts an explicit chown image for affirm/docker', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0:
+                image: "myorg/myapp:1.2.3"
+                chown: true
+                chown-image: "myorg/chowner:1.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.0.0',
+          datasource: 'docker',
+          depName: 'myorg/chowner',
+          packageName: 'myorg/chowner',
+          depType: 'docker',
+          replaceString: 'myorg/chowner:1.0.0',
+        },
+      ]);
+    });
+
+    it('does not extract any image for affirm/docker when its config is not an object', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              affirm/docker#v5.12.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.12.0',
+          datasource: 'github-tags',
+          depName: 'affirm/docker',
+          packageName: 'affirm/docker-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });
