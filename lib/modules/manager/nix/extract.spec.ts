@@ -1174,7 +1174,7 @@ describe('modules/manager/nix/extract', () => {
     };
 
     const result = await extractPackageFile(flakeNix, 'flake.nix', config);
-    expect(result?.deps[0]).resolves.toEqual({
+    expect(result?.deps[0]).toMatchObject({
       currentDigest: 'newdigest123',
       depName: 'disko',
       packageName: 'https://github.com/nix-community/disko',
