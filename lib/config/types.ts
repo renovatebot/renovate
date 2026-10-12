@@ -643,6 +643,10 @@ export const configScopes = [
   'manager',
   /** an update type's configuration object, like `major` */
   'updateType',
+  /** the `vulnerabilityAlerts` configuration object */
+  'vulnerabilityAlert',
+  /** the `group` configuration object, which is merged into an update when it's grouped */
+  'group',
 ] as const;
 
 export type ConfigScope = (typeof configScopes)[number];
@@ -650,6 +654,7 @@ export type ConfigScope = (typeof configScopes)[number];
 export type AllowedParents =
   | '.'
   | 'bumpVersions'
+  | 'group'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
