@@ -556,10 +556,12 @@ describe('modules/manager/pep621/processors/uv', () => {
         [[package]]
         name = "mako"
         version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
 
         [[package]]
         name = "markupsafe"
         version = "2.1.5"
+        source = { registry = "https://example.com/simple" }
       `);
 
       const deps: PackageDependency[] = [
@@ -578,6 +580,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'mako',
           depName: 'mako',
           datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
           lockedVersion: '1.3.10',
           depType: 'indirect',
           enabled: false,
@@ -586,8 +589,74 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'markupsafe',
           depName: 'markupsafe',
           datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
           lockedVersion: '2.1.5',
           depType: 'indirect',
+          enabled: false,
+        },
+      ]);
+    });
+
+    it('only adds indirect deps with a registry source', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "root-project"
+        version = "0.1.0"
+        source = { editable = "." }
+
+        [[package]]
+        name = "virtual-project"
+        version = "0.1.0"
+        source = { virtual = "packages/virtual" }
+
+        [[package]]
+        name = "path-dep"
+        version = "1.0.0"
+        source = { path = "dist/path_dep-1.0.0-py3-none-any.whl" }
+
+        [[package]]
+        name = "directory-dep"
+        version = "1.0.0"
+        source = { directory = "packages/directory-dep" }
+
+        [[package]]
+        name = "git-dep"
+        version = "1.0.0"
+        source = { git = "https://github.com/foo/git-dep?rev=v1.0.0#0123456789abcdef0123456789abcdef01234567" }
+
+        [[package]]
+        name = "url-dep"
+        version = "1.0.0"
+        source = { url = "https://example.com/url_dep-1.0.0.tar.gz" }
+
+        [[package]]
+        name = "no-source-dep"
+        version = "1.0.0"
+
+        [[package]]
+        name = "registry-dep"
+        version = "1.0.0"
+        source = { registry = "https://pypi.org/simple" }
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'registry-dep',
+          depName: 'registry-dep',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          lockedVersion: '1.0.0',
+          depType: depTypes.indirect,
           enabled: false,
         },
       ]);
