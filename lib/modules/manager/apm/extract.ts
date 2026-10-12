@@ -60,7 +60,8 @@ function determineDatasource(
  * Determine the datasource for a ref that the default versioning can't read as
  * a version, such as a branch. It has no tag to look up, so Renovate follows
  * the ref's commit instead, as github-actions does for `uses: owner/action@main`:
- * with `github-digest` on GitHub hosts, and `git-refs` on every other host.
+ * with `github-digest` on GitHub hosts, and `git-refs` on every other host, both
+ * with `exact` versioning so the branch name itself counts as a valid value.
  */
 function determineRefDatasource(
   host: string,
@@ -79,6 +80,7 @@ function determineRefDatasource(
   return {
     datasource: GitRefsDatasource.id,
     packageName: `https://${host}/${repoPath}`,
+    versioning: exactVersioning.id,
   };
 }
 

@@ -367,6 +367,7 @@ describe('modules/manager/apm/extract', () => {
           depType: 'apm',
           packageName: 'https://gitlab.com/team/project',
           datasource: GitRefsDatasource.id,
+          versioning: 'exact',
           currentValue: 'main',
           replaceString: 'gitlab.com/team/project#main',
           autoReplaceStringTemplate:
@@ -387,6 +388,7 @@ describe('modules/manager/apm/extract', () => {
           depType: 'apm',
           packageName: 'https://gitlab.com/team/project',
           datasource: GitRefsDatasource.id,
+          versioning: 'exact',
           currentValue: 'main',
           currentDigest: 'b0cbd3df1533b396d281a6886d5132f623393a9c',
           replaceString:
