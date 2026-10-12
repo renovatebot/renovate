@@ -2,10 +2,7 @@ import { isArray, isObject } from '@sindresorhus/is';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
-import {
-  getSupportedToolNames,
-  getToolConfig,
-} from '../../util/exec/containerbase.ts';
+import { getSupportedToolNames } from '../../util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
@@ -27,11 +24,6 @@ function toolConstraintProperties(): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
 
   for (const toolName of getSupportedToolNames()) {
-    const toolConfig = getToolConfig(toolName);
-    if (!toolConfig) {
-      continue;
-    }
-
     const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     const description = def?.description ?? '';
 
@@ -72,11 +64,6 @@ function installToolProperties(): Record<string, unknown> {
   const properties: Record<string, unknown> = {};
 
   for (const toolName of getSupportedToolNames()) {
-    const toolConfig = getToolConfig(toolName);
-    if (!toolConfig) {
-      continue;
-    }
-
     const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     const description = def?.description ?? '';
 
