@@ -287,4 +287,17 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     fields: ['version'],
     dependency: 'ghcr.io/ossf/scorecard',
   },
+  // https://github.com/buildkite-plugins/plugin-linter-buildkite-plugin
+  // Verified against `hooks/command`: the README's stated default of
+  // `2.0.3` is stale - the real fallback is `v2.1.0`, but that default isn't
+  // literal file text when `image-version` is unset, so we only report an
+  // explicit value.
+  'plugin-linter': {
+    extract: extractFixedImageVersion(
+      'buildkite/plugin-linter',
+      'image-version',
+    ),
+    fields: ['image-version'],
+    dependency: 'buildkite/plugin-linter',
+  },
 };

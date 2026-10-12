@@ -1429,5 +1429,47 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('does not extract an image for plugin-linter when image-version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-linter#v3.3.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'plugin-linter',
+          packageName: 'buildkite-plugins/plugin-linter-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the buildkite/plugin-linter image when image-version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-linter#v3.3.0:
+                image-version: "v2.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'plugin-linter',
+          packageName: 'buildkite-plugins/plugin-linter-buildkite-plugin',
+        },
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'docker',
+          depName: 'buildkite/plugin-linter',
+          packageName: 'buildkite/plugin-linter',
+          depType: 'docker',
+        },
+      ]);
+    });
   });
 });
