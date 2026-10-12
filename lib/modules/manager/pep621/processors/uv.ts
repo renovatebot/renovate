@@ -285,6 +285,11 @@ function generateCMD(updatedDeps: Upgrade[]): string {
       case depTypes.buildSystemRequires:
         // build requirements are not locked in the lock files, no need to update.
         break;
+      case depTypes.indirect:
+        // indirect deps are unconstrained in pyproject.toml, so pin them to
+        // avoid uv upgrading past the intended version.
+        deps.push(`${dep.packageName}==${dep.newVersion}`);
+        break;
       default: {
         deps.push(dep.packageName!);
       }
