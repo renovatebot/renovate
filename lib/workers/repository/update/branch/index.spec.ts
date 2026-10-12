@@ -3232,14 +3232,20 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const postUpgradeTasks = {
+        commands: ['echo hardcoded-string'],
+        dataFileTemplate:
+          '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+        executionMode: 'branch',
+      } satisfies NonNullable<BranchConfig['postUpgradeTasks']>;
+
       const inconfig: BranchConfig = {
         ...config,
-        postUpgradeTasks: {
-          commands: ['echo hardcoded-string'],
-          dataFileTemplate:
-            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
-          executionMode: 'branch',
-        },
+        postUpgradeTasks,
+        upgrades: config.upgrades.map((upgrade) => ({
+          ...upgrade,
+          postUpgradeTasks,
+        })),
       };
 
       try {
@@ -3339,14 +3345,20 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
+      const postUpgradeTasks = {
+        commands: ['echo hardcoded-string'],
+        dataFileTemplate:
+          '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+        executionMode: 'branch',
+      } satisfies NonNullable<BranchConfig['postUpgradeTasks']>;
+
       const inconfig: BranchConfig = {
         ...config,
-        postUpgradeTasks: {
-          commands: ['echo hardcoded-string'],
-          dataFileTemplate:
-            '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
-          executionMode: 'branch',
-        },
+        postUpgradeTasks,
+        upgrades: config.upgrades.map((upgrade) => ({
+          ...upgrade,
+          postUpgradeTasks,
+        })),
       };
 
       try {
