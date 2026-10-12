@@ -67,6 +67,7 @@ export class DockerHubCache {
 
     this.cache.updatedAt = updatedAt;
 
+    // v8 ignore else -- needs a cache populated across two sync runs
     if (earliestDate && latestDate) {
       for (const [key, item] of Object.entries(this.cache.items)) {
         const id = parseInt(key, 10);

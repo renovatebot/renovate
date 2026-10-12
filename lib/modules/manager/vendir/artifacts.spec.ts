@@ -42,45 +42,41 @@ describe('modules/manager/vendir/artifacts', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns null if no vendir.lock.yml found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if empty vendir.lock.yml found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
     fs.readLocalFile.mockResolvedValueOnce('');
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.lock.yml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -94,15 +90,15 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot([{ cmd: 'vendir sync' }]);
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: 'vendir sync' }]);
   });
 
   it('returns updated vendir.lock', async () => {
@@ -115,14 +111,14 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -143,14 +139,14 @@ describe('modules/manager/vendir/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps: [],
         newPackageFileContent: vendirFile,
         config: { ...config, isLockFileMaintenance: true },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -172,14 +168,14 @@ describe('modules/manager/vendir/artifacts', () => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: 'vendir.yml',
@@ -307,8 +303,8 @@ describe('modules/manager/vendir/artifacts', () => {
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
@@ -316,7 +312,7 @@ describe('modules/manager/vendir/artifacts', () => {
           ...config,
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -443,14 +439,14 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -476,8 +472,8 @@ describe('modules/manager/vendir/artifacts', () => {
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
+    await expect(
+      vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
@@ -486,7 +482,7 @@ describe('modules/manager/vendir/artifacts', () => {
           constraints: { vendir: '0.35.0', helm: '3.17.0' },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           type: 'addition',
@@ -541,6 +537,34 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: vendirFile,
+        config: {
+          ...config,
+          extractedConstraints: { vendir: '0.35.0', helm: '3.17.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool vendir 0.35.0' },
+      { cmd: 'install-tool helm 3.17.0' },
+      { cmd: 'vendir sync' },
+    ]);
+  });
+
   describe('Docker', () => {
     beforeEach(() => {
       GlobalConfig.set({
@@ -559,8 +583,8 @@ describe('modules/manager/vendir/artifacts', () => {
       );
       fs.getParentDir.mockReturnValue('');
       const updatedDeps = [{ depName: 'dep1' }];
-      expect(
-        await vendir.updateArtifacts({
+      await expect(
+        vendir.updateArtifacts({
           packageFileName: 'vendir.yml',
           updatedDeps,
           newPackageFileContent: vendirFile,
@@ -569,7 +593,7 @@ describe('modules/manager/vendir/artifacts', () => {
             constraints: { vendir: '0.35.0', helm: '3.17.0' },
           },
         }),
-      ).toEqual([
+      ).resolves.toEqual([
         {
           file: {
             type: 'addition',

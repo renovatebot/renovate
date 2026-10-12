@@ -12,7 +12,11 @@ import { regEx } from '../../../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { loadPackageJson } from '../../utils.ts';
-import type { NpmPackage, NpmPackageDependency } from '../types.ts';
+import type {
+  NpmPackage,
+  NpmPackageDependency,
+  OverrideDependency,
+} from '../types.ts';
 import {
   extractDependency,
   getExtractedConstraints,
@@ -21,12 +25,22 @@ import {
 import { setNodeCommitTopic } from './node.ts';
 import { extractOverrideDepsRec } from './overrides.ts';
 
+export function hasDevEnginesPackageManager(
+  packageJson: Pick<NpmPackage, 'devEngines'>,
+): boolean {
+  const pm = packageJson.devEngines?.packageManager;
+  if (Array.isArray(pm)) {
+    return pm.some((item) => isNonEmptyObject(item));
+  }
+  return isNonEmptyObject(pm);
+}
+
 export function extractPackageJson(
   packageJson: NpmPackage,
   packageFile: string,
 ): PackageFileContent<NpmManagerData> | null {
   logger.trace(`npm.extractPackageJson(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<NpmManagerData>[] = [];
 
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug({ packageFile }, 'Ignoring vendorised package.json');
@@ -73,10 +87,10 @@ export function extractPackageJson(
           dependencies = { [match.groups.name]: match.groups.range };
         }
         for (const [key, val] of Object.entries(
-          dependencies as NpmPackageDependency,
+          dependencies as Partial<OverrideDependency>,
         )) {
           const depName = parseDepName(depType, key);
-          let dep: PackageDependency = {
+          let dep: PackageDependency<NpmManagerData> = {
             depType,
             depName,
           };
@@ -85,13 +99,7 @@ export function extractPackageJson(
           }
           // v8 ignore else -- TODO: add test #40625
           if (depType === 'overrides' && !isString(val)) {
-            // TODO: fix type #22198
-            deps.push(
-              ...extractOverrideDepsRec(
-                [depName],
-                val as unknown as NpmManagerData,
-              ),
-            );
+            deps.push(...extractOverrideDepsRec([depName], val));
           } else if (depType === 'pnpm' && depName === 'overrides') {
             // pnpm overrides
             // https://pnpm.io/package_json#pnpmoverrides
@@ -120,8 +128,7 @@ export function extractPackageJson(
               }
             }
           } else {
-            // TODO: fix type #22198
-            dep = { ...dep, ...extractDependency(depType, depName, val!) };
+            dep = { ...dep, ...extractDependency(depType, depName, val) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
@@ -137,6 +144,37 @@ export function extractPackageJson(
     }
   }
 
+  if (packageJson.devEngines) {
+    for (const subKey of ['runtime', 'packageManager'] as const) {
+      const value = packageJson.devEngines[subKey];
+      if (!value) {
+        continue;
+      }
+      const items = Array.isArray(value) ? value : [value];
+      const depType = `devEngines.${subKey}`;
+      for (let i = 0; i < items.length; i += 1) {
+        const item = items[i];
+        if (!item?.name || !item.version) {
+          continue;
+        }
+        const dep: PackageDependency<NpmManagerData> = {
+          depType,
+          depName: item.name,
+          ...extractDependency(depType, item.name, item.version),
+        };
+        setNodeCommitTopic(dep);
+        dep.prettyDepType = depType;
+        if (Array.isArray(value)) {
+          dep.managerData = {
+            ...dep.managerData,
+            devEnginesIndex: i,
+          };
+        }
+        deps.push(dep);
+      }
+    }
+  }
+
   const extractedConstraints = getExtractedConstraints(deps);
 
   return {
@@ -147,7 +185,7 @@ export function extractPackageJson(
       packageJsonName,
       hasPackageManager:
         isNonEmptyStringAndNotWhitespace(packageJson.packageManager) ||
-        isNonEmptyObject(packageJson.devEngines?.packageManager),
+        hasDevEnginesPackageManager(packageJson),
       workspaces: packageJson.workspaces,
     },
   };
@@ -161,7 +199,8 @@ export async function hasPackageManager(
   const packageJsonResult = await loadPackageJson(packageJsonDir);
 
   return (
-    isNonEmptyString(packageJsonResult?.packageManager?.name) &&
-    isNonEmptyString(packageJsonResult?.packageManager?.version)
+    (isNonEmptyString(packageJsonResult?.packageManager?.name) &&
+      isNonEmptyString(packageJsonResult?.packageManager?.version)) ||
+    hasDevEnginesPackageManager(packageJsonResult)
   );
 }

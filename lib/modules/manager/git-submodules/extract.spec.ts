@@ -4,7 +4,6 @@ import { mock } from 'vitest-mock-extended';
 import { clearEnv } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as git from '../../../util/git/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { extractPackageFile } from './index.ts';
 
 const createSimpleGit = vi.mocked(git.createSimpleGit);
@@ -16,8 +15,6 @@ describe('modules/manager/git-submodules/extract', () => {
     const { simpleGit } =
       await vi.importActual<typeof import('simple-git')>('simple-git');
     GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
-    // clear host rules
-    hostRules.clear();
     clearEnv();
 
     createSimpleGit.mockImplementation((...args: any[]) => {
@@ -44,7 +41,9 @@ describe('modules/manager/git-submodules/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('empty submodule returns null', async () => {
-      expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
+      await expect(
+        extractPackageFile('', '.gitmodules.1', {}),
+      ).resolves.toBeNull();
     });
 
     it('currentValue is unset when no branch is specified', async () => {

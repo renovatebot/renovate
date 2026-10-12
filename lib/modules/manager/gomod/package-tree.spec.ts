@@ -72,7 +72,7 @@ describe('modules/manager/gomod/package-tree', () => {
         Promise.resolve(monorepo[f]),
       );
 
-      expect(await getGoModulesInTidyOrder('shared/go.mod')).toEqual([
+      await expect(getGoModulesInTidyOrder('shared/go.mod')).resolves.toEqual([
         'api/go.mod',
         'cmd/go.mod',
       ]);
@@ -82,15 +82,19 @@ describe('modules/manager/gomod/package-tree', () => {
       scm.getFileList.mockResolvedValue(['a/go.mod']);
       fs.readLocalFile.mockResolvedValue('module example.com/a\n');
 
-      expect(await getGoModulesInTidyOrder('a/go.mod')).toEqual([]);
-      expect(await getGoModulesInTidyOrder('nowhere/go.mod')).toEqual([]);
+      await expect(getGoModulesInTidyOrder('a/go.mod')).resolves.toEqual([]);
+      await expect(getGoModulesInTidyOrder('nowhere/go.mod')).resolves.toEqual(
+        [],
+      );
     });
 
     it('skips go.mod files which cannot be read', async () => {
       scm.getFileList.mockResolvedValue(Object.keys(monorepo));
       fs.readLocalFile.mockResolvedValue(null);
 
-      expect(await getGoModulesInTidyOrder('shared/go.mod')).toEqual([]);
+      await expect(getGoModulesInTidyOrder('shared/go.mod')).resolves.toEqual(
+        [],
+      );
     });
 
     it('traverses bare ../ replace directives pointing to a parent module', async () => {
@@ -107,7 +111,9 @@ describe('modules/manager/gomod/package-tree', () => {
         Promise.resolve(files[f]),
       );
 
-      expect(await getGoModulesInTidyOrder('go.mod')).toEqual(['e2e/go.mod']);
+      await expect(getGoModulesInTidyOrder('go.mod')).resolves.toEqual([
+        'e2e/go.mod',
+      ]);
     });
   });
 });

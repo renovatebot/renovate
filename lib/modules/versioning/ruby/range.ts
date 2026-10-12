@@ -45,7 +45,7 @@ export function satisfiesRange(ver: string, range: Range): boolean {
 export function parseRanges(range: string): Range[] {
   const originalRanges = range.split(',').map(parse);
   const ranges: Range[] = [];
-  for (let i = 0; i < originalRanges.length; ) {
+  for (let i = 0; i < originalRanges.length;) {
     if (
       i + 1 < originalRanges.length &&
       originalRanges[i].operator === PGTE &&

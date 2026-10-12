@@ -6,11 +6,15 @@ import {
 import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
-import { queryReleases } from '../../../util/github/graphql/index.ts';
+import {
+  queryReleases,
+  queryTags,
+} from '../../../util/github/graphql/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
@@ -28,10 +32,11 @@ import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { getSourceUrl } from './common.ts';
+import { getSourceUrl, isPublicGoPackage, publicGoproxyUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { VersionInfo } from './schema.ts';
+import { GoVersionTimestampCache } from './timestamp-cache.ts';
 
 /** TODO #42566 */
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
@@ -118,7 +123,7 @@ export class GoProxyDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-    const goproxy = getEnv().GOPROXY ?? 'https://proxy.golang.org,direct';
+    const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
       return this.direct.getReleases(config);
     }
@@ -159,13 +164,17 @@ export class GoProxyDatasource extends Datasource {
         const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
           fallback === '|' ? true : statusCode === 404 || statusCode === 410;
-        const msg = canFallback
-          ? 'Goproxy error: trying next URL provided with GOPROXY'
-          : 'Goproxy error: skipping other URLs provided with GOPROXY';
-        logger.debug({ err }, msg);
         if (!canFallback) {
-          break;
+          logger.debug(
+            { err },
+            'Goproxy error: not falling back to other URLs provided with GOPROXY, rethrowing',
+          );
+          this.handleGenericErrors(err);
         }
+        logger.debug(
+          { err },
+          'Goproxy error: trying next URL provided with GOPROXY',
+        );
       }
     }
 
@@ -182,7 +191,7 @@ export class GoProxyDatasource extends Datasource {
     }
 
     if (result?.sourceUrl && servedByProxy) {
-      await this.addGithubReleaseTimestamps(
+      await this.addGithubTimestamps(
         packageName,
         result.sourceUrl,
         result.releases,
@@ -195,9 +204,9 @@ export class GoProxyDatasource extends Datasource {
   /**
    * A Go proxy reports the commit time of the tagged commit as a version's `Time`, which can be much earlier than the point at which that version was released.
    *
-   * When the module is hosted on GitHub and the version has a GitHub Release, the Release's publication time is a better indicator of when the version became available.
+   * When the module is hosted on GitHub, a GitHub Release's publication time, or - if there's no Release - the git tag's own creation time (distinct from the commit time for an annotated tag), is a better indicator of when the version became available. A Release is preferred over a tag when both exist for the same version.
    */
-  async addGithubReleaseTimestamps(
+  async addGithubTimestamps(
     packageName: string,
     sourceUrl: string,
     releases: Release[],
@@ -215,38 +224,47 @@ export class GoProxyDatasource extends Datasource {
     const repository = trimTrailingSlash(
       trimLeadingSlash(parsedUrl.pathname),
     ).replace(regEx(/\.git$/), '');
+    const githubConfig = {
+      packageName: repository,
+      registryUrl: parsedUrl.origin,
+    };
 
-    try {
-      const githubReleases = await queryReleases(
-        {
-          packageName: repository,
-          registryUrl: parsedUrl.origin,
-        },
-        this.githubHttp,
-      );
+    const [githubTags, githubReleases] = await Promise.all([
+      queryTags(githubConfig, this.githubHttp).catch((err) => {
+        logger.debug(
+          { err, packageName },
+          'Error fetching GitHub Tags for Go module',
+        );
+        return [];
+      }),
+      queryReleases(githubConfig, this.githubHttp).catch((err) => {
+        logger.debug(
+          { err, packageName },
+          'Error fetching GitHub Releases for Go module',
+        );
+        return [];
+      }),
+    ]);
 
-      const timestamps = new Map<string, Timestamp>();
-      for (const { version, releaseTimestamp } of githubReleases) {
-        timestamps.set(version, releaseTimestamp);
+    const timestamps = new Map<string, Timestamp>();
+    for (const { version, releaseTimestamp } of githubTags) {
+      timestamps.set(version, releaseTimestamp);
+    }
+    for (const { version, releaseTimestamp } of githubReleases) {
+      timestamps.set(version, releaseTimestamp);
+    }
+
+    const tagPrefix = getTagPrefix(packageName, timestamps.keys());
+    for (const release of releases) {
+      const version = release.version.replace(incompatibleSuffixRegex, '');
+      const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+      if (
+        releaseTimestamp &&
+        (!release.releaseTimestamp ||
+          releaseTimestamp > release.releaseTimestamp)
+      ) {
+        release.releaseTimestamp = releaseTimestamp;
       }
-
-      const tagPrefix = getTagPrefix(packageName, timestamps.keys());
-      for (const release of releases) {
-        const version = release.version.replace(incompatibleSuffixRegex, '');
-        const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
-        if (
-          releaseTimestamp &&
-          (!release.releaseTimestamp ||
-            releaseTimestamp > release.releaseTimestamp)
-        ) {
-          release.releaseTimestamp = releaseTimestamp;
-        }
-      }
-    } catch (err) {
-      logger.debug(
-        { err, packageName },
-        'Error fetching GitHub Releases for Go module',
-      );
     }
   }
 
@@ -255,6 +273,7 @@ export class GoProxyDatasource extends Datasource {
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
         key: GoProxyDatasource.getCacheKey(config),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -267,7 +286,7 @@ export class GoProxyDatasource extends Datasource {
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
   encodeCase(input: string): string {
-    return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
+    return input.replace(regEx(/(?:[A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
@@ -336,6 +355,7 @@ export class GoProxyDatasource extends Datasource {
         key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
         // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
         ttlMinutes: 100 * 24 * 60,
+        cacheable: isPublicGoPackage(packageName),
       },
       () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
     );
@@ -412,9 +432,9 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod =
-      modParts?.baseMod ??
-      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
+    /* v8 ignore start: defensive - modRegex matches any non-empty package name, so baseMod is always set */
+    const baseMod = modParts?.baseMod ?? packageName;
+    /* v8 ignore stop */
     const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
@@ -442,6 +462,8 @@ export class GoProxyDatasource extends Datasource {
           );
         });
 
+        const timestamps = await GoVersionTimestampCache.init(baseUrl, pkg);
+
         releases = await p.map(filteredReleases, async (versionInfo) => {
           const { version, newDigest, releaseTimestamp } = versionInfo;
 
@@ -449,13 +471,24 @@ export class GoProxyDatasource extends Datasource {
             return { version, newDigest, releaseTimestamp };
           }
 
+          const cachedTimestamp = timestamps.get(version);
+          if (cachedTimestamp) {
+            return { version, releaseTimestamp: cachedTimestamp };
+          }
+
           try {
-            return await this.versionInfo(baseUrl, pkg, version);
+            const release = await this.versionInfo(baseUrl, pkg, version);
+            if (release.releaseTimestamp) {
+              timestamps.set(version, release.releaseTimestamp);
+            }
+            return release;
           } catch (err) {
             logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
             return { version };
           }
         });
+
+        await timestamps.save();
 
         if (constraintsFiltering === 'strict') {
           releases = await p.map(releases, async (rel) => {
@@ -510,6 +543,7 @@ export class GoProxyDatasource extends Datasource {
         }
         if (!result.releases.length) {
           const releaseFromLatest = pseudoVersionToRelease(latestVersion);
+          // v8 ignore else -- needs an empty version list plus a non-pseudo latest
           if (releaseFromLatest) {
             result.releases.push(releaseFromLatest);
           }
@@ -531,17 +565,25 @@ export class GoProxyDatasource extends Datasource {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
     const constraintsFilteringKey =
-      constraintsFiltering && constraintsFiltering !== 'none'
-        ? `@@${constraintsFiltering}`
-        : '';
-    // TODO: types (#22198)
-    return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
+      constraintsFiltering === 'none' ? '' : constraintsFiltering;
+    return buildCacheKey(
+      'getReleases',
+      packageName,
+      goproxy,
+      noproxy?.toString(),
+      constraintsFilteringKey,
+    );
   }
 
   static getVersionedCacheKey(packageName: string, version: string): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
-    // TODO: types (#22198)
-    return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
+    return buildCacheKey(
+      'goDirective',
+      packageName,
+      version,
+      goproxy,
+      noproxy?.toString(),
+    );
   }
 }

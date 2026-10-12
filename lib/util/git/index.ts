@@ -134,7 +134,12 @@ export function createSimpleGit({
   const gitEnv = authentication
     ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
     : childEnv;
-  return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
+  return simpleGit({
+    ...simpleGitConfig(),
+    // simple-git blocks explicitly passed `GIT_*` and other guarded variables unless allowed. The environment is fully controlled by Renovate, so allow all of it.
+    allowEnvironment: Object.keys(gitEnv),
+    ...config,
+  }).env(gitEnv);
 }
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
@@ -360,7 +365,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
+    gitAuthor ?? 'Renovate <renovate@whitesourcesoftware.com>',
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -416,6 +421,15 @@ export function setPlatformIgnoredAuthors(emails: string[] = []): void {
   platformIgnoredAuthors = emails;
 }
 
+/**
+ * Clears the in-memory `isBranchModified()` results.
+ *
+ * @internal Test helper, so read-only tests can share one `initRepo()`.
+ */
+export function clearBranchIsModifiedCache(): void {
+  config.branchIsModified = {};
+}
+
 export async function getSubmodules(): Promise<string[]> {
   try {
     return (
@@ -444,7 +458,13 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitEnv = getGitEnvironmentVariables(getChildEnv());
+  // simple-git fixes the allowed environment variables on creation, so the authenticated environment needs its own instance
+  const submoduleGit = instrumentGit(
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      authentication: {},
+    }),
+  );
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -458,7 +478,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
+        submoduleGit.submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -605,7 +625,7 @@ export const syncGit = withInstrumenting(
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
-    // If upstreamUrl is set then the bot is running in fork mode
+    // If upstreamUrl is set then Renovate is running in fork mode
     // The "upstream" remote is the original repository which was forked from
     if (config.upstreamUrl) {
       const { upstreamUrl } = config;

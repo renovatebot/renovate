@@ -97,13 +97,13 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('initPlatform()', () => {
     it('should init', async () => {
-      expect(
-        await codeCommit.initPlatform({
+      await expect(
+        codeCommit.initPlatform({
           endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
           username: 'abc',
           password: '123',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
     });

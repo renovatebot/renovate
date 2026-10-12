@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GitlabTagsDatasource } from './index.ts';
 
@@ -11,15 +12,23 @@ describe('modules/datasource/gitlab-tags/index', () => {
         {
           name: 'v1.0.0',
           commit: {
+            id: 'abc100',
             created_at: '2020-03-04T12:01:37.000-06:00',
           },
         },
         {
           name: 'v1.1.0',
-          commit: {},
+          commit: {
+            id: 'abc110',
+            created_at: '',
+          },
         },
         {
           name: 'v1.1.1',
+          commit: {
+            id: 'abc111',
+            created_at: '',
+          },
         },
       ];
       httpMock
@@ -31,8 +40,25 @@ describe('modules/datasource/gitlab-tags/index', () => {
         registryUrls: ['https://gitlab.company.com/api/v4/'],
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(3);
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.company.com/api/v4',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+          {
+            gitRef: 'v1.1.1',
+            version: 'v1.1.1',
+          },
+        ],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      });
     });
 
     it('returns tags from custom registry in sub path', async () => {
@@ -40,15 +66,23 @@ describe('modules/datasource/gitlab-tags/index', () => {
         {
           name: 'v1.0.0',
           commit: {
+            id: 'abc100',
             created_at: '2020-03-04T12:01:37.000-06:00',
           },
         },
         {
           name: 'v1.1.0',
-          commit: {},
+          commit: {
+            id: 'abc110',
+            created_at: '',
+          },
         },
         {
           name: 'v1.1.1',
+          commit: {
+            id: 'abc111',
+            created_at: '',
+          },
         },
       ];
       httpMock
@@ -60,12 +94,32 @@ describe('modules/datasource/gitlab-tags/index', () => {
         registryUrls: ['https://my.company.com/gitlab'],
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(3);
+      expect(res).toEqual({
+        registryUrl: 'https://my.company.com/gitlab',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+          {
+            gitRef: 'v1.1.1',
+            version: 'v1.1.1',
+          },
+        ],
+        sourceUrl: 'https://my.company.com/gitlab/some/dep2',
+      });
     });
 
     it('returns tags with default registry', async () => {
-      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      const body = [
+        { name: 'v1.0.0', commit: { id: 'abc100', created_at: '' } },
+        { name: 'v1.1.0', commit: { id: 'abc110', created_at: '' } },
+      ];
       httpMock
         .scope('https://gitlab.com')
         .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
@@ -74,8 +128,20 @@ describe('modules/datasource/gitlab-tags/index', () => {
         datasource,
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(2);
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+        ],
+        sourceUrl: 'https://gitlab.com/some/dep2',
+      });
     });
   });
 
@@ -85,6 +151,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const body = [
         {
           id: digest,
+          created_at: '2020-03-04T12:01:37.000-06:00',
         },
       ];
       httpMock
@@ -103,6 +170,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
       const digest = 'abcd00001234';
       const body = {
         id: digest,
+        created_at: '2020-03-04T12:01:37.000-06:00',
       };
       httpMock
         .scope('https://gitlab.company.com')
@@ -117,6 +185,38 @@ describe('modules/datasource/gitlab-tags/index', () => {
         'branch',
       );
       expect(res).toBe(digest);
+    });
+
+    it('caches the digest of a branch separately from the latest commit', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(200, [
+          { id: 'latest-sha', created_at: '2020-03-04T12:01:37.000-06:00' },
+        ])
+        .get('/api/v4/projects/some%2Fdep2/repository/commits/branch')
+        .reply(200, {
+          id: 'branch-sha',
+          created_at: '2020-03-04T12:01:37.000-06:00',
+        });
+      const config = {
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'some/dep2',
+      };
+
+      await expect(getDigest(config)).resolves.toBe('latest-sha');
+      await expect(getDigest(config, 'branch')).resolves.toBe('branch-sha');
     });
 
     it('returns null from gitlab installation with no commits', async () => {

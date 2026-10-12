@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, hostRules } from '~test/util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -9,6 +9,7 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
@@ -20,6 +21,7 @@ const datasource = vi.mocked(_datasource);
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../../../util/git/index.ts');
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
@@ -58,7 +60,9 @@ describe('modules/manager/mise/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+    );
   });
 
   it('returns null if lock file does not exist', async () => {
@@ -236,7 +240,182 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('returns artifactError on exec failure with combined output', async () => {
+  it('returns the sidecars written by mise lock', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(
+        `[[tools.prettier]]\nversion = "3.9.9"\naube = { path = ".mise/locks/prettier/3.9.9", digest = "sha256:abc" }\n`,
+      )
+      .mockResolvedValueOnce('modified uv.lock')
+      .mockResolvedValueOnce('new package.json')
+      .mockResolvedValueOnce('new aube-lock.yaml');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['.mise/locks/pipx-black/26.5.1/uv.lock'],
+        not_added: [
+          '.mise/locks/prettier/3.9.9/package.json',
+          '.mise/locks/prettier/3.9.9/aube-lock.yaml',
+        ],
+        deleted: [
+          '.mise/locks/prettier/3.9.8/package.json',
+          '.mise/locks/prettier/3.9.8/aube-lock.yaml',
+        ],
+      }),
+    );
+    mockExecAll(safeMiseVersionOutput);
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: lockMaintenanceConfig,
+    });
+
+    expect(git.getRepoStatus).toHaveBeenCalledWith('.mise/locks');
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expect.stringContaining('version = "3.9.9"'),
+          path: 'mise.lock',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'modified uv.lock',
+          path: '.mise/locks/pipx-black/26.5.1/uv.lock',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'new package.json',
+          path: '.mise/locks/prettier/3.9.9/package.json',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'new aube-lock.yaml',
+          path: '.mise/locks/prettier/3.9.9/aube-lock.yaml',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          path: '.mise/locks/prettier/3.9.8/package.json',
+          type: 'deletion',
+        },
+      },
+      {
+        file: {
+          path: '.mise/locks/prettier/3.9.8/aube-lock.yaml',
+          type: 'deletion',
+        },
+      },
+    ]);
+  });
+
+  it('returns restored sidecars when the lock file is unchanged', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('restored uv.lock');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+        not_added: ['subdir/.mise/locks/pipx-black/26.5.1/uv.lock'],
+        deleted: [],
+      }),
+    );
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'subdir/mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(git.getRepoStatus).toHaveBeenCalledWith('subdir/.mise/locks');
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'restored uv.lock',
+          path: 'subdir/.mise/locks/pipx-black/26.5.1/uv.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
+
+  it('refreshes metadata from the updated in-memory lockfile', async () => {
+    const originalLockFile =
+      '[[tools.node]]\nversion = "20.0.0"\nplatforms = { linux = { checksum = "old" } }\n';
+    const updatedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "new" } }\n';
+    const refreshedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "refreshed" } }\n';
+    fs.readLocalFile
+      .mockResolvedValueOnce(originalLockFile)
+      .mockResolvedValueOnce(refreshedLockFile);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '[tools]\nnode = "22"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      updatedLockFile,
+    );
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: expect.stringContaining('checksum = "refreshed"'),
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
+  it('returns regenerated content that matches the in-memory update', async () => {
+    const originalLockFile = '[[tools.node]]\nversion = "20.0.0"\n';
+    const updatedLockFile = '[[tools.node]]\nversion = "22.0.0"\n';
+    fs.readLocalFile
+      .mockResolvedValueOnce(originalLockFile)
+      .mockResolvedValueOnce(updatedLockFile);
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '[tools]\nnode = "22"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: updatedLockFile,
+        },
+      },
+    ]);
+  });
+
+  it('returns artifactError on exec failure with the error output', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const error = new Error('exec error');
     (error as any).stdout = 'stdout output';
@@ -254,7 +433,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         artifactError: {
           fileName: 'mise.lock',
-          stderr: `stdout output\nstderr output\nexec error`,
+          stderr: 'stderr output',
         },
       },
     ]);
@@ -382,6 +561,39 @@ describe('modules/manager/mise/artifacts', () => {
       newPackageFileContent: '',
       config: {
         constraints: {
+          mise: '2026.6.12',
+          node: '24.16.0',
+          npm: '11.4.2',
+          go: '1.24.4',
+          ruby: '3.4.3',
+        },
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: 'install-tool node 24.16.0' },
+      { cmd: 'install-tool npm 11.4.2' },
+      { cmd: 'install-tool golang 1.24.4' },
+      { cmd: 'install-tool ruby 3.4.3' },
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: {
+        extractedConstraints: {
           mise: '2026.6.12',
           node: '24.16.0',
           npm: '11.4.2',
@@ -697,7 +909,7 @@ version = "3.10.17"
       expect(res).toEqual({ status: 'already-updated' });
     });
 
-    it('returns unsupported when version does not match', () => {
+    it('updates the lockfile when version changes', () => {
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
         lockFile: 'mise.lock',
@@ -707,7 +919,102 @@ version = "3.10.17"
         newVersion: '22.0.0',
       });
 
-      expect(res).toEqual({ status: 'unsupported' });
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+    });
+
+    it('keeps the package file in the update set for artifact refresh', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: '[[tools.node]]\nversion = "22"\n',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.toml': '[[tools.node]]\nversion = "22"\n',
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+    });
+
+    it('does not add a null package file to the update set', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: null as never,
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+      expect(res.files).not.toHaveProperty('mise.toml');
+    });
+
+    it('preserves a vendor prefix in the lockfile version', () => {
+      const javaLockFileContent = `
+[[tools.java]]
+version = 'temurin-25.0.3+9.0.LTS'
+backend = 'core:java'
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: javaLockFileContent,
+        depName: 'java',
+        currentVersion: '25.0.3+9.0.LTS',
+        newVersion: '25.0.4+8.0.LTS',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining(
+            "version = 'temurin-25.0.4+8.0.LTS'",
+          ),
+        },
+      });
+    });
+
+    it('supports quoted version keys and ignores other nested keys', () => {
+      const quotedKeyLockFileContent = `
+[[tools.node]]
+foo.bar = "ignored"
+"version" = "20.11.0"
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: quotedKeyLockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('"version" = "20.12.0"'),
+        },
+      });
     });
 
     it('returns unsupported when tool not in lock file', () => {
@@ -749,6 +1056,36 @@ version = "3.10.17"
       expect(res).toEqual({ status: 'unsupported' });
     });
 
+    it('returns unsupported when the lockfile schema is invalid', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: 'foo = "bar"',
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when the lock entry has no array-table AST node', () => {
+      const inlineLockFileContent = `
+tools = { node = [{ version = "20.11.0" }] }
+`;
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent: inlineLockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
     it('returns unsupported when depName is undefined', () => {
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
@@ -762,8 +1099,38 @@ version = "3.10.17"
       expect(res).toEqual({ status: 'unsupported' });
     });
 
+    it('returns unsupported when the lock entry lookup cannot be resolved', () => {
+      vi.spyOn(lockfile, 'getLockedVersion').mockReturnValueOnce('20.11.0');
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'ruby',
+        currentVersion: '3.2.0',
+        newVersion: '3.3.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when a prefixed lock entry has no short-name match', () => {
+      vi.spyOn(lockfile, 'getLockedVersion').mockReturnValueOnce('20.11.0');
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'core:ruby',
+        currentVersion: '3.2.0',
+        newVersion: '3.3.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
     it('returns update-failed in case of errors', () => {
-      vi.spyOn(lockfile, 'getLockedVersion').mockImplementationOnce(() => {
+      vi.spyOn(lockfile, 'getLockedTool').mockImplementationOnce(() => {
         throw new Error('unexpected error');
       });
 

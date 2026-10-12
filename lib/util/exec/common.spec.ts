@@ -147,15 +147,17 @@ function getSpawnStub(args: StubArgs): any {
   }
 
   return {
-    on,
-    spawnargs: cmd.split(regEx(/\s+/)),
-    stdout: stdoutStream,
-    stderr: stderrStream,
-    emit,
-    unref,
-    kill,
+    nodeChildProcess: {
+      on,
+      spawnargs: cmd.split(regEx(/\s+/)),
+      stdout: stdoutStream,
+      stderr: stderrStream,
+      emit,
+      unref,
+      kill,
+      pid,
+    },
     pid,
-    catch: (fn: (err: Error) => void) => fn(new Error('mock')),
   };
 }
 

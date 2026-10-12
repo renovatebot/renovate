@@ -54,15 +54,13 @@ const BazelDepToPackageDep = RuleFragment.extend({
     name: StringFragment,
     version: StringFragment.optional(),
   }),
-}).transform(
-  ({ rule, children: { name, version } }): BasePackageDep => ({
-    datasource: BazelDatasource.id,
-    depType: rule,
-    depName: name.value,
-    currentValue: version?.value,
-    ...(version ? {} : { skipReason: 'unspecified-version' }),
-  }),
-);
+}).transform(({ rule, children: { name, version } }): BasePackageDep => ({
+  datasource: BazelDatasource.id,
+  depType: rule,
+  depName: name.value,
+  currentValue: version?.value,
+  ...(version ? {} : { skipReason: 'unspecified-version' }),
+}));
 
 const GitOverrideToPackageDep = RuleFragment.extend({
   rule: z.literal('git_override'),

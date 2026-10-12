@@ -365,6 +365,22 @@ describe('modules/manager/deno/schema', () => {
       });
     });
 
+    it('jsr package under a short scope', () => {
+      expect(
+        DenoDependency.parse({
+          depValue: 'jsr:@db/sqlite@^0.13.0',
+          depType: 'imports',
+        }),
+      ).toEqual({
+        currentRawValue: 'jsr:@db/sqlite@^0.13.0',
+        currentValue: '^0.13.0',
+        datasource: 'jsr',
+        depName: '@db/sqlite',
+        depType: 'imports',
+        versioning: 'deno',
+      });
+    });
+
     it('invalid jsr package versions', () => {
       expect(
         DenoDependency.parse({

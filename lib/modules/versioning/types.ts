@@ -24,8 +24,7 @@ export interface DistroSchedule {
 }
 
 export type DistroDataFile =
-  | 'data/ubuntu-distro-info.json'
-  | 'data/debian-distro-info.json';
+  'data/ubuntu-distro-info.json' | 'data/debian-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 
@@ -187,3 +186,12 @@ export interface VersioningApi {
 }
 
 export type VersioningApiConstructor = new (config?: string) => VersioningApi;
+
+/**
+ * One term of a comparator range, such as the `<=` and the `1.2.3` of `<=1.2.3`.
+ * The terms parsed from a single range are ANDed together.
+ */
+export interface RangeComparator {
+  operator: string;
+  version: string;
+}

@@ -132,7 +132,7 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 ## How to Use Preset Configs
 
 By default, Renovate App's onboarding PR suggests the `["config:recommended"]` preset.
-If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
+If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your self-hosted config.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
@@ -369,6 +369,11 @@ Parameters are supported similar to other methods:
   ]
 }
 ```
+
+!!! note
+  Renovate warns about HTTP requests to internal hosts (loopback, private ranges, and similar) by default, and can be set to block them - see [`internalHostAccess`](./self-hosted-configuration.md#internalhostaccess).
+  Because a preset's response becomes configuration, fetching presets from an internal host needs a deliberate grant from the self-hosted administrator: a `hostRules` entry in their own configuration setting [`allowInternal=true`](./self-hosted-configuration.md#hostrulesallowinternal), scoped with a `hostType` or a URL-prefix `matchHost`.
+  This applies to `npm:` presets too, where the scoped grant names the registry, for example `{ "matchHost": "https://registry.corp/", "hostType": "npm", "allowInternal": true }`.
 
 ## Templating presets
 

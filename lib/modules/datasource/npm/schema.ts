@@ -22,6 +22,8 @@ const Attestations = z.object({
 
 const Distribution = z.object({
   attestations: Attestations.optional(),
+  integrity: z.string().optional(),
+  tarball: z.string().optional(),
 });
 
 export const NpmResponseVersion = z.object({

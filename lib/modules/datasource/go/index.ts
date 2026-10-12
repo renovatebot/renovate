@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -19,6 +20,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
+import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
@@ -36,11 +38,13 @@ export class GoDatasource extends Datasource {
     commitMessageTopic: 'module {{depName}}',
   };
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time takes precedence over both.';
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time or git tag creation time takes precedence over both.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
@@ -61,14 +65,16 @@ export class GoDatasource extends Datasource {
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const constraintsFilteringKey =
-      config.constraintsFiltering && config.constraintsFiltering !== 'none'
-        ? `@@${config.constraintsFiltering}`
-        : '';
+      config.constraintsFiltering === 'none' ? '' : config.constraintsFiltering;
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.packageName}@@${constraintsFilteringKey}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.packageName,
+          constraintsFilteringKey,
+        ),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -143,7 +149,8 @@ export class GoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        key: `getDigest:${config.packageName}:${newValue}`,
+        key: buildCacheKey('getDigest', config.packageName, newValue),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

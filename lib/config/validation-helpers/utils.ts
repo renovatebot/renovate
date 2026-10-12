@@ -63,7 +63,7 @@ export function validateNumber(
 
 /**  An option is a false global if it has the same name as a global only option
  *   but is actually just the field of a non global option or field an children of the non global option
- *   eg. token: it's global option used as the bot's token as well and
+ *   eg. token: it's global option used as Renovate's token as well and
  *   also it can be the token used for a platform inside the hostRules configuration
  */
 export function isFalseGlobal(
@@ -123,7 +123,7 @@ export function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['currentValue', 'datasource'];
+  const mandatoryFields = ['datasource'];
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
@@ -131,6 +131,17 @@ export function validateRegexManagerFields(
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
+  }
+
+  const versionFields = ['currentValue', 'currentDigest'];
+  if (!versionFields.some((field) => hasField(customManager, field))) {
+    const templateFields = versionFields
+      .map((field) => `${field}Template`)
+      .join(' or ');
+    errors.push({
+      topic: ConfigValidationTopic.Error,
+      message: `Regex Managers must contain ${versionFields.join(' or ')}, their template variants (${templateFields}) or regex groups named after configuration fields`,
+    });
   }
 
   const nameFields = ['depName', 'packageName'];
@@ -176,7 +187,7 @@ export function validateJSONataManagerFields(
     });
   }
 
-  const mandatoryFields = ['currentValue', 'datasource'];
+  const mandatoryFields = ['datasource'];
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
@@ -184,6 +195,14 @@ export function validateJSONataManagerFields(
         message: `JSONata Managers must contain ${field}Template configuration or ${field} in the query `,
       });
     }
+  }
+
+  const versionFields = ['currentValue', 'currentDigest'];
+  if (!versionFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: ConfigValidationTopic.Error,
+      message: `JSONata Managers must contain ${versionFields.join(' or ')} in the query or their templates`,
+    });
   }
 
   const nameFields = ['depName', 'packageName'];

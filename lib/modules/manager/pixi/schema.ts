@@ -14,7 +14,11 @@ export type Channels = z.infer<typeof Channel>[];
 
 const Channel = z.union([
   z.string(),
-  z.object({ channel: z.string(), priority: z.number() }),
+  z.object({
+    channel: z.string(),
+    priority: z.number().optional(),
+    'exclude-newer': z.string().optional(),
+  }),
 ]);
 
 export interface PixiPackageDependency extends PackageDependency {
