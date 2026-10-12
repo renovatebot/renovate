@@ -31,6 +31,7 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## Renovate core features not supported on all platforms
 
+
 | Feature               | Platforms which lack feature                                 |
 | --------------------- | ------------------------------------------------------------ |
 | Dependency Dashboard  | Bitbucket, Bitbucket Server, Gerrit, SCM-Manager             |
