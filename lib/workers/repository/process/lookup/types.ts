@@ -2,6 +2,7 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types.ts';
+import type { DatasourceName } from '../../../../datasource-list.generated.ts';
 import type { ChangelogRelease } from '../../../../modules/datasource/types.ts';
 import type {
   LookupUpdate,
@@ -78,6 +79,7 @@ export interface UpdateResult {
   lookupName?: string;
   skipReason?: SkipReason;
   registryUrl?: string;
+  effectiveDatasource?: DatasourceName;
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];

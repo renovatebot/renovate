@@ -4,10 +4,11 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { acquireLock } from '../../mutex.ts';
 import * as packageCache from './index.ts';
+import { buildCacheKey } from './key.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
-interface CachedOptions {
+export interface CachedOptions {
   /**
    * The cache namespace.
    */
@@ -81,7 +82,7 @@ export async function withCache<T>(
     return fn();
   }
 
-  const cacheKey = `cache-decorator:${key}`;
+  const cacheKey = buildCacheKey('cache-decorator', key);
 
   // prevent concurrent processing and cache writes
   const releaseLock = await acquireLock(cacheKey, namespace);

@@ -27,6 +27,7 @@ export function runRenovateRepoStats(
   prList: Pr[],
 ): void {
   const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
+  let lastPRMergedAt: string | undefined;
 
   for (const pr of prList) {
     if (
@@ -39,6 +40,9 @@ export function runRenovateRepoStats(
     switch (pr.state) {
       case 'merged':
         prStats.merged += 1;
+        if (pr.closedAt && (!lastPRMergedAt || pr.closedAt > lastPRMergedAt)) {
+          lastPRMergedAt = pr.closedAt;
+        }
         break;
       case 'closed':
         prStats.closed += 1;
@@ -50,7 +54,10 @@ export function runRenovateRepoStats(
         break;
     }
   }
-  logger.debug({ stats: prStats }, `Renovate repository PR statistics`);
+  logger.debug(
+    { stats: prStats, lastPRMergedAt },
+    `Renovate repository PR statistics`,
+  );
 }
 
 function branchCacheToMetadata({

@@ -1,7 +1,5 @@
-import { partial } from '~test/util.ts';
 import * as _cache from '../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
-import type { BranchConfig } from '../../types.ts';
 import {
   deleteReconfigureBranchCache,
   setReconfigureBranchCache,
@@ -25,22 +23,31 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
       });
     });
 
-    it('sets new cache with an extract result', () => {
+    it('sets new cache with a successful extraction', () => {
       const dummyCache = {} satisfies RepoCacheData;
-      const extractResult = {
-        packageFiles: {},
-        branches: [partial<BranchConfig>()],
-        branchList: ['some-branch'],
-      };
       cache.getCache.mockReturnValue(dummyCache);
 
-      setReconfigureBranchCache('reconfigure-sha', true, extractResult);
+      setReconfigureBranchCache('reconfigure-sha', true, true);
 
       expect(dummyCache).toEqual({
         reconfigureBranchCache: {
           reconfigureBranchSha: 'reconfigure-sha',
           isConfigValid: true,
-          extractResult,
+          extractionSucceeded: true,
+        },
+      });
+    });
+
+    it('omits a failed extraction', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+
+      setReconfigureBranchCache('reconfigure-sha', true, false);
+
+      expect(dummyCache).toEqual({
+        reconfigureBranchCache: {
+          reconfigureBranchSha: 'reconfigure-sha',
+          isConfigValid: true,
         },
       });
     });
@@ -62,16 +69,12 @@ describe('workers/repository/reconfigure/reconfigure-cache', () => {
       });
     });
 
-    it('updates extractResult old cache', () => {
+    it('updates old cache with a successful extraction', () => {
       const dummyCache = {
         reconfigureBranchCache: {
           reconfigureBranchSha: 'reconfigure-sha',
           isConfigValid: false,
-          extractResult: {
-            branches: [partial<BranchConfig>()],
-            branchList: ['some-branch'],
-            packageFiles: {},
-          },
+          extractionSucceeded: true,
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValue(dummyCache);

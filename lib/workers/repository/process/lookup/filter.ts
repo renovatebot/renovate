@@ -3,9 +3,6 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import * as npmVersioning from '../../../../modules/versioning/npm/index.ts';
-import * as pep440 from '../../../../modules/versioning/pep440/index.ts';
-import * as poetryVersioning from '../../../../modules/versioning/poetry/index.ts';
 import { getRegexPredicate } from '../../../../util/string-match.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { FilterConfig } from './types.ts';
@@ -127,10 +124,7 @@ export function filterVersions(
       filteredReleases = filteredReleases.filter((r) =>
         versioningApi.matches(r.version, allowedVersions),
       );
-    } else if (
-      config.versioning !== npmVersioning.id &&
-      semver.validRange(allowedVersions)
-    ) {
+    } else if (semver.validRange(allowedVersions)) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions',
@@ -145,17 +139,6 @@ export function filterVersions(
           /* v8 ignore stop */
           allowedVersions,
         ),
-      );
-    } else if (
-      config.versioning === poetryVersioning.id &&
-      pep440.isValid(allowedVersions)
-    ) {
-      logger.debug(
-        { depName: config.depName },
-        'Falling back to pypi syntax for allowedVersions',
-      );
-      filteredReleases = filteredReleases.filter((r) =>
-        pep440.matches(r.version, allowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);

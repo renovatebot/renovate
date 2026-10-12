@@ -15,12 +15,6 @@ export function getPackageManagerVersion(
   name: string,
   pkg: PackageJson,
 ): string | null {
-  if (pkg.volta?.[name]) {
-    const version = pkg.volta[name];
-    logger.debug(`Found ${name} constraint in package.json volta: ${version}`);
-
-    return version;
-  }
   if (pkg.devEngines?.packageManager) {
     const packageManagers = isArray(pkg.devEngines.packageManager)
       ? pkg.devEngines.packageManager
@@ -34,6 +28,12 @@ export function getPackageManagerVersion(
       );
       return version;
     }
+  }
+  if (pkg.volta?.[name]) {
+    const version = pkg.volta[name];
+    logger.debug(`Found ${name} constraint in package.json volta: ${version}`);
+
+    return version;
   }
   if (pkg.packageManager?.name === name) {
     const version = pkg.packageManager.version;

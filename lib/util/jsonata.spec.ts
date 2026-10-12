@@ -39,6 +39,123 @@ describe('util/jsonata', () => {
       });
     });
 
+    describe('$matchRegexOrGlob', () => {
+      async function evaluate(input: string, data: unknown): Promise<unknown> {
+        const expression = getExpression(input);
+        // make typescript happy
+        if (expression instanceof Error) {
+          throw expression;
+        }
+        return await expression.evaluate(data);
+      }
+
+      const scopeExpression =
+        '$matchRegexOrGlob(packageName, ["@myorg{/,}**", "com.myorg{/,}**"])';
+
+      it.each`
+        packageName          | expected
+        ${'@myorg/foo'}      | ${true}
+        ${'@myorg'}          | ${true}
+        ${'@myorg-labs/foo'} | ${false}
+        ${'com.myorg:foo'}   | ${true}
+        ${'@MYORG/Foo'}      | ${true}
+      `(
+        'matches glob patterns against "$packageName"',
+        async ({ packageName, expected }) => {
+          await expect(
+            evaluate(scopeExpression, { packageName }),
+          ).resolves.toBe(expected);
+        },
+      );
+
+      it('supports regex patterns', async () => {
+        const expression = '$matchRegexOrGlob(packageName, ["/^@myorg\\//"])';
+        await expect(
+          evaluate(expression, { packageName: '@myorg/foo' }),
+        ).resolves.toBe(true);
+        await expect(
+          evaluate(expression, { packageName: '@myorg-labs/foo' }),
+        ).resolves.toBe(false);
+      });
+
+      it('supports negative patterns', async () => {
+        const expression = '$matchRegexOrGlob(packageName, ["!@myorg{/,}**"])';
+        await expect(
+          evaluate(expression, { packageName: '@myorg/foo' }),
+        ).resolves.toBe(false);
+        await expect(
+          evaluate(expression, { packageName: 'lodash' }),
+        ).resolves.toBe(true);
+      });
+
+      it('returns true if any array element matches', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(registryUrls, ["https://example.com/**"])',
+          {
+            registryUrls: [
+              'https://registry.npmjs.org',
+              'https://example.com/npm',
+            ],
+          },
+        );
+        expect(result).toBe(true);
+      });
+
+      it('returns false if no array element matches', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(registryUrls, ["https://example.com/**"])',
+          { registryUrls: ['https://registry.npmjs.org', 42] },
+        );
+        expect(result).toBe(false);
+      });
+
+      it('returns false for missing input', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(packageName, ["**"])',
+          {},
+        );
+        expect(result).toBe(false);
+      });
+
+      it('returns false for non-string input', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(packageName, ["**"])',
+          { packageName: 42 },
+        );
+        expect(result).toBe(false);
+      });
+
+      it('accepts a single string pattern', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(packageName, "@myorg{/,}**")',
+          { packageName: '@myorg/foo' },
+        );
+        expect(result).toBe(true);
+      });
+
+      it('returns false for empty patterns', async () => {
+        const result = await evaluate('$matchRegexOrGlob(packageName, [])', {
+          packageName: '@myorg/foo',
+        });
+        expect(result).toBe(false);
+      });
+
+      it('returns false for missing patterns', async () => {
+        const result = await evaluate('$matchRegexOrGlob(packageName)', {
+          packageName: '@myorg/foo',
+        });
+        expect(result).toBe(false);
+      });
+
+      it('returns false for non-string patterns', async () => {
+        const result = await evaluate(
+          '$matchRegexOrGlob(packageName, ["@myorg{/,}**", 42])',
+          { packageName: '@myorg/foo' },
+        );
+        expect(result).toBe(false);
+      });
+    });
+
     describe('concurrent evaluation', () => {
       beforeEach(() => {
         memCache.init();

@@ -25,6 +25,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `knownDepTypes`               | yes      |       |
 | `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
+| `supportsNpmrc`               | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
@@ -106,6 +107,11 @@ This should be placed in `dep-types.ts`.
 ### `supportsLockFileMaintenance` (optional)
 
 Set to `true` if this package manager needs to update lock files in addition to package files.
+
+### `supportsNpmrc` (optional)
+
+Set to `true` if the manager's returned values carry an `npmrc` resolved from the repository's `.npmrc` and the `npmrc` config.
+Only such a manager may return `NpmrcPackageFileContent` / `NpmrcPackageFile`, the types which have the `npmrc` field; this is checked at compile time.
 
 ### `updateArtifacts` (async, optional)
 

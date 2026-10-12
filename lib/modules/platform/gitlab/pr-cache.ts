@@ -12,6 +12,8 @@ import { GitLabMergeRequests } from './schema.ts';
 import type { GitlabPr, GitlabPrCacheData } from './types.ts';
 import { prInfo } from './utils.ts';
 
+const syncedCacheKey = 'gitlab:pr-cache-synced';
+
 export class GitlabPrCache {
   private items: GitlabPr[] = [];
   private cache: GitlabPrCacheData;
@@ -65,11 +67,11 @@ export class GitlabPrCache {
     ignorePrAuthor: boolean,
   ): Promise<GitlabPrCache> {
     const res = new GitlabPrCache(repo, author, ignorePrAuthor);
-    const isSynced = memCache.get<true | undefined>('gitlab-pr-cache-synced');
+    const isSynced = memCache.get<true | undefined>(syncedCacheKey);
 
     if (!isSynced) {
       await res.sync(http);
-      memCache.set('gitlab-pr-cache-synced', true);
+      memCache.set(syncedCacheKey, true);
     }
 
     return res;

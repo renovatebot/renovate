@@ -1678,7 +1678,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'The following dependencies are either deprecated or have replacements available.',
+            '> The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
@@ -1702,6 +1702,7 @@ None detected
                 deps: [
                   {
                     depName: '@material-ui/core',
+                    packageName: '@material-ui/core',
                     deprecationMessage: 'This package is deprecated',
                     updates: [
                       {
@@ -1713,6 +1714,7 @@ None detected
                   },
                   {
                     depName: '@material-ui/icons',
+                    packageName: '@material-ui/icons',
                     updates: [
                       {
                         updateType: 'replacement',
@@ -1723,6 +1725,7 @@ None detected
                   },
                   {
                     depName: '@mui/material',
+                    packageName: '@mui/material',
                     updates: [
                       {
                         newValue: '^6.2.0',
@@ -1732,6 +1735,7 @@ None detected
                   },
                   {
                     depName: '@mui/icons-material',
+                    packageName: '@mui/icons-material',
                     updates: [
                       {
                         newValue: '^6.2.0',
@@ -2378,6 +2382,9 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain(
+        '> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`]',
+      );
       // the note must stay outside the <details> block, otherwise GitHub
       // renders it as plain text rather than a note alert
       expect(result.indexOf('> ℹ️ **Note**')).toBeLessThan(

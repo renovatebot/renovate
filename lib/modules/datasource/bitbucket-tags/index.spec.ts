@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { BitbucketTagsDatasource } from './index.ts';
 
@@ -146,6 +147,39 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       );
       expect(res).toBeString();
       expect(res).toBe('123');
+    });
+
+    it('caches the digest of a tag separately from the latest commit', async () => {
+      const cache = new Map<string, unknown>();
+      vi.spyOn(packageCache, 'get').mockImplementation((ns, key) =>
+        Promise.resolve(cache.get(`${ns}|${key}`)),
+      );
+      vi.spyOn(packageCache, 'setWithRawTtl').mockImplementation(
+        (ns, key, value) => {
+          cache.set(`${ns}|${key}`, value);
+          return Promise.resolve();
+        },
+      );
+      httpMock
+        .scope('https://api.bitbucket.org')
+        .get('/2.0/repositories/some/dep2')
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
+        .get('/2.0/repositories/some/dep2/commits/master')
+        .reply(200, {
+          pagelen: 1,
+          values: [{ hash: 'latest-sha', date: '2020-11-19T09:05:35+00:00' }],
+          page: 1,
+        })
+        .get('/2.0/repositories/some/dep2/refs/tags/v1.0.0')
+        .reply(200, { name: 'v1.0.0', target: { hash: 'tag-sha' } });
+      const config = { datasource, packageName: 'some/dep2' };
+
+      await expect(getDigest(config)).resolves.toBe('latest-sha');
+      await expect(getDigest(config, 'v1.0.0')).resolves.toBe('tag-sha');
     });
 
     it('returns null for missing hash', async () => {
