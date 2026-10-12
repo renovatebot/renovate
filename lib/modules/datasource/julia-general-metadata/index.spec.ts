@@ -64,7 +64,7 @@ describe('modules/datasource/julia-general-metadata/index', () => {
           },
           '0.5.3': {
             registered: '2019-07-17T05:33:46',
-            yanked: true,
+            yanked: '2019-07-18T00:00:00',
             has_artifacts: false,
           },
         });

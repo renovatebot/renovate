@@ -7,7 +7,7 @@ export const JuliaPackageMetadata = z
     z.string(),
     z.object({
       registered: MaybeTimestamp.optional(),
-      yanked: z.boolean().optional(),
+      yanked: z.string().optional(),
     }),
   )
   .refine((versions) => Object.keys(versions).length > 0, 'No releases found')
