@@ -30,14 +30,15 @@ describe('config/migrate-validate', () => {
     });
 
     it('migrates a legacy dependency match-all without creating an invalid regex', async () => {
-      const input = {
+      const input: RenovateConfig = {
         packageRules: [
           {
+            // @ts-expect-error -- legacy option
             matchDepPatterns: ['*'],
             automerge: true,
           },
         ],
-      } as unknown as RenovateConfig;
+      };
 
       const res = await migrateAndValidate(config, input);
 
@@ -54,15 +55,16 @@ describe('config/migrate-validate', () => {
     });
 
     it('validates a legacy package match-all combined with an exclusion', async () => {
-      const input = {
+      const input: RenovateConfig = {
         packageRules: [
           {
+            // @ts-expect-error -- legacy option
             packagePatterns: ['*'],
             excludePackageNames: ['some-package'],
             automerge: true,
           },
         ],
-      } as unknown as RenovateConfig;
+      };
 
       const res = await migrateAndValidate(config, input);
 
