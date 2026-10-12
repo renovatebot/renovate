@@ -39,6 +39,12 @@ export function generateCommitFingerprintConfig(
       // TS cannot narrow the type here
       filteredUpgrade[field] = upgrade[field]!;
     }
+    if (upgrade.postUpgradeTasks) {
+      filteredUpgrade.postUpgradeTasks = {
+        commands: upgrade.postUpgradeTasks.commands,
+        fileFilters: upgrade.postUpgradeTasks.fileFilters,
+      };
+    }
     return filteredUpgrade;
   });
 

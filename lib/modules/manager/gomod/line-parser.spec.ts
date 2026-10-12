@@ -274,6 +274,19 @@ describe('modules/manager/gomod/line-parser', () => {
     });
   });
 
+  it.each`
+    version
+    ${'v2.0.0-00010101000000-000000000000'}
+    ${'v1.2.3-00010101000000-000000000000'}
+  `('should skip the placeholder pseudo-version $version', ({ version }) => {
+    const res = parseLine(`require foo/foo/v2 ${version}`);
+    expect(res).toMatchObject({
+      currentDigest: '000000000000',
+      currentValue: version,
+      skipReason: 'invalid-version',
+    });
+  });
+
   it('should parse replace definition with placeholder pseudo-version', () => {
     const line =
       'replace foo/foo => bar/bar v0.0.0-00010101000000-000000000000';

@@ -3,10 +3,6 @@ import { processHostRules } from './rules.ts';
 
 describe('modules/manager/npm/post-update/rules', () => {
   describe('processHostRules()', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('returns empty if no rules', () => {
       const res = processHostRules();
       expect(res.additionalNpmrcContent).toHaveLength(0);

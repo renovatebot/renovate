@@ -721,7 +721,7 @@ describe('config/validation', () => {
         {
           topic: 'allowedVersions',
           message:
-            '"allowedVersions" can\'t be used in ".". Allowed objects: packageRules.',
+            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -801,22 +801,22 @@ describe('config/validation', () => {
         {
           topic: 'ansible.minor.matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'ansible.minor.matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -1725,13 +1725,13 @@ describe('config/validation', () => {
         {
           topic: 'managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
           ),
         },
         {
           topic: 'npm.minor.managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+            `"managerFilePatterns" can't be used in "minor", as it can only be used `,
           ),
         },
       ]);
@@ -1776,9 +1776,23 @@ describe('config/validation', () => {
         {
           topic: 'hostType',
           message:
-            '"hostType" can\'t be used in ".". Allowed objects: hostRules.',
+            '"hostType" can\'t be used at the top level of a config, as it can only be used in `hostRules`.',
         },
       ]);
+    });
+
+    it('does not warn about an option with a restricted parent when encrypted at the top level', async () => {
+      const config = {
+        encrypted: {
+          hostType: 'npm',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates preset values', async () => {
@@ -2142,6 +2156,47 @@ describe('config/validation', () => {
             'packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {"matchUpdateTypes":["major"],"registryUrls":["https://registry.npmjs.org"]}',
         },
       ]);
+    });
+
+    it('errors if matchIsBreaking is combined with a pre-lookup option', async () => {
+      const config = partial<AllConfig>({
+        packageRules: [
+          {
+            matchIsBreaking: false,
+            separateMajorMinor: false,
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0]: packageRules cannot combine both matchIsBreaking and separateMajorMinor. Rule: {"matchIsBreaking":false,"separateMajorMinor":false}',
+        },
+      ]);
+    });
+
+    it('accepts matchIsBreaking as a packageRules selector', async () => {
+      const config = partial<AllConfig>({
+        packageRules: [
+          {
+            matchIsBreaking: false,
+            automerge: true,
+          },
+        ],
+      });
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('warns when registryUrls is set at the top level of repo config', async () => {
@@ -2620,6 +2675,11 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
           message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
       ]);
       expect(errors).toMatchObject([
         {
@@ -2651,7 +2711,13 @@ describe('config/validation', () => {
         config,
       );
 
-      expect(warnings).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
+      ]);
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
@@ -3136,7 +3202,7 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);
@@ -3162,7 +3228,7 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);

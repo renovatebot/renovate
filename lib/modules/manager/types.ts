@@ -88,7 +88,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   minimumReleaseAge?: Nullish<string>;
 }
 
-export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
+export interface RangeConfig<T = unknown> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
@@ -96,9 +96,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy?: RangeStrategy;
 }
 
-export interface PackageFileContent<
-  T = Record<string, any>,
-> extends ManagerData<T> {
+export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
@@ -110,7 +108,6 @@ export interface PackageFileContent<
   additionalRegistryUrls?: string[];
   deps: PackageDependency<T>[];
   lockFiles?: string[];
-  npmrc?: string;
   packageFileVersion?: string;
   skipInstalls?: boolean | null;
   matchStrings?: string[];
@@ -118,9 +115,20 @@ export interface PackageFileContent<
   fileFormat?: string;
 }
 
-export interface PackageFile<
-  T = Record<string, any>,
+export interface PackageFile<T = unknown> extends PackageFileContent<T> {
+  packageFile: string;
+}
+
+/** the package file content of a manager with `supportsNpmrc`, the only kind carrying an `npmrc` */
+export interface NpmrcPackageFileContent<
+  T = unknown,
 > extends PackageFileContent<T> {
+  npmrc?: string;
+}
+
+export interface NpmrcPackageFile<
+  T = unknown,
+> extends NpmrcPackageFileContent<T> {
   packageFile: string;
 }
 
@@ -180,7 +188,7 @@ export interface LookupUpdate {
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
  */
 export interface PackageDependency<
-  T = Record<string, any>,
+  T = unknown,
   DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
@@ -246,6 +254,7 @@ export interface PackageDependency<
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
+  versionCompatibility?: string;
   isInternal?: boolean;
   variableName?: string;
   indentation?: string;
@@ -259,6 +268,10 @@ export interface PackageDependency<
   isAbandoned?: boolean;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s, for this dependency alone.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
+  /**
    * Whether the package registry has attestation information for the given update.
    *
    * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
@@ -267,7 +280,7 @@ export interface PackageDependency<
 }
 
 export interface Upgrade<
-  T = Record<string, any>,
+  T = unknown,
   DepType extends string = string,
 > extends PackageDependency<T, DepType> {
   workspace?: string;
@@ -319,7 +332,7 @@ export type UpdateArtifactsResult =
       artifactError?: ArtifactError;
     };
 
-export interface UpdateArtifact<T = Record<string, unknown>> {
+export interface UpdateArtifact<T = unknown> {
   packageFileName: string;
   updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
@@ -352,7 +365,7 @@ export interface UpdateLockFileConfig {
   run: () => Promise<unknown>;
 }
 
-export interface UpdateDependencyConfig<T = Record<string, any>> {
+export interface UpdateDependencyConfig<T = unknown> {
   fileContent: string;
   packageFile: string;
   upgrade: Upgrade<T>;
@@ -403,7 +416,7 @@ export interface DepTypeMetadata {
   description: string;
 }
 
-interface ManagerApiBase extends ModuleApi {
+export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
@@ -411,6 +424,8 @@ interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /** Whether the package files carry an `npmrc` resolved from the repository `.npmrc` and the config, see `NpmrcPackageFile` */
+  supportsNpmrc?: boolean;
   /**
    * Whether Renovate delegates to external command(s)/package manager to perform lockFileMaintenance.
    * A `string` value is a Markdown note describing the nuance of the support, e.g. when it's partial
@@ -473,10 +488,37 @@ export type ManagerApi = ManagerApiBase &
         supportsLockFileMaintenance?: false;
         lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
       }
+  ) &
+  // this ensures at compile time that only a manager with supportsNpmrc=true returns package files carrying an `npmrc`
+  (
+    | {
+        supportsNpmrc: true;
+        extractAllPackageFiles?(
+          config: ExtractConfig,
+          files: string[],
+        ): MaybePromise<NpmrcPackageFile[] | null>;
+        extractPackageFile?(
+          content: string,
+          packageFile?: string,
+          config?: ExtractConfig,
+        ): MaybePromise<NpmrcPackageFileContent | null>;
+      }
+    | {
+        supportsNpmrc?: false;
+        extractAllPackageFiles?(
+          config: ExtractConfig,
+          files: string[],
+        ): MaybePromise<(PackageFile & { npmrc?: never })[] | null>;
+        extractPackageFile?(
+          content: string,
+          packageFile?: string,
+          config?: ExtractConfig,
+        ): MaybePromise<(PackageFileContent & { npmrc?: never }) | null>;
+      }
   );
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig<T = Record<string, any>>
+export interface PostUpdateConfig<T = unknown>
   extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
@@ -488,7 +530,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
 
   packageFile?: string;
 
-  upgrades: Upgrade[];
+  upgrades: Upgrade<T>[];
   npmLock?: string;
   yarnLock?: string;
   branchName: string;

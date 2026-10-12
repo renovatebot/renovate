@@ -894,8 +894,14 @@ describe('modules/manager/nix/extract', () => {
     });
   });
 
-  it('includes flake with nixpkgs channel as tarball type', async () => {
-    const flakeLock = codeBlock`{
+  it.each`
+    extension
+    ${'xz'}
+    ${'zst'}
+  `(
+    'extracts nixpkgs channel from .tar.$extension URL',
+    async ({ extension }) => {
+      const flakeLock = codeBlock`{
     "nodes": {
       "nixpkgs": {
         "locked": {
@@ -903,11 +909,11 @@ describe('modules/manager/nix/extract', () => {
           "narHash": "sha256-V29Bu1nR6Ayt+uUhf/6L43DSxb66BQ+8E2wH1GHa5IA=",
           "rev": "0e6684e6c5755325f801bda1751a8a4038145d7d",
           "type": "tarball",
-          "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.xz"
+          "url": "https://releases.nixos.org/nixos/25.05/nixos-25.05.809350.0e6684e6c575/nixexprs.tar.${extension}"
         },
         "original": {
           "type": "tarball",
-          "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+          "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.${extension}"
         }
       },
       "root": {
@@ -919,20 +925,21 @@ describe('modules/manager/nix/extract', () => {
     "root": "root",
     "version": 7
   }`;
-    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
-      deps: [
-        {
-          currentValue: 'nixpkgs-unstable',
-          datasource: 'git-refs',
-          depName: 'nixpkgs',
-          packageName: 'https://github.com/NixOS/nixpkgs',
-          lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
-          versioning: 'nixpkgs',
-        },
-      ],
-    });
-  });
+      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+      await expect(extractPackageFile('', 'flake.nix')).resolves.toMatchObject({
+        deps: [
+          {
+            currentValue: 'nixpkgs-unstable',
+            datasource: 'git-refs',
+            depName: 'nixpkgs',
+            packageName: 'https://github.com/NixOS/nixpkgs',
+            lockedVersion: '0e6684e6c5755325f801bda1751a8a4038145d7d',
+            versioning: 'nixpkgs',
+          },
+        ],
+      });
+    },
+  );
 
   it('finds currentDigest correctly when input sha is pinned', async () => {
     const flakeNix = codeBlock`{

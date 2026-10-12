@@ -26,7 +26,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     super(AzurePipelinesTasksDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = versioning;
 

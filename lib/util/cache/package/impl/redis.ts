@@ -91,6 +91,13 @@ export class PackageCacheRedis extends PackageCacheBase {
       client = createClient({ ...config, RESP });
     }
 
+    // node-redis emits connection errors (e.g. a closed idle socket) as events
+    // and reconnects on its own, but an unhandled `error` event exits the process
+    client.on('error', (err: Error) => {
+      logger.once.warn({ err }, 'Redis cache connection error');
+      logger.debug({ err }, 'Redis cache connection error');
+    });
+
     await client.connect();
     logger.debug('Redis cache connected');
     const binaryClient = client.withTypeMapping({
