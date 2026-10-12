@@ -73,4 +73,9 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractSingleImageField('image'),
     fields: ['image'],
   },
+  // https://github.com/improbable-eng/docker-service-buildkite-plugin
+  'improbable-eng/docker-service': {
+    extract: extractSingleImageField('container'),
+    fields: ['container'],
+  },
 };
