@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { createGunzip } from 'node:zlib';
+import type { Transform } from 'node:stream';
+import { createGunzip, createZstdDecompress } from 'node:zlib';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -7,6 +8,7 @@ import * as fs from '../../../../util/fs/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
 import type { Http, HttpOptions } from '../../../../util/http/index.ts';
 import { acquireLock } from '../../../../util/mutex.ts';
+import { parseUrl } from '../../../../util/url.ts';
 import type { ReleaseResult } from '../../types.ts';
 import { datasource } from '../common.ts';
 
@@ -109,13 +111,48 @@ async function downloadFileToCache(
   return true;
 }
 
+function getFileExtension(pathname: string): string {
+  const start = pathname.lastIndexOf('.');
+
+  if (start === -1) {
+    return '';
+  }
+
+  return pathname.slice(start);
+}
+
+// https://github.com/rpm-software-management/libsolv/blob/a8a2de8947beeb56cd7b97d1e4afb1a2e4515a43/ext/solv_xfopen.c#L607-L656
+const decompressors: Record<string, () => Transform | never> = {
+  '.gz': createGunzip,
+  '.xz': () => {
+    throw new Error('LZMA compression is not supported');
+  },
+  '.lzma': () => {
+    throw new Error('LZMA compression is not supported');
+  },
+  '.bz2': () => {
+    throw new Error('BZip2 compression is not supported');
+  },
+  '.zst': createZstdDecompress,
+  '.zck': () => {
+    throw new Error('ZChunk compression is not supported');
+  },
+};
+
 async function decompressFile(
   compressedFile: string,
   decompressedFile: string,
 ): Promise<void> {
+  const decompressor = decompressors[getFileExtension(compressedFile)];
+
+  if (!decompressor) {
+    await fs.renameCacheFile(compressedFile, decompressedFile);
+    return;
+  }
+
   await fs.pipeline(
     fs.createCacheReadStream(compressedFile),
-    createGunzip(),
+    decompressor(),
     fs.createCacheWriteStream(decompressedFile),
   );
 }
@@ -134,11 +171,16 @@ export async function getCachedDecompressedFile(
     const cacheDir = await fs.ensureCacheDir(cacheSubDir);
     const urlHash = toSha256(url);
     const decompressedFile = upath.join(cacheDir, `${urlHash}.${extension}`);
-    let lastTimestamp = await getFileCreationTime(decompressedFile);
+    const lastTimestamp = await getFileCreationTime(decompressedFile);
+    const urlParsed = parseUrl(url);
+
+    if (!urlParsed) {
+      throw new Error('Cannot parse URL');
+    }
 
     const compressedFile = upath.join(
       cacheDir,
-      `${randomUUID()}_${urlHash}.gz`,
+      `${randomUUID()}_${urlHash}${getFileExtension(urlParsed.pathname)}`,
     );
     const decompressedTempFile = upath.join(
       cacheDir,
@@ -158,7 +200,6 @@ export async function getCachedDecompressedFile(
           // Only replace the shared cache file after a successful decompress.
           await decompressFile(compressedFile, decompressedTempFile);
           await fs.renameCacheFile(decompressedTempFile, decompressedFile);
-          lastTimestamp = await getFileCreationTime(decompressedFile);
         } catch (err) {
           logger.warn(
             {
@@ -170,11 +211,10 @@ export async function getCachedDecompressedFile(
             },
             'Failed to extract RPM metadata file from compressed file',
           );
+          if (!lastTimestamp) {
+            throw err;
+          }
         }
-      }
-
-      if (!lastTimestamp) {
-        throw new Error('Missing metadata in extracted RPM metadata file!');
       }
 
       return decompressedFile;

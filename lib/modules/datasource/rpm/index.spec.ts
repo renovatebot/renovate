@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { promisify } from 'node:util';
-import { gzip as _gzip } from 'node:zlib';
+import * as zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
@@ -10,6 +10,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import * as cacheFs from '../../../util/fs/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
+import { joinUrlParts } from '../../../util/url.ts';
 import { RpmDatasource } from './index.ts';
 
 const registryUrl = 'https://example.com/repo/repodata/';
@@ -17,7 +18,12 @@ const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
 
-const gzip = promisify(_gzip);
+const gzip = promisify(zlib.gzip);
+const zstdCompress = promisify(zlib.zstdCompress);
+
+async function noCompress(data: string): Promise<NonSharedBuffer> {
+  return Promise.resolve(Buffer.from(data));
+}
 
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
@@ -198,18 +204,48 @@ describe('modules/datasource/rpm/index', () => {
       `;
     }
 
-    async function mockPrimaryXmlResponse(primaryXml: string): Promise<void> {
+    async function mockPrimaryXmlResponse(
+      primaryXml: string,
+      filename = 'somesha256-primary.xml.gz',
+      contentType = 'application/gzip',
+      compress: (buffer: string) => Promise<NonSharedBuffer> = gzip,
+    ): Promise<string> {
       httpMock
         .scope(primaryXmlRegistryUrl)
-        .get('/somesha256-primary.xml.gz')
-        .reply(200, await gzip(primaryXml), {
-          'Content-Type': 'application/gzip',
+        .get(`/${filename}`)
+        .reply(200, await compress(primaryXml), {
+          'Content-Type': contentType,
         });
+
+      return joinUrlParts(primaryXmlRegistryUrl, filename);
     }
 
-    it('returns the correct releases', async () => {
-      await mockPrimaryXmlResponse(
-        buildPrimaryXml(codeBlock`
+    it.each([
+      {
+        filename: 'somesha256-primary.xml.gz',
+        compress: gzip,
+        contentType: 'application/gzip',
+      },
+      {
+        filename: 'somesha256-primary.xml.zst',
+        compress: zstdCompress,
+        contentType: 'application/zstd',
+      },
+      {
+        filename: 'somesha256-primary.xml',
+        compress: noCompress,
+        contentType: 'text/xml',
+      },
+      {
+        filename: 'somesha256-primary',
+        compress: noCompress,
+        contentType: 'text/xml',
+      },
+    ])(
+      'returns the correct releases from $filename',
+      async ({ filename, contentType, compress }) => {
+        const url = await mockPrimaryXmlResponse(
+          buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
             <arch>x86_64</arch>
@@ -231,22 +267,64 @@ describe('modules/datasource/rpm/index', () => {
             <version epoch="0" ver="1.2"/>
           </package>
         `),
-      );
+          filename,
+          contentType,
+          compress,
+        );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
-        packageName,
-      );
+        const releases = await rpmDatasource.getReleasesByPackageName(
+          url,
+          packageName,
+        );
 
-      expect(releases).toEqual({
-        releases: [
-          { version: '1.0-2.azl3' },
-          { version: '1.1-1.azl3' },
-          { version: '1.1-2.azl3' },
-          { version: '1.2' },
-        ],
-      });
-    });
+        expect(releases).toEqual({
+          releases: [
+            { version: '1.0-2.azl3' },
+            { version: '1.1-1.azl3' },
+            { version: '1.1-2.azl3' },
+            { version: '1.2' },
+          ],
+        });
+      },
+    );
+
+    it.each([
+      {
+        filename: 'somesha256-primary.xml.xz',
+        compressorName: 'LZMA',
+        contentType: 'application/xz',
+      },
+      {
+        filename: 'somesha256-primary.xml.lzma',
+        compressorName: 'LZMA',
+        contentType: 'application/xz',
+      },
+      {
+        filename: 'somesha256-primary.xml.bz2',
+        compressorName: 'BZip2',
+        contentType: 'application/x-bzip2',
+      },
+      {
+        filename: 'somesha256-primary.xml.zck',
+        compressorName: 'ZChunk',
+        // Yes, dl.fedoraproject.org returns Content-Type: text/xml for .zck
+        contentType: 'text/xml',
+      },
+    ])(
+      'throws an error for unsupported compression $compressorName',
+      async ({ filename, contentType, compressorName }) => {
+        const url = await mockPrimaryXmlResponse(
+          buildPrimaryXml(''),
+          filename,
+          contentType,
+          noCompress,
+        );
+
+        await expect(
+          rpmDatasource.getReleasesByPackageName(url, packageName),
+        ).rejects.toThrow(`${compressorName} compression is not supported`);
+      },
+    );
 
     it('throws an error if somesha256-primary.xml.gz is not found', async () => {
       httpMock
@@ -270,6 +348,12 @@ describe('modules/datasource/rpm/index', () => {
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
       ).rejects.toThrow(`Empty response body from getting ${primaryXmlUrl}.`);
+    });
+
+    it('throws an error for invalid URL', async () => {
+      await expect(
+        rpmDatasource.getReleasesByPackageName(':/', packageName),
+      ).rejects.toThrow('Cannot parse URL');
     });
 
     it('rethrows non-Error fetch failures', async () => {
@@ -407,7 +491,7 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
-      ).rejects.toThrow('Missing metadata in extracted RPM metadata file!');
+      ).rejects.toThrow('extract failed');
     });
 
     it('keeps the previous extracted primary.xml if a refresh extract fails', async () => {
