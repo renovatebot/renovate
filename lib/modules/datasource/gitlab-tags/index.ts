@@ -7,6 +7,7 @@ import {
   getSourceUrl,
 } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -115,13 +116,17 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
           `repository/commits?per_page=1`,
         );
         const gitlabCommits = await this.http.getJson(url, GitlabCommits);
-        digest = gitlabCommits.body[0].id;
+        digest = gitlabCommits.body[0]?.id ?? null;
       }
     } catch (err) {
-      logger.debug(
-        { gitlabRepo: repo, err, registryUrl },
-        'Error getting latest commit from Gitlab repo',
-      );
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.debug(
+          { gitlabRepo: repo, err, registryUrl },
+          'Gitlab repo or ref not found when getting commit',
+        );
+        return null;
+      }
+      this.handleGenericErrors(err);
     }
 
     return digest;
