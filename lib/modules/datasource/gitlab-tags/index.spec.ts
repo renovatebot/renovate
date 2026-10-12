@@ -166,6 +166,28 @@ describe('modules/datasource/gitlab-tags/index', () => {
       expect(res).toBe(digest);
     });
 
+    it('url-encodes refs containing slashes', async () => {
+      const digest = 'abcd00001234';
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get(
+          '/api/v4/projects/some%2Fdep2/repository/commits/release%2F1.0%23x',
+        )
+        .reply(200, {
+          id: digest,
+          created_at: '2020-03-04T12:01:37.000-06:00',
+        });
+      const res = await getDigest(
+        {
+          datasource,
+          registryUrls: ['https://gitlab.company.com/api/v4/'],
+          packageName: 'some/dep2',
+        },
+        'release/1.0#x',
+      );
+      expect(res).toBe(digest);
+    });
+
     it('returns commits from gitlab installation for a specific branch', async () => {
       const digest = 'abcd00001234';
       const body = {

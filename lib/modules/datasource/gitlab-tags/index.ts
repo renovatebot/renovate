@@ -103,7 +103,7 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
           `projects`,
           urlEncodedRepo,
           `repository/commits/`,
-          newValue,
+          encodeURIComponent(newValue),
         );
         const gitlabCommit = await this.http.getJson(url, GitlabCommit);
         digest = gitlabCommit.body.id;
