@@ -10,6 +10,7 @@ import { getFile } from '../../../util/git/index.ts';
 import { Result } from '../../../util/result.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import {
+  findHelmRepositoryCredentials,
   generateHelmEnvs,
   generateRegistryLoginCmd,
 } from '../helmv3/common.ts';
@@ -20,6 +21,7 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { Doc, LockVersion } from './schema.ts';
+import type { HelmfileManagerData } from './types.ts';
 import { isOciRepositoryFlagSet } from './utils.ts';
 
 export async function updateArtifacts({
@@ -27,7 +29,9 @@ export async function updateArtifacts({
   updatedDeps,
   newPackageFileContent,
   config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+}: UpdateArtifact<HelmfileManagerData>): Promise<
+  UpdateArtifactsResult[] | null
+> {
   logger.trace(`helmfile.updateArtifacts(${packageFileName})`);
 
   const { isLockFileMaintenance } = config;
@@ -91,6 +95,23 @@ export async function updateArtifacts({
       }
     }
 
+    const repositoryCredentialEnvs = Object.fromEntries(
+      docs.flatMap((doc) =>
+        coerceArray(doc.repositories)
+          .filter((value) => !isOciRepositoryFlagSet(value))
+          .flatMap((value) => {
+            const credentials = findHelmRepositoryCredentials(value.url);
+            const envName = value.name.toUpperCase().replaceAll('-', '_');
+            return credentials
+              ? [
+                  [`${envName}_USERNAME`, credentials.username],
+                  [`${envName}_PASSWORD`, credentials.password],
+                ]
+              : [];
+          }),
+      ),
+    );
+
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`);
 
     return await updateLockFile({
@@ -100,7 +121,10 @@ export async function updateArtifacts({
       run: () =>
         exec(cmd, {
           docker: {},
-          extraEnv: generateHelmEnvs(helmConstraint),
+          extraEnv: {
+            ...generateHelmEnvs(helmConstraint),
+            ...repositoryCredentialEnvs,
+          },
           toolConstraints,
         }),
     });

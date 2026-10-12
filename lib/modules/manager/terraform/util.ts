@@ -33,7 +33,7 @@ export function getLockedVersion(
 ): string | undefined {
   const depRegistryUrl = dep.registryUrls
     ? dep.registryUrls[0]
-    : TerraformProviderDatasource.defaultRegistryUrls[0];
+    : TerraformProviderDatasource.getDefaultRegistryUrls()[0];
   const foundLock = locks.find(
     (lock) =>
       lock.packageName === dep.packageName &&
@@ -59,7 +59,10 @@ export function applyOciDependency(
   // Strip optional `//subfolder` sub-path (e.g. `example.com/repo//modules/vpc`)
   const imageRef = (url.host + url.pathname).replace(regEx(/\/\/.+$/), '');
 
-  const parsed = getDep(imageRef, false, registryAliases);
+  const parsed = getDep(imageRef, {
+    specifyReplaceString: false,
+    registryAliases,
+  });
   dep.packageName = parsed.packageName;
   dep.datasource = parsed.datasource;
   dep.currentValue = url.searchParams.get('tag') ?? undefined;

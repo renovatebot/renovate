@@ -245,41 +245,44 @@ export abstract class HttpBase<
       }
 
       const startTime = Date.now();
-      const httpTask: GotTask = async () => {
-        let releaseLock: undefined | (() => void);
-        if (isReadMethod) {
-          releaseLock = await acquireLock(
-            `${options.method} ${url}`,
-            'http-mutex',
-            timeout * 2,
-          );
-        }
-        try {
-          const cachedResponse = await cacheProvider?.bypassServer<unknown>(
-            options.method,
-            url,
-          );
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
-          const queueMs = Date.now() - startTime;
-          return fetch(url, this._normalizeOptions(options), {
-            queueMs,
-          });
-        } finally {
-          releaseLock?.();
-        }
+      const fetchTask: GotTask = () => {
+        const queueMs = Date.now() - startTime;
+        return fetch(url, this._normalizeOptions(options), { queueMs });
       };
 
       const throttle = getThrottle(url);
-      const throttledTask = throttle ? () => throttle.add(httpTask) : httpTask;
+      const throttledTask = throttle
+        ? () => throttle.add(fetchTask)
+        : fetchTask;
 
       const queue = getQueue(url);
       const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
 
+      // cached responses don't hit the server, so they skip the throttle and queue
+      async function httpTask(): Promise<HttpResponse<unknown>> {
+        if (cacheProvider) {
+          const releaseLock = await acquireLock(
+            `${options.method} ${url}`,
+            'http-mutex',
+            timeout * 2,
+          );
+          try {
+            const cachedResponse = await cacheProvider.bypassServer<unknown>(
+              options.method,
+              url,
+            );
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+          } finally {
+            releaseLock();
+          }
+        }
+        return queuedTask();
+      }
+
       const { maxRetryAfter = 60 } = hostRule;
-      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
+      resPromise = wrapWithRetry(httpTask, url, getRetryAfter, maxRetryAfter);
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);
