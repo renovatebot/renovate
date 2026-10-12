@@ -345,4 +345,28 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     fields: ['targets[].version'],
     dependency: 'golang',
   },
+  // https://github.com/buildkite-plugins/ecs-deploy-buildkite-plugin
+  // `image` can be a plain string or an array of strings (the schema
+  // declares `type: [string, array]` directly, confirmed in
+  // `hooks/command`, which normalises either into a list and updates one
+  // container definition per entry) - extract one dep per entry.
+  'ecs-deploy': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          image: z.union([z.string(), z.array(z.string())]).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success || !parsed.data.image) {
+        return [];
+      }
+      const images = Array.isArray(parsed.data.image)
+        ? parsed.data.image
+        : [parsed.data.image];
+      return images.map((image) =>
+        getDep(image, { registryAliases, depType: 'docker' }),
+      );
+    },
+    fields: ['image'],
+  },
 };
