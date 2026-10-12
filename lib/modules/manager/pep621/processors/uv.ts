@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -181,13 +182,18 @@ export class UvProcessor extends BasePyProjectProcessor {
             }
           }
 
-          for (const [name, { version, registry }] of Object.entries(
-            lockFileMapping,
-          )) {
-            // only registry sourced packages can be looked up, others are
-            // local, git or url sources (including the project itself)
-            if (registry && !directPackageNames.has(name)) {
-              deps.push(indirectDep(name, version, registry));
+          // In a uv workspace, all members share the lock file of the
+          // workspace root. Only add indirect deps for the package file next
+          // to the lock file to avoid duplicating them for every member.
+          if (upath.dirname(lockFileName) === upath.dirname(packageFile)) {
+            for (const [name, { version, registry }] of Object.entries(
+              lockFileMapping,
+            )) {
+              // only registry sourced packages can be looked up, others are
+              // local, git or url sources (including the project itself)
+              if (registry && !directPackageNames.has(name)) {
+                deps.push(indirectDep(name, version, registry));
+              }
             }
           }
         }
