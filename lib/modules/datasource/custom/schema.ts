@@ -6,7 +6,7 @@ export const ReleaseResultZod = z.object({
     z
       .object({
         version: z.string(),
-        name: z.string().optional(),
+        name: z.string().optional().catch(undefined),
         isDeprecated: z.boolean().optional(),
         releaseTimestamp: MaybeTimestamp,
         sourceUrl: z.string().optional(),

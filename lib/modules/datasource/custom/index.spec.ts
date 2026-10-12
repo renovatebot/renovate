@@ -158,6 +158,40 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it.each`
+      name
+      ${null}
+      ${123}
+      ${{ title: 'Not a string' }}
+    `(
+      'drops non-string release name $name but keeps the release',
+      async ({ name }) => {
+        const release = {
+          changelogContent:
+            '### Upgrade notes\n\n- Updated the catalog bundle.',
+          changelogUrl: 'https://example.com/foo/releases/v1.1.0',
+          version: 'v1.1.0',
+        };
+        httpMock
+          .scope('https://example.com')
+          .get('/v1/invalid-name')
+          .reply(200, { releases: [{ ...release, name }] });
+
+        const result = await getPkgReleases({
+          datasource: `${CustomDatasource.id}.foo`,
+          packageName: 'myPackage',
+          customDatasources: {
+            foo: {
+              defaultRegistryUrlTemplate: 'https://example.com/v1/invalid-name',
+            },
+          },
+        });
+
+        expect(result).toEqual({ releases: [release] });
+        expect(result?.releases[0].name).toBeUndefined();
+      },
+    );
+
     it('drops non-string changelog content but keeps the release', async () => {
       const content = {
         releases: [
