@@ -309,4 +309,10 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     fields: ['version'],
     dependency: 'buildkite/plugin-tester',
   },
+  // https://github.com/johnsyweb/markdownlint-buildkite-plugin
+  'johnsyweb/markdownlint': {
+    extract: extractFixedImageVersion('markdownlint/markdownlint', 'version'),
+    fields: ['version'],
+    dependency: 'markdownlint/markdownlint',
+  },
 };
