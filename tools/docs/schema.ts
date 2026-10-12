@@ -180,7 +180,7 @@ function createSingleConfig(
     /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
     temp.properties = { ...option.properties };
   }
-  if (option.default === null) {
+  if (option.default === null || option.nullable) {
     temp.type = [option.type, 'null'];
   }
   if (
