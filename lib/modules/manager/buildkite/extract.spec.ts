@@ -1471,5 +1471,47 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('does not extract an image for plugin-tester when version is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-tester#v1.0.0: ~
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'plugin-tester',
+          packageName: 'buildkite-plugins/plugin-tester-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it('extracts the buildkite/plugin-tester image when version is set', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              plugin-tester#v1.0.0:
+                version: "v4.0.0"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'plugin-tester',
+          packageName: 'buildkite-plugins/plugin-tester-buildkite-plugin',
+        },
+        {
+          currentValue: 'v4.0.0',
+          datasource: 'docker',
+          depName: 'buildkite/plugin-tester',
+          packageName: 'buildkite/plugin-tester',
+          depType: 'docker',
+        },
+      ]);
+    });
   });
 });

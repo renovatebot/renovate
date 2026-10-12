@@ -300,4 +300,13 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     fields: ['image-version'],
     dependency: 'buildkite/plugin-linter',
   },
+  // https://github.com/buildkite-plugins/plugin-tester-buildkite-plugin
+  // Verified against `hooks/command`: the published Docker Hub image is
+  // `buildkite/plugin-tester`, not `buildkite-plugins/buildkite-plugin-tester`
+  // (the GitHub org path and the published image name differ).
+  'plugin-tester': {
+    extract: extractFixedImageVersion('buildkite/plugin-tester', 'version'),
+    fields: ['version'],
+    dependency: 'buildkite/plugin-tester',
+  },
 };
