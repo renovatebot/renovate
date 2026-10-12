@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -435,5 +436,37 @@ export const knownPlugins: Record<string, KnownPlugin> = {
   'affirm/docker': {
     extract: extractDockerPluginDeps,
     fields: ['image', 'chown', 'chown-image', 'mount-checkout'],
+  },
+  // https://github.com/forumone/extract-buildkite-plugin
+  // `image` can be a plain string, or an object with `repository` (required
+  // in the object form) and `tag`/`service` (mutually exclusive) -
+  // verified against `plugin.yml`/`lib/lib.bash`. Only the string and
+  // `repository`+`tag` shapes produce a simple, versioned image reference;
+  // the `service`-based naming (no `tag`) isn't extractable as one.
+  'forumone/extract': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          image: z
+            .union([
+              z.string(),
+              z.object({ repository: z.string(), tag: z.string().optional() }),
+            ])
+            .optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success || !parsed.data.image) {
+        return [];
+      }
+      const { image } = parsed.data;
+      if (isString(image)) {
+        return [getDep(image, { registryAliases, depType: 'docker' })];
+      }
+      if (!image.tag) {
+        return [];
+      }
+      return [depWithVersion(image.repository, image.tag, registryAliases)];
+    },
+    fields: ['image', 'image.repository', 'image.tag'],
   },
 };
