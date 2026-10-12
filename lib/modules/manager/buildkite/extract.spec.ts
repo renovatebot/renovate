@@ -876,5 +876,51 @@ describe('modules/manager/buildkite/extract', () => {
         },
       ]);
     });
+
+    it('extracts the image embedded in the equinixmetal-buildkite/kind-cluster plugin config', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/kind-cluster#v1.0.0:
+                custom_image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/kind-cluster',
+          packageName: 'equinixmetal-buildkite/kind-cluster-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not extract an image from kind-cluster when custom_image is absent', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              equinixmetal-buildkite/kind-cluster#v1.0.0:
+                k8s_version: "1.29"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          depName: 'equinixmetal-buildkite/kind-cluster',
+          packageName: 'equinixmetal-buildkite/kind-cluster-buildkite-plugin',
+        },
+      ]);
+    });
   });
 });

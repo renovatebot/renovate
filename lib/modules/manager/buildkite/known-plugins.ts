@@ -78,4 +78,14 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     extract: extractSingleImageField('container'),
     fields: ['container'],
   },
+  // https://github.com/equinixmetal-buildkite/kind-cluster-buildkite-plugin
+  // `custom_image` overrides an internal, pinned `kindest/node` image
+  // selected by the (non-Docker-reference) `k8s_version` field - only
+  // `custom_image` is a user-configurable Docker dependency. Its
+  // `kind_version`/`helm_version` fields pin separate CLI tools, not Docker
+  // images - out of scope here.
+  'equinixmetal-buildkite/kind-cluster': {
+    extract: extractSingleImageField('custom_image'),
+    fields: ['custom_image'],
+  },
 };
