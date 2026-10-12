@@ -197,6 +197,7 @@ export async function lookupUpdates(
         'deprecationMessage',
         'sourceUrl',
         'registryUrl',
+        'effectiveDatasource',
         'sourceDirectory',
         'homepage',
         'changelogUrl',
@@ -235,7 +236,11 @@ export async function lookupUpdates(
       }
       // Reapply package rules in case we missed something from sourceUrl
       config = await applyPackageRules(
-        { ...config, sourceUrl: res.sourceUrl },
+        {
+          ...config,
+          sourceUrl: res.sourceUrl,
+          effectiveDatasource: res.effectiveDatasource,
+        },
         'source-url',
       );
       if (config.followTag) {

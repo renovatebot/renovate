@@ -22,7 +22,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 export async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
-): Promise<NpmrcPackageFile | null> {
+): Promise<NpmrcPackageFile<NpmManagerData> | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
     logger.warn({ fileName: packageFile }, 'Could not read file content');

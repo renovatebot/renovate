@@ -1,12 +1,9 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
-import { Result } from '../../../util/result.ts';
 import { Datasource } from '../datasource.ts';
-import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -37,46 +34,37 @@ export class CdnjsDatasource extends Datasource {
   private async _getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const result = Result.parse(config, ReleasesConfig)
-      .transform(({ packageName, registryUrl }) => {
-        const [library] = packageName.split('/');
-
-        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
-
-        return this.http.getJsonSafe(
-          url,
-          { cacheProvider: memCacheProvider },
-          CdnjsAPIVersionResponse,
-        );
-      })
-      .transform(({ versions, homepage, repository }): ReleaseResult => {
-        const releases: Release[] = versions;
-
-        const res: ReleaseResult = { releases };
-
-        if (homepage) {
-          res.homepage = homepage;
-        }
-
-        if (repository) {
-          res.sourceUrl = repository;
-        }
-
-        return res;
-      });
-
-    const { val, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'cdnjs: validation error');
+    const { packageName, registryUrl } = config;
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
+    const [library] = packageName.split('/');
+
+    const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
+
+    const body = await this.fetchJsonOrNull(url, CdnjsAPIVersionResponse, {
+      cacheProvider: memCacheProvider,
+    });
+    if (!body) {
+      return null;
     }
 
-    return val;
+    const { versions, homepage, repository } = body;
+    const releases: Release[] = versions;
+
+    const res: ReleaseResult = { releases };
+
+    if (homepage) {
+      res.homepage = homepage;
+    }
+
+    if (repository) {
+      res.sourceUrl = repository;
+    }
+
+    return res;
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -84,7 +72,7 @@ export class CdnjsDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
-        key: `getReleases:${library}`,
+        key: buildCacheKey('getReleases', library),
         cacheable: true,
         fallback: true,
       },
@@ -96,32 +84,20 @@ export class CdnjsDatasource extends Datasource {
     config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
-    const { packageName } = config;
-    const [library] = packageName.split('/');
-    const assetName = packageName.replace(`${library}/`, '');
-
-    const result = Result.parse(config, DigestsConfig)
-      .transform(({ registryUrl }) => {
-        const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
-
-        return this.http.getJsonSafe(url, CdnjsAPISriResponse);
-      })
-      .transform(({ sri }): string => {
-        return sri?.[assetName];
-      });
-
-    const { val = null, err } = await result.unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'cdnjs: validation error');
+    const { packageName, registryUrl } = config;
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
       return null;
     }
 
-    if (err) {
-      this.handleGenericErrors(err);
-    }
+    const [library] = packageName.split('/');
+    const assetName = packageName.replace(`${library}/`, '');
 
-    return val;
+    const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
+
+    const body = await this.fetchJsonOrNull(url, CdnjsAPISriResponse);
+
+    return body?.sri?.[assetName] ?? null;
   }
 
   override getDigest(
@@ -131,7 +107,12 @@ export class CdnjsDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
-        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
         cacheable: true,
         fallback: true,
       },

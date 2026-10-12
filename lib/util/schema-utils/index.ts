@@ -360,10 +360,11 @@ export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   }
 });
 
-export function withDepType<
-  Output extends PackageDependency[],
-  Schema extends z.ZodType<Output>,
->(schema: Schema, depType: string, force = true): z.ZodType<Output> {
+export function withDepType<Output extends PackageDependency[]>(
+  schema: z.ZodType<Output>,
+  depType: string,
+  force = true,
+): z.ZodType<Output> {
   return schema.transform((deps) => {
     for (const dep of deps) {
       if (!dep.depType || force) {

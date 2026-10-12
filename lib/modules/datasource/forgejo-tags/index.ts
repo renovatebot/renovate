@@ -19,9 +19,7 @@ export class ForgejoTagsDatasource extends GiteaTagsDatasource {
   protected override readonly cacheNamespace: PackageCacheNamespace =
     'datasource-forgejo-tags';
 
-  override http = new ForgejoHttp(ForgejoTagsDatasource.id);
-
   constructor() {
-    super(ForgejoTagsDatasource.id);
+    super(ForgejoTagsDatasource.id, new ForgejoHttp(ForgejoTagsDatasource.id));
   }
 }

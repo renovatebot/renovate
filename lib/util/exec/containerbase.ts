@@ -6,11 +6,15 @@ import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
+import { buildCacheKey } from '../cache/package/key.ts';
 import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
-export const allToolConfig: Record<ToolName, ToolConfig> = {
+/**
+ * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
+ */
+export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   apm: {
     datasource: 'github-releases',
     packageName: 'microsoft/apm',
@@ -127,12 +131,6 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     datasource: 'java-version',
     packageName: 'java?system=true',
     versioning: 'npm',
-  },
-  /* not used in Renovate */
-  'java-maven': {
-    datasource: 'java-version',
-    packageName: 'java?system=true',
-    versioning: 'maven',
   },
   jb: {
     datasource: 'github-releases',
@@ -253,6 +251,18 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   },
 } as const;
 
+/**
+ * A Containerbase `tool` that Renovate supports configuring the version of.
+ */
+export type SupportedToolNames = keyof typeof allToolConfig;
+
+/**
+ * All Containerbase `tool`s that Renovate supports configuring the version of.
+ */
+export function getSupportedToolNames(): readonly ToolName[] {
+  return Object.keys(allToolConfig) as readonly ToolName[];
+}
+
 let _getPkgReleases: Promise<
   typeof import('../../modules/datasource/index.ts')
 > | null = null;
@@ -265,7 +275,7 @@ async function getPkgReleases(
   return getPkgReleases(toolConfig);
 }
 
-export function getToolConfig(toolName: ToolName): ToolConfig {
+export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
   return allToolConfig[toolName];
 }
 
@@ -388,7 +398,9 @@ export async function resolveConstraint(
 
 // Docker execs run in a fresh `--rm` container each time, so `memoize` must
 // stay false there - only the persistent-host (binarySource=install) path
-// can safely skip a tool it has already installed this run.
+// can safely skip a tool whose requested version is already active.
+// `install-tool` also activates the version it installs, so the memo tracks
+// the active version per tool, not every installed version.
 export async function generateInstallCommands(
   toolConstraints: Opt<ToolConstraint[]>,
   memoize = false,
@@ -399,11 +411,11 @@ export async function generateInstallCommands(
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
       if (memoize) {
-        const cacheKey = `containerbase-installed:${toolName}:${toolVersion}`;
-        if (memCache.get<boolean | undefined>(cacheKey)) {
+        const cacheKey = buildCacheKey('containerbase-active', toolName);
+        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
           continue;
         }
-        memCache.set(cacheKey, true);
+        memCache.set(cacheKey, toolVersion);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);

@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import type { GithubRestRelease } from '../../../util/github/types.ts';
 import { getApiBaseUrl } from '../../../util/github/url.ts';
@@ -17,7 +18,7 @@ import type { HermitSearchResult } from './types.ts';
  * repository. It expects the search manifest to come from an asset `index.json` from
  * a release named index.
  */
-export class HermitDatasource extends Datasource {
+export class HermitDatasource extends Datasource<GithubHttp> {
   static readonly id = 'hermit';
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -37,8 +38,7 @@ export class HermitDatasource extends Datasource {
   pathRegex: RegExp;
 
   constructor() {
-    super(HermitDatasource.id);
-    this.http = new GithubHttp(id);
+    super(HermitDatasource.id, new GithubHttp(id));
     this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 
@@ -100,7 +100,11 @@ export class HermitDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getReleases:${config.registryUrl ?? ''}-${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -173,7 +177,7 @@ export class HermitDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${HermitDatasource.id}`,
-        key: `getHermitSearchManifest:${u.toString()}`,
+        key: buildCacheKey('getHermitSearchManifest', u.toString()),
       },
       () => this._getHermitSearchManifest(u),
     );

@@ -1106,6 +1106,77 @@ describe('workers/repository/update/pr/index', () => {
         });
       });
 
+      it('keeps dependency-specific notes without suppressing shared repository notes', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const embeddedUpgrade = {
+          ...dummyUpgrade,
+          sourceUrl: 'https://github.com/some/repo',
+          logJSON: {
+            ...dummyUpgrade.logJSON!,
+            perDependencyNotes: true,
+            versions: [
+              {
+                ...dummyRelease,
+                version: '4.5.6',
+                releaseNotes: {
+                  body: 'bar notes',
+                  notesSourceUrl: 'https://github.com/some/repo',
+                  url: 'https://github.com/some/repo/releases/4.5.6',
+                },
+              },
+            ],
+          },
+        };
+        const repositoryUpgrade = {
+          ...dummyUpgrade,
+          sourceUrl: 'https://github.com/some/repo',
+          currentValue: '2.3.4',
+        };
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade,
+            repositoryUpgrade,
+            {
+              ...embeddedUpgrade,
+              depName: 'baz',
+              logJSON: {
+                ...embeddedUpgrade.logJSON,
+                versions: [
+                  {
+                    ...embeddedUpgrade.logJSON.versions[0],
+                    releaseNotes: {
+                      ...embeddedUpgrade.logJSON.versions[0].releaseNotes,
+                      body: 'baz notes',
+                    },
+                  },
+                ],
+              },
+            },
+            { ...repositoryUpgrade, depName: 'qux' },
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades).toMatchObject([
+          { depName: 'bar', hasReleaseNotes: true },
+          { depName: 'bar', hasReleaseNotes: true },
+          { depName: 'baz', hasReleaseNotes: true },
+          { depName: 'qux', hasReleaseNotes: false },
+        ]);
+        expect(
+          bodyConfig.upgrades.map((upgrade) => upgrade.releases?.length),
+        ).toEqual([1, 4, 1, 0]);
+        expect(
+          bodyConfig.upgrades.map(
+            (upgrade) => upgrade.releases?.[0]?.releaseNotes?.body,
+          ),
+        ).toEqual(['bar notes', undefined, 'baz notes', undefined]);
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
