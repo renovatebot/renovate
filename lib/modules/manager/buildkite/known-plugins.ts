@@ -129,4 +129,14 @@ export const knownPlugins: Record<string, KnownPlugin> = {
     ),
     fields: ['docker_image', 'use_docker'],
   },
+  // https://github.com/buildkite-plugins/junit-annotate-buildkite-plugin
+  // `ruby-image` is only used when `run-in-docker` is true (the default).
+  'junit-annotate': {
+    extract: whenTrue(
+      'run-in-docker',
+      true,
+      extractSingleImageField('ruby-image'),
+    ),
+    fields: ['ruby-image', 'run-in-docker'],
+  },
 };
