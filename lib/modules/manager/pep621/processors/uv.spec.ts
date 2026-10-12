@@ -1495,6 +1495,87 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('dont propagate indirect dep registries into UV_EXTRA_INDEX_URL', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      hostRules.add({
+        matchHost: 'https://private.com/simple',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      // indirect deps take their registryUrls from uv.lock, which already
+      // records where each package comes from. Passing them as extra indexes
+      // would give them priority over the project's default index.
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+        },
+        {
+          packageName: 'mako',
+          depType: depTypes.indirect,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          newVersion: '1.3.11',
+        },
+        {
+          packageName: 'markupsafe',
+          depType: depTypes.indirect,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://private.com/simple'],
+          newVersion: '2.1.6',
+        },
+      ];
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako==1.3.11 --upgrade-package markupsafe==2.1.6',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL: 'https://user:pass@example.com/simple',
+            },
+          },
+        },
+      ]);
+    });
+
     it('continues if Google auth is not configured', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
