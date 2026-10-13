@@ -99,7 +99,8 @@ function getPinnedValue(newVersion: string): string {
 // Components of the last specifier; a union like `0.10, 0.11` must not be
 // counted as one value.
 function componentCount(value: string): number {
-  return value.split(',').at(-1)!.trim().split('.').length;
+  const lastSpecifier = value.split(',').at(-1)!.trim();
+  return lastSpecifier.split('.').length;
 }
 
 function getNewValue({
