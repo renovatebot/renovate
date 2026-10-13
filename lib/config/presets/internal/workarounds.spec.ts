@@ -379,7 +379,7 @@ describe('config/presets/internal/workarounds', () => {
       ${'19.0110'} | ${false}
       ${'v0.1.0'}  | ${true}
       ${'v1.13.1'} | ${true}
-    `('allowedVersisons("$input") == "$expected"', ({ input, expected }) => {
+    `('allowedVersions("$input") == "$expected"', ({ input, expected }) => {
       expect(matchRegexOrGlob(input, allowedVersions)).toEqual(expected);
     });
   });
