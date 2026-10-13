@@ -539,7 +539,8 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         const dep = res!.deps[0];
         const updated = await doAutoReplace(
           partial<BranchUpgradeConfig>({
-            ...dep,
+            depName: dep.depName,
+            currentValue: dep.currentValue ?? undefined,
             manager: 'terraform',
             packageFile: 'main.tf',
             depIndex: 0,
@@ -1008,7 +1009,8 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         const extracted = await extractPackageFile(content, file, {});
         return doAutoReplace(
           partial<BranchUpgradeConfig>({
-            ...extracted!.deps[index],
+            depName: extracted!.deps[index].depName,
+            currentValue: extracted!.deps[index].currentValue ?? undefined,
             manager: 'terraform',
             packageFile: file,
             depIndex: index,
