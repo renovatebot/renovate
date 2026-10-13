@@ -515,7 +515,7 @@ describe('workers/repository/process/extract-update', () => {
               datasource: 'npm',
               newVersions: ['1.14.1', '1.14.2', '2.0.0'],
             },
-            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
+            'Dependency axios in package.json has update(s) proposed which would update you to a malicious version - skipping',
           );
         });
       });
