@@ -1169,6 +1169,50 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('uses mise Java shorthand vendor setting for bare selectors', async () => {
+      const defaultResult = await extractPackageFile(
+        `[tools]\njava = "21.0.2"`,
+        miseFilename,
+      );
+      expect(defaultResult?.deps[0]).toMatchObject({
+        depName: 'java',
+        currentValue: '21.0.2',
+        datasource: 'java-version',
+        packageName: 'java-jdk',
+      });
+
+      const settingsResult = await extractPackageFile(
+        `[settings]\njava.shorthand_vendor = "openjdk"\n[tools]\njava = "21.0.2"`,
+        miseFilename,
+      );
+      expect(settingsResult?.deps[0]).toMatchObject({
+        depName: 'java',
+        currentValue: '21.0.2',
+        datasource: 'java-version',
+        packageName: 'openjdk-jdk',
+      });
+
+      const nestedSettingsResult = await extractPackageFile(
+        `[settings.java]\nshorthand_vendor = "openjdk"\n[tools]\njava = "21.0.2"`,
+        miseFilename,
+      );
+      expect(nestedSettingsResult?.deps[0]).toMatchObject({
+        packageName: 'openjdk-jdk',
+      });
+    });
+
+    it('does not override an explicit Java vendor with shorthand setting', async () => {
+      const result = await extractPackageFile(
+        `[settings]\njava.shorthand_vendor = "openjdk"\n[tools]\njava = "temurin-21.0.2"`,
+        miseFilename,
+      );
+      expect(result?.deps[0]).toMatchObject({
+        currentValue: '21.0.2',
+        datasource: 'java-version',
+        packageName: 'java-jdk',
+      });
+    });
+
     it.each`
       version            | currentValue
       ${'21'}            | ${'21'}

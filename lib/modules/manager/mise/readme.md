@@ -15,6 +15,10 @@ Renovate supports all standard mise configuration file patterns:
 
 Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
 
+### Java vendor selection
+
+For bare Java selectors such as `java = "21"`, mise's default vendor depends on the mise version. Renovate does not infer which mise version a repository will use, so it cannot determine that default reliably. Renovate uses its Java datasource default unless the mise file explicitly sets `java.shorthand_vendor = "openjdk"`; that setting is honored when choosing releases for bare Java selectors. Explicit vendor-prefixed selectors are left unchanged.
+
 ### Remote task files
 
 Renovate supports remote [git task files](https://mise.jdx.dev/tasks/toml-tasks.html#git) in `tasks.<name>.file`, using the same `git::` forms as for remote `include` entries.

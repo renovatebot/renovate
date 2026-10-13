@@ -3,8 +3,9 @@ import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { adoptiumRegistryUrl, getAdoptiumReleases } from './adoptium.ts';
-import { datasource, parsePackage } from './common.ts';
+import { datasource, miseJavaRegistryUrl, parsePackage } from './common.ts';
 import { getGraalvmReleases, graalvmRegistryUrl } from './graalvm.ts';
+import { getOpenjdkReleases } from './openjdk.ts';
 
 export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -14,9 +15,13 @@ export class JavaVersionDatasource extends Datasource {
   }
 
   override getDefaultRegistryUrls(packageName: string): string[] {
-    return packageName.includes('oracle-graalvm')
-      ? [graalvmRegistryUrl]
-      : [adoptiumRegistryUrl];
+    if (packageName.includes('oracle-graalvm')) {
+      return [graalvmRegistryUrl];
+    }
+    if (packageName.includes('openjdk')) {
+      return [miseJavaRegistryUrl];
+    }
+    return [adoptiumRegistryUrl];
   }
 
   override supportsCustomRegistry(packageName: string): boolean {
@@ -41,6 +46,10 @@ export class JavaVersionDatasource extends Datasource {
           pkgConfig,
           effectiveRegistryUrl,
         );
+      }
+
+      if (pkgConfig.vendor === 'openjdk') {
+        return await getOpenjdkReleases(this.http, pkgConfig);
       }
 
       // Default to Adoptium
