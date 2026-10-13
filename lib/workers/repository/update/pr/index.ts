@@ -325,7 +325,11 @@ export async function ensurePr(
         const shared = !logJSON.perDependencyNotes;
         const notesKey = shared
           ? getRepoNameWithSourceDirectory(upgrade)
-          : `${upgrade.datasource}-${upgrade.packageName ?? upgrade.depName}-${upgrade.newVersion ?? upgrade.newValue}`;
+          : JSON.stringify([
+              upgrade.datasource,
+              upgrade.packageName ?? upgrade.depName,
+              upgrade.newVersion ?? upgrade.newValue,
+            ]);
         const seenNotes = shared ? commitRepos : dependencyNotes;
         if (
           logJSON.hasReleaseNotes &&
