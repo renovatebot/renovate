@@ -78,10 +78,10 @@ export function extractResource(base: string): PackageDependency | null {
   };
 }
 
-export function extractImage(
+export function extractImage<T = never>(
   image: Image,
   aliases?: Record<string, string>,
-): PackageDependency | null {
+): PackageDependency<T> | null {
   if (!image.name) {
     return null;
   }

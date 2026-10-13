@@ -18,3 +18,7 @@ export interface GitSource {
   remote: string;
   subdir?: string;
 }
+
+export interface JsonnetBundlerManagerData {
+  subdir?: string;
+}

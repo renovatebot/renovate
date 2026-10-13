@@ -99,14 +99,18 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+  return (
+    (upgrade.depType === 'packageManager' ||
+      upgrade.depType === 'devEngines.packageManager') &&
+    upgrade.depName === 'yarn'
+  );
 }
 
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = [],
+  upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);

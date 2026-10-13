@@ -1234,11 +1234,274 @@ describe('modules/manager/npm/extract/index', () => {
             depType: 'dependencies',
             prettyDepType: 'dependency',
           },
+          {
+            currentValue: '3.0.0',
+            datasource: 'npm',
+            depName: 'yarn',
+            depType: 'devEngines.packageManager',
+            prettyDepType: 'devEngines.packageManager',
+          },
         ],
         managerData: {
           hasPackageManager: true,
         },
       });
+    });
+
+    it.each([false, true])(
+      'extracts devEngines constraints with array form: %s',
+      async (arrayForm) => {
+        const runtime = { name: 'node', version: '22.11.0' };
+        const packageManager = { name: 'pnpm', version: '9.0.0' };
+        const content = JSON.stringify({
+          engines: { node: '20.0.0', pnpm: '8.0.0' },
+          packageManager: 'pnpm@8.15.5',
+          devEngines: {
+            runtime: arrayForm ? [runtime] : runtime,
+            packageManager: arrayForm ? [packageManager] : packageManager,
+          },
+        });
+
+        const res = await npmExtract.extractPackageFile(
+          content,
+          'package.json',
+          defaultExtractConfig,
+        );
+
+        expect(res?.extractedConstraints).toEqual({
+          node: '22.11.0',
+          pnpm: '9.0.0',
+        });
+      },
+    );
+
+    it('extracts devEngines.runtime and devEngines.packageManager', async () => {
+      const pJson = {
+        devEngines: {
+          runtime: { name: 'node', version: '22.11.0' },
+          packageManager: { name: 'pnpm', version: '9.0.0', onFail: 'error' },
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            commitMessageTopic: 'Node.js',
+            currentValue: '22.11.0',
+            datasource: 'node-version',
+            depName: 'node',
+            depType: 'devEngines.runtime',
+            prettyDepType: 'devEngines.runtime',
+          },
+          {
+            commitMessageTopic: 'pnpm',
+            currentValue: '9.0.0',
+            datasource: 'npm',
+            depName: 'pnpm',
+            depType: 'devEngines.packageManager',
+            prettyDepType: 'devEngines.packageManager',
+          },
+        ],
+      });
+    });
+
+    it('extracts Bun and Deno from devEngines.runtime', async () => {
+      const pJson = {
+        devEngines: {
+          runtime: [
+            { name: 'node', version: '24.7.0' },
+            { name: 'bun', version: '1.2.0' },
+            { name: 'deno', version: '2.4.0' },
+          ],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '24.7.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 0 },
+        },
+        {
+          commitMessageTopic: 'Bun',
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 1 },
+        },
+        {
+          commitMessageTopic: 'Deno',
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 2 },
+        },
+      ]);
+    });
+
+    it('sets hasPackageManager when devEngines.packageManager is an array', async () => {
+      const pJson = {
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(true);
+    });
+
+    it('does not set hasPackageManager when devEngines.packageManager array has only invalid items', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [null, {}],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(false);
+    });
+
+    it('sets hasPackageManager for devEngines.packageManager array items with stray keys (mirrors single-object semantics)', async () => {
+      // `isNonEmptyObject` is true for any object with at least one key, so
+      // a single `{ foo: 'bar' }` already returns true. The array branch
+      // mirrors that semantic — the actual extract step still filters items
+      // lacking `name`/`version`.
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [{ foo: 'bar' }],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(true);
+      expect(res?.deps).toEqual([]);
+    });
+
+    it('does not set hasPackageManager when devEngines.packageManager is an empty array', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.managerData?.hasPackageManager).toBe(false);
+    });
+
+    it('extracts devEngines.packageManager array form', async () => {
+      const pJson = {
+        devEngines: {
+          packageManager: [
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn', version: '4.5.0' },
+          ],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+          managerData: { devEnginesIndex: 0 },
+        },
+        {
+          currentValue: '4.5.0',
+          datasource: 'npm',
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+          packageName: '@yarnpkg/cli-dist',
+          managerData: { devEnginesIndex: 1 },
+        },
+      ]);
+    });
+
+    it('skips devEngines items without name', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: { version: '9.0.0' },
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toEqual([]);
+    });
+
+    it('skips malformed and version-less devEngines array items', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: [
+            null,
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn' },
+          ],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '9.0.0',
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+          managerData: { devEnginesIndex: 1 },
+        },
+      ]);
+    });
+
+    it('skips devEngines items without version', async () => {
+      const pJson = {
+        name: 'demo',
+        devEngines: {
+          packageManager: { name: 'pnpm' },
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toEqual([]);
     });
 
     it('extracts dependencies from overrides', async () => {
@@ -1705,6 +1968,32 @@ describe('modules/manager/npm/extract/index', () => {
         packageFile: '.yarnrc.yml',
       });
     });
+
+    it.each`
+      packageManager
+      ${{ name: 'yarn', version: '4.6.0' }}
+      ${[{ name: 'yarn', version: '4.6.0' }]}
+    `(
+      'recognizes devEngines.packageManager for Yarn catalogs: $packageManager',
+      async ({ packageManager }) => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          'catalog:\n  is-positive: 1.0.0\n',
+        );
+        fs.readLocalFile.mockResolvedValueOnce(
+          JSON.stringify({ devEngines: { packageManager } }),
+        );
+
+        const res = await extractAllPackageFiles(defaultExtractConfig, [
+          '.yarnrc.yml',
+        ]);
+
+        expect(res[0]).toMatchObject({
+          packageFile: '.yarnrc.yml',
+          deps: [{ depName: 'is-positive', depType: 'yarn.catalog.default' }],
+          managerData: { hasPackageManager: true },
+        });
+      },
+    );
 
     it('extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps', async () => {
       const yarnrc = codeBlock`

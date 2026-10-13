@@ -1,5 +1,13 @@
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import {
+  defaultRegistryUrl,
+  getApiBaseUrl,
+  getDepHost,
+  getSourceUrl,
+} from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -9,12 +17,9 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
-import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
-export class GitlabTagsDatasource extends Datasource {
+export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
-
-  protected override http: GitlabHttp;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -24,8 +29,7 @@ export class GitlabTagsDatasource extends Datasource {
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
-    super(GitlabTagsDatasource.id);
-    this.http = new GitlabHttp(GitlabTagsDatasource.id);
+    super(GitlabTagsDatasource.id, new GitlabHttp(GitlabTagsDatasource.id));
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
@@ -36,14 +40,14 @@ export class GitlabTagsDatasource extends Datasource {
     registryUrl,
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const depHost = getDepHost(registryUrl);
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
 
     // tag
     const url = joinUrlParts(
-      depHost,
-      `api/v4/projects`,
+      apiBaseUrl,
+      `projects`,
       urlEncodedRepo,
       `repository/tags?per_page=100`,
     );
@@ -68,7 +72,11 @@ export class GitlabTagsDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          getDepHost(config.registryUrl),
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this.fetchReleases(config),
@@ -84,7 +92,7 @@ export class GitlabTagsDatasource extends Datasource {
     { packageName: repo, registryUrl }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const depHost = getDepHost(registryUrl);
+    const apiBaseUrl = getApiBaseUrl(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
     let digest: string | null = null;
@@ -92,33 +100,33 @@ export class GitlabTagsDatasource extends Datasource {
     try {
       if (newValue) {
         const url = joinUrlParts(
-          depHost,
-          `api/v4/projects`,
+          apiBaseUrl,
+          `projects`,
           urlEncodedRepo,
           `repository/commits/`,
-          newValue,
+          encodeURIComponent(newValue),
         );
         const gitlabCommit = await this.http.getJson(url, GitlabCommit);
         digest = gitlabCommit.body.id;
       } else {
         const url = joinUrlParts(
-          depHost,
-          `api/v4/projects`,
+          apiBaseUrl,
+          `projects`,
           urlEncodedRepo,
           `repository/commits?per_page=1`,
         );
         const gitlabCommits = await this.http.getJson(url, GitlabCommits);
-        digest = gitlabCommits.body[0].id;
+        digest = gitlabCommits.body[0]?.id ?? null;
       }
     } catch (err) {
-      logger.debug(
-        { gitlabRepo: repo, err, registryUrl },
-        'Error getting latest commit from Gitlab repo',
-      );
-    }
-
-    if (!digest) {
-      return null;
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.debug(
+          { gitlabRepo: repo, err, registryUrl },
+          'Gitlab repo or ref not found when getting commit',
+        );
+        return null;
+      }
+      this.handleGenericErrors(err);
     }
 
     return digest;
@@ -130,7 +138,12 @@ export class GitlabTagsDatasource extends Datasource {
   ): Promise<string | null> {
     return this.cached(
       {
-        key: `getDigest:${getDepHost(config.registryUrl)}:${config.packageName}`,
+        key: buildCacheKey(
+          'getDigest',
+          getDepHost(config.registryUrl),
+          config.packageName,
+          newValue,
+        ),
         fallback: true,
       },
       () => this.fetchDigest(config, newValue),
