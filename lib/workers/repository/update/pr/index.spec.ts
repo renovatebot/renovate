@@ -1177,6 +1177,54 @@ describe('workers/repository/update/pr/index', () => {
         ).toEqual(['bar notes', undefined, 'baz notes', undefined]);
       });
 
+      it('attaches dependency-specific notes once per dependency and new version', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const embeddedUpgrade = {
+          ...dummyUpgrade,
+          logJSON: {
+            ...dummyUpgrade.logJSON!,
+            perDependencyNotes: true,
+          },
+        };
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade,
+            { ...embeddedUpgrade, currentValue: '2.3.4' },
+            { ...embeddedUpgrade, newVersion: '5.0.0' },
+            { ...embeddedUpgrade, depName: 'baz' },
+            {
+              ...embeddedUpgrade,
+              datasource: 'custom',
+              packageName: 'bar',
+              newVersion: undefined,
+              newValue: '6.0.0',
+            },
+            {
+              ...embeddedUpgrade,
+              datasource: 'custom',
+              packageName: 'bar',
+              newVersion: undefined,
+              newValue: '6.0.0',
+              currentValue: '2.3.4',
+            },
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades).toMatchObject([
+          { depName: 'bar', currentValue: '1.2.3', hasReleaseNotes: true },
+          { depName: 'bar', currentValue: '2.3.4', hasReleaseNotes: false },
+          { depName: 'bar', newVersion: '5.0.0', hasReleaseNotes: true },
+          { depName: 'baz', hasReleaseNotes: true },
+          { newValue: '6.0.0', currentValue: '1.2.3', hasReleaseNotes: true },
+          { newValue: '6.0.0', currentValue: '2.3.4', hasReleaseNotes: false },
+        ]);
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
