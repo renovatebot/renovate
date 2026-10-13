@@ -35,7 +35,7 @@ export const hostnameMatchRegex = regEx(
 // as the whole value of a module's `source`/`version` ref, e.g. `${local.tag}`
 // or `${var.tag}`. This regex matches that entire reference so the underlying
 // local/variable value can be resolved and tracked by Renovate instead.
-export const localOrVariableRefRegex = regEx(
+const localOrVariableRefRegex = regEx(
   /^\$\{\s*(?<kind>local|var)\.(?<name>[a-zA-Z_][a-zA-Z0-9_-]*)\s*\}$/,
 );
 
@@ -45,7 +45,7 @@ export const localOrVariableRefRegex = regEx(
  * determined (i.e. a `locals` value or a `variable` block with a string
  * `default`).
  */
-export function resolveLocalOrVariableValue(
+function resolveLocalOrVariableValue(
   value: string,
   hclRoot: TerraformDefinitionFile,
 ): string | undefined {
@@ -94,7 +94,8 @@ export class ModuleExtractor extends DependencyExtractor {
       return [];
     }
 
-    const dependencies = [];
+    const dependencies: PackageDependency[] = [];
+    const refUsers = new Map<string, PackageDependency[]>();
     for (const [depName, moduleElements] of Object.entries(modules)) {
       for (const moduleElement of moduleElements) {
         const dep = {
@@ -105,7 +106,20 @@ export class ModuleExtractor extends DependencyExtractor {
             source: moduleElement.source,
           },
         };
-        dependencies.push(this.analyseTerraformModule(dep, config, hclRoot));
+        dependencies.push(
+          this.analyseTerraformModule(dep, config, hclRoot, refUsers),
+        );
+      }
+    }
+
+    // A shared declaration is rewritten by every update, so it must not feed
+    // modules from different packages.
+    for (const users of refUsers.values()) {
+      const packages = new Set(users.map((u) => u.packageName ?? u.depName));
+      if (packages.size > 1) {
+        for (const user of users) {
+          user.skipReason = 'contains-variable';
+        }
       }
     }
 
@@ -116,6 +130,7 @@ export class ModuleExtractor extends DependencyExtractor {
     dep: PackageDependency<TerraformManagerData>,
     config: ExtractConfig,
     hclRoot: TerraformDefinitionFile,
+    refUsers: Map<string, PackageDependency[]>,
   ): PackageDependency {
     // TODO #22198
     const source = dep.managerData!.source!;
@@ -173,18 +188,17 @@ export class ModuleExtractor extends DependencyExtractor {
       dep.skipReason = 'no-source';
     }
 
-    if (
-      isString(dep.currentValue) &&
-      !dep.skipReason &&
-      localOrVariableRefRegex.test(dep.currentValue)
-    ) {
+    if (isString(dep.currentValue) && !dep.skipReason) {
       const resolvedValue = resolveLocalOrVariableValue(
         dep.currentValue,
         hclRoot,
       );
-      if (isString(resolvedValue)) {
+      if (isString(resolvedValue) && !resolvedValue.includes('${')) {
+        const users = coerceArray(refUsers.get(dep.currentValue));
+        users.push(dep);
+        refUsers.set(dep.currentValue, users);
         dep.currentValue = resolvedValue;
-      } else {
+      } else if (localOrVariableRefRegex.test(dep.currentValue)) {
         logger.debug(
           { dep },
           'Terraform: unable to resolve local/variable reference used as module ref/version',

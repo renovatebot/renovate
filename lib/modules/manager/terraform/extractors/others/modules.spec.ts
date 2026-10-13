@@ -1,3 +1,8 @@
+import { codeBlock } from 'common-tags';
+import { partial } from '~test/util.ts';
+import { doAutoReplace } from '../../../../../workers/repository/update/branch/auto-replace.ts';
+import type { BranchUpgradeConfig } from '../../../../../workers/types.ts';
+import { extractPackageFile } from '../../index.ts';
 import {
   ModuleExtractor,
   azureDevOpsSshRefMatchRegex,
@@ -5,9 +10,9 @@ import {
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
   hostnameMatchRegex,
-  localOrVariableRefRegex,
-  resolveLocalOrVariableValue,
 } from './modules.ts';
+
+vi.mock('../../../../../util/fs/index.ts');
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
   const extractor = new ModuleExtractor();
@@ -342,76 +347,22 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
     });
   });
 
-  describe('localOrVariableRefRegex', () => {
-    it('matches local and var references', () => {
-      expect(localOrVariableRefRegex.exec('${local.tag}')?.groups).toEqual({
-        kind: 'local',
-        name: 'tag',
-      });
-      expect(localOrVariableRefRegex.exec('${var.tag}')?.groups).toEqual({
-        kind: 'var',
-        name: 'tag',
-      });
-      expect(localOrVariableRefRegex.exec('${ var.tag }')?.groups).toEqual({
-        kind: 'var',
-        name: 'tag',
-      });
-    });
-
-    it('does not match plain values or partial interpolations', () => {
-      expect(localOrVariableRefRegex.exec('v1.0.0')).toBeNull();
-      expect(localOrVariableRefRegex.exec('v1-${local.suffix}')).toBeNull();
-      expect(localOrVariableRefRegex.exec('${module.foo.tag}')).toBeNull();
-    });
-  });
-
-  describe('resolveLocalOrVariableValue', () => {
-    it('resolves a local value', () => {
-      const res = resolveLocalOrVariableValue('${local.tag}', {
-        locals: [{ tag: 'v1.0.0' }],
-      });
-      expect(res).toBe('v1.0.0');
-    });
-
-    it('resolves a variable default value', () => {
-      const res = resolveLocalOrVariableValue('${var.tag}', {
-        variable: { tag: [{ default: 'v1.0.0', const: true }] },
-      });
-      expect(res).toBe('v1.0.0');
-    });
-
-    it('returns undefined when the value is not a reference', () => {
-      expect(resolveLocalOrVariableValue('v1.0.0', {})).toBeUndefined();
-    });
-
-    it('returns undefined when the local is not declared', () => {
-      expect(
-        resolveLocalOrVariableValue('${local.tag}', { locals: [{}] }),
-      ).toBeUndefined();
-    });
-
-    it('returns undefined when the variable has no default', () => {
-      expect(
-        resolveLocalOrVariableValue('${var.tag}', {
-          variable: { tag: [{ const: true }] },
-        }),
-      ).toBeUndefined();
-    });
-  });
-
   describe('extract modules using local/variable refs', () => {
-    it('resolves a local value used as a github ref', () => {
-      const res = extractor.extract(
-        {
-          locals: [{ tag: 'v1.0.0' }],
-          module: {
-            foo: [{ source: 'github.com/hashicorp/example?ref=${local.tag}' }],
-          },
-        },
-        [],
+    it('resolves a local value used as a github ref', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
         {},
       );
-      expect(res).toMatchObject([
+      expect(res?.deps).toMatchObject([
         {
           depName: 'github.com/hashicorp/example',
           currentValue: 'v1.0.0',
@@ -420,23 +371,24 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       ]);
     });
 
-    it('resolves a const variable default used as a module version', () => {
-      const res = extractor.extract(
-        {
-          variable: { ver: [{ default: '1.0.0', const: true }] },
-          module: {
-            foo: [
-              {
-                source: 'hashicorp/consul/aws',
-                version: '${var.ver}',
-              },
-            ],
-          },
-        },
-        [],
+    it('resolves a const variable default used as a module version', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          variable "ver" {
+            type    = string
+            const   = true
+            default = "1.0.0"
+          }
+
+          module "foo" {
+            source  = "hashicorp/consul/aws"
+            version = "${'$'}{var.ver}"
+          }
+        `,
+        'main.tf',
         {},
       );
-      expect(res).toMatchObject([
+      expect(res?.deps).toMatchObject([
         {
           depName: 'hashicorp/consul/aws',
           currentValue: '1.0.0',
@@ -445,23 +397,134 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       ]);
     });
 
-    it('skips with contains-variable reason when the reference cannot be resolved', () => {
-      const res = extractor.extract(
-        {
-          module: {
-            foo: [{ source: 'github.com/hashicorp/example?ref=${local.tag}' }],
-          },
-        },
-        [],
+    it('skips when the reference cannot be resolved', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
         {},
       );
-      expect(res).toMatchObject([
+      expect(res?.deps).toMatchObject([
         {
           depName: 'github.com/hashicorp/example',
           skipReason: 'contains-variable',
         },
       ]);
     });
+
+    it('skips when the variable has no default', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          variable "tag" {
+            const = true
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{var.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([{ skipReason: 'contains-variable' }]);
+    });
+
+    it('skips a chained local', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            base = "v1.0.0"
+            tag  = local.base
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([{ skipReason: 'contains-variable' }]);
+    });
+
+    it('allows a shared local for modules of the same package', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "a" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+
+          module "b" {
+            source = "github.com/hashicorp/example//sub?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        { currentValue: 'v1.0.0' },
+        { currentValue: 'v1.0.0' },
+      ]);
+      expect(res?.deps.some((d) => d.skipReason)).toBeFalse();
+    });
+
+    it('skips a shared local used by modules of different packages', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "a" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+
+          module "b" {
+            source = "github.com/hashicorp/other?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        { skipReason: 'contains-variable' },
+        { skipReason: 'contains-variable' },
+      ]);
+    });
+
+    it.each`
+      declaration                                                      | expected
+      ${'locals {\n  tag = "v1.0.0"\n}'}                               | ${'locals {\n  tag = "v2.0.0"\n}'}
+      ${'variable "tag" {\n  const   = true\n  default = "v1.0.0"\n}'} | ${'variable "tag" {\n  const   = true\n  default = "v2.0.0"\n}'}
+    `(
+      'updates the declaration and not the source line',
+      async ({ declaration, expected }) => {
+        const ref = declaration.startsWith('locals') ? 'local' : 'var';
+        const module = `module "foo" {\n  source = "github.com/hashicorp/example?ref=\${${ref}.tag}"\n}`;
+        const content = `${declaration}\n\n${module}`;
+        const res = await extractPackageFile(content, 'main.tf', {});
+        const dep = res!.deps[0];
+        const updated = await doAutoReplace(
+          partial<BranchUpgradeConfig>({
+            ...dep,
+            manager: 'terraform',
+            packageFile: 'main.tf',
+            depIndex: 0,
+            newValue: 'v2.0.0',
+          }),
+          content,
+          false,
+        );
+        expect(updated).toBe(`${expected}\n\n${module}`);
+      },
+    );
   });
 
   describe('extract git-tags modules with .git in domain or repo name', () => {

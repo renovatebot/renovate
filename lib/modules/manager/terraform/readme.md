@@ -29,26 +29,38 @@ Check the tables to see where some dependencies can be hosted.
 | GithubTags        |      yes       |       yes       |
 | TerraformRegistry |      yes       |       yes       |
 
-##### Dynamic module `source`/`version` (Terraform 1.15+)
+##### Dynamic module `source`/`version`
 
-Terraform `1.15` lets you use a `local` value or a `const` input `variable` as the whole value of a module's `source` ref (the `ref=` part of a Git-style source URL) or `version` attribute, for example:
+Terraform `1.15` and OpenTofu `1.8` let you use a `local` value or an input `variable` as the whole value of the `ref` of a module `source` (the `ref=` part of a Git-style source URL) or of the `version` attribute.
+Terraform requires the `variable` to have `const = true` for this, so a plain `variable` does not work there.
+OpenTofu does not need `const`.
+Renovate does not check `const`, so it works for both tools.
 
 ```hcl
 variable "module_version" {
-  type  = string
-  const = true
+  type    = string
+  const   = true
   default = "v1.2.3"
 }
 
 module "example" {
-  source  = "github.com/hashicorp/example?ref=${var.module_version}"
+  source = "github.com/hashicorp/example?ref=${var.module_version}"
 }
 ```
 
-When Renovate finds a `${local.x}` or `${var.x}` reference used as the **entire** `ref`/`version` value, it resolves it to the matching `locals` value or `variable` block's `default`, as long as that declaration is in the **same file**.
-Renovate then proposes updates to the `locals`/`variable` declaration itself, instead of the module's `source` line.
+When Renovate finds a `${local.x}` or `${var.x}` reference used as the **entire** `ref`/`version` value, it resolves the reference to the matching `locals` value or to the `default` of the matching `variable` block.
+This only works when the declaration is in the **same file** as the module.
+Renovate then proposes updates to the `locals`/`variable` declaration itself, instead of the `source` line of the module.
 
-If Renovate can't resolve the reference (for example, the `locals`/`variable` block is declared in a different file, the `variable` has no `default`, or the value isn't a plain string), the dependency is skipped with the reason `contains-variable`.
+Renovate updates the `default` of the `variable` block.
+If the value comes from `*.tfvars`, `-var` or `TF_VAR_*`, Renovate bumps a `default` that is not used.
+A `variable` declared in a separate `variables.tf` file, which is the usual layout, is skipped.
+
+The dependency is skipped with the reason `contains-variable` when:
+
+- Renovate cannot resolve the reference, for example because the declaration is in a different file, the `variable` has no `default`, or the value is not a plain string.
+- The resolved value is itself a reference, such as a local that points to another local.
+- One local or variable is shared by modules from different packages, because an update for one module would also change the others.
 
 #### Providers
 
