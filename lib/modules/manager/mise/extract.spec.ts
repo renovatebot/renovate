@@ -1199,6 +1199,17 @@ describe('modules/manager/mise/extract', () => {
       expect(nestedSettingsResult?.deps[0]).toMatchObject({
         packageName: 'openjdk-jdk',
       });
+
+      const coreBackendResult = await extractPackageFile(
+        `[settings]\njava.shorthand_vendor = "openjdk"\n[tools]\n"core:java" = "21.0.2"`,
+        miseFilename,
+      );
+      expect(coreBackendResult?.deps[0]).toMatchObject({
+        depName: 'core:java',
+        currentValue: '21.0.2',
+        datasource: 'java-version',
+        packageName: 'openjdk-jdk',
+      });
     });
 
     it('does not override an explicit Java vendor with shorthand setting', async () => {
