@@ -244,6 +244,8 @@ export abstract class HttpBase<
             url,
             headers: options.headers,
             method,
+            responseType: options.responseType,
+            responseBecomesConfig: options.responseBecomesConfig,
             throwHttpErrors: options.throwHttpErrors !== false,
           })}`,
         )

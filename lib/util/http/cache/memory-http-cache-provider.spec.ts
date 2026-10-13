@@ -91,6 +91,74 @@ describe('util/http/cache/memory-http-cache-provider', () => {
     expect(res2.body).not.toBe(res1.body);
   });
 
+  it('copies the shared response for every caller', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .reply(200, [{ msg: 'Hello, world!' }]);
+
+    const promise1 = http.getJsonUnchecked<{ msg: string }[]>(
+      'https://example.com/foo/bar',
+      { cacheProvider: memCacheProvider },
+    );
+    const promise2 = http.getJsonUnchecked<{ msg: string }[]>(
+      'https://example.com/foo/bar',
+      { cacheProvider: memCacheProvider },
+    );
+
+    const res1 = await promise1;
+    res1.body.push({ msg: 'mutated' });
+    res1.body[0].msg = 'changed';
+
+    const res2 = await promise2;
+    expect(res2.body).toEqual([{ msg: 'Hello, world!' }]);
+  });
+
+  it('does not share concurrent requests with different headers', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .reply(200, { msg: 'one' })
+      .get('/foo/bar')
+      .reply(200, { msg: 'two' });
+
+    const [res1, res2] = await Promise.all([
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+        headers: { authorization: 'Bearer one' },
+      }),
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+        headers: { authorization: 'Bearer two' },
+      }),
+    ]);
+
+    expect([res1.body, res2.body]).toIncludeSameMembers([
+      { msg: 'one' },
+      { msg: 'two' },
+    ]);
+  });
+
+  it('does not share concurrent requests with different response types', async () => {
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .times(2)
+      .reply(200, { msg: 'Hello, world!' });
+
+    const [jsonRes, textRes] = await Promise.all([
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+      http.getText('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+    ]);
+
+    expect(jsonRes.body).toEqual({ msg: 'Hello, world!' });
+    expect(textRes.body).toBe('{"msg":"Hello, world!"}');
+  });
+
   it('does not keep failed concurrent requests', async () => {
     httpMock
       .scope('https://example.com')
