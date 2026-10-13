@@ -1313,35 +1313,70 @@ describe('util/exec/index', () => {
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('lets an opted-in caller handle a command timeout', async () => {
-    const timeoutError = new ExecError('Command timed out', {
-      cmd: 'foobar',
-      stdout: '',
-      stderr: '',
-      options: {},
-      signal: 'SIGTERM',
-      timedOut: true,
-    });
-    cpExec.mockRejectedValueOnce(timeoutError);
+  it.each`
+    signal       | exitCode
+    ${'SIGTERM'} | ${undefined}
+    ${'SIGKILL'} | ${undefined}
+    ${undefined} | ${143}
+  `(
+    'lets an opted-in caller handle a timeout with signal=$signal, exitCode=$exitCode',
+    async ({ signal, exitCode }) => {
+      const timeoutError = new ExecError('Command timed out', {
+        cmd: 'foobar',
+        stdout: '',
+        stderr: '',
+        options: {},
+        signal,
+        exitCode,
+        timedOut: true,
+      });
+      cpExec.mockRejectedValueOnce(timeoutError);
 
-    await expect(exec('foobar', { abortOnTimeout: false })).rejects.toBe(
-      timeoutError,
-    );
-  });
+      await expect(exec('foobar', { abortOnTimeout: false })).rejects.toBe(
+        timeoutError,
+      );
+    },
+  );
 
-  it('still aborts a command timeout by default', async () => {
+  it.each`
+    signal       | exitCode
+    ${'SIGTERM'} | ${undefined}
+    ${'SIGKILL'} | ${undefined}
+    ${undefined} | ${143}
+  `(
+    'still aborts a timeout with signal=$signal, exitCode=$exitCode by default',
+    async ({ signal, exitCode }) => {
+      cpExec.mockRejectedValueOnce(
+        new ExecError('Command timed out', {
+          cmd: 'foobar',
+          stdout: '',
+          stderr: '',
+          options: {},
+          signal,
+          exitCode,
+          timedOut: true,
+        }),
+      );
+
+      await expect(exec('foobar')).rejects.toThrow(TEMPORARY_ERROR);
+    },
+  );
+
+  it('aborts a command timeout when explicitly configured', async () => {
     cpExec.mockRejectedValueOnce(
       new ExecError('Command timed out', {
         cmd: 'foobar',
         stdout: '',
         stderr: '',
         options: {},
-        signal: 'SIGTERM',
+        exitCode: 143,
         timedOut: true,
       }),
     );
 
-    await expect(exec('foobar')).rejects.toThrow(TEMPORARY_ERROR);
+    await expect(exec('foobar', { abortOnTimeout: true })).rejects.toThrow(
+      TEMPORARY_ERROR,
+    );
   });
 
   it('still aborts an opted-in caller on an external SIGTERM', async () => {

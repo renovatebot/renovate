@@ -197,12 +197,11 @@ export async function exec(
         );
       }
       if (
-        err.signal === 'SIGTERM' &&
-        !(err.timedOut && opts.abortOnTimeout === false)
+        err.timedOut ? opts.abortOnTimeout !== false : err.signal === 'SIGTERM'
       ) {
         logger.debug(
           { err },
-          'exec interrupted by SIGTERM - run needs to be aborted',
+          'exec timed out or interrupted by SIGTERM - run needs to be aborted',
         );
         throw new Error(TEMPORARY_ERROR);
       }

@@ -343,6 +343,28 @@ describe('modules/manager/util', () => {
     ]);
   });
 
+  it.each`
+    timedOut     | metadata
+    ${true}      | ${{ timedOut: true }}
+    ${false}     | ${{}}
+    ${undefined} | ${{}}
+  `(
+    'preserves artifact timeout metadata when timedOut=$timedOut',
+    ({ timedOut, metadata }) => {
+      const err = Object.assign(new Error('Command timed out'), { timedOut });
+
+      expect(artifactErrorResult('foo.lock', err)).toEqual([
+        {
+          artifactError: {
+            fileName: 'foo.lock',
+            stderr: 'Command timed out',
+            ...metadata,
+          },
+        },
+      ]);
+    },
+  );
+
   describe('updateLockFile', () => {
     it('writes the package file, deletes the lock file and returns the update', async () => {
       fs.readLocalFile.mockResolvedValueOnce('new content');

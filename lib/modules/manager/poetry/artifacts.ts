@@ -229,6 +229,7 @@ export async function updateArtifacts({
         }
 
         const execOptions: ExecOptions = {
+          abortOnTimeout: false,
           cwdFile: packageFileName,
           extraEnv,
           docker: {},
