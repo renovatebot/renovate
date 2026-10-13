@@ -98,6 +98,7 @@ import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
+  GithubGraphqlIssueAuthor,
   GithubIssue as Issue,
 } from './schema.ts';
 import type {
@@ -1382,14 +1383,23 @@ async function getIssues(): Promise<Issue[]> {
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
-        ...(!config.ignorePrAuthor && { user: config.renovateUsername }),
       },
       readOnly: true,
     },
   );
 
-  logger.debug(`Retrieved ${result.length} issues`);
-  return Issue.array().parse(result);
+  // `filterBy: { createdBy }` does not match GitHub App bot logins on GitHub Enterprise Cloud,
+  // so the issues are filtered by author in code, like pull requests
+  const issues = config.ignorePrAuthor
+    ? result
+    : result.filter((issue) => {
+        const login = GithubGraphqlIssueAuthor.safeParse(issue).data?.author
+          ?.login;
+        return login === config.renovateUsername;
+      });
+
+  logger.debug(`Retrieved ${issues.length} issues`);
+  return Issue.array().parse(issues);
 }
 
 export async function getIssueList(): Promise<Issue[]> {
