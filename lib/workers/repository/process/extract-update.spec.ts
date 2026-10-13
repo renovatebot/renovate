@@ -395,7 +395,7 @@ describe('workers/repository/process/extract-update', () => {
                 manager: 'npm',
                 datasource: 'npm',
               },
-              'Dependency is currently using a malicious version',
+              'Dependency axios in package.json is currently using a malicious version',
             );
           });
 

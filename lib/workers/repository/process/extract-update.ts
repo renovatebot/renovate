@@ -256,7 +256,7 @@ export function reportMaliciousSkippedDependencies(
               manager: manager,
               datasource: dep.datasource,
             },
-            'Dependency is currently using a malicious version',
+            `Dependency ${dep.depName} in ${packageFile.packageFile} is currently using a malicious version`,
           );
 
           // and make sure that it then gets updates proposed in the update phase
@@ -275,7 +275,7 @@ export function reportMaliciousSkippedDependencies(
               datasource: dep.datasource,
               newVersions,
             },
-            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
+            `Dependency ${dep.depName} in ${packageFile.packageFile} has update(s) proposed which would update you to a malicious version - skipping`,
           );
         }
       }
