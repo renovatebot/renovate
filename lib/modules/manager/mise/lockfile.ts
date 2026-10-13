@@ -111,8 +111,23 @@ export function getSidecarDir(lockFileName: string): string {
 export function getLockedVersion(
   lockFileData: MiseLockFile,
   depName: string,
+  selector?: string,
 ): string | undefined {
-  return getLockedTool(lockFileData, depName)?.[0]?.version;
+  const lockedTools = getLockedTool(lockFileData, depName);
+  if (!lockedTools?.length) {
+    return undefined;
+  }
+
+  // The lock file can contain multiple entries for a tool when it is
+  // declared with different selectors (for example in a task and globally).
+  // Prefer the entry that records the configured selector. Older lock files
+  // do not contain specifiers, so fall back to matching the resolved version.
+  const matchingTool = selector
+    ? (lockedTools.find((tool) => tool.specifiers?.includes(selector)) ??
+      lockedTools.find((tool) => tool.version.startsWith(selector)))
+    : undefined;
+
+  return matchingTool?.version ?? lockedTools[0].version;
 }
 
 /**

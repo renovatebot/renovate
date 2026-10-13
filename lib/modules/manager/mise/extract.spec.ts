@@ -1457,6 +1457,45 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('matches locked versions to the configured selector', async () => {
+      const multiBackendLockFileContent = codeBlock`
+        [[tools.java]]
+        version = "temurin-25.0.4+101.0.LTS"
+        backend = "core:java"
+        specifiers = ["temurin-25"]
+
+        [[tools.java]]
+        version = "oracle-graalvm-25.0.4.1.1"
+        backend = "core:java"
+        specifiers = ["oracle-graalvm-25"]
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(multiBackendLockFileContent);
+      const content = codeBlock`
+        [tools]
+        java = "temurin-25"
+
+        [tasks.build.tools]
+        java = "oracle-graalvm-25"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'java',
+          depType: 'tools',
+          currentValue: 'temurin-25',
+          lockedVersion: '25.0.4+101.0.LTS',
+        },
+        {
+          depName: 'java',
+          depType: 'task-build-tools',
+          currentValue: 'oracle-graalvm-25',
+          lockedVersion: '25.0.4.1.1',
+        },
+      ]);
+    });
+
     it('treats fuzzy selectors as lockfile-only dependencies', async () => {
       const fuzzyLockFileContent = codeBlock`
         [[tools.node]]

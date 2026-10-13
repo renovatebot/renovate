@@ -439,7 +439,7 @@ function extractToolEntry(
       : getToolConfig(backend, toolName, version, options);
   const dependency = createDependency(depName, version, toolConfig, depType);
   const lockedVersion = lockFileData
-    ? getLockedVersion(lockFileData, dependency.depName)
+    ? getLockedVersion(lockFileData, dependency.depName, version ?? undefined)
     : undefined;
 
   if (version !== null && lockedVersion) {
