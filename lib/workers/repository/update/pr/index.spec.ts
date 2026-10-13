@@ -1277,6 +1277,38 @@ describe('workers/repository/update/pr/index', () => {
         ).toEqual(['foo-1.0.0 notes', 'foo notes']);
       });
 
+      it('keeps dependency-specific notes from different registries', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade('registry a notes', {
+              registryUrl: 'https://a.example.com',
+              newVersion: '2.0.0',
+            }),
+            embeddedUpgrade('registry b notes', {
+              registryUrl: 'https://b.example.com',
+              newVersion: '2.0.0',
+              currentValue: '2.3.4',
+            }),
+            embeddedUpgrade('registry a notes', {
+              registryUrl: 'https://a.example.com',
+              newVersion: '2.0.0',
+              currentValue: '3.4.5',
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(
+          bodyConfig.upgrades.map(
+            (upgrade) => upgrade.releases?.[0]?.releaseNotes?.body,
+          ),
+        ).toEqual(['registry a notes', 'registry b notes', undefined]);
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 

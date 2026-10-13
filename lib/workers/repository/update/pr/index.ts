@@ -327,6 +327,7 @@ export async function ensurePr(
           ? getRepoNameWithSourceDirectory(upgrade)
           : JSON.stringify([
               upgrade.datasource,
+              upgrade.registryUrl,
               upgrade.packageName ?? upgrade.depName,
               upgrade.newVersion ?? upgrade.newValue,
             ]);
