@@ -97,8 +97,8 @@ import {
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubVulnerabilityAlerts,
   GithubGraphqlIssueAuthor,
+  GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
 import type {
@@ -1393,8 +1393,8 @@ async function getIssues(): Promise<Issue[]> {
   const issues = config.ignorePrAuthor
     ? result
     : result.filter((issue) => {
-        const login = GithubGraphqlIssueAuthor.safeParse(issue).data?.author
-          ?.login;
+        const login =
+          GithubGraphqlIssueAuthor.safeParse(issue).data?.author?.login;
         return login === config.renovateUsername;
       });
 
