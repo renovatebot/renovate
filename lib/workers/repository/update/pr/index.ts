@@ -33,6 +33,7 @@ import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { memoize } from '../../../../util/memoize.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
@@ -325,7 +326,7 @@ export async function ensurePr(
         const shared = !logJSON.perDependencyNotes;
         const notesKey = shared
           ? getRepoNameWithSourceDirectory(upgrade)
-          : JSON.stringify([
+          : quickStringify([
               upgrade.datasource,
               upgrade.registryUrl,
               upgrade.packageName ?? upgrade.depName,
