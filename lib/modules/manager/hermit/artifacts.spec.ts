@@ -429,6 +429,7 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('should return error on installation error', async () => {
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       mockExecAll(
         new ExecError('', {
           stdout: '',
@@ -635,6 +636,7 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('returns generic error when a non-UpdateHermitError propagates from updateHermitPackage', async () => {
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       mockExecAll(new Error('unexpected execution failure'));
 
       const res = await updateArtifacts(
@@ -660,6 +662,7 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('stringifies non-Error thrown values in the generic fallback', async () => {
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       exec.mockImplementationOnce(() => {
         // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
         throw 'raw string failure';
