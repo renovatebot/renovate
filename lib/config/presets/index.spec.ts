@@ -1479,6 +1479,12 @@ describe('config/presets/index', () => {
       expect(packageCache.get).not.toHaveBeenCalled();
     });
 
+    it('ignores Mise-generated lock directories in the default preset', async () => {
+      const res = await presets.getPreset(':ignoreModulesAndTests', {});
+      expect(res.ignorePaths).toContain('**/.mise/locks/**');
+      expect(res.ignorePaths).toContain('**/.config/mise/locks/**');
+    });
+
     it('handles removed presets with a migration', async () => {
       const res = await presets.getPreset(':base', {});
       expect(res).toEqual({
