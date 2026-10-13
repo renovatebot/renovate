@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
 import type { BunyanRecord } from '../../logger/types.ts';
@@ -38,8 +38,8 @@ export function extractRepoProblems(
 }
 
 function formatProblemSubject(problem: BunyanRecord): string {
-  const depName = is.nonEmptyString(problem.depName) ? problem.depName : null;
-  const packageFile = is.nonEmptyString(problem.packageFile)
+  const depName = isNonEmptyString(problem.depName) ? problem.depName : null;
+  const packageFile = isNonEmptyString(problem.packageFile)
     ? problem.packageFile
     : null;
   if (depName && packageFile) {
