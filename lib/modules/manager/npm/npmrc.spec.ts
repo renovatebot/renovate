@@ -23,7 +23,6 @@ async function resolveRepoNpmrc(
 describe('modules/manager/npm/npmrc', () => {
   describe('resolveNpmrc', () => {
     beforeEach(async () => {
-      GlobalConfig.reset();
       const realFs = await vi.importActual<typeof fs>(
         '../../../util/fs/index.ts',
       );

@@ -37,10 +37,6 @@ describe('modules/manager/nuget/integration', () => {
     baseConfig.rangeStrategy = 'replace';
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   async function makeConfig(
     dep: PackageDependency,
   ): Promise<LookupUpdateConfig> {

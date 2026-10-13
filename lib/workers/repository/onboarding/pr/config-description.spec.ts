@@ -10,7 +10,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.reset();
       config = partial<RenovateConfig>();
     });
 

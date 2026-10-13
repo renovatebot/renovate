@@ -35,7 +35,6 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
-    GlobalConfig.reset();
     InheritConfig.reset();
   });
 

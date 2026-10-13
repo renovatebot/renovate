@@ -24,10 +24,6 @@ describe('modules/manager/nuget/extract', () => {
       GlobalConfig.set(adminConfig);
     });
 
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns null for invalid csproj', async () => {
       await expect(
         extractPackageFile(

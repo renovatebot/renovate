@@ -37,10 +37,6 @@ describe('modules/manager/cargo/artifacts', () => {
     docker.resetPrefetchedImages();
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null if no Cargo.lock found', async () => {
     fs.statLocalFile.mockRejectedValue(new Error('not found!'));
     const updatedDeps = [

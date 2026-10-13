@@ -15,10 +15,6 @@ describe('modules/datasource/go/timestamp-cache', () => {
   const v1 = '2018-01-01T00:00:00.000Z' as Timestamp;
   const v2 = '2019-01-01T00:00:00.000Z' as Timestamp;
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('stores newly fetched timestamps', async () => {
     const cache = await GoVersionTimestampCache.init(baseUrl, packageName);
     expect(cache.get('v1.0.0')).toBeUndefined();

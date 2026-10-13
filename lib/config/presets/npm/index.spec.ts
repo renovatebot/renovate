@@ -8,7 +8,6 @@ import * as npm from './index.ts';
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     setNpmrc();
   });
 

@@ -160,10 +160,6 @@ describe('workers/repository/update/branch/index', () => {
       repoCache.getCache.mockReturnValue({});
     });
 
-    afterEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);

@@ -30,8 +30,6 @@ describe('workers/repository/config-migration/pr/index', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    GlobalConfig.reset();
-
     config = {
       ...getConfig(),
       configMigration: true,
@@ -269,7 +267,6 @@ describe('workers/repository/config-migration/pr/index', () => {
     const err = partial<RequestError>({ response });
 
     beforeEach(() => {
-      GlobalConfig.reset();
       scm.deleteBranch.mockResolvedValue();
     });
 

@@ -241,7 +241,6 @@ describe('modules/platform/forgejo/index', () => {
   ];
 
   beforeEach(() => {
-    GlobalConfig.reset();
     forgejo.resetPlatform();
     memCache.init();
     repoCache.resetCache();

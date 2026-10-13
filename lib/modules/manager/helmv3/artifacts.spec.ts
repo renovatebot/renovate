@@ -67,10 +67,6 @@ describe('modules/manager/helmv3/artifacts', () => {
     ecrMock.reset();
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('returns null if no Chart.lock found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
     await expect(

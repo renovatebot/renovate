@@ -16,7 +16,6 @@ const sanitize = vi.mocked(_sanitize);
 describe('modules/datasource/npm/npmrc', () => {
   beforeEach(() => {
     setNpmrc('');
-    GlobalConfig.reset();
   });
 
   describe('getMatchHostFromNpmrcHost()', () => {

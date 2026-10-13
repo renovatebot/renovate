@@ -2,7 +2,6 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
-import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
 import { tryDecryptOpenPgp } from './openpgp.ts';
 
@@ -20,7 +19,6 @@ describe('config/decrypt/openpgp', () => {
     beforeEach(() => {
       vi.resetModules();
       config = {};
-      GlobalConfig.reset();
       setPrivateKeys(undefined, undefined);
     });
 

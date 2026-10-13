@@ -241,7 +241,6 @@ describe('modules/platform/gitea/index', () => {
   ];
 
   beforeEach(() => {
-    GlobalConfig.reset();
     gitea.resetPlatform();
     memCache.init();
     repoCache.resetCache();

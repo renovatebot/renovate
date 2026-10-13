@@ -13,7 +13,6 @@ describe('workers/repository/init/apis', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.reset();
       config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];

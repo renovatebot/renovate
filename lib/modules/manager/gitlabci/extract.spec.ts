@@ -19,10 +19,6 @@ describe('modules/manager/gitlabci/extract', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('extractAllPackageFile()', () => {
     it('extracts from empty file', () => {
       expect(extractPackageFile('', '', {})).toBeNull();

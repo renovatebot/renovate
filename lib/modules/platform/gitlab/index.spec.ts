@@ -34,7 +34,6 @@ const branchSha = fakeSha('branchSha');
 
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
-    GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(branchSha);

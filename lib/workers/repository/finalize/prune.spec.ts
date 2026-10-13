@@ -17,10 +17,6 @@ beforeEach(() => {
 
 describe('workers/repository/finalize/prune', () => {
   describe('pruneStaleBranches()', () => {
-    beforeEach(() => {
-      GlobalConfig.reset();
-    });
-
     it('returns if no branchList', async () => {
       delete config.branchList;
       await cleanup.pruneStaleBranches(config, config.branchList);

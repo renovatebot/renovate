@@ -15,10 +15,6 @@ const azurePipelinesFilename = 'azure-pipelines.yaml';
 const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 
 describe('modules/manager/azure-pipelines/extract', () => {
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines, azurePipelinesFilename);
     expect(file).not.toBeNull();

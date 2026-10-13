@@ -2,7 +2,6 @@ import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
-import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
 import { tryDecryptBcPgp } from './bcpgp.ts';
 
@@ -32,7 +31,6 @@ describe('config/decrypt/bcpgp', () => {
 
     beforeEach(() => {
       config = {};
-      GlobalConfig.reset();
       setPrivateKeys(undefined, undefined);
       vi.stubEnv('RENOVATE_X_PGP_RUNTIME', undefined);
     });

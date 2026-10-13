@@ -46,10 +46,6 @@ describe('modules/manager/nuget/artifacts', () => {
     docker.resetPrefetchedImages();
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('re-throws TEMPORARY_ERROR', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({

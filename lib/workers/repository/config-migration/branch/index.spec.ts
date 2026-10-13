@@ -23,7 +23,6 @@ describe('workers/repository/config-migration/branch/index', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      GlobalConfig.reset();
       config = getConfig();
       config.branchPrefix = 'some/';
     });

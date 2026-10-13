@@ -61,10 +61,6 @@ describe('util/http/github', () => {
     repositoryCache.getCache.mockReturnValue(repoCache);
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   describe('HTTP', () => {
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:123test' });
