@@ -1,15 +1,15 @@
 import { z } from 'zod/v4';
+import { LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
-export const JuliaPackageMetadata = z
-  .record(
-    z.string(),
-    z.object({
-      registered: MaybeTimestamp.optional(),
-      yanked: z.string().optional(),
-    }),
-  )
+export const JuliaPackageMetadata = LooseRecord(
+  z.string(),
+  z.object({
+    registered: MaybeTimestamp.optional(),
+    yanked: z.string().optional(),
+  }),
+)
   .refine((versions) => Object.keys(versions).length > 0, 'No releases found')
   .transform((versions): ReleaseResult => {
     const releases: Release[] = Object.entries(versions).map(

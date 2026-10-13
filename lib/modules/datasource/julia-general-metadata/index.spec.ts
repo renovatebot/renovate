@@ -25,6 +25,27 @@ describe('modules/datasource/julia-general-metadata/index', () => {
       ).resolves.toBeNull();
     });
 
+    it('drops a malformed version and keeps the rest', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/versions.json')
+        .reply(200, {
+          '0.5.0': { registered: '2018-08-09T10:04:18' },
+          '0.5.1': 'not-an-object',
+        });
+      await expect(
+        getPkgReleases({ datasource, packageName: 'Example' }),
+      ).resolves.toEqual({
+        registryUrl: 'https://juliaregistries.github.io/GeneralMetadata.jl/',
+        releases: [
+          {
+            version: '0.5.0',
+            releaseTimestamp: '2018-08-09T10:04:18.000Z',
+          },
+        ],
+      });
+    });
+
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/Example/versions.json').reply(404);
       await expect(
