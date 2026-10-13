@@ -155,7 +155,6 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         allowedVersions: '!/^19\\.(0614|0110)$/',
-        matchManagers: ['pre-commit'],
         matchPackageNames: ['norwoodj/helm-docs'],
       },
     ],
