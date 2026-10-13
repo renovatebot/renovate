@@ -1311,6 +1311,21 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts lockedVersion when tool has no version', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = {}
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        lockedVersion: '20.11.0',
+      });
+    });
+
     it('sets lockFiles array when lock file present', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
