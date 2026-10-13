@@ -24,7 +24,7 @@ import type { WriteUpdateResult } from './write.ts';
 import { writeUpdates } from './write.ts';
 
 // Increment this if needing to cache bust ALL extract caches
-export const EXTRACT_CACHE_REVISION = 2;
+export const EXTRACT_CACHE_REVISION = 1;
 
 export interface ExtractResult {
   branches: BranchConfig[];
