@@ -327,6 +327,25 @@ describe.concurrent('config-validator', () => {
   });
 
   describe('hostRules', () => {
+    it('registers the configured platform token as a host rule', async () => {
+      await withTmpDir(async (dirPath) => {
+        const { exitCode, all } = await runValidator([], {
+          cwd: dirPath,
+          env: {
+            LOG_LEVEL: 'debug',
+            RENOVATE_ENDPOINT: 'https://gitlab.example.com/api/v4/',
+            RENOVATE_PLATFORM: 'gitlab',
+            RENOVATE_TOKEN: 'test-token',
+          },
+        });
+
+        expect(exitCode).toBe(0);
+        expect(all).toContain(
+          'Adding token authentication for gitlab.example.com (hostType=gitlab) to hostRules',
+        );
+      });
+    });
+
     it("does not drop the self-hosted admin's own hostRules headers against allowedHeaders when registering them", async () => {
       // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - `hostRules.add()` no longer filters (and warns about) the admin's own headers
       //
