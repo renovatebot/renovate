@@ -75,9 +75,12 @@ export async function extractPackageFile(
   }
 
   const toolEntries: [string, MiseTool, string][] = [];
-  const javaSettings = coerceObject(misefile.settings?.java);
-  const javaShorthandVendor = isNonEmptyString(javaSettings.shorthand_vendor)
+  const javaSettings = misefile.settings?.java;
+  const shorthandVendor = isObject(javaSettings)
     ? javaSettings.shorthand_vendor
+    : undefined;
+  const javaShorthandVendor = isNonEmptyString(shorthandVendor)
+    ? shorthandVendor
     : undefined;
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {

@@ -49,8 +49,8 @@ function getMiseArchitecture(architecture: string | null): string | null {
 }
 
 export function getOpenjdkMetadataUrl(pkgConfig: PackageConfig): string | null {
-  const os = getMiseOs(pkgConfig.os);
-  const architecture = getMiseArchitecture(pkgConfig.architecture);
+  const os = getMiseOs(pkgConfig.os ?? null);
+  const architecture = getMiseArchitecture(pkgConfig.architecture ?? null);
   if (!os || !architecture) {
     return null;
   }
