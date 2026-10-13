@@ -10,7 +10,6 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { regEx } from '../../../../util/regex.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 
 import type {
@@ -39,10 +38,6 @@ import {
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from './yarnrc.ts';
-
-const miseSidecarPackageJsonRegex = regEx(
-  /(?:^|\/)(?:\.mise\/locks|\.config\/mise\/locks)\/.+\/package\.json$/,
-);
 
 function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
   return Object.values(lockFiles).filter(isString).length > 1;
@@ -239,11 +234,6 @@ export async function extractAllPackageFiles(
 ): Promise<NpmrcPackageFile<NpmManagerData>[]> {
   const npmFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
-    if (miseSidecarPackageJsonRegex.test(packageFile)) {
-      logger.trace({ packageFile }, 'Ignoring Mise-generated package sidecar');
-      continue;
-    }
-
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       // pnpm workspace files are their own package file, defined via managerFilePatterns.
