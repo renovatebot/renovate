@@ -13,7 +13,7 @@ export function copyResponse<T>(
   if (deep) {
     res.headers = clone(headers);
     res.body =
-      body instanceof Uint8Array ? (body.subarray() as T) : clone<T>(body);
+      body instanceof Uint8Array ? (Buffer.from(body) as T) : clone<T>(body);
   }
 
   if (cached) {

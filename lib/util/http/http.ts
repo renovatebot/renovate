@@ -259,6 +259,9 @@ export abstract class HttpBase<
         ? requestKey
         : null;
 
+    // each Http subclass runs its own handleResponse, so it doesn't join another's request
+    const inFlightKey = `${this.constructor.name}-${requestKey}`;
+
     let resPromise: Promise<HttpResponse<unknown>> | null = null;
     let sharedResponse = false;
 
@@ -271,7 +274,7 @@ export abstract class HttpBase<
         ObsoleteCacheHitLogger.write(url);
       }
     } else if (cacheProvider) {
-      resPromise = getInFlightRequest(cacheProvider, requestKey);
+      resPromise = getInFlightRequest(cacheProvider, inFlightKey);
       sharedResponse = !!resPromise;
     }
 
@@ -314,7 +317,7 @@ export abstract class HttpBase<
       if (cacheProvider) {
         resPromise = setInFlightRequest(
           cacheProvider,
-          requestKey,
+          inFlightKey,
           cachedTask(cacheProvider),
         );
       } else {

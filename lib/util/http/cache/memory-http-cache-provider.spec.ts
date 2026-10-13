@@ -159,6 +159,34 @@ describe('util/http/cache/memory-http-cache-provider', () => {
     expect(textRes.body).toBe('{"msg":"Hello, world!"}');
   });
 
+  it('does not share concurrent requests between Http subclasses', async () => {
+    const handled = vi.fn();
+    class OtherHttp extends Http {
+      protected override handleResponse(): void {
+        handled();
+      }
+    }
+    const otherHttp = new OtherHttp('test');
+    httpMock
+      .scope('https://example.com')
+      .get('/foo/bar')
+      .times(2)
+      .reply(200, { msg: 'Hello, world!' });
+
+    const [res1, res2] = await Promise.all([
+      http.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+      otherHttp.getJsonUnchecked('https://example.com/foo/bar', {
+        cacheProvider: memCacheProvider,
+      }),
+    ]);
+
+    expect(res1.body).toEqual({ msg: 'Hello, world!' });
+    expect(res2.body).toEqual({ msg: 'Hello, world!' });
+    expect(handled).toHaveBeenCalledOnce();
+  });
+
   it('does not keep failed concurrent requests', async () => {
     httpMock
       .scope('https://example.com')
