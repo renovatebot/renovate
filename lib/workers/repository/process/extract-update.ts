@@ -147,7 +147,6 @@ export async function extract(
   const configHash = instrument('fingerprint', () =>
     fingerprint(generateFingerprintConfig(config)),
   );
-  // istanbul ignore if
   if (
     overwriteCache &&
     isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
