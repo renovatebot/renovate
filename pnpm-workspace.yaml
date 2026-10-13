@@ -25,7 +25,12 @@ overrides:
   '@simple-git/argv-parser@2.0.0': 2.0.1
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'
+  http-cache-semantics@<=4.2.0: 4.3.0
+  katex@>=0.11.0 <0.18.2: 0.18.2
   protobufjs@8.0.1: 8.8.0
+  shell-quote@>=1.8.4 <1.11.0: 1.11.0
+  smol-toml@<=1.8.0: 1.9.0
+  source-map-js@>=1.0.0 <1.2.2: 1.2.2
   vite: 'catalog:'
 
 ignoredOptionalDependencies:
