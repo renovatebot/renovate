@@ -54,6 +54,8 @@ Not this bucket:
 
 **Test:** this is a net-new Manager, Datasource or Versioning scheme for an ecosystem that Renovate currently extracts nothing from.
 
+An ecosystem is a tool or file format, not a language: a Manager for a new tool (e.g. prek, or tox) is `new-ecosystem` even when Renovate already supports other tools for that language.
+
 Belongs here:
 
 - [#41893](https://github.com/renovatebot/renovate/discussions/41893) - Support LibMan package manager (the canonical item; also asked as [#45069](https://github.com/renovatebot/renovate/discussions/45069) and [#46445](https://github.com/renovatebot/renovate/discussions/46445), both closed as duplicates, i.e. three independent asks)
@@ -287,7 +289,7 @@ Mend Hosted Request discussions get `audience:mend-hosted`, and a bucket only if
 
 - PRs authored by `renovate[bot]` are `dependency-updates`, with no further judgement.
 - For other PRs, use the bucket of the item they deliver.
-  If there's no linked issue or discussion, infer it from the Conventional Commit type and scope: `docs` → `docs`, `chore`/`ci`/`test`/`refactor`/`build` → `engineering-health`, `feat(presets)`/`feat(replacements)`/`fix(presets)` → `ecosystem-data`, `feat(manager/…)`/`feat(datasource/…)` → `ecosystem-depth` (or `new-ecosystem` for a new module for an ecosystem Renovate extracts nothing from), and `fix(…)` → `bug-fix`, including `fix(platform/…)`.
+  If there's no linked issue or discussion, infer it from the Conventional Commit type and scope: `docs` → `docs`, `chore`/`ci`/`test`/`refactor`/`build` → `engineering-health`, `feat(presets)`/`feat(replacements)`/`fix(presets)` → `ecosystem-data`, `feat(manager/…)`/`feat(datasource/…)` → `ecosystem-depth` (or `new-ecosystem` for a new module for an ecosystem Renovate extracts nothing from), and `fix(…)` → `bug-fix`, including `fix(platform/…)`, unless the body describes adding support for something that was never supported (e.g. `fix(nix): support flake input updates`), which is `ecosystem-depth`.
 - The `presets` inference only holds for presets that encode knowledge of the package world (monorepos, replacements, package lists). Presets that encode Renovate behavior - schedules such as `schedule:officeHours`, `:semanticPrefixFixDepsChoreOthers`, `config:*` semantics - take the bucket of that behavior, usually `workflow-fit` or `predictability`.
 - A duplicate (a discussion closed as `DUPLICATE`, or one with the `duplicate` label) takes the same bucket as its canonical item, so it can still be counted. Do not count a duplicate as separate work in a bucket total. Only `new-ecosystem` counts repeat asks as a signal.
 
@@ -344,6 +346,7 @@ Not a papercut:
 - [#39050](https://github.com/renovatebot/renovate/discussions/39050) "autoclosed PRs get '- autoclosed' in the title instead of a label" → needs a design decision and touches Gerrit, which has no PR titles (fails 3)
 - [#36695](https://github.com/renovatebot/renovate/discussions/36695) "trailing comma times out after 30 minutes" → real cost, not an irritation (fails 2)
 - [#40294](https://github.com/renovatebot/renovate/issues/40294) "Yarn 1 update fails since 42.68.5" → blocking regression (fails 2)
+- Adding a new `ecosystem-data` entry (e.g. a monorepo grouping) → routine data work, not a papercut. Only flag an `ecosystem-data` item when it corrects an existing entry that was causing irritation
 
 ## Audience label family (one per item)
 
