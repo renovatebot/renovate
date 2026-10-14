@@ -22,10 +22,6 @@ export class PythonVersionDatasource extends Datasource {
     this.pythonEolDatasource = new EndoflifeDateDatasource();
   }
 
-  override supportsCustomRegistry(_packageName: string): boolean {
-    return true;
-  }
-
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return [defaultRegistryUrl];
   }
