@@ -136,21 +136,21 @@ Don't use `lifecycle` for `minimumReleaseAge`/release-age gating (that's `bucket
 
 This is kept as a single cross-cutting label rather than its own bucket because it's a small share of volume (around 3% of ideas) scattered across several buckets: promote it to a full `bucket:*` label if that share grows.
 
-### Papercut
+### Rough edge
 
 <details>
-    <summary>Papercut label</summary>
+    <summary>Rough edge label</summary>
 
-    papercut
+    rough-edge
 
 </details>
 
-Use `papercut` as a cross-cutting flag when all three hold: a user hits it repeatedly in ordinary use, it's irritating rather than blocking (there's a workaround or you live with it), and the fix is small and self-contained (hours not weeks, no design decision needed).
-If any one fails, don't apply it, however small the item looks.
+Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from something Renovate already does (not missing coverage, a missing feature or a missing data entry), users hit it repeatedly in ordinary use, and it's irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
+If any one fails, don't apply it.
 Apply it alongside a `bucket:*` label, not instead of one.
-The label is a commitment that the fix is cheap enough to just do, not a deprioritisation.
+The size of the fix is not a test: record effort separately (e.g. `good first issue`).
 
-This is kept as a single cross-cutting label rather than its own bucket because it concentrates unevenly across buckets (measured at around a quarter of `bucket:predictability`, `bucket:observability`, `bucket:docs` and `bucket:ecosystem-data` items, versus almost none of `bucket:ecosystem-depth`) rather than forming a bucket of its own.
+This is kept as a single cross-cutting label rather than its own bucket because it concentrates unevenly across buckets (measured at around half of `bucket:predictability`, `bucket:docs` and `bucket:bug-fix` items, versus around 5% of `bucket:ecosystem-depth` and `bucket:security-supply-chain`) rather than forming a bucket of its own.
 
 ### Audience
 

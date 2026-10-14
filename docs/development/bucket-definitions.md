@@ -314,23 +314,28 @@ Not lifecycle:
 - Showing release age or timestamps for an update, e.g. [#44381](https://github.com/renovatebot/renovate/discussions/44381) "Show ReleaseAge / Timestamp on Dependency Dashboard" → `observability` (it describes the update, not the dependency's health). It is lifecycle only if the age is used to judge the dependency itself, e.g. staleness or abandonment
 - Changelog fetching → about the update, not the dependency's life
 
-## `papercut` (cross-cutting flag)
+## `rough-edge` (cross-cutting flag)
 
 **Test:** all three must hold:
 
-1. a user hits it _repeatedly in ordinary use_
-1. it's _irritating, not blocking_ - there's a workaround or you live with it
-1. the fix is _small and self-contained_: hours not weeks, no design decision needed.
+1. the irritation comes from something Renovate _already does_ - a behavior, output, message, default or presentation - not from missing coverage, a missing feature or a missing data entry. "Add support for X" fails this test, however small
+1. users hit it _repeatedly in ordinary use_
+1. it's _irritating, not blocking_ - a workaround exists or you live with it, and there are no failed runs, data loss or security exposure
 
-If any one fails it isn't a papercut, however small it looks.
+If any one fails it isn't a rough edge.
 Applied alongside a bucket, not instead of one.
 
-The label is a commitment that the fix is cheap enough to just do, not a deprioritisation.
-Often, it's quicker to raise a PR with the fix, rather than create an Issue.
+The size of the fix is not a test: a rough edge may need a design decision, or touch several platforms.
+Record effort separately (e.g. `good first issue`) - "quick wins" are rough edges that are also small, not the definition of a rough edge.
 
-Evidence for (1) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognising it as a common irritation.
+For (1), the boundary is "Renovate already acts on this, and acts annoyingly" (a rough edge) versus "Renovate doesn't handle this" (a coverage gap).
+The fix may well be a new config option, but the flag applies when the irritation comes from current behavior.
+
+Evidence for (2) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognising it as a common irritation.
 Most items have little engagement, so low engagement alone doesn't disqualify an item - judge whether ordinary use would hit it repeatedly.
-PRs have no engagement signal, so judge them on the same three tests as the issue they fix, not on the size of the diff alone.
+PRs have no engagement signal, so judge them on the same three tests as the issue they fix.
+
+For (3), only _exposure_ excludes a security-themed item: a non-blocking irritation from a security feature is still a rough edge.
 
 Flag it on:
 
@@ -339,14 +344,17 @@ Flag it on:
 - [#41466](https://github.com/renovatebot/renovate/issues/41466) / [#41467](https://github.com/renovatebot/renovate/issues/41467) - hidden-unicode warning fires on binary files and spams the dashboard
 - [#40144](https://github.com/renovatebot/renovate/issues/40144) / [#40143](https://github.com/renovatebot/renovate/issues/40143) - `--help` doesn't show defaults or allowed values
 - [#38060](https://github.com/renovatebot/renovate/discussions/38060) / [#40868](https://github.com/renovatebot/renovate/discussions/40868) - `.jsonc` config files not discovered
+- [#39050](https://github.com/renovatebot/renovate/discussions/39050) - autoclosed PRs get "- autoclosed" in the title instead of a label (needs a design decision, but the irritation is current behavior)
+- [#35164](https://github.com/renovatebot/renovate/discussions/35164) - hard-coded config migration commit message (the fix is a new option, but the irritation is current behavior)
+- [#35344](https://github.com/renovatebot/renovate/discussions/35344) - gomod updates touch the `go`/`toolchain` directives (Renovate already acts here, and acts annoyingly)
+- [#18011](https://github.com/renovatebot/renovate/discussions/18011) - redundant stability-days check (security-themed, but no exposure)
 
-Not a papercut:
+Not a rough edge:
 
-- [#42444](https://github.com/renovatebot/renovate/discussions/42444) "prTitle different from commitMessage" → small ask, deep change (fails 3)
-- [#39050](https://github.com/renovatebot/renovate/discussions/39050) "autoclosed PRs get '- autoclosed' in the title instead of a label" → needs a design decision and touches Gerrit, which has no PR titles (fails 3)
-- [#36695](https://github.com/renovatebot/renovate/discussions/36695) "trailing comma times out after 30 minutes" → real cost, not an irritation (fails 2)
-- [#40294](https://github.com/renovatebot/renovate/issues/40294) "Yarn 1 update fails since 42.68.5" → blocking regression (fails 2)
-- Adding a new `ecosystem-data` entry (e.g. a monorepo grouping) → routine data work, not a papercut. Only flag an `ecosystem-data` item when it corrects an existing entry that was causing irritation
+- Adding a new `ecosystem-data` entry (e.g. a monorepo grouping) → missing data entry (fails 1). Only flag an `ecosystem-data` item when it corrects an existing entry that was causing irritation
+- [#36695](https://github.com/renovatebot/renovate/discussions/36695) "trailing comma times out after 30 minutes" → a failed run, not an irritation (fails 3)
+- [#40294](https://github.com/renovatebot/renovate/issues/40294) "Yarn 1 update fails since 42.68.5" → blocking regression (fails 3)
+- [#41636](https://github.com/renovatebot/renovate/discussions/41636) "markdown badges expose internal package names" → security exposure (fails 3)
 
 ## Audience label family (one per item)
 
