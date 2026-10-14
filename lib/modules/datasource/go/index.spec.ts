@@ -43,7 +43,7 @@ vi.mock('./releases-goproxy.ts', () => {
   return {
     GoProxyDatasource: vi.fn(
       class {
-        getReleases = () => getReleasesProxyMock();
+        getReleasesOrUndefined = () => getReleasesProxyMock();
       },
     ),
   };
@@ -321,6 +321,17 @@ describe('modules/datasource/go/index', () => {
 
     afterEach(() => {
       setCache.mockRestore();
+    });
+
+    it('does not cache inconclusive lookups', async () => {
+      getReleasesProxyMock.mockResolvedValue(undefined);
+
+      const res = await datasource.getReleases({
+        packageName: 'golang.org/foo/bar',
+      });
+
+      expect(res).toBeNull();
+      expect(setCache).not.toHaveBeenCalled();
     });
 
     it('does not cache releases for modules matching GOPRIVATE', async () => {

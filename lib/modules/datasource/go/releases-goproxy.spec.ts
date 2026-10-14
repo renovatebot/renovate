@@ -1917,6 +1917,38 @@ describe('modules/datasource/go/releases-goproxy', () => {
         expect(setCache).not.toHaveBeenCalled();
       });
 
+      it('does not cache lookups which fell back from a 401', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', `${privateUrl}|off`);
+        httpMock
+          .scope(`${privateUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(401);
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).not.toHaveBeenCalled();
+      });
+
+      it('caches lookups which fell back from other errors', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', `${privateUrl}|off`);
+        httpMock
+          .scope(`${privateUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .replyWithError('unknown');
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).toHaveBeenCalledOnce();
+      });
+
       it('caches modules served by a private proxy if cachePrivatePackages is enabled', async () => {
         GlobalConfig.set({ cachePrivatePackages: true });
         vi.stubEnv('GOPROXY', privateUrl);
