@@ -145,7 +145,7 @@ This is kept as a single cross-cutting label rather than its own bucket because 
 
 </details>
 
-Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from something Renovate already does (not missing coverage, a missing feature or a missing data entry), users hit it repeatedly in ordinary use, and it's irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
+Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from one of Renovate's own surfaces (config discovery, PR/commit presentation, the dashboard, logs, the CLI, defaults, docs) behaving below reasonable expectation, rather than a gap in ecosystem or platform coverage, users hit it repeatedly in ordinary use, and it's irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
 If any one fails, don't apply it.
 Apply it alongside a `bucket:*` label, not instead of one.
 The size of the fix is not a test: record effort separately (e.g. `good first issue`).

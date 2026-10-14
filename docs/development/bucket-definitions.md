@@ -318,7 +318,7 @@ Not lifecycle:
 
 **Test:** all three must hold:
 
-1. the irritation comes from something Renovate _already does_ - a behavior, output, message, default or presentation - not from missing coverage, a missing feature or a missing data entry. "Add support for X" fails this test, however small
+1. the irritation comes from one of Renovate's _own surfaces_ - config discovery and validation, PR/commit presentation, the Dependency Dashboard, logs and messages, the CLI, defaults, docs, or the changes it makes to files it already manages - behaving below reasonable expectation. A gap in _ecosystem or platform_ coverage (including a missing data entry) is not a rough edge, however small
 1. users hit it _repeatedly in ordinary use_
 1. it's _irritating, not blocking_ - a workaround exists or you live with it, and there are no failed runs, data loss or security exposure
 
@@ -328,8 +328,12 @@ Applied alongside a bucket, not instead of one.
 The size of the fix is not a test: a rough edge may need a design decision, or touch several platforms.
 Record effort separately (e.g. `good first issue`) - "quick wins" are rough edges that are also small, not the definition of a rough edge.
 
-For (1), the boundary is "Renovate already acts on this, and acts annoyingly" (a rough edge) versus "Renovate doesn't handle this" (a coverage gap).
-The fix may well be a new config option, but the flag applies when the irritation comes from current behavior.
+For (1), ask "whose surface is this?".
+For example, `.jsonc` config files not being discovered ([#38060](https://github.com/renovatebot/renovate/discussions/38060)) reads like "add support for a filename", but config discovery is Renovate's own front door: a user reasonably expects `renovate.jsonc` to work, and Renovate silently ignores it so the repo looks unconfigured.
+Renovate also silently ignores bun catalogs ([#36886](https://github.com/renovatebot/renovate/discussions/36886)), but that silence is about an ecosystem Renovate doesn't yet model, so it's a coverage gap.
+The fix may well be a new config option, but the flag applies when the irritation comes from Renovate's own surface.
+
+Many `predictability` items (e.g. silently ignoring something) will also be rough edges almost by definition - that's expected, and `rough-edge` with `predictability` is where the highest-value fixes tend to sit.
 
 Evidence for (2) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognising it as a common irritation.
 Most items have little engagement, so low engagement alone doesn't disqualify an item - judge whether ordinary use would hit it repeatedly.
@@ -343,7 +347,9 @@ Flag it on:
 - [#35156](https://github.com/renovatebot/renovate/discussions/35156) - "Compare Source" links use `...` instead of `..`
 - [#41466](https://github.com/renovatebot/renovate/issues/41466) / [#41467](https://github.com/renovatebot/renovate/issues/41467) - hidden-unicode warning fires on binary files and spams the dashboard
 - [#40144](https://github.com/renovatebot/renovate/issues/40144) / [#40143](https://github.com/renovatebot/renovate/issues/40143) - `--help` doesn't show defaults or allowed values
-- [#38060](https://github.com/renovatebot/renovate/discussions/38060) / [#40868](https://github.com/renovatebot/renovate/discussions/40868) - `.jsonc` config files not discovered
+- [#38060](https://github.com/renovatebot/renovate/discussions/38060) / [#40868](https://github.com/renovatebot/renovate/discussions/40868) - `.jsonc` config files not discovered (config discovery is Renovate's own surface)
+- [#42367](https://github.com/renovatebot/renovate/discussions/42367) - config file in a `.config/` directory not discovered
+- [#37150](https://github.com/renovatebot/renovate/discussions/37150) - `postUpdateOptions` can't be set by an environment variable
 - [#39050](https://github.com/renovatebot/renovate/discussions/39050) - autoclosed PRs get "- autoclosed" in the title instead of a label (needs a design decision, but the irritation is current behavior)
 - [#35164](https://github.com/renovatebot/renovate/discussions/35164) - hard-coded config migration commit message (the fix is a new option, but the irritation is current behavior)
 - [#35344](https://github.com/renovatebot/renovate/discussions/35344) - gomod updates touch the `go`/`toolchain` directives (Renovate already acts here, and acts annoyingly)
@@ -351,6 +357,7 @@ Flag it on:
 
 Not a rough edge:
 
+- [#36886](https://github.com/renovatebot/renovate/discussions/36886) "Support bun catalogs" → ecosystem coverage gap, not Renovate's own surface (fails 1)
 - Adding a new `ecosystem-data` entry (e.g. a monorepo grouping) → missing data entry (fails 1). Only flag an `ecosystem-data` item when it corrects an existing entry that was causing irritation
 - [#36695](https://github.com/renovatebot/renovate/discussions/36695) "trailing comma times out after 30 minutes" → a failed run, not an irritation (fails 3)
 - [#40294](https://github.com/renovatebot/renovate/issues/40294) "Yarn 1 update fails since 42.68.5" → blocking regression (fails 3)
