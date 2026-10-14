@@ -5,6 +5,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
@@ -97,7 +98,9 @@ function releasesCDNUrl(packageName: string, registryUrl: string): string {
 export class PodDatasource extends Datasource {
   static readonly id = 'pod';
 
-  override readonly defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://cdn.cocoapods.org'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -219,7 +222,7 @@ export class PodDatasource extends Datasource {
     let baseUrl = registryUrl.replace(regEx(/\/+$/), '');
     // In order to not abuse github API limits, query CDN instead
     if (isDefaultRepo(baseUrl)) {
-      [baseUrl] = this.defaultRegistryUrls;
+      [baseUrl] = this.getDefaultRegistryUrls('');
     }
 
     let result: ReleaseResult | null = null;
@@ -243,8 +246,7 @@ export class PodDatasource extends Datasource {
       {
         ttlMinutes: 30,
         namespace: `datasource-${PodDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

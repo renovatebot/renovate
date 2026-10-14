@@ -167,6 +167,17 @@ describe('modules/manager/pip-compile/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
     ]);
+    expect(logger.trace).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cmd: 'pip-compile requirements.in',
+        registryCredVars: [],
+      }),
+      'pip-compile command',
+    );
+    expect(logger.trace).not.toHaveBeenCalledWith(
+      expect.objectContaining({ env: expect.anything() }),
+      expect.anything(),
+    );
   });
 
   it('supports docker mode', async () => {

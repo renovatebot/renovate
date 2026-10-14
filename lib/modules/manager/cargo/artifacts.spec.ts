@@ -890,6 +890,62 @@ describe('modules/manager/cargo/artifacts', () => {
     );
   });
 
+  it('supports docker mode with crate git index credential', async () => {
+    fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.add({
+      token: 'some-crate-token',
+      matchHost: 'git.example.com',
+      hostType: CrateDatasource.id,
+    });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    await expect(
+      cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { rust: '1.65.0' } },
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0:
+                'url.https://ssh:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://git:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+              GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+              GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+            }),
+          }),
+        }),
+      ]),
+    );
+  });
+
   it('supports install mode', async () => {
     fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });

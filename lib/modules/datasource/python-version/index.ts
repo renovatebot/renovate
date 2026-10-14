@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
@@ -23,12 +22,15 @@ export class PythonVersionDatasource extends Datasource {
     this.pythonEolDatasource = new EndoflifeDateDatasource();
   }
 
-  override readonly customRegistrySupport = true;
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly defaultVersioning = versioning;
-
-  override readonly caching = true;
 
   async getPrebuildReleases(): Promise<ReleaseResult | null> {
     return await this.pythonPrebuildDatasource.getReleases({
@@ -44,7 +46,7 @@ export class PythonVersionDatasource extends Datasource {
     });
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     /* v8 ignore next -- should never happen */
@@ -108,13 +110,12 @@ export class PythonVersionDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
-        key: `${config.registryUrl}`,
+        key: config.registryUrl!,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }

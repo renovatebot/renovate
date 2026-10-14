@@ -5,12 +5,14 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
+import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -26,7 +28,10 @@ import { addReleaseNotes } from './release-notes.ts';
 import { getInRangeReleases } from './releases.ts';
 import type {
   ChangeLogError,
+  ChangeLogFile,
+  ChangeLogNotes,
   ChangeLogPlatform,
+  ChangeLogProject,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
@@ -39,27 +44,12 @@ function tagPrecision(tag: string): number {
 
 export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
-  private readonly platform: ChangeLogPlatform;
-  private readonly datasource:
-    | 'bitbucket-tags'
-    | 'bitbucket-server-tags'
-    | 'forgejo-tags'
-    | 'gitea-tags'
-    | 'github-tags'
-    | 'gitlab-tags';
+  protected readonly platform: ChangeLogPlatform;
+  private readonly family: (typeof PLATFORM_FAMILIES)[ChangeLogPlatform];
 
-  constructor(
-    platform: ChangeLogPlatform,
-    datasource:
-      | 'bitbucket-tags'
-      | 'bitbucket-server-tags'
-      | 'forgejo-tags'
-      | 'gitea-tags'
-      | 'github-tags'
-      | 'gitlab-tags',
-  ) {
+  constructor(platform: ChangeLogPlatform) {
     this.platform = platform;
-    this.datasource = datasource;
+    this.family = PLATFORM_FAMILIES[platform];
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -70,13 +60,36 @@ export abstract class ChangeLogSource {
     nextHead: string,
   ): string;
 
-  abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
+  getAPIBaseUrl(config: BranchUpgradeConfig): string {
+    return this.family.apiBaseUrl(this.getBaseUrl(config));
+  }
+
+  /**
+   * Fetch the repository's changelog markdown file, if it has one.
+   */
+  abstract getReleaseNotesMd(
+    repository: string,
+    apiBaseUrl: string,
+    sourceDirectory?: string,
+  ): Promise<ChangeLogFile | null>;
+
+  /**
+   * Fetch the platform's list of releases for the project. Platforms without a
+   * releases API keep this default.
+   */
+  getReleaseList(
+    _project: ChangeLogProject,
+    _release: ChangeLogRelease,
+  ): Promise<ChangeLogNotes[]> {
+    logger.trace(`${this.platform}: release lists are not supported`);
+    return Promise.resolve([]);
+  }
 
   async getAllTags(endpoint: string, repository: string): Promise<string[]> {
     const tags = (
       await getPkgReleases({
         registryUrls: [endpoint],
-        datasource: this.datasource,
+        datasource: this.family.tagsDatasource,
         packageName: repository,
         versioning:
           'regex:(?<major>\\d+)(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?',
@@ -85,7 +98,7 @@ export abstract class ChangeLogSource {
 
     if (isNullOrUndefined(tags) || isEmptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`,
+        `No ${this.family.tagsDatasource} tags found for repository: ${repository}`,
       );
 
       return [];
@@ -317,7 +330,7 @@ export abstract class ChangeLogSource {
     prev: string,
     next: string,
   ): string {
-    return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
+    return buildCacheKey(slugifyUrl(sourceUrl), packageName, prev, next);
   }
 
   getBaseUrl(config: BranchUpgradeConfig): string {

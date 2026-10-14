@@ -407,6 +407,30 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toContain('knative.dev/pkg 4a022ed9999a');
     });
 
+    it('updates pseudo-version of a major version module with digest updateType', () => {
+      const fileContent = codeBlock`
+        module example.com/test
+        require github.com/foo/bar/v2 v2.0.0-20250312035536-b7bbf4be5dbd
+      `;
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade: {
+          depName: 'github.com/foo/bar/v2',
+          managerData: { lineNumber: 1 },
+          updateType: 'digest',
+          currentValue: 'v2.0.0-20250312035536-b7bbf4be5dbd',
+          currentDigest: 'b7bbf4be5dbd',
+          newValue: 'v2.0.0-20260120122510-4a022ed9999a',
+          newDigest: '4a022ed9999a',
+          depType: 'require',
+        },
+      });
+      expect(res).toContain(
+        'require github.com/foo/bar/v2 v2.0.0-20260120122510-4a022ed9999a',
+      );
+    });
+
     it('falls back to bare hash when newValue equals currentValue', () => {
       const fileContent = codeBlock`
         module example.com/test

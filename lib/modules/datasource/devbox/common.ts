@@ -1,3 +1,3 @@
-export const defaultRegistryUrl = 'https://search.devbox.sh/v2/';
+export const defaultRegistryUrl = 'https://www.nixsearch.com/v2/';
 
 export const datasource = 'devbox';

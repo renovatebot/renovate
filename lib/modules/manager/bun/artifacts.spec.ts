@@ -193,6 +193,28 @@ describe('modules/manager/bun/artifacts', () => {
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
       });
+
+      it('restores .npmrc when the install fails', async () => {
+        const execError = new ExecError('nope', {
+          cmd: '',
+          stdout: '',
+          stderr: '',
+          options: {},
+        });
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+        // npmrc
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
+        exec.mockRejectedValueOnce(execError);
+
+        await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
+        ]);
+
+        expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
+      });
     });
 
     describe('when using .lock lockfile format', () => {

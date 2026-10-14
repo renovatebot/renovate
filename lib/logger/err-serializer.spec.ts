@@ -54,8 +54,6 @@ describe('logger/err-serializer', () => {
     const baseUrl = 'https://github.com';
 
     beforeEach(() => {
-      // clean up hostRules
-      hostRules.clear();
       hostRules.add({
         hostType: 'any',
         matchHost: baseUrl,

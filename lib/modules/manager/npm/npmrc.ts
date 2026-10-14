@@ -8,17 +8,13 @@ import {
 import { regEx } from '../../../util/regex.ts';
 import { parseNpmrc, renderNpmrc } from './npmrc-parser.ts';
 import type {
-  NpmrcDocument,
+  NpmrcConfig,
   NpmrcLine,
   NpmrcLineEnding,
   NpmrcResult,
   NpmrcSettingLine,
+  SanitizedRepoNpmrc,
 } from './types.ts';
-
-interface SanitizedRepoNpmrc {
-  content: string;
-  detectedLineEnding: NpmrcDocument['detectedLineEnding'];
-}
 
 /**
  * Mirrors npm's environment-reference grammar. Escape handling remains
@@ -127,22 +123,18 @@ function mergeNpmrcDocuments(
   return `${configNpmrc}${separator}${sanitizedRepoNpmrc.content}`;
 }
 
-export async function resolveNpmrc(
-  packageFile: string,
-  config: { npmrc?: string; npmrcMerge?: boolean },
-): Promise<NpmrcResult> {
-  const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
-  if (!npmrcFileName) {
-    return {
-      npmrc: isString(config.npmrc) ? config.npmrc : undefined,
-      npmrcFileName,
-    };
-  }
-
-  const repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
-
-  if (!isString(repoNpmrc)) {
-    return { npmrc: undefined, npmrcFileName };
+/**
+ * Combines the configured `npmrc` with the sanitized repository `.npmrc`, honouring `npmrcMerge`.
+ *
+ * @returns the `npmrc` to use for the package file, or `undefined` when there is neither
+ */
+export function applyConfigNpmrc(
+  config: NpmrcConfig,
+  repoNpmrc: SanitizedRepoNpmrc | undefined,
+  npmrcFileName?: string | null,
+): string | undefined {
+  if (!repoNpmrc) {
+    return isString(config.npmrc) ? config.npmrc : undefined;
   }
 
   if (isString(config.npmrc) && !config.npmrcMerge) {
@@ -151,10 +143,33 @@ export async function resolveNpmrc(
       'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
     );
 
-    return { npmrc: config.npmrc, npmrcFileName };
+    return config.npmrc;
   }
 
-  const sanitizedRepoNpmrc = sanitizeRepoNpmrc(repoNpmrc, npmrcFileName);
-  const npmrc = mergeNpmrcDocuments(config.npmrc, sanitizedRepoNpmrc);
-  return { npmrc, npmrcFileName };
+  return mergeNpmrcDocuments(config.npmrc, repoNpmrc);
+}
+
+export async function resolveNpmrc(
+  packageFile: string,
+  config: NpmrcConfig,
+): Promise<NpmrcResult> {
+  const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
+  if (!npmrcFileName) {
+    return {
+      npmrc: applyConfigNpmrc(config, undefined),
+      npmrcFileName,
+    };
+  }
+
+  const repoNpmrcContent = await readLocalFile(npmrcFileName, 'utf8');
+
+  if (!isString(repoNpmrcContent)) {
+    return { npmrc: undefined, npmrcFileName };
+  }
+
+  const repoNpmrc = sanitizeRepoNpmrc(repoNpmrcContent, npmrcFileName);
+  return {
+    npmrc: applyConfigNpmrc(config, repoNpmrc, npmrcFileName),
+    npmrcFileName,
+  };
 }

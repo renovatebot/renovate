@@ -19,10 +19,6 @@ import {
 vi.mock('../../util/fs/index.ts');
 
 describe('modules/manager/util', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   it('applies GitHub source for tag', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';
@@ -374,6 +370,7 @@ describe('modules/manager/util', () => {
         'new package file',
       );
       expect(fs.deleteLocalFile).toHaveBeenCalledWith('foo.lock');
+      expect(fs.readLocalFile).toHaveBeenCalledWith('foo.lock', 'utf8');
       expect(run).toHaveBeenCalledOnce();
     });
 
@@ -409,6 +406,43 @@ describe('modules/manager/util', () => {
         updateLockFile({
           lockFileName: 'foo.lock',
           existingLockFileContent: 'old content',
+          run: () => Promise.resolve(),
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('reads and returns the lock file as bytes when given a Buffer', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('new content') as never,
+      );
+
+      const res = await updateLockFile({
+        lockFileName: 'foo.lockb',
+        existingLockFileContent: Buffer.from('old content'),
+        run: () => Promise.resolve(),
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'foo.lockb',
+            contents: Buffer.from('new content'),
+          },
+        },
+      ]);
+      expect(fs.readLocalFile).toHaveBeenCalledWith('foo.lockb');
+    });
+
+    it('returns null when a binary lock file is unchanged', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        Buffer.from('old content') as never,
+      );
+
+      await expect(
+        updateLockFile({
+          lockFileName: 'foo.lockb',
+          existingLockFileContent: Buffer.from('old content'),
           run: () => Promise.resolve(),
         }),
       ).resolves.toBeNull();

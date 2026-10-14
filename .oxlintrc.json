@@ -262,6 +262,7 @@
       "files": ["lib/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
+        "renovate/require-build-cache-key": "error",
         "renovate/require-cacheable": "error"
       }
     },
@@ -284,14 +285,10 @@
         "lib/modules/datasource/deno/index.ts",
         "lib/modules/datasource/docker/index.ts",
         "lib/modules/datasource/endoflife-date/index.ts",
-        "lib/modules/datasource/forgejo-releases/index.ts",
-        "lib/modules/datasource/forgejo-tags/index.ts",
         "lib/modules/datasource/galaxy-collection/index.ts",
         "lib/modules/datasource/git-refs/base.ts",
         "lib/modules/datasource/git-refs/index.ts",
         "lib/modules/datasource/git-tags/index.ts",
-        "lib/modules/datasource/gitea-releases/index.ts",
-        "lib/modules/datasource/gitea-tags/index.ts",
         "lib/modules/datasource/github-digest/index.ts",
         "lib/modules/datasource/github-release-attachments/index.ts",
         "lib/modules/datasource/gitlab-packages/index.ts",
@@ -400,6 +397,7 @@
         "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/consistent-hook-timeouts": "error",
         "renovate/inline-single-use-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-fake-sha-in-specs": "error",
@@ -408,6 +406,12 @@
         "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["lib/util/git/index.spec.ts"],
+      "rules": {
+        "renovate/consistent-hook-timeouts": "off"
       }
     },
     {

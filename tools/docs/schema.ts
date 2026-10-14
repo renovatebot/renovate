@@ -1,16 +1,24 @@
+import { isPlainObject } from '@sindresorhus/is';
 import { getOptions } from '../../lib/config/options/index.ts';
+import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type {
+  AllowedParents,
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
+import { readDocsHeadings } from './utils.ts';
 
 type JsonSchemaBasicType =
   'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
@@ -28,16 +36,53 @@ const presetsToSuggest = [
   'security:only-security-updates',
 ];
 
-function getOptionDocsUrl(option: RenovateOptions): string {
-  const parent = option.parents?.find((parent) => parent !== '.');
-  const anchor = parent
-    ? `${parent}${option.name}`.toLowerCase()
-    : option.name.toLowerCase();
-  const page = option.globalOnly
-    ? 'self-hosted-configuration'
-    : 'configuration-options';
+const docsPages = {
+  repo: 'configuration-options',
+  global: 'self-hosted-configuration',
+} as const;
 
-  return `https://docs.renovatebot.com/${page}/#${anchor}`;
+export type DocsHeadings = Record<keyof typeof docsPages, Set<string>>;
+
+export async function readAllDocsHeadings(): Promise<DocsHeadings> {
+  return {
+    repo: await readDocsHeadings(`${docsPages.repo}.md`),
+    global: await readDocsHeadings(`${docsPages.global}.md`),
+  };
+}
+
+/**
+ * An option is documented under a single heading, which is either top-level or below one of its `parents`, so we can only link to it by finding the heading which exists.
+ */
+function getOptionDocsHeading(
+  option: RenovateOptions,
+  headings: Set<string>,
+): string {
+  if (headings.has(option.name)) {
+    return option.name;
+  }
+
+  const parents = option.parents?.filter((parent) => parent !== '.') ?? [];
+  const documentedChild = parents
+    .map((parent) => `${parent}.${option.name}`)
+    .find((heading) => headings.has(heading));
+  if (documentedChild) {
+    return documentedChild;
+  }
+
+  /* options which have no heading of their own, like the per-manager ones, are documented elsewhere */
+  return parents.length ? `${parents[0]}.${option.name}` : option.name;
+}
+
+export function getOptionDocsUrl(
+  option: RenovateOptions,
+  headings: DocsHeadings,
+): string {
+  const scope = option.globalOnly ? 'global' : 'repo';
+  const anchor = getOptionDocsHeading(option, headings[scope])
+    .replaceAll('.', '')
+    .toLowerCase();
+
+  return `https://docs.renovatebot.com/${docsPages[scope]}/#${anchor}`;
 }
 
 /**
@@ -60,12 +105,15 @@ function createExtendsSchema(items: Record<string, any>): any[] {
   ];
 }
 
-function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
+function createSingleConfig(
+  option: RenovateOptions,
+  headings: DocsHeadings,
+): Record<string, unknown> {
   const temp: Record<string, any> & {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
-    const docsUrl = getOptionDocsUrl(option);
+    const docsUrl = getOptionDocsUrl(option, headings);
     temp.description = `${option.description}\nSee also: ${docsUrl}`;
     temp.markdownDescription = `${option.description}\n\nSee also: [${option.name}](${docsUrl})`;
   }
@@ -123,14 +171,23 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     hasKey('additionalProperties', option) &&
     option.additionalProperties !== undefined
   ) {
-    temp.additionalProperties = option.additionalProperties;
+    /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
+    temp.additionalProperties = isPlainObject(option.additionalProperties)
+      ? { ...option.additionalProperties }
+      : option.additionalProperties;
   }
-  if (option.default === null) {
+  if (hasKey('properties', option) && option.properties !== undefined) {
+    /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
+    temp.properties = { ...option.properties };
+  }
+  if (option.default === null || option.nullable) {
     temp.type = [option.type, 'null'];
   }
   if (
     (temp.type === 'object' || temp.type?.includes('object')) &&
-    !option.freeChoice
+    !option.freeChoice &&
+    /* an option which describes the shape of its own values, like a map of strings, doesn't nest a Renovate config */
+    temp.additionalProperties === undefined
   ) {
     temp.$ref = '#';
   }
@@ -163,12 +220,17 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.additionalProperties = false;
     temp.properties = {};
 
-    for (const {
-      name,
-      description,
-    } of toolDefinitions as readonly ConstraintDefinition[]) {
-      const base = `A constraint for the \`${name}\` Containerbase tool`;
-      temp.properties[name] = {
+    for (const toolName of getSupportedToolNames()) {
+      const toolConfig = getToolConfig(toolName);
+      if (!toolConfig) {
+        continue;
+      }
+
+      const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+      const description = def?.description ?? '';
+
+      const base = `A constraint for the \`${toolName}\` Containerbase tool`;
+      temp.properties[toolName] = {
         type: 'string',
         description: description ? `${base}. ${description}` : base,
       };
@@ -209,7 +271,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     for (const {
       name,
       description,
-    } of toolDefinitions as readonly ConstraintDefinition[]) {
+    } of toolDefinitionDocumentation as readonly ConstraintDefinition[]) {
       const base = `Install the \`${name}\` Containerbase tool`;
       temp.properties[name] = {
         type: 'object',
@@ -228,64 +290,88 @@ function createSchemaForParentConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (!option.parents || option.parents.includes('.')) {
+    const parents = getAllowedParents(option);
+    if (!parents || parents.includes('.')) {
       properties[option.name] = { $ref: `#/definitions/${option.name}` };
     }
   }
 }
 
-function addChildrenArrayInParents(
+/**
+ * The objects an option can be used in, other than the top level of a config.
+ */
+function getNestedParents(option: RenovateOptions): AllowedParents[] {
+  return (getAllowedParents(option) ?? []).filter((parent) => parent !== '.');
+}
+
+/**
+ * The schema which a parent's children are declared on, which differs depending on whether the parent is an array of configs, a map of configs, or a config itself.
+ */
+function getChildrenSchema(
+  definition: Record<string, any>,
+): Record<string, any> {
+  const type: JsonSchemaType | undefined = definition.type;
+  if (type === 'array' || (Array.isArray(type) && type.includes('array'))) {
+    definition.items ??= {};
+    return definition.items;
+  }
+
+  /* a map of configs declares its children on its values, rather than on the map itself */
+  if (isPlainObject(definition.additionalProperties)) {
+    return definition.additionalProperties;
+  }
+
+  return definition;
+}
+
+function addChildrenToParents(
   options: RenovateOptions[],
   properties: Record<string, any>,
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        definitions[parent].items = {
-          allOf: [
-            {
-              type: 'object',
-              properties: {
-                description: {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                        description:
-                          'A custom description for this configuration object',
-                      },
-                    },
-                    {
-                      type: 'string',
-                      description:
-                        'A custom description for this configuration object',
-                    },
-                  ],
+    for (const parent of getNestedParents(option)) {
+      getChildrenSchema(definitions[parent]).allOf = [
+        {
+          type: 'object',
+          properties: {
+            description: {
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    description:
+                      'A custom description for this configuration object',
+                  },
                 },
-                overrideDescription: {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                        description:
-                          'Description which replaces the descriptions of any presets which this config extends',
-                      },
-                    },
-                    {
-                      type: 'string',
-                      description:
-                        'Description which replaces the descriptions of any presets which this config extends',
-                    },
-                  ],
+                {
+                  type: 'string',
+                  description:
+                    'A custom description for this configuration object',
                 },
-              },
+              ],
             },
-          ],
-        };
-      }
+            overrideDescription: {
+              oneOf: [
+                {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    description:
+                      'Description which replaces the descriptions of any presets which this config extends',
+                  },
+                },
+                {
+                  type: 'string',
+                  description:
+                    'Description which replaces the descriptions of any presets which this config extends',
+                },
+              ],
+            },
+          },
+        },
+      ];
     }
   }
 }
@@ -318,38 +404,36 @@ function createSchemaForChildConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        definitions[parent].items.allOf[0].properties[option.name] = {
+    for (const parent of getNestedParents(option)) {
+      {
+        const children = getChildrenSchema(definitions[parent]);
+        children.allOf[0].properties[option.name] = {
           $ref: `#/definitions/${option.name}`,
         };
 
         for (const prop of option.requiredIf ?? []) {
-          definitions[parent].items.allOf.push(
-            toRequiredPropertiesRule(prop, option),
-          );
+          children.allOf.push(toRequiredPropertiesRule(prop, option));
         }
       }
     }
   }
 }
 
-interface GenerateSchemaOpts {
-  filename?: string;
+interface BuildSchemaOpts {
   version?: string;
   isInherit?: boolean;
   isGlobal?: boolean;
 }
 
-export async function generateSchema(
-  dist: string,
-  {
-    filename = 'renovate-schema.json',
-    version = pkg.version,
-    isInherit = false,
-    isGlobal = false,
-  }: GenerateSchemaOpts = {},
-): Promise<void> {
+interface GenerateSchemaOpts extends BuildSchemaOpts {
+  filename?: string;
+}
+
+export async function buildSchema({
+  version = pkg.version,
+  isInherit = false,
+  isGlobal = false,
+}: BuildSchemaOpts = {}): Promise<Record<string, any>> {
   if (isInherit && isGlobal) {
     throw new Error(
       'Generating schema for both `isInherit` and `isGlobal` is not supported. Only use one',
@@ -433,15 +517,26 @@ export async function generateSchema(
     return 0;
   });
   const definitions = schema.definitions;
+  const headings = await readAllDocsHeadings();
   for (const option of configurationOptions) {
-    definitions[option.name] = createSingleConfig(option);
+    definitions[option.name] = createSingleConfig(option, headings);
   }
 
   const properties = schema.properties as Record<string, any>;
 
   createSchemaForParentConfigs(configurationOptions, properties, definitions);
-  addChildrenArrayInParents(configurationOptions, properties, definitions);
+  addChildrenToParents(configurationOptions, properties, definitions);
   createSchemaForChildConfigs(configurationOptions, properties, definitions);
+
+  return schema;
+}
+
+export async function generateSchema(
+  dist: string,
+  { filename = 'renovate-schema.json', ...opts }: GenerateSchemaOpts = {},
+): Promise<void> {
+  const schema = await buildSchema(opts);
+
   await updateFile(
     `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,
