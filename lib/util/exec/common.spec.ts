@@ -147,13 +147,16 @@ function getSpawnStub(args: StubArgs): any {
   }
 
   return {
-    on,
-    spawnargs: cmd.split(regEx(/\s+/)),
-    stdout: stdoutStream,
-    stderr: stderrStream,
-    emit,
-    unref,
-    kill,
+    nodeChildProcess: {
+      on,
+      spawnargs: cmd.split(regEx(/\s+/)),
+      stdout: stdoutStream,
+      stderr: stderrStream,
+      emit,
+      unref,
+      kill,
+      pid,
+    },
     pid,
   };
 }
@@ -868,12 +871,12 @@ describe('util/exec/common', () => {
     const killSpy = vi.spyOn(process, 'kill');
 
     afterEach(() => {
-      delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', undefined);
       vi.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', 'true');
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
@@ -893,7 +896,7 @@ describe('util/exec/common', () => {
     });
 
     it('handles process.kill call on non existent gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      vi.stubEnv('RENOVATE_X_EXEC_GPID_HANDLE', 'true');
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });

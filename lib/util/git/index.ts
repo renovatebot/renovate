@@ -37,10 +37,12 @@ import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
+import { coerceArray } from '../array.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { coerceObject } from '../object.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
@@ -132,7 +134,12 @@ export function createSimpleGit({
   const gitEnv = authentication
     ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
     : childEnv;
-  return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
+  return simpleGit({
+    ...simpleGitConfig(),
+    // simple-git blocks explicitly passed `GIT_*` and other guarded variables unless allowed. The environment is fully controlled by Renovate, so allow all of it.
+    allowEnvironment: Object.keys(gitEnv),
+    ...config,
+  }).env(gitEnv);
 }
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
@@ -358,7 +365,7 @@ async function cleanLocalBranches(): Promise<void> {
 
 export function setGitAuthor(gitAuthor: string | undefined): void {
   const gitAuthorParsed = parseGitAuthor(
-    gitAuthor ?? 'Renovate Bot <renovate@whitesourcesoftware.com>',
+    gitAuthor ?? 'Renovate <renovate@whitesourcesoftware.com>',
   );
   if (!gitAuthorParsed) {
     const error = new Error(CONFIG_VALIDATION);
@@ -406,12 +413,21 @@ export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
 }: RenovateConfig): void {
-  config.ignoredAuthors = gitIgnoredAuthors ?? [];
+  config.ignoredAuthors = coerceArray(gitIgnoredAuthors);
   setGitAuthor(gitAuthor);
 }
 
 export function setPlatformIgnoredAuthors(emails: string[] = []): void {
   platformIgnoredAuthors = emails;
+}
+
+/**
+ * Clears the in-memory `isBranchModified()` results.
+ *
+ * @internal Test helper, so read-only tests can share one `initRepo()`.
+ */
+export function clearBranchIsModifiedCache(): void {
+  config.branchIsModified = {};
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -442,7 +458,13 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitEnv = getGitEnvironmentVariables(getChildEnv());
+  // simple-git fixes the allowed environment variables on creation, so the authenticated environment needs its own instance
+  const submoduleGit = instrumentGit(
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      authentication: {},
+    }),
+  );
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -456,7 +478,7 @@ export async function cloneSubmodules(
     try {
       logger.debug(`Cloning git submodule at ${submodule}`);
       await gitRetry(() =>
-        git.env(gitEnv).submoduleUpdate(['--init', '--recursive', submodule]),
+        submoduleGit.submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
       logger.warn({ err, submodule }, `Unable to initialise git submodule`);
@@ -603,7 +625,7 @@ export const syncGit = withInstrumenting(
     /* v8 ignore next -- TODO: add test #40625 */
     delete getCache()?.semanticCommits;
 
-    // If upstreamUrl is set then the bot is running in fork mode
+    // If upstreamUrl is set then Renovate is running in fork mode
     // The "upstream" remote is the original repository which was forked from
     if (config.upstreamUrl) {
       const { upstreamUrl } = config;
@@ -907,7 +929,7 @@ export async function getFileList(): Promise<string[]> {
 }
 
 export function getBranchList(): string[] {
-  return Object.keys(config.branchCommits ?? {});
+  return Object.keys(coerceObject(config.branchCommits));
 }
 
 export async function isBranchBehindBase(
@@ -1269,7 +1291,7 @@ export async function getBranchLastCommitTime(
     return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }
@@ -1717,7 +1739,7 @@ export async function getCommitTreeSha(
   commitSha: LongCommitSha,
 ): Promise<LongCommitSha> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
+  const { treeSha } = coerceObject(treeShaRegex.exec(commitOutput)?.groups);
   if (!treeSha) {
     const snippet = commitOutput.split(newlineRegex)[0];
     /* v8 ignore next -- tested, but v8 reports template literal as partial */

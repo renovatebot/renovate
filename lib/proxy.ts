@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isUndefined } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
 import { logger } from './logger/index.ts';
 import { addSecretForSanitizing } from './util/sanitize.ts';
@@ -20,8 +20,8 @@ export function bootstrap(): void {
   envVars.forEach((envVar) => {
     /* v8 ignore next -- env is case-insensitive on windows */
     if (
-      typeof process.env[envVar] === 'undefined' &&
-      typeof process.env[envVar.toLowerCase()] !== 'undefined'
+      isUndefined(process.env[envVar]) &&
+      !isUndefined(process.env[envVar.toLowerCase()])
     ) {
       process.env[envVar] = process.env[envVar.toLowerCase()];
     }

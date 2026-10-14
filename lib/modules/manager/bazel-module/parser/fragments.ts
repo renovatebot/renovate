@@ -5,6 +5,7 @@ import {
   LooseRecord,
 } from '../../../../util/schema-utils/index.ts';
 import * as starlark from './starlark.ts';
+import type { ChildFragments } from './types.ts';
 
 export const StringFragment = z.object({
   type: z.literal('string'),
@@ -16,7 +17,7 @@ export const BooleanFragment = z.object({
   value: z.boolean(),
   isComplete: z.literal(true),
 });
-const PrimitiveFragments = z.discriminatedUnion('type', [
+export const PrimitiveFragments = z.discriminatedUnion('type', [
   StringFragment,
   BooleanFragment,
 ]);
@@ -30,7 +31,7 @@ export const StringArrayFragment = z.object({
   items: LooseArray(StringFragment),
   isComplete: z.boolean(),
 });
-const ValueFragments = z.discriminatedUnion('type', [
+export const ValueFragments = z.discriminatedUnion('type', [
   StringFragment,
   BooleanFragment,
   ArrayFragment,
@@ -94,28 +95,7 @@ export const AllFragments = z.discriminatedUnion('type', [
   StringFragment,
 ]);
 
-export type AllFragments = z.infer<typeof AllFragments>;
-export type ArrayFragment = z.infer<typeof ArrayFragment>;
-export type AttributeFragment = z.infer<typeof AttributeFragment>;
-export type BooleanFragment = z.infer<typeof BooleanFragment>;
-export type ChildFragments = Record<string, ValueFragments>;
-export type PrimitiveFragments = z.infer<typeof PrimitiveFragments>;
-export type RuleFragment = z.infer<typeof RuleFragment>;
-export type PreparedExtensionTagFragment = z.infer<
-  typeof PreparedExtensionTagFragment
->;
-export type ExtensionTagFragment = z.infer<typeof ExtensionTagFragment>;
-export type UseRepoRuleFragment = z.infer<typeof UseRepoRuleFragment>;
-export type RepoRuleCallFragment = z.infer<typeof RepoRuleCallFragment>;
-export type StringFragment = z.infer<typeof StringFragment>;
-export type ValueFragments = z.infer<typeof ValueFragments>;
-export type ResultFragment =
-  | RuleFragment
-  | ExtensionTagFragment
-  | UseRepoRuleFragment
-  | RepoRuleCallFragment;
-
-export function string(value: string): StringFragment {
+export function string(value: string): z.infer<typeof StringFragment> {
   return {
     type: 'string',
     isComplete: true,
@@ -123,7 +103,9 @@ export function string(value: string): StringFragment {
   };
 }
 
-export function boolean(value: string | boolean): BooleanFragment {
+export function boolean(
+  value: string | boolean,
+): z.infer<typeof BooleanFragment> {
   return {
     type: 'boolean',
     isComplete: true,
@@ -135,7 +117,7 @@ export function rule(
   rule: string,
   children: ChildFragments = {},
   isComplete = false,
-): RuleFragment {
+): z.infer<typeof RuleFragment> {
   return {
     type: 'rule',
     rule,
@@ -148,7 +130,7 @@ export function preparedExtensionTag(
   extension: string,
   rawExtension: string,
   offset: number,
-): PreparedExtensionTagFragment {
+): z.infer<typeof PreparedExtensionTagFragment> {
   return {
     type: 'preparedExtensionTag',
     extension,
@@ -166,7 +148,7 @@ export function extensionTag(
   children: ChildFragments = {},
   rawString?: string,
   isComplete = false,
-): ExtensionTagFragment {
+): z.infer<typeof ExtensionTagFragment> {
   return {
     type: 'extensionTag',
     extension,
@@ -184,7 +166,7 @@ export function useRepoRule(
   bzlFile: string,
   ruleName: string,
   isComplete = false,
-): UseRepoRuleFragment {
+): z.infer<typeof UseRepoRuleFragment> {
   return {
     type: 'useRepoRule',
     variableName,
@@ -200,7 +182,7 @@ export function repoRuleCall(
   children: ChildFragments = {},
   rawString?: string,
   isComplete = false,
-): RepoRuleCallFragment {
+): z.infer<typeof RepoRuleCallFragment> {
   return {
     type: 'repoRuleCall',
     functionName,
@@ -213,9 +195,9 @@ export function repoRuleCall(
 
 export function attribute(
   name: string,
-  value?: ValueFragments,
+  value?: z.infer<typeof ValueFragments>,
   isComplete = false,
-): AttributeFragment {
+): z.infer<typeof AttributeFragment> {
   return {
     type: 'attribute',
     name,
@@ -225,9 +207,9 @@ export function attribute(
 }
 
 export function array(
-  items: PrimitiveFragments[] = [],
+  items: z.infer<typeof PrimitiveFragments>[] = [],
   isComplete = false,
-): ArrayFragment {
+): z.infer<typeof ArrayFragment> {
   return {
     type: 'array',
     items,
@@ -235,12 +217,14 @@ export function array(
   };
 }
 
-export function isValue(data: unknown): data is ValueFragments {
+export function isValue(data: unknown): data is z.infer<typeof ValueFragments> {
   const result = ValueFragments.safeParse(data);
   return result.success;
 }
 
-export function isPrimitive(data: unknown): data is PrimitiveFragments {
+export function isPrimitive(
+  data: unknown,
+): data is z.infer<typeof PrimitiveFragments> {
   const result = PrimitiveFragments.safeParse(data);
   return result.success;
 }

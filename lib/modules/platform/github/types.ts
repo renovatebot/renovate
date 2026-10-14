@@ -87,12 +87,28 @@ export interface UserDetails {
   email: EmailAddress | null;
 }
 
+interface GithubHostBase {
+  apiUrl: URL;
+}
+
+export interface GithubComHost extends GithubHostBase {
+  type: 'github';
+}
+
+export interface GithubEnterpriseCloudHost extends GithubHostBase {
+  type: 'ghec';
+}
+
+export interface GithubEnterpriseServerHost extends GithubHostBase {
+  type: 'ghes';
+  version: string | null;
+}
+
+export type GithubHost =
+  GithubComHost | GithubEnterpriseCloudHost | GithubEnterpriseServerHost;
+
 export interface PlatformConfig {
-  hostType: string;
-  endpoint: string;
-  isGhe?: boolean;
-  isGheCloud?: boolean;
-  gheVersion?: string | null;
+  host: GithubHost;
   isGHApp?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
@@ -151,6 +167,12 @@ export interface GhRepo {
 export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
     pullRequest: { number: number };
+  };
+}
+
+export interface GhEnqueuePullRequestResponse {
+  enqueuePullRequest: {
+    mergeQueueEntry: { id: string; position: number } | null;
   };
 }
 

@@ -73,6 +73,7 @@ async function getContent(file: string): Promise<ReadContentResult> {
   let contents: string | null = '';
   const isSymlink = await localPathIsSymbolicLink(file);
 
+  // v8 ignore else -- hermit always tracks its packages as symlinks
   if (isSymlink) {
     contents = await readLocalSymlink(file);
   }

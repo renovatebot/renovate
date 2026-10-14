@@ -3,6 +3,7 @@ import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import type { PlatformId } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
+import { coerceArray } from '../../util/array.ts';
 import {
   setGitAuthor,
   setNoVerify,
@@ -47,7 +48,7 @@ export function setPlatformApi(name: PlatformId): void {
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey, config.gitPrivateKeyPassphrase);
-  setNoVerify(config.gitNoVerify ?? []);
+  setNoVerify(coerceArray(config.gitNoVerify));
   // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);
   // TODO: types
@@ -56,8 +57,8 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ...config,
     ...platformInfo,
     hostRules: [
-      ...(platformInfo?.hostRules ?? []),
-      ...(config.hostRules ?? []),
+      ...coerceArray(platformInfo?.hostRules),
+      ...coerceArray(config.hostRules),
     ],
   };
   // v8 ignore else -- TODO: add test #40625

@@ -60,20 +60,22 @@ async function getModules(
   const res: GitModule[] = [];
   try {
     const modules = (
-      (await git.raw([
+      await git.raw([
         'config',
         '--file',
         gitModulesPath,
         '--get-regexp',
         '\\.path',
-      ])) ?? /* istanbul ignore next: should never happen */ ''
+      ])
     )
       .trim()
       .split(regEx(/\n/))
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/));
+      const [, name, path] = line.split(
+        regEx(/submodule\.(?<name>.+?)\.path\s(?<path>.+)/),
+      );
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {

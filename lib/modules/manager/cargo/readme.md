@@ -21,5 +21,13 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 Rules from this list are converted to environment variable directives if they match _any_ of these characteristics:
 
 - No `hostType` is defined, or
-- `hostType` is `cargo`, or
+- `hostType` is `cargo` or `crate`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
+
+### Git index registries
+
+When Renovate clones a git index registry over `http(s)` to look up versions, it exports the same `insteadOf` directives as for artifact updates, with `hostType=crate` in place of `hostType=cargo`.
+Because artifact updates accept `hostType=crate` rules too, a single `crate` rule covers both the lookup and the `Cargo.lock` update.
+Git uses the credentials of the directive whose URL matches the index URL.
+Cloning a git index registry other than the crates.io index (`https://index.crates.io/`) requires `allowCustomCrateGitRegistries`.
+Sparse registries (`sparse+https://`) are fetched over HTTP, and use `hostRules` like other datasources.

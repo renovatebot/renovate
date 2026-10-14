@@ -9,18 +9,20 @@ import {
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
-import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
-  toolNames,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
 import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { formatCell, replaceContent } from './utils.ts';
+import { formatCell, indexMarkdown, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
@@ -137,6 +139,8 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'properties',
+    'requiresCheckAtTrustBoundary',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -251,25 +255,6 @@ function genDeprecationMsg(el: Record<string, any>): string {
   return `${warning}\n`;
 }
 
-function indexMarkdown(lines: string[]): Record<string, [number, number]> {
-  const indexed: Record<string, [number, number]> = {};
-
-  let optionName = '';
-  let start = 0;
-  for (const [i, line] of lines.entries()) {
-    if (line.startsWith('## ') || line.startsWith('### ')) {
-      if (optionName) {
-        indexed[optionName] = [start, i - 1];
-      }
-      start = i;
-      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
-    }
-  }
-  indexed[optionName] = [start, lines.length - 1];
-
-  return indexed;
-}
-
 function generateLockFileTable(): string {
   const allManagers = getManagers();
   const rows: { name: string; lockFiles: string[] }[] = [];
@@ -304,6 +289,24 @@ function generateCacheNamespacesList(): string {
   let list = '\n';
   for (const ns of namespaces) {
     list += `- \`${ns}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
+function generateInheritConfigSupportList(): string {
+  const inheritable = options
+    .filter((option) => option.inheritConfigSupport)
+    .map((option) => {
+      const parent = option.parents?.find((p) => p !== '.');
+      return parent ? `${parent}.${option.name}` : option.name;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  let list = '\n';
+  for (const fullName of inheritable) {
+    list += `- \`${fullName}\`\n`;
   }
   list += '\n';
 
@@ -353,15 +356,15 @@ function generateConfigFileNames(): string {
 function generateToolsForConstraints(): string {
   let output = '| Tool | Additional Information | Versioning | Datasource |\n';
   output += '| --- | --- | --- | --- |\n';
-  for (const toolDef of toolDefinitions) {
-    const toolConfig = getToolConfig(toolDef.name);
+  for (const toolName of getSupportedToolNames()) {
+    const toolConfig = getToolConfig(toolName);
     if (!toolConfig) {
       continue;
     }
-    const def: ConstraintDefinition = toolDef;
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
-    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
   return output;
@@ -384,16 +387,19 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of toolNames) {
+  for (const tool of getSupportedToolNames()) {
     output += `- \`${tool}\`\n`;
   }
 
   return output;
 }
 
-export async function generateConfig(dist: string, bot = false): Promise<void> {
+export async function generateConfig(
+  dist: string,
+  globalOnly = false,
+): Promise<void> {
   let configFile = `configuration-options.md`;
-  if (bot) {
+  if (globalOnly) {
     configFile = `self-hosted-configuration.md`;
   }
 
@@ -405,7 +411,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name),
+      (option) =>
+        !!option.globalOnly === globalOnly && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -464,7 +471,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   let content = configOptionsRaw.join('\n');
 
-  if (bot) {
+  if (globalOnly) {
     content = replaceContent(
       content,
       generateCacheNamespacesList(),
@@ -472,7 +479,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (globalOnly) {
+    content = replaceContent(
+      content,
+      generateInheritConfigSupportList(),
+      '<!-- Autogenerate inheritConfigSupport-list -->',
+    );
+  }
+
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateLockFileTable(),
@@ -480,7 +495,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateConfigFileNames(),
@@ -488,7 +503,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForConstraints(),
@@ -496,7 +511,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateAdditionalConstraints(),
@@ -504,7 +519,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForInstallTools(),
@@ -512,7 +527,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateStatusCheckWhenTable(),

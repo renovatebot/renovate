@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -33,10 +33,11 @@ export async function extractDenoCompatiblePackageJson(
     return null;
   }
 
+  const workspaces = extracted.managerData?.workspaces;
   const result = extracted as PackageFile<DenoManagerData>;
   result.managerData = {
     packageName: extracted.managerData?.packageJsonName,
-    workspaces: extracted.managerData?.workspaces,
+    workspaces: isArray(workspaces, isString) ? workspaces : undefined,
   };
   result.packageFile = packageFile;
   return result;
@@ -57,6 +58,11 @@ export async function detectNodeCompatWorkspaces({
   // npm workspace
   if (isNonEmptyArray(managerData?.workspaces)) {
     filters = managerData?.workspaces;
+  }
+
+  // findPackages() matches every package.json below the directory when it is given no patterns
+  if (!filters) {
+    return { packagePaths: [] };
   }
 
   const localDir = GlobalConfig.get('localDir');

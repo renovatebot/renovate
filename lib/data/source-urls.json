@@ -3,7 +3,7 @@
   "docker": {
     "adminer": "https://github.com/vrana/adminer",
     "amd64/registry": "https://github.com/distribution/distribution",
-    "amd64/traefik": "https://github.com/containous/traefik",
+    "amd64/traefik": "https://github.com/traefik/traefik",
     "confluentinc/ksqldb-cli": "https://github.com/confluentinc/ksql",
     "confluentinc/ksqldb-server": "https://github.com/confluentinc/ksql",
     "coredns/coredns": "https://github.com/coredns/coredns",
@@ -27,9 +27,15 @@
     "mcr.microsoft.com/dotnet/sdk": "https://github.com/dotnet/sdk",
     "node": "https://github.com/nodejs/node",
     "prom/blackbox-exporter": "https://github.com/prometheus/blackbox_exporter",
+    "quay.io/buildah/stable": "https://github.com/podman-container-tools/buildah",
+    "quay.io/containers/buildah": "https://github.com/podman-container-tools/buildah",
+    "quay.io/containers/podman": "https://github.com/podman-container-tools/podman",
+    "quay.io/containers/skopeo": "https://github.com/podman-container-tools/skopeo",
+    "quay.io/podman/stable": "https://github.com/podman-container-tools/podman",
+    "quay.io/skopeo/stable": "https://github.com/podman-container-tools/skopeo",
     "registry": "https://github.com/distribution/distribution",
     "timberio/vector": "https://github.com/vectordotdev/vector",
-    "traefik": "https://github.com/containous/traefik",
+    "traefik": "https://github.com/traefik/traefik",
     "xpkg.upbound.io/upbound/provider-gcp": "https://github.com/upbound/provider-gcp"
   },
   "helm": {

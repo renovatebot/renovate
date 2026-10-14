@@ -158,15 +158,15 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
 
-      expect(
-        await gerritScm.commitAndPush({
+      await expect(
+        gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'main',
           message: 'commit msg',
           files: [],
           prTitle: 'pr title',
         }),
-      ).toBe(commitSha);
+      ).resolves.toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -190,8 +190,8 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
 
-      expect(
-        await gerritScm.commitAndPush({
+      await expect(
+        gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'main',
           message: 'commit msg',
@@ -203,7 +203,7 @@ describe('modules/platform/gerrit/scm', () => {
             'Renovate-Branch: user-provided',
           ],
         }),
-      ).toBe(commitSha);
+      ).resolves.toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -237,15 +237,15 @@ describe('modules/platform/gerrit/scm', () => {
       });
       git.pushCommit.mockResolvedValueOnce(true);
 
-      expect(
-        await gerritScm.commitAndPush({
+      await expect(
+        gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'new-main',
           message: ['commit msg'],
           files: [],
           prTitle: 'pr title',
         }),
-      ).toBe(commitSha);
+      ).resolves.toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'new-main',
         branchName: 'renovate/dependency-1.x',
@@ -278,15 +278,15 @@ describe('modules/platform/gerrit/scm', () => {
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce(null); //no changes
 
-      expect(
-        await gerritScm.commitAndPush({
+      await expect(
+        gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'main',
           message: ['commit msg'],
           files: [],
           prTitle: 'pr title',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -332,8 +332,8 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
-      expect(
-        await gerritScm.commitAndPush({
+      await expect(
+        gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'main',
           message: 'commit msg',
@@ -341,7 +341,7 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
           autoApprove: true,
         }),
-      ).toBe(commitSha);
+      ).resolves.toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',

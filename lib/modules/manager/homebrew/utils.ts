@@ -1,4 +1,4 @@
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 
 // Extract Ruby string value (handles both quote styles)
 export function extractRubyString(
@@ -20,11 +20,11 @@ export function updateRubyString(
   newValue: string,
 ): string | null {
   const doubleQuote = regEx(
-    `(\\b${keyword}\\s+)"${escapeRegExp(oldValue)}"`,
+    `(\\b${keyword}\\s+)"${RegExp.escape(oldValue)}"`,
     'g',
   );
   const singleQuote = regEx(
-    `(\\b${keyword}\\s+)'${escapeRegExp(oldValue)}'`,
+    `(\\b${keyword}\\s+)'${RegExp.escape(oldValue)}'`,
     'g',
   );
   const result = content

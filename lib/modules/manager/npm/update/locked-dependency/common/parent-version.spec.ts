@@ -27,9 +27,9 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .get('/express')
         .reply(200, expressJson);
 
-      expect(
-        await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1'),
-      ).toBe('4.11.1');
+      await expect(
+        findFirstParentVersion('express', '4.0.0', 'send', '0.11.1'),
+      ).resolves.toBe('4.11.1');
     });
 
     it('finds removed dependencies', async () => {
@@ -45,14 +45,9 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
           'dist-tags': { latest: '10.0.0' },
         });
 
-      expect(
-        await findFirstParentVersion(
-          'express',
-          '4.0.0',
-          'buffer-crc32',
-          '10.0.0',
-        ),
-      ).toBe('4.9.1');
+      await expect(
+        findFirstParentVersion('express', '4.0.0', 'buffer-crc32', '10.0.0'),
+      ).resolves.toBe('4.9.1');
     });
 
     it('finds when a greater version is needed', async () => {
@@ -70,9 +65,9 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
           'dist-tags': { latest: '6.2.0' },
         });
 
-      expect(
-        await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4'),
-      ).toBe('4.14.0');
+      await expect(
+        findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4'),
+      ).resolves.toBe('4.14.0');
     });
 
     it('finds when a range matches greater versions', async () => {
@@ -89,9 +84,9 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
           'dist-tags': { latest: '1.6.15' },
         });
 
-      expect(
-        await findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1'),
-      ).toBe('4.16.1');
+      await expect(
+        findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1'),
+      ).resolves.toBe('4.16.1');
     });
 
     it('returns null if no matching', async () => {
@@ -107,9 +102,9 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
           'dist-tags': { latest: '10.0.0' },
         });
 
-      expect(
-        await findFirstParentVersion('express', '4.16.1', 'debug', '9.0.0'),
-      ).toBeNull();
+      await expect(
+        findFirstParentVersion('express', '4.16.1', 'debug', '9.0.0'),
+      ).resolves.toBeNull();
     });
   });
 });

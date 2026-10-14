@@ -128,7 +128,7 @@ function extractLeinRepos(content: string): string[] {
   const result: string[] = [];
 
   const repoContent = trimAtKey(
-    content.replace(regEx(/;;.*([\r\n])/g), '$1'), // get rid of comments
+    content.replace(regEx(/;;.*(?<newline>[\r\n])/g), '$<newline>'), // get rid of comments
     'repositories',
   );
 

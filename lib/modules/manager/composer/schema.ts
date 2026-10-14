@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
@@ -255,18 +256,18 @@ export const ComposerExtract = z
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<ComposerManagerData>[] = [];
 
     const profiles = [
       {
         depType: 'require',
         req: require,
-        locked: lockfile?.packages ?? [],
+        locked: coerceArray(lockfile?.packages),
       },
       {
         depType: 'require-dev',
         req: requireDev,
-        locked: lockfile?.packagesDev ?? [],
+        locked: coerceArray(lockfile?.packagesDev),
       },
     ];
 
@@ -293,7 +294,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<ComposerManagerData> = {
           depType,
           depName,
           currentValue,

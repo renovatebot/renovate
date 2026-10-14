@@ -23,25 +23,18 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
-  | 'global'
-  | 'inherit'
-  | 'repository'
-  | 'package'
-  | 'branch'
-  | 'pr';
+  'global' | 'inherit' | 'repository' | 'package' | 'branch' | 'pr';
 
 export type RenovateSplit =
-  | 'init'
-  | 'onboarding'
-  | 'extract'
-  | 'lookup'
-  | 'update';
+  'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
 export type DryRunConfig = 'extract' | 'lookup' | 'full';
+export type InternalHostAccess = 'allow' | 'warn' | 'block';
 export type RequiredConfig = 'required' | 'optional' | 'ignored';
 
 export interface GroupConfig extends Record<string, unknown> {
@@ -50,7 +43,12 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
-export type StatusCheckWhen = 'always' | 'never' | 'failed';
+export const allowedStatusCheckWhenValues = [
+  'always',
+  'never',
+  'failed',
+] as const;
+export type StatusCheckWhen = (typeof allowedStatusCheckWhenValues)[number];
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -124,6 +122,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeBuffer?: Nullish<string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -203,6 +202,7 @@ export interface GlobalOnlyConfigLegacy {
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
+  exitCodeForErrors?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
@@ -234,7 +234,7 @@ export interface GlobalOnlyConfigLegacy {
  */
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
-  allowCustomCrateRegistries?: boolean;
+  allowCustomCrateGitRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
@@ -259,6 +259,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
+  inheritConfigTrusted?: boolean;
+  internalHostAccess?: InternalHostAccess;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -343,8 +345,7 @@ export type RenovateRepository = string | RenovateRepositoryEntry;
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
+  'timestamp-required' | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -402,6 +403,7 @@ export interface RenovateConfig
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   description?: string | string[];
+  overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
@@ -583,11 +585,7 @@ export type MergeStrategy =
 
 // This list should be added to as any new unsafe execution commands should be permitted
 export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper'
-  | 'mise'
-  | 'pixi';
+  'bazelModDeps' | 'goGenerate' | 'gradleWrapper' | 'mise' | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -604,6 +602,7 @@ export interface PackageRule
   matchDepNames?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
+  matchIsBreaking?: boolean;
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
@@ -625,13 +624,37 @@ export interface PackageRule
 }
 
 export interface ValidationMessage {
-  topic: string;
+  // Topic is either the known list of topics, or a dynamically generated one
+  topic: ConfigValidationTopic | (string & {});
   message: string;
 }
+
+/**
+ * The kinds of place a config option can be used, which expand to the {@link AllowedParents} they cover.
+ *
+ * These are for the places which can't reasonably be listed, like every manager or every update type, so an option which is only valid in a specific object - like `hostRules` - should use `parents` instead.
+ */
+export const configScopes = [
+  /** the top level of a repository, global, inherited or preset config */
+  'repo',
+  /** a `packageRules` entry */
+  'packageRule',
+  /** a manager's configuration object, like `npm` */
+  'manager',
+  /** an update type's configuration object, like `major` */
+  'updateType',
+  /** the `vulnerabilityAlerts` configuration object */
+  'vulnerabilityAlert',
+  /** the `group` configuration object, which is merged into an update when it's grouped */
+  'group',
+] as const;
+
+export type ConfigScope = (typeof configScopes)[number];
 
 export type AllowedParents =
   | '.'
   | 'bumpVersions'
+  | 'group'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
@@ -648,6 +671,17 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  /**
+   * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
+   *
+   * This is in addition to any existing config validation, and ensures that these options are re-validated due to their sensitive nature.
+   *
+   * A failure of that check **must** lead to a {@link ConfigValidationTopic.Security} error (which is then a full config validation error), stopping the Renovate run.
+   *
+   * After this check has been performed, additional filtering (for defence in depth) could be performed, but may not have an indication of what is repo- or preset-config vs global self-hosted config.
+   */
+  requiresCheckAtTrustBoundary?: boolean;
 
   inheritConfigSupport?: boolean;
 
@@ -674,6 +708,13 @@ export interface RenovateOptionBase {
 
   parents?: AllowedParents[];
 
+  /**
+   * The kinds of place this option can be used, which are expanded alongside any `parents`.
+   *
+   * An option which declares neither is treated as valid anywhere, which is what we're working towards removing in #43020.
+   */
+  scopes?: ConfigScope[];
+
   stage?: RenovateConfigStage;
 
   experimental?: boolean;
@@ -698,6 +739,13 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
+
+  /**
+   * Whether the option can be set to `null`.
+   *
+   * This is only needed if the default is not `null` (which makes this implied).
+   */
+  nullable?: boolean;
 
   /**
    * Managers which support this option, leave undefined if all managers support it.
@@ -765,6 +813,11 @@ export interface RenovateStringOption extends RenovateOptionBase {
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
+
+  /**
+   * The keys the object accepts, for an option whose keys are a known set rather than the user's choice.
+   */
+  properties?: Record<string, unknown>;
   mergeable?: boolean;
   type: 'object';
 }
@@ -793,11 +846,13 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   updateType?: UpdateType;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
+  isBreaking?: boolean;
   sourceUrl?: string | null;
   categories?: string[];
   baseBranch?: string;
   manager?: string;
   datasource?: string;
+  effectiveDatasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: Timestamp | null;
   repository?: string;

@@ -28,7 +28,7 @@ function isPossibleChartRepo(url: string): boolean {
 }
 
 const githubRelease = regEx(
-  /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
+  /^(?<repoUrl>https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//,
 );
 
 function getSourceUrl(release: HelmRelease): string | undefined {
@@ -36,7 +36,7 @@ function getSourceUrl(release: HelmRelease): string | undefined {
   const [githubUrl] = release.urls;
   const releaseMatch = githubRelease.exec(githubUrl);
   if (releaseMatch) {
-    return releaseMatch[1];
+    return releaseMatch.groups!.repoUrl;
   }
 
   if (release.home && isPossibleChartRepo(release.home)) {
