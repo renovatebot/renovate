@@ -524,7 +524,6 @@ const staticGroups = {
       'group:octokit',
       'group:phpstan',
       'group:polymer',
-      'group:primer',
       'group:puppeteer',
       'group:react',
       'group:remark',
