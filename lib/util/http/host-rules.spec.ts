@@ -844,6 +844,39 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('hostType=go-proxy gets a fallback to hostType=go if no hostType=go-proxy credentials', () => {
+    hostRules.add({
+      hostType: 'go',
+      matchHost: 'example.com',
+      token: 'go-token',
+    });
+
+    const opts = { ...options, hostType: 'go-proxy' };
+    const hostRule = findMatchingRule('https://example.com/foo/@v/list', opts);
+    expect(hostRule).toEqual({
+      token: 'go-token',
+    });
+  });
+
+  it('hostType=go-proxy does not fallback to hostType=go if hostType=go-proxy already has credentials', () => {
+    hostRules.add({
+      hostType: 'go',
+      matchHost: 'example.com',
+      token: 'go-token',
+    });
+    hostRules.add({
+      hostType: 'go-proxy',
+      matchHost: 'example.com',
+      token: 'go-proxy-token',
+    });
+
+    const opts = { ...options, hostType: 'go-proxy' };
+    const hostRule = findMatchingRule('https://example.com/foo/@v/list', opts);
+    expect(hostRule).toEqual({
+      token: 'go-proxy-token',
+    });
+  });
+
   it('should remove forbidden headers from request', () => {
     GlobalConfig.set({ allowedHeaders: ['X-*'] });
     const hostRule = {
