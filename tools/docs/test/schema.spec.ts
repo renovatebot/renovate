@@ -282,7 +282,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     beforeAll(async () => {
       repoSchema = await compileSchema();
       globalSchema = await compileSchema({ isGlobal: true });
-    });
+    }, 30000);
 
     function getPresetsRejectedBySchema(): string[] {
       const rejected: string[] = [];
