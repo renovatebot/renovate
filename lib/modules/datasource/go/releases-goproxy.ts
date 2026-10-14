@@ -469,6 +469,10 @@ export class GoProxyDatasource extends Datasource {
           : undefined;
       return { version, sourceUrl };
     } catch (err) {
+      // a failure to authenticate means we can't tell whether there's a latest version, so rethrow it, rather than looking as if there isn't one
+      if (err instanceof HttpError && err.response?.statusCode === 401) {
+        throw err;
+      }
       logger.trace({ err }, 'Failed to get latest version');
       return null;
     }

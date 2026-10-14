@@ -1270,6 +1270,21 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toBeNull();
     });
 
+    it('throws if the latest version fails to authenticate', async () => {
+      vi.stubEnv('GOPROXY', `${baseUrl},direct`);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200)
+        .get('/@latest')
+        .reply(401);
+
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/google/btree' }),
+      ).rejects.toThrow(HttpError);
+    });
+
     it('uses latest if package has no releases', async () => {
       vi.stubEnv('GOPROXY', baseUrl);
 
@@ -1850,6 +1865,24 @@ describe('modules/datasource/go/releases-goproxy', () => {
         httpMock
           .scope(`${privateUrl}/github.com/google/btree`)
           .get('/@v/list')
+          .reply(401);
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).not.toHaveBeenCalled();
+      });
+
+      it('does not cache lookups where the latest version failed to authenticate', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', `${privateUrl}|off`);
+        httpMock
+          .scope(`${privateUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(200)
+          .get('/@latest')
           .reply(401);
 
         const res = await datasource.getReleases({
