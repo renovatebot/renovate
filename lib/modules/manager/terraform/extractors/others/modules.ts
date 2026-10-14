@@ -193,11 +193,12 @@ export class ModuleExtractor extends DependencyExtractor {
   }
 
   private getReference(dep: ModuleDependency): Reference | null {
-    // `tag`/`digest` of OCI modules are not resolved
+    // `tag`/`digest` of OCI modules are not resolved; a module without
+    // `source` has a skip reason, so `source` is set past that check
     if (
       !isString(dep.currentValue) ||
       dep.skipReason ||
-      isOCIRegistry(dep.managerData?.source ?? '')
+      isOCIRegistry(dep.managerData!.source)
     ) {
       return null;
     }
