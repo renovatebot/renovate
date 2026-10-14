@@ -1,5 +1,6 @@
 import { definePlugin } from '@oxlint/plugins';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
+import consistentHookTimeouts from './rules/consistent-hook-timeouts.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
@@ -44,6 +45,7 @@ export default definePlugin({
   },
   rules: {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
+    'consistent-hook-timeouts': consistentHookTimeouts,
     'enforce-ts-extension': enforceTsExtension,
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
