@@ -774,6 +774,7 @@ describe('modules/datasource/rpm/index', () => {
       { name: 'gzip-compressed', compress: gzip },
       { name: 'zstd-compressed', compress: zstdCompress },
     ])('handles $name primary.xml', async ({ compress }) => {
+      mockRepomdResponse();
       httpMock
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
@@ -790,10 +791,10 @@ describe('modules/datasource/rpm/index', () => {
           ),
         );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(releases).toEqual({ releases: [{ version: '1.0-2.azl3' }] });
     });
