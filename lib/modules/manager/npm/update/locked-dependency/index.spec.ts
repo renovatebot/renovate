@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { clone } from '../../../../../util/clone.ts';
@@ -17,14 +18,6 @@ const mimeJson = Fixtures.get('mime.json', './package-lock');
 const serveStaticJson = Fixtures.get('serve-static.json', './package-lock');
 const sendJson = Fixtures.get('send.json', './package-lock');
 const typeIsJson = Fixtures.getJson('type-is.json', './package-lock');
-const bundledPackageJson = Fixtures.get(
-  'bundled.package.json',
-  './package-lock',
-);
-const bundledPackageLockJson = Fixtures.get(
-  'bundled.package-lock.json',
-  './package-lock',
-);
 
 describe('modules/manager/npm/update/locked-dependency/index', () => {
   describe('updateLockedDependency()', () => {
@@ -43,55 +36,55 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
     });
 
     it('validates filename', async () => {
-      expect(
-        await updateLockedDependency({ ...config, lockFile: 'yarn.lock' }),
-      ).toMatchObject({});
-      expect(
-        await updateLockedDependency({ ...config, lockFile: 'yarn.lock2' }),
-      ).toMatchObject({});
+      await expect(
+        updateLockedDependency({ ...config, lockFile: 'yarn.lock' }),
+      ).resolves.toMatchObject({});
+      await expect(
+        updateLockedDependency({ ...config, lockFile: 'yarn.lock2' }),
+      ).resolves.toMatchObject({});
     });
 
     it('validates versions', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           newVersion: '^2.0.0',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('returns null for unparseable files', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: 'not json',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('rejects lockFileVersion 2', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: lockFileContent.replace(': 1,', ': 2,'),
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('returns null if no locked deps', async () => {
-      expect(await updateLockedDependency(config)).toMatchObject({});
+      await expect(updateLockedDependency(config)).resolves.toMatchObject({});
     });
 
     it('rejects null if no constraint found', async () => {
-      expect(
-        await updateLockedDependency({
+      await expect(
+        updateLockedDependency({
           ...config,
           lockFileContent: lockFileContent.replace('1.0.0', '10.0.0'),
           depName: 'accepts',
           currentVersion: '10.0.0',
           newVersion: '11.0.0',
         }),
-      ).toMatchObject({});
+      ).resolves.toMatchObject({});
     });
 
     it('remediates in-range', async () => {
@@ -229,6 +222,26 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
     });
 
     it('fails remediation if bundled', async () => {
+      const bundledPackageJson = codeBlock`
+        {
+          "name": "repro-renovate-13977",
+          "version": "1.0.0",
+          "description": "",
+          "main": "index.js",
+          "scripts": {
+            "test": "echo \\"Error: no test specified\\" && exit 1"
+          },
+          "author": "",
+          "license": "ISC",
+          "devDependencies": {
+            "semantic-release": "19.0.2"
+          }
+        }
+      `;
+      const bundledPackageLockJson = Fixtures.get(
+        'bundled.package-lock.json',
+        './package-lock',
+      );
       config.depName = 'ansi-regex';
       config.currentVersion = '3.0.0';
       config.newVersion = '5.0.1';

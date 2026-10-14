@@ -19,7 +19,7 @@ export async function getLockedVersions(
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { managerData = {} } = packageFile;
-    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData;
+    const { yarnLock, npmLock, pnpmLockFile } = managerData;
     const lockFiles: string[] = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
@@ -39,17 +39,24 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion =
-          lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#22198)
-            `${dep.depName}@${dep.currentValue}`
-          ];
         if (
-          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+          dep.depType !== 'devEngines.runtime' &&
+          dep.depType !== 'devEngines.packageManager'
+        ) {
+          dep.lockedVersion =
+            lockFileCache[yarnLock].lockedVersions?.[
+              // TODO: types (#22198)
+              `${dep.depName}@${dep.currentValue}`
+            ];
+        }
+        if (
+          (dep.depType === 'engines' ||
+            dep.depType === 'packageManager' ||
+            dep.depType === 'devEngines.packageManager') &&
           dep.depName === 'yarn' &&
           !isYarn1
         ) {
-          dep.packageName = '@yarnpkg/cli';
+          dep.packageName = '@yarnpkg/cli-dist';
         }
       }
     } else if (npmLock) {
@@ -115,7 +122,9 @@ export async function getLockedVersions(
         if (
           dep.depType === 'engines' ||
           dep.depType === 'packageManager' ||
-          dep.depType === 'volta'
+          dep.depType === 'volta' ||
+          dep.depType === 'devEngines.runtime' ||
+          dep.depType === 'devEngines.packageManager'
         ) {
           continue;
         }
@@ -130,16 +139,16 @@ export async function getLockedVersions(
           lockFileCache[npmLock].lockedVersions?.[lockedDepName],
         )!;
       }
-    } else if (pnpmShrinkwrap) {
+    } else if (pnpmLockFile) {
       logger.debug('Found pnpm lock-file');
-      lockFiles.push(pnpmShrinkwrap);
-      if (!lockFileCache[pnpmShrinkwrap]) {
-        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
-        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+      lockFiles.push(pnpmLockFile);
+      if (!lockFileCache[pnpmLockFile]) {
+        logger.trace(`Retrieving/parsing ${pnpmLockFile}`);
+        lockFileCache[pnpmLockFile] = await getPnpmLock(pnpmLockFile);
       }
 
       const packageDir = upath.dirname(packageFile.packageFile);
-      const pnpmRootDir = upath.dirname(pnpmShrinkwrap);
+      const pnpmRootDir = upath.dirname(pnpmLockFile);
       const relativeDir = upath.relative(pnpmRootDir, packageDir) || '.';
 
       for (const dep of packageFile.deps) {
@@ -150,7 +159,7 @@ export async function getLockedVersions(
 
         if (catalogName) {
           const lockedVersion = semver.valid(
-            lockFileCache[pnpmShrinkwrap].lockedVersionsWithCatalog?.[
+            lockFileCache[pnpmLockFile].lockedVersionsWithCatalog?.[
               catalogName
             ]?.[depName!],
           );
@@ -162,9 +171,9 @@ export async function getLockedVersions(
         } else {
           // TODO: types (#22198)
           const lockedVersion = semver.valid(
-            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[
-              relativeDir
-            ]?.[depType!]?.[depName!],
+            lockFileCache[pnpmLockFile].lockedVersionsWithPath?.[relativeDir]?.[
+              depType!
+            ]?.[depName!],
           );
 
           // v8 ignore else -- TODO: add test #40625

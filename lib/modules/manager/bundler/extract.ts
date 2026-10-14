@@ -9,6 +9,7 @@ import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
 import { extractLockFileEntries } from './locked-version.ts';
+import type { BundlerManagerData } from './types.ts';
 
 function formatContent(input: string): string {
   return `${input.replace(regEx(/^ {2}/), '')}\n`; //remove leading whitespace and add a new line at the end
@@ -31,17 +32,17 @@ const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 export async function extractPackageFile(
   content: string,
   packageFile?: string,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFileContent<BundlerManagerData> | null> {
   let lineNumber: number;
   async function processGroupBlock(
     line: string,
     repositoryUrl?: string,
     trimGroupLine = false,
   ): Promise<void> {
-    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
+    const groupMatch = regEx(/^group\s+(?<groups>.*?)\s+do/).exec(line);
     if (groupMatch) {
-      const depTypes = groupMatch[1]
-        .split(',')
+      const depTypes = groupMatch
+        .groups!.groups.split(',')
         .map((group) => group.trim())
         .map((group) => group.replace(regEx(/^:/), ''));
 
@@ -90,7 +91,7 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFileContent = {
+  const res: PackageFileContent<BundlerManagerData> = {
     registryUrls: [],
     deps: [],
   };
@@ -138,7 +139,7 @@ export async function extractPackageFile(
     const gemMatch = gemMatchRegex.exec(line)?.groups;
 
     if (gemMatch) {
-      const dep: PackageDependency = {
+      const dep: PackageDependency<BundlerManagerData> = {
         depName: gemMatch.depName,
         managerData: { lineNumber },
         datasource: RubygemsDatasource.id,
@@ -245,7 +246,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line);
+    const platformsMatch = regEx(/^platforms\s+(?:.*?)\s+do/).test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -278,7 +279,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = regEx(/^if\s+(.*?)/).test(line);
+    const ifMatch = regEx(/^if\s+(?:.*?)/).test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';

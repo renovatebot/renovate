@@ -20,6 +20,4 @@ export interface OverridePackageDep extends BasePackageDep {
 }
 
 export type BazelModulePackageDep =
-  | BasePackageDep
-  | OverridePackageDep
-  | MergePackageDep;
+  BasePackageDep | OverridePackageDep | MergePackageDep;

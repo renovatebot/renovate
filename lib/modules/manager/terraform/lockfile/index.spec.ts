@@ -36,14 +36,14 @@ describe('modules/manager/terraform/lockfile/index', () => {
   it('returns artifact error', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
     fs.readLocalFile.mockRejectedValueOnce(new Error('File not found'));
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'main.tf',
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         artifactError: {
           fileName: '.terraform.lock.hcl',
@@ -54,42 +54,42 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('returns null if no .terraform.lock.hcl found', async () => {
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'main.tf',
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if .terraform.lock.hcl is empty', async () => {
     fs.readLocalFile.mockResolvedValueOnce('');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'main.tf',
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if .terraform.lock.hcl is invalid', async () => {
     fs.readLocalFile.mockResolvedValueOnce('empty');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
 
-    expect(
-      await updateArtifacts({
+    await expect(
+      updateArtifacts({
         packageFileName: 'main.tf',
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('update single dependency with exact constraint and depType provider', async () => {

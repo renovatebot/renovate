@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import {
   CONFIG_VALIDATION,
+  HOST_BLOCKED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
@@ -137,6 +138,30 @@ describe('config/presets/index', () => {
           ' Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
       );
       expect(e!.validationMessage).toBeUndefined();
+    });
+
+    it('throws if the preset host is blocked', async () => {
+      config.extends = ['http://10.1.2.3/preset.json'];
+      http.getPreset.mockRejectedValueOnce(new Error(HOST_BLOCKED));
+      let e: Error | undefined;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e!.validationError).toBe(
+        'Preset host is blocked by this Renovate instance (http://10.1.2.3/preset.json). If this is intended, ask your Renovate administrator to permit it with a `hostRules` entry setting `allowInternal=true`, scoped either by `hostType` (for example `preset` or `npm`) or by a URL-prefix `matchHost`',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          preset: 'http://10.1.2.3/preset.json',
+          documentationUrl: expect.stringContaining(
+            'self-hosted-configuration/#hostrulesallowinternal',
+          ),
+        },
+        'Preset host is blocked by this Renovate instance',
+      );
     });
 
     it('throws if invalid preset', async () => {
@@ -350,23 +375,60 @@ describe('config/presets/index', () => {
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(11);
+      expect(res).toEqual({
+        matchPackageNames: [
+          '*/eslint-plugin',
+          '@babel/eslint-parser',
+          '@eslint/**',
+          '@eslint-community/**',
+          '@stylistic/eslint-plugin**',
+          '@types/eslint',
+          '@types/eslint__**',
+          '@typescript-eslint/**',
+          'babel-eslint',
+          'eslint**',
+          'typescript-eslint',
+        ],
+      });
     });
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(23);
+      expect(res).toEqual({
+        description: ['All lint-related packages.'],
+        matchPackageNames: [
+          'ember-template-lint**',
+          '*/eslint-plugin',
+          '@babel/eslint-parser',
+          '@eslint/**',
+          '@eslint-community/**',
+          '@stylistic/eslint-plugin**',
+          '@types/eslint',
+          '@types/eslint__**',
+          '@typescript-eslint/**',
+          'babel-eslint',
+          'eslint**',
+          'typescript-eslint',
+          'friendsofphp/php-cs-fixer',
+          'squizlabs/php_codesniffer',
+          'symplify/easy-coding-standard',
+          'stylelint**',
+          'codelyzer',
+          '/\\btslint\\b/',
+          '@oxlint/**',
+          'oxlint',
+          'prettier',
+          'remark-lint',
+          'standard',
+        ],
+      });
     });
 
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(23);
@@ -375,9 +437,11 @@ describe('config/presets/index', () => {
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
       expect(res.automerge).toBeUndefined();
-      expect(res.minor!.automerge).toBeTrue();
+      expect(res).toMatchObject({
+        major: { automerge: false },
+        minor: { automerge: true },
+      });
     });
 
     it('ignores presets', async () => {
@@ -397,9 +461,8 @@ describe('config/presets/index', () => {
 
       const { config: res } = await presets.resolveConfigPresets(config);
 
-      expect(res.labels).toEqual(['self-hosted resolved']);
       expect(local.getPreset.mock.calls).toHaveLength(1);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({ labels: ['self-hosted resolved'] });
     });
 
     it('returns the presets which have been merged into the resulting config', async () => {
@@ -536,7 +599,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -575,7 +638,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -616,7 +679,7 @@ describe('config/presets/index', () => {
         ],
       });
 
-      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      await expect(presets.resolveConfigPresets(config)).resolves.toBeDefined();
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
         packageRules: [
@@ -1409,7 +1472,9 @@ describe('config/presets/index', () => {
 
     it('does not use cache for internal presets', async () => {
       const memCacheGetSpy = vi.spyOn(memCache, 'get');
-      expect(await presets.getPreset(':dependencyDashboard', {})).toBeDefined();
+      await expect(
+        presets.getPreset(':dependencyDashboard', {}),
+      ).resolves.toBeDefined();
       expect(memCacheGetSpy).not.toHaveBeenCalled();
       expect(packageCache.get).not.toHaveBeenCalled();
     });
@@ -1491,10 +1556,23 @@ describe('config/presets/index', () => {
 
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
-      expect(res).toMatchSnapshot();
-      // @ts-expect-error -- partial config
-      expect(res.matchPackageNames).toHaveLength(5);
-      expect(res.extends).toHaveLength(5);
+      expect(res).toEqual({
+        description: ['All lint-related packages.'],
+        extends: [
+          'packages:emberTemplateLint',
+          'packages:eslint',
+          'packages:phpLinters',
+          'packages:stylelint',
+          'packages:tslint',
+        ],
+        matchPackageNames: [
+          '@oxlint/**',
+          'oxlint',
+          'prettier',
+          'remark-lint',
+          'standard',
+        ],
+      });
     });
 
     it('gets parameterised configs', async () => {
@@ -1571,9 +1649,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toMatchSnapshot('validationSource');
-      expect(e!.validationError).toMatchSnapshot('validationError');
-      expect(e!.validationMessage).toMatchSnapshot('validationMessage');
+      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationError).toBeUndefined();
+      expect(e!.validationMessage).toBeUndefined();
     });
 
     it('handles no config', async () => {

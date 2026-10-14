@@ -1,22 +1,19 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
+import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
-import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as dockerVersioning from '../../versioning/docker/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
 import * as githubActionsVersioning from '../../versioning/github-actions/index.ts';
-import * as nodeVersioning from '../../versioning/node/index.ts';
-import * as npmVersioning from '../../versioning/npm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
   ExtractConfig,
@@ -63,8 +60,10 @@ function extractDockerAction(
   actionRef: DockerReference,
   config: ExtractConfig,
 ): PackageDependency {
-  const dep = getDep(actionRef.originalRef, true, config.registryAliases);
-  dep.depType = 'docker';
+  const dep = getDep(actionRef.originalRef, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   dep.replaceString = actionRef.originalRef;
   return dep;
 }
@@ -187,6 +186,7 @@ function extractWithRegex(
       continue;
     }
 
+    // v8 ignore else -- the parsed ref is either a docker or a repository ref
     if (actionRef.kind === 'repository') {
       deps.push(
         extractRepositoryAction(
@@ -206,16 +206,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
 
   switch (platform) {
     case 'forgejo':
-      return {
-        registryUrls: [registryUrl],
-        datasource: ForgejoTagsDatasource.id,
-      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
+        datasource: PLATFORM_FAMILIES[platform].tagsDatasource,
       };
     case 'github':
+      // GitHub is left without a datasource on purpose: `extractRepositoryAction`
+      // then picks `github-digest` or `github-tags` from the ref it parsed.
       return { registryUrls: [registryUrl] };
   }
 
@@ -256,43 +254,6 @@ function extractRunner(runner: string): PackageDependency | null {
   return dependency;
 }
 
-// For official https://github.com/actions
-const versionedActions: Record<string, string> = {
-  go: npmVersioning.id,
-  node: nodeVersioning.id,
-  python: npmVersioning.id,
-
-  // Not covered yet because they use different datasources/packageNames:
-  // - dotnet
-  // - java
-};
-
-function extractVersionedAction(step: UsesStep): PackageDependency | null {
-  for (const [action, versioning] of Object.entries(versionedActions)) {
-    const actionName = `actions/setup-${action}`;
-    if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
-      continue;
-    }
-
-    const fieldName = `${action}-version`;
-    const currentValue = step.with?.[fieldName];
-    if (!currentValue) {
-      return null;
-    }
-
-    return {
-      datasource: GithubReleasesDatasource.id,
-      depName: action,
-      packageName: `actions/${action}-versions`,
-      versioning,
-      extractVersion: '^(?<version>\\d+\\.\\d+\\.\\d+)(-\\d+)?$',
-      currentValue,
-      depType: 'uses-with',
-    };
-  }
-  return null;
-}
-
 function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -300,12 +261,6 @@ function extractSteps(steps: UsesStep[]): PackageDependency[] {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
       deps.push(...res.data);
-      continue;
-    }
-
-    const versionedDep = extractVersionedAction(step);
-    if (versionedDep) {
-      deps.push(versionedDep);
     }
   }
 
@@ -336,19 +291,21 @@ function extractWithYAMLParser(
 
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(job.container, {
+          registryAliases: config.registryAliases,
+          depType: 'container',
+        }),
+      );
     }
 
     for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(service, {
+          registryAliases: config.registryAliases,
+          depType: 'service',
+        }),
+      );
     }
 
     for (const runner of job['runs-on']) {
@@ -384,7 +341,7 @@ async function readLockfile(): Promise<LockfileState> {
  * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
  */
 function getLockfile(): Promise<LockfileState> {
-  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cacheKey = buildCacheKey('github-actions', actionsLockFile);
   const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
   if (cached !== undefined) {
     return cached;

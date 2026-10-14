@@ -19,7 +19,7 @@ import type { MiseRegistryData, ToolingDefinition } from './types.ts';
 export const asdfTooling = upgradeableTooling;
 
 function shortJavaVersioning(version: string): { versioning?: string } {
-  if (regEx(/^\d+(\.\d+)?$/).test(version)) {
+  if (regEx(/^\d+(?:\.\d+)?$/).test(version)) {
     return { versioning: semverPartialVersioning.id };
   }
   return {};
@@ -69,7 +69,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
     misePluginUrl: 'https://mise.jdx.dev/lang/java.html',
     config: (version) => {
       // no prefix is shorthand for openjdk
-      const versionMatch = regEx(/^(\d\S+)/).exec(version)?.[1];
+      const versionMatch =
+        regEx(/^(?<version>\d\S+)/).exec(version)?.groups?.version;
       if (versionMatch) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -137,12 +138,13 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
         /^oracle-graalvm-(?<version>\d\S+)/,
       ).exec(version)?.groups;
       if (oracleGraalvmJdkMatches) {
-        return {
+        const result = {
           datasource: JavaVersionDatasource.id,
-          packageName: 'java-jdk',
           currentValue: oracleGraalvmJdkMatches.version,
           ...shortJavaVersioning(oracleGraalvmJdkMatches.version),
+          packageName: 'oracle-graalvm-jdk',
         };
+        return result;
       }
 
       return undefined;

@@ -1,6 +1,6 @@
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
-import { massageConfig } from '../../massage.ts';
+import type { RenovateConfig } from '../../types.ts';
 import { validateConfig } from '../../validation.ts';
 import { resolveConfigPresets } from '../index.ts';
 import * as npm from '../npm/index.ts';
@@ -12,6 +12,20 @@ vi.mock('../../../modules/datasource/npm/index.ts');
 const getPresetSpy = vi.spyOn(npm, 'getPreset');
 
 const ignoredPresets = ['default:group', 'default:timezone'];
+
+// `packages:` and `monorepo:` presets are `packageRules` fragments made of selectors only.
+// They are consumed via `packageRules[].extends` (as the `group:` presets do), so they are validated there, next to the option a real rule carries.
+const packageRuleFragmentGroups = ['monorepo', 'packages'];
+
+// Every other preset is validated the way `inheritConfig` and repository config consume it: resolved into the config extending it and validated as a whole.
+// This deliberately does not use the `isPreset` leniency of `validateConfig()`, which lets a preset source keep selectors at its top level.
+function presetUsage(groupName: string, presetName: string): RenovateConfig {
+  const preset = `${groupName}:${presetName}`;
+  if (packageRuleFragmentGroups.includes(groupName)) {
+    return { packageRules: [{ extends: [preset], groupName: presetName }] };
+  }
+  return { extends: [preset] };
+}
 
 describe('config/presets/internal/index', () => {
   beforeEach(() => {
@@ -27,20 +41,18 @@ describe('config/presets/internal/index', () => {
   });
 
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
-    for (const [presetName, presetConfig] of Object.entries(
-      groupPresets,
-    ).filter(
-      ([key]) =>
+    for (const presetName of Object.keys(groupPresets).filter(
+      (key) =>
         key !== 'description' &&
         !ignoredPresets.includes(`${groupName}:${key}`),
     )) {
       it(`${`${groupName}:${presetName}`} validates`, async () => {
         try {
           const { config } = await resolveConfigPresets(
-            massageConfig(presetConfig),
+            presetUsage(groupName, presetName),
           );
           const configType = groupName === 'global' ? 'global' : 'repo';
-          const res = await validateConfig(configType, config, true);
+          const res = await validateConfig(configType, config);
           expect(res.errors).toBeEmptyArray();
           expect(res.warnings).toBeEmptyArray();
         } catch (err) {

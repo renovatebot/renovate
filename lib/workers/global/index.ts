@@ -13,7 +13,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global.ts';
+import { GlobalConfig, setHttpGlobalConfig } from '../../config/global.ts';
 import * as configParser from '../../config/index.ts';
 import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
@@ -157,6 +157,7 @@ export async function start(): Promise<number> {
   }
 
   let config: AllConfig;
+  let repoExitCode = 0;
   const env = getEnv();
   try {
     if (isNonEmptyStringAndNotWhitespace(env.AWS_SECRET_ACCESS_KEY)) {
@@ -176,21 +177,13 @@ export async function start(): Promise<number> {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
-      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        userAgent: config.userAgent,
-      });
+      // set before `globalInitialize()`, so that `hostRules` headers from file config are checked against `allowedHeaders`, and the platform's own initialization requests are judged by the administrator's `internalHostAccess` setting and recognized as going to the platform endpoint
+      setHttpGlobalConfig(config);
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        platform: config.platform,
-        endpoint: config.endpoint,
-        userAgent: config.userAgent,
-      });
+      // set again in case local presets are used, now that platform initialization may have changed `platform` and `endpoint`
+      setHttpGlobalConfig(config);
 
       await validatePresets(config);
 
@@ -233,7 +226,10 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            for (const rule of repoConfig.hostRules) {
+              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host, and exempt from `allowedHeaders` altogether
+              hostRules.add(rule, { trusted: true });
+            }
             repoConfig.hostRules = [];
           }
 
@@ -241,7 +237,11 @@ export async function start(): Promise<number> {
           queue.clear();
           throttle.clear();
 
-          await repositoryWorker.renovateRepository(repoConfig);
+          const repoResult =
+            await repositoryWorker.renovateRepository(repoConfig);
+          if (config.exitCodeForErrors && !repoExitCode) {
+            repoExitCode = repoResult?.exitCode ?? 0;
+          }
           setMeta({});
         },
         {
@@ -281,6 +281,13 @@ export async function start(): Promise<number> {
         `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
       );
     }
+  }
+  if (repoExitCode) {
+    logger.info(
+      { exitCode: repoExitCode },
+      'Renovate is exiting with an error-specific code due to a repository error',
+    );
+    return repoExitCode;
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {

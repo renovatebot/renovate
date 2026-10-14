@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { promisify } from 'node:util';
-import { gzip as _gzip } from 'node:zlib';
+import zlib from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
@@ -17,7 +17,8 @@ const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
 
-const gzip = promisify(_gzip);
+const gzip = promisify(zlib.gzip);
+const zstdCompress = promisify(zlib.zstdCompress);
 
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
@@ -42,7 +43,7 @@ describe('modules/datasource/rpm/index', () => {
     cacheDirResult = null;
   });
 
-  describe('getPrimaryGzipUrl', () => {
+  describe('getPrimaryUrl', () => {
     it('returns the correct primary.xml URL', async () => {
       const repomdXml = codeBlock`
         <?xml version="1.0" encoding="UTF-8"?>
@@ -59,7 +60,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       const resolvedPrimaryXmlUrl =
-        await rpmDatasource.getPrimaryGzipUrl(registryUrl);
+        await rpmDatasource.getPrimaryUrl(registryUrl);
 
       expect(resolvedPrimaryXmlUrl).toBe(primaryXmlUrl);
     });
@@ -80,7 +81,7 @@ describe('modules/datasource/rpm/index', () => {
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
       const resolvedPrimaryXmlUrl =
-        await rpmDatasource.getPrimaryGzipUrl(registryUrl);
+        await rpmDatasource.getPrimaryUrl(registryUrl);
 
       expect(resolvedPrimaryXmlUrl).toBe(primaryXmlUrl);
     });
@@ -88,9 +89,7 @@ describe('modules/datasource/rpm/index', () => {
     it('throws an error if repomd.xml is missing', async () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
         `Request failed with status code 404 (Not Found): GET ${registryUrl}repomd.xml`,
       );
     });
@@ -101,9 +100,9 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .replyWithError('Network error');
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow('Network error');
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+        'Network error',
+      );
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
@@ -121,9 +120,9 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(`is not in XML format.`);
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+        `is not in XML format.`,
+      );
     });
 
     it('throws an error if no primary data is found', async () => {
@@ -141,9 +140,9 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+        `No primary data found in ${registryUrl}repomd.xml`,
+      );
     });
 
     it('throws an error if no location element is found', async () => {
@@ -161,9 +160,7 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
         `No location element found in ${registryUrl}repomd.xml`,
       );
     });
@@ -183,9 +180,9 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
-      ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
+      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+        `No href found in ${registryUrl}repomd.xml`,
+      );
     });
   });
 
@@ -427,12 +424,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
 
@@ -458,12 +452,9 @@ describe('modules/datasource/rpm/index', () => {
         )
         .mockRejectedValueOnce(new Error('extract failed'));
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
       await expect(
@@ -482,12 +473,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
 
@@ -506,17 +494,46 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toEqual({
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toEqual({
         releases: [{ version: '2.0-1.azl3' }],
       });
       await expect(
         cacheFs.readCacheFile(extractedPrimaryXmlPath, 'utf8'),
       ).resolves.toContain('ver="2.0"');
+    });
+
+    it.each([
+      {
+        name: 'uncompressed',
+        compress: (input: string) => Buffer.from(input),
+      },
+      { name: 'gzip-compressed', compress: gzip },
+      { name: 'zstd-compressed', compress: zstdCompress },
+    ])('handles $name primary.xml', async ({ compress }) => {
+      httpMock
+        .scope(primaryXmlRegistryUrl)
+        .get('/somesha256-primary.xml.gz')
+        .reply(
+          200,
+          await compress(
+            buildPrimaryXml(codeBlock`
+                <package type="rpm">
+                  <name>example-package</name>
+                  <arch>x86_64</arch>
+                  <version epoch="0" ver="1.0" rel="2.azl3"/>
+                </package>
+              `),
+          ),
+        );
+
+      const releases = await rpmDatasource.getReleasesByPackageName(
+        primaryXmlUrl,
+        packageName,
+      );
+
+      expect(releases).toEqual({ releases: [{ version: '1.0-2.azl3' }] });
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
@@ -549,12 +566,9 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      expect(
-        await rpmDatasource.getReleasesByPackageName(
-          primaryXmlUrl,
-          packageName,
-        ),
-      ).toBeNull();
+      await expect(
+        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+      ).resolves.toBeNull();
     });
 
     it('returns null if version is not found in a version element', async () => {
@@ -659,9 +673,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns the correct releases', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
-        primaryXmlUrl,
-      );
+      vi.spyOn(rpmDatasource, 'getPrimaryUrl').mockResolvedValue(primaryXmlUrl);
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockResolvedValue({
         releases: [
           { version: '1.0-2.azl3' },
@@ -686,8 +698,8 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('throws an error if getPrimaryGzipUrl fails', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockRejectedValue(
+    it('throws an error if getPrimaryUrl fails', async () => {
+      vi.spyOn(rpmDatasource, 'getPrimaryUrl').mockRejectedValue(
         new Error('Something wrong'),
       );
 
@@ -700,9 +712,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if getReleasesByPackageName fails', async () => {
-      vi.spyOn(rpmDatasource, 'getPrimaryGzipUrl').mockResolvedValue(
-        primaryXmlUrl,
-      );
+      vi.spyOn(rpmDatasource, 'getPrimaryUrl').mockResolvedValue(primaryXmlUrl);
       vi.spyOn(rpmDatasource, 'getReleasesByPackageName').mockRejectedValue(
         new Error('Something wrong'),
       );

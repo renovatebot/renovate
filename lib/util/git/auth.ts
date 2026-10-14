@@ -7,6 +7,7 @@ import type { ResolvedChildEnv } from '../exec/utils.ts';
 import { find, getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
+import { addGitConfigEnvironmentVariables } from './config.ts';
 import type { AuthenticationRule } from './types.ts';
 import { parseGitUrl } from './url.ts';
 
@@ -34,21 +35,6 @@ export function getGitAuthenticatedEnvironmentVariables(
     return { ...environmentVariables };
   }
 
-  const gitConfigCountEnvVariable = environmentVariables.GIT_CONFIG_COUNT;
-  let gitConfigCount = 0;
-  if (gitConfigCountEnvVariable) {
-    // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
-    gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
-    if (Number.isNaN(gitConfigCount)) {
-      logger.warn(
-        {
-          GIT_CONFIG_COUNT: gitConfigCountEnvVariable,
-        },
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
-      );
-      gitConfigCount = 0;
-    }
-  }
   let authenticationRules: AuthenticationRule[];
   if (token) {
     authenticationRules = getAuthenticationRulesWithToken(
@@ -67,22 +53,13 @@ export function getGitAuthenticatedEnvironmentVariables(
     );
   }
 
-  // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
-  // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one for each rule and add it to the object
-  const newEnvironmentVariables = {
-    ...environmentVariables,
-  };
-  for (const rule of authenticationRules) {
-    newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
-      `url.${rule.url}.insteadOf`;
-    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
-      rule.insteadOf;
-    gitConfigCount++;
-  }
-  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
-
-  return newEnvironmentVariables;
+  return addGitConfigEnvironmentVariables(
+    environmentVariables,
+    authenticationRules.map((rule) => ({
+      key: `url.${rule.url}.insteadOf`,
+      value: rule.insteadOf,
+    })),
+  );
 }
 
 function getAuthenticationRulesWithToken(

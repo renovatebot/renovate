@@ -1,13 +1,17 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
@@ -146,8 +150,8 @@ export async function downloadHttpProtocol(
       }
 
       const failedUrl = url;
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ failedUrl }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
       }
 

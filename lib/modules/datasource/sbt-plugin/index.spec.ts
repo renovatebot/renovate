@@ -17,7 +17,18 @@ describe('modules/datasource/sbt-plugin/index', () => {
       extractPageLinks(mavenIndexHtml, (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'autofix-3.0.6_2.11',
+      'sbt-scalatest_2.12_1.0',
+      'scalatest',
+      'scalatest-app_native0.4_3',
+      'scalatest_2.12',
+      'scalatest_2.13',
+      'scalatest_2.13.0-RC1',
+      'scalatest_3',
+      'scalatest_sjs1.0.0-M7_2.13.0-RC2',
+      'test-interface',
+    ]);
   });
 
   it('parses sbt index directory', () => {
@@ -25,7 +36,15 @@ describe('modules/datasource/sbt-plugin/index', () => {
       extractPageLinks(sbtPluginIndex, (x) =>
         regEx(/^\.+/).test(x) ? null : x,
       ),
-    ).toMatchSnapshot();
+    ).toEqual([
+      'au.com.onegeek',
+      'ch',
+      'com.github.DavidPerezIngeniero',
+      'org.portable-scala',
+      'scalajs-react-interface',
+      'uk.co.josephearl',
+      'woshilaiceshide',
+    ]);
   });
 
   it('uses proper hostType', () => {
@@ -67,22 +86,22 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/scalatest/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         }),
-      ).toBeNull();
-      expect(
-        await getPkgReleases({
+      ).resolves.toBeNull();
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.scalatest:scalaz',
           registryUrls: [],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('fetches sbt plugins', async () => {
@@ -139,14 +158,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/foundweekends/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.foundweekends:sbt-bintray',
           registryUrls: [],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
@@ -208,14 +227,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         .get('/org/foundweekends/')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'org.foundweekends:sbt-bintray_2.12',
           registryUrls: [],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/org/foundweekends/sbt-bintray',
         registryUrl: 'https://repo.maven.apache.org/maven2',
@@ -287,14 +306,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         )
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
         registryUrl: 'https://repo.maven.apache.org/maven2',
@@ -368,14 +387,14 @@ describe('modules/datasource/sbt-plugin/index', () => {
         )
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: mavenVersioning.id,
           datasource: SbtPluginDatasource.id,
           packageName: 'io.get-coursier:sbt-coursier',
           registryUrls: [MAVEN_REPO],
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         dependencyUrl:
           'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
         registryUrl: 'https://repo.maven.apache.org/maven2',

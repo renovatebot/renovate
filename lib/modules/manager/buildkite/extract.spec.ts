@@ -15,8 +15,14 @@ describe('modules/manager/buildkite/extract', () => {
               abc/detect-clowns#v2.0.0: ~
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'abc/detect-clowns',
+          packageName: 'abc/detect-clowns-buildkite-plugin',
+        },
+      ]);
     });
 
     it('extracts multiple plugins in same file', () => {
@@ -40,8 +46,20 @@ describe('modules/manager/buildkite/extract', () => {
                 run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
     });
 
     it('adds skipReason', () => {
@@ -63,8 +81,18 @@ describe('modules/manager/buildkite/extract', () => {
                 run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2.5',
+          depName: 'namespace/docker-compose',
+          skipReason: 'invalid-version',
+        },
+        {
+          currentValue: 'v1.3.2',
+          depName: 'github.com/buildkite/plugin-docker-compose',
+          skipReason: 'invalid-dependency-specification',
+        },
+      ]);
     });
 
     it('extracts arrays of plugins', () => {
@@ -85,8 +113,32 @@ describe('modules/manager/buildkite/extract', () => {
                   run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.1',
+          datasource: 'github-tags',
+          depName: 'docker-login',
+          packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
+        },
+        {
+          currentValue: 'v2.5.1',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+        {
+          currentValue: 'v2.0.1',
+          datasource: 'github-tags',
+          depName: 'docker-login',
+          packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
+        },
+        {
+          currentValue: 'v2.5.1',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+        },
+      ]);
     });
 
     it('extracts git-based plugins', () => {
@@ -98,8 +150,20 @@ describe('modules/manager/buildkite/extract', () => {
                   build: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.2.7',
+          datasource: 'github-tags',
+          depName: 'some-org/some-plugin',
+          registryUrls: ['https://github.company.com'],
+        },
+        {
+          currentValue: 'v0.0.1',
+          datasource: 'github-tags',
+          depName: 'some-third-org/some-third-plugin',
+          registryUrls: ['https://github.company.com'],
+        },
+      ]);
     });
 
     it('extracts git-based plugin with .git at the end of its name', () => {

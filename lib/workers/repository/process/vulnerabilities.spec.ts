@@ -1,17 +1,27 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
+import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
-import type { RenovateConfig } from '~test/util.ts';
-import { logger } from '~test/util.ts';
+import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageRuleInputConfig } from '../../../config/types.ts';
+import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
+import { Result } from '../../../util/result.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as lookup from './lookup/index.ts';
+import type { LookupUpdateConfig } from './lookup/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
 const createMock = vi.fn();
+const getMavenReleases = vi.spyOn(MavenDatasource.prototype, 'getReleases');
+const postprocessMavenRelease = vi.spyOn(
+  MavenDatasource.prototype,
+  'postprocessRelease',
+);
 
 vi.mock('@renovatebot/osv-offline', () => {
   return {
@@ -66,7 +76,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -727,6 +742,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'drupal/ai',
+                packageName: 'drupal/ai',
                 currentValue: '1.0.6',
                 datasource: 'packagist',
               },
@@ -777,6 +793,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'drupal/ai',
+                packageName: 'drupal/ai',
                 currentValue: '1.0.6',
                 datasource: 'packagist',
               },
@@ -856,7 +873,9 @@ describe('workers/repository/process/vulnerabilities', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         dockerfile: [
           {
-            deps: [{ depName: 'node', datasource: 'docker' }],
+            deps: [
+              { depName: 'node', packageName: 'node', datasource: 'docker' },
+            ],
             packageFile: 'some-file',
           },
         ],
@@ -876,7 +895,9 @@ describe('workers/repository/process/vulnerabilities', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
-            deps: [{ depName: 'lodash', datasource: 'npm' }],
+            deps: [
+              { depName: 'lodash', packageName: 'lodash', datasource: 'npm' },
+            ],
             packageFile: 'some-file',
           },
         ],
@@ -898,7 +919,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -923,7 +949,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -954,6 +985,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '#4.17.11',
                 datasource: 'npm',
               },
@@ -983,6 +1015,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.11',
                 datasource: 'npm',
               },
@@ -1011,6 +1044,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.11',
                 datasource: 'npm',
               },
@@ -1057,7 +1091,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1087,7 +1126,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1121,7 +1165,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'fake', currentValue: '1.5.1', datasource: 'npm' },
+              {
+                depName: 'fake',
+                packageName: 'fake',
+                currentValue: '1.5.1',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1164,7 +1213,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         gomod: [
           {
             deps: [
-              { depName: 'stdlib', currentValue: '1.7.5', datasource: 'go' },
+              {
+                depName: 'stdlib',
+                packageName: 'stdlib',
+                currentValue: '1.7.5',
+                datasource: 'go',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1223,6 +1277,8 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
           isVulnerabilityAlert: true,
+          // security updates inherit `vulnerabilityAlerts`, which disables `minimumReleaseAge`
+          force: { minimumReleaseAge: null },
         },
       ]);
     });
@@ -1234,6 +1290,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'toolchain',
                 currentValue: '1.23.6',
                 datasource: 'golang-version',
@@ -1296,6 +1353,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'golang',
                 currentValue: '1.26.0',
                 datasource: 'golang-version',
@@ -1303,6 +1361,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               },
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'toolchain',
                 currentValue: '1.26.5',
                 datasource: 'golang-version',
@@ -1388,6 +1447,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'go',
+                packageName: 'go',
                 depType: 'golang',
                 currentValue: '1.23.5',
                 datasource: 'golang-version',
@@ -1413,6 +1473,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 depType: 'dependencies',
                 currentValue: '4.17.10',
                 datasource: 'npm',
@@ -1449,6 +1510,8 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName:
+                  'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                packageName:
                   'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
                 currentValue: '3.4.0',
                 datasource: 'maven',
@@ -1513,12 +1576,103 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('proposes a fresh security fix immediately despite minimumReleaseAge', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'org.example:lib',
+                packageName: 'org.example:lib',
+                currentValue: '1.0.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-1111-2222-3333',
+          modified: '',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'org.example:lib',
+                purl: 'pkg:maven/org.example/lib',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.1' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // The user enforces a long release-age delay with strict filtering.
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+
+      // The real vulnerability flow appends the security packageRule to config.
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      // The fix was released yesterday: far inside the 14-day window, so a normal
+      // update would be held as a pending status check.
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '1.0.1',
+            releaseTimestamp: asTimestamp(
+              DateTime.now().minus({ days: 1 }).toISO(),
+            ),
+          },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, release) =>
+        Promise.resolve(release),
+      );
+
+      // Feed the config that the vulnerability flow just mutated into the real lookup.
+      const dep = packageFiles.maven[0].deps[0];
+      const lookupConfig = partial<LookupUpdateConfig>({
+        ...config,
+        abandonmentThreshold: config.abandonmentThreshold ?? undefined,
+        manager: 'maven',
+        packageName: dep.depName,
+        currentValue: dep.currentValue!,
+        datasource: dep.datasource,
+        versioning: 'maven',
+      });
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(lookupConfig),
+      ).unwrapOrThrow();
+
+      // The fix is proposed right away, with no pending status check.
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({ newVersion: '1.0.1' });
+      expect(updates[0]).not.toHaveProperty('pendingChecks');
+    });
+
     it('vulnerability with multiple affected entries and version ranges', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1590,7 +1744,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+              {
+                depName: 'django',
+                packageName: 'django',
+                currentValue: '3.2',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1659,7 +1818,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1681,6 +1845,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'tiny_http',
+                packageName: 'tiny_http',
                 currentValue: '0.1.2',
                 datasource: 'crate',
               },
@@ -1783,7 +1948,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1845,6 +2015,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'aeson',
+                packageName: 'aeson',
                 currentValue: '0.4.0.0',
                 datasource: 'hackage',
               },
@@ -1900,7 +2071,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         poetry: [
           {
             deps: [
-              { depName: 'quokka', currentValue: '1.2.3', datasource: 'pypi' },
+              {
+                depName: 'quokka',
+                packageName: 'quokka',
+                currentValue: '1.2.3',
+                datasource: 'pypi',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -1945,6 +2121,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'com.guicedee.services:log4j-core',
+                packageName: 'com.guicedee.services:log4j-core',
                 currentValue: '1.0.10.1',
                 datasource: 'maven',
               },
@@ -1957,6 +2134,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'SharpZipLib',
+                packageName: 'SharpZipLib',
                 currentValue: '1.3.0',
                 datasource: 'nuget',
               },
@@ -1969,6 +2147,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'lodash',
+                packageName: 'lodash',
                 currentValue: '4.17.15',
                 datasource: 'npm',
               },
@@ -2070,6 +2249,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'com.guicedee.services:log4j-core',
+                packageName: 'com.guicedee.services:log4j-core',
                 currentValue: '1.0.10.1',
                 datasource: 'maven',
               },
@@ -2174,7 +2354,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '0.5.0', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '0.5.0',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -2253,6 +2438,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'django-mfa2',
+                packageName: 'django-mfa2',
                 currentValue: '2.5.0',
                 datasource: 'pypi',
               },
@@ -2337,6 +2523,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'mattermost-desktop',
+                packageName: 'mattermost-desktop',
                 currentValue: '5.8.0',
                 datasource: 'npm',
               },
@@ -2427,7 +2614,12 @@ describe('workers/repository/process/vulnerabilities', () => {
         npm: [
           {
             deps: [
-              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+              {
+                depName: 'lodash',
+                packageName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
             ],
             packageFile: 'some-file',
           },
@@ -2491,6 +2683,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               {
                 depName: 'sys-info',
+                packageName: 'sys-info',
                 currentValue: '0.6.0',
                 datasource: 'crate',
               },

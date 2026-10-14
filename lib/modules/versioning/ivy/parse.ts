@@ -34,13 +34,11 @@ function parseDynamicRevision(str: string): Revision | null {
 
   const range = parseRange(str);
   if (range?.length === 1) {
-    const rangeValue = rangeToStr(range);
-    if (rangeValue) {
-      return {
-        type: REV_TYPE_RANGE,
-        value: rangeValue,
-      };
-    }
+    // `rangeToStr` only returns null for a null range, which is ruled out above
+    return {
+      type: REV_TYPE_RANGE,
+      value: rangeToStr(range)!,
+    };
   }
 
   return null;

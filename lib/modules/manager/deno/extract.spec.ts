@@ -133,7 +133,9 @@ describe('modules/manager/deno/extract', () => {
     it('invalid deno.json file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.json');
       fs.readLocalFile.mockResolvedValueOnce('invalid');
-      expect(await extractAllPackageFiles({}, ['deno.json'])).toEqual([]);
+      await expect(extractAllPackageFiles({}, ['deno.json'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('multiple matched files with deno.json only', async () => {
@@ -157,17 +159,23 @@ describe('modules/manager/deno/extract', () => {
     it('deno.lock without package.json', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('deno.lock');
       fs.localPathIsFile.mockResolvedValue(false);
-      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
+      await expect(extractAllPackageFiles({}, ['deno.lock'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('deno.lock when collectPackageJson returns null', async () => {
       vi.mocked(compat.collectPackageJson).mockResolvedValueOnce(null);
-      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
+      await expect(extractAllPackageFiles({}, ['deno.lock'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('deno.lock when collectPackageJson returns empty array', async () => {
       vi.mocked(compat.collectPackageJson).mockResolvedValueOnce([]);
-      expect(await extractAllPackageFiles({}, ['deno.lock'])).toEqual([]);
+      await expect(extractAllPackageFiles({}, ['deno.lock'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('complex config with imports, scopes, tasks and lint', async () => {
@@ -220,9 +228,9 @@ describe('modules/manager/deno/extract', () => {
           version: '5',
         }),
       );
-      expect(
-        await extractAllPackageFiles({}, ['deno.jsonc', 'deno.lock']),
-      ).toStrictEqual([
+      await expect(
+        extractAllPackageFiles({}, ['deno.jsonc', 'deno.lock']),
+      ).resolves.toStrictEqual([
         {
           deps: [
             {
@@ -463,7 +471,9 @@ describe('modules/manager/deno/extract', () => {
           );
         });
 
-        expect(await extractAllPackageFiles({}, ['deno.lock'])).toStrictEqual([
+        await expect(
+          extractAllPackageFiles({}, ['deno.lock']),
+        ).resolves.toStrictEqual([
           {
             deps: [
               {

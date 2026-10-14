@@ -1,16 +1,9 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
-import {
-  BITBUCKET_API_USING_HOST_TYPES,
-  BITBUCKET_SERVER_API_USING_HOST_TYPES,
-  FORGEJO_API_USING_HOST_TYPES,
-  GITEA_API_USING_HOST_TYPES,
-  GITHUB_API_USING_HOST_TYPES,
-  GITLAB_API_USING_HOST_TYPES,
-} from '../../constants/index.ts';
+import { PLATFORM_FAMILIES } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
-import type { HostRule } from '../../types/index.ts';
+import type { CombinedHostRuleWithTrustedHeaders } from '../host-rules.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
@@ -21,7 +14,6 @@ import type { GotOptions } from './types.ts';
 export type HostRulesGotOptions = Pick<
   GotOptions & InternalHttpOptions,
   | 'hostType'
-  | 'url'
   | 'noAuth'
   | 'headers'
   | 'token'
@@ -41,7 +33,7 @@ export type HostRulesGotOptions = Pick<
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-): HostRule {
+): CombinedHostRuleWithTrustedHeaders {
   const { hostType, readOnly } = options;
   let res = hostRules.find({ hostType, url, readOnly });
 
@@ -57,7 +49,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `github` hostType
   if (
     hostType &&
-    GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.github.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'github'
   ) {
     res = {
@@ -99,7 +91,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `gitlab` hostType
   if (
     hostType &&
-    GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.gitlab.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'gitlab'
   ) {
     res = {
@@ -114,7 +106,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `bitbucket` hostType
   if (
     hostType &&
-    BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.bitbucket.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'bitbucket'
   ) {
     res = {
@@ -129,7 +121,9 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `bitbucket-server` hostType
   if (
     hostType &&
-    BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES['bitbucket-server'].apiUsingHostTypes.includes(
+      hostType,
+    ) &&
     hostType !== 'bitbucket-server'
   ) {
     res = {
@@ -144,7 +138,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `forgejo` hostType
   if (
     hostType &&
-    FORGEJO_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.forgejo.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'forgejo'
   ) {
     res = {
@@ -159,7 +153,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   // Fallback to `gitea` hostType
   if (
     hostType &&
-    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    PLATFORM_FAMILIES.gitea.apiUsingHostTypes.includes(hostType) &&
     hostType !== 'gitea'
   ) {
     res = {
@@ -178,7 +172,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
 export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-  hostRule: HostRule,
+  hostRule: CombinedHostRuleWithTrustedHeaders,
 ): GotOptions {
   if (hostRule.enabled === false) {
     options.enabled = false;
@@ -224,10 +218,15 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.headers) {
     const allowedHeaders = GlobalConfig.get('allowedHeaders');
+    // headers already known to have come from the self-hosted administrator's own (`trusted`) config bypassed `allowedHeaders` at registration - see `hostRules.add()` - so must not be re-checked, and dropped, here
+    const trustedHeaderNames = new Set(hostRule.trustedHeaderNames);
     const filteredHeaders: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(hostRule.headers)) {
-      if (matchRegexOrGlobList(header, allowedHeaders)) {
+      if (
+        trustedHeaderNames.has(header) ||
+        matchRegexOrGlobList(header, allowedHeaders)
+      ) {
         filteredHeaders[header] = value;
       } else {
         logger.once.error(

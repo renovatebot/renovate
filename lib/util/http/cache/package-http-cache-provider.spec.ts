@@ -87,7 +87,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'old response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'old response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
@@ -103,7 +103,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'cached response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider();
@@ -276,7 +276,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'cached response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider();
@@ -349,7 +349,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
@@ -365,7 +365,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider();
@@ -381,7 +381,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider();

@@ -11,14 +11,7 @@ In addition, AWS may pull existing versions if serious problems arise during the
 
 ### AWS API configuration
 
-Since the datasource uses the AWS SDK for JavaScript, you can configure it like other AWS Tools.
-You can use common AWS configuration options, for example:
-
-- Set the region via the `AWS_REGION` environment variable or your `~/.aws/config` file
-- Provide credentials via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables or your `~/.aws/credentials` file
-- Select the profile to use via `AWS_PROFILE` environment variable
-
-Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
+See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
 ```json {title="Minimal IAM privileges needed for this datasource" configType=none}
 {
