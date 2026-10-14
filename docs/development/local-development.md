@@ -197,6 +197,10 @@ You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
+We use [rumdl](https://rumdl.dev) to lint Markdown, configured in `.rumdl.toml`.
+Run `pnpm markdown-lint` to check Markdown or `pnpm markdown-lint-fix` to apply lint fixes.
+Prettier remains the Markdown formatter, and existing `markdownlint-disable` comments are supported.
+
 ### IDE extensions
 
 We recommend installing the extensions listed in `.vscode/extensions.json`.
