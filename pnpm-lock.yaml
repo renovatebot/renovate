@@ -122,8 +122,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
-        specifier: 13.121.2
-        version: 13.121.2(zod@4.6.5)
+        specifier: 13.126.0
+        version: 13.126.0(zod@4.6.5)
       '@renovatebot/detect-tools':
         specifier: 4.0.21
         version: 4.0.21
@@ -137,8 +137,8 @@ importers:
         specifier: 5.0.1
         version: 5.0.1
       '@renovatebot/pgp':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 2.0.3
+        version: 2.0.3
       '@renovatebot/ruby-semver':
         specifier: 5.0.0
         version: 5.0.0
@@ -913,8 +913,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@containerbase/base@14.32.1':
-    resolution: {integrity: sha512-v0anQD2Jk0nv5yf8YTFVpJGARJ9I1XveaudOIxd8B/QEcAX7zL5upR5vzU3SQp/6NQKEY13/WLweEFQ11SXq3g==}
+  '@containerbase/base@14.37.0':
+    resolution: {integrity: sha512-O7eRdGi5D564mmw0sm7vTs810sAZiM7ebrZdc58W+f66g/uMhqVdqqCrNcgEv2nPno0E8ffFXUC1MjnN3V7oFw==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -1821,8 +1821,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.121.2':
-    resolution: {integrity: sha512-9kVN3orwjlUImY7udkrD72GV+gQxKWdwloIOpu0xvl0Alu8epNIw+sL8FOZr4mghPfy9j5Y/hVNizjAVheiGZQ==}
+  '@renovatebot/base-image@13.126.0':
+    resolution: {integrity: sha512-5wcwKcShC4XDPztB6lksi5v0/lj+KpfzUI+ajKvttOx+q4NXBAjn7frUKGqw4dMIxBRehSVxBJEhfbhgyVWd7g==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -1850,8 +1850,8 @@ packages:
     resolution: {integrity: sha512-KmMz+X68YvrS6aN6TJWtDiH8aCIL2Igcvceh17STHxMUN3KxXsC24COoOXjMOl/Gb+okBwwduMm8PY/WY/0Cpg==}
     engines: {node: ^22.11.0 || >=24.10.0, pnpm: '>=10.0.0'}
 
-  '@renovatebot/pgp@2.0.2':
-    resolution: {integrity: sha512-wAQXq8yQYm94slVEMRTIyGgNF04kyg++N1hmrmDwynoW0mQyL95UXY/NnkaKYIpm7+JyoXQDUKW1Yx6lwt7U6Q==}
+  '@renovatebot/pgp@2.0.3':
+    resolution: {integrity: sha512-6Q5Lik+akLCgyoRMpdTkGWMBbBzDgJU30WkhHWHY0gLNzrXM9Un5v15fTIUE1SsHWRoTuoP5AALRK/Y/KuGTJw==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/ruby-semver@5.0.0':
@@ -6366,7 +6366,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.32.1(zod@4.6.5)':
+  '@containerbase/base@14.37.0(zod@4.6.5)':
     optionalDependencies:
       zod: 4.6.5
 
@@ -7149,9 +7149,9 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.121.2(zod@4.6.5)':
+  '@renovatebot/base-image@13.126.0(zod@4.6.5)':
     dependencies:
-      '@containerbase/base': 14.32.1(zod@4.6.5)
+      '@containerbase/base': 14.37.0(zod@4.6.5)
     optionalDependencies:
       zod: 4.6.5
 
@@ -7188,7 +7188,7 @@ snapshots:
 
   '@renovatebot/pep440@5.0.1': {}
 
-  '@renovatebot/pgp@2.0.2': {}
+  '@renovatebot/pgp@2.0.3': {}
 
   '@renovatebot/ruby-semver@5.0.0': {}
 

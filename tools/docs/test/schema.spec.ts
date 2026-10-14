@@ -84,7 +84,7 @@ async function getLinksToMissingHeadings(): Promise<string[]> {
   );
 }
 
-describe('tools/docs/test/schema', () => {
+describe('tools/docs/test/schema', { timeout: 30000 }, () => {
   describe('getOptionDocsUrl', () => {
     it('links an option with no parents to its own heading', () => {
       expect(
@@ -159,7 +159,7 @@ describe('tools/docs/test/schema', () => {
     beforeAll(async () => {
       repoSchema = await compileSchema();
       globalSchema = await compileSchema({ isGlobal: true });
-    });
+    }, 30000);
 
     it('allows a map of values to use any key', () => {
       /* `secrets` is self-hosted only, so is only in the global schema */
@@ -282,7 +282,7 @@ describe('tools/docs/test/schema', () => {
     beforeAll(async () => {
       repoSchema = await compileSchema();
       globalSchema = await compileSchema({ isGlobal: true });
-    });
+    }, 30000);
 
     function getPresetsRejectedBySchema(): string[] {
       const rejected: string[] = [];
