@@ -3076,7 +3076,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: { ghActionsLock: 'v0.1.6' },
+    default: { ghActionsLock: 'v0.2.0' },
     mergeable: true,
     cli: false,
     supportedManagers: [
