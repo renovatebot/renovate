@@ -1,6 +1,7 @@
 import {
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
+  isString,
   isTruthy,
 } from '@sindresorhus/is';
 import type { ConstraintsFilter } from '../../../config/types.ts';
@@ -51,6 +52,37 @@ const versionTagRegex = regEx(/^v\d/);
  * @see https://go.dev/ref/mod#non-module-compat
  */
 const incompatibleSuffixRegex = regEx(/\+incompatible$/);
+
+/**
+ * A Go proxy responds with a `404` or `410` when it can't fetch a module from its origin, with the reason in the body, which includes the origin's response when it requires authentication, for instance:
+ *
+ *     not found: example.com/foo@latest: unrecognized import path "example.com/foo": reading https://example.com/foo?go-get=1: 401 Unauthorized
+ *
+ * @see https://go.dev/ref/mod#goproxy-protocol
+ */
+const originAuthFailureRegex = regEx(/\b(?:401 Unauthorized|403 Forbidden)\b/);
+
+/**
+ * Whether a request to a Go proxy failed because either the proxy, or the module's origin, requires authentication, which means we can't tell whether the module exists.
+ */
+function isAuthFailure(err: unknown): boolean {
+  const potentialHttpError = err instanceof ExternalHostError ? err.err : err;
+  if (!(potentialHttpError instanceof HttpError)) {
+    return false;
+  }
+
+  const statusCode = potentialHttpError.response?.statusCode;
+  if (statusCode === 401) {
+    return true;
+  }
+
+  if (statusCode !== 404 && statusCode !== 410) {
+    return false;
+  }
+
+  const body = potentialHttpError.response?.body;
+  return isString(body) && originAuthFailureRegex.test(body);
+}
 
 /**
  * @see https://go.dev/ref/mod#pseudo-versions
@@ -175,7 +207,7 @@ export class GoProxyDatasource extends Datasource {
           );
           this.handleGenericErrors(err);
         }
-        if (statusCode === 401) {
+        if (isAuthFailure(err)) {
           authFailed = true;
         }
         logger.debug(
@@ -573,10 +605,13 @@ export class GoProxyDatasource extends Datasource {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
         const status = potentialHttpError.response?.statusCode;
+        // until we've found a version, an authentication failure means we can't tell whether the module exists, so needs to be handled by the caller
+        const isInconclusive = !result.releases.length && isAuthFailure(err);
         if (
           potentialHttpError instanceof HttpError &&
           (status === 404 || status === 403) &&
-          major !== packageMajor
+          major !== packageMajor &&
+          !isInconclusive
         ) {
           break;
         }

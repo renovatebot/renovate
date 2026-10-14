@@ -1270,6 +1270,31 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(res).toBeNull();
     });
 
+    it('keeps versions found before a later major version fails to authenticate', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200, 'v1.0.0 2018-08-13T15:31:12Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('/v2/@v/list')
+        .reply(404, 'not found: github.com/google/btree/v2: 401 Unauthorized');
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.0' },
+      });
+    });
+
     it('throws if the latest version fails to authenticate', async () => {
       vi.stubEnv('GOPROXY', `${baseUrl},direct`);
 
@@ -1875,6 +1900,23 @@ describe('modules/datasource/go/releases-goproxy', () => {
         expect(setCache).not.toHaveBeenCalled();
       });
 
+      it('does not cache lookups which fell back from a 401 with abortOnError', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        hostRules.add({ abortOnError: true });
+        vi.stubEnv('GOPROXY', `${privateUrl}|off`);
+        httpMock
+          .scope(`${privateUrl}/github.com/google/btree`)
+          .get('/@v/list')
+          .reply(401);
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).not.toHaveBeenCalled();
+      });
+
       it('does not cache lookups where the latest version failed to authenticate', async () => {
         GlobalConfig.set({ cachePrivatePackages: true });
         vi.stubEnv('GOPROXY', `${privateUrl}|off`);
@@ -1891,6 +1933,82 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
         expect(res).toBeNull();
         expect(setCache).not.toHaveBeenCalled();
+      });
+
+      it.each`
+        status | body
+        ${404} | ${'not found: example.com/foo/bar@latest: unrecognized import path "example.com/foo/bar": reading https://example.com/foo/bar?go-get=1: 401 Unauthorized'}
+        ${410} | ${'not found: example.com/foo/bar@latest: unrecognized import path "example.com/foo/bar": reading https://example.com/foo/bar?go-get=1: 403 Forbidden'}
+      `(
+        'does not cache lookups where the proxy failed to authenticate to the origin: $status',
+        async ({ status, body }) => {
+          vi.stubEnv('GOPROXY', `${baseUrl},direct`);
+          httpMock
+            .scope(`${baseUrl}/example.com/foo/bar`)
+            .get('/@v/list')
+            .reply(status, body);
+          httpMock
+            .scope('https://example.com')
+            .get('/foo/bar?go-get=1')
+            .reply(200, '<html></html>');
+
+          const res = await datasource.getReleases({
+            packageName: 'example.com/foo/bar',
+          });
+
+          expect(res).toBeNull();
+          expect(setCache).not.toHaveBeenCalledWith(
+            'datasource-go-proxy',
+            expect.anything(),
+            expect.anything(),
+            expect.anything(),
+          );
+        },
+      );
+
+      it('caches lookups where the proxy could not find the module', async () => {
+        vi.stubEnv('GOPROXY', `${baseUrl},direct`);
+        httpMock
+          .scope(`${baseUrl}/example.com/foo/bar`)
+          .get('/@v/list')
+          .reply(
+            404,
+            "not found: module example.com/foo/bar: git ls-remote -q --end-of-options https://example.com/foo/bar: exit status 128:\n\tfatal: could not read Username for 'https://example.com': terminal prompts disabled",
+          );
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, '<html></html>');
+
+        const res = await datasource.getReleases({
+          packageName: 'example.com/foo/bar',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-go-proxy',
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+        );
+      });
+
+      it('caches lookups which fell back from non-HTTP errors', async () => {
+        GlobalConfig.set({ cachePrivatePackages: true });
+        vi.stubEnv('GOPROXY', 'direct|off');
+        githubGetTags.mockRejectedValueOnce(new Error('unknown'));
+
+        const res = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(res).toBeNull();
+        expect(setCache).toHaveBeenCalledWith(
+          'datasource-go-proxy',
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+        );
       });
 
       it('caches lookups which fell back from other errors', async () => {
