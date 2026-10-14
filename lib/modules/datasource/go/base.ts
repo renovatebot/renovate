@@ -29,6 +29,9 @@ export class BaseGoDatasource {
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
   );
+  private static readonly goImportRegexp = regEx(
+    /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
+  );
 
   private static readonly id = 'go';
   private static readonly http = new Http(BaseGoDatasource.id);
@@ -122,12 +125,38 @@ export class BaseGoDatasource {
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
+  /**
+   * Returns the module proxy URL that a `go-import` meta tag with the `mod` VCS advertises for the module.
+   *
+   * @see https://go.dev/ref/mod#serving-from-proxy
+   */
+  static async getModProxyUrl(goModule: string): Promise<string | null> {
+    const html = await BaseGoDatasource.goGet(goModule);
+    const importMatchGroups =
+      BaseGoDatasource.goImportRegexp.exec(html)?.groups;
+    if (!importMatchGroups) {
+      return null;
+    }
+    const { prefix, proto, goImportURL } = importMatchGroups;
+
+    if (proto !== 'mod' || !goModule.startsWith(prefix)) {
+      return null;
+    }
+
+    return goImportURL;
+  }
+
+  private static async goGet(goModule: string): Promise<string> {
+    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
+    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
+    const { body } = await BaseGoDatasource.http.getText(pkgUrl);
+    return body;
+  }
+
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
-    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
-    const { body: html } = await BaseGoDatasource.http.getText(pkgUrl);
+    const html = await BaseGoDatasource.goGet(goModule);
 
     const goSourceHeader = BaseGoDatasource.goSourceHeader(html, goModule);
     if (goSourceHeader) {
@@ -248,9 +277,8 @@ export class BaseGoDatasource {
     html: string,
     goModule: string,
   ): DataSource | null {
-    const importMatchGroups = regEx(
-      /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
-    ).exec(html)?.groups;
+    const importMatchGroups =
+      BaseGoDatasource.goImportRegexp.exec(html)?.groups;
     if (!importMatchGroups) {
       logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;

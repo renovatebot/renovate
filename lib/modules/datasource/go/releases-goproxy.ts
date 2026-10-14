@@ -125,7 +125,7 @@ export class GoProxyDatasource extends Datasource {
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
-      return this.direct.getReleases(config);
+      return this.getDirectReleases(config);
     }
     const proxyList = parseGoproxy(goproxy);
     const noproxy = parseNoproxy();
@@ -135,7 +135,7 @@ export class GoProxyDatasource extends Datasource {
 
     if (noproxy?.test(packageName)) {
       logger.debug(`Fetching ${packageName} via GONOPROXY match`);
-      result = await this.direct.getReleases(config);
+      result = await this.getDirectReleases(config);
       return result;
     }
 
@@ -144,7 +144,7 @@ export class GoProxyDatasource extends Datasource {
         if (url === 'off') {
           break;
         } else if (url === 'direct') {
-          result = await this.direct.getReleases(config);
+          result = await this.getDirectReleases(config);
           break;
         }
 
@@ -199,6 +199,33 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  /**
+   * Looks up a module directly from its source, or from the module proxy its `go-import` meta tag advertises with the `mod` VCS, as with private Buf Schema Registries.
+   */
+  private async getDirectReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    const { packageName } = config;
+
+    const source = await BaseGoDatasource.getDatasource(packageName);
+    if (!source) {
+      const modProxyUrl = await BaseGoDatasource.getModProxyUrl(packageName);
+      if (modProxyUrl) {
+        logger.debug(
+          `Fetching ${packageName} via go-import mod proxy ${modProxyUrl}`,
+        );
+        const res = await this.getVersionsWithInfo(
+          modProxyUrl,
+          packageName,
+          config.constraintsFiltering,
+        );
+        return res.releases.length ? res : null;
+      }
+    }
+
+    return this.direct.getReleases(config);
   }
 
   /**
