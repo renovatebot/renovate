@@ -536,5 +536,65 @@ describe('modules/datasource/go/base', () => {
         });
       });
     });
+
+    describe('getModProxyUrl', () => {
+      it('returns the proxy URL for mod imports', async () => {
+        const meta =
+          '<meta name="go-import" content="buf.build/gen/go mod https://buf.build/gen/go">';
+        httpMock
+          .scope('https://buf.build')
+          .get('/gen/go/gogo/protobuf/protocolbuffers/go?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'buf.build/gen/go/gogo/protobuf/protocolbuffers/go',
+        );
+
+        expect(res).toBe('https://buf.build/gen/go');
+      });
+
+      it('returns null for git imports', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo/bar git https://example.com/foo/bar.git">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null for go-import prefix mismatch', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/other mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('returns null without a go-import meta tag', async () => {
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, '<html></html>');
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+    });
   });
 });
