@@ -86,7 +86,7 @@ Instead, set `"dependencyDashboardApproval": true` for major updates so that you
 ## Abandoned PRs
 
 Renovate normally cleans up its own branches and PRs once it decides they are no longer needed, for example after you merge or close a PR.
-Depending on the state of the branch, Renovate either autocloses the PR and deletes the branch, or leaves the branch alone.
+Depending on the state of the branch, Renovate either autocloses the PR and deletes the branch, or, if the branch has been modified, flags the PR as abandoned.
 
 If someone other than Renovate modified the branch, Renovate will not destroy that work by autoclosing the PR and deleting the branch.
 
@@ -95,7 +95,7 @@ Instead, Renovate flags the PR as abandoned by:
 - Appending `- abandoned` to the PR title
 - Adding a comment to the PR explaining that autoclosing was skipped
 
-This tells you that Renovate no longer considers the branch or PR its own, and will not touch it again.
+This tells you that Renovate no longer considers the branch or PR its own, and will not autoclose or delete it.
 
 ### Recommended actions for abandoned PRs
 
