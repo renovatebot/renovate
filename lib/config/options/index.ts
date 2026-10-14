@@ -812,6 +812,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'composerIgnorePlatformReqs',
+    scopes: sharedScopes,
     description:
       'Configure use of `--ignore-platform-reqs` or `--ignore-platform-req` for the Composer package manager.',
     type: 'array',
@@ -820,6 +821,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'goGetDirs',
+    scopes: sharedScopes,
     description: 'Directory pattern to run `go get` on.',
     type: 'array',
     subType: 'string',
@@ -1211,6 +1213,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignorePlugins',
+    scopes: sharedScopes,
     description:
       'Set this to `true` if `allowPlugins=true` but you wish to skip running plugins when updating lock files.',
     type: 'boolean',
@@ -1218,6 +1221,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreScripts',
+    scopes: sharedScopes,
     description:
       'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
@@ -3035,6 +3039,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'postUpdateOptions',
+    scopes: sharedScopes,
     description:
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
