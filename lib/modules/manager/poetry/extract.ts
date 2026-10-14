@@ -9,11 +9,15 @@ import {
 } from '../../../util/fs/index.ts';
 import { Result } from '../../../util/result.ts';
 import { massage as massageToml } from '../../../util/toml.ts';
-import { uniq } from '../../../util/uniq.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type { PackageFileContent } from '../types.ts';
-import { Lockfile, PoetryPyProject, getPypiUrl } from './schema.ts';
+import {
+  Lockfile,
+  PoetryPyProject,
+  getRegistryUrls,
+  withImplicitPypi,
+} from './schema.ts';
 import { getLockfilePoetryVersion } from './utils.ts';
 
 /**
@@ -55,23 +59,8 @@ export async function extractPackageFile(
     Lockfile.transform(({ lock }) => lock),
   ).unwrapOr({});
 
-  if (
-    poetrySources?.length &&
-    !poetrySources.some(
-      ({ name, priority }) => name === 'pypi' || priority === 'default',
-    ) &&
-    isLegacyPoetry(lockContents)
-  ) {
-    // Insert implicit PyPI as secondary, keeping source priority order
-    const urls = poetrySources
-      .filter(({ priority }) => priority !== 'explicit')
-      .map(({ priority, url }) => ({ priority, url: url! }));
-    const idx = urls.findIndex(({ priority }) => priority === 'supplemental');
-    urls.splice(idx === -1 ? urls.length : idx, 0, {
-      priority: 'secondary',
-      url: getPypiUrl(),
-    });
-    res.registryUrls = uniq(urls.map(({ url }) => url));
+  if (poetrySources?.length && isLegacyPoetry(lockContents)) {
+    res.registryUrls = getRegistryUrls(withImplicitPypi(poetrySources, true));
   }
 
   let pythonVersion: string | undefined;
