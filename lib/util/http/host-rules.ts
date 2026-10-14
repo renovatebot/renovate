@@ -165,6 +165,17 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `go` hostType, which requests to a Go module proxy used until they were split into the `go-proxy` datasource
+  if (hostType === 'go-proxy') {
+    res = {
+      ...hostRules.find({
+        hostType: 'go',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   return res;
 }
 
