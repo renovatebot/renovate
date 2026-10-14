@@ -245,8 +245,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       google-auth-library:
-        specifier: 11.1.0
-        version: 11.1.0(supports-color@7.2.0)
+        specifier: 11.2.0
+        version: 11.2.0(supports-color@7.2.0)
       got:
         specifier: 16.0.0
         version: 16.0.0
@@ -3535,8 +3535,8 @@ packages:
     resolution: {integrity: sha512-c8B/VNLmxRcmqqenRA9t+9IyOjf9+V6lTxPaUJLqOCONdQkWZ0ETYgX0qbtJqPsgCNusT9MZ5Jeidw8Eb9tn2g==}
     engines: {node: '>=20'}
 
-  google-auth-library@11.1.0:
-    resolution: {integrity: sha512-YIBq5KNoHQrZ9PM4PeodDBqqBGlSTIxh1zibN8u3zNIO9UJg8gvKuCpdKV7fWXhsZ2zRkU6FhGrgKNgLJ2IRgw==}
+  google-auth-library@11.2.0:
+    resolution: {integrity: sha512-R9/Dwc3swSur04RnizQ6EBUmmcno2cC5cAKtrG/C+pY+W7c5l6rSnFWgMkR7NSYj1n6XWmb/KhcjxGslWm4yIA==}
     engines: {node: '>=22'}
 
   google-logging-utils@1.1.3:
@@ -8788,7 +8788,7 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.4.1
 
-  google-auth-library@11.1.0(supports-color@7.2.0):
+  google-auth-library@11.2.0(supports-color@7.2.0):
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11
