@@ -4,7 +4,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { ContainerbaseToolVersions } from './schema.ts';
+import { ContainerbaseToolVersions, formatPath } from './schema.ts';
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
@@ -23,6 +23,9 @@ export class ContainerbaseDatasource extends Datasource {
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
     'The release timestamp is taken from the `releaseTimestamp` field of each version, when it is known.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is taken from the `sourceUrl` field of the tool file, when it is known.';
 
   private async fetchReleases({
     packageName,
@@ -34,7 +37,7 @@ export class ContainerbaseDatasource extends Datasource {
     }
 
     const body = await this.fetchJsonOrNull(
-      joinUrlParts(registryUrl, `${packageName}.json`),
+      joinUrlParts(registryUrl, formatPath, `${packageName}.json`),
       ContainerbaseToolVersions,
     );
     if (!body) {
@@ -43,6 +46,8 @@ export class ContainerbaseDatasource extends Datasource {
 
     const result: ReleaseResult = {
       registryUrl,
+      sourceUrl: body.sourceUrl,
+      homepage: body.homepage,
       releases: body.versions.map(
         ({ version, prerelease, releaseTimestamp }) => ({
           version,
