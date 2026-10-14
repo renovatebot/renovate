@@ -810,12 +810,6 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
   Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
-## `gerritSshPort`
-
-Port used when Renovate clones Gerrit repositories over SSH.
-
-The default value is `29418`, which matches Gerrit's default SSH port.
-
 ## `gitNoVerify`
 
 Controls when Renovate passes the `--no-verify` flag to `git`.

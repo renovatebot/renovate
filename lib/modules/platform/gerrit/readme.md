@@ -25,7 +25,7 @@ The Gerrit user account must be allowed to assign the Code-Review label with "+2
 
 You must set `platform=gerrit` in your Renovate config file.
 
-If your Gerrit SSH server does not listen on the default port `29418`, set `gerritSshPort` to override the SSH clone port used by Renovate.
+When cloning over SSH, Renovate uses Gerrit's `/ssh_info` endpoint to discover the SSH host and port.
 
 ## Renovate PR/Branch-Model with Gerrit and needed permissions
 

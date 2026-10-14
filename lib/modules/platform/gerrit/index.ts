@@ -1,6 +1,5 @@
 import { isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
@@ -192,12 +191,13 @@ export async function initRepo({
   }
 
   const baseUrl = defaults.endpoint!;
+  const sshInfo = gitUrl === 'ssh' ? await client.getSshInfo() : undefined;
   const url = getGerritRepoUrl(
     repository,
     baseUrl,
     gitUrl,
     config.gerritUsername!,
-    GlobalConfig.get('gerritSshPort'),
+    sshInfo,
   );
   configureScm(repository, config.labels);
   await git.initRepo({

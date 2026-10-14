@@ -179,7 +179,11 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
-    it('initRepo() - uses username in ssh clone url', async () => {
+    it('initRepo() - uses advertised SSH host and port in clone url', async () => {
+      clientMock.getSshInfo.mockResolvedValueOnce({
+        host: 'ssh.gerrit.com',
+        port: 29418,
+      });
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
       clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
@@ -190,13 +194,16 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'ssh://user@dev.gerrit.com:29418/test/repo',
+        url: 'ssh://user@ssh.gerrit.com:29418/test/repo',
         virtualBranches: {},
       });
     });
 
-    it('initRepo() - uses configured ssh port in clone url', async () => {
-      GlobalConfig.set({ gerritSshPort: 2501 });
+    it('initRepo() - uses advertised non-default SSH port', async () => {
+      clientMock.getSshInfo.mockResolvedValueOnce({
+        host: 'dev.gerrit.com',
+        port: 2501,
+      });
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
       clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization

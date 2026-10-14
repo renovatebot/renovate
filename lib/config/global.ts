@@ -38,7 +38,6 @@ export class GlobalConfig {
     'endpoint',
     'executionTimeout',
     'exposeAllEnv',
-    'gerritSshPort',
     'gitTimeout',
     'githubTokenWarn',
     'httpCacheTtlDays',
