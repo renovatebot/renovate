@@ -44,7 +44,9 @@ export function getRepoUrl(
   // clone to avoid mutating the caller's URL; href is known-valid
   const url = parseUrl(endpoint.href)!;
   if (authToken) {
-    const [username, password] = authToken.split(':');
+    const [username, password] = authToken.includes(':')
+      ? authToken.split(':')
+      : ['x-access-token', authToken];
     url.username = username;
     url.password = password ?? '';
   }
