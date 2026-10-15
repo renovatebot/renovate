@@ -78,7 +78,7 @@ export function getRepoUrl(
     url: endpoint,
   });
 
-  repoUrl.username = hostOptions.username ?? '';
+  repoUrl.username = hostOptions.username ?? 'x-access-token';
   repoUrl.password = hostOptions.token ?? '';
 
   return repoUrl.toString();
