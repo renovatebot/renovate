@@ -64,22 +64,24 @@ export abstract class GitHostTagsDatasource<
   }
 
   /**
-   * Whether the releases and digests are stored in the package cache. `false`
-   * skips the package cache entirely, whatever
+   * Whether this class stores the releases and digests in the package cache.
+   * `false` skips it entirely, whatever
    * {@link GitHostTagsDatasource.isCacheable} and `cachePrivatePackages` say.
+   * The central releases cache which {@link Datasource.caching} enables is a
+   * separate layer.
    */
-  protected readonly usePackageCache: boolean = true;
+  protected readonly useGitHostTagCaching: boolean = true;
 
   /**
    * Returns the result of `fn`, stored in the package cache under `key` unless
-   * {@link GitHostTagsDatasource.usePackageCache} is `false`.
+   * {@link GitHostTagsDatasource.useGitHostTagCaching} is `false`.
    */
   protected cachedLookup<T>(
     registryUrl: string | undefined,
     key: string,
     fn: () => Promise<T>,
   ): Promise<T> {
-    if (!this.usePackageCache) {
+    if (!this.useGitHostTagCaching) {
       return fn();
     }
 
