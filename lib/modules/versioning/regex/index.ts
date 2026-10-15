@@ -2,6 +2,7 @@ import { isUndefined } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GenericVersioningApi } from '../generic.ts';
+import { parseRange, satisfiesComparator } from '../generic-range.ts';
 import type { VersioningApiConstructor } from '../types.ts';
 import type { RegExpVersion } from './types.ts';
 
@@ -83,6 +84,65 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       parsedVersion &&
       parsedVersion.compatibility === parsedCurrent?.compatibility
     );
+  }
+
+  override isValid(input: string): boolean {
+    return (
+      this.isVersion(input) ||
+      parseRange(input, (v) => this.isVersion(v)) !== null
+    );
+  }
+
+  override isVersion(version: string): boolean {
+    return this._parse(version) !== null;
+  }
+
+  override isSingleVersion(input: string): boolean {
+    const range = parseRange(input, (v) => this.isVersion(v));
+    if (range) {
+      return (
+        range.length === 1 &&
+        (range[0].operator === '=' || range[0].operator === '==')
+      );
+    }
+    return this.isVersion(input);
+  }
+
+  override matches(version: string, range: string): boolean {
+    const comparators = parseRange(range, (v) => this.isVersion(v));
+    if (!comparators) {
+      return this.equals(version, range);
+    }
+    return comparators.every((comparator) =>
+      satisfiesComparator(
+        this._compare(version, comparator.version),
+        comparator.operator,
+      ),
+    );
+  }
+
+  override getSatisfyingVersion(
+    versions: string[],
+    range: string,
+  ): string | null {
+    if (parseRange(range, (v) => this.isVersion(v)) === null) {
+      return super.getSatisfyingVersion(versions, range);
+    }
+    const matching = versions.filter((v) => this.matches(v, range));
+    matching.sort((a, b) => this._compare(a, b));
+    return matching.at(-1) ?? null;
+  }
+
+  override minSatisfyingVersion(
+    versions: string[],
+    range: string,
+  ): string | null {
+    if (parseRange(range, (v) => this.isVersion(v)) === null) {
+      return super.minSatisfyingVersion(versions, range);
+    }
+    const matching = versions.filter((v) => this.matches(v, range));
+    matching.sort((a, b) => this._compare(a, b));
+    return matching.at(0) ?? null;
   }
 }
 

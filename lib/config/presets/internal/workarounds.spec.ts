@@ -304,12 +304,13 @@ describe('config/presets/internal/workarounds', () => {
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
-      it('keeps regex versioning for java-version values outside mise', async () => {
+      it('keeps regex versioning for java-version values in other managers', async () => {
         const res = await applyPackageRules<
           PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
         >({
           datasource: 'java-version',
           depName: 'java',
+          manager: 'asdf',
           packageName: 'java-jdk',
           currentValue: '21',
           packageRules,
@@ -319,19 +320,22 @@ describe('config/presets/internal/workarounds', () => {
       });
 
       it.each`
-        currentValue | expectedVersioning
-        ${'21'}      | ${'semver-partial'}
-        ${'21.0'}    | ${'semver-partial'}
-        ${'21.0.9'}  | ${javaRegexVersioning}
+        manager             | currentValue | expectedVersioning
+        ${'mise'}           | ${'21'}      | ${'semver-partial'}
+        ${'mise'}           | ${'21.0'}    | ${'semver-partial'}
+        ${'mise'}           | ${'21.0.9'}  | ${javaRegexVersioning}
+        ${'github-actions'} | ${'21'}      | ${'semver-partial'}
+        ${'github-actions'} | ${'21.0'}    | ${'semver-partial'}
+        ${'github-actions'} | ${'21.0.9'}  | ${javaRegexVersioning}
       `(
-        'uses $expectedVersioning versioning for mise Java version $currentValue',
-        async ({ currentValue, expectedVersioning }) => {
+        'uses $expectedVersioning versioning for $manager Java version $currentValue',
+        async ({ manager, currentValue, expectedVersioning }) => {
           const res = await applyPackageRules<
             PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
           >({
             datasource: 'java-version',
             depName: 'java',
-            manager: 'mise',
+            manager,
             packageName: 'java-jdk',
             currentValue,
             packageRules,

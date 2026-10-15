@@ -167,6 +167,7 @@ describe('modules/versioning/paket/index', () => {
       ${'1.0.0'}            | ${'1.0.0-rc.1'}       | ${true}
       ${'1.0.0.2420'}       | ${'1.0'}              | ${true}
       ${'1.0.0-alpha'}      | ${'1.0.0-prerelease'} | ${true}
+      ${'1-alpha'}          | ${'1.0.0-prerelease'} | ${true}
       ${'1.0.0-prerelease'} | ${'1.0.0-alpha'}      | ${false}
       ${'1.0.1-alpha'}      | ${'1.0.0-prerelease'} | ${true}
       ${'foo'}              | ${'1.2.3'}            | ${false}

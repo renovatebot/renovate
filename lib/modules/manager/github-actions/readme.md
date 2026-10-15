@@ -222,7 +222,7 @@ steps:
     with:
       node-version: '22.0.0'
 
-- uses: astral-sh/setup-uv@v10.1.0
+- uses: astral-sh/setup-uv@v10.3.0
   with:
     version: '0.4.x'
 ```
@@ -239,8 +239,6 @@ steps:
       version: '12.0.0'
       runtime: 'node@24.1.0'
 ```
-
-The following Actions have support for their `with:` blocks:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
 

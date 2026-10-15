@@ -9,7 +9,7 @@ import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
 import type { PR, PRMergeMethod, Repo } from './schema.ts';
-import type { GiteaPlatformKey } from './types.ts';
+import type { AllowedMergeMethods, GiteaPlatformKey } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body
@@ -70,10 +70,17 @@ export function getRepoUrl(
 
 export function getMergeMethod(
   strategy: MergeStrategy | undefined,
+  allowedMergeMethods: AllowedMergeMethods,
 ): PRMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':
-      return 'rebase';
+      // Renovate only automerges branches that are already up to date with
+      // their target branch, so a strict "fast-forward only" merge is safe
+      // and is preferred over "rebase" (rebase-then-fast-forward) when the
+      // repository allows it.
+      return allowedMergeMethods?.has('fast-forward-only')
+        ? 'fast-forward-only'
+        : 'rebase';
     case 'merge-commit':
       return 'merge';
     case 'rebase':

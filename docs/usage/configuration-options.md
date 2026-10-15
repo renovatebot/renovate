@@ -2358,8 +2358,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
@@ -3002,6 +3004,33 @@ When set to `timestamp-optional`, Renovate will treat a release without a releas
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgeBuffer`
+
+Use this option to extend the time Renovate waits before suggesting an update, on top of [`minimumReleaseAge`](#minimumreleaseage).
+
+Some projects publish a set of related packages, where companion packages (like platform-specific binaries) are published _after_ the main package.
+For example, `@biomejs/biome@2.5.10` may be published some minutes before `@biomejs/cli-linux-x64@2.5.10`.
+If your package manager enforces its own release age cooldown, like pnpm's `minimumReleaseAge` setting or npm's `--before` flag, Renovate may suggest the main package as soon as it passes `minimumReleaseAge`, while a companion package published later is still within the package manager's cooldown.
+The package manager then refuses to update the lock file, and the update fails with an artifact error.
+
+`minimumReleaseAgeBuffer` avoids this by letting Renovate wait longer than the package manager's cooldown.
+Renovate defers the update until `minimumReleaseAge` _plus_ the buffer duration has passed, while the package manager keeps using the plain `minimumReleaseAge` cutoff.
+This way, packages published up to the buffer time after the suggested release have also passed the package manager's cooldown.
+
+By default, Renovate uses a buffer of 30 minutes.
+Set `minimumReleaseAgeBuffer` to `null` to disable the buffer.
+
+For example, with the following configuration Renovate waits 3 days plus 1 hour before suggesting an update, while the package manager's cooldown stays at 3 days:
+
+```json
+{
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBuffer": "1 hour"
+}
+```
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
 ## `minor`
 
 Add to this object if you wish to define rules that apply only to minor updates.
@@ -3601,6 +3630,32 @@ The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### `packageRules.matchIsBreaking`
+
+Use `matchIsBreaking` to match updates based on whether Renovate considers them breaking.
+Set it to `true` to match only breaking updates, or `false` to match only non-breaking updates.
+
+What counts as breaking depends on the versioning of the dependency:
+
+- Versionings with their own notion of breaking changes decide themselves, for example Cargo treats a minor bump of a `0.x` crate (`0.1.0` to `0.2.0`) as breaking
+- For all other versionings, an update is breaking if its `updateType` is `major`
+
+Rules with `matchIsBreaking` never match when there is no update to evaluate, for example for `lockFileMaintenance`.
+
+The following example automerges all non-breaking updates of packages in the `@myorg` scope:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@myorg{/,}**"],
+      "matchIsBreaking": false,
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### `packageRules.matchJsonata`
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
@@ -3616,6 +3671,7 @@ $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
 $detectPlatform(sourceUrl) = 'github'
+$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://registry.example.com/**"])
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
@@ -3623,6 +3679,7 @@ $detectPlatform(sourceUrl) = 'github'
 Renovate provides the following custom JSONata functions:
 
 - `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
+- `$matchRegexOrGlob(input, patterns)` - Returns `true` if `input` matches `patterns`, using Renovate's [string pattern matching](./string-pattern-matching.md) syntax. `input` can be a string or an array of strings, in which case any matching element returns `true`. `patterns` is an array of strings, or a single string. Returns `false` if `input` is missing. Use this to combine conditions on different fields with `or`, which separate `match*` options can't do because they are combined with `and`.
 
 ### `packageRules.matchManagers`
 
@@ -4746,6 +4803,10 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
+In some situations managers can not derive which registry a given dependency comes from.
+In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
+When specifying `registryUrls` alongside a dependency with `skipReason: unknown-registry`, Renovate will use the configured `registryUrls`.
+
 ## `replacement`
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
@@ -5276,6 +5337,10 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   By default, when Renovate creates a `vulnerabilityAlerts` PR, it ignores settings like `branchConcurrentLimit`, `commitHourlyLimit`, `prConcurrentLimit`, `prHourlyLimit`, or `schedule`.
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
+
+!!! note
+  Some managers disable certain dependencies by default, such as `indirect` Go modules or Gradle `strictly` constraints.
+  Renovate still raises vulnerability-fix PRs for those dependencies, unless you disable them yourself with a `packageRules` entry that sets `enabled=false`.
 
 If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
 Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:

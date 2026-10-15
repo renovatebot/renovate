@@ -19,6 +19,29 @@ const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
 
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
+    it('ignores a resolver whose location is not a url', () => {
+      const res = extractPackageFile(codeBlock`
+        resolvers += "my-repo" at "not a url"
+        libraryDependencies += "org.example" % "foo" % "1.0.0"
+      `);
+      expect(res?.deps).toMatchObject([{ registryUrls: [] }]);
+    });
+
+    it('ignores symbols that were never defined', () => {
+      const res = extractPackageFile(codeBlock`
+        scalaVersion := undefinedScalaVersion
+        version := undefinedProjectVersion
+        libraryDependencies += "org.example" % undefinedArtifact % undefinedVersion
+        libraryDependencies += "org.example" % "known" % Versions.undefinedDotted
+      `);
+      // the undefined symbols resolve to nothing, so no version is attached
+      expect(res?.deps).toHaveLength(2);
+      expect(
+        res?.deps.every((dep) => dep.currentValue === undefined),
+      ).toBeTrue();
+      expect(res?.packageFileVersion).toBeUndefined();
+    });
+
     it('returns null for empty', () => {
       expect(extractPackageFile('')).toBeNull();
       expect(extractPackageFile('non-sense')).toBeNull();
@@ -537,6 +560,21 @@ describe('modules/manager/sbt/extract', () => {
   });
 
   describe('extractAllPackageFiles()', () => {
+    it('skips a package file that yields nothing', async () => {
+      // `build.sbt` is sorted first, so it is read first
+      fs.readLocalFile
+        .mockResolvedValueOnce(sbt)
+        .mockResolvedValueOnce('// just a comment');
+
+      const packages = await extractAllPackageFiles({}, [
+        'project/Empty.scala',
+        'build.sbt',
+      ]);
+
+      expect(packages).toHaveLength(1);
+      expect(packages[0].packageFile).toBe('build.sbt');
+    });
+
     it('extracts proxy repositories', async () => {
       const repositoryContent = codeBlock`
       [repositories]

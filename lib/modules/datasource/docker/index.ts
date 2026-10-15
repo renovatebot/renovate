@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -90,7 +91,9 @@ export class DockerDatasource extends Datasource {
 
   override readonly defaultVersioning = dockerVersioningId;
 
-  override readonly defaultRegistryUrls = [DOCKER_HUB];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [DOCKER_HUB];
+  }
 
   override readonly defaultConfig = defaultConfig;
 
@@ -233,7 +236,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
-        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, configDigest),
         ttlMinutes: 1440 * 28,
       },
       () => this._getImageConfig(registryHost, dockerRepository, configDigest),
@@ -284,7 +287,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-imageconfig',
-        key: `${registryHost}:${dockerRepository}@${configDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, configDigest),
         ttlMinutes: 1440 * 28,
       },
       () => this._getHelmConfig(registryHost, dockerRepository, configDigest),
@@ -487,7 +490,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-architecture',
-        key: `${registryHost}:${dockerRepository}@${currentDigest}`,
+        key: buildCacheKey(registryHost, dockerRepository, currentDigest),
         ttlMinutes: 1440 * 28,
         shouldCacheResult: isNonEmptyString,
       },
@@ -702,7 +705,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-labels',
-        key: `${registryHost}:${dockerRepository}:${tag}`,
+        key: buildCacheKey(registryHost, dockerRepository, tag),
         ttlMinutes: 24 * 60,
       },
       () => this._getLabels(registryHost, dockerRepository, tag),
@@ -765,6 +768,8 @@ export class DockerDatasource extends Datasource {
       'https://ghcr.io', // GHCR sorts from oldest to newest, so we need to get all pages
       'https://quay.io', // Quay sorts from oldest to newest, so we need to get all pages
       'https://cgr.dev', // Chainguard sorts lexically and publishes a tag per build, so current versions sort past the page limit
+      'https://registry.access.redhat.com', // RH catalog; Quay-style lexicographic sort, high tag counts
+      'https://registry.redhat.io', // RH authenticated catalog; same backend
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
@@ -930,7 +935,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-tags',
-        key: `${registryHost}:${dockerRepository}`,
+        key: buildCacheKey(registryHost, dockerRepository),
         cacheable: registryHost === DOCKER_HUB,
       },
       () => this._getTags(registryHost, dockerRepository),
@@ -1133,11 +1138,15 @@ export class DockerDatasource extends Datasource {
       config.packageName,
       config.registryUrl!,
     );
-    const digest = config.currentDigest ? `@${config.currentDigest}` : '';
     return withCache(
       {
         namespace: 'datasource-docker-digest',
-        key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
+        key: buildCacheKey(
+          registryHost,
+          dockerRepository,
+          newTag,
+          config.currentDigest,
+        ),
         fallback: true,
         shouldCacheResult: isNonEmptyString,
       },
@@ -1209,7 +1218,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-hub-tags',
-        key: `${dockerRepository}`,
+        key: dockerRepository,
       },
       () => this._getDockerHubTags(dockerRepository),
     );
@@ -1313,7 +1322,7 @@ export class DockerDatasource extends Datasource {
     return withCache(
       {
         namespace: 'datasource-docker-releases-v2',
-        key: `${registryHost}:${dockerRepository}`,
+        key: buildCacheKey(registryHost, dockerRepository),
         cacheable: registryHost === DOCKER_HUB,
         fallback: true,
       },

@@ -17,10 +17,10 @@ export class SwiftPackageRegistryDatasource extends Datasource {
     super(SwiftPackageRegistryDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
-
   // SE-0292 has no canonical "default" registry; users opt in by configuring one.
-  override readonly defaultRegistryUrls = [];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [];
+  }
 
   // Multiple registries may be discovered from registries.json (default + named scopes).
   // Try them in order, accept the first 200.

@@ -22,7 +22,10 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 vi.mock('../exec/index.ts', () => ({ exec: mockFn() }));
-vi.mock('../sanitize.ts', () => ({ addSecretForSanitizing: mockFn() }));
+vi.mock('../sanitize.ts', () => ({
+  addSecretForSanitizing: mockFn(),
+  clearRepoSanitizedSecretsList: mockFn(),
+}));
 
 const exec = mockedExtended(exec_);
 const sanitize = mockedExtended(sanitize_);

@@ -43,7 +43,12 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
-export type StatusCheckWhen = 'always' | 'never' | 'failed';
+export const allowedStatusCheckWhenValues = [
+  'always',
+  'never',
+  'failed',
+] as const;
+export type StatusCheckWhen = (typeof allowedStatusCheckWhenValues)[number];
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -117,6 +122,7 @@ export interface RenovateSharedConfig {
   manager?: string;
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeBuffer?: Nullish<string>;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
@@ -228,7 +234,7 @@ export interface GlobalOnlyConfigLegacy {
  */
 export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedCommands?: string[];
-  allowCustomCrateRegistries?: boolean;
+  allowCustomCrateGitRegistries?: boolean;
   allowPlugins?: boolean;
   allowScripts?: boolean;
   allowShellExecutorForPostUpgradeCommands?: boolean;
@@ -596,6 +602,7 @@ export interface PackageRule
   matchDepNames?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
+  matchIsBreaking?: boolean;
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
@@ -622,9 +629,32 @@ export interface ValidationMessage {
   message: string;
 }
 
+/**
+ * The kinds of place a config option can be used, which expand to the {@link AllowedParents} they cover.
+ *
+ * These are for the places which can't reasonably be listed, like every manager or every update type, so an option which is only valid in a specific object - like `hostRules` - should use `parents` instead.
+ */
+export const configScopes = [
+  /** the top level of a repository, global, inherited or preset config */
+  'repo',
+  /** a `packageRules` entry */
+  'packageRule',
+  /** a manager's configuration object, like `npm` */
+  'manager',
+  /** an update type's configuration object, like `major` */
+  'updateType',
+  /** the `vulnerabilityAlerts` configuration object */
+  'vulnerabilityAlert',
+  /** the `group` configuration object, which is merged into an update when it's grouped */
+  'group',
+] as const;
+
+export type ConfigScope = (typeof configScopes)[number];
+
 export type AllowedParents =
   | '.'
   | 'bumpVersions'
+  | 'group'
   | 'customDatasources'
   | 'customManagers'
   | 'hostRules'
@@ -678,6 +708,13 @@ export interface RenovateOptionBase {
 
   parents?: AllowedParents[];
 
+  /**
+   * The kinds of place this option can be used, which are expanded alongside any `parents`.
+   *
+   * An option which declares neither is treated as valid anywhere, which is what we're working towards removing in #43020.
+   */
+  scopes?: ConfigScope[];
+
   stage?: RenovateConfigStage;
 
   experimental?: boolean;
@@ -702,6 +739,13 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
+
+  /**
+   * Whether the option can be set to `null`.
+   *
+   * This is only needed if the default is not `null` (which makes this implied).
+   */
+  nullable?: boolean;
 
   /**
    * Managers which support this option, leave undefined if all managers support it.
@@ -769,6 +813,11 @@ export interface RenovateStringOption extends RenovateOptionBase {
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
+
+  /**
+   * The keys the object accepts, for an option whose keys are a known set rather than the user's choice.
+   */
+  properties?: Record<string, unknown>;
   mergeable?: boolean;
   type: 'object';
 }
@@ -797,11 +846,13 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   updateType?: UpdateType;
   mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
+  isBreaking?: boolean;
   sourceUrl?: string | null;
   categories?: string[];
   baseBranch?: string;
   manager?: string;
   datasource?: string;
+  effectiveDatasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: Timestamp | null;
   repository?: string;

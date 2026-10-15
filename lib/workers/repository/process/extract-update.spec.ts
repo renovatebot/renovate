@@ -1,9 +1,11 @@
 import { fakeSha, logger, scm } from '~test/util.ts';
+import { hashMap } from '../../../modules/manager/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
+import * as _extractIndex from '../extract/index.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
@@ -35,6 +37,7 @@ vi.mock('../extract/index.ts');
 vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
+const extractAllDependencies = vi.mocked(_extractIndex.extractAllDependencies);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
 const write = vi.mocked(_write);
@@ -98,6 +101,37 @@ describe('workers/repository/process/extract-update', () => {
       expect(packageFiles).toBeUndefined();
     });
 
+    it('leaves the cache alone when not overwriting it', async () => {
+      const config = { repoIsOnboarded: true };
+      const cache = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+
+      await extract(config, false);
+
+      expect(cache.scan).toEqual({});
+    });
+
+    it('keeps cached scans for branches that are still configured', async () => {
+      const config = {
+        baseBranch: 'master',
+        baseBranches: ['master'],
+        repoIsOnboarded: true,
+      };
+      const cache = {
+        scan: {
+          master: { sha: 'old' },
+          stale: { sha: 'old' },
+        },
+      };
+      repositoryCache.getCache.mockReturnValueOnce(cache as never);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+
+      await extract(config);
+
+      expect(Object.keys(cache.scan)).toEqual(['master']);
+    });
+
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
@@ -119,6 +153,59 @@ describe('workers/repository/process/extract-update', () => {
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
+    });
+
+    describe('cached package files', () => {
+      const config = { repoIsOnboarded: true, baseBranch: 'master' };
+      let cache: { scan: Record<string, BaseBranchCache> };
+
+      beforeEach(() => {
+        cache = { scan: {} };
+        repositoryCache.getCache.mockReturnValue(cache);
+        scm.getBranchCommit.mockResolvedValue(branchSha);
+        scm.checkoutBranch.mockResolvedValue(branchSha);
+      });
+
+      function createPackageFiles(): Record<string, PackageFile[]> {
+        return {
+          npm: [
+            {
+              packageFile: 'package.json',
+              deps: [{ depName: 'axios', currentValue: '1.14.0' }],
+            },
+          ],
+        };
+      }
+
+      it('stores a copy of the extracted package files', async () => {
+        extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: createPackageFiles(),
+          extractionFingerprints: {},
+        });
+
+        const res = await extract(config);
+        res.npm[0].deps[0].skipReason = 'internal-error';
+
+        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
+      });
+
+      it('returns a copy of the cached package files', async () => {
+        cache.scan.master = {
+          revision: EXTRACT_CACHE_REVISION,
+          sha: branchSha,
+          configHash: fingerprint(generateFingerprintConfig(config)),
+          extractionFingerprints: {},
+          packageFiles: createPackageFiles(),
+        };
+
+        const res = await extract(config);
+        res.npm[0].deps[0].skipReason = 'internal-error';
+
+        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
+        expect(
+          (await extract(config)).npm[0].deps[0].skipReason,
+        ).toBeUndefined();
+      });
     });
 
     it('fetches vulnerabilities', async () => {
@@ -535,6 +622,12 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.extractionFingerprints = { npm: 'old-fingerprint' };
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('valid if fingerprints are unchanged', () => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.extractionFingerprints = { npm: hashMap.get('npm')! };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
     });
 
     it('valid cache and config', () => {

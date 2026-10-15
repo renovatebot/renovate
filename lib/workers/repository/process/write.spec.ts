@@ -395,6 +395,60 @@ describe('workers/repository/process/write', () => {
     });
   });
 
+  describe('generateCommitFingerprintConfig()', () => {
+    it('does not include postUpgradeTasks when not set', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toBeUndefined();
+    });
+
+    it('includes postUpgradeTasks commands and fileFilters', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              fileFilters: ['**/*.txt'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toEqual({
+        commands: ['echo hello'],
+        fileFilters: ['**/*.txt'],
+      });
+    });
+
+    it('changes fingerprint when postUpgradeTasks commands change', () => {
+      const branchWithoutTasks = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const branchWithTasks = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const fingerprintWithoutTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithoutTasks),
+      );
+      const fingerprintWithTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithTasks),
+      );
+      expect(fingerprintWithoutTasks).not.toBe(fingerprintWithTasks);
+    });
+  });
+
   describe('canSkipBranchUpdateCheck()', () => {
     let branchCache: BranchCache = {
       branchName: 'branch',

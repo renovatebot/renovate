@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -102,6 +103,16 @@ describe('modules/manager/travis/extract', () => {
 
     it('handles invalid matrix node_js syntax', () => {
       const res = extractPackageFile(invalidMatrixYAML);
+      expect(res).toBeNull();
+    });
+
+    it('ignores a matrix node_js that is neither a string nor an array', () => {
+      const content = codeBlock`
+        jobs:
+          include:
+            - node_js: 18
+      `;
+      const res = extractPackageFile(content);
       expect(res).toBeNull();
     });
   });

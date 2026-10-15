@@ -134,10 +134,6 @@ function mockDescribeImagesCommand(result: DescribeImagesResult): void {
 }
 
 describe('modules/datasource/aws-machine-image/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getSortedAwsMachineImages()', () => {
     it('with 3 returned images', async () => {
       mockDescribeImagesCommand(mock3Images);

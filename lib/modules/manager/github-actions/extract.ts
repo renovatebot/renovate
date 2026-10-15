@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
+import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
-import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
-import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubRunnersDatasource } from '../../datasource/github-runners/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
@@ -60,8 +60,10 @@ function extractDockerAction(
   actionRef: DockerReference,
   config: ExtractConfig,
 ): PackageDependency {
-  const dep = getDep(actionRef.originalRef, true, config.registryAliases);
-  dep.depType = 'docker';
+  const dep = getDep(actionRef.originalRef, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   dep.replaceString = actionRef.originalRef;
   return dep;
 }
@@ -184,6 +186,7 @@ function extractWithRegex(
       continue;
     }
 
+    // v8 ignore else -- the parsed ref is either a docker or a repository ref
     if (actionRef.kind === 'repository') {
       deps.push(
         extractRepositoryAction(
@@ -203,16 +206,14 @@ function detectDatasource(registryUrl: string): PackageDependency {
 
   switch (platform) {
     case 'forgejo':
-      return {
-        registryUrls: [registryUrl],
-        datasource: ForgejoTagsDatasource.id,
-      };
     case 'gitea':
       return {
         registryUrls: [registryUrl],
-        datasource: GiteaTagsDatasource.id,
+        datasource: PLATFORM_FAMILIES[platform].tagsDatasource,
       };
     case 'github':
+      // GitHub is left without a datasource on purpose: `extractRepositoryAction`
+      // then picks `github-digest` or `github-tags` from the ref it parsed.
       return { registryUrls: [registryUrl] };
   }
 
@@ -290,19 +291,21 @@ function extractWithYAMLParser(
 
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(job.container, {
+          registryAliases: config.registryAliases,
+          depType: 'container',
+        }),
+      );
     }
 
     for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(service, {
+          registryAliases: config.registryAliases,
+          depType: 'service',
+        }),
+      );
     }
 
     for (const runner of job['runs-on']) {
@@ -338,7 +341,7 @@ async function readLockfile(): Promise<LockfileState> {
  * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
  */
 function getLockfile(): Promise<LockfileState> {
-  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cacheKey = buildCacheKey('github-actions', actionsLockFile);
   const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
   if (cached !== undefined) {
     return cached;

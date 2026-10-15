@@ -130,6 +130,7 @@ export function findVariableInKotlinImport(
   if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
     for (const tokens of ctx.tmpKotlinImportStore) {
       const lastToken = tokens.at(-1);
+      // v8 ignore else -- needs a kotlin import whose prefix resolves to nothing
       if (lastToken && name.startsWith(`${lastToken.value}.`)) {
         const prefix = tokens
           .slice(0, -1)
@@ -137,6 +138,7 @@ export function findVariableInKotlinImport(
           .join('.');
         const identifier = `${prefix}.${name}`;
 
+        // v8 ignore else -- needs a kotlin import whose prefix resolves to nothing
         if (variables[identifier]) {
           return variables[identifier];
         }

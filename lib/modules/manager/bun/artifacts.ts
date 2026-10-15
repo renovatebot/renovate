@@ -5,19 +5,15 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
@@ -50,64 +46,47 @@ export async function updateArtifacts(
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+    return await withNpmrcHostRules(
+      pkgFileDir,
+      additionalNpmrcContent,
+      async () => {
+        let cmd = 'bun install';
 
-    let cmd = 'bun install';
+        if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+          cmd += ' --ignore-scripts';
+        }
 
-    if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-    }
+        const execOptions: ExecOptions = {
+          cwdFile: lockFileName,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'bun',
+              constraint: await resolveToolConstraint(config, 'bun'),
+            },
+          ],
+        };
 
-    const execOptions: ExecOptions = {
-      cwdFile: lockFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'bun',
-          constraint: await resolveToolConstraint(config, 'bun'),
-        },
-      ],
-    };
-
-    await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(cmd, execOptions),
+        });
       },
-    ];
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

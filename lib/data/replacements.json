@@ -41,6 +41,7 @@
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
       "replacements:pwpush-to-universal-container",
+      "replacements:react-native-magic-modal-to-magic-modal",
       "replacements:react-query-devtools-to-scoped",
       "replacements:react-query-to-scoped",
       "replacements:react-scripts-ts-to-react-scripts",
@@ -57,6 +58,7 @@
       "replacements:semantic-release-replace-plugin-to-unscoped",
       "replacements:spectre-cli-to-spectre-console-cli",
       "replacements:standard-version-to-commit-and-tag",
+      "replacements:temporalio-interceptors-opentelemetry-to-v2",
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
@@ -1034,6 +1036,17 @@
       }
     ]
   },
+  "react-native-magic-modal-to-magic-modal": {
+    "description": "`react-native-magic-modal` was renamed to `magic-modal` in version 10.0.0. The old name is deprecated but still published at the same version, depending on and re-exporting `magic-modal`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=10.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["react-native-magic-modal"],
+        "replacementName": "magic-modal"
+      }
+    ]
+  },
   "react-query-devtools-to-scoped": {
     "description": "`react-query/devtools` became scoped under the `tanstack` organization.",
     "packageRules": [
@@ -1210,6 +1223,18 @@
         "matchPackageNames": ["standard-version"],
         "replacementName": "commit-and-tag-version",
         "replacementVersion": "9.5.0"
+      }
+    ]
+  },
+  "temporalio-interceptors-opentelemetry-to-v2": {
+    "description": "`@temporalio/interceptors-opentelemetry` was replaced by `@temporalio/interceptors-opentelemetry-v2`, which supports OpenTelemetry v2.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.19.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@temporalio/interceptors-opentelemetry"],
+        "replacementName": "@temporalio/interceptors-opentelemetry-v2",
+        "replacementVersion": "1.19.0"
       }
     ]
   },

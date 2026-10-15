@@ -4,7 +4,9 @@ import { DateTime } from 'luxon';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import {
   getQueryString,
   parseLinkHeader,
@@ -13,11 +15,11 @@ import {
 import type { Pr } from '../types.ts';
 import type { PR } from './schema.ts';
 import { PRList } from './schema.ts';
-import type { GiteaLikeHttp, GiteaPlatformKey, PrCacheData } from './types.ts';
+import type { GiteaPlatformKey, PrCacheData } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
 function syncedCacheKey(platform: GiteaPlatformKey): string {
-  return `${platform}-pr-cache-synced`;
+  return buildCacheKey(platform, 'pr-cache-synced');
 }
 
 interface RepoPrCacheOptions {
@@ -30,7 +32,7 @@ interface RepoPrCacheOptions {
  * The PRs of a single repository, backed by the repository cache.
  */
 class RepoPrCache {
-  private readonly http: GiteaLikeHttp;
+  private readonly http: GiteaHttp;
   private readonly platform: GiteaPlatformKey;
   private readonly cache: PrCacheData;
   private items: Pr[] = [];
@@ -39,7 +41,7 @@ class RepoPrCache {
   private readonly author: string;
 
   constructor(
-    http: GiteaLikeHttp,
+    http: GiteaHttp,
     platform: GiteaPlatformKey,
     { repo, ignorePrAuthor, author }: RepoPrCacheOptions,
   ) {
@@ -171,12 +173,12 @@ class RepoPrCache {
  * after `platform.initRepo()`.
  */
 export class GiteaPrCache {
-  private readonly http: GiteaLikeHttp;
+  private readonly http: GiteaHttp;
   private readonly platform: GiteaPlatformKey;
   private repoOptions: RepoPrCacheOptions | null = null;
   private repoCache: RepoPrCache | null = null;
 
-  constructor(http: GiteaLikeHttp, platform: GiteaPlatformKey) {
+  constructor(http: GiteaHttp, platform: GiteaPlatformKey) {
     this.http = http;
     this.platform = platform;
   }

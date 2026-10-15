@@ -850,6 +850,28 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('uses semantic commits without a scope', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const res = generateBranchConfig(branch);
+
+      expect(res.commitMessage).toBe(
+        'chore: update dependency some-dep to v1.2.0',
+      );
+    });
+
     it('calculates the highest priority semanticCommitType', () => {
       const branch = [
         {
@@ -1636,6 +1658,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1647,6 +1670,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: 'docker',
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1658,6 +1682,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1669,6 +1694,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',

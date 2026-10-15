@@ -18,7 +18,7 @@ import * as git from '../../../util/git/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import { getPrBodyStruct, hashBody } from '../pr-body.ts';
 import type {
   AutodiscoverConfig,
@@ -42,17 +42,21 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type { Comment, Label, Repo } from './schema.ts';
+import { PRMergeMethod } from './schema.ts';
 import type {
+  AllowedMergeMethods,
   CombinedCommitStatus,
   GiteaPlatform,
   GiteaPlatformOptions,
   PRUpdateParams,
 } from './types.ts';
 import {
+  API_PATH,
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
@@ -68,6 +72,9 @@ interface GiteaRepoConfig {
   ignorePrAuthor: boolean;
   repository: string;
   mergeMethod: PRMergeMethod;
+  /** The set of merge styles allowed by the repository, used to pick the
+   * best matching Gitea/Forgejo merge style for a given `MergeStrategy`. */
+  allowedMergeMethods: AllowedMergeMethods;
 
   issueList: Promise<Issue[]> | null;
   labelList: Promise<Label[]> | null;
@@ -249,12 +256,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       branchOrTag?: string,
     ): Promise<string | null> {
       const repo = repoName ?? config.repository;
-      const contents = await helper.getRepoContents(
-        http,
-        repo,
-        fileName,
-        branchOrTag,
-      );
+      const contents = await getRepoFile(http, repo, fileName, branchOrTag, {
+        baseUrl: joinUrlParts(defaults.endpoint, API_PATH),
+      });
       if (contents.type !== 'file') {
         return null;
       }
@@ -334,6 +338,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
 
       if (mergeStyle) {
         config.mergeMethod = mergeStyle;
+        config.allowedMergeMethods = new Set(
+          PRMergeMethod.options.filter((style) => isAllowed(style, repo)),
+        );
       } else {
         logger.debug(
           'Repository has no allowed merge methods - aborting renovation',
@@ -618,8 +625,10 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             try {
               await helper.mergePR(http, config.repository, gpr.number, {
                 Do:
-                  getMergeMethod(platformPrOptions?.automergeStrategy) ??
-                  config.mergeMethod,
+                  getMergeMethod(
+                    platformPrOptions?.automergeStrategy,
+                    config.allowedMergeMethods,
+                  ) ?? config.mergeMethod,
                 merge_when_checks_succeed: true,
                 delete_branch_after_merge: true,
               });
@@ -749,7 +758,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
     async mergePr({ id: prNumber, strategy }: MergePRConfig): Promise<boolean> {
       try {
         await helper.mergePR(http, config.repository, prNumber, {
-          Do: getMergeMethod(strategy) ?? config.mergeMethod,
+          Do:
+            getMergeMethod(strategy, config.allowedMergeMethods) ??
+            config.mergeMethod,
         });
         return true;
       } catch (err) {

@@ -57,6 +57,10 @@ describe('workers/repository/errors-warnings', () => {
               {
                 warnings: [{ message: 'Warning 1', topic: '' }],
               },
+              {
+                // a second warned dep in a file that is already listed
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
               {},
             ],
           },
