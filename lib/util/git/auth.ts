@@ -116,6 +116,10 @@ export function getAuthenticationRules(
   }
 
   const url = { ...insteadUrl };
+  // git-url-parse would prefix `x-token-auth:` again on bitbucket.org
+  if (hasUser && url.source === 'bitbucket.org') {
+    url.source = 'bitbucket';
+  }
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol
     : 'https';

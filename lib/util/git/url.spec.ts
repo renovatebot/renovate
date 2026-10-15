@@ -1,5 +1,10 @@
 import { hostRules } from '~test/host-rules.ts';
-import { getHttpUrl, getRemoteUrlWithToken, parseGitUrl } from './url.ts';
+import {
+  getHttpUrl,
+  getRemoteUrlWithToken,
+  getTokenCredentials,
+  parseGitUrl,
+} from './url.ts';
 
 describe('util/git/url', () => {
   describe('parseGitUrl', () => {
@@ -31,6 +36,24 @@ describe('util/git/url', () => {
         user: '',
       });
     });
+  });
+
+  describe('getTokenCredentials()', () => {
+    it.each`
+      platform              | token          | expected
+      ${'azure'}            | ${'token'}     | ${'x-access-token:token'}
+      ${'bitbucket'}        | ${'token'}     | ${'x-token-auth:token'}
+      ${'bitbucket-server'} | ${'token'}     | ${'x-token-auth:token'}
+      ${'scm-manager'}      | ${'token'}     | ${'x-access-token:token'}
+      ${'scm-manager'}      | ${'user:pass'} | ${'user:pass'}
+      ${'gerrit'}           | ${'token'}     | ${'token'}
+      ${null}               | ${'token'}     | ${'token'}
+    `(
+      'returns $expected for $platform and $token',
+      ({ platform, token, expected }) => {
+        expect(getTokenCredentials(platform, token)).toBe(expected);
+      },
+    );
   });
 
   describe('getHttpUrl()', () => {
@@ -103,6 +126,43 @@ describe('util/git/url', () => {
       expect(getHttpUrl('https://codeberg.org/some/repo', 'user:pass')).toBe(
         'https://user:pass@codeberg.org/some/repo',
       );
+    });
+
+    it('returns azure url with token', () => {
+      expect(
+        getHttpUrl('https://dev.azure.com/org/proj/_git/repo', 'token'),
+      ).toBe('https://x-access-token:token@dev.azure.com/org/proj/_git/repo');
+      expect(
+        getHttpUrl('https://dev.azure.com/org/proj/_git/repo', 'user:pass'),
+      ).toBe('https://user:pass@dev.azure.com/org/proj/_git/repo');
+    });
+
+    it('returns bitbucket cloud url with a single x-token-auth username', () => {
+      expect(getHttpUrl('https://bitbucket.org/some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.org/some/repo',
+      );
+      expect(getHttpUrl('git@bitbucket.org:some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.org/some/repo',
+      );
+      expect(getHttpUrl('https://bitbucket.com/some/repo', 'token')).toBe(
+        'https://x-token-auth:token@bitbucket.com/some/repo',
+      );
+      expect(getHttpUrl('https://bitbucket.org/some/repo', 'user:pass')).toBe(
+        'https://user:pass@bitbucket.org/some/repo',
+      );
+    });
+
+    it('returns bitbucket-server url with token', () => {
+      hostRules.add({
+        matchHost: 'git.mycompany.com',
+        hostType: 'bitbucket-server',
+      });
+      expect(
+        getHttpUrl('https://git.mycompany.com/scm/proj/repo.git', 'token'),
+      ).toBe('https://x-token-auth:token@git.mycompany.com/scm/proj/repo.git');
+      expect(
+        getHttpUrl('https://git.mycompany.com/scm/proj/repo.git', 'user:pass'),
+      ).toBe('https://user:pass@git.mycompany.com/scm/proj/repo.git');
     });
 
     it('returns bitbucket-server url', () => {
