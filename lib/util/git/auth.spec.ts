@@ -15,9 +15,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -57,9 +60,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -75,9 +81,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -118,9 +127,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -141,9 +153,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -160,9 +175,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -182,9 +200,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -205,9 +226,12 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -255,6 +279,73 @@ describe('util/git/auth', () => {
       });
     });
 
+    it.each(['gitea', 'forgejo'])(
+      'returns url with x-oauth-basic password for %s token',
+      (hostType) => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables(
+            {},
+            `https://${hostType}.example.com/`,
+            {
+              token: 'token1234',
+              hostType,
+              matchHost: `${hostType}.example.com`,
+            },
+          ),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: `url.https://token1234:x-oauth-basic@${hostType}.example.com/.insteadOf`,
+          GIT_CONFIG_KEY_1: `url.https://token1234:x-oauth-basic@${hostType}.example.com/.insteadOf`,
+          GIT_CONFIG_KEY_2: `url.https://token1234:x-oauth-basic@${hostType}.example.com/.insteadOf`,
+          GIT_CONFIG_VALUE_0: `ssh://git@${hostType}.example.com/`,
+          GIT_CONFIG_VALUE_1: `git@${hostType}.example.com:`,
+          GIT_CONFIG_VALUE_2: `https://${hostType}.example.com/`,
+        });
+      },
+    );
+
+    it('keeps a token containing username and password unchanged', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables({}, 'https://gitea.com/', {
+          token: 'user:pass',
+          hostType: 'gitea',
+          matchHost: 'gitea.com',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://user:pass@gitea.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://user:pass@gitea.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://user:pass@gitea.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@gitea.com/',
+        GIT_CONFIG_VALUE_1: 'git@gitea.com:',
+        GIT_CONFIG_VALUE_2: 'https://gitea.com/',
+      });
+    });
+
+    it.each(['go', 'cargo'])(
+      'returns url with x-access-token username for %s host rule token on github.com',
+      (hostType) => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
+            token: 'token1234',
+            hostType,
+            matchHost: 'github.com',
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_1:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_2:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_1: 'git@github.com:',
+          GIT_CONFIG_VALUE_2: 'https://github.com/',
+        });
+      },
+    );
+
     it('returns original environment variables when no token is set', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
@@ -279,9 +370,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.http://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.http://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.http://token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.http://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.http://x-access-token:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.http://x-access-token:token1234@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'http://github.com/',
@@ -297,9 +391,12 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/org.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/org.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/org.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token1234@github.com/org.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token1234@github.com/org.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/org.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/org',
         GIT_CONFIG_VALUE_1: 'git@github.com:org',
         GIT_CONFIG_VALUE_2: 'https://github.com/org',
@@ -320,10 +417,11 @@ describe('util/git/auth', () => {
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@github.com/org/repo.insteadOf',
+          'url.https://x-access-token:token1234@github.com/org/repo.insteadOf',
         GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@github.com/org/repo.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/org/repo.insteadOf',
+          'url.https://x-access-token:token1234@github.com/org/repo.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token1234@github.com/org/repo.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/org/repo',
         GIT_CONFIG_VALUE_1: 'git@github.com:org/repo',
         GIT_CONFIG_VALUE_2: 'https://github.com/org/repo',
@@ -344,11 +442,11 @@ describe('util/git/auth', () => {
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@github.com:89/org/repo.git.insteadOf',
+          'url.https://x-access-token:token1234@github.com:89/org/repo.git.insteadOf',
         GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@github.com:89/org/repo.git.insteadOf',
+          'url.https://x-access-token:token1234@github.com:89/org/repo.git.insteadOf',
         GIT_CONFIG_KEY_2:
-          'url.https://token1234@github.com:89/org/repo.git.insteadOf',
+          'url.https://x-access-token:token1234@github.com:89/org/repo.git.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_2: 'https://github.com:89/org/repo.git',
@@ -398,9 +496,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -422,9 +523,12 @@ describe('util/git/auth', () => {
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0: 'existing-key',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_3:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'existing-value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
@@ -450,9 +554,12 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '9',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2:
+          'url.https://x-access-token:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_3:
           'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_4:
@@ -460,10 +567,11 @@ describe('util/git/auth', () => {
         GIT_CONFIG_KEY_5:
           'url.https://gitlab-ci-token:token234@gitlab.example.com/.insteadOf',
         GIT_CONFIG_KEY_6:
-          'url.https://ssh:token345@github.example.com/.insteadOf',
+          'url.https://x-access-token:token345@github.example.com/.insteadOf',
         GIT_CONFIG_KEY_7:
-          'url.https://git:token345@github.example.com/.insteadOf',
-        GIT_CONFIG_KEY_8: 'url.https://token345@github.example.com/.insteadOf',
+          'url.https://x-access-token:token345@github.example.com/.insteadOf',
+        GIT_CONFIG_KEY_8:
+          'url.https://x-access-token:token345@github.example.com/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',

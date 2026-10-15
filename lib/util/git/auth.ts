@@ -9,7 +9,9 @@ import { regEx } from '../regex.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
 import { addGitConfigEnvironmentVariables } from './config.ts';
 import type { AuthenticationRule } from './types.ts';
-import { parseGitUrl } from './url.ts';
+import { getTokenCredentials, parseGitUrl } from './url.ts';
+
+const platformHostTypes = new Set<string>(PLATFORM_HOST_TYPES);
 
 const githubApiUrls = new Set([
   'github.com',
@@ -67,13 +69,16 @@ function getAuthenticationRulesWithToken(
   hostType: string | undefined | null,
   authToken: string,
 ): AuthenticationRule[] {
-  let token = authToken;
-  let type = hostType;
-  type ??= detectPlatform(url);
-  if (type === 'gitlab') {
-    token = `gitlab-ci-token:${authToken}`;
-  }
-  return getAuthenticationRules(url, type, token);
+  const type = hostType ?? detectPlatform(url);
+  const platform =
+    hostType && platformHostTypes.has(hostType)
+      ? hostType
+      : detectPlatform(url);
+  return getAuthenticationRules(
+    url,
+    type,
+    getTokenCredentials(platform, authToken),
+  );
 }
 
 /**
