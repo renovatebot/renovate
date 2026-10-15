@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
@@ -245,6 +246,47 @@ describe('modules/manager/bundler/artifacts', () => {
         { cmd: 'install-tool bundler 2.3.5' },
         { cmd: 'ruby --version' },
         { cmd: 'bundler lock --update foo bar' },
+      ]);
+    });
+
+    it('installs the target bundler version before updating the lockfile', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      fs.readLocalFile.mockResolvedValueOnce(
+        `${codeBlock`
+        DEPENDENCIES
+          bundler (= 4.0.21)
+
+        BUNDLED WITH
+           4.0.21
+      `}\n`,
+      );
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: ['Gemfile.lock'] }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+
+      const res = await updateArtifacts({
+        packageFileName: 'Gemfile',
+        updatedDeps: [
+          { depName: 'bundler', newVersion: '4.0.22', updateType: 'patch' },
+        ],
+        newPackageFileContent: codeBlock`
+          source 'https://rubygems.org'
+          ruby '4.0.7'
+          gem 'bundler', '4.0.22'
+        `,
+        config: {
+          extractedConstraints: { bundler: '4.0.21' },
+        },
+      });
+
+      expect(res).toEqual([updatedGemfileLock]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool ruby 4.0.7' },
+        { cmd: 'install-tool bundler 4.0.22' },
+        { cmd: 'ruby --version' },
+        { cmd: 'bundler lock --update --bundler' },
       ]);
     });
 

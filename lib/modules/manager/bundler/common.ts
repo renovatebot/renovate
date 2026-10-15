@@ -79,13 +79,18 @@ function getBundlerConstraintFromLockFile(
 }
 
 export async function getBundlerConstraint(
-  updateArtifact: Pick<UpdateArtifact, 'config'>,
+  updateArtifact: Pick<UpdateArtifact, 'config' | 'updatedDeps'>,
   existingLockFileContent: string,
 ): Promise<string | undefined> {
-  const { config } = updateArtifact;
-  return await resolveToolConstraint(config, 'bundler', () =>
-    getBundlerConstraintFromLockFile(existingLockFileContent),
-  );
+  const { config, updatedDeps } = updateArtifact;
+  return await resolveToolConstraint(config, 'bundler', () => {
+    const bundlerUpdate = updatedDeps.find((dep) => dep.depName === 'bundler');
+    if (bundlerUpdate?.newVersion) {
+      logger.debug('Using target bundler version for artifact generation');
+      return bundlerUpdate.newVersion;
+    }
+    return getBundlerConstraintFromLockFile(existingLockFileContent);
+  });
 }
 
 export async function getLockFilePath(

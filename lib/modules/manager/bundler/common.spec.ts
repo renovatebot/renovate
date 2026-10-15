@@ -32,46 +32,72 @@ describe('modules/manager/bundler/common', () => {
 
   describe('getBundlerConstraint', () => {
     it('uses existing constraint', async () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
         config: {
           constraints: { bundler: '2.1.0' },
         },
+        updatedDeps: [{ depName: 'bundler', newVersion: '4.0.22' }],
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('2.1.0');
     });
 
-    it('extracts from lockfile', async () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
+    it('uses the target version when upgrading bundler', async () => {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
+        config: {
+          extractedConstraints: { bundler: '4.0.21' },
+        },
+        updatedDeps: [
+          { depName: 'rake', newVersion: '13.4.2' },
+          { depName: 'bundler', newVersion: '4.0.22' },
+        ],
+      };
+
+      const version = await getBundlerConstraint(config, lockedContent);
+
+      expect(version).toEqual('4.0.22');
+    });
+
+    it.each`
+      updatedDeps
+      ${[]}
+      ${[{ depName: 'rake', newVersion: '13.4.2' }]}
+      ${[{ depName: 'bundler' }]}
+    `('extracts from lockfile for $updatedDeps', async ({ updatedDeps }) => {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
         config: {},
+        updatedDeps,
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
     });
 
     it('prefers the lockfile over the extracted constraint', async () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
         config: {
           extractedConstraints: { bundler: '2.4.0' },
         },
+        updatedDeps: [],
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
     });
 
     it('falls back to the extracted constraint', async () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
         config: {
           extractedConstraints: { bundler: '2.4.0' },
         },
+        updatedDeps: [],
       };
       const version = await getBundlerConstraint(config, '');
       expect(version).toBe('2.4.0');
     });
 
     it('returns undefined', async () => {
-      const config: Pick<UpdateArtifact, 'config'> = {
+      const config: Pick<UpdateArtifact, 'config' | 'updatedDeps'> = {
         config: {},
+        updatedDeps: [],
       };
       const version = await getBundlerConstraint(config, '');
       expect(version).toBeUndefined();
