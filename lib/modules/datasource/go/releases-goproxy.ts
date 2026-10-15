@@ -118,9 +118,12 @@ export class GoProxyDatasource extends Datasource {
 
   private readonly githubHttp = new GithubHttp(GithubReleasesDatasource.id);
 
+  /**
+   * @returns `undefined` if the lookup was inconclusive, so it isn't cached
+   */
   private async _getReleases(
     config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
+  ): Promise<ReleaseResult | null | undefined> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
@@ -132,6 +135,7 @@ export class GoProxyDatasource extends Datasource {
 
     let result: ReleaseResult | null = null;
     let servedByProxy = false;
+    let authFailed = false;
 
     if (noproxy?.test(packageName)) {
       logger.debug(`Fetching ${packageName} via GONOPROXY match`);
@@ -171,11 +175,21 @@ export class GoProxyDatasource extends Datasource {
           );
           this.handleGenericErrors(err);
         }
+        if (statusCode === 401) {
+          authFailed = true;
+        }
         logger.debug(
           { err },
           'Goproxy error: trying next URL provided with GOPROXY',
         );
       }
+    }
+
+    if (!result && authFailed) {
+      logger.debug(
+        `Goproxy: not caching lookup of ${packageName}, as a URL provided with GOPROXY failed to authenticate`,
+      );
+      return undefined;
     }
 
     if (result && !result.sourceUrl) {
@@ -295,7 +309,12 @@ export class GoProxyDatasource extends Datasource {
     }
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  /**
+   * Same as {@link GoProxyDatasource.getReleases}, except that an inconclusive lookup is returned as `undefined`, so callers which cache the result can avoid caching it too.
+   */
+  getReleasesOrUndefined(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null | undefined> {
     return withCache(
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
@@ -305,6 +324,10 @@ export class GoProxyDatasource extends Datasource {
       },
       () => this._getReleases(config),
     );
+  }
+
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return (await this.getReleasesOrUndefined(config)) ?? null;
   }
 
   /**

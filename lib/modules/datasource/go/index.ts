@@ -59,14 +59,14 @@ export class GoDatasource extends Datasource {
 
   private _getReleases(
     config: GetReleasesConfig,
-  ): Promise<ReleaseResult | null> {
-    return this.goproxy.getReleases(config);
+  ): Promise<ReleaseResult | null | undefined> {
+    return this.goproxy.getReleasesOrUndefined(config);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const constraintsFilteringKey =
       config.constraintsFiltering === 'none' ? '' : config.constraintsFiltering;
-    return withCache(
+    const res = await withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
         key: buildCacheKey(
@@ -79,6 +79,7 @@ export class GoDatasource extends Datasource {
       },
       () => this._getReleases(config),
     );
+    return res ?? null;
   }
 
   /**
