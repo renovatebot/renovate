@@ -84,6 +84,27 @@ describe('util/git/url', () => {
       );
     });
 
+    it('returns gitea url with token', () => {
+      expect(getHttpUrl('https://gitea.com/some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo',
+      );
+      expect(getHttpUrl('git@gitea.com:some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo',
+      );
+      expect(getHttpUrl('https://gitea.com/some/repo', 'user:pass')).toBe(
+        'https://user:pass@gitea.com/some/repo',
+      );
+    });
+
+    it('returns forgejo url with token', () => {
+      expect(getHttpUrl('https://codeberg.org/some/repo', 'token')).toBe(
+        'https://token:x-oauth-basic@codeberg.org/some/repo',
+      );
+      expect(getHttpUrl('https://codeberg.org/some/repo', 'user:pass')).toBe(
+        'https://user:pass@codeberg.org/some/repo',
+      );
+    });
+
     it('returns bitbucket-server url', () => {
       expect(getHttpUrl('http://git.mycompany.com/scm/proj/repo.git')).toBe(
         'http://git.mycompany.com/scm/proj/repo.git',
@@ -207,6 +228,13 @@ describe('util/git/url', () => {
       hostRules.add({ token: 'token' });
       expect(getRemoteUrlWithToken('ssh://gitlab.com/some/repo.git')).toBe(
         'https://gitlab-ci-token:token@gitlab.com/some/repo.git',
+      );
+    });
+
+    it('returns https url with x-oauth-basic password for gitea token', () => {
+      hostRules.add({ token: 'token' });
+      expect(getRemoteUrlWithToken('git@gitea.com:some/repo.git')).toBe(
+        'https://token:x-oauth-basic@gitea.com/some/repo.git',
       );
     });
 
