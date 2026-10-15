@@ -132,6 +132,18 @@
       }
     ]
   },
+  "cloudflare-vitest-pool-workers-to-vitest-plugin": {
+    "description": "`@cloudflare/vitest-pool-workers` was renamed to `@cloudflare/vitest-plugin` for the v1 generally available release.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.22.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@cloudflare/vitest-pool-workers"],
+        "replacementName": "@cloudflare/vitest-plugin",
+        "replacementVersion": "1.0.0"
+      }
+    ]
+  },
   "containerbase": {
     "description": "Replace containerbase dependencies.",
     "packageRules": [
