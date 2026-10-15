@@ -130,7 +130,7 @@ export async function getGoproxyReleases(
   logger.trace(`goproxy.getReleases(${packageName})`);
   const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
   if (goproxy === 'direct') {
-    return getDirectReleases(config);
+    return getDirectOrModProxyReleases(config);
   }
   const proxyList = parseGoproxy(goproxy);
   const noproxy = parseNoproxy();
@@ -140,7 +140,7 @@ export async function getGoproxyReleases(
 
   if (noproxy?.test(packageName)) {
     logger.debug(`Fetching ${packageName} via GONOPROXY match`);
-    result = await getDirectReleases(config);
+    result = await getDirectOrModProxyReleases(config);
     return result;
   }
 
@@ -149,7 +149,7 @@ export async function getGoproxyReleases(
       if (url === 'off') {
         break;
       } else if (url === 'direct') {
-        result = await getDirectReleases(config);
+        result = await getDirectOrModProxyReleases(config);
         break;
       }
 
@@ -200,6 +200,35 @@ export async function getGoproxyReleases(
   }
 
   return result;
+}
+
+/**
+ * Looks up a module directly from its source, or from the module proxy its
+ * `go-import` meta tag advertises with the `mod` VCS, as with private Buf
+ * Schema Registries.
+ */
+async function getDirectOrModProxyReleases(
+  config: GetReleasesConfig,
+): Promise<ReleaseResult | null> {
+  const { packageName } = config;
+
+  const source = await BaseGoDatasource.getDatasource(packageName);
+  if (!source) {
+    const modProxyUrl = await BaseGoDatasource.getModProxyUrl(packageName);
+    if (modProxyUrl) {
+      logger.debug(
+        `Fetching ${packageName} via go-import mod proxy ${modProxyUrl}`,
+      );
+      const res = await getVersionsWithInfo(
+        modProxyUrl,
+        packageName,
+        config.constraintsFiltering,
+      );
+      return res.releases.length ? res : null;
+    }
+  }
+
+  return getDirectReleases(config);
 }
 
 /**

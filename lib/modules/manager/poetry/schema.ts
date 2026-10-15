@@ -232,52 +232,85 @@ export const PoetrySource = z.object({
 });
 export type PoetrySource = z.infer<typeof PoetrySource>;
 
+export function getPypiUrl(): string {
+  return getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+}
+
+function sortSources(sources: PoetrySource[]): PoetrySource[] {
+  return sources.sort(
+    (a, b) =>
+      PoetrySourceOrder.indexOf(a.priority) -
+      PoetrySourceOrder.indexOf(b.priority),
+  );
+}
+
+/**
+ * Adds the implicit PyPI source when the project does not configure it.
+ *
+ * Poetry >= 1.8 only adds PyPI when there is no primary source.
+ * Before 1.8, PyPI was also added as a secondary source next to a primary one.
+ */
+export function withImplicitPypi(
+  sources: PoetrySource[],
+  legacyPoetry: boolean,
+): PoetrySource[] {
+  if (
+    sources.some(
+      ({ name, priority }) => name === 'pypi' || priority === 'default',
+    )
+  ) {
+    return sources;
+  }
+
+  const hasPrimarySource = sources.some(
+    ({ priority }) => priority === 'primary',
+  );
+  if (hasPrimarySource && !legacyPoetry) {
+    return sources;
+  }
+
+  return sortSources([
+    ...sources,
+    {
+      name: 'pypi',
+      priority: hasPrimarySource ? 'secondary' : 'default',
+      url: getPypiUrl(),
+    },
+  ]);
+}
+
+export function getRegistryUrls(sources: PoetrySource[]): string[] {
+  return uniq(
+    sources
+      .filter(({ priority }) => priority !== 'explicit')
+      .map(({ url }) => url!),
+  );
+}
+
 export const PoetrySources = LooseArray(PoetrySource, {
   onError: ({ error: err }) => {
     logger.debug({ err }, 'Poetry: error parsing sources array');
   },
 })
   .transform((sources) => {
-    const pypiUrl = getEnv().PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+    const pypiUrl = getPypiUrl();
     const result: PoetrySource[] = [];
 
-    let overridesPyPi = false;
-    let hasDefaultSource = false;
-    let hasPrimarySource = false;
     for (const source of sources) {
       if (source.name === 'pypi') {
         source.url = pypiUrl;
-        overridesPyPi = true;
       }
 
       if (!source.url) {
         continue;
       }
 
-      if (source.priority === 'default') {
-        hasDefaultSource = true;
-      } else if (source.priority === 'primary') {
-        hasPrimarySource = true;
-      }
-
       result.push(source);
     }
 
-    if (sources.length && !hasDefaultSource && !overridesPyPi) {
-      result.push({
-        name: 'pypi',
-        priority: hasPrimarySource ? 'secondary' : 'default',
-        url: pypiUrl,
-      });
-    }
-
-    result.sort(
-      (a, b) =>
-        PoetrySourceOrder.indexOf(a.priority) -
-        PoetrySourceOrder.indexOf(b.priority),
+    return sortSources(
+      sources.length ? withImplicitPypi(result, false) : result,
     );
-
-    return result;
   })
   .catch([]);
 
@@ -433,18 +466,15 @@ export const PoetryPyProject = Toml.pipe(
           }
         }
 
-        const sourceUrlsFiltered = sourceUrls.filter(
-          ({ priority }) => priority !== 'explicit',
-        );
-        if (sourceUrlsFiltered.length) {
-          packageFileContent.registryUrls = uniq(
-            sourceUrlsFiltered.map(({ url }) => url!),
-          );
+        const registryUrls = getRegistryUrls(sourceUrls);
+        if (registryUrls.length) {
+          packageFileContent.registryUrls = registryUrls;
         }
       }
 
       return {
         packageFileContent,
+        poetrySources: sourceUrls,
         poetryRequirement: buildSystem?.poetryRequirement,
       };
     }),
