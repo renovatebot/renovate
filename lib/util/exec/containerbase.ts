@@ -6,6 +6,7 @@ import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
+import { buildCacheKey } from '../cache/package/key.ts';
 import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
@@ -410,7 +411,7 @@ export async function generateInstallCommands(
       const toolVersion = await resolveConstraint(toolConstraint);
       const { toolName } = toolConstraint;
       if (memoize) {
-        const cacheKey = `containerbase-active:${toolName}`;
+        const cacheKey = buildCacheKey('containerbase-active', toolName);
         if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
           continue;
         }

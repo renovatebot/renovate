@@ -6,6 +6,7 @@ import {
 import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -124,7 +125,7 @@ export class GoProxyDatasource extends Datasource {
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
-      return this.direct.getReleases(config);
+      return this.getDirectReleases(config);
     }
     const proxyList = parseGoproxy(goproxy);
     const noproxy = parseNoproxy();
@@ -134,7 +135,7 @@ export class GoProxyDatasource extends Datasource {
 
     if (noproxy?.test(packageName)) {
       logger.debug(`Fetching ${packageName} via GONOPROXY match`);
-      result = await this.direct.getReleases(config);
+      result = await this.getDirectReleases(config);
       return result;
     }
 
@@ -143,7 +144,7 @@ export class GoProxyDatasource extends Datasource {
         if (url === 'off') {
           break;
         } else if (url === 'direct') {
-          result = await this.direct.getReleases(config);
+          result = await this.getDirectReleases(config);
           break;
         }
 
@@ -198,6 +199,33 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  /**
+   * Looks up a module directly from its source, or from the module proxy its `go-import` meta tag advertises with the `mod` VCS, as with private Buf Schema Registries.
+   */
+  private async getDirectReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    const { packageName } = config;
+
+    const source = await BaseGoDatasource.getDatasource(packageName);
+    if (!source) {
+      const modProxyUrl = await BaseGoDatasource.getModProxyUrl(packageName);
+      if (modProxyUrl) {
+        logger.debug(
+          `Fetching ${packageName} via go-import mod proxy ${modProxyUrl}`,
+        );
+        const res = await this.getVersionsWithInfo(
+          modProxyUrl,
+          packageName,
+          config.constraintsFiltering,
+        );
+        return res.releases.length ? res : null;
+      }
+    }
+
+    return this.direct.getReleases(config);
   }
 
   /**
@@ -564,17 +592,25 @@ export class GoProxyDatasource extends Datasource {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
     const constraintsFilteringKey =
-      constraintsFiltering && constraintsFiltering !== 'none'
-        ? `@@${constraintsFiltering}`
-        : '';
-    // TODO: types (#22198)
-    return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
+      constraintsFiltering === 'none' ? '' : constraintsFiltering;
+    return buildCacheKey(
+      'getReleases',
+      packageName,
+      goproxy,
+      noproxy?.toString(),
+      constraintsFilteringKey,
+    );
   }
 
   static getVersionedCacheKey(packageName: string, version: string): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
-    // TODO: types (#22198)
-    return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
+    return buildCacheKey(
+      'goDirective',
+      packageName,
+      version,
+      goproxy,
+      noproxy?.toString(),
+    );
   }
 }

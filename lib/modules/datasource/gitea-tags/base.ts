@@ -1,6 +1,9 @@
+import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type {
@@ -9,7 +12,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { Commits, Tag } from './schema.ts';
-import { getApiUrl, getCacheKey, getSourceUrl } from './util.ts';
+import { getApiUrl, getSourceUrl } from './util.ts';
 
 /**
  * Shared implementation of the datasources which speak the Gitea API.
@@ -93,7 +96,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, this.cacheKeyType),
+        key: buildCacheKey(resolvedUrl, repo, this.cacheKeyType),
         fallback: true,
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
@@ -123,7 +126,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, `tag-${tag}`),
+        key: buildCacheKey(resolvedUrl, repo, 'tag', tag),
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
       () => this._getTagCommit(resolvedUrl, repo, tag),
@@ -137,20 +140,31 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     repo: string,
     newValue?: string,
   ): Promise<string | null> {
-    if (newValue?.length) {
-      return this.getTagCommit(registryUrl, repo, newValue);
+    try {
+      if (newValue?.length) {
+        return await this.getTagCommit(registryUrl, repo, newValue);
+      }
+
+      const url = `${getApiUrl(
+        registryUrl,
+      )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
+      const { body } = await this.http.getJson(url, Commits);
+
+      if (body.length === 0) {
+        return null;
+      }
+
+      return body[0].sha;
+    } catch (err) {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.debug(
+          { giteaRepo: repo, err, registryUrl },
+          'Gitea repo or ref not found when getting commit',
+        );
+        return null;
+      }
+      this.handleGenericErrors(err);
     }
-
-    const url = `${getApiUrl(
-      registryUrl,
-    )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
-    const { body } = await this.http.getJson(url, Commits);
-
-    if (body.length === 0) {
-      return null;
-    }
-
-    return body[0].sha;
   }
 
   override getDigest(
@@ -161,7 +175,7 @@ export abstract class GiteaDatasource extends Datasource<GiteaHttp> {
     return withCache(
       {
         namespace: this.cacheNamespace,
-        key: getCacheKey(resolvedUrl, repo, 'digest'),
+        key: buildCacheKey(resolvedUrl, repo, 'digest', newValue),
         fallback: true,
         cacheable: this.isPublicRegistry(resolvedUrl),
       },
