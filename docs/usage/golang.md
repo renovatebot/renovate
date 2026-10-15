@@ -147,3 +147,42 @@ If you do not run Renovate with GitLab as its platform, you also need a host rul
 
 Without the `go` host rule, GitLab responds to the unauthenticated `?go-get=1` request with a truncated `go-import` path, so Renovate resolves the wrong repository.
 Lookups then fail with a 404 response for a tags URL with a truncated project path, for example: `https://gitlab.company.com/api/v4/projects/group%2Fsubgroup/repository/tags?per_page=100`.
+
+### Private Go modules served by a module proxy (Buf Schema Registry)
+
+Some hosts, like a private [Buf Schema Registry](https://buf.build/docs/bsr/) (BSR), serve Go modules from a Go module proxy instead of a Git repository.
+They advertise this with a `go-import` meta tag that uses `mod` instead of `git`, for example:
+
+```html
+<meta
+  name="go-import"
+  content="bsr.example.com/gen/go mod https://bsr.example.com/gen/go"
+/>
+```
+
+When Renovate looks up a module directly, it follows the `mod` proxy URL, as the `go` command does.
+Renovate only follows the URL if it is a valid `https` URL, and prefers a `mod` entry over a VCS entry for the same module.
+
+Renovate looks up a module directly when `GOPROXY` is set to `direct`, or the module matches `GONOPROXY` or `GOPRIVATE`.
+For a private registry, set `GOPRIVATE` (or `GONOPROXY`) to the registry's host so that the module is not sent to the public proxy:
+
+```sh
+GOPRIVATE=bsr.example.com
+```
+
+Renovate uses the host rule with `hostType` set to `go` to authenticate both the `?go-get=1` request and the requests to the `mod` proxy:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'bsr.example.com',
+      hostType: 'go',
+      token: process.env.BSR_TOKEN,
+    },
+  ],
+};
+```
+
+Public modules on `buf.build` are served through `proxy.golang.org`.
+To try the `mod` lookup with a public module, set `GOPROXY=direct` or `GONOPROXY=buf.build`.

@@ -481,6 +481,19 @@ describe('modules/datasource/go/base', () => {
         expect(res).toBeNull();
       });
 
+      it('returns null for non-git imports', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo/bar hg https://example.com/foo/bar">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource('example.com/foo/bar');
+
+        expect(res).toBeNull();
+      });
+
       it('returns null for invalid import URL', async () => {
         const meta =
           '<meta name="go-import" content="buf.build/gen/go/gogo/protobuf/protocolbuffers/go git foobar">';
@@ -581,6 +594,68 @@ describe('modules/datasource/go/base', () => {
         );
 
         expect(res).toBeNull();
+      });
+
+      it('returns null when the prefix is not a path prefix of the module', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foobar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl('example.com/foobar');
+
+        expect(res).toBeNull();
+      });
+
+      it('returns the proxy URL when the prefix is the module itself', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/foo mod https://example.com/proxy">';
+        httpMock
+          .scope('https://example.com')
+          .get('/foo?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl('example.com/foo');
+
+        expect(res).toBe('https://example.com/proxy');
+      });
+
+      it.each`
+        url
+        ${'http://example.com/proxy'}
+        ${'ftp://example.com/proxy'}
+        ${'not-a-url'}
+      `('ignores the non-https or invalid proxy URL $url', async ({ url }) => {
+        const meta = `<meta name="go-import" content="example.com/foo mod ${url}">`;
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('finds the mod import among several go-import meta tags', async () => {
+        const meta = `
+          <meta name="go-import" content="example.com/foo/bar git https://example.com/foo/bar.git">
+          <meta name="go-import" content="example.com/foo/bar mod https://example.com/proxy">
+        `;
+        httpMock
+          .scope('https://example.com')
+          .get('/foo/bar?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getModProxyUrl(
+          'example.com/foo/bar',
+        );
+
+        expect(res).toBe('https://example.com/proxy');
       });
 
       it('returns null without a go-import meta tag', async () => {
