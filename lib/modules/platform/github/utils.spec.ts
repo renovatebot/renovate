@@ -52,7 +52,7 @@ describe('modules/platform/github/utils', () => {
       ).toBe('https://x-access-token:token@github.com/some/repo.git');
     });
 
-    it('splits username and password when authToken contains a colon', () => {
+    it('sets username and password when provided as a username:password combination', () => {
       expect(
         getRepoUrl(
           'some/repo',

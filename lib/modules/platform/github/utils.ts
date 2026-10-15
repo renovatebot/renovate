@@ -48,7 +48,7 @@ export function getRepoUrl(
       ? authToken.split(':')
       : ['x-access-token', authToken];
     url.username = username;
-    url.password = password ?? '';
+    url.password = password;
   }
   url.host = url.host.replace('api.github.com', 'github.com');
   url.pathname = `${repository}.git`;
