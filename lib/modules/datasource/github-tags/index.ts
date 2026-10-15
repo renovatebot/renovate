@@ -27,7 +27,7 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
 
   // the GraphQL fetcher caches the tags and releases itself, and the latest
   // commit lookup uses the HTTP memory cache
-  protected override readonly usePackageCache = false;
+  protected override readonly useGitHostTagCaching = false;
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
