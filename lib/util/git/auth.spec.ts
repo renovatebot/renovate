@@ -467,14 +467,82 @@ describe('util/git/auth', () => {
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
-          'url.https://ssh:token1234@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token1234@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_KEY_1:
-          'url.https://git:token1234@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token1234@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_KEY_2:
-          'url.https://token1234@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token1234@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
+      });
+    });
+
+    it.each([
+      ['azure', 'https://dev.azure.com/', 'dev.azure.com'],
+      ['scm-manager', 'https://scm.example.com/', 'scm.example.com'],
+    ])(
+      'returns url with x-access-token username for %s token',
+      (hostType, url, host) => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables({}, url, {
+            token: 'token1234',
+            hostType,
+            matchHost: host,
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: `url.https://x-access-token:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_KEY_1: `url.https://x-access-token:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_KEY_2: `url.https://x-access-token:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_VALUE_0: `ssh://git@${host}/`,
+          GIT_CONFIG_VALUE_1: `git@${host}:`,
+          GIT_CONFIG_VALUE_2: url,
+        });
+      },
+    );
+
+    it.each([
+      ['bitbucket.org', 'bitbucket'],
+      ['bitbucket.org', undefined],
+      ['bitbucket.com', 'bitbucket'],
+      ['git.example.com', 'bitbucket'],
+    ])(
+      'returns url with a single x-token-auth username for %s token with hostType %s',
+      (host, hostType) => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables({}, `https://${host}/`, {
+            token: 'token1234',
+            hostType,
+            matchHost: host,
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: `url.https://x-token-auth:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_KEY_1: `url.https://x-token-auth:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_KEY_2: `url.https://x-token-auth:token1234@${host}/.insteadOf`,
+          GIT_CONFIG_VALUE_0: `ssh://git@${host}/`,
+          GIT_CONFIG_VALUE_1: `git@${host}:`,
+          GIT_CONFIG_VALUE_2: `https://${host}/`,
+        });
+      },
+    );
+
+    it('keeps a bitbucket token containing username and password unchanged', () => {
+      expect(
+        getGitAuthenticatedEnvironmentVariables({}, 'https://bitbucket.org/', {
+          token: 'user:pass',
+          hostType: 'bitbucket',
+          matchHost: 'bitbucket.org',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://user:pass@bitbucket.org/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://user:pass@bitbucket.org/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://user:pass@bitbucket.org/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@bitbucket.org/',
+        GIT_CONFIG_VALUE_1: 'git@bitbucket.org:',
+        GIT_CONFIG_VALUE_2: 'https://bitbucket.org/',
       });
     });
   });
@@ -710,11 +778,11 @@ describe('util/git/auth', () => {
       expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
-          'url.https://ssh:token123@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token123@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_KEY_1:
-          'url.https://git:token123@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token123@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_KEY_2:
-          'url.https://token123@git.mycompany.com/scm/.insteadOf',
+          'url.https://x-token-auth:token123@git.mycompany.com/scm/.insteadOf',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'https://git.mycompany.com/scm/',
