@@ -269,9 +269,25 @@ let _getPkgReleases: Promise<
 
 async function getPkgReleases(
   toolConfig: ToolConfig,
+  nodeVersion?: string,
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
+  if (nodeVersion) {
+    // drop releases (e.g. npm, pnpm) whose engines.node excludes the Node we install
+    const compatible = await getPkgReleases({
+      ...toolConfig,
+      constraintsFiltering: 'strict',
+      constraints: { node: nodeVersion },
+    });
+    if (compatible?.releases.length) {
+      return compatible;
+    }
+    logger.debug(
+      { toolConfig, nodeVersion },
+      'No tool releases compatible with node version - ignoring node constraint',
+    );
+  }
   return getPkgReleases(toolConfig);
 }
 
@@ -321,6 +337,7 @@ function isStable(
 
 export async function resolveConstraint(
   toolConstraint: ToolConstraint,
+  nodeVersion?: string,
 ): Promise<string> {
   const { toolName } = toolConstraint;
   const toolConfig = allToolConfig[toolName];
@@ -346,7 +363,7 @@ export async function resolveConstraint(
     }
   }
 
-  const pkgReleases = await getPkgReleases(toolConfig);
+  const pkgReleases = await getPkgReleases(toolConfig, nodeVersion);
   const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
@@ -407,9 +424,13 @@ export async function generateInstallCommands(
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
+    let nodeVersion: string | undefined;
     for (const toolConstraint of toolConstraints) {
-      const toolVersion = await resolveConstraint(toolConstraint);
+      const toolVersion = await resolveConstraint(toolConstraint, nodeVersion);
       const { toolName } = toolConstraint;
+      if (toolName === 'node') {
+        nodeVersion = toolVersion;
+      }
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
         if (memCache.get<string | undefined>(cacheKey) === toolVersion) {

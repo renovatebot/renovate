@@ -266,6 +266,22 @@ describe('util/exec/containerbase', () => {
     );
   });
 
+  describe('resolveConstraint() with node version', () => {
+    it('ignores node version when no release is compatible', async () => {
+      datasource.getPkgReleases
+        .mockResolvedValueOnce({ releases: [] })
+        .mockResolvedValueOnce({ releases: [{ version: '12.2.0' }] });
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, '20.17.0'),
+      ).resolves.toBe('12.2.0');
+      expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+      });
+    });
+  });
+
   describe('generateInstallCommands()', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -288,6 +304,24 @@ describe('util/exec/containerbase', () => {
       await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
         'install-tool composer 2.1.0',
       ]);
+    });
+
+    it('filters later tool releases by the resolved node version', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'npm', constraint: '>=1' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool npm 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+        constraintsFiltering: 'strict',
+        constraints: { node: '20.17.0' },
+      });
     });
 
     it('repeats install commands when not memoizing', async () => {
