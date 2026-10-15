@@ -5,8 +5,8 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { DockerDatasource } from '../docker/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
 
@@ -40,21 +40,46 @@ describe('modules/datasource/helm/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returns null without a request for oci:// registries', async () => {
+    it('looks up oci:// registries using the docker datasource', async () => {
+      const getReleases = vi
+        .spyOn(DockerDatasource.prototype, 'getReleases')
+        .mockResolvedValueOnce({
+          registryUrl: 'https://ghcr.io',
+          releases: [{ version: '5.18.0' }, { version: '5.19.0' }],
+        });
       await expect(
         getPkgReleases({
           datasource: HelmDatasource.id,
           packageName: 'grafana-operator',
-          registryUrls: ['oci://ghcr.io/grafana/helm-charts'],
+          registryUrls: ['oci://ghcr.io/grafana/helm-charts/'],
         }),
-      ).resolves.toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        {
-          packageName: 'grafana-operator',
-          registryUrl: 'oci://ghcr.io/grafana/helm-charts',
-        },
-        expect.stringContaining('does not support `oci://`'),
-      );
+      ).resolves.toMatchObject({
+        releases: [{ version: '5.18.0' }, { version: '5.19.0' }],
+      });
+      expect(getReleases).toHaveBeenCalledExactlyOnceWith({
+        packageName: 'ghcr.io/grafana/helm-charts/grafana-operator',
+        registryUrl: 'https://index.docker.io',
+      });
+    });
+
+    it('keeps the docker.io host for oci:// registries on Docker Hub', async () => {
+      const getReleases = vi
+        .spyOn(DockerDatasource.prototype, 'getReleases')
+        .mockResolvedValueOnce({
+          registryUrl: 'https://index.docker.io',
+          releases: [{ version: '1.5.0' }],
+        });
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'gateway-helm',
+          registryUrls: ['oci://docker.io/envoyproxy'],
+        }),
+      ).resolves.toMatchObject({ releases: [{ version: '1.5.0' }] });
+      expect(getReleases).toHaveBeenCalledExactlyOnceWith({
+        packageName: 'docker.io/envoyproxy/gateway-helm',
+        registryUrl: 'https://index.docker.io',
+      });
     });
 
     it('returns null for empty response', async () => {
