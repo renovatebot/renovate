@@ -9,7 +9,13 @@ import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
 import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
-import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
+import type {
+  ConstraintName,
+  Opt,
+  ToolConfig,
+  ToolConstraint,
+  ToolName,
+} from './types.ts';
 
 /**
  * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
@@ -269,23 +275,23 @@ let _getPkgReleases: Promise<
 
 async function getPkgReleases(
   toolConfig: ToolConfig,
-  nodeVersion?: string,
+  resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
-  if (nodeVersion) {
-    // drop releases (e.g. npm, pnpm) whose engines.node excludes the Node we install
+  if (Object.keys(resolvedTools).length) {
+    // drop releases whose runtime constraints (e.g. `engines.node`) exclude the runtime versions we install
     const compatible = await getPkgReleases({
       ...toolConfig,
       constraintsFiltering: 'strict',
-      constraints: { node: nodeVersion },
+      constraints: { ...resolvedTools },
     });
     if (compatible?.releases.length) {
       return compatible;
     }
     logger.debug(
-      { toolConfig, nodeVersion },
-      'No tool releases compatible with node version - ignoring node constraint',
+      { toolConfig, resolvedTools },
+      'No tool releases compatible with resolved tools - ignoring their constraints',
     );
   }
   return getPkgReleases(toolConfig);
@@ -337,7 +343,7 @@ function isStable(
 
 export async function resolveConstraint(
   toolConstraint: ToolConstraint,
-  nodeVersion?: string,
+  resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<string> {
   const { toolName } = toolConstraint;
   const toolConfig = allToolConfig[toolName];
@@ -363,7 +369,7 @@ export async function resolveConstraint(
     }
   }
 
-  const pkgReleases = await getPkgReleases(toolConfig, nodeVersion);
+  const pkgReleases = await getPkgReleases(toolConfig, resolvedTools);
   const releases = coerceArray(pkgReleases?.releases);
 
   if (!releases?.length) {
@@ -424,12 +430,18 @@ export async function generateInstallCommands(
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
-    let nodeVersion: string | undefined;
+    // Runtimes are listed before the tools that run on them (e.g. node before npm),
+    // so a runtime's resolved version is recorded here for the tools after it.
+    const resolvedTools: Partial<Record<ConstraintName, string>> = {};
     for (const toolConstraint of toolConstraints) {
-      const toolVersion = await resolveConstraint(toolConstraint, nodeVersion);
+      const toolVersion = await resolveConstraint(
+        toolConstraint,
+        resolvedTools,
+      );
       const { toolName } = toolConstraint;
+      // only node for now; other runtimes (e.g. python, ruby) can be added here
       if (toolName === 'node') {
-        nodeVersion = toolVersion;
+        resolvedTools.node = toolVersion;
       }
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);

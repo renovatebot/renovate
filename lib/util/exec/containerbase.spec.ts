@@ -266,13 +266,13 @@ describe('util/exec/containerbase', () => {
     );
   });
 
-  describe('resolveConstraint() with node version', () => {
-    it('ignores node version when no release is compatible', async () => {
+  describe('resolveConstraint() with resolved tools', () => {
+    it('ignores resolved tools when no release is compatible', async () => {
       datasource.getPkgReleases
         .mockResolvedValueOnce({ releases: [] })
         .mockResolvedValueOnce({ releases: [{ version: '12.2.0' }] });
       await expect(
-        resolveConstraint({ toolName: 'npm' }, '20.17.0'),
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
       ).resolves.toBe('12.2.0');
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
         datasource: 'npm',
@@ -306,7 +306,7 @@ describe('util/exec/containerbase', () => {
       ]);
     });
 
-    it('filters later tool releases by the resolved node version', async () => {
+    it('filters later tool releases by earlier resolved tools', async () => {
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node', constraint: '20.17.0' },
         { toolName: 'npm', constraint: '>=1' },
