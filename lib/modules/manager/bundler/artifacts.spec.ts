@@ -249,46 +249,56 @@ describe('modules/manager/bundler/artifacts', () => {
       ]);
     });
 
-    it('installs the target bundler version before updating the lockfile', async () => {
-      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-      fs.readLocalFile.mockResolvedValueOnce(
-        `${codeBlock`
+    it.each`
+      constraint
+      ${undefined}
+      ${''}
+      ${'4.0.22'}
+      ${'~> 4.0'}
+    `(
+      'installs the target bundler version with constraint "$constraint" before updating the lockfile',
+      async ({ constraint }) => {
+        GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+        fs.readLocalFile.mockResolvedValueOnce(
+          `${codeBlock`
         DEPENDENCIES
           bundler (= 4.0.21)
 
         BUNDLED WITH
            4.0.21
       `}\n`,
-      );
-      const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValueOnce(
-        partial<StatusResult>({ modified: ['Gemfile.lock'] }),
-      );
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+        );
+        const execSnapshots = mockExecAll();
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: ['Gemfile.lock'] }),
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
 
-      const res = await updateArtifacts({
-        packageFileName: 'Gemfile',
-        updatedDeps: [
-          { depName: 'bundler', newVersion: '4.0.22', updateType: 'patch' },
-        ],
-        newPackageFileContent: codeBlock`
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [
+            { depName: 'bundler', newVersion: '4.0.22', updateType: 'patch' },
+          ],
+          newPackageFileContent: codeBlock`
           source 'https://rubygems.org'
           ruby '4.0.7'
           gem 'bundler', '4.0.22'
         `,
-        config: {
-          extractedConstraints: { bundler: '4.0.21' },
-        },
-      });
+          config: {
+            constraints: { bundler: constraint },
+            extractedConstraints: { bundler: '4.0.21' },
+          },
+        });
 
-      expect(res).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'install-tool ruby 4.0.7' },
-        { cmd: 'install-tool bundler 4.0.22' },
-        { cmd: 'ruby --version' },
-        { cmd: 'bundler lock --update --bundler' },
-      ]);
-    });
+        expect(res).toEqual([updatedGemfileLock]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'install-tool ruby 4.0.7' },
+          { cmd: 'install-tool bundler 4.0.22' },
+          { cmd: 'ruby --version' },
+          { cmd: 'bundler lock --update --bundler' },
+        ]);
+      },
+    );
 
     describe('Docker', () => {
       beforeEach(() => {
@@ -582,6 +592,39 @@ describe('modules/manager/bundler/artifacts', () => {
     });
 
     describe('Error handling', () => {
+      it.each`
+        constraint
+        ${'4.0.21'}
+        ${'< 4.0.22'}
+        ${'invalid'}
+      `(
+        'reports conflicting bundler constraint "$constraint" without running commands',
+        async ({ constraint }) => {
+          GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+          fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+          const execSnapshots = mockExecAll();
+
+          const res = await updateArtifacts({
+            packageFileName: 'Gemfile',
+            updatedDeps: [
+              { depName: 'bundler', newVersion: '4.0.22', updateType: 'patch' },
+            ],
+            newPackageFileContent: "gem 'bundler', '4.0.22'",
+            config: { constraints: { bundler: constraint } },
+          });
+
+          expect(res).toEqual([
+            {
+              artifactError: {
+                fileName: 'Gemfile.lock',
+                stderr: `Cannot update Bundler to 4.0.22: it does not satisfy constraints.bundler "${constraint}". Update or remove this constraint.`,
+              },
+            },
+          ]);
+          expect(execSnapshots).toEqual([]);
+        },
+      );
+
       it('returns error when failing in lockFileMaintenance true', async () => {
         const execError = new ExecError('Exec error', {
           cmd: '',
