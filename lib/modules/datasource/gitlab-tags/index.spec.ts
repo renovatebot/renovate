@@ -1,5 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GitlabTagsDatasource } from './index.ts';
@@ -225,6 +226,28 @@ describe('modules/datasource/gitlab-tags/index', () => {
       expect(res).toBe(digest);
     });
 
+    it('url-encodes refs containing slashes', async () => {
+      const digest = 'abcd00001234';
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get(
+          '/api/v4/projects/some%2Fdep2/repository/commits/release%2F1.0%23x',
+        )
+        .reply(200, {
+          id: digest,
+          created_at: '2020-03-04T12:01:37.000-06:00',
+        });
+      const res = await getDigest(
+        {
+          datasource,
+          registryUrls: ['https://gitlab.company.com/api/v4/'],
+          packageName: 'some/dep2',
+        },
+        'release/1.0#x',
+      );
+      expect(res).toBe(digest);
+    });
+
     it('returns commits from gitlab installation for a specific branch', async () => {
       const digest = 'abcd00001234';
       const body = {
@@ -305,6 +328,59 @@ describe('modules/datasource/gitlab-tags/index', () => {
         'unknown-branch',
       );
       expect(res).toBeNull();
+    });
+
+    it('throws ExternalHostError on server errors', async () => {
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(502);
+      await expect(
+        getDigest({
+          datasource,
+          registryUrls: ['https://gitlab.company.com/api/v4/'],
+          packageName: 'some/dep2',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('rethrows other errors', async () => {
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits/branch')
+        .reply(403);
+      await expect(
+        getDigest(
+          {
+            datasource,
+            registryUrls: ['https://gitlab.company.com/api/v4/'],
+            packageName: 'some/dep2',
+          },
+          'branch',
+        ),
+      ).rejects.toThrow('403');
+    });
+
+    it('returns the stale cached digest when the lookup fails', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+      vi.spyOn(packageCache, 'get').mockResolvedValue({
+        cachedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        value: 'stale-sha',
+      });
+      const setSpy = vi
+        .spyOn(packageCache, 'setWithRawTtl')
+        .mockResolvedValue();
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/repository/commits?per_page=1')
+        .reply(502);
+      const res = await getDigest({
+        datasource,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'some/dep2',
+      });
+      expect(res).toBe('stale-sha');
+      expect(setSpy).not.toHaveBeenCalled();
     });
   });
 });

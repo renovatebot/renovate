@@ -718,6 +718,26 @@ describe('modules/datasource/npm/get', () => {
       expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
     });
 
+    it('shares one request between parallel lookups of the same package', async () => {
+      const scope = httpMock
+        .scope('https://example.com')
+        .get('/some-package')
+        .reply(200, {
+          name: 'some-package',
+          'dist-tags': { latest: '1.0.0' },
+          versions: { '1.0.0': {} },
+        });
+
+      const [dep1, dep2] = await Promise.all([
+        getDependency(http, 'https://example.com', 'some-package'),
+        getDependency(http, 'https://example.com', 'some-package'),
+      ]);
+
+      expect(dep1).toMatchObject({ tags: { latest: '1.0.0' } });
+      expect(dep2).toEqual(dep1);
+      expect(scope.isDone()).toBe(true);
+    });
+
     it('returns releases when `time` contains non-string entries', async () => {
       // JFrog Artifactory emits `"unpublished": null` under `time`, which
       // previously caused the whole packument to fail schema validation.

@@ -1,5 +1,6 @@
 import type { MockInstance } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GiteaTagsDatasource } from './index.ts';
@@ -267,6 +268,41 @@ describe('modules/datasource/gitea-tags/index', () => {
         packageName: 'some/dep2',
       });
       expect(res).toBeNull();
+    });
+  });
+
+  describe('getDigest with errors', () => {
+    it('returns null when the tag is not found', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/some/dep2/tags/v1.0.0')
+        .reply(404);
+      const res = await getDigest(
+        { datasource, packageName: 'some/dep2' },
+        'v1.0.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null when the repository is not found', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get(
+          '/api/v1/repos/some/dep2/commits?stat=false&verification=false&files=false&page=1&limit=1',
+        )
+        .reply(404);
+      const res = await getDigest({ datasource, packageName: 'some/dep2' });
+      expect(res).toBeNull();
+    });
+
+    it('throws ExternalHostError on server errors', async () => {
+      httpMock
+        .scope('https://gitea.com')
+        .get('/api/v1/repos/some/dep2/tags/v1.0.0')
+        .reply(502);
+      await expect(
+        getDigest({ datasource, packageName: 'some/dep2' }, 'v1.0.0'),
+      ).rejects.toThrow(ExternalHostError);
     });
   });
 

@@ -6,6 +6,12 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { Registry } from './schema.ts';
 
+const cacheProvider = new PackageHttpCacheProvider({
+  namespace: 'datasource-typst:cache-provider',
+  checkAuthorizationHeader: false,
+  checkCacheControlHeader: false,
+});
+
 export class TypstDatasource extends Datasource {
   static readonly id = 'typst';
 
@@ -29,12 +35,6 @@ export class TypstDatasource extends Datasource {
     const [, pkg] = packageName.split('/');
 
     const [registryUrl] = this.getDefaultRegistryUrls('');
-
-    const cacheProvider = new PackageHttpCacheProvider({
-      namespace: 'datasource-typst:cache-provider',
-      checkAuthorizationHeader: false,
-      checkCacheControlHeader: false,
-    });
 
     const { body: registry } = await this.http.getJson(
       registryUrl,
