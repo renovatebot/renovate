@@ -876,11 +876,11 @@ describe('modules/manager/cargo/artifacts', () => {
               GIT_CONFIG_KEY_2:
                 'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',

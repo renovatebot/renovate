@@ -11,6 +11,8 @@ import { addGitConfigEnvironmentVariables } from './config.ts';
 import type { AuthenticationRule } from './types.ts';
 import { getTokenCredentials, parseGitUrl } from './url.ts';
 
+const platformHostTypes = new Set<string>(PLATFORM_HOST_TYPES);
+
 const githubApiUrls = new Set([
   'github.com',
   'api.github.com',
@@ -68,10 +70,14 @@ function getAuthenticationRulesWithToken(
   authToken: string,
 ): AuthenticationRule[] {
   const type = hostType ?? detectPlatform(url);
+  const platform =
+    hostType && platformHostTypes.has(hostType)
+      ? hostType
+      : detectPlatform(url);
   return getAuthenticationRules(
     url,
     type,
-    getTokenCredentials(type, authToken),
+    getTokenCredentials(platform, authToken),
   );
 }
 

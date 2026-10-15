@@ -322,6 +322,30 @@ describe('util/git/auth', () => {
       });
     });
 
+    it.each(['go', 'cargo'])(
+      'returns url with x-access-token username for %s host rule token on github.com',
+      (hostType) => {
+        expect(
+          getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
+            token: 'token1234',
+            hostType,
+            matchHost: 'github.com',
+          }),
+        ).toStrictEqual({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_1:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_KEY_2:
+            'url.https://x-access-token:token1234@github.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+          GIT_CONFIG_VALUE_1: 'git@github.com:',
+          GIT_CONFIG_VALUE_2: 'https://github.com/',
+        });
+      },
+    );
+
     it('returns original environment variables when no token is set', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
