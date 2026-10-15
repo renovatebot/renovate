@@ -152,7 +152,7 @@ Lookups then fail with a 404 response for a tags URL with a truncated project pa
 
 Some Go modules are not served from version control, but instead through a module proxy.
 
-For instance, when interacting with a private [Buf Schema Registry](https://buf.build/docs/bsr/) (BSR), the Go toolchain is pointed to a module proxy on the BSR, instead of source code to take the module from
+For instance, when interacting with a private [Buf Schema Registry](https://buf.build/docs/bsr/) (BSR), the Go toolchain is pointed to a module proxy on the BSR, which allows serving the module directly, instead of retrieving it from source control.
 
 They advertise this with a `go-import` meta tag that uses `mod` instead of `git`, for example:
 
