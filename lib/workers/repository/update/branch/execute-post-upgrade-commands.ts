@@ -391,6 +391,7 @@ export default async function executePostUpgradeCommands(
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
+      constraints: config.constraints,
       postUpgradeTasks:
         config.postUpgradeTasks!.executionMode === 'branch'
           ? config.postUpgradeTasks
