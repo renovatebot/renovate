@@ -1,7 +1,10 @@
+import { logger } from '../../../logger/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { DigestConfig } from '../types.ts';
 import { Commits, Tag } from './schema.ts';
 import { getApiUrl, getSourceUrl } from './util.ts';
 
@@ -96,5 +99,27 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
     }
 
     return body[0].sha;
+  }
+
+  protected override async fetchDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    try {
+      return await super.fetchDigest(config, newValue);
+    } catch (err) {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.debug(
+          {
+            giteaRepo: config.packageName,
+            err,
+            registryUrl: config.registryUrl,
+          },
+          'Gitea repo or ref not found when getting commit',
+        );
+        return null;
+      }
+      this.handleGenericErrors(err);
+    }
   }
 }

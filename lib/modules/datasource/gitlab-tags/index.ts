@@ -6,10 +6,11 @@ import {
   getSourceUrl,
 } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
-import type { GetReleasesConfig, GitHostTag } from '../types.ts';
+import type { DigestConfig, GetReleasesConfig, GitHostTag } from '../types.ts';
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 
 export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp> {
@@ -75,18 +76,10 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
       `projects`,
       encodeURIComponent(repo),
       `repository/commits/`,
-      tag,
+      encodeURIComponent(tag),
     );
-    try {
-      const gitlabCommit = await this.http.getJson(url, GitlabCommit);
-      return gitlabCommit.body.id;
-    } catch (err) {
-      logger.debug(
-        { gitlabRepo: repo, err, registryUrl },
-        'Error getting tag commit from Gitlab repo',
-      );
-      return null;
-    }
+    const gitlabCommit = await this.http.getJson(url, GitlabCommit);
+    return gitlabCommit.body.id;
   }
 
   protected async fetchLatestCommit(
@@ -99,15 +92,29 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
       encodeURIComponent(repo),
       `repository/commits?per_page=1`,
     );
+    const gitlabCommits = await this.http.getJson(url, GitlabCommits);
+    return gitlabCommits.body[0]?.id ?? null;
+  }
+
+  protected override async fetchDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
     try {
-      const gitlabCommits = await this.http.getJson(url, GitlabCommits);
-      return gitlabCommits.body[0].id;
+      return await super.fetchDigest(config, newValue);
     } catch (err) {
-      logger.debug(
-        { gitlabRepo: repo, err, registryUrl },
-        'Error getting latest commit from Gitlab repo',
-      );
-      return null;
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        logger.debug(
+          {
+            gitlabRepo: config.packageName,
+            err,
+            registryUrl: config.registryUrl,
+          },
+          'Gitlab repo or ref not found when getting commit',
+        );
+        return null;
+      }
+      this.handleGenericErrors(err);
     }
   }
 }
