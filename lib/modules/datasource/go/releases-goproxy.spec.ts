@@ -913,6 +913,79 @@ describe('modules/datasource/go/releases-goproxy', () => {
         ]);
       });
 
+      it('prefers the mod proxy over a git go-import for the same module', async () => {
+        vi.stubEnv('GOPROXY', 'direct');
+
+        httpMock
+          .scope('https://bsr.example.com')
+          .get('/gen/go/acme/petapis/grpc/go?go-get=1')
+          .reply(
+            200,
+            `
+              <meta name="go-import" content="bsr.example.com/gen/go git https://github.com/acme/petapis.git">
+              ${modMeta}
+            `,
+          );
+        httpMock
+          .scope(`${modProxyUrl}/${packageName}`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0 2018-01-01T00:00:00Z')
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        const res = await datasource.getReleases({ packageName });
+
+        expect(res?.releases).toEqual([
+          { releaseTimestamp: '2018-01-01T00:00:00.000Z', version: 'v1.0.0' },
+        ]);
+      });
+
+      it('looks up modules from the mod proxy for GONOPROXY matches', async () => {
+        vi.stubEnv('GOPROXY', baseUrl);
+        vi.stubEnv('GONOPROXY', 'bsr.example.com');
+
+        httpMock
+          .scope('https://bsr.example.com')
+          .get('/gen/go/acme/petapis/grpc/go?go-get=1')
+          .reply(200, modMeta);
+        httpMock
+          .scope(`${modProxyUrl}/${packageName}`)
+          .get('/@v/list')
+          .reply(200, 'v1.0.0 2018-01-01T00:00:00Z')
+          .get('/@latest')
+          .reply(200, { Version: 'v1.0.0' })
+          .get('/v2/@v/list')
+          .reply(404);
+
+        const res = await datasource.getReleases({ packageName });
+
+        expect(res?.releases).toEqual([
+          { releaseTimestamp: '2018-01-01T00:00:00.000Z', version: 'v1.0.0' },
+        ]);
+      });
+
+      it.each([401, 500])(
+        'throws on a %i from the mod proxy',
+        async (statusCode) => {
+          vi.stubEnv('GOPROXY', 'direct');
+
+          httpMock
+            .scope('https://bsr.example.com')
+            .get('/gen/go/acme/petapis/grpc/go?go-get=1')
+            .reply(200, modMeta);
+          httpMock
+            .scope(`${modProxyUrl}/${packageName}`)
+            .get('/@v/list')
+            .reply(statusCode);
+
+          await expect(datasource.getReleases({ packageName })).rejects.toThrow(
+            HttpError,
+          );
+        },
+      );
+
       it('returns null if the mod proxy has no releases', async () => {
         vi.stubEnv('GOPROXY', 'direct');
 
