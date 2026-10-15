@@ -858,6 +858,19 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('hostType=go-proxy gets a fallback to a host-less hostType=go if no hostType=go-proxy credentials', () => {
+    hostRules.add({
+      hostType: 'go',
+      token: 'any-host-go-token',
+    });
+
+    const opts = { ...options, hostType: 'go-proxy' };
+    const hostRule = findMatchingRule('https://example.com/foo/@v/list', opts);
+    expect(hostRule).toEqual({
+      token: 'any-host-go-token',
+    });
+  });
+
   it(`hostType=go-proxy's fallback to hostType=go only copies auth-related fields`, () => {
     hostRules.add({
       hostType: 'go',
