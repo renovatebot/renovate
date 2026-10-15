@@ -858,6 +858,39 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it(`hostType=go-proxy's fallback to hostType=go only copies auth-related fields`, () => {
+    hostRules.add({
+      hostType: 'go',
+      matchHost: 'example.com',
+
+      token: 'go-token',
+
+      username: 'renovatebot',
+      password: 'super-secret',
+
+      httpsCertificate: '--- BEGIN ...',
+      httpsPrivateKey: '--- BEGIN ...',
+      httpsCertificateAuthority: '--- BEGIN ...',
+
+      // ignored
+      enabled: true,
+      timeout: 10000000,
+    });
+
+    const opts = { ...options, hostType: 'go-proxy' };
+    const hostRule = findMatchingRule('https://example.com/foo/@v/list', opts);
+    expect(hostRule).toEqual({
+      token: 'go-token',
+
+      username: 'renovatebot',
+      password: 'super-secret',
+
+      httpsCertificate: '--- BEGIN ...',
+      httpsPrivateKey: '--- BEGIN ...',
+      httpsCertificateAuthority: '--- BEGIN ...',
+    });
+  });
+
   it('hostType=go-proxy does not fallback to hostType=go if hostType=go-proxy already has credentials', () => {
     hostRules.add({
       hostType: 'go',
