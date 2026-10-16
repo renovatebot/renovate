@@ -202,6 +202,8 @@ export interface AsyncMergeParams {
   mergeMethod: string;
   prNo: number;
   strategy?: MergeStrategy;
+  /** Whether to bypass the branch rules the token may bypass */
+  bypassRules: boolean;
   /** Whether the base branch of the PR has a merge queue */
   queueEnabled: boolean;
   /** Whether the host is a GitHub Enterprise Server */
