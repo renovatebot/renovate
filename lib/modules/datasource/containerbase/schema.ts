@@ -13,7 +13,26 @@ export const ContainerbaseToolVersion = z.object({
 export type ContainerbaseToolVersion = z.infer<typeof ContainerbaseToolVersion>;
 
 /** The format of the tool files this datasource reads. */
-export const formatPath = 'v1';
+export const formatVersion = 1;
+export const formatPath = `v${formatVersion}`;
+
+export const ContainerbaseFormat = z.object({
+  version: z.number(),
+  /** `current`, `preview` or `deprecated` */
+  status: z.string(),
+  /** when a deprecated format is removed */
+  removalDate: z.string().optional(),
+});
+
+/**
+ * The root `index.json` published by containerbase/tool-versions, reduced to
+ * the published formats.
+ */
+export const ContainerbaseFormats = z.object({
+  formats: LooseArray(ContainerbaseFormat),
+});
+
+export type ContainerbaseFormats = z.infer<typeof ContainerbaseFormats>;
 
 /**
  * A `<tool>.json` file published by containerbase/tool-versions, reduced to

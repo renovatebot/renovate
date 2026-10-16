@@ -4,7 +4,12 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { ContainerbaseToolVersions, formatPath } from './schema.ts';
+import {
+  ContainerbaseFormats,
+  ContainerbaseToolVersions,
+  formatPath,
+  formatVersion,
+} from './schema.ts';
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
@@ -27,6 +32,51 @@ export class ContainerbaseDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is taken from the `sourceUrl` field of the tool file, when it is known.';
 
+  /**
+   * Reads the root index of the registry, or `null` when it can't be read.
+   * The index is optional, so errors don't fail the lookup.
+   */
+  private fetchFormats(
+    registryUrl: string,
+  ): Promise<ContainerbaseFormats | null> {
+    return this.cached({ key: `formats:${registryUrl}` }, async () => {
+      try {
+        return await this.fetchJsonOrNull(
+          joinUrlParts(registryUrl, 'index.json'),
+          ContainerbaseFormats,
+        );
+      } catch (err) {
+        logger.debug(
+          { err, datasource: this.id, registryUrl },
+          'Failed to read the containerbase root index',
+        );
+        return null;
+      }
+    });
+  }
+
+  /**
+   * Warns once when the root index marks the format this datasource reads as
+   * deprecated.
+   */
+  private async checkFormat(registryUrl: string): Promise<void> {
+    const formats = await this.fetchFormats(registryUrl);
+    const format = formats?.formats.find(
+      ({ version }) => version === formatVersion,
+    );
+    if (format?.status === 'deprecated') {
+      logger.once.warn(
+        {
+          datasource: this.id,
+          registryUrl,
+          format: formatPath,
+          removalDate: format.removalDate,
+        },
+        'The containerbase tool-versions format is deprecated, update Renovate',
+      );
+    }
+  }
+
   private async fetchReleases({
     packageName,
     registryUrl,
@@ -35,6 +85,8 @@ export class ContainerbaseDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
+
+    await this.checkFormat(registryUrl);
 
     const body = await this.fetchJsonOrNull(
       joinUrlParts(registryUrl, formatPath, `${packageName}.json`),
