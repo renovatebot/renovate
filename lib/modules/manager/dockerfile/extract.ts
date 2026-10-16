@@ -463,34 +463,44 @@ export function extractPackageFile(
       }
     }
 
-    const runMountFromRegex = regEx(
-      `^[ \\t]*RUN(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--mount=(?:\\S*=\\S*,)*from=(?<image>[^, ]+)`,
-      'im',
+    let runOptions =
+      instruction.match(regEx(/^[ \t]*RUN\b(?<options>[\s\S]*)/i))?.groups
+        ?.options ?? '';
+    const runOptionRegex = regEx(
+      `^(?:${escapeChar}[ \\t]*\\r?\\n|[ \\t]|#[^\\r\\n]*\\r?\\n)*(?<option>--[a-z]+(?:=\\S+?)?)(?:${escapeChar}[ \\t]*\\r?\\n|[ \\t]+|$)`,
+      'i',
     );
-    const runMountFromMatch = instruction.match(runMountFromRegex);
-    if (runMountFromMatch?.groups?.image) {
-      if (stageNames.includes(runMountFromMatch.groups.image)) {
-        logger.debug(
-          { image: runMountFromMatch.groups.image },
-          'Skipping alias RUN --mount=from',
-        );
-      } else {
-        const dep = getDep(runMountFromMatch.groups.image, {
-          registryAliases: config.registryAliases,
-        });
-        const lineNumberRanges: number[][] = [
-          [lineNumberInstrStart, lineNumber],
-        ];
-        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'Dockerfile RUN --mount=from',
-        );
-        deps.push(dep);
+    let runOptionMatch: RegExpExecArray | null;
+    // Stop at the command instead of treating its arguments as RUN options.
+    while ((runOptionMatch = runOptionRegex.exec(runOptions))) {
+      runOptions = runOptions.slice(runOptionMatch[0].length);
+      const runMountFromMatch = runOptionMatch.groups?.option.match(
+        regEx(/^--mount=(?:[^,\s]+,)*from=(?<image>[^,\s]+)/i),
+      );
+      if (runMountFromMatch?.groups?.image) {
+        if (stageNames.includes(runMountFromMatch.groups.image)) {
+          logger.debug(
+            { image: runMountFromMatch.groups.image },
+            'Skipping alias RUN --mount=from',
+          );
+        } else {
+          const dep = getDep(runMountFromMatch.groups.image, {
+            registryAliases: config.registryAliases,
+          });
+          const lineNumberRanges: number[][] = [
+            [lineNumberInstrStart, lineNumber],
+          ];
+          processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+          logger.debug(
+            {
+              depName: dep.depName,
+              currentValue: dep.currentValue,
+              currentDigest: dep.currentDigest,
+            },
+            'Dockerfile RUN --mount=from',
+          );
+          deps.push(dep);
+        }
       }
     }
 
