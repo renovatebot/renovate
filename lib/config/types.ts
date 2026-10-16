@@ -51,7 +51,7 @@ export const allowedStatusCheckWhenValues = [
 export type StatusCheckWhen = (typeof allowedStatusCheckWhenValues)[number];
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
-export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
+export type BinarySource = 'docker' | 'global' | 'install' | 'hermit' | 'mise';
 
 // TODO: Proper typings
 /**

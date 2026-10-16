@@ -15,6 +15,7 @@ import {
 } from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
+import { getMiseEnvs, isMise } from './mise.ts';
 import type {
   CommandWithOptions,
   DockerOptions,
@@ -137,6 +138,19 @@ async function prepareRawExec(
       env: {
         ...rawOptions.env,
         ...hermitEnvVars,
+      },
+    };
+  } else if (isMise()) {
+    const miseEnvVars = await getMiseEnvs(rawOptions);
+    logger.debug(
+      { miseEnvVars },
+      'merging mise environment variables into the execution options',
+    );
+    rawOptions = {
+      ...rawOptions,
+      env: {
+        ...rawOptions.env,
+        ...miseEnvVars,
       },
     };
   }

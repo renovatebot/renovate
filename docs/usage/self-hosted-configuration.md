@@ -178,13 +178,13 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option          | Description                                                                                   |
-| --------------- | --------------------------------------------------------------------------------------------- |
-| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.                  |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
-| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
-| `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
-| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).    |
+| Option          | Description                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.                                                                        |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                                                                            |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                                                                       |
+| `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files, or `mise` without safe mode with `binarySource=mise`. |
+| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).                                                          |
 
 ## `autodiscover`
 
@@ -326,11 +326,12 @@ If the "development branch" is configured but the branch itself does not exist (
 
 Renovate often needs to use third-party tools in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
 
-Renovate supports three possible ways to access those tools:
+Renovate supports these ways to access those tools:
 
 - `global`: Uses pre-installed tools, e.g. `npm` installed via `npm install -g npm`.
 - `install` (default): Downloads and installs tools at runtime if running in a [Containerbase](https://github.com/containerbase/base) environment, otherwise falls back to `global`
 - `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
+- `mise`: Uses a globally installed [mise](https://mise.jdx.dev) (`2026.7.12` or newer) to install the repository's tools, in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) unless `mise` is in [`allowedUnsafeExecutions`](#allowedunsafeexecutions).
 
 If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
