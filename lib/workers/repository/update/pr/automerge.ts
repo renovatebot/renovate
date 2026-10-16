@@ -40,6 +40,7 @@ export async function checkAutoMerge(
     automergeStrategy,
     pruneBranchAfterAutomerge,
     automergeComment,
+    automergeLabel,
     ignoreTests,
     rebaseRequested,
   } = config;
@@ -125,6 +126,26 @@ export async function checkAutoMerge(
       topic: null,
       content: automergeComment!,
     });
+    return { automerged: true, branchRemoved: false };
+  }
+  if (automergeType === 'label') {
+    // TODO: types (#22198)
+    logger.debug(`Applying automerge label: ${automergeLabel!}`);
+    // istanbul ignore if
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(`DRY-RUN: Would add automerge label to PR #${pr.number}`);
+      return {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+    }
+    if (!pr.labels?.includes(automergeLabel!)) {
+      await platform.updatePr({
+        number: pr.number,
+        prTitle: pr.title,
+        addLabels: [automergeLabel!],
+      });
+    }
     return { automerged: true, branchRemoved: false };
   }
   // Let's merge this
