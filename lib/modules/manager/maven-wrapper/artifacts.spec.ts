@@ -79,9 +79,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'maven-wrapper' }],
+      updatedDeps: [
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '2.0.0' },
+      ],
       config: {
-        currentValue: '2.0.0',
         newValue: '3.3.1',
         constraints: undefined,
       },
@@ -212,8 +214,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const result = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.3.0', newValue: '3.3.1' },
+      updatedDeps: [
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '3.3.0' },
+      ],
+      config: { newValue: '3.3.1' },
     });
     expect(result).toEqual([
       {
@@ -309,8 +314,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      updatedDeps: [
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '3.0.0' },
+      ],
+      config: { newValue: '3.3.1' },
     });
 
     expect(execSnapshots).toMatchObject([
@@ -349,6 +357,30 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(git.getRepoStatus).toHaveBeenCalledExactlyOnceWith();
   });
 
+  it('uses the maven version to pick the Java toolchain when grouped with an unrelated dependency', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    GlobalConfig.set({
+      localDir: upath.join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
+
+    await updateArtifacts({
+      packageFileName: 'maven',
+      newPackageFileContent: '',
+      updatedDeps: [
+        // with a grouped, unrelated dependency first, `config.currentValue`
+        // is the unrelated dependency's, not maven's
+        { depName: 'some-other-dep', currentValue: '2.0.0' },
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '3.0.0' },
+      ],
+      config: { currentValue: '2.0.0', newValue: '2.1.0' },
+    });
+
+    expect(execSnapshots[0]).toMatchObject({ cmd: 'install-tool java 17.0.0' });
+  });
+
   it('prefers the derived Java version over the extracted constraint', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
@@ -360,9 +392,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'maven-wrapper' }],
+      updatedDeps: [
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '3.0.0' },
+      ],
       config: {
-        currentValue: '3.0.0',
         newValue: '3.3.1',
         extractedConstraints: { java: '8.0.1' },
       },
@@ -384,8 +418,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: './mvnw',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      updatedDeps: [
+        { depName: 'maven-wrapper' },
+        { depName: 'maven', currentValue: '3.0.0' },
+      ],
+      config: { newValue: '3.3.1' },
     });
 
     expect(execSnapshots).toMatchObject([
