@@ -33,6 +33,21 @@ describe('modules/datasource/go/releases-direct', () => {
       ).rejects.toThrow('unknown');
     });
 
+    it('returns null when the tag datasource finds no releases', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'github-tags',
+        packageName: 'golang/text',
+        registryUrl: 'https://github.com',
+      });
+      githubGetTags.mockResolvedValueOnce(null);
+
+      const res = await getDirectReleases({
+        packageName: 'golang.org/x/text',
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('processes real data', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',

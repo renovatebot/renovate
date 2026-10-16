@@ -82,7 +82,6 @@ export async function getDirectReleases(
   }
 
   const res = await tagDatasource.getReleases(source);
-  /* v8 ignore next -- TODO: add test */
   if (!res) {
     return null;
   }
