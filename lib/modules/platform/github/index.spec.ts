@@ -5573,6 +5573,10 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  it('returns the maximum PR body length', () => {
+    expect(github.maxBodyLength()).toBe(50000);
+  });
+
   describe('mergePr(prNo) - merge queue', () => {
     const pullsListItem = {
       number: 1234,
