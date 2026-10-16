@@ -1,20 +1,198 @@
+import { isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
-import type { KnownPlugin } from './types.ts';
+import type { KnownPlugin, KnownPluginExtractor } from './types.ts';
 
 // https://github.com/buildkite-plugins/docker-buildkite-plugin
-const DockerPluginConfig = z.object({ image: z.string().optional() });
+// `chown`/`chown-image`/`mount-checkout` are also present on the
+// (unmodified fork) `affirm/docker` plugin below - shared here.
+const DockerPluginConfig = z.object({
+  image: z.string().optional(),
+  chown: z.boolean().optional(),
+  'chown-image': z.string().optional(),
+  'mount-checkout': z.boolean().optional(),
+});
 
 function extractDockerPluginDeps(
   config: unknown,
   registryAliases: Record<string, string>,
 ): PackageDependency[] {
   const parsed = DockerPluginConfig.safeParse(config);
-  if (!parsed.success || !parsed.data.image) {
+  if (!parsed.success) {
     return [];
   }
-  return [getDep(parsed.data.image, { registryAliases, depType: 'docker' })];
+  const deps: PackageDependency[] = [];
+  if (parsed.data.image) {
+    deps.push(
+      getDep(parsed.data.image, { registryAliases, depType: 'docker' }),
+    );
+  }
+  // `hooks/pre-exit`: the chown step only runs when `chown` is true (default
+  // false) AND `mount-checkout` is not false (default true).
+  const mountCheckout = parsed.data['mount-checkout'] ?? true;
+  if (parsed.data.chown && mountCheckout && parsed.data['chown-image']) {
+    deps.push(
+      getDep(parsed.data['chown-image'], {
+        registryAliases,
+        depType: 'docker',
+      }),
+    );
+  }
+  return deps;
+}
+
+/**
+ * A plugin whose config has a single free-form field holding a complete
+ * Docker image reference (as written, including any tag/digest) - the
+ * field's own text is already a literal substring of the file, so `getDep`
+ * can be used directly.
+ */
+function extractSingleImageField(field: string): KnownPluginExtractor {
+  const schema = z.object({ [field]: z.string().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const image = parsed.success ? parsed.data[field] : undefined;
+    if (!image) {
+      return [];
+    }
+    return [getDep(image, { registryAliases, depType: 'docker' })];
+  };
+}
+
+/**
+ * Wraps `inner` so it only runs when the given boolean config field is
+ * (explicitly or by its own default) `true` - for a plugin whose image field
+ * is only meaningful behind a boolean "use Docker for this" toggle.
+ */
+function whenTrue(
+  gateField: string,
+  gateDefault: boolean,
+  inner: KnownPluginExtractor,
+): KnownPluginExtractor {
+  const schema = z.object({ [gateField]: z.boolean().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const enabled =
+      (parsed.success ? parsed.data[gateField] : undefined) ?? gateDefault;
+    return enabled ? inner(config, registryAliases) : [];
+  };
+}
+
+/**
+ * Wraps `inner` so it only runs when the given string config field equals
+ * `expected` (explicitly, or by its own default) - for a plugin whose image
+ * field is only meaningful behind a mode/type toggle.
+ */
+function whenEquals(
+  gateField: string,
+  expected: string,
+  gateDefault: string,
+  inner: KnownPluginExtractor,
+): KnownPluginExtractor {
+  const schema = z.object({ [gateField]: z.string().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const value =
+      (parsed.success ? parsed.data[gateField] : undefined) ?? gateDefault;
+    return value === expected ? inner(config, registryAliases) : [];
+  };
+}
+
+/**
+ * A plugin's own config field is rarely the *complete* text Renovate needs
+ * to replace on update - e.g. a version/tag field is just `1.21`, while the
+ * full dependency is conceptually `golang:1.21`. `getDep()` (built for
+ * Dockerfile `FROM` lines) always sets `replaceString` to the *entire*
+ * string passed in, which is wrong here: that joined/synthesised string
+ * never appears literally in the YAML, so Renovate's auto-replace can never
+ * find it and the update silently never applies.
+ *
+ * Instead, this derives `depName`/`packageName` via `getDep()` (so
+ * registry-alias resolution, `quay.io`/`library/` prefix handling etc.
+ * still apply to the image-name portion), but sets `currentValue` itself to
+ * the literal field text and leaves `replaceString`/`autoReplaceStringTemplate`
+ * unset - Renovate's own auto-replace fallback then uses `currentValue` as
+ * the replace target (`lib/workers/repository/update/branch/auto-replace.ts`),
+ * which *is* a literal substring of the file. This mirrors how
+ * ../github-actions/known-actions's `parseValue`/`parseImageValue` handle a
+ * `with:` input - they never set `replaceString` either.
+ */
+function depWithVersion(
+  imageName: string,
+  currentValue: string,
+  registryAliases: Record<string, string>,
+): PackageDependency {
+  const dep = getDep(imageName, {
+    registryAliases,
+    depType: 'docker',
+    specifyReplaceString: false,
+  });
+  dep.currentValue = currentValue;
+  return dep;
+}
+
+/**
+ * A plugin whose config has separate image-name and tag/version fields. If
+ * the user's own `image` value already carries a tag/digest (`myorg/app:1`),
+ * it's a complete, literal reference on its own - handled like
+ * `extractSingleImageField`, ignoring `tagField` (joining a second tag onto
+ * an already-tagged image would produce `myorg/app:1:2`, not a real
+ * reference). Otherwise, `imageField` (or `defaultImage`, for a plugin with
+ * a real, known default image name) names the dependency and `tagField`'s
+ * literal text becomes `currentValue` (see `depWithVersion`) - `tagField`
+ * absent means there's no version text to anchor a replace to, so nothing
+ * is reported, even if the plugin has its own default tag.
+ */
+function extractImageTagJoin(
+  imageField: string,
+  tagField: string,
+  defaultImage?: string,
+): KnownPluginExtractor {
+  const schema = z.object({
+    [imageField]: z.string().optional(),
+    [tagField]: z.string().optional(),
+  });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    if (!parsed.success) {
+      return [];
+    }
+    const rawImage = parsed.data[imageField];
+    if (rawImage && regEx(/[:@]/).test(rawImage)) {
+      return [getDep(rawImage, { registryAliases, depType: 'docker' })];
+    }
+    const image = rawImage ?? defaultImage;
+    const tag = parsed.data[tagField];
+    if (!image || !tag) {
+      return [];
+    }
+    return [depWithVersion(image, tag, registryAliases)];
+  };
+}
+
+/**
+ * A plugin with a hardcoded backing Docker image, where the user only
+ * supplies a version/tag via `versionField`. The field being absent means
+ * there's no version text to anchor a replace to (even where the plugin's
+ * own hook falls back to a default like `latest`), so nothing is reported.
+ */
+function extractFixedImageVersion(
+  imageName: string,
+  versionField: string,
+): KnownPluginExtractor {
+  const schema = z.object({ [versionField]: z.string().optional() });
+  return (config, registryAliases) => {
+    const parsed = schema.safeParse(config);
+    const version = parsed.success ? parsed.data[versionField] : undefined;
+    if (!version) {
+      return [];
+    }
+    return [depWithVersion(imageName, version, registryAliases)];
+  };
 }
 
 /**
@@ -28,5 +206,313 @@ function extractDockerPluginDeps(
  * Modelled on ../github-actions/known-actions.
  */
 export const knownPlugins: Record<string, KnownPlugin> = {
-  docker: { extract: extractDockerPluginDeps },
+  docker: {
+    extract: extractDockerPluginDeps,
+    fields: ['image', 'chown', 'chown-image', 'mount-checkout'],
+  },
+  // https://github.com/buildkite-plugins/docker-compose-buildkite-plugin
+  'docker-compose': {
+    extract: extractSingleImageField('run-image'),
+    fields: ['run-image'],
+  },
+  // https://github.com/buildkite-plugins/docker-cache-buildkite-plugin
+  // `image` is the name of the image this plugin *builds and caches*
+  // (`lib/shared.bash` pushes it as `<registry>/<image>:<cache-key>`), not
+  // something it pulls - it's an output, not a dependency. Left disabled.
+  'docker-cache': {
+    extract: extractSingleImageField('image'),
+    enabled: false,
+    fields: ['image'],
+  },
+  // https://github.com/jameslnewell/docker-run-buildkite-plugin
+  'jameslnewell/docker-run': {
+    extract: extractSingleImageField('image'),
+    fields: ['image'],
+  },
+  // https://github.com/oasislabs/docker-buildkite-plugin - a fork of the
+  // official `docker` plugin, pinned to an older upstream snapshot that
+  // predates the `chown`/`chown-image` feature, so only `image` applies.
+  'oasislabs/docker': {
+    extract: extractSingleImageField('image'),
+    fields: ['image'],
+  },
+  // https://github.com/improbable-eng/docker-service-buildkite-plugin
+  'improbable-eng/docker-service': {
+    extract: extractSingleImageField('container'),
+    fields: ['container'],
+  },
+  // https://github.com/equinixmetal-buildkite/kind-cluster-buildkite-plugin
+  // `custom_image` overrides an internal, pinned `kindest/node` image
+  // selected by the (non-Docker-reference) `k8s_version` field - only
+  // `custom_image` is a user-configurable Docker dependency. Its
+  // `kind_version`/`helm_version` fields pin separate CLI tools, not Docker
+  // images - out of scope here.
+  'equinixmetal-buildkite/kind-cluster': {
+    extract: extractSingleImageField('custom_image'),
+    fields: ['custom_image'],
+  },
+  // https://github.com/joscha/codecov-buildkite-plugin
+  // Verified against `hooks/post-command` - the plugin's own default
+  // (`buildpack-deps:jessie-scm`, used when `docker_image` is unset) isn't
+  // literal text in the file, so it isn't reported; only an explicit value
+  // is.
+  'joscha/codecov': {
+    extract: extractSingleImageField('docker_image'),
+    fields: ['docker_image'],
+  },
+  // https://github.com/buildkite-plugins/golangci-lint-buildkite-plugin
+  // `docker_image` is only used when `use_docker` is true (the default) -
+  // verified against `plugin.yml`/`hooks/command`. The plugin's own default
+  // image value (`golangci/golangci-lint:latest`) isn't literal text in the
+  // file when `docker_image` is unset, so we don't report it.
+  'golangci-lint': {
+    extract: whenTrue(
+      'use_docker',
+      true,
+      extractSingleImageField('docker_image'),
+    ),
+    fields: ['docker_image', 'use_docker'],
+  },
+  // https://github.com/buildkite-plugins/junit-annotate-buildkite-plugin
+  // `ruby-image` is only used when `run-in-docker` is true (the default).
+  'junit-annotate': {
+    extract: whenTrue(
+      'run-in-docker',
+      true,
+      extractSingleImageField('ruby-image'),
+    ),
+    fields: ['ruby-image', 'run-in-docker'],
+  },
+  // https://github.com/buildkite-plugins/shellcheck-buildkite-plugin
+  // `image` defaults to `koalaman/shellcheck` (a known, fixed name) when
+  // unset; `version` must be present as literal text to report anything.
+  // Verified against `hooks/command` - the README's stated `version`
+  // default of `latest` is stale; the real fallback is `stable`, but that
+  // default isn't literal file text either, so we only report an explicit
+  // `version`.
+  shellcheck: {
+    extract: extractImageTagJoin('image', 'version', 'koalaman/shellcheck'),
+    fields: ['image', 'version'],
+  },
+  // https://github.com/buildkite-plugins/docker-image-push-buildkite-plugin
+  // `image`/`tag` name a *local* image this plugin pushes to a registry
+  // (README: "pushes an image that already exists in the local Docker
+  // daemon") - an output, not a dependency. Left disabled.
+  'docker-image-push': {
+    extract: extractImageTagJoin('image', 'tag'),
+    enabled: false,
+    fields: ['image', 'tag'],
+  },
+  // https://github.com/grapl-security/codecov-buildkite-plugin (archived)
+  // `image` has no real fallback in code (its `plugin.yml`'s stated default
+  // is stale documentation); `tag` defaults to `latest` but that default
+  // isn't literal file text, so only an explicit `tag` is reported.
+  'grapl-security/codecov': {
+    extract: extractImageTagJoin('image', 'tag'),
+    fields: ['image', 'tag'],
+  },
+  // https://github.com/grapl-security/vault-login-buildkite-plugin (archived)
+  // `image` defaults to `hashicorp/vault` - verified against `lib/vault.sh`.
+  'grapl-security/vault-login': {
+    extract: extractImageTagJoin('image', 'tag', 'hashicorp/vault'),
+    fields: ['image', 'tag'],
+  },
+  // https://github.com/grapl-security/vault-env-buildkite-plugin (archived)
+  // Same pattern as vault-login, verified against `hooks/environment`.
+  'grapl-security/vault-env': {
+    extract: extractImageTagJoin('image', 'tag', 'hashicorp/envconsul'),
+    fields: ['image', 'tag'],
+  },
+  // https://github.com/buildkite-plugins/golang-buildkite-plugin
+  golang: {
+    extract: extractFixedImageVersion('golang', 'version'),
+    fields: ['version'],
+    dependency: 'golang',
+  },
+  // https://github.com/buildkite-plugins/ossf-scorecard-buildkite-plugin
+  // Backing image is on GHCR, not Docker Hub - verified against
+  // `hooks/command`.
+  'ossf-scorecard': {
+    extract: extractFixedImageVersion('ghcr.io/ossf/scorecard', 'version'),
+    fields: ['version'],
+    dependency: 'ghcr.io/ossf/scorecard',
+  },
+  // https://github.com/buildkite-plugins/plugin-linter-buildkite-plugin
+  // Verified against `hooks/command`: the README's stated default of
+  // `2.0.3` is stale - the real fallback is `v2.1.0`, but that default isn't
+  // literal file text when `image-version` is unset, so we only report an
+  // explicit value.
+  'plugin-linter': {
+    extract: extractFixedImageVersion(
+      'buildkite/plugin-linter',
+      'image-version',
+    ),
+    fields: ['image-version'],
+    dependency: 'buildkite/plugin-linter',
+  },
+  // https://github.com/buildkite-plugins/plugin-tester-buildkite-plugin
+  // Verified against `hooks/command`: the published Docker Hub image is
+  // `buildkite/plugin-tester`, not `buildkite-plugins/buildkite-plugin-tester`
+  // (the GitHub org path and the published image name differ).
+  'plugin-tester': {
+    extract: extractFixedImageVersion('buildkite/plugin-tester', 'version'),
+    fields: ['version'],
+    dependency: 'buildkite/plugin-tester',
+  },
+  // https://github.com/johnsyweb/markdownlint-buildkite-plugin
+  'johnsyweb/markdownlint': {
+    extract: extractFixedImageVersion('markdownlint/markdownlint', 'version'),
+    fields: ['version'],
+    dependency: 'markdownlint/markdownlint',
+  },
+  // https://github.com/buildkite-plugins/golang-cross-compile-buildkite-plugin
+  // Doesn't run Docker directly itself - it generates a pipeline with one
+  // step per `targets[]` entry, each delegating to the `golang` plugin
+  // pinned at `golang#v2.0.0`, passing through `version`. So this is the
+  // same `golang:${version}` image as that plugin, just indirectly. Uses
+  // `LooseArray` so one target with a non-string (e.g. unquoted numeric)
+  // `version` doesn't drop every other target in the list.
+  'golang-cross-compile': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          targets: LooseArray(
+            z.object({ version: z.string().optional() }),
+          ).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success) {
+        return [];
+      }
+      return coerceArray(parsed.data.targets)
+        .filter((target) => target.version)
+        .map((target) =>
+          depWithVersion('golang', target.version!, registryAliases),
+        );
+    },
+    fields: ['targets[].version'],
+    dependency: 'golang',
+  },
+  // https://github.com/buildkite-plugins/ecs-deploy-buildkite-plugin
+  // `image` can be a plain string or an array of strings (the schema
+  // declares `type: [string, array]` directly, confirmed in
+  // `hooks/command`, which normalises either into a list and updates one
+  // container definition per entry) - extract one dep per entry.
+  'ecs-deploy': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          image: z.union([z.string(), z.array(z.string())]).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success || !parsed.data.image) {
+        return [];
+      }
+      const images = Array.isArray(parsed.data.image)
+        ? parsed.data.image
+        : [parsed.data.image];
+      return images.map((image) =>
+        getDep(image, { registryAliases, depType: 'docker' }),
+      );
+    },
+    fields: ['image'],
+  },
+  // https://github.com/buildkite-plugins/aws-lambda-deploy-buildkite-plugin
+  // `image-uri` is only meaningful when `package-type` is `Image` (it
+  // defaults to `Zip`) - verified against `hooks/post-command`, which only
+  // requires/validates `image-uri` in that case.
+  'aws-lambda-deploy': {
+    extract: whenEquals(
+      'package-type',
+      'Image',
+      'Zip',
+      extractSingleImageField('image-uri'),
+    ),
+    fields: ['image-uri', 'package-type'],
+  },
+  // https://github.com/affirm/docker-buildkite-plugin - an unmodified fork
+  // of the official `docker` plugin (0 commits ahead, 27 behind upstream),
+  // so it shares the exact same extractor/shape.
+  'affirm/docker': {
+    extract: extractDockerPluginDeps,
+    fields: ['image', 'chown', 'chown-image', 'mount-checkout'],
+  },
+  // https://github.com/forumone/extract-buildkite-plugin
+  // `image` can be a plain string, or an object with `repository` (required
+  // in the object form) and `tag`/`service` (mutually exclusive) -
+  // verified against `plugin.yml`/`lib/lib.bash`. Only the string and
+  // `repository`+`tag` shapes produce a simple, versioned image reference;
+  // the `service`-based naming (no `tag`) isn't extractable as one.
+  'forumone/extract': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          image: z
+            .union([
+              z.string(),
+              z.object({ repository: z.string(), tag: z.string().optional() }),
+            ])
+            .optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success || !parsed.data.image) {
+        return [];
+      }
+      const { image } = parsed.data;
+      if (isString(image)) {
+        return [getDep(image, { registryAliases, depType: 'docker' })];
+      }
+      if (!image.tag) {
+        return [];
+      }
+      return [depWithVersion(image.repository, image.tag, registryAliases)];
+    },
+    fields: ['image', 'image.repository', 'image.tag'],
+  },
+  // https://github.com/buildkite-plugins/wiz-buildkite-plugin
+  // `image-address` is a scan *target* the user points at their own build
+  // output, not a pinned dependency - confirmed via the README and
+  // `hooks/post-command`. Implemented so the shape is on record, but left
+  // disabled.
+  wiz: {
+    extract: extractSingleImageField('image-address'),
+    enabled: false,
+    fields: ['image-address'],
+  },
+  // https://github.com/equinixmetal-buildkite/trivy-buildkite-plugin
+  // Same scan-target caveat as `wiz` above - confirmed via the README.
+  'equinixmetal-buildkite/trivy': {
+    extract: extractSingleImageField('image-ref'),
+    enabled: false,
+    fields: ['image-ref'],
+  },
+  // https://github.com/buildkite-plugins/github-actions-buildkite-plugin
+  // `runners` is an array of `{runs-on, queue, image?, cache?}` objects -
+  // not a map, despite how it might read at a glance - and isn't declared
+  // in `plugin.yml`'s own schema at all (it's passed through and validated
+  // by the downstream `buildkite-gha` runtime instead). An explicit
+  // `image` only applies to the matching Linux x86-64 label and must be an
+  // immutable `@sha256:` reference; there's no default to fall back to.
+  // Verified against the plugin's README and the `buildkite-gha`
+  // compatibility docs it links to.
+  'github-actions': {
+    extract: (config, registryAliases) => {
+      const parsed = z
+        .object({
+          runners: LooseArray(
+            z.object({ image: z.string().optional() }),
+          ).optional(),
+        })
+        .safeParse(config);
+      if (!parsed.success) {
+        return [];
+      }
+      return coerceArray(parsed.data.runners)
+        .filter((runner) => runner.image)
+        .map((runner) =>
+          getDep(runner.image, { registryAliases, depType: 'docker' }),
+        );
+    },
+    fields: ['runners[].image'],
+  },
 };
