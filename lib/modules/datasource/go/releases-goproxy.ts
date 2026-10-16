@@ -28,6 +28,7 @@ import {
   trimTrailingSlash,
 } from '../../../util/url.ts';
 import goVersioning from '../../versioning/go-mod-directive/index.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -52,26 +53,16 @@ const versionTagRegex = regEx(/^v\d/);
  */
 const incompatibleSuffixRegex = regEx(/\+incompatible$/);
 
-/**
- * @see https://go.dev/ref/mod#pseudo-versions
- */
-const pseudoVersionRegex = regEx(
-  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
-);
-
 export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
-  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
-  if (!match) {
+  const commit = parseVersionCommit(pseudoVersion);
+  if (!commit) {
     return null;
   }
 
-  const { digest: newDigest, timestamp } = match;
-  const releaseTimestamp = asTimestamp(timestamp);
-
   return {
     version: pseudoVersion,
-    newDigest,
-    releaseTimestamp,
+    newDigest: commit.revision,
+    releaseTimestamp: asTimestamp(commit.timestamp),
   };
 }
 
