@@ -14,6 +14,7 @@ import { platform } from '../../modules/platform/index.ts';
 import { coerceArray } from '../../util/array.ts';
 import { emojify } from '../../util/emoji.ts';
 import { regEx } from '../../util/regex.ts';
+import { getReadableCronSchedule } from '../../util/schedule.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
@@ -224,6 +225,23 @@ function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
+function getScheduleDescription(
+  schedule: string[],
+  timezone: string | undefined,
+): string {
+  const descriptions =
+    getReadableCronSchedule(schedule) ??
+    schedule.map((value) => `\`${value}\``);
+  return `Schedule (${timezone ?? 'UTC'}): ${descriptions.join(', ')}`;
+}
+
+function getScheduleKey(branch: BranchConfig): string {
+  return JSON.stringify([
+    branch.timezone ?? 'UTC',
+    coerceArray(branch.schedule),
+  ]);
+}
+
 function getListItem(
   branch: BranchConfig,
   type: DependencyDashboardListItemType,
@@ -269,15 +287,50 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
 }
 
 function getBranchList(
+  config: RenovateConfig,
   branches: BranchConfig[],
   listItemType: DependencyDashboardListItemType,
+  nested = false,
 ): string {
-  return branches
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
-    .join('');
+  if (
+    !config.dependencyDashboardReportSchedules ||
+    listItemType !== 'unschedule'
+  ) {
+    return branches
+      .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+      .join('');
+  }
+
+  const scheduleGroups = new Map<string, BranchConfig[]>();
+  for (const branch of branches) {
+    const scheduleKey = getScheduleKey(branch);
+    const scheduleGroup = scheduleGroups.get(scheduleKey);
+    if (scheduleGroup) {
+      scheduleGroup.push(branch);
+    } else {
+      scheduleGroups.set(scheduleKey, [branch]);
+    }
+  }
+
+  let result = '';
+  for (const groupedBranches of scheduleGroups.values()) {
+    if (result) {
+      result = `${result.trimEnd()}\n\n`;
+    }
+    const [firstBranch] = groupedBranches;
+    const description = firstBranch.schedule?.length
+      ? getScheduleDescription(firstBranch.schedule, firstBranch.timezone)
+      : 'Schedule unavailable';
+    result += `${nested ? '####' : '###'} ${description}\n\n`;
+    result += groupedBranches
+      .map((branch) => getListItem(branch, listItemType))
+      .join('');
+  }
+  return result;
 }
 
 function getBranchesListMd(
+  config: RenovateConfig,
   branches: BranchConfig[],
   predicate: (
     value: BranchConfig,
@@ -305,7 +358,7 @@ function getBranchesListMd(
     )) {
       result = `${result.trimEnd()}\n\n`;
       result += `### ${category}\n\n`;
-      result += getBranchList(branches, listItemType);
+      result += getBranchList(config, branches, listItemType, true);
     }
     if (hasUncategorized) {
       result = `${result.trimEnd()}\n\n`;
@@ -313,7 +366,7 @@ function getBranchesListMd(
     }
   }
   result = `${result.trimEnd()}\n\n`;
-  result += getBranchList(uncategorized, listItemType);
+  result += getBranchList(config, uncategorized, listItemType, hasCategorized);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (hasCategorized) {
@@ -496,6 +549,7 @@ export async function ensureDependencyDashboard(
   }
 
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'needs-approval',
     'Pending Approval',
@@ -506,6 +560,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'minimum-group-size-not-met',
     'Group Size Not Met',
@@ -513,6 +568,7 @@ export async function ensureDependencyDashboard(
     'approveGroup',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'not-scheduled',
     'Awaiting Schedule',
@@ -523,6 +579,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) =>
       branch.result === 'branch-limit-reached' ||
@@ -537,6 +594,7 @@ export async function ensureDependencyDashboard(
     '🔐',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'error',
     'Errored',
@@ -544,12 +602,14 @@ export async function ensureDependencyDashboard(
     'retry',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'needs-pr-approval',
     'PR Creation Approval Required',
     'The following branches exist but PR creation requires approval. To approve PR creation, click on a checkbox below.',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'pr-edited',
     'PR Edited (Blocked)',
@@ -557,6 +617,7 @@ export async function ensureDependencyDashboard(
     'rebase',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
@@ -564,6 +625,7 @@ export async function ensureDependencyDashboard(
     'unpend',
   );
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
     'Pending Branch Automerge',
@@ -597,6 +659,7 @@ export async function ensureDependencyDashboard(
       branch.prBlockedBy !== 'BranchAutomerge',
   );
   issueBody += getBranchesListMd(
+    config,
     inProgress,
     (branch) => !!branch.prBlockedBy || !branch.prNo,
     'Other Branches',
@@ -604,6 +667,7 @@ export async function ensureDependencyDashboard(
     'other',
   );
   issueBody += getBranchesListMd(
+    config,
     inProgress,
     (branch) => branch.prNo && !branch.prBlockedBy,
     'Open',
@@ -614,6 +678,7 @@ export async function ensureDependencyDashboard(
   );
 
   issueBody += getBranchesListMd(
+    config,
     branches,
     (branch) => branch.result === 'already-existed',
     'PR Closed (Blocked)',
