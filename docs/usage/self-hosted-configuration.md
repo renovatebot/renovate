@@ -825,11 +825,15 @@ Read the [GitLab docs about HTTP Git access with Kerberos](https://docs.gitlab.c
 
 When set to `store`, Renovate will, during platform initialization:
 
-1. Add `store` to the `credential.<endpoint>.helper` setting in the global Git configuration (`~/.gitconfig`), if it is not already there
+1. Set the `credential.<endpoint>.helper` setting in the global Git configuration (`~/.gitconfig`, or the file in `GIT_CONFIG_GLOBAL`) to an empty value followed by `store`, so that Git uses only the credential store for the GitLab endpoint
 1. Create or update the entry for the GitLab endpoint in the `~/.git-credentials` file, if the file does not already have the current username and token
 
 Both files must be writable by Renovate.
 Renovate does not revert these changes when it finishes.
+
+The empty value makes Git ignore credential helpers for the GitLab endpoint which were configured before.
+Renovate also passes these settings, and the username, to its own Git processes as `GIT_CONFIG_*` environment variables, which take precedence over all Git config files.
+This matters when Renovate runs in a GitLab CI job with `FF_GIT_URLS_WITHOUT_TOKENS` enabled: the GitLab Runner configures a credential helper that returns the CI job token, and Git would use this token instead of Renovate's token, for example when the `baseDir` is inside the job's project directory.
 
 !!! note
   The credential store only has an entry for the host of your `endpoint`.

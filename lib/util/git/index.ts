@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
 import {
   isBoolean,
+  isNonEmptyArray,
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -55,7 +56,12 @@ import {
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
 import { formatCommitMessage } from './commit-trailers.ts';
-import { getNoVerify, simpleGitConfig } from './config.ts';
+import {
+  addGitConfigEnvironmentVariables,
+  getCredentialStoreConfig,
+  getNoVerify,
+  simpleGitConfig,
+} from './config.ts';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
@@ -131,11 +137,20 @@ export function createSimpleGit({
       LC_ALL: 'C.UTF-8',
     },
   });
-  const gitEnv = authentication
+  const authenticatedEnv = authentication
     ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
     : childEnv;
+  // Passed as environment variables, these entries take precedence over credential helpers from any config file
+  const credentialStoreConfig = getCredentialStoreConfig();
+  const gitEnv = isNonEmptyArray(credentialStoreConfig)
+    ? addGitConfigEnvironmentVariables(authenticatedEnv, credentialStoreConfig)
+    : authenticatedEnv;
+  const options = simpleGitConfig();
+  if (isNonEmptyArray(credentialStoreConfig)) {
+    options.unsafe = { ...options.unsafe, allowUnsafeCredentialHelper: true };
+  }
   return simpleGit({
-    ...simpleGitConfig(),
+    ...options,
     // simple-git blocks explicitly passed `GIT_*` and other guarded variables unless allowed. The environment is fully controlled by Renovate, so allow all of it.
     allowEnvironment: Object.keys(gitEnv),
     ...config,

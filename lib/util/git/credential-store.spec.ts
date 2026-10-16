@@ -6,8 +6,13 @@ import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import {
+  getCredentialStoreConfig,
+  setCredentialStoreConfig,
+} from './config.ts';
+import {
   enableGitCredentialStore,
   getGitCredentialStorePath,
+  setupGitCredentialStore,
   updateGitCredentialStore,
 } from './credential-store.ts';
 import * as git from './index.ts';
@@ -51,14 +56,25 @@ describe('util/git/credential-store', () => {
       createSimpleGit.mockReturnValue(gitMock);
     });
 
-    it('adds the store helper if it is not configured', async () => {
+    function mockHelpers(values: string[]): void {
       gitMock.getConfig.mockResolvedValue({
         key,
-        value: null,
-        values: [],
+        value: values.at(-1) ?? null,
+        values,
         paths: [],
         scopes: new Map(),
       });
+    }
+
+    function expectStoreOnlyHelpersAdded(): void {
+      expect(gitMock.addConfig.mock.calls).toEqual([
+        [key, '', true, 'global'],
+        [key, 'store', true, 'global'],
+      ]);
+    }
+
+    it('adds a helper reset and the store helper if nothing is configured', async () => {
+      mockHelpers([]);
 
       await enableGitCredentialStore('https://gitlab.example.com');
 
@@ -71,50 +87,41 @@ describe('util/git/credential-store', () => {
         },
       });
       expect(gitMock.getConfig).toHaveBeenCalledWith(key, 'global');
-      expect(gitMock.addConfig).toHaveBeenCalledExactlyOnceWith(
-        key,
-        'store',
-        true,
-        'global',
-      );
+      expect(gitMock.raw).not.toHaveBeenCalled();
+      expectStoreOnlyHelpersAdded();
     });
 
-    it('keeps other helpers and adds the store helper', async () => {
-      gitMock.getConfig.mockResolvedValue({
-        key,
-        value: 'cache',
-        values: ['cache'],
-        paths: [],
-        scopes: new Map(),
-      });
+    it.each`
+      values
+      ${['cache']}
+      ${['store']}
+      ${['cache', 'store']}
+      ${['', 'store', 'cache']}
+      ${['store', '']}
+    `(
+      'replaces the configured helpers $values',
+      async ({ values }: { values: string[] }) => {
+        mockHelpers(values);
 
-      await enableGitCredentialStore('https://gitlab.example.com');
+        await enableGitCredentialStore('https://gitlab.example.com');
 
-      expect(gitMock.addConfig).toHaveBeenCalledExactlyOnceWith(
-        key,
-        'store',
-        true,
-        'global',
-      );
-    });
+        expect(gitMock.raw).toHaveBeenCalledExactlyOnceWith([
+          'config',
+          '--global',
+          '--unset-all',
+          key,
+        ]);
+        expectStoreOnlyHelpersAdded();
+      },
+    );
 
     it('uses the origin of the URL', async () => {
-      gitMock.getConfig.mockResolvedValue({
-        key,
-        value: null,
-        values: [],
-        paths: [],
-        scopes: new Map(),
-      });
+      mockHelpers([]);
 
       await enableGitCredentialStore('https://gitlab.example.com/api/v4/');
 
-      expect(gitMock.addConfig).toHaveBeenCalledExactlyOnceWith(
-        key,
-        'store',
-        true,
-        'global',
-      );
+      expect(gitMock.getConfig).toHaveBeenCalledWith(key, 'global');
+      expectStoreOnlyHelpersAdded();
     });
 
     it('throws on invalid URLs', async () => {
@@ -124,17 +131,12 @@ describe('util/git/credential-store', () => {
       expect(gitMock.getConfig).not.toHaveBeenCalled();
     });
 
-    it('does nothing if the store helper is already configured', async () => {
-      gitMock.getConfig.mockResolvedValue({
-        key,
-        value: 'store',
-        values: ['cache', 'store'],
-        paths: [],
-        scopes: new Map(),
-      });
+    it('does nothing if only the store helper is already configured', async () => {
+      mockHelpers(['', 'store']);
 
       await enableGitCredentialStore('https://gitlab.example.com');
 
+      expect(gitMock.raw).not.toHaveBeenCalled();
       expect(gitMock.addConfig).not.toHaveBeenCalled();
     });
   });
@@ -284,6 +286,60 @@ describe('util/git/credential-store', () => {
       expect(JSON.stringify(logger.logger.debug.mock.calls)).not.toContain(
         'some-token',
       );
+    });
+  });
+
+  describe('setupGitCredentialStore()', () => {
+    let gitMock: ReturnType<typeof mock<SimpleGit>>;
+
+    beforeEach(() => {
+      setCredentialStoreConfig([]);
+      gitMock = mock<SimpleGit>();
+      gitMock.getConfig.mockResolvedValue({
+        key: 'credential.https://gitlab.example.com:8443.helper',
+        value: null,
+        values: [],
+        paths: [],
+        scopes: new Map(),
+      });
+      createSimpleGit.mockReturnValue(gitMock);
+    });
+
+    it('enables the store, writes the credentials and makes the store the only credential source', async () => {
+      await setupGitCredentialStore(
+        'https://gitlab.example.com:8443/api/v4/',
+        'oauth2',
+        'some-token',
+      );
+
+      expect(gitMock.addConfig).toHaveBeenCalledTimes(2);
+      expect(readStore()).toBe(
+        'https://oauth2:some-token@gitlab.example.com:8443\n',
+      );
+      expect(getCredentialStoreConfig()).toEqual([
+        { key: 'credential.https://gitlab.example.com:8443.helper', value: '' },
+        {
+          key: 'credential.https://gitlab.example.com:8443.helper',
+          value: 'store',
+        },
+        {
+          key: 'credential.https://gitlab.example.com:8443.username',
+          value: 'oauth2',
+        },
+      ]);
+    });
+
+    it('does not change the Git config entries if the store cannot be written', async () => {
+      vi.mocked(fs.writeFile).mockRejectedValueOnce(new Error('EROFS'));
+
+      await expect(
+        setupGitCredentialStore(
+          'https://gitlab.example.com:8443',
+          'oauth2',
+          'some-token',
+        ),
+      ).rejects.toThrow('Cannot write the Git credential store file');
+      expect(getCredentialStoreConfig()).toEqual([]);
     });
   });
 });

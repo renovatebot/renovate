@@ -4,7 +4,7 @@ import upath from 'upath';
 import { logger } from '../../logger/index.ts';
 import { newlineRegex } from '../regex.ts';
 import { parseUrl } from '../url.ts';
-import { simpleGitConfig } from './config.ts';
+import { setCredentialStoreConfig, simpleGitConfig } from './config.ts';
 import { createSimpleGit } from './index.ts';
 
 /**
@@ -22,8 +22,18 @@ function parseStoreUrl(url: string): URL {
   return parsedUrl;
 }
 
+// An empty value resets the list of credential helpers collected so far
+const storeOnlyHelpers = ['', 'store'];
+
+function isStoreOnly(values: string[]): boolean {
+  return (
+    values.length === storeOnlyHelpers.length &&
+    values.every((value, index) => value === storeOnlyHelpers[index])
+  );
+}
+
 /**
- * Enables the `store` credential helper for the origin of `url` in the global Git configuration.
+ * Makes the `store` credential helper the only one used for the origin of `url`, via the global Git configuration.
  */
 export async function enableGitCredentialStore(url: string): Promise<void> {
   const { origin } = parseStoreUrl(url);
@@ -38,13 +48,19 @@ export async function enableGitCredentialStore(url: string): Promise<void> {
     },
   });
   const { values } = await git.getConfig(key, 'global');
-  if (values.includes('store')) {
+  if (isStoreOnly(values)) {
     logger.debug(`Git credential store is already enabled for ${origin}`);
     return;
   }
 
+  // Helpers configured earlier for this origin (e.g. the GitLab Runner's CI job token helper) would otherwise answer first
   logger.debug(`Enabling the Git credential store for ${origin}`);
-  await git.addConfig(key, 'store', true, 'global');
+  if (values.length) {
+    await git.raw(['config', '--global', '--unset-all', key]);
+  }
+  for (const helper of storeOnlyHelpers) {
+    await git.addConfig(key, helper, true, 'global');
+  }
 }
 
 function isEntryForOrigin(line: string, origin: URL): boolean {
@@ -100,4 +116,24 @@ export async function updateGitCredentialStore(
       cause: err,
     });
   }
+}
+
+/**
+ * Makes the Git credential store the only credential source for the origin of `url`, and stores the credentials in it.
+ */
+export async function setupGitCredentialStore(
+  url: string,
+  username: string,
+  password: string,
+): Promise<void> {
+  await enableGitCredentialStore(url);
+  await updateGitCredentialStore(url, username, password);
+
+  // Config files in other scopes can reset the helpers or set another username, e.g. the GitLab Runner's config for the CI job token
+  const { origin } = parseStoreUrl(url);
+  setCredentialStoreConfig([
+    { key: `credential.${origin}.helper`, value: '' },
+    { key: `credential.${origin}.helper`, value: 'store' },
+    { key: `credential.${origin}.username`, value: username },
+  ]);
 }

@@ -186,10 +186,7 @@ describe('modules/platform/gitlab/index', () => {
           });
 
           expect(
-            credentialStore.enableGitCredentialStore,
-          ).not.toHaveBeenCalled();
-          expect(
-            credentialStore.updateGitCredentialStore,
+            credentialStore.setupGitCredentialStore,
           ).not.toHaveBeenCalled();
         },
       );
@@ -205,10 +202,7 @@ describe('modules/platform/gitlab/index', () => {
         ).resolves.toEqual({ endpoint: `${endpoint}/` });
 
         expect(
-          credentialStore.enableGitCredentialStore,
-        ).toHaveBeenCalledExactlyOnceWith(`${endpoint}/`);
-        expect(
-          credentialStore.updateGitCredentialStore,
+          credentialStore.setupGitCredentialStore,
         ).toHaveBeenCalledExactlyOnceWith(
           `${endpoint}/`,
           'oauth2',
@@ -218,7 +212,7 @@ describe('modules/platform/gitlab/index', () => {
 
       it('throws if the Git credential store cannot be set up', async () => {
         const err = new Error('Cannot write the Git credential store file');
-        credentialStore.updateGitCredentialStore.mockRejectedValueOnce(err);
+        credentialStore.setupGitCredentialStore.mockRejectedValueOnce(err);
 
         await expect(
           gitlab.initPlatform({
