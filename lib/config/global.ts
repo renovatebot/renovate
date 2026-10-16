@@ -58,6 +58,7 @@ export class GlobalConfig {
     'onboardingPrTitle',
     'platform',
     'prCacheSyncMaxPages',
+    'prMergeabilityCheckAttempts',
     'presetCachePersistence',
     'productLinks',
     'rebaseAllOpenBranches',
