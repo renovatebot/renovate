@@ -32,9 +32,11 @@ async function updateArtifact(
 
 export async function updateArtifacts({
   packageFileName,
-  config,
+  updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const version = config.newVersion!;
+  const version = updatedDeps.find(
+    (dep) => dep.depName === 'batect/batect',
+  )!.newVersion!;
 
   logger.debug(
     `Updating Batect wrapper scripts for ${packageFileName} to ${version}`,
