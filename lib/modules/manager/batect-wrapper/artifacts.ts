@@ -32,9 +32,11 @@ async function updateArtifact(
 
 export async function updateArtifacts({
   packageFileName,
-  config,
+  updatedDeps,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const version = config.newVersion!;
+  // A `batect` wrapper script holds a single Batect version, so the update of
+  // this package file is always the first one.
+  const version = updatedDeps[0].newVersion!;
 
   logger.debug(
     `Updating Batect wrapper scripts for ${packageFileName} to ${version}`,
