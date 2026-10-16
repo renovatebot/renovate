@@ -1,4 +1,10 @@
-import { Graph, depthFirstSearch, topologicalSort } from 'graph-data-structure';
+import {
+  CycleError,
+  Graph,
+  depthFirstSearch,
+  hasCycle,
+  topologicalSort,
+} from 'graph-data-structure';
 import upath from 'upath';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import {
@@ -7,6 +13,7 @@ import {
 } from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { scm } from '../../platform/scm.ts';
+import type { GoModulesTidyPlan } from './types.ts';
 
 // `[^\S\n]` is horizontal whitespace, so a match never crosses a line boundary.
 // `[^\s/]` rules out comment lines, and lets this match the single line form as
@@ -61,15 +68,16 @@ async function buildDependencyGraph(): Promise<Graph> {
 
 /**
  * Get all `go.mod` files which transitively depend on `packageFileName`, ordered
- * so that a module always comes before the modules which depend on it.
- * The given `packageFileName` is not included.
+ * so that a module comes before the modules which depend on it whenever the
+ * relationship is acyclic. Cycles are tolerated and each dependent module is
+ * included once. The given `packageFileName` is not included.
  */
-export async function getGoModulesInTidyOrder(
+export async function getGoModulesTidyPlan(
   packageFileName: string,
-): Promise<string[]> {
+): Promise<GoModulesTidyPlan> {
   const graph = await buildDependencyGraph();
   if (!graph.adjacent(packageFileName)) {
-    return [];
+    return { modules: [], containsCycle: false };
   }
 
   const dependents = new Set(
@@ -79,5 +87,26 @@ export async function getGoModulesInTidyOrder(
     }),
   );
 
-  return topologicalSort(graph).filter((f) => dependents.has(f));
+  try {
+    return {
+      modules: topologicalSort(graph).filter((f) => dependents.has(f)),
+      containsCycle: false,
+    };
+  } catch (err) {
+    /* v8 ignore next -- topologicalSort only throws CycleError */
+    if (!(err instanceof CycleError)) {
+      throw err;
+    }
+    return {
+      modules: [...dependents].reverse(),
+      containsCycle: hasCycle(graph, { sourceNodes: [packageFileName] }),
+    };
+  }
+}
+
+export async function getGoModulesInTidyOrder(
+  packageFileName: string,
+): Promise<string[]> {
+  const { modules } = await getGoModulesTidyPlan(packageFileName);
+  return modules;
 }
