@@ -5375,7 +5375,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
 !!! note
   If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
 
-With the default `rangeStrategy=update-lockfile`, if the fixed version is outside the current range then Renovate bumps the range to the fixed version where the versioning can express it, for example `^3.2.4` → `^4.1.11`, and otherwise keeps the replaced range.
+With the default `rangeStrategy=update-lockfile`, if the fixed version is outside the current range then Renovate bumps the range so that it includes the fixed version where the versioning can express that, for example `^3.2.4` → `^4.1.11`, and otherwise keeps the replaced range.
 
 ### `vulnerabilityAlerts.vulnerabilityFixStrategy`
 
