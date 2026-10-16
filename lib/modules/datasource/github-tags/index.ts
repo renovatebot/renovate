@@ -27,7 +27,13 @@ export class GithubTagsDatasource extends GitHostTagsDigestDatasource<GithubHttp
 
   // the GraphQL fetcher caches the tags and releases itself, and the latest
   // commit lookup uses the HTTP memory cache
-  protected override readonly useGitHostTagCaching = false;
+  protected override cachedLookup<T>(
+    _registryUrl: string | undefined,
+    _key: string,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    return fn();
+  }
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure

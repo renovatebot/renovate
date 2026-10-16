@@ -46,49 +46,26 @@ export abstract class GitHostTagsDatasource<
 
   /**
    * Whether the lookups against `registryUrl` may be stored in the package
-   * cache. The base class only calls it through
-   * {@link GitHostTagsDatasource.isCacheableFor}, so `registryUrl` is always
-   * the URL returned by {@link GitHostTagsDatasource.getRegistryUrl}.
+   * cache. `registryUrl` is always the URL returned by
+   * {@link GitHostTagsDatasource.getRegistryUrl}.
    */
   protected isCacheable(_registryUrl: string): boolean {
     return true;
   }
 
   /**
-   * Resolves `registryUrl` with {@link GitHostTagsDatasource.getRegistryUrl}
-   * and passes it to {@link GitHostTagsDatasource.isCacheable}. Every cache site
-   * uses it, so subclasses must not override it.
-   */
-  protected isCacheableFor(registryUrl: string | undefined): boolean {
-    return this.isCacheable(this.getRegistryUrl(registryUrl));
-  }
-
-  /**
-   * Whether this class stores the releases and digests in the package cache.
-   * `false` skips it entirely, whatever
-   * {@link GitHostTagsDatasource.isCacheable} and `cachePrivatePackages` say.
-   * The central releases cache which {@link Datasource.caching} enables is a
-   * separate layer.
-   */
-  protected readonly useGitHostTagCaching: boolean = true;
-
-  /**
-   * Returns the result of `fn`, stored in the package cache under `key` unless
-   * {@link GitHostTagsDatasource.useGitHostTagCaching} is `false`.
+   * Returns the result of `fn`, stored in the package cache under `key` when
+   * {@link GitHostTagsDatasource.isCacheable} or `cachePrivatePackages` allows
+   * it. A subclass whose API client caches the lookups itself overrides it to
+   * call `fn` directly.
    */
   protected cachedLookup<T>(
     registryUrl: string | undefined,
     key: string,
     fn: () => Promise<T>,
   ): Promise<T> {
-    if (!this.useGitHostTagCaching) {
-      return fn();
-    }
-
-    return this.cached(
-      { key, fallback: true, cacheable: this.isCacheableFor(registryUrl) },
-      fn,
-    );
+    const cacheable = this.isCacheable(this.getRegistryUrl(registryUrl));
+    return this.cached({ key, fallback: true, cacheable }, fn);
   }
 
   protected getCacheKey(
