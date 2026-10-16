@@ -18,12 +18,9 @@ import {
 vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/pnpm', () => {
-  beforeAll(() => {
-    GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
-  });
-
   beforeEach(() => {
     vi.restoreAllMocks();
+    GlobalConfig.set({ localDir: getFixturePath('pnpm-monorepo/', '..') });
   });
 
   describe('.extractPnpmFilters()', () => {
