@@ -122,6 +122,7 @@ export class AzurePipelinesTasksDatasource extends Datasource {
       {
         namespace: `datasource-${AzurePipelinesTasksDatasource.id}`,
         key: url,
+        cacheable: url === BUILT_IN_TASKS_URL || url === MARKETPLACE_TASKS_URL,
         ttlMinutes: 24 * 60,
       },
       () => this._getTasks(url, opts, schema),
