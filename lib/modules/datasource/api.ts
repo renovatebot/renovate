@@ -1,4 +1,5 @@
 import { ApkDatasource } from './apk/index.ts';
+import { ApmDatasource } from './apm/index.ts';
 import { ArtifactoryDatasource } from './artifactory/index.ts';
 import { AwsEKSAddonDataSource } from './aws-eks-addon/index.ts';
 import { AwsMachineImageDatasource } from './aws-machine-image/index.ts';
@@ -86,6 +87,7 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(ApkDatasource.id, new ApkDatasource());
+api.set(ApmDatasource.id, new ApmDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsEKSAddonDataSource.id, new AwsEKSAddonDataSource());
 api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
