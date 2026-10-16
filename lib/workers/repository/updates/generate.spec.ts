@@ -1618,6 +1618,26 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('uses the resolved version for lockfile update titles', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          depName: 'node',
+          currentValue: 'latest',
+          isLockfileOnly: true,
+          isLockfileUpdate: true,
+          manager: 'mise',
+          newValue: 'latest',
+          newVersion: '22.16.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('Update dependency node to v22.16.0');
+      expect(res.commitMessage).toBe('Update dependency node to v22.16.0');
+      expect(res.upgrades[0]).toMatchObject({ newValue: 'latest' });
+    });
+
     it('prevents issue with duplicating "v" character', () => {
       const branch = [
         {

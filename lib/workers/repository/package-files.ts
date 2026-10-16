@@ -4,6 +4,17 @@ import type { PackageFile } from '../../modules/manager/types.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
 
+function formatVersionWithLockedVersion(
+  version: string,
+  lockedVersion?: string,
+): string {
+  if (!lockedVersion || version === lockedVersion) {
+    return version;
+  }
+
+  return `${version} (locked: ${lockedVersion})`;
+}
+
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
@@ -125,10 +136,27 @@ export class PackageFiles {
             } else {
               version = 'unknown version';
             }
+            if (
+              lock &&
+              (ver || digest) &&
+              dep.updates?.some((update) => update.isLockfileUpdate)
+            ) {
+              version = formatVersionWithLockedVersion(version, lock);
+            }
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
-                dep.updates?.map((update) => `\`${update.newValue}\``),
+                dep.updates?.map((update) => {
+                  const value = update.isLockfileUpdate
+                    ? formatVersionWithLockedVersion(
+                        update.newValue ??
+                          update.newVersion ??
+                          'unknown version',
+                        update.newVersion,
+                      )
+                    : update.newValue;
+                  return `\`${value}\``;
+                }),
               ),
             ];
             if (uniqueUpdates.length > 0) {
