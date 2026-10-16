@@ -326,6 +326,28 @@ function getBranchesListMd(
   return `${result.trimEnd()}\n\n`;
 }
 
+function getPendingUpgradesMd(branches: BranchConfig[]): string {
+  const items = branches.flatMap((branch) =>
+    coerceArray(branch.pendingUpgrades).map((upgrade) => {
+      const target =
+        upgrade.newVersion ?? upgrade.newDigestShort ?? upgrade.newValue;
+      const to = isNonEmptyString(target) ? ` to \`${target}\`` : '';
+      return ` - \`${upgrade.depName!}\`${to} for branch \`${branch.branchName}\`\n`;
+    }),
+  );
+  if (items.length === 0) {
+    return '';
+  }
+  let result = '';
+  if (!branches.some((branch) => branch.result === 'pending')) {
+    result += '## Pending Status Checks\n\n';
+  }
+  result +=
+    'The following updates await pending status checks and will be added to their branch once these pass.\n\n';
+  result += items.join('');
+  return `${result}\n`;
+}
+
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
@@ -563,6 +585,7 @@ export async function ensureDependencyDashboard(
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
     'unpend',
   );
+  issueBody += getPendingUpgradesMd(branches);
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
