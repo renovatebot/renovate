@@ -647,24 +647,30 @@ export const configScopes = [
   'vulnerabilityAlert',
   /** the `group` configuration object, which is merged into an update when it's grouped */
   'group',
+  /** every object a config can be nested in, for the options which are read wherever they're found */
+  'any',
 ] as const;
 
 export type ConfigScope = (typeof configScopes)[number];
 
+/**
+ * The objects which a config can be nested in, other than the top level and the ones which are covered by a {@link ConfigScope}.
+ */
+export const namedParents = [
+  'bumpVersions',
+  'customDatasources',
+  'customManagers',
+  'group',
+  'hostRules',
+  'logLevelRemap',
+  'packageRules',
+  'postUpgradeTasks',
+  'toolSettings',
+  'vulnerabilityAlerts',
+] as const;
+
 export type AllowedParents =
-  | '.'
-  | 'bumpVersions'
-  | 'group'
-  | 'customDatasources'
-  | 'customManagers'
-  | 'hostRules'
-  | 'logLevelRemap'
-  | 'packageRules'
-  | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts'
-  | 'toolSettings'
-  | ManagerName
-  | UpdateTypeOptions;
+  '.' | (typeof namedParents)[number] | ManagerName | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
