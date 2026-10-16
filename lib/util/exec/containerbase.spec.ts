@@ -1,4 +1,5 @@
 import { GlobalConfig } from '../../config/global.ts';
+import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
 import * as memCache from '../cache/memory/index.ts';
 import {
@@ -267,13 +268,42 @@ describe('util/exec/containerbase', () => {
   });
 
   describe('resolveConstraint() with resolved tools', () => {
-    it('ignores resolved tools when no release is compatible', async () => {
-      datasource.getPkgReleases
-        .mockResolvedValueOnce({ releases: [] })
-        .mockResolvedValueOnce({ releases: [{ version: '12.2.0' }] });
+    // run the real constraints filtering against npm-like releases
+    function mockNpmReleases(...nodeConstraints: string[]): void {
+      datasource.getPkgReleases.mockImplementation((config) =>
+        Promise.resolve(
+          applyConstraintsFiltering(
+            {
+              releases: nodeConstraints.map((node, i) => ({
+                version: `${11 + i}.0.0`,
+                constraints: { node: [node] },
+              })),
+            },
+            config,
+          ),
+        ),
+      );
+    }
+
+    it('picks the newest release compatible with the parent version', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
       await expect(
         resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
-      ).resolves.toBe('12.2.0');
+      ).resolves.toBe('11.0.0');
+    });
+
+    it('picks the newest release when the parent version supports it', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '24.15.0' }),
+      ).resolves.toBe('12.0.0');
+    });
+
+    it('ignores the parent version when no release is compatible', async () => {
+      mockNpmReleases('^22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('12.0.0');
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
         datasource: 'npm',
         packageName: 'npm',
