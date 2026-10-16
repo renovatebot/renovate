@@ -1648,6 +1648,13 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'packageRules',
+    scopes: [
+      'repo',
+      'packageRule',
+      'manager',
+      'updateType',
+      'vulnerabilityAlert',
+    ],
     description: 'Rules for matching packages.',
     type: 'array',
     stage: 'package',
