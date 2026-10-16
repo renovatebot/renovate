@@ -3064,6 +3064,7 @@ const options: Readonly<RenovateOptions>[] = [
       'npmDedupe',
       'npmInstallTwice',
       'pnpmDedupe',
+      'uvExportRequirements',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],
