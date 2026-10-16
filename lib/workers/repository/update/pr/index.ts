@@ -33,6 +33,7 @@ import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { memoize } from '../../../../util/memoize.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
@@ -286,7 +287,8 @@ export async function ensurePr(
   }
 
   const processedUpgrades: string[] = [];
-  const commitRepos: string[] = [];
+  // repository names for shared notes, JSON keys for per-dependency notes
+  const seenNotes = new Set<string>();
 
   function getRepoNameWithSourceDirectory(
     upgrade: BranchUpgradeConfig,
@@ -322,17 +324,20 @@ export async function ensurePr(
         upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
         const shared = !logJSON.perDependencyNotes;
+        const notesKey = shared
+          ? getRepoNameWithSourceDirectory(upgrade)
+          : quickStringify([
+              upgrade.datasource,
+              upgrade.registryUrl,
+              upgrade.packageName ?? upgrade.depName,
+              upgrade.newVersion ?? upgrade.newValue,
+            ]);
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !(
-            shared &&
-            commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
-          )
+          !seenNotes.has(notesKey)
         ) {
-          if (shared) {
-            commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
-          }
+          seenNotes.add(notesKey);
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             for (const version of logJSON.versions) {
