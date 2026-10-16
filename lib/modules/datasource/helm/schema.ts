@@ -4,6 +4,7 @@ import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import { api as helmVersioning } from '../../versioning/helm/index.ts';
 import type { Release } from '../types.ts';
 
 const HelmRelease = z.object({
@@ -60,7 +61,11 @@ export const HelmRepository = z
       HelmRelease.array()
         .min(1)
         .transform((helmReleases) => {
-          const latestRelease = helmReleases[0];
+          const latestRelease = helmReleases.reduce((latest, release) =>
+            helmVersioning.isGreaterThan(release.version, latest.version)
+              ? release
+              : latest,
+          );
           const homepage = latestRelease.home;
           const sourceUrl = getSourceUrl(latestRelease);
           const releases = helmReleases.map(
