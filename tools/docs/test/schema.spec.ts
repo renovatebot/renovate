@@ -270,6 +270,9 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       expect(schemaErrors(repoSchema, { extends: 123 })).toEqual([
         'must be array',
         'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
         'must match exactly one schema in oneOf',
       ]);
     });

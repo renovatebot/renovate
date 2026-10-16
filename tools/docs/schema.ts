@@ -24,18 +24,6 @@ type JsonSchemaBasicType =
   'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
-/* These are sorted in priority order, but editors may not suggest in that order */
-const presetsToSuggest = [
-  'config:best-practices',
-  'config:recommended',
-  'mergeConfidence:all-badges',
-  'abandonments:recommended',
-  'group:all',
-  'replacements:all',
-  'security:minimumReleaseAgeNpm',
-  'security:only-security-updates',
-];
-
 const docsPages = {
   repo: 'configuration-options',
   global: 'self-hosted-configuration',
@@ -86,23 +74,13 @@ export function getOptionDocsUrl(
 }
 
 /**
- * When suggesting presets in `extends`, suggest a number of values that users may want to use
+ * Suggests values in an editor, while still accepting anything else matching `items`.
  */
-function createExtendsSchema(items: Record<string, any>): any[] {
-  return [
-    {
-      type: 'array',
-      items: {
-        anyOf: [
-          {
-            enum: presetsToSuggest,
-          },
-          items,
-        ],
-      },
-    },
-    { ...items },
-  ];
+function suggestValues(
+  values: string[],
+  items: Record<string, unknown>,
+): Record<string, any> {
+  return { anyOf: [{ enum: values }, items] };
 }
 
 function createSingleConfig(
@@ -135,17 +113,19 @@ function createSingleConfig(
         } else {
           temp.items.enum = option.allowedValues;
         }
+      } else if (option.suggestedValues) {
+        /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+        Object.assign(
+          temp.items,
+          suggestValues(option.suggestedValues, { type: option.subType }),
+        );
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
-      if (option.name === 'extends') {
-        temp.oneOf = createExtendsSchema(items);
-      } else {
-        temp.oneOf = [{ type: 'array', items }, { ...items }];
-      }
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
     }
   } else {
     if (hasKey('format', option) && option.format) {
@@ -162,7 +142,14 @@ function createSingleConfig(
       } else {
         temp.enum = option.allowedValues;
       }
+      /* v8 ignore start -- not yet reachable; the next two commits each introduce a scalar option using `suggestedValues` */
+    } else if (option.suggestedValues) {
+      Object.assign(
+        temp,
+        suggestValues(option.suggestedValues, { type: option.type }),
+      );
     }
+    /* v8 ignore stop */
   }
   if (option.default !== undefined) {
     temp.default = option.default;
