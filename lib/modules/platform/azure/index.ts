@@ -5,8 +5,8 @@ import type {
   GitItem,
   GitPullRequest,
   GitPullRequestCommentThread,
-  GitPullRequestSearchCriteria,
   GitPullRequestCompletionOptions,
+  GitPullRequestSearchCriteria,
   GitStatus,
   GitVersionDescriptor,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
