@@ -430,6 +430,15 @@ jobs:
               matrix.cache-key
             }}-
 
+      # git-ignored canary, tests must not read a `config.js` from the working directory
+      - name: Create canary config.js
+        shell: bash
+        run: |
+          cat > config.js <<'EOF'
+          globalThis.__RENOVATE_CONFIG_JS_CANARY__ = true;
+          export default { token: 'canary-config-js-must-not-be-read-by-tests' };
+          EOF
+
       - name: Unit tests
         shell: bash
         run: |
