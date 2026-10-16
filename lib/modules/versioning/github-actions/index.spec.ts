@@ -392,28 +392,31 @@ describe('modules/versioning/github-actions/index', () => {
 
   describe('.isBreaking()', () => {
     it.each`
-      version      | current      | expected
-      ${'2.0.0'}   | ${'1.0.0'}   | ${true}
-      ${'1.1.0'}   | ${'1.0.0'}   | ${false}
-      ${'1.0.1'}   | ${'1.0.0'}   | ${false}
-      ${'0.2.0'}   | ${'0.1.0'}   | ${true}
-      ${'0.1.1'}   | ${'0.1.0'}   | ${false}
-      ${'1.0.0'}   | ${'0.9.0'}   | ${true}
-      ${'invalid'} | ${'1.0.0'}   | ${false}
-      ${'1.0.0'}   | ${'invalid'} | ${false}
-      ${'v2.0.0'}  | ${'v1.0.0'}  | ${true}
-      ${'v1.1.0'}  | ${'v1.0.0'}  | ${false}
-      ${'v0.2.0'}  | ${'v0.1.0'}  | ${true}
-      ${'v2.0.0'}  | ${'1.0.0'}   | ${true}
-      ${'2.0.0'}   | ${'v1.0.0'}  | ${true}
-      ${'1.1.0'}   | ${'v1.0.0'}  | ${false}
-      ${'v1.1.0'}  | ${'1.0.0'}   | ${false}
-      ${'v1.0.0'}  | ${'0.9.0'}   | ${true}
-      ${'1.0.0'}   | ${'v0.9.0'}  | ${true}
+      currentVersion | newVersion   | expected
+      ${'1.0.0'}     | ${'2.0.0'}   | ${true}
+      ${'1.0.0'}     | ${'1.1.0'}   | ${false}
+      ${'1.0.0'}     | ${'1.0.1'}   | ${false}
+      ${'0.1.0'}     | ${'0.2.0'}   | ${true}
+      ${'0.1.0'}     | ${'0.1.1'}   | ${false}
+      ${'0.9.0'}     | ${'1.0.0'}   | ${true}
+      ${'1.0.0'}     | ${'invalid'} | ${false}
+      ${'invalid'}   | ${'1.0.0'}   | ${false}
+      ${'v1.0.0'}    | ${'v2.0.0'}  | ${true}
+      ${'v1.0.0'}    | ${'v1.1.0'}  | ${false}
+      ${'v0.1.0'}    | ${'v0.2.0'}  | ${true}
+      ${'1.0.0'}     | ${'v2.0.0'}  | ${true}
+      ${'v1.0.0'}    | ${'2.0.0'}   | ${true}
+      ${'v1.0.0'}    | ${'1.1.0'}   | ${false}
+      ${'1.0.0'}     | ${'v1.1.0'}  | ${false}
+      ${'0.9.0'}     | ${'v1.0.0'}  | ${true}
+      ${'v0.9.0'}    | ${'1.0.0'}   | ${true}
+      ${'v7'}        | ${'v8'}      | ${true}
     `(
-      'isBreaking("$version", "$current") === $expected',
-      ({ version, current, expected }) => {
-        expect(githubActions.isBreaking!(version, current)).toBe(expected);
+      'isBreaking("$currentVersion", "$newVersion") === $expected',
+      ({ currentVersion, newVersion, expected }) => {
+        expect(githubActions.isBreaking!(currentVersion, newVersion)).toBe(
+          expected,
+        );
       },
     );
   });
