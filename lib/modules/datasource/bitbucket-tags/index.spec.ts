@@ -125,6 +125,23 @@ describe('modules/datasource/bitbucket-tags/index', () => {
     });
   });
 
+  describe('getSourceUrl', () => {
+    it('falls back to the default registry', () => {
+      expect(BitbucketTagsDatasource.getSourceUrl('some/dep2')).toBe(
+        'https://bitbucket.org/some/dep2',
+      );
+    });
+
+    it('uses the given registry', () => {
+      expect(
+        BitbucketTagsDatasource.getSourceUrl(
+          'some/dep2',
+          'https://bitbucket.example.com',
+        ),
+      ).toBe('https://bitbucket.example.com/some/dep2');
+    });
+  });
+
   describe('getTagCommit', () => {
     it('returns tags commit hash from bitbucket cloud', async () => {
       const body = {
