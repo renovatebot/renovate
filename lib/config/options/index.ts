@@ -1564,6 +1564,15 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'registryStrategy',
+    description:
+      'Strategy to use when multiple registryUrls are available for a datasource lookup.',
+    type: 'string',
+    allowedValues: ['first', 'hunt', 'merge'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'extractVersion',
     scopes: lookupScopes,
     description:
