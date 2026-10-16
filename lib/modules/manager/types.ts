@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  PdmUpdateStrategy,
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -73,6 +74,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
+  pdmUpdateStrategy?: PdmUpdateStrategy;
   currentValue?: string;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
