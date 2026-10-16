@@ -16,7 +16,11 @@ import { emojify } from '../../util/emoji.ts';
 import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
-import type { BranchConfig, SelectAllConfig } from '../types.ts';
+import type {
+  BranchConfig,
+  BranchUpgradeConfig,
+  SelectAllConfig,
+} from '../types.ts';
 import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
@@ -326,25 +330,43 @@ function getBranchesListMd(
   return `${result.trimEnd()}\n\n`;
 }
 
+function getHeldUpgradeTarget(
+  upgrade: BranchUpgradeConfig,
+): string | undefined {
+  if (upgrade.isDigest || upgrade.isPinDigest) {
+    return upgrade.newDigestShort;
+  }
+  return upgrade.newVersion ?? upgrade.newDigestShort ?? upgrade.newValue;
+}
+
 function getPendingUpgradesMd(branches: BranchConfig[]): string {
-  const items = branches.flatMap((branch) =>
-    coerceArray(branch.pendingUpgrades).map((upgrade) => {
-      const target =
-        upgrade.newVersion ?? upgrade.newDigestShort ?? upgrade.newValue;
-      const to = isNonEmptyString(target) ? ` to \`${target}\`` : '';
-      return ` - \`${upgrade.depName!}\`${to} for branch \`${branch.branchName}\`\n`;
-    }),
+  const excludedResults = ['already-existed', 'error', 'pr-edited'];
+  const items = new Set(
+    branches
+      .filter((branch) => !excludedResults.includes(branch.result!))
+      .flatMap((branch) =>
+        coerceArray(branch.pendingUpgrades).map((upgrade) => {
+          const target = getHeldUpgradeTarget(upgrade);
+          const to = isNonEmptyString(target) ? ` to \`${target}\`` : '';
+          return ` - \`${upgrade.depName!}\`${to} for branch \`${branch.branchName}\`\n`;
+        }),
+      ),
   );
-  if (items.length === 0) {
+  if (items.size === 0) {
     return '';
   }
+  const pendingBranches = branches.filter(
+    (branch) => branch.result === 'pending',
+  );
   let result = '';
-  if (!branches.some((branch) => branch.result === 'pending')) {
+  if (pendingBranches.length === 0) {
     result += '## Pending Status Checks\n\n';
+  } else if (splitBranchesByCategory(pendingBranches).hasCategorized) {
+    result += '### Held Updates\n\n';
   }
   result +=
     'The following updates await pending status checks and will be added to their branch once these pass.\n\n';
-  result += items.join('');
+  result += [...items].join('');
   return `${result}\n`;
 }
 
