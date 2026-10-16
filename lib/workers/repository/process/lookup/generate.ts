@@ -61,6 +61,22 @@ export async function generateUpdate(
           newVersion,
           allVersions,
         })!;
+        if (
+          config.isVulnerabilityAlert &&
+          rangeStrategy === 'update-lockfile' &&
+          !versioningApi.matches(newVersion, currentValue)
+        ) {
+          const bumpedValue = versioningApi.getNewValue({
+            currentValue,
+            rangeStrategy: 'bump',
+            currentVersion,
+            newVersion,
+            allVersions,
+          });
+          if (bumpedValue && versioningApi.matches(newVersion, bumpedValue)) {
+            update.newValue = bumpedValue;
+          }
+        }
       }
     } catch (err) {
       logger.warn(
