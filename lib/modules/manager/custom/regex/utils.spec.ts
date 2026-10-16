@@ -1,10 +1,10 @@
 import { partial } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../../util/regex.ts';
-import type { PackageFileInfo, RegexManagerConfig } from './types.ts';
+import type { PackageFileInfo, RegexExtractConfig } from './types.ts';
 import * as utils from './utils.ts';
 
-const baseConfig = partial<RegexManagerConfig>({ matchStrings: [] });
+const baseConfig = partial<RegexExtractConfig>({ matchStrings: [] });
 const baseFileInfo = partial<PackageFileInfo>({
   packageFile: 'file.txt',
   packageFileName: 'file.txt',
@@ -32,6 +32,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.registryUrls).toEqual(['https://registry.example.com/']);
     });
@@ -44,6 +45,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.registryUrls).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -60,6 +62,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.datasource).toBe('npm');
     });
@@ -72,8 +75,57 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.indentation).toBe('  ');
+    });
+
+    it('replaces depName when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: { depName: 'foo/bar' },
+          replaceString: undefined,
+        },
+        {
+          registryAliases: { foo: 'baz' },
+          ...baseConfig,
+        },
+        baseFileInfo,
+      );
+      expect(dep?.packageName).toBe('baz/bar');
+    });
+
+    it('replaces packageName when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: { depName: 'foo/dep', packageName: 'foo/pkg' },
+          replaceString: undefined,
+        },
+        {
+          registryAliases: { foo: 'baz' },
+          ...baseConfig,
+        },
+        baseFileInfo,
+      );
+      expect(dep?.packageName).toBe('baz/pkg');
+    });
+    it('replaces registryUrls when registryAliases is set', () => {
+      const dep = utils.createDependency(
+        {
+          groups: {
+            depName: 'foo/dep',
+            packageName: 'foo/pkg',
+            registryUrl: 'https://foo',
+          },
+          replaceString: undefined,
+        },
+        {
+          registryAliases: { 'https://foo': 'https://baz' },
+          ...baseConfig,
+        },
+        baseFileInfo,
+      );
+      expect(dep?.registryUrls).toEqual(['https://baz/']);
     });
 
     it('sets empty indentation when indentation group is non-whitespace', () => {
@@ -84,6 +136,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.indentation).toBe('');
     });
@@ -96,6 +149,7 @@ describe('modules/manager/custom/regex/utils', () => {
         },
         baseConfig,
         baseFileInfo,
+        {},
       );
       expect(dep?.depName).toBe('my-package');
     });
