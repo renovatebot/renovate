@@ -3607,6 +3607,15 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['.', 'packageRules'],
   },
   {
+    name: 'changelogsLocation',
+    description:
+      'Controls whether changelogs/release notes are put in the PR body or in a PR comment.',
+    type: 'string',
+    allowedValues: ['body', 'comment'],
+    default: 'body',
+    cli: false,
+  },
+  {
     name: 'cloneSubmodules',
     scopes: ['repo'],
     description:
