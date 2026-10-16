@@ -328,6 +328,7 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
+  getPrDismissedReviewers?(prNo: number): Promise<string[]>;
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
