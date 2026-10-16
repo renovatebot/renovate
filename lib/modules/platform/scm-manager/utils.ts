@@ -78,6 +78,7 @@ export function getRepoUrl(
     url: endpoint,
   });
 
+  // SCM-Manager ignores the username for API keys, `x-access-token` is our own choice and not documented by SCM-Manager
   repoUrl.username = hostOptions.username ?? 'x-access-token';
   repoUrl.password = hostOptions.token ?? '';
 
