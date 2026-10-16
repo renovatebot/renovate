@@ -1532,6 +1532,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'defaultRegistryUrls',
+    scopes: lookupScopes,
     description:
       'List of registry URLs to use as the default for a datasource.',
     type: 'array',
@@ -1554,6 +1555,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'registryUrls',
+    scopes: lookupScopes,
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
     type: 'array',
