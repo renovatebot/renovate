@@ -3193,6 +3193,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'hostType for a package rule. Can be a platform name or a datasource name.',
     type: 'string',
+    suggestedValues: [...PLATFORM_HOST_TYPES, ...AllDatasourcesListLiteral],
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,
