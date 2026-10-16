@@ -34,6 +34,7 @@ A rule that uses `"regex"` instead never matches, and Renovate does not warn abo
 
 !!! note
   A regex manager does not inherit the default config of the manager that normally handles the file type, only the built-in defaults.
+  <br>
   For example, the `nuget` manager defaults `rangeStrategy` to `bump` so that bare NuGet versions keep getting updates, but a regex manager that extracts NuGet dependencies uses the `auto` default instead.
   Read [Getting updates for non-pinned (bare) versions](../nuget/index.md#getting-updates-for-non-pinned-bare-versions) to learn when you need to set `rangeStrategy` yourself.
 
