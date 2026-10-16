@@ -1,8 +1,10 @@
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
+import type { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { GitTagsDatasource } from '../git-tags/index.ts';
+
 export type GoproxyFallback =
   | ',' // WhenNotFoundOrGone
   | '|'; // Always
-
-import type { DatasourceName } from '../../../datasource-list.generated.ts';
 
 export interface DataSource {
   datasource: DatasourceName;
@@ -14,3 +16,10 @@ export interface GoproxyItem {
   url: string;
   fallback: GoproxyFallback;
 }
+
+/**
+ * How the `go` datasource looks up a module hosted on one git host: the
+ * platform's tags datasource, or `git-tags` for any other host, whose package
+ * name is already the clone URL and which therefore knows no source URL.
+ */
+export type GoTagDatasource = GitHostTagsDigestDatasource | GitTagsDatasource;

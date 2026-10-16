@@ -18,7 +18,13 @@ import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import type { DataSource } from './types.ts';
 
-// TODO: figure out class hierarchy (#10532)
+/**
+ * Resolves a Go module path into the repository it is hosted in: the `*-tags`
+ * datasource which serves that host, and the package name and registry URL to
+ * look it up with.
+ *
+ * @see https://go.dev/ref/mod#vcs-find
+ */
 export class BaseGoDatasource {
   private static readonly gitlabHttpsRegExp = regEx(
     /^(?<httpsRegExpUrl>https:\/\/[^/]*gitlab\.[^/]*)\/(?<httpsRegExpName>.+?)(?:\/v\d+)?[/]?$/,
