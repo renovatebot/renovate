@@ -216,9 +216,10 @@ describe('modules/platform/scm-manager/utils', () => {
       ${'endpoint'}
       ${undefined}
     `(
-      'should use empty string, because username was not provided with option $gitUrl',
+      'should use fallback username, because username was not provided with option $gitUrl',
       ({ gitUrl }: { gitUrl: string | undefined }) => {
         hostRules.clear();
+        hostRules.add({ token: 'token' });
         expect(
           getRepoUrl(
             {
@@ -228,7 +229,9 @@ describe('modules/platform/scm-manager/utils', () => {
             gitUrl as GitUrlOption | undefined,
             endpoint,
           ),
-        ).toBe('http://localhost:8081/scm/repo/default/repo');
+        ).toBe(
+          'http://x-access-token:token@localhost:8081/scm/repo/default/repo',
+        );
       },
     );
 
@@ -238,7 +241,7 @@ describe('modules/platform/scm-manager/utils', () => {
       ${'endpoint'}
       ${undefined}
     `(
-      'should use empty string, because token was not provided. With option $gitUrl',
+      'should omit the password, because token was not provided. With option $gitUrl',
       ({ gitUrl }: { gitUrl: string | undefined }) => {
         hostRules.clear();
         hostRules.add({ username: 'tzerr' });
