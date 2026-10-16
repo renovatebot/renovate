@@ -170,7 +170,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
     expect(logger.trace).toHaveBeenCalledWith(
       expect.objectContaining({
         cmd: 'pip-compile requirements.in',
-        registryCredVars: [],
       }),
       'pip-compile command',
     );
