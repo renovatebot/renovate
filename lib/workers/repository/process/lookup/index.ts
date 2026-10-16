@@ -370,6 +370,8 @@ export async function lookupUpdates(
         compareValue &&
         currentVersion &&
         rangeStrategy === 'pin' &&
+        !config.currentDigest &&
+        !config.pinDigests &&
         !versioningApi.isSingleVersion(compareValue)
       ) {
         const newValue =
