@@ -287,8 +287,8 @@ export async function ensurePr(
   }
 
   const processedUpgrades: string[] = [];
-  const commitRepos: string[] = [];
-  const dependencyNotes: string[] = [];
+  // repository names for shared notes, JSON keys for per-dependency notes
+  const seenNotes = new Set<string>();
 
   function getRepoNameWithSourceDirectory(
     upgrade: BranchUpgradeConfig,
@@ -332,13 +332,12 @@ export async function ensurePr(
               upgrade.packageName ?? upgrade.depName,
               upgrade.newVersion ?? upgrade.newValue,
             ]);
-        const seenNotes = shared ? commitRepos : dependencyNotes;
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !seenNotes.includes(notesKey)
+          !seenNotes.has(notesKey)
         ) {
-          seenNotes.push(notesKey);
+          seenNotes.add(notesKey);
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             for (const version of logJSON.versions) {
