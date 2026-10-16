@@ -1,4 +1,5 @@
 import { isArray } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
@@ -8,8 +9,16 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import {
+  extractPackage,
+  resolveParents,
+} from '../../../../modules/manager/maven/extract.ts';
 import * as _mise from '../../../../modules/manager/mise/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
+import {
+  bumpPackageVersion as bumpNpmPackageVersion,
+  updateDependency as updateNpmDependency,
+} from '../../../../modules/manager/npm/update/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
 import * as _poetry from '../../../../modules/manager/poetry/index.ts';
@@ -20,6 +29,7 @@ import type {
   UpdateArtifact,
 } from '../../../../modules/manager/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { generateBranchConfig } from '../../updates/generate.ts';
 import * as _autoReplace from './auto-replace.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
 
@@ -1195,6 +1205,258 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('updates grouped Maven properties, inherited properties and replacements across version length changes', async () => {
+      const pom = codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <version>1.0.99</version>
+          <properties>
+            <foo.version>\${actual.version}</foo.version>
+            <actual.version>1.2.3</actual.version>
+          </properties>
+          <dependencies>
+            <dependency>
+              <groupId>org.example</groupId><artifactId>foo</artifactId>
+              <version>\${foo.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.example</groupId><artifactId>bar</artifactId>
+              <version>3.4.5</version>
+            </dependency>
+          </dependencies>
+        </project>
+      `;
+      const childPom = codeBlock`
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <parent>
+            <groupId>org.example</groupId><artifactId>parent</artifactId>
+            <version>1.0.99</version>
+          </parent>
+          <dependencies>
+            <dependency>
+              <groupId>org.example</groupId><artifactId>foo-api</artifactId>
+              <version>\${foo.version}</version>
+            </dependency>
+          </dependencies>
+        </project>
+      `;
+      const [extracted] = resolveParents([
+        extractPackage(pom, 'pom.xml', {})!,
+        extractPackage(childPom, 'child/pom.xml', {})!,
+      ]);
+      const upgrades = extracted.deps.map((dep) => ({
+        depName: dep.depName,
+        datasource: dep.datasource,
+        currentValue: dep.currentValue!,
+        fileReplacePosition: dep.fileReplacePosition,
+        sharedVariableName: dep.sharedVariableName,
+        managerData: dep.managerData,
+        manager: 'maven',
+        packageFile: extracted.packageFile,
+        packageFileVersion: extracted.packageFileVersion,
+        branchName: 'renovate/group',
+        groupName: 'group',
+        bumpVersion: dep.depName === 'org.example:bar' ? 'patch' : 'minor',
+        newValue: dep.depName === 'org.example:bar' ? '3.4.6' : '1.2.4',
+        newName:
+          dep.depName === 'org.example:bar'
+            ? 'org.replaced:bar-new'
+            : undefined,
+      })) satisfies BranchUpgradeConfig[];
+      const grouped = generateBranchConfig(upgrades);
+      git.getFile.mockReset();
+      git.getFile.mockResolvedValue(pom);
+
+      const res = await getUpdatedPackageFiles({ ...config, ...grouped });
+
+      expect(grouped.upgrades.map((dep) => dep.depName)).toEqual([
+        'org.example:bar',
+        'org.example:foo',
+        'org.example:foo-api',
+      ]);
+      expect(res.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'pom.xml',
+          contents: pom
+            .replace('1.0.99', '1.1.0')
+            .replace('1.2.3', '1.2.4')
+            .replace('3.4.5', '3.4.6')
+            .replace(
+              '<groupId>org.example</groupId><artifactId>bar</artifactId>',
+              '<groupId>org.replaced</groupId><artifactId>bar-new</artifactId>',
+            ),
+        },
+      ]);
+    });
+
+    it.each`
+      firstBump    | secondBump | expected
+      ${undefined} | ${'minor'} | ${'1.1.0'}
+      ${'minor'}   | ${'patch'} | ${'1.0.100'}
+    `(
+      'applies Maven bumps in order: $firstBump then $secondBump',
+      async ({ firstBump, secondBump, expected }) => {
+        const pom = codeBlock`
+          <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <version>1.0.99</version>
+            <dependencies>
+              <dependency><groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version></dependency>
+              <dependency><groupId>org.example</groupId><artifactId>bar</artifactId><version>3.4.5</version></dependency>
+            </dependencies>
+          </project>
+        `;
+        const { deps, packageFileVersion } = extractPackage(
+          pom,
+          'pom.xml',
+          {},
+        )!;
+        git.getFile.mockReset();
+        git.getFile.mockResolvedValue(pom);
+        const upgrade = {
+          packageFile: 'pom.xml',
+          branchName: '',
+          manager: 'maven',
+          packageFileVersion,
+        } satisfies BranchUpgradeConfig;
+        config.upgrades.push(
+          {
+            ...upgrade,
+            bumpVersion: firstBump,
+            currentValue: '3.4.5',
+            newValue: '3.4.6',
+            fileReplacePosition: deps[1].fileReplacePosition,
+            managerData: deps[1].managerData,
+          },
+          {
+            ...upgrade,
+            bumpVersion: secondBump,
+            currentValue: '1.2.3',
+            newValue: '1.2.4',
+            fileReplacePosition: deps[0].fileReplacePosition,
+            managerData: deps[0].managerData,
+          },
+        );
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res.updatedPackageFiles).toEqual([
+          {
+            type: 'addition',
+            path: 'pom.xml',
+            contents: pom
+              .replace('1.0.99', expected)
+              .replace('1.2.3', '1.2.4')
+              .replace('3.4.5', '3.4.6'),
+          },
+        ]);
+      },
+    );
+
+    it.each([false, true])(
+      'handles Maven bump-only changes on a reused branch (already bumped: %s)',
+      async (alreadyBumped) => {
+        const basePom = codeBlock`
+          <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <version>1.0.99</version>
+            <dependencies>
+              <dependency><groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version></dependency>
+            </dependencies>
+          </project>
+        `;
+        const pom = basePom
+          .replace('1.2.3', '1.2.4')
+          .replace('1.0.99', alreadyBumped ? '1.0.100' : '1.0.99');
+        const extracted = extractPackage(basePom, 'pom.xml', {})!;
+        git.getFile.mockReset();
+        git.getFile.mockImplementation((_file, branch) =>
+          Promise.resolve(branch === config.baseBranch ? basePom : pom),
+        );
+        config.reuseExistingBranch = true;
+        config.upgrades.push({
+          depName: extracted.deps[0].depName,
+          fileReplacePosition: extracted.deps[0].fileReplacePosition,
+          managerData: extracted.deps[0].managerData,
+          currentValue: '1.2.3',
+          packageFile: 'pom.xml',
+          branchName: '',
+          manager: 'maven',
+          bumpVersion: 'patch',
+          packageFileVersion: extracted.packageFileVersion,
+          newValue: '1.2.4',
+        });
+
+        const res = await getUpdatedPackageFiles(config);
+
+        expect(res.reuseExistingBranch).toBe(alreadyBumped);
+        expect(res.updatedPackageFiles).toEqual(
+          alreadyBumped
+            ? []
+            : [
+                {
+                  type: 'addition',
+                  path: 'pom.xml',
+                  contents: pom.replace('1.0.99', '1.0.100'),
+                },
+              ],
+        );
+        expect(git.getFile).toHaveBeenCalledWith('pom.xml', config.branchName);
+        expect(
+          git.getFile.mock.calls.some(
+            ([, branch]) => branch === config.baseBranch,
+          ),
+        ).toBe(!alreadyBumped);
+      },
+    );
+
+    it('keeps npm mirror timing before a later dependency update', async () => {
+      const packageJson = JSON.stringify({
+        version: '0.9.0',
+        dependencies: { alpha: '1.0.0', beta: '1.0.0' },
+      });
+      git.getFile.mockReset();
+      git.getFile.mockResolvedValue(packageJson);
+      npm.updateDependency.mockImplementation(updateNpmDependency);
+      npm.bumpPackageVersion.mockImplementation(bumpNpmPackageVersion);
+      const upgrade = {
+        packageFile: 'package.json',
+        branchName: '',
+        manager: 'npm',
+        depType: 'dependencies',
+        currentValue: '1.0.0',
+        packageFileVersion: '0.9.0',
+      } satisfies BranchUpgradeConfig;
+      config.upgrades.push(
+        {
+          ...upgrade,
+          depName: 'alpha',
+          newValue: '1.0.1',
+          // npm accepts mirror bumps, but the shared type only lists semver bumps.
+          bumpVersion: 'mirror:beta' as BranchUpgradeConfig['bumpVersion'],
+        },
+        {
+          ...upgrade,
+          depName: 'beta',
+          newValue: '2.0.0',
+        },
+      );
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'package.json',
+          contents: JSON.stringify({
+            version: '1.0.0',
+            dependencies: { alpha: '1.0.1', beta: '2.0.0' },
+          }),
+        },
+      ]);
+      expect(
+        JSON.parse(npm.updateDependency.mock.calls[1][0].fileContent).version,
+      ).toBe('1.0.0');
     });
 
     it('bumps versions in autoReplace managers', async () => {
