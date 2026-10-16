@@ -309,6 +309,49 @@ describe('modules/manager/helm-values/extract', () => {
       ]);
     });
 
+    it.each`
+      value
+      ${'""'}
+      ${'~'}
+      ${''}
+    `('skips an image whose tag is empty or null ($value)', ({ value }) => {
+      const content = codeBlock`
+        image:
+          repository: registry.example.com/org/app
+          tag: ${value}
+          pullPolicy: IfNotPresent
+        sidecar:
+          image:
+            repository: nginx
+            tag: 1.27.0
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'registry.example.com/org/app',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '1.27.0',
+          depName: 'nginx',
+        },
+      ]);
+      expect(result?.deps[0].currentValue).toBeUndefined();
+      expect(result?.deps[0].currentDigest).toBeUndefined();
+    });
+
+    it('skips an image whose version key is empty', () => {
+      const content = codeBlock`
+        image:
+          repository: nginx
+          version: ""
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        { depName: 'nginx', skipReason: 'unspecified-version' },
+      ]);
+    });
+
     it('extracts a sibling-keyed image with registry aliases', () => {
       const content = codeBlock`
         cli:
