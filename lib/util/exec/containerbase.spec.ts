@@ -306,7 +306,23 @@ describe('util/exec/containerbase', () => {
       ]);
     });
 
-    it('filters later tool releases by earlier resolved tools', async () => {
+    it('only matches a tool against its own parent', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'composer' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool composer 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-releases',
+        packageName: 'containerbase/composer-prebuild',
+        versioning: 'composer',
+      });
+    });
+
+    it('filters tool releases by the resolved parent version', async () => {
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node', constraint: '20.17.0' },
         { toolName: 'npm', constraint: '>=1' },

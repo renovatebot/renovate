@@ -1,3 +1,4 @@
+import { type ToolMetadata, tools } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global.ts';
@@ -9,12 +10,13 @@ import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
 import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
-import type {
-  ConstraintName,
-  Opt,
-  ToolConfig,
-  ToolConstraint,
-  ToolName,
+import {
+  type ConstraintName,
+  type Opt,
+  type ToolConfig,
+  type ToolConstraint,
+  type ToolName,
+  isToolName,
 } from './types.ts';
 
 /**
@@ -430,19 +432,21 @@ export async function generateInstallCommands(
 ): Promise<string[]> {
   const installCommands: string[] = [];
   if (toolConstraints?.length) {
-    // Runtimes are listed before the tools that run on them (e.g. node before npm),
-    // so a runtime's resolved version is recorded here for the tools after it.
-    const resolvedTools: Partial<Record<ConstraintName, string>> = {};
+    // Parents are listed before their tools (e.g. node before npm),
+    // so a tool is matched against its parent's already resolved version.
+    const resolvedTools: Partial<Record<ToolName, string>> = {};
     for (const toolConstraint of toolConstraints) {
+      const { toolName } = toolConstraint;
+      const { parent }: ToolMetadata = tools[toolName];
+      const parentConstraint: Partial<Record<ConstraintName, string>> = {};
+      if (isToolName(parent) && resolvedTools[parent]) {
+        parentConstraint[parent] = resolvedTools[parent];
+      }
       const toolVersion = await resolveConstraint(
         toolConstraint,
-        resolvedTools,
+        parentConstraint,
       );
-      const { toolName } = toolConstraint;
-      // only node for now; other runtimes (e.g. python, ruby) can be added here
-      if (toolName === 'node') {
-        resolvedTools.node = toolVersion;
-      }
+      resolvedTools[toolName] = toolVersion;
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
         if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
