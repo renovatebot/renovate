@@ -45,7 +45,7 @@ const trustSubdirCmd = 'mise trust mise.toml';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
 const miseVersionCmd = 'mise version';
-// `mise version` output for a release that supports safe mode / `mise lock --bump`
+// `mise version` output for a release that supports safe mode
 const safeMiseVersionOutput = {
   stdout: '2026.7.12 linux-x64 (2026-07-23)',
   stderr: '',
@@ -388,6 +388,56 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('updates mise.lock and its sidecars together for a dependency update', async () => {
+    const updatedLockFile =
+      '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.132.2~aa673d8d", digest = "sha256:new" }\n';
+    fs.readLocalFile
+      .mockResolvedValueOnce('original lockfile')
+      .mockResolvedValueOnce(updatedLockFile)
+      .mockResolvedValueOnce('updated generated package manifest');
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json'],
+        not_added: [],
+        deleted: [],
+      }),
+    );
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'npm:renovate' }],
+      newPackageFileContent: '[tools]\n"npm:renovate" = "44.134.1"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: updatedLockFile,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: '.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json',
+          contents: 'updated generated package manifest',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: 'mise lock npm:renovate' },
+    ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      updatedLockFile,
+    );
+  });
+
   it('returns regenerated content that matches the in-memory update', async () => {
     const originalLockFile = '[[tools.node]]\nversion = "20.0.0"\n';
     const updatedLockFile = '[[tools.node]]\nversion = "22.0.0"\n';
@@ -467,19 +517,17 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
-    // version probe returns nothing here, so no --bump
     expect(execSnapshots).toMatchObject([
-      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: lockfileMaintenanceCmd },
     ]);
   });
 
-  it('runs mise lock --bump for lockFileMaintenance when mise supports it', async () => {
+  it('does not bump tool versions during lockFileMaintenance', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce('existing content');
-    const execSnapshots = mockExecAll(safeMiseVersionOutput);
+    const execSnapshots = mockExecAll();
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
@@ -489,9 +537,8 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: miseVersionCmd },
       { cmd: trustCmd },
-      { cmd: 'mise lock --bump' },
+      { cmd: lockfileMaintenanceCmd },
     ]);
   });
 
@@ -815,7 +862,6 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
-      { cmd: miseVersionCmd },
       { cmd: trustLocalCmd },
       { cmd: 'mise lock --local' },
     ]);
