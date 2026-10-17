@@ -260,11 +260,6 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
 } as const;
 
 /**
- * A Containerbase `tool` that Renovate supports configuring the version of.
- */
-export type SupportedToolNames = keyof typeof allToolConfig;
-
-/**
  * All Containerbase `tool`s that Renovate supports configuring the version of.
  */
 export function getSupportedToolNames(): readonly ToolName[] {
