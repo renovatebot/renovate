@@ -11,11 +11,17 @@ import { compile } from '../../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { normalizeDepNames } from '../../extract/manager-files.ts';
 
+function getSourceDepName(upgrade: BranchUpgradeConfig): string | undefined {
+  // Package rules can override depName, but baseDeps retains the extracted name.
+  return upgrade.baseDeps?.[upgrade.depIndex!]?.depName ?? upgrade.depName;
+}
+
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string,
 ): Promise<boolean> {
   const { manager, packageFile, depIndex } = upgrade;
+  const depName = getSourceDepName(upgrade);
   let newUpgrade: PackageDependency;
   try {
     const newExtract = await extractPackageFile(
@@ -61,15 +67,16 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
+  normalizeDepNames(newUpgrade);
   if (
-    upgrade.depName !== newUpgrade.depName &&
+    depName !== newUpgrade.depName &&
     upgrade.newName !== newUpgrade.depName
   ) {
     logger.debug(
       {
         manager,
         packageFile,
-        currentDepName: upgrade.depName,
+        currentDepName: depName,
         newDepName: newUpgrade.depName,
       },
       'depName mismatch',
@@ -82,7 +89,7 @@ export async function confirmIfDepUpdated(
       {
         manager,
         packageFile,
-        currentDepName: upgrade.depName,
+        currentDepName: depName,
         newDepName: newUpgrade.depName,
       },
       'depName is not updated',
@@ -97,7 +104,7 @@ export async function confirmIfDepUpdated(
       try {
         const compiledValue = compile(
           upgrade.autoReplaceStringTemplate,
-          upgrade,
+          { ...upgrade, depName },
           false,
         );
         templateMatchesExtractedValue =
@@ -224,7 +231,6 @@ export async function doAutoReplace(
 ): Promise<string | null> {
   const {
     packageFile,
-    depName,
     depNameTemplate,
     newName,
     currentValue,
@@ -236,6 +242,7 @@ export async function doAutoReplace(
     autoReplaceGlobalMatch,
     autoReplaceStringTemplate,
   } = upgrade;
+  const depName = getSourceDepName(upgrade);
   /*
     If replacement support for more managers is added,
     please also update the list in docs/usage/configuration-options.md
@@ -286,7 +293,11 @@ export async function doAutoReplace(
   try {
     let newString: string;
     if (autoReplaceStringTemplate && !newName) {
-      newString = compile(autoReplaceStringTemplate, upgrade, false);
+      newString = compile(
+        autoReplaceStringTemplate,
+        { ...upgrade, depName },
+        false,
+      );
     } else {
       newString = replaceString!;
 
