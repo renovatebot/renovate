@@ -364,6 +364,7 @@ export async function lookupUpdates(
             versioningApi,
           );
         }
+        res.currentValueTimestamp = newestMatchingVersionTimestamp ?? undefined;
       }
 
       if (

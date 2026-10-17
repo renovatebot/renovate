@@ -84,6 +84,8 @@ export interface UpdateResult {
   versioning?: string;
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: Timestamp;
+  /** Timestamp of the newest version matching the current value, or null for an unversioned value. */
+  currentValueTimestamp?: Timestamp | null;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
   mostRecentTimestamp?: Timestamp | null;

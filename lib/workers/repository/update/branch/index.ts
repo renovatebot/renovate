@@ -48,6 +48,7 @@ import type {
   PrBlockedBy,
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
+import { isMinimumReleaseAgeApplicable } from '../../process/lookup/filter-checks.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -457,15 +458,33 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
+        const isCurrentValueDigest =
+          (upgrade.updateType === 'digest' ||
+            upgrade.updateType === 'pinDigest') &&
+          upgrade.newValue === upgrade.currentValue;
+        const minimumReleaseAgeMs = isMinimumReleaseAgeApplicable(
+          upgrade.updateType,
+        )
+          ? calculateMinimumReleaseAgeMs(upgrade)
+          : 0;
 
-        if (minimumReleaseAgeMs) {
+        if (
+          minimumReleaseAgeMs &&
+          !(
+            isCurrentValueDigest &&
+            upgrade.updateType === 'pinDigest' &&
+            upgrade.currentValueTimestamp === null
+          )
+        ) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
             upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
 
           // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
-          if (upgrade.releaseTimestamp) {
-            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+          const releaseTimestamp = isCurrentValueDigest
+            ? upgrade.currentValueTimestamp
+            : upgrade.releaseTimestamp;
+          if (releaseTimestamp) {
+            const timeElapsed = getElapsedMs(releaseTimestamp);
             if (timeElapsed < minimumReleaseAgeMs) {
               logger.debug(
                 {
