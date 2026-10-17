@@ -5,6 +5,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
@@ -37,6 +38,23 @@ describe('modules/datasource/helm/index', () => {
           registryUrls: [],
         }),
       ).resolves.toBeNull();
+    });
+
+    it('returns null without a request for oci:// registries', async () => {
+      await expect(
+        getPkgReleases({
+          datasource: HelmDatasource.id,
+          packageName: 'grafana-operator',
+          registryUrls: ['oci://ghcr.io/grafana/helm-charts'],
+        }),
+      ).resolves.toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          packageName: 'grafana-operator',
+          registryUrl: 'oci://ghcr.io/grafana/helm-charts',
+        },
+        expect.stringContaining('does not support `oci://`'),
+      );
     });
 
     it('returns null for empty response', async () => {
