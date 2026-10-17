@@ -1,5 +1,10 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
+import {
+  isNonEmptyArray,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_BLOCKED, HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -55,6 +60,14 @@ export function getDatasourceList(): string[] {
   return Array.from(datasources.keys());
 }
 
+function getMavenConstraintCacheKeyParts(config: GetReleasesConfig): string[] {
+  return config.datasource === 'maven' &&
+    config.constraintsFiltering === 'strict' &&
+    isNonEmptyStringAndNotWhitespace(config.constraints?.java)
+    ? ['java.version']
+    : [];
+}
+
 /**
  * Projects the registry-level config onto the fields a datasource
  * implementation is allowed to see.
@@ -107,7 +120,11 @@ async function getRegistryReleases(
   registryUrl: string,
 ): Promise<ReleaseResult | null> {
   const cacheNamespace: PackageCacheNamespace = `datasource-releases-${datasource.id}`;
-  const cacheKey = buildCacheKey(registryUrl, config.packageName);
+  const cacheKey = buildCacheKey(
+    registryUrl,
+    config.packageName,
+    ...getMavenConstraintCacheKeyParts(config),
+  );
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
   const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
@@ -496,6 +513,7 @@ function fetchCachedReleases(
       config.defaultRegistryUrls,
       config.additionalRegistryUrls,
     ]),
+    ...getMavenConstraintCacheKeyParts(config),
   );
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
