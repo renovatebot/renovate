@@ -54,6 +54,7 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '2019', isDeprecated: true },
       { version: '2016', isDeprecated: true },
     ],
+    xcode: [{ version: '27' }, { version: '27-xlarge' }],
   };
 
   public static isValidRunner(
