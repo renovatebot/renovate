@@ -61,6 +61,7 @@ async function detectMiseVersion(
     const { stdout } = await exec('mise version', execOptions);
     const version = regEx(/\d+\.\d+\.\d+/).exec(stdout)?.[0];
     if (version && miseVersioning.isVersion(version)) {
+      logger.info(`Using mise version ${version}`);
       return version;
     }
     logger.debug({ stdout }, 'Could not parse mise version output');
@@ -168,21 +169,17 @@ export async function updateArtifacts({
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
 
-  // The mise version is needed to decide safe mode (untrusted path) and
-  // `mise lock --bump` (lock file maintenance). Detect it at runtime rather
-  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
-  // change the outcome: an allowlisted, non-maintenance run behaves the same
-  // regardless of version.
+  // Detect the mise version at runtime rather than requiring a pinned
+  // `constraints.mise`. Besides deciding safe mode (untrusted path) and
+  // `mise lock --bump` (lock file maintenance), this logs the version used to
+  // update the lock file.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
-  let miseSupportsSafeFeatures = false;
-  if (!miseAllowlisted || config.isLockFileMaintenance) {
-    const miseVersion = await detectMiseVersion({
-      cwdFile: packageFileName,
-      toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
-      docker: {},
-    });
-    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
-  }
+  const miseVersion = await detectMiseVersion({
+    cwdFile: packageFileName,
+    toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
+    docker: {},
+  });
+  const miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
 
   const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
   if (!miseAllowlisted && !safeMode) {

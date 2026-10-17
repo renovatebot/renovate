@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git, hostRules, partial } from '~test/util.ts';
+import { env, fs, git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -168,11 +168,11 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
   });
 
-  it('does not set MISE_SAFE or probe the version on the allowlisted path', async () => {
+  it('logs the mise version and does not set MISE_SAFE on the allowlisted path', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
-    const execSnapshots = mockExecAll();
+    const execSnapshots = mockExecAll(safeMiseVersionOutput);
 
     await updateArtifacts({
       packageFileName: 'mise.toml',
@@ -181,7 +181,11 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
+    expect(logger.logger.info).toHaveBeenCalledWith(
+      'Using mise version 2026.7.12',
+    );
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       {
         cmd: updateToolCmd,
@@ -207,6 +211,7 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -235,6 +240,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -383,6 +389,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -420,7 +427,10 @@ describe('modules/manager/mise/artifacts', () => {
     const error = new Error('exec error');
     (error as any).stdout = 'stdout output';
     (error as any).stderr = 'stderr output';
-    const execSnapshots = mockExecSequence([error]);
+    const execSnapshots = mockExecSequence([
+      new Error('mise not found'),
+      error,
+    ]);
 
     const res = await updateArtifacts({
       packageFileName: 'mise.toml',
@@ -437,12 +447,15 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchObject([{ cmd: trustCmd }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
+      { cmd: trustCmd },
+    ]);
   });
 
   it('rethrows TEMPORARY_ERROR', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
-    mockExecSequence([new Error(TEMPORARY_ERROR)]);
+    mockExecSequence([new Error('mise not found'), new Error(TEMPORARY_ERROR)]);
 
     await expect(
       updateArtifacts({
@@ -509,6 +522,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: updateMultipleToolsCmd },
     ]);
@@ -517,7 +531,14 @@ describe('modules/manager/mise/artifacts', () => {
   it('looks up latest versions for tool versions before `mise lock`, if not set', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
-    for (const version of ['1.2.3', '2.3.4', '3.4.5', '4.5.6', '5.6.7']) {
+    for (const version of [
+      '1.2.3',
+      '2.3.4',
+      '3.4.5',
+      '4.5.6',
+      '5.6.7',
+      '6.7.8',
+    ]) {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: version }],
       });
@@ -536,13 +557,14 @@ describe('modules/manager/mise/artifacts', () => {
         // no constraints
       },
     });
-
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 1.2.3' },
-      { cmd: 'install-tool node 2.3.4' },
-      { cmd: 'install-tool npm 3.4.5' },
-      { cmd: 'install-tool golang 4.5.6' },
-      { cmd: 'install-tool ruby 5.6.7' },
+      { cmd: miseVersionCmd },
+      { cmd: 'install-tool mise 2.3.4' },
+      { cmd: 'install-tool node 3.4.5' },
+      { cmd: 'install-tool npm 4.5.6' },
+      { cmd: 'install-tool golang 5.6.7' },
+      { cmd: 'install-tool ruby 6.7.8' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -571,6 +593,8 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: miseVersionCmd },
       { cmd: 'install-tool mise 2026.6.12' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
@@ -604,6 +628,8 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 2026.6.12' },
+      { cmd: miseVersionCmd },
       { cmd: 'install-tool mise 2026.6.12' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
@@ -651,6 +677,8 @@ describe('modules/manager/mise/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool mise 1.0.0' },
+        { cmd: miseVersionCmd },
+        { cmd: 'install-tool mise 1.0.0' },
         { cmd: 'install-tool node 1.0.0' },
         { cmd: 'install-tool npm 1.0.0' },
         { cmd: 'install-tool golang 1.0.0' },
@@ -680,6 +708,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       {
         cmd: updateToolCmd,
@@ -707,6 +736,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: lockfileMaintenanceCmd },
     ]);
@@ -735,6 +765,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustEnvCmd },
       {
         cmd: updateToolCmd,
@@ -770,6 +801,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustLocalCmd },
       { cmd: 'mise lock --local node' },
     ]);
@@ -789,6 +821,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustEnvLocalCmd },
       {
         cmd: 'mise lock --local node',
@@ -835,6 +868,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: "mise lock '|| date; echo ' node" },
     ]);
@@ -863,6 +897,7 @@ describe('modules/manager/mise/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustSubdirCmd },
       {
         cmd: updateToolCmd,
