@@ -74,6 +74,7 @@ function getLatestAllowedVersion(
 
   if (versionsWithoutTimestamp.length) {
     const logMeta = {
+      manager: 'terraform',
       depName: lock.packageName,
       versions: versionsWithoutTimestamp,
       check: 'minimumReleaseAge',
