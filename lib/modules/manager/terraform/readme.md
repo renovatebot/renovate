@@ -29,6 +29,43 @@ Check the tables to see where some dependencies can be hosted.
 | GithubTags        |      yes       |       yes       |
 | TerraformRegistry |      yes       |       yes       |
 
+##### Dynamic module `source`/`version`
+
+Terraform `1.15` and OpenTofu `1.8` let you use a `local` value or an input `variable` as the whole value of the `ref` of a module `source` (the `ref=` part of a Git-style source URL) or of the `version` attribute.
+Terraform requires the `variable` to have `const = true` for this, so a plain `variable` does not work there.
+OpenTofu does not need `const`.
+Renovate does not check `const`, so it works for both tools.
+
+```hcl
+variable "module_version" {
+  type    = string
+  const   = true
+  default = "v1.2.3"
+}
+
+module "example" {
+  source = "github.com/hashicorp/example?ref=${var.module_version}"
+}
+```
+
+When Renovate finds a `${local.x}` or `${var.x}` reference used as the **entire** `ref`/`version` value, it resolves the reference to the matching `locals` value or to the `default` of the matching `variable` block.
+Terraform treats all files of a directory as one module, so the declaration can be in the same file as the module or in another `.tf`/`.tofu` file of the **same directory**, for example `variables.tf` or `locals.tf`.
+Declarations in other directories are not used.
+Renovate then proposes updates to the `locals`/`variable` declaration itself, instead of the `source` line of the module.
+
+Renovate updates the `default` of the `variable` block, in the file that declares it.
+That file must be matched by `managerFilePatterns`, which is the case with the default patterns.
+If the value comes from `*.tfvars`, `-var` or `TF_VAR_*`, Renovate bumps a `default` that is not used.
+
+The dependency is skipped with the reason `contains-variable` when:
+
+- Renovate cannot resolve the reference, for example because the declaration is in a different directory, the `variable` has no `default`, or the value is not a plain string.
+- The resolved value is itself a reference, such as a local that points to another local.
+- One local or variable is shared by modules that come from different repositories (or different registry modules), because an update for one module would also change the others.
+  Modules from different folders of the same repository can share a local or variable.
+
+When the declaration is in a different file than the module, the module itself is reported as skipped with `contains-variable`, and the update is proposed for the declaration in its own file.
+
 #### Providers
 
 Providers are deprecated in Terraform `0.13.0`.

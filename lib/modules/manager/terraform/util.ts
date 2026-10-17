@@ -1,9 +1,15 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
+import upath from 'upath';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { readLocalDirectory, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type { PackageDependency } from '../types.ts';
+import { parseHCL } from './hcl/index.ts';
+import type { TerraformDefinitionFile } from './hcl/types.ts';
 import type { ProviderLock } from './lockfile/types.ts';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util.ts';
 
@@ -88,4 +94,49 @@ export async function extractLocksForPackageFile(
     }
   }
   return locks;
+}
+
+const terraformFileRegex = regEx(/\.(?:tf|tofu)$/);
+const moduleUsingReferenceRegex = regEx(/\b(?:local|var)\./);
+
+/**
+ * Reads and parses the other Terraform files of the directory of `packageFile`
+ * which contain a module that may use a `local`/`variable` reference.
+ * Terraform treats all files of a directory as one module, so a `local` or
+ * `variable` can be declared in a different file than the module using it.
+ */
+export async function readSiblingHclFiles(
+  packageFile: string,
+): Promise<TerraformDefinitionFile[]> {
+  const dir = upath.dirname(packageFile);
+  let fileNames: string[];
+  try {
+    fileNames = coerceArray(await readLocalDirectory(dir));
+  } catch (err) {
+    logger.debug({ packageFile, err }, 'Terraform: cannot read directory');
+    return [];
+  }
+
+  const self = upath.normalize(packageFile);
+  const siblings: TerraformDefinitionFile[] = [];
+  for (const fileName of fileNames.filter((name) =>
+    terraformFileRegex.test(name),
+  )) {
+    const siblingFile = upath.join(dir, fileName);
+    if (siblingFile === self) {
+      continue;
+    }
+    const content = await readLocalFile(siblingFile, 'utf8');
+    if (
+      !content?.includes('module') ||
+      !moduleUsingReferenceRegex.test(content)
+    ) {
+      continue;
+    }
+    const hclMap = await parseHCL(content, siblingFile);
+    if (hclMap) {
+      siblings.push(hclMap);
+    }
+  }
+  return siblings;
 }
