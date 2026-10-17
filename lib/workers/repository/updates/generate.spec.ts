@@ -1502,6 +1502,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeTrue();
       expect(res.upgrades).toHaveLength(2);
+      expect(res).not.toHaveProperty('pendingUpgrades');
     });
 
     it('filters pendingChecks', () => {
@@ -1525,6 +1526,67 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeUndefined();
       expect(res.upgrades).toHaveLength(1);
+    });
+
+    it('keeps filtered pendingChecks upgrades as pendingUpgrades', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newVersion: '2.0.0',
+          pendingChecks: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'digest-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          updateType: 'digest',
+          newValue: '1.0.0',
+          newDigest: 'sha256:abcdef1234567890',
+          pendingChecks: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newVersion: '1.1.0',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades).toMatchObject([{ depName: 'other-dep' }]);
+      expect(res.pendingUpgrades).toMatchObject([
+        { depName: 'some-dep', newVersion: '2.0.0', pendingChecks: true },
+        { depName: 'digest-dep', newDigestShort: 'abcdef1' },
+      ]);
+    });
+
+    it('does not set pendingUpgrades without pendingChecks', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+        {
+          manager: 'some-manager',
+          depName: 'other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades).toHaveLength(2);
+      expect(res).not.toHaveProperty('pendingUpgrades');
     });
 
     it('displays pending versions', () => {
