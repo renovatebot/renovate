@@ -175,7 +175,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
 | `pinDigest`           | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#pindigest-updates).        |
-| `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
+| `lockFileMaintenance` | ❌                            | Generally not possible, as we delegate to the package manager to perform the required changes. See below. |
 | `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
@@ -263,6 +263,14 @@ This decouples "how fresh must a release be before I trust it enough to upgrade 
 ```
 
 These are functionally identical options.
+
+#### Lock file maintenance
+
+Generally, Renovate delegates lock file maintenance to the package manager.
+
+In some cases, Renovate performs the resolution of versions itself, which leads to Renovate applying `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to the version resolution. This applies to the following managers:
+
+- [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`: Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
 
 ### What happens to security updates?
 
