@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -159,12 +160,10 @@ export class UvProcessor extends BasePyProjectProcessor {
       packageFile,
       this.lockfileName,
     );
-    if (lockFileName === null) {
-      logger.debug({ packageFile }, `No uv lock file found`);
-    } else {
+    if (lockFileName) {
       const lockFileContent = await readLocalFile(lockFileName, 'utf8');
       if (lockFileContent) {
-        const { val: lockFileMapping, err } = Result.parse(
+        const { val: lockFile, err } = Result.parse(
           lockFileContent,
           UvLockfile,
         ).unwrap();
@@ -172,14 +171,37 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
+          const lockFileMapping = lockFile.packages;
           for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
+              dep.lockedVersion = lockFileMapping[packageName].version;
+            }
+          }
+
+          // In a uv workspace, all members share the lock file of the
+          // workspace root. Only add indirect deps for the package file next
+          // to the lock file to avoid duplicating them for every member.
+          if (upath.dirname(lockFileName) === upath.dirname(packageFile)) {
+            // direct deps of other workspace members are not indirect either
+            const directPackageNames = new Set([
+              ...deps.map((dep) => dep.packageName),
+              ...lockFile.workspaceDeps,
+            ]);
+            for (const [name, { version, registry }] of Object.entries(
+              lockFileMapping,
+            )) {
+              // only registry sourced packages can be looked up, others are
+              // local, git or url sources (including the project itself)
+              if (registry && !directPackageNames.has(name)) {
+                deps.push(indirectDep(name, version, registry));
+              }
             }
           }
         }
       }
+    } else {
+      logger.debug({ packageFile }, `No uv lock file found`);
     }
 
     return Promise.resolve(deps);
@@ -277,6 +299,11 @@ function generateCMD(updatedDeps: Upgrade[]): string {
       case depTypes.buildSystemRequires:
         // build requirements are not locked in the lock files, no need to update.
         break;
+      case depTypes.indirect:
+        // indirect deps are unconstrained in pyproject.toml, so pin them to
+        // avoid uv upgrading past the intended version.
+        deps.push(`${dep.packageName}==${dep.newVersion}`);
+        break;
       default: {
         deps.push(dep.packageName!);
       }
@@ -286,12 +313,39 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
 }
 
+/**
+ * As indirect dependencies don't exist in the package file, we create them
+ * from the lock file. By omitting currentValue and currentVersion they are
+ * treated as unconstrained dependencies with a locked version, meaning they
+ * are updated via 'update-lockfile' strategy.
+ *
+ * They are disabled by default to avoid noise. When a vulnerability alert
+ * matches one of them, the alert system force-enables the update.
+ */
+function indirectDep(
+  name: string,
+  version: string,
+  registry: string,
+): PackageDependency {
+  return {
+    packageName: name,
+    depName: name,
+    datasource: PypiDatasource.id,
+    registryUrls: [registry],
+    lockedVersion: version,
+    depType: depTypes.indirect,
+    enabled: false,
+  };
+}
+
 async function getUvExtraIndexUrl(
   project: PyProject,
   deps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
+    // indirect deps take their registry from uv.lock, uv already knows it
+    .filter((dep) => dep.depType !== depTypes.indirect)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;

@@ -7,6 +7,12 @@ In addition to standard dependencies, these toolsets are also supported:
 - `hatch`
 - `pixi` (including `pixi.lock` files)
 
+### Transitive / indirect dependencies
+
+For `uv`, this manager detects dependencies that only appear in `uv.lock` files.
+They are disabled by default but can be forced to enable by vulnerability alerts.
+They will be upgraded with `--upgrade-package` option.
+
 ### Trust model for pixi lock file updates
 
 Running `pixi lock` can execute arbitrary code from conda package hooks, so Renovate treats `pixi.lock` refreshes as an unsafe execution.
