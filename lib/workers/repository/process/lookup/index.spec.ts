@@ -1061,6 +1061,51 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('updates the lockfile for vulnerabilityAlerts when the fix is in a tilde range', async () => {
+      config.currentValue = '~0.9.0';
+      config.lockedVersion = '0.9.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '0.9.5';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          isLockfileUpdate: true,
+          newValue: '~0.9.0',
+          newVersion: '0.9.5',
+        },
+      ]);
+    });
+
+    it('bumps the tilde range for vulnerabilityAlerts when the fix is out of range', async () => {
+      config.currentValue = '~0.9.0';
+      config.lockedVersion = '0.9.0';
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '1.0.1';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          newValue: '~1.0.1',
+          newVersion: '1.0.1',
+        },
+      ]);
+    });
+
     it('replaces the range for vulnerabilityAlerts when a bump would not allow the fix', async () => {
       config.currentValue = '<1';
       config.lockedVersion = '0.9.0';
