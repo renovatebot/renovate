@@ -747,22 +747,19 @@ describe('modules/manager/npm/post-update/index', () => {
       ]);
     });
 
-    it('restores a nested repository .npmrc after generating artifacts', async () => {
+    function initNpmrcFileMocks(initialFiles: Map<string, string>) {
       const npmrcFilename = 'packages/core/.npmrc';
-      const originalNpmrc = 'package-lock=false\r\nkeep = true';
-      const files = new Map<string, string>([[npmrcFilename, originalNpmrc]]);
       fs.readLocalFile.mockImplementation((fileName): Promise<string | null> =>
-        Promise.resolve(files.get(fileName) ?? null),
+        Promise.resolve(initialFiles.get(fileName) ?? null),
       );
       fs.writeLocalFile.mockImplementation((fileName, content) => {
-        files.set(fileName, content.toString());
+        initialFiles.set(fileName, content.toString());
         return Promise.resolve();
       });
       fs.deleteLocalFile.mockImplementation((fileName) => {
-        files.delete(fileName);
+        initialFiles.delete(fileName);
         return Promise.resolve();
       });
-
       const packageFiles: AdditionalPackageFiles = {
         npm: [
           {
@@ -785,6 +782,14 @@ describe('modules/manager/npm/post-update/index', () => {
           },
         ],
       });
+      return { npmrcFilename, files: initialFiles, packageFiles, config };
+    }
+
+    it('restores a nested repository .npmrc after generating artifacts', async () => {
+      const originalNpmrc = 'package-lock=false\r\nkeep = true';
+      const { npmrcFilename, files, packageFiles, config } = initNpmrcFileMocks(
+        new Map([['packages/core/.npmrc', originalNpmrc]]),
+      );
 
       await expect(getAdditionalFiles(config, packageFiles)).toResolve();
 
@@ -797,6 +802,20 @@ describe('modules/manager/npm/post-update/index', () => {
         npmrcFilename,
         originalNpmrc,
       );
+    });
+
+    it('deletes a created .npmrc after generating artifacts', async () => {
+      const { npmrcFilename, files, packageFiles, config } = initNpmrcFileMocks(
+        new Map(),
+      );
+
+      await expect(getAdditionalFiles(config, packageFiles)).toResolve();
+
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        npmrcFilename,
+        'keep = true\n',
+      );
+      expect(files.has(npmrcFilename)).toBeFalse();
     });
 
     it('restores a repository .npmrc when artifact generation throws', async () => {
