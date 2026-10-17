@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { getNpmLock } from './npm.ts';
@@ -63,6 +64,49 @@ describe('modules/manager/npm/extract/npm', () => {
           'supports-color': '5.5.0',
         },
         lockfileVersion: 3,
+      });
+    });
+
+    it('extracts npm 12 lockfile', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        {
+          "name": "npm12",
+          "version": "1.0.0",
+          "lockfileVersion": 4,
+          "requires": true,
+          "packages": {
+            "": {
+              "name": "npm12",
+              "version": "1.0.0",
+              "dependencies": {
+                "escape-string-regexp": "^1.0.5",
+                "has-flag": "^3.0.0"
+              }
+            },
+            "node_modules/escape-string-regexp": {
+              "version": "1.0.5",
+              "resolved": "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz",
+              "integrity": "sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg=="
+            },
+            "node_modules/has-flag": {
+              "version": "3.0.0",
+              "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-3.0.0.tgz",
+              "integrity": "sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==",
+              "patched": {
+                "integrity": "sha512-/MJdQzUWalI3NMluARhqxHnlNSjeqhsdVArG49xZ7Z9lbhRVPr2xeiMJyH0h9xmc9yNhV4ocK6w9SPe/SeShSA==",
+                "path": "patches/has-flag@3.0.0.patch"
+              }
+            }
+          }
+        }
+      `);
+      const res = await getNpmLock('package.json');
+      expect(res).toEqual({
+        lockedVersions: {
+          'escape-string-regexp': '1.0.5',
+          'has-flag': '3.0.0',
+        },
+        lockfileVersion: 4,
       });
     });
 
