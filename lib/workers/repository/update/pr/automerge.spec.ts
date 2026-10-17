@@ -67,6 +67,32 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
+    it('should automerge label', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.updatePr).toHaveBeenCalledWith({
+        number: pr.number,
+        prTitle: pr.title,
+        addLabels: ['merge'],
+      });
+      expect(platform.mergePr).not.toHaveBeenCalled();
+    });
+
+    it('should not re-add automerge label if already present', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      pr.labels = ['merge'];
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.updatePr).not.toHaveBeenCalled();
+    });
+
     it('should remove previous automerge comment when rebasing', async () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';

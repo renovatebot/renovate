@@ -216,7 +216,8 @@ export async function writeUpdates(
         }
         if (
           branch.result === 'automerged' &&
-          branch.automergeType !== 'pr-comment'
+          branch.automergeType !== 'pr-comment' &&
+          branch.automergeType !== 'label'
         ) {
           // Stop processing other branches because base branch has been changed
           return 'automerged';
