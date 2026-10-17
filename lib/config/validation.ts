@@ -48,6 +48,10 @@ import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
+import {
+  describeAllowedLocations,
+  getAllowedParents,
+} from './options/scopes.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
 import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
@@ -57,10 +61,14 @@ import type {
   RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
+  StatusCheckWhen,
   ValidationMessage,
   ValidationResult,
 } from './types.ts';
-import { allowedStatusCheckStrings } from './types.ts';
+import {
+  allowedStatusCheckStrings,
+  allowedStatusCheckWhenValues,
+} from './types.ts';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches.ts';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers.ts';
 import { ConfigValidationTopic } from './validation-helpers/types.ts';
@@ -78,6 +86,7 @@ const options = getOptions();
 let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
+let optionLocations: Record<string, string>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
@@ -163,6 +172,7 @@ function initOptions(): void {
   }
 
   optionParents = {};
+  optionLocations = {};
   optionInherits = new Set();
   optionTypes = {};
   optionRegexOrGlob = new Set();
@@ -173,8 +183,11 @@ function initOptions(): void {
   for (const option of options) {
     optionTypes[option.name] = option.type;
 
-    if (option.parents) {
-      optionParents[option.name] = option.parents;
+    const parents = getAllowedParents(option);
+    if (parents) {
+      optionParents[option.name] = parents;
+      // TODO: types (#22198)
+      optionLocations[option.name] = describeAllowedLocations(option)!;
     }
 
     if (option.inheritConfigSupport) {
@@ -390,12 +403,15 @@ export async function validateConfig(
               : getParentName(parentPath);
           if (
             !isPreset &&
+            parentName &&
             optionParents[key] &&
             !optionParents[key].includes(parentName as AllowedParents)
           ) {
-            // TODO: types (#22198)
-            const options = optionParents[key]?.toSorted().join(', ');
-            const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
+            const usedIn =
+              parentName === '.'
+                ? 'at the top level of a config'
+                : `in "${parentName}"`;
+            const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
               topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
               message,
@@ -870,7 +886,6 @@ export async function validateConfig(
                     }
                   }
                 } else if (key === 'statusCheckWhen') {
-                  const allowedWhenValues = ['always', 'never', 'failed'];
                   for (const [
                     statusCheckKey,
                     statusCheckValue,
@@ -887,7 +902,9 @@ export async function validateConfig(
                     }
                     if (
                       !isString(statusCheckValue) ||
-                      !allowedWhenValues.includes(statusCheckValue)
+                      !allowedStatusCheckWhenValues.includes(
+                        statusCheckValue as StatusCheckWhen,
+                      )
                     ) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
@@ -974,7 +991,7 @@ export async function validateConfig(
                       });
                     } else if (isToolName(k)) {
                       // TODO: #31831
-                      const versioningId = getToolConfig(k).versioning;
+                      const versioningId = getToolConfig(k)?.versioning;
                       const versioning = getVersioning(versioningId);
                       if (!versioning.isValid(v)) {
                         warnings.push({

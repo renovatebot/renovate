@@ -1,7 +1,7 @@
 import { GithubReleasesDatasource } from '../../../datasource/github-releases/index.ts';
-import * as condaVersioning from '../../../versioning/conda/index.ts';
 import * as nodeVersioning from '../../../versioning/node/index.ts';
 import * as npmVersioning from '../../../versioning/npm/index.ts';
+import * as semverVersioning from '../../../versioning/semver/index.ts';
 import type { KnownActionConfig } from '../types.ts';
 import {
   actionsVersionsExtractVersion,
@@ -108,6 +108,14 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     // match the bare release tag
     extractVersion: '^v(?<version>\\d+\\..*)$',
   },
+  // https://github.com/denoland/setup-deno
+  'denoland/setup-deno': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'deno',
+    packageName: 'denoland/deno',
+    versioning: npmVersioning.id,
+    withSchema: valSchema('deno-version'),
+  },
   // https://github.com/docker/setup-buildx-action
   'docker/setup-buildx-action': {
     datasource: GithubReleasesDatasource.id,
@@ -138,6 +146,14 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     depName: 'foundry',
     packageName: 'foundry-rs/foundry',
+  },
+  // https://github.com/github/gh-aw-actions/tree/main/setup-cli
+  'github/gh-aw-actions/setup-cli': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'github/gh-aw',
+    // A major-version channel such as `v1` installs the latest stable
+    // release of that major, so preserve its precision.
+    withSchema: partialValSchema('version'),
   },
   // https://github.com/GitTools/actions (there is no root-level Action, only
   // subpaths are usable; the sibling `GitTools/actions/gitreleasemanager/setup`
@@ -253,9 +269,11 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'gohugoio/hugo',
     withSchema: valSchema('hugo-version'),
   },
+  // https://github.com/prefix-dev/setup-pixi
+  // pixi tags are v-prefixed, which conda versioning cannot bucket
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,
-    versioning: condaVersioning.id,
+    versioning: semverVersioning.id,
     packageName: 'prefix-dev/pixi',
     withSchema: valSchema('pixi-version'),
   },
@@ -290,6 +308,18 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
+  },
+  // https://github.com/slsa-framework/actions/tree/main/attest/actions
+  'slsa-framework/actions/attest/actions': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/attester',
+    withSchema: valSchema('version'),
+  },
+  // https://github.com/slsa-framework/actions/tree/main/slsa_with_provenance
+  'slsa-framework/actions/slsa_with_provenance': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'slsa-framework/source-tool',
+    withSchema: valSchema('version'),
   },
   // https://github.com/stCarolas/setup-maven
   'stCarolas/setup-maven': {

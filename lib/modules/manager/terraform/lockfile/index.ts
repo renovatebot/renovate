@@ -75,7 +75,7 @@ async function updateAllLocks(
 }
 
 export function getNewConstraint(
-  dep: Upgrade<Record<string, unknown>>,
+  dep: Upgrade,
   oldConstraint: string | undefined,
 ): string | undefined {
   const {

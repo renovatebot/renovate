@@ -1,7 +1,9 @@
-import { type RenovateConfig, partial } from '~test/util.ts';
+import { type RenovateConfig, git, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { extractPackageJson } from '../../../modules/manager/npm/extract/common/package-file.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import * as _changelog from '../changelog/index.ts';
+import { getUpdatedPackageFiles } from '../update/branch/get-updated.ts';
 import { branchifyUpgrades } from './branchify.ts';
 import * as _flatten from './flatten.ts';
 
@@ -21,6 +23,49 @@ beforeEach(() => {
 
 describe('workers/repository/updates/branchify', () => {
   describe('branchifyUpgrades()', () => {
+    it('groups and updates both Yarn package manager declarations', async () => {
+      config.semanticCommits = 'disabled';
+      const original = {
+        packageManager: 'yarn@4.5.0',
+        devEngines: { packageManager: { name: 'yarn', version: '4.5.0' } },
+      };
+      const extracted = extractPackageJson(original, 'package.json')!;
+      for (const dep of extracted.deps) {
+        dep.updates = [
+          {
+            newValue: '4.6.0',
+            newVersion: '4.6.0',
+            newMajor: 4,
+            updateType: 'minor',
+          },
+        ];
+      }
+      const actualFlatten =
+        await vi.importActual<typeof _flatten>('./flatten.ts');
+      flattenUpdates.mockImplementationOnce(actualFlatten.flattenUpdates);
+      git.getFile.mockResolvedValue(JSON.stringify(original));
+
+      const { branches } = await branchifyUpgrades(config, {
+        npm: [{ ...extracted, packageFile: 'package.json' }],
+      });
+
+      expect(branches).toHaveLength(1);
+      expect(
+        branches[0].upgrades.map(({ depType }) => depType),
+      ).toIncludeSameMembers(['devEngines.packageManager', 'packageManager']);
+      const result = await getUpdatedPackageFiles(branches[0]);
+      expect(result.updatedPackageFiles).toHaveLength(1);
+      const manifest = result.updatedPackageFiles[0];
+      expect(manifest.type).toBe('addition');
+      if (manifest.type !== 'addition') {
+        throw new Error('Expected package.json update');
+      }
+      expect(JSON.parse(manifest.contents!.toString())).toEqual({
+        packageManager: 'yarn@4.6.0',
+        devEngines: { packageManager: { name: 'yarn', version: '4.6.0' } },
+      });
+    });
+
     it('returns empty', async () => {
       flattenUpdates.mockResolvedValueOnce([]);
       const res = await branchifyUpgrades(config, {});

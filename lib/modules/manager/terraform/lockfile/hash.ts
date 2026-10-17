@@ -10,6 +10,7 @@ import {
   deduplicateArray,
   isNotNullOrUndefined,
 } from '../../../../util/array.ts';
+import { buildCacheKey } from '../../../../util/cache/package/key.ts';
 import { withCache } from '../../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import { hashStream } from '../../../../util/hash.ts';
@@ -143,7 +144,7 @@ export class TerraformProviderHash {
     return withCache(
       {
         namespace: `terraform-provider-hash`,
-        key: `calculateSingleHash:${build.url}`,
+        key: buildCacheKey('calculateSingleHash', build.url),
         ttlMinutes: TerraformProviderHash.hashCacheTTL,
       },
       () => TerraformProviderHash._calculateSingleHash(build, cacheDir),
