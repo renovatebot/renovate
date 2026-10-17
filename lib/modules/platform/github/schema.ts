@@ -181,5 +181,15 @@ const GithubRestIssue = GithubIssueBase.extend({
   return { number, state, title, body, lastModified };
 });
 
+/**
+ * The author of an issue node returned by the GraphQL API.
+ *
+ * Issues are filtered by author in code, because `filterBy: { createdBy }`
+ * does not match GitHub App bot logins on every GitHub flavour.
+ */
+export const GithubGraphqlIssueAuthor = z.object({
+  author: Nullish(z.object({ login: z.string() })),
+});
+
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 export type GithubIssue = z.infer<typeof GithubIssue>;
