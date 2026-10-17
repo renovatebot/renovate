@@ -62,6 +62,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:ucanaccess-to-io-github-spannm",
       "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
@@ -1312,6 +1313,17 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "ucanaccess-to-io-github-spannm": {
+    "description": "`net.sf.ucanaccess:ucanaccess` is no longer maintained, development continues at `io.github.spannm:ucanaccess`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["net.sf.ucanaccess:ucanaccess"],
+        "replacementName": "io.github.spannm:ucanaccess",
+        "replacementVersion": "5.1.8"
       }
     ]
   },
