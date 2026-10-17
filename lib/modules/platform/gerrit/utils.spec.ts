@@ -99,60 +99,32 @@ describe('modules/platform/gerrit/utils', () => {
       });
     });
     describe('ssh gitUrl', () => {
-      it('create a simple url', () => {
-        hostRules.add({
-          username: 'abc',
-          password: '123',
-        });
+      it('uses the advertised SSH host and port', () => {
         const repoUrl = utils.getGerritRepoUrl(
           'web/apps',
           baseUrl,
           'ssh',
           'abc',
+          { host: 'ssh.example.com', port: 2501 },
         );
-        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@ssh.example.com:2501/web/apps');
       });
 
-      it('create a url with trailing slash', () => {
-        hostRules.add({
-          username: 'abc',
-          password: '123',
-        });
+      it('ignores the HTTP port and context path', () => {
         const repoUrl = utils.getGerritRepoUrl(
           'web/apps',
-          'https://gerrit.example.com/',
+          'http://gerrit.example.com:8080/context/',
           'ssh',
           'abc',
+          { host: 'ssh.example.com', port: 29418 },
         );
-        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@ssh.example.com:29418/web/apps');
       });
 
-      it('create a url when base has context', () => {
-        hostRules.add({
-          username: 'abc',
-          password: '123',
-        });
-        const repoUrl = utils.getGerritRepoUrl(
-          'web/apps',
-          'https://gerrit.example.com/context',
-          'ssh',
-          'abc',
-        );
-        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
-      });
-
-      it('ignores non-default HTTP port from the endpoint', () => {
-        vi.spyOn(hostRules, 'find').mockReturnValue({
-          username: 'abc',
-          password: '123',
-        });
-        const repoUrl = utils.getGerritRepoUrl(
-          'web/apps',
-          'http://gerrit.example.com:8080/',
-          'ssh',
-          'abc',
-        );
-        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+      it('requires SSH info for SSH URLs', () => {
+        expect(() =>
+          utils.getGerritRepoUrl('web/apps', baseUrl, 'ssh', 'abc'),
+        ).toThrow('Gerrit SSH info is required for SSH clone URLs');
       });
     });
   });

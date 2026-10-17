@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { hostRules } from '~test/host-rules.ts';
 import { fakeSha, git, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
@@ -42,6 +43,7 @@ describe('modules/platform/gerrit/index', () => {
   const currentRevision = '0123456789abcdef0123456789abcdef01234567';
 
   beforeEach(async () => {
+    GlobalConfig.reset();
     hostRules.add({
       username: 'user',
       password: 'pass',
@@ -56,6 +58,10 @@ describe('modules/platform/gerrit/index', () => {
       username: 'user',
       password: 'pass',
     });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
   });
 
   describe('initPlatform()', () => {
@@ -173,7 +179,11 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
-    it('initRepo() - uses username in ssh clone url', async () => {
+    it('initRepo() - uses advertised SSH host and port in clone url', async () => {
+      clientMock.getSshInfo.mockResolvedValueOnce({
+        host: 'ssh.gerrit.com',
+        port: 29418,
+      });
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
       clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
@@ -184,7 +194,27 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'ssh://user@dev.gerrit.com:29418/test/repo',
+        url: 'ssh://user@ssh.gerrit.com:29418/test/repo',
+        virtualBranches: {},
+      });
+    });
+
+    it('initRepo() - uses advertised non-default SSH port', async () => {
+      clientMock.getSshInfo.mockResolvedValueOnce({
+        host: 'dev.gerrit.com',
+        port: 2501,
+      });
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        gitUrl: 'ssh',
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'ssh://user@dev.gerrit.com:2501/test/repo',
         virtualBranches: {},
       });
     });

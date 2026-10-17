@@ -15,8 +15,6 @@ export const MIN_GERRIT_VERSION = '3.0.0';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
-const DEFAULT_SSH_PORT = `29418`;
-
 /**
  * Max comment size in Gerrit (16kiB by default)
  * https://gerrit-review.googlesource.com/Documentation/config-gerrit.html#change:~:text=change.commentSizeLimit
@@ -36,23 +34,33 @@ export function getGerritRepoUrl(
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
   username: string,
+  sshInfo?: { host: string; port: number },
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
 
-  const url =
-    gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository, username)
-      : createHttpUrl(endpointUrl, endpoint, repository);
+  let url: string;
+  if (gitUrl === 'ssh') {
+    if (!sshInfo) {
+      throw new Error('Gerrit SSH info is required for SSH clone URLs');
+    }
+    url = createSshUrl(repository, username, sshInfo);
+  } else {
+    url = createHttpUrl(endpointUrl, endpoint, repository);
+  }
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string, username: string): string {
-  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(
+  repository: string,
+  username: string,
+  { host, port }: { host: string; port: number },
+): string {
+  return `ssh://${username}@${host}:${port}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {

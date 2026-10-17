@@ -5,6 +5,7 @@ import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
 import { getQueryString } from '../../../util/url.ts';
 import type { GerritAccountInfo, GerritChangeMessageInfo } from './schema.ts';
 import {
@@ -45,6 +46,24 @@ class GerritClient {
       z.string(),
     );
     return res.body;
+  }
+
+  async getSshInfo(): Promise<{ host: string; port: number }> {
+    const { body } = await this.gerritHttp.getText('ssh_info');
+    const sshInfo = body.trim();
+    if (sshInfo === 'NOT_AVAILABLE') {
+      throw new Error('Gerrit SSH is not available');
+    }
+    const match = regEx(/^(?<host>\S+)\s+(?<port>\d+)$/).exec(sshInfo);
+    if (!match?.groups) {
+      throw new Error(`Invalid Gerrit SSH info: ${sshInfo}`);
+    }
+
+    const port = parseInt(match.groups.port, 10);
+    if (port < 1 || port > 65535) {
+      throw new Error(`Invalid Gerrit SSH port: ${port}`);
+    }
+    return { host: match.groups.host, port };
   }
 
   async getRepos(): Promise<string[]> {
