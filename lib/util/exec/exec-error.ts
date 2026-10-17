@@ -7,6 +7,7 @@ export interface ExecErrorData {
   options: RawExecOptions;
   exitCode?: number;
   signal?: NodeJS.Signals;
+  timedOut?: boolean;
 }
 
 export class ExecError extends Error {
@@ -16,10 +17,11 @@ export class ExecError extends Error {
   options: RawExecOptions;
   exitCode?: number;
   signal?: NodeJS.Signals;
+  timedOut?: boolean;
   err?: Error;
 
   constructor(message: string, data: ExecErrorData, err?: Error) {
-    const { cmd, exitCode, stderr, stdout, options, signal } = data;
+    const { cmd, exitCode, stderr, stdout, options, signal, timedOut } = data;
 
     super(message);
 
@@ -35,6 +37,10 @@ export class ExecError extends Error {
 
     if (signal) {
       this.signal = signal;
+    }
+
+    if (timedOut) {
+      this.timedOut = true;
     }
 
     if (err) {
