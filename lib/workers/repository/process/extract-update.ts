@@ -18,6 +18,7 @@ import { extractAllDependencies } from '../extract/index.ts';
 import { branchifyUpgrades } from '../updates/branchify.ts';
 import { fetchUpdates } from './fetch.ts';
 import { calculateLibYears } from './libyear.ts';
+import { unskipLockfileOnlyDeps } from './lockfile-only-deps.ts';
 import { sortBranches } from './sort.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 import type { WriteUpdateResult } from './write.ts';
@@ -218,6 +219,7 @@ export async function lookup(
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
+  await unskipLockfileOnlyDeps(config, packageFiles);
   await fetchUpdates(config, packageFiles);
   // call this twice, as the second time, the updates will be availalbe for malicious package checks
   // TODO: this will be refactored as part of #42423
