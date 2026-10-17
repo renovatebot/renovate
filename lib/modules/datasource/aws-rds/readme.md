@@ -13,7 +13,37 @@ In addition, AWS may pull existing versions if serious problems arise during the
 
 See [Calling AWS Services from Renovate](../../../calling-aws-services.md) for how to configure your credentials.
 
-```json {title="Minimal IAM privileges needed for this datasource" configType=none}
+You can also provide credentials specifically for this datasource with a `hostRules` entry.
+Set `hostType` to `aws-rds`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "aws-rds",
+      "username": "access-key-id",
+      "password": "secret-access-key",
+      "token": "session-token"
+    }
+  ]
+}
+```
+
+These credentials only apply to AWS RDS lookups.
+When this host rule is absent or incomplete, Renovate uses the default AWS credential provider chain.
+
+You can also specify a different `region` and/or `profile` for each dependency, by adding an object with those keys to the filter array.
+Renovate removes these objects from the filter before it calls the AWS API.
+If you set host rule credentials, Renovate uses them instead of the `profile`.
+
+```yaml
+# Use the eu-west-1 region with credentials from the `renovate-west` profile
+# rdsFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]},{"region":"eu-west-1","profile":"renovate-west"}]
+```
+
+The minimal IAM privileges required for this datasource are:
+
+```json {configType=none}
 {
   "Sid": "AllowDBEngineVersionLookup",
   "Effect": "Allow",
