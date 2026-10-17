@@ -75,7 +75,6 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
-  minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
