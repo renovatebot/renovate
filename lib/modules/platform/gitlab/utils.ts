@@ -1,5 +1,6 @@
 import url from 'node:url';
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -75,6 +76,9 @@ export function getRepoUrl(
     url: defaults.endpoint,
   });
   const env = getEnv();
+  // Credentials in the URL break Kerberos-enabled GitLab, see `gitCredentialPassing`
+  const useCredentialStore =
+    GlobalConfig.get('gitCredentialPassing') === 'store';
 
   if (
     gitUrl === 'endpoint' ||
@@ -101,7 +105,7 @@ export function getRepoUrl(
       protocol: protocol.slice(0, -1) || 'https',
       /* v8 ignore stop */
       // TODO: types (#22198)
-      auth: `oauth2:${opts.token!}`,
+      auth: useCredentialStore ? undefined : `oauth2:${opts.token!}`,
       host,
       pathname: `${newPathname}/${repository}.git`,
     });
@@ -115,7 +119,9 @@ export function getRepoUrl(
   if (!repoUrl) {
     return '';
   }
-  repoUrl.username = 'oauth2';
-  repoUrl.password = opts.token!;
+  if (!useCredentialStore) {
+    repoUrl.username = 'oauth2';
+    repoUrl.password = opts.token!;
+  }
   return repoUrl.toString();
 }
