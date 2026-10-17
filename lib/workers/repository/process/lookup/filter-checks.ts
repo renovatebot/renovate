@@ -16,7 +16,7 @@ import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
-import { getUpdateType } from './update-type.ts';
+import { classifyRelease } from './update-type.ts';
 
 export interface InternalChecksResult {
   release?: Release;
@@ -33,8 +33,6 @@ export function isMinimumReleaseAgeApplicable(
     updateType !== 'rollback' &&
     // Not yet supported: TODO #40288
     updateType !== 'pin' &&
-    // Not yet supported: TODO #44820
-    updateType !== 'pinDigest' &&
     // Not yet supported: TODO #39400
     updateType !== 'replacement' &&
     // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
@@ -60,6 +58,35 @@ export function isMinimumConfidenceApplicable(
 
 export interface MinimumConfidenceCheckResult {
   isPending: boolean;
+}
+
+/**
+ * Emitted by every `minimumReleaseAge` check which had no `releaseTimestamp` to
+ * age against while `minimumReleaseAgeBehaviour=timestamp-optional`.
+ *
+ * Shared as a constant rather than a helper function so that each caller keeps
+ * its own `logger.once` call site.
+ */
+export const missingReleaseTimestampWarning =
+  "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information";
+
+/**
+ * Resolve the config an internal check runs against: merge the
+ * `updateType`-scoped sub-config in, then apply the `packageRules` which match
+ * on `updateType`.
+ *
+ * Shared by `filterInternalChecks()` and the digest-only check in
+ * `lookupUpdates()`, so that both resolve `minimumReleaseAge` identically.
+ */
+export async function resolveUpdateTypeConfig<
+  T extends Partial<LookupUpdateConfig & UpdateResult>,
+>(config: T, updateType: UpdateType): Promise<T> {
+  const configWithUpdateType = { ...config, updateType };
+  const releaseConfig = mergeChildConfig(
+    configWithUpdateType,
+    configWithUpdateType[updateType]!,
+  );
+  return await applyPackageRules(releaseConfig, 'update-type');
 }
 
 /**
@@ -120,21 +147,16 @@ export async function filterInternalChecks(
     // iterate through releases from highest to lowest, looking for the first which will pass checks if present
     for (let candidateRelease of sortedReleases.reverse()) {
       // merge the release data into dependency config
-      let releaseConfig = mergeChildConfig(config, candidateRelease);
-      // calculate updateType and then apply it
-      releaseConfig.updateType = getUpdateType(
-        releaseConfig,
-        versioningApi,
-        // TODO #22198
-        currentVersion!,
-        candidateRelease.version,
+      const candidateConfig = mergeChildConfig(config, candidateRelease);
+      const releaseConfig = await resolveUpdateTypeConfig(
+        candidateConfig,
+        classifyRelease(
+          versioningApi,
+          // TODO #22198
+          currentVersion!,
+          candidateRelease.version,
+        ),
       );
-      releaseConfig = mergeChildConfig(
-        releaseConfig,
-        releaseConfig[releaseConfig.updateType]!,
-      );
-      // Apply packageRules in case any apply to updateType
-      releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
       const updatedCandidateRelease = await postprocessRelease(
         releaseConfig,
@@ -213,9 +235,7 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length) {
-      logger.once.warn(
-        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
-      );
+      logger.once.warn(missingReleaseTimestampWarning);
       logger.once.debug(
         {
           depName,

@@ -29,6 +29,9 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
     beforeEach(async () => {
       GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
+        ...env,
+      }));
 
       tmpDir = await dir({ unsafeCleanup: true });
     });
@@ -1053,7 +1056,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'some-command',
         expect.objectContaining({
           cwd: localDir,
-          extraEnv: gitEnvVars,
+          env: gitEnvVars,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);
@@ -1207,6 +1210,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
             jenkins: '2.541.3',
           },
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally uses `jenkins`, which is not a valid ToolName, to test that invalid tools are ignored
           installTools: {
             jenkins: {},
           } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
@@ -1276,6 +1280,49 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           }),
         );
         expect(res.artifactErrors).toHaveLength(0);
+      });
+
+      it('passes the branch-level constraints when using executionMode=branch', async () => {
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+          ],
+          constraints: { npm: '10.2.3' },
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'branch',
+            installTools: { npm: {} },
+          },
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+        );
+        GlobalConfig.set({
+          localDir: upath.join(tmpDir.path, 'local'),
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        const res = await postUpgradeCommands.default(config);
+
+        expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+          'some-command',
+          expect.objectContaining({
+            toolConstraints: [{ toolName: 'npm', constraint: '10.2.3' }],
+          }),
+        );
+        expect(res?.artifactErrors).toHaveLength(0);
       });
 
       it(`logs when skipping a constraint that isn't a known tool`, async () => {

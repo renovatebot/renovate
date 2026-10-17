@@ -1,4 +1,5 @@
 import * as memCache from './cache/memory/index.ts';
+import { coerceObject } from './object.ts';
 
 let customEnv: Record<string, string> = {};
 
@@ -15,7 +16,7 @@ export function setUserEnv(envObj: Record<string, string> | undefined): void {
 }
 
 export function getUserEnv(): Record<string, string> {
-  return memCache.get('userEnv') ?? {};
+  return coerceObject(memCache.get('userEnv'));
 }
 
 /**

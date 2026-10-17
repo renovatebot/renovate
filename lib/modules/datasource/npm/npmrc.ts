@@ -17,12 +17,12 @@ let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
 function envReplace(value: any, env = getEnv()): any {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!isString(value)) {
     return value;
   }
 
-  const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
+  const ENV_EXPR = regEx(/(?<esc>\\*)\$\{(?<envVarName>[^}]+)\}/g);
 
   return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {
@@ -157,7 +157,9 @@ export function setNpmrc(input?: string): void {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;
-  } else if (npmrc) {
+  } else {
+    // `npmrc` starts as an object and is only ever reassigned to one, so it is
+    // always truthy here
     logger.debug('Resetting npmrc');
     npmrc = {};
     npmrcRaw = '';

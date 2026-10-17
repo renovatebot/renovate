@@ -2,6 +2,7 @@ import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
 import { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../cache/package/index.ts';
 import { Http, type HttpResponse } from '../index.ts';
@@ -86,7 +87,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'old response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'old response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
@@ -102,7 +103,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'cached response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider();
@@ -275,7 +276,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     cache[url] = {
       etag: 'etag-value',
       lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-      httpResponse: { statusCode: 200, body: 'cached response' },
+      httpResponse: { statusCode: 200, headers: {}, body: 'cached response' },
       timestamp: '2024-06-15T00:00:00.000Z',
     };
     const cacheProvider = createCacheProvider();
@@ -348,7 +349,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider({ softTtlMinutes: 0 });
@@ -364,7 +365,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider();
@@ -380,7 +381,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       cache[headUrl] = {
         etag: 'etag-value',
         lastModified: 'Fri, 15 Jun 2024 00:00:00 GMT',
-        httpResponse: { statusCode: 200, body: '' },
+        httpResponse: { statusCode: 200, headers: {}, body: '' },
         timestamp: '2024-06-15T00:00:00.000Z',
       };
       const cacheProvider = createCacheProvider();
@@ -517,7 +518,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
           checkAuthorizationHeader,
         });
 
-        const response = { headers: {} } as HttpResponse;
+        const response = partial<HttpResponse>({ headers: {} });
 
         if (cacheControl !== undefined) {
           response.headers['cache-control'] = cacheControl;
@@ -538,9 +539,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
         checkCacheControlHeader: true,
       });
 
-      const response = {
+      const response = partial<HttpResponse>({
         headers: { 'cache-control': 'PUBLIC, max-age=300' },
-      } as HttpResponse;
+      });
 
       expect(cacheProvider.cacheAllowed(response)).toBe(true);
     });

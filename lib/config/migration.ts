@@ -9,6 +9,7 @@ import {
 import { dequal } from 'dequal';
 import { logger } from '../logger/index.ts';
 import { clone } from '../util/clone.ts';
+import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { MigrationsService } from './migrations/index.ts';
 import { getOptions } from './options/index.ts';
@@ -23,7 +24,10 @@ import { mergeChildConfig } from './utils.ts';
 
 const options = getOptions();
 export function fixShortHours(input: string): string {
-  return input.replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2');
+  return input.replace(
+    regEx(/(?<hours> \d?\d)(?<meridiem>(?:a|p)m)/g),
+    '$<hours>:00$<meridiem>',
+  );
 }
 
 let optionTypes: Record<string, RenovateOptions['type']>;
@@ -197,12 +201,12 @@ export function migrateConfig(
       ].managerFilePatterns.map((filePattern) => {
         const pattern = filePattern as string;
         if (pattern.endsWith('.in')) {
-          return pattern.replace(/\.in$/, '.txt');
+          return pattern.replace(regEx(/\.in$/), '.txt');
         }
         if (pattern.endsWith('.in/')) {
-          return pattern.replace(/\.in\/$/, '.txt/');
+          return pattern.replace(regEx(/\.in\/$/), '.txt/');
         }
-        return pattern.replace(/\.in\$\/$/, '.txt$/');
+        return pattern.replace(regEx(/\.in\$\/$/), '.txt$/');
       });
     }
     if (
@@ -226,7 +230,7 @@ export function migrateConfig(
     // @ts-expect-error -- TODO: fix me
     if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
-        migratedConfig.gradle ?? {},
+        coerceObject(migratedConfig.gradle),
         // @ts-expect-error -- TODO: fix me
         migratedConfig['gradle-lite'],
       );

@@ -1,4 +1,4 @@
-import { isString, isUndefined } from '@sindresorhus/is';
+import { isString, isTruthy, isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { bunyan } from '../expose.ts';
@@ -45,9 +45,7 @@ export function createDefaultStreams(
     ? createLogFileStream(logFile)
     : undefined;
 
-  return [stdout, problemsStream, logFileStream].filter(
-    Boolean,
-  ) as BunyanStream[];
+  return [stdout, problemsStream, logFileStream].filter(isTruthy);
 }
 
 function createLogFileStream(logFile: string): BunyanStream {

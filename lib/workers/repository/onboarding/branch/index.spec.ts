@@ -155,6 +155,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.env;
       delete expectConfig.extends;
       delete expectConfig.ignorePresets;
+      delete expectConfig.overrideDescription;
       expect(
         configModule.getOnboardingConfigContents,
       ).toHaveBeenCalledExactlyOnceWith(expectConfig, getConfigFileNames()[0]);
@@ -379,6 +380,38 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(scm.mergeToLocal).not.toHaveBeenCalled();
     });
 
+    it('skips processing onboarding branch on forgejo when main/onboarding SHAs have not changed', async () => {
+      GlobalConfig.set({
+        platform: 'forgejo',
+        onboarding: true,
+        onboardingBranch: config.onboardingBranch,
+      });
+      const dummyCache = {
+        onboardingBranchCache: {
+          defaultBranchSha: defaultSha,
+          onboardingBranchSha: onboardingSha,
+          isConflicted: false,
+          isModified: false,
+          configFileParsed: 'raw',
+          configFileName: 'renovate.json',
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      scm.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null); // finds closed onboarding pr
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({ bodyStruct: { rebaseRequested: false } }),
+      ); // finds open onboarding pr
+      git.getBranchCommit
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(onboardingSha);
+      config.onboardingRebaseCheckbox = true;
+      await checkOnboardingBranch(config);
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+      expect(scm.mergeToLocal).not.toHaveBeenCalled();
+    });
+
     it('processes modified onboarding branch and invalidates extract cache', async () => {
       const dummyCache = {
         scan: {
@@ -528,6 +561,27 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         await checkOnboardingBranch(config);
 
+        expect(OnboardingState.prUpdateRequested).toBeFalse();
+        expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+          config.onboardingBranch,
+        );
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      });
+
+      it('treats forgejo as supporting extended markdown', async () => {
+        GlobalConfig.set({
+          platform: 'forgejo',
+          onboarding: true,
+          onboardingBranch: config.onboardingBranch,
+        });
+        const pr = { bodyStruct: { rebaseRequested: false } };
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
+        await checkOnboardingBranch(config);
+
+        expect(logger.trace).not.toHaveBeenCalledWith(
+          `Platform 'forgejo' does not support extended markdown`,
+        );
         expect(OnboardingState.prUpdateRequested).toBeFalse();
         expect(scm.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
           config.onboardingBranch,

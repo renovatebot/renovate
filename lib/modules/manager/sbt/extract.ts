@@ -20,13 +20,14 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
+import type { SbtManagerData } from './types.ts';
 import { normalizeScalaVersion, sortPackageFiles } from './util.ts';
 
 type Vars = Record<string, string>;
 
 interface Ctx {
   vars: Vars;
-  deps: PackageDependency[];
+  deps: PackageDependency<SbtManagerData>[];
   registryUrls: string[];
 
   scalaVersion?: string;
@@ -100,7 +101,7 @@ const scalaVersionMatch = q
         packageName = 'org.scala-lang:scala3-library_3';
       }
 
-      const dep: PackageDependency = {
+      const dep: PackageDependency<SbtManagerData> = {
         datasource: MavenDatasource.id,
         depName: 'scala',
         packageName,
@@ -280,7 +281,7 @@ function depHandler(ctx: Ctx): Ctx {
 
   const depName = `${groupId!}:${artifactId!}`;
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<SbtManagerData> = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
@@ -396,7 +397,7 @@ export function extractProxyUrls(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): PackageFileContent<SbtManagerData> | null {
   return extractPackageFileInternal(content, packageFile);
 }
 
@@ -404,7 +405,7 @@ function extractPackageFileInternal(
   content: string,
   packageFile: string,
   ctxScalaVersion?: string,
-): PackageFileContent | null {
+): PackageFileContent<SbtManagerData> | null {
   if (
     packageFile === 'project/build.properties' ||
     packageFile.endsWith('/project/build.properties')
@@ -413,7 +414,7 @@ function extractPackageFileInternal(
     const sbtVersion = regexResult?.groups?.version;
     const matchString = regexResult?.[0];
     if (sbtVersion) {
-      const sbtDependency: PackageDependency = {
+      const sbtDependency: PackageDependency<SbtManagerData> = {
         datasource: GithubReleasesDatasource.id,
         depName: 'sbt/sbt',
         packageName: 'sbt/sbt',

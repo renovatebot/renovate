@@ -1,4 +1,5 @@
 import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
+import { coerceArray } from '../util/array.ts';
 import { clone } from '../util/clone.ts';
 import { toMs } from '../util/pretty-time.ts';
 import { getOptions } from './options/index.ts';
@@ -66,7 +67,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
               delete newRule[newKey];
             }
           });
-          newRule.matchUpdateTypes = rule.matchUpdateTypes ?? [];
+          newRule.matchUpdateTypes = coerceArray(rule.matchUpdateTypes);
           newRule.matchUpdateTypes.push(key);
           newRule = { ...newRule, ...val };
           newRules.push(newRule);

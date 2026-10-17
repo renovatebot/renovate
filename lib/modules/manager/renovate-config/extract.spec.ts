@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
+import { presetSources } from '../../../config/presets/index.ts';
 import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/renovate-config/extract', () => {
@@ -85,6 +86,85 @@ describe('modules/manager/renovate-config/extract', () => {
         });
       });
 
+      it('provides skipReason for relative presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["./system/registries", "../shared", "/security/base"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              depName: './system/registries',
+              skipReason: 'unsupported-datasource',
+            },
+            {
+              depName: '../shared',
+              skipReason: 'unsupported-datasource',
+            },
+            {
+              depName: '/security/base',
+              skipReason: 'unsupported-datasource',
+            },
+          ],
+        });
+      });
+
+      it('provides skipReason for malformed presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["./foo#1.2.3", "github>abc/foo#1.2.3"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              depName: './foo#1.2.3',
+              skipReason: 'invalid-value',
+            },
+            {
+              datasource: 'github-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { preset: './foo#1.2.3', err: expect.any(Error) },
+          'Failed to parse preset',
+        );
+      });
+
+      it('ignores templated presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": ["local>{{ env.PRESET_REPO }}:python-312", "github>abc/foo#1.2.3"]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              datasource: 'github-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+      });
+
       it('provides skipReason for presets without versions', () => {
         expect(
           extractPackageFile(
@@ -93,7 +173,8 @@ describe('modules/manager/renovate-config/extract', () => {
               "extends": [
                 "github>abc/foo",
                 "gitlab>abc/bar:xyz",
-                "gitea>cde/foo//path/xyz"
+                "gitea>cde/foo//path/xyz",
+                "forgejo>cde/bar//path/xyz"
               ]
             }
           `,
@@ -111,6 +192,10 @@ describe('modules/manager/renovate-config/extract', () => {
             },
             {
               depName: 'cde/foo',
+              skipReason: 'unspecified-version',
+            },
+            {
+              depName: 'cde/bar',
               skipReason: 'unspecified-version',
             },
           ],
@@ -240,6 +325,47 @@ describe('modules/manager/renovate-config/extract', () => {
         });
       });
 
+      it('extracts from a config file with Forgejo hosted presets', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "extends": [
+                "forgejo>abc/foo#1.2.3",
+                "forgejo>abc/bar:xyz#1.2.3",
+                "forgejo>cde/foo//path/xyz#1.2.3",
+                "forgejo>cde/bar:xyz/sub#1.2.3"
+              ]
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              datasource: 'forgejo-tags',
+              depName: 'abc/foo',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
+              depName: 'abc/bar',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
+              depName: 'cde/foo',
+              currentValue: '1.2.3',
+            },
+            {
+              datasource: 'forgejo-tags',
+              depName: 'cde/bar',
+              currentValue: '1.2.3',
+            },
+          ],
+        });
+      });
+
       it('supports JSON5', () => {
         expect(
           extractPackageFile(
@@ -262,6 +388,41 @@ describe('modules/manager/renovate-config/extract', () => {
             },
           ],
         });
+      });
+
+      describe('the internal supportedPresetSources map stays in sync with supported presets', () => {
+        const repoHostedSources = Object.entries(presetSources)
+          .filter(
+            ([source, { repoHosted }]) =>
+              repoHosted &&
+              // but `local` uses the existing platform, so doesn't get its own `-tags` datasource lookup
+              source !== 'local',
+          )
+          .map(([source]) => source);
+
+        it.each(repoHostedSources)(
+          'extracts a pinned "%s>" preset reference',
+          (source) => {
+            expect(
+              extractPackageFile(
+                codeBlock`
+                {
+                  "extends": ["${source}>abc/foo#1.2.3"]
+                }
+              `,
+                'renovate.json',
+              ),
+            ).toEqual({
+              deps: [
+                {
+                  datasource: `${source}-tags`,
+                  depName: 'abc/foo',
+                  currentValue: '1.2.3',
+                },
+              ],
+            });
+          },
+        );
       });
     });
 

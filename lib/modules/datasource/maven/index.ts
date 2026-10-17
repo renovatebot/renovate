@@ -1,6 +1,8 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -26,7 +28,7 @@ import {
 } from './util.ts';
 
 function getLatestSuitableVersion(releases: Release[]): string | null {
-  /* v8 ignore next 3 -- TODO: add test */
+  /* v8 ignore next -- TODO: add test */
   if (!releases?.length) {
     return null;
   }
@@ -69,7 +71,9 @@ export class MavenDatasource extends Datasource {
 
   override readonly caching = true;
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
@@ -82,8 +86,8 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
-    super(id);
+  constructor(id = MavenDatasource.id, http?: Http) {
+    super(id, http);
   }
 
   async fetchVersionsFromMetadata(
@@ -106,7 +110,7 @@ export class MavenDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -162,7 +166,7 @@ export class MavenDatasource extends Datasource {
       }
     }
 
-    if (!this.defaultRegistryUrls.includes(registryUrl)) {
+    if (!this.getDefaultRegistryUrls('').includes(registryUrl)) {
       result.isPrivate = true;
     }
 
@@ -174,9 +178,13 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = versionOrig
-      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
-      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cacheKey = buildCacheKey(
+      'postprocessRelease',
+      registryUrl,
+      packageName,
+      versionOrig,
+      version,
+    );
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,

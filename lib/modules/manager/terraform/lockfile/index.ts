@@ -1,8 +1,10 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import * as p from '../../../../util/promises.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
@@ -107,7 +109,7 @@ async function updateAllLocks(
         packageName: lock.packageName,
         registryUrls: [lock.registryUrl],
       };
-      const { releases } = (await getPkgReleases(updateConfig)) ?? {};
+      const { releases } = coerceObject(await getPkgReleases(updateConfig));
       if (!releases) {
         return null;
       }
@@ -120,12 +122,13 @@ async function updateAllLocks(
       const update: ProviderLockUpdate = {
         newVersion,
         newConstraint: lock.constraints,
-        newHashes:
-          (await TerraformProviderHash.createHashes(
+        newHashes: coerceArray(
+          await TerraformProviderHash.createHashes(
             lock.registryUrl,
             lock.packageName,
             newVersion,
-          )) ?? [],
+          ),
+        ),
         ...lock,
       };
       return update;
@@ -137,7 +140,7 @@ async function updateAllLocks(
 }
 
 export function getNewConstraint(
-  dep: Upgrade<Record<string, unknown>>,
+  dep: Upgrade,
   oldConstraint: string | undefined,
 ): string | undefined {
   const {
@@ -169,7 +172,7 @@ export function getNewConstraint(
     //remove surplus .0 version
     return sortConstraints(
       oldConstraint.replace(
-        regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+        regEx(`(,\\s|^)${RegExp.escape(currentValue)}(\\.0)*`),
         `$1${newValue}`,
       ),
     );
@@ -242,7 +245,7 @@ export async function updateArtifacts({
         const updateLock = locks.find(
           (value) => value.packageName === packageName,
         );
-        /* v8 ignore next 4 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!updateLock) {
           logger.debug(`Skipping. No lock found for "${packageName}"`);
           continue;
@@ -254,6 +257,7 @@ export async function updateArtifacts({
             updateLock.constraints,
           );
 
+          // v8 ignore else -- needs a lockfile update that also produces a change
           if (!satisfyingVersion) {
             logger.debug(
               `Skipping. Lockfile update with "${newVersion}" does not statisfy constraints "${updateLock.constraints}" for "${packageName}"`,
@@ -270,12 +274,13 @@ export async function updateArtifacts({
           // TODO #22198
           newVersion: newVersion!,
           newConstraint: newConstraint!,
-          newHashes:
-            (await TerraformProviderHash.createHashes(
+          newHashes: coerceArray(
+            await TerraformProviderHash.createHashes(
               registryUrl,
               updateLock.packageName,
               newVersion!,
-            )) ?? /* v8 ignore next: needs test */ [],
+            ),
+          ),
           ...updateLock,
         };
         updates.push(update);
