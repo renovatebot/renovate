@@ -50,6 +50,7 @@ The [`config:best-practices` preset](./presets-config.md#configbest-practices) h
     ":pinDevDependencies",
     "abandonments:recommended",
     "security:minimumReleaseAgeNpm",
+    "security:minimumReleaseAgePypi",
     ":maintainLockFilesWeekly"
   ]
 }
