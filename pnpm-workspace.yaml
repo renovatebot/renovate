@@ -27,7 +27,7 @@ overrides:
   esbuild: 'catalog:'
   http-cache-semantics@<=4.2.0: 4.3.0
   katex@>=0.11.0 <0.18.2: 0.19.0
-  protobufjs@8.0.1: 8.8.0
+  protobufjs@8.0.1: 8.8.1
   shell-quote@>=1.8.4 <1.11.0: 1.12.0
   smol-toml@<=1.8.0: 1.9.1
   source-map-js@>=1.0.0 <1.2.2: 1.2.2
