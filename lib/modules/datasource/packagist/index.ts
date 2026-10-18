@@ -1,12 +1,13 @@
-import { isObject } from '@sindresorhus/is';
+import { isNumber, isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
-import { replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
+import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -19,6 +20,40 @@ import {
   parsePackagesResponses,
 } from './schema.ts';
 
+interface PackagistLookupError {
+  code?: string;
+  statusCode?: number;
+}
+
+function isDefaultPackagistHost(registryUrl: string): boolean {
+  const url = parseUrl(registryUrl);
+
+  /* v8 ignore if -- typescript strict null check */
+  if (!url) {
+    return false;
+  }
+
+  return ['repo.packagist.org', 'packagist.org'].includes(url.host);
+}
+
+function isTransientPackagistError(err: PackagistLookupError): boolean {
+  const { code: errCode, statusCode } = err;
+
+  if (errCode && ['ECONNRESET', 'ETIMEDOUT'].includes(errCode)) {
+    return true;
+  }
+
+  if (!isNumber(statusCode)) {
+    return false;
+  }
+
+  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
+    return true;
+  }
+
+  return false;
+}
+
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
 
@@ -26,7 +61,9 @@ export class PackagistDatasource extends Datasource {
     super(PackagistDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://repo.packagist.org'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repo.packagist.org'];
+  }
 
   override readonly defaultVersioning = composerVersioning.id;
 
@@ -68,7 +105,7 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getRegistryMeta:${regUrl}`,
+        key: buildCacheKey('getRegistryMeta', regUrl),
       },
       () => this._getRegistryMeta(regUrl),
     );
@@ -107,7 +144,10 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `getPackagistFile:${PackagistDatasource.getPackagistFileUrl(regUrl, regFile)}`,
+        key: buildCacheKey(
+          'getPackagistFile',
+          PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
+        ),
         ttlMinutes: 1440,
         cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
       },
@@ -172,7 +212,12 @@ export class PackagistDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${PackagistDatasource.id}`,
-        key: `packagistV2Lookup:${registryUrl}:${metadataUrl}:${packageName}`,
+        key: buildCacheKey(
+          'packagistV2Lookup',
+          registryUrl,
+          metadataUrl,
+          packageName,
+        ),
         ttlMinutes: 10,
       },
       () => this._packagistV2Lookup(registryUrl, metadataUrl, packageName),
@@ -212,7 +257,7 @@ export class PackagistDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.trace(`getReleases(${packageName})`);
 
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -257,13 +302,11 @@ export class PackagistDatasource extends Datasource {
       logger.trace({ dep }, 'dep');
       return dep;
     } catch (err) /* istanbul ignore next */ {
-      if (err.host === 'packagist.org') {
-        if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-          throw new ExternalHostError(err);
-        }
-        if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-          throw new ExternalHostError(err);
-        }
+      if (
+        isDefaultPackagistHost(registryUrl) &&
+        isTransientPackagistError(err)
+      ) {
+        throw new ExternalHostError(err);
       }
       throw err;
     }

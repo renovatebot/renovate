@@ -1,3 +1,4 @@
+import { isObject, isString } from '@sindresorhus/is';
 import { hasKey } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { HelmDockerImageDependency } from './types.ts';
@@ -28,8 +29,7 @@ export function matchesHelmValuesDockerHeuristic(
 ): data is HelmDockerImageDependency {
   return !!(
     parentKeyRe.test(parentKey) &&
-    data &&
-    typeof data === 'object' &&
+    isObject(data) &&
     hasKey('repository', data) &&
     (hasKey('tag', data) || hasKey('version', data))
   );
@@ -39,5 +39,29 @@ export function matchesHelmValuesInlineImage(
   parentKey: string,
   data: unknown,
 ): data is string {
-  return !!(parentKeyRe.test(parentKey) && data && typeof data === 'string');
+  return !!(parentKeyRe.test(parentKey) && data && isString(data));
+}
+
+/**
+ * Returns the version defined by a sibling `tag` or `version` key of the given
+ * object, if any:
+ *
+ * cli:
+ *   image: 'something'
+ *   tag: v1.0.0
+ * cli:
+ *   image: 'something'
+ *   version: v1.0.0
+ */
+export function getHelmValuesSiblingVersion(
+  data: Record<string, unknown> | HelmDockerImageDependency,
+): string | undefined {
+  const { tag, version } = data as Record<string, unknown>;
+  if (isString(tag) && tag) {
+    return tag;
+  }
+  if (isString(version) && version) {
+    return version;
+  }
+  return undefined;
 }

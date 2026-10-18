@@ -1,23 +1,35 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
-  ConstraintName,
   ExecOptions,
   ExtraEnv,
   ToolConstraint,
 } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { getConfigType, getLockFileName } from './lockfile.ts';
+import type {
+  ToolConstraintsConfig,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+} from '../types.ts';
+import {
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
+import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
 
 /**
  * First mise release that supports the features this manager relies on:
@@ -81,24 +93,53 @@ function versionSupportsSafeFeatures(version: string | null): boolean {
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
  * @see https://mise.jdx.dev/dev-tools/backends/gem.html
  */
-function getMiseLockToolConstraints(
-  constraints?: Partial<Record<ConstraintName, string>> | null,
+async function getMiseLockToolConstraints(
+  config: ToolConstraintsConfig,
+  miseConstraint: string | undefined,
   safeMode = false,
-): ToolConstraint[] {
-  const miseConstraint: ToolConstraint = {
+): Promise<ToolConstraint[]> {
+  const miseToolConstraint: ToolConstraint = {
     toolName: 'mise',
-    constraint: constraints?.mise,
+    constraint: miseConstraint,
   };
   if (safeMode) {
-    return [miseConstraint];
+    return [miseToolConstraint];
   }
   return [
-    miseConstraint,
-    { toolName: 'node', constraint: constraints?.node },
-    { toolName: 'npm', constraint: constraints?.npm },
-    { toolName: 'golang', constraint: constraints?.go },
-    { toolName: 'ruby', constraint: constraints?.ruby },
+    miseToolConstraint,
+    {
+      toolName: 'node',
+      constraint: await resolveToolConstraint(config, 'node'),
+    },
+    {
+      toolName: 'npm',
+      constraint: await resolveToolConstraint(config, 'npm'),
+    },
+    {
+      // the golang tool is constrained by the `go` constraint
+      toolName: 'golang',
+      constraint: await resolveToolConstraint(config, 'go'),
+    },
+    {
+      toolName: 'ruby',
+      constraint: await resolveToolConstraint(config, 'ruby'),
+    },
   ];
+}
+
+/**
+ * Collects the native dependency sidecars which `mise lock` wrote beside the
+ * lock file. The lock file records each sidecar's path and digest, so they
+ * have to be committed together. A version change moves a sidecar to a new
+ * directory, so this includes new untracked files and deleted ones.
+ *
+ * @see https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars
+ */
+async function getSidecarChanges(
+  lockFileName: string,
+): Promise<UpdateArtifactsResult[]> {
+  const status = await getRepoStatus(getSidecarDir(lockFileName));
+  return fileChangesToArtifactResults(await collectFileChanges(status));
 }
 
 /**
@@ -108,11 +149,14 @@ function getMiseLockToolConstraints(
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  newPackageFileContent,
+  newLockFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const lockFileName = getLockFileName(packageFileName);
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
+  const originalLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const currentLockFileContent = newLockFileContent ?? originalLockFileContent;
+  if (!currentLockFileContent) {
     logger.debug({ lockFileName }, 'No mise lock file found');
     return null;
   }
@@ -129,13 +173,12 @@ export async function updateArtifacts({
   // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
   // change the outcome: an allowlisted, non-maintenance run behaves the same
   // regardless of version.
+  const miseConstraint = await resolveToolConstraint(config, 'mise');
   let miseSupportsSafeFeatures = false;
   if (!miseAllowlisted || config.isLockFileMaintenance) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
-      toolConstraints: [
-        { toolName: 'mise', constraint: config.constraints?.mise },
-      ],
+      toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
       docker: {},
     });
     miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
@@ -193,7 +236,11 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv,
-    toolConstraints: getMiseLockToolConstraints(config.constraints, safeMode),
+    toolConstraints: await getMiseLockToolConstraints(
+      config,
+      miseConstraint,
+      safeMode,
+    ),
     docker: {},
   };
 
@@ -206,40 +253,27 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
-    await exec(commands, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
-      return null;
+    if (newLockFileContent) {
+      await writeLocalFile(lockFileName, newLockFileContent);
     }
-
-    logger.debug({ lockFileName }, 'Returning updated mise lock file');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
+    const lockFileResults = await updateLockFile({
+      lockFileName,
+      existingLockFileContent: originalLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () => exec(commands, execOptions),
+    });
+    const results = [
+      ...coerceArray(lockFileResults),
+      ...(await getSidecarChanges(lockFileName)),
     ];
+    return results.length ? results : null;
   } catch (err) {
-    // istanbul ignore if: not worth testing
+    /* v8 ignore if -- defensive rethrow, not worth testing */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
 
-    const errorOutput = [err.stdout, err.stderr, err.message]
-      .filter(isString)
-      .join('\n');
-
     logger.warn({ err, lockFileName }, 'Error updating mise lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: errorOutput,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

@@ -10,7 +10,7 @@ This document describes how you can edit branch names, commit messages, PR title
 ## Branch Name
 
 The branch name is very important for Renovate because it helps determine "grouping" of updates, and also makes it efficient when an existing PR needs to be updated when a newer version of a package is released.
-If you change the `branchPrefix` while you have ignored some upgrades (closed PR without merging), you might get a duplicate PR after the new `branchPrefix` setting is picked up by the bot.
+If you change the `branchPrefix` while you have ignored some upgrades (closed PR without merging), you might get a duplicate PR after the new `branchPrefix` setting is picked up by Renovate.
 
 `branchName` default value is `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
 

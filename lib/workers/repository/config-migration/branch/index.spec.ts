@@ -131,6 +131,37 @@ describe('workers/repository/config-migration/branch/index', () => {
       );
     });
 
+    it('updates migration branch on a platform that cannot refresh prs', async () => {
+      const { refreshPr } = platform;
+      Object.defineProperty(platform, 'refreshPr', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+      platform.getBranchPr.mockResolvedValue(mock<Pr>({ number: 1 }));
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+
+      try {
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'migration-pr-exists',
+            },
+          },
+          migratedData,
+        );
+
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
+        });
+      } finally {
+        platform.refreshPr = refreshPr;
+      }
+    });
+
     it('creates migration branch when migration enabled but no pr exists', async () => {
       vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
@@ -293,6 +324,32 @@ describe('workers/repository/config-migration/branch/index', () => {
         );
         expect(res).toMatchObject({
           result: 'no-migration-branch',
+        });
+      });
+
+      it('creates a new migration branch when the old branch is already gone', async () => {
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(false);
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
+          'committed',
+        );
+
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
+          },
+          migratedData,
+        );
+
+        expect(scm.deleteBranch).not.toHaveBeenCalled();
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
         });
       });
 

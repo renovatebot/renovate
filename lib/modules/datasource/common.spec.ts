@@ -232,12 +232,17 @@ describe('modules/datasource/common', () => {
         datasource: 'foo',
         packageName: 'bar',
         constraintsFiltering: 'strict' as const,
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally using invalid constraint names
         constraints: { baz: '^1.0.0', qux: 'invalid' } as never,
       };
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
-          { version: '2.0.0', constraints: { baz: [undefined] } as never },
+          {
+            version: '2.0.0',
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally using invalid constraint value
+            constraints: { baz: [undefined] } as never,
+          },
           { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
         ],
       };

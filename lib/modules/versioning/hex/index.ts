@@ -18,11 +18,14 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 function hex2npm(input: string): string {
   return input
-    .replace(regEx(/~>\s*(\d+\.\d+)$/), '^$1')
-    .replace(regEx(/~>\s*(\d+\.\d+\.\d+)/), '~$1')
+    .replace(regEx(/~>\s*(?<version>\d+\.\d+)$/), '^$<version>')
+    .replace(regEx(/~>\s*(?<version>\d+\.\d+\.\d+)/), '~$<version>')
     .replace(regEx(/==|and/), '')
     .replace('or', '||')
-    .replace(regEx(/!=\s*(\d+\.\d+(\.\d+.*)?)/), '>$1 <$1')
+    .replace(
+      regEx(/!=\s*(?<version>\d+\.\d+(?:\.\d+.*)?)/),
+      '>$<version> <$<version>',
+    )
     .trim();
 }
 
@@ -103,18 +106,21 @@ function getNewValue({
   if (newSemver) {
     newSemver = npm2hex(newSemver);
 
-    if (regEx(/~>\s*(\d+\.\d+\.\d+)$/).test(currentValue)) {
+    if (regEx(/~>\s*(?:\d+\.\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/[\^~]\s*(\d+\.\d+\.\d+)/g),
-        (_str, p1: string) => `~> ${p1}`,
+        regEx(/[\^~]\s*(?<version>\d+\.\d+\.\d+)/g),
+        (_str, version: string) => `~> ${version}`,
       );
-    } else if (regEx(/~>\s*(\d+\.\d+)$/).test(currentValue)) {
+    } else if (regEx(/~>\s*(?:\d+\.\d+)$/).test(currentValue)) {
       newSemver = newSemver.replace(
-        regEx(/\^\s*(\d+\.\d+)(\.\d+)?/g),
-        (_str, p1: string) => `~> ${p1}`,
+        regEx(/\^\s*(?<version>\d+\.\d+)(?:\.\d+)?/g),
+        (_str, version: string) => `~> ${version}`,
       );
     } else {
-      newSemver = newSemver.replace(regEx(/~\s*(\d+\.\d+\.\d)/g), '~> $1');
+      newSemver = newSemver.replace(
+        regEx(/~\s*(?<version>\d+\.\d+\.\d)/g),
+        '~> $<version>',
+      );
     }
     if (npm.isVersion(newSemver)) {
       newSemver = `== ${newSemver}`;

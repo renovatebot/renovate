@@ -49,25 +49,25 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns null if unchanged', async () => {
@@ -84,15 +84,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '',
         config,
       }),
-    ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock', async () => {
@@ -108,15 +112,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock with precise version update', async () => {
@@ -135,14 +143,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -176,14 +184,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -218,14 +226,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
@@ -268,14 +276,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd }]);
@@ -388,14 +396,14 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ];
 
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
 
@@ -413,14 +421,14 @@ describe('modules/manager/cargo/artifacts', () => {
   it('returns updated Cargo.lock when there are no more dependencies to update', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: 'New Cargo.lock',
@@ -444,15 +452,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated workspace Cargo.lock', async () => {
@@ -474,15 +486,19 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'crates/one/Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path crates/one/Cargo.toml --workspace',
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
@@ -491,8 +507,8 @@ describe('modules/manager/cargo/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -502,8 +518,12 @@ describe('modules/manager/cargo/artifacts', () => {
           constraints: { rust: '1.65.0' },
         },
       }),
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -519,14 +539,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -543,14 +563,15 @@ describe('modules/manager/cargo/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CI ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -583,14 +604,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -607,6 +628,7 @@ describe('modules/manager/cargo/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CI ' +
           '-e GIT_CONFIG_KEY_0 ' +
           '-e GIT_CONFIG_VALUE_0 ' +
           '-e GIT_CONFIG_KEY_1 ' +
@@ -623,27 +645,28 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
-              'url.https://ssh:some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_1:
-              'url.https://git:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_2:
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_3:
-              'url.https://ssh:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_4:
-              'url.https://git:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_5:
-              'url.https://some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
             GIT_CONFIG_VALUE_1: 'git@github.com:',
             GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -684,14 +707,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -707,16 +730,17 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '9',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_6:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_7:
@@ -762,14 +786,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -785,10 +809,11 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -822,14 +847,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -845,22 +870,79 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '6',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
               GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
               GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
               GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+            }),
+          }),
+        }),
+      ]),
+    );
+  });
+
+  it('supports docker mode with crate git index credential', async () => {
+    fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.add({
+      token: 'some-crate-token',
+      matchHost: 'git.example.com',
+      hostType: CrateDatasource.id,
+    });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    await expect(
+      cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { rust: '1.65.0' } },
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0:
+                'url.https://ssh:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://git:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+              GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+              GIT_CONFIG_VALUE_2: 'https://git.example.com/',
             }),
           }),
         }),
@@ -881,14 +963,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       {
         file: {
           contents: undefined,
@@ -919,6 +1001,35 @@ describe('modules/manager/cargo/artifacts', () => {
     ]);
   });
 
+  it('falls back to the extracted rust constraint', async () => {
+    fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    await expect(
+      cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, extractedConstraints: { rust: '1.65.0' } },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool rust 1.65.0' },
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+      },
+    ]);
+  });
+
   it('catches errors', async () => {
     fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
@@ -932,14 +1043,14 @@ describe('modules/manager/cargo/artifacts', () => {
         datasource: CrateDatasource.id,
       },
     ];
-    expect(
-      await cargo.updateArtifacts({
+    await expect(
+      cargo.updateArtifacts({
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { artifactError: { fileName: 'Cargo.lock', stderr: 'not found' } },
     ]);
   });

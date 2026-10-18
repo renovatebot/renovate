@@ -1,5 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import type { CommitMessageJSON } from '../../../types/index.ts';
+import { regEx } from '../../../util/regex.ts';
 
 /**
  * @see https://git-scm.com/docs/git-commit#_discussion
@@ -10,7 +11,7 @@ import type { CommitMessageJSON } from '../../../types/index.ts';
  */
 export abstract class CommitMessage {
   private static readonly SEPARATOR: string = ':';
-  private static readonly EXTRA_WHITESPACES = /\s+/g;
+  private static readonly EXTRA_WHITESPACES = regEx(/\s+/g);
 
   private _body = '';
   private _footer = '';
