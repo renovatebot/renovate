@@ -125,8 +125,8 @@ importers:
         specifier: 13.133.0
         version: 13.133.0(zod@4.6.6)
       '@renovatebot/detect-tools':
-        specifier: 4.0.21
-        version: 4.0.21
+        specifier: 4.0.22
+        version: 4.0.22
       '@renovatebot/good-enough-parser':
         specifier: 2.0.1
         version: 2.0.1
@@ -2047,8 +2047,8 @@ packages:
       zod:
         optional: true
 
-  '@renovatebot/detect-tools@4.0.21':
-    resolution: {integrity: sha512-1+yfO/pivwJu1m8180pfxHSVlx9ByZVDUa9xcvRLBraAFTn+ziDeOBoKVqpr4lElYwZ6kBNfE945dCVewz6edQ==}
+  '@renovatebot/detect-tools@4.0.22':
+    resolution: {integrity: sha512-WmTPjbvMvrpv2sGaCyMNlBCt+R1pp372mkyFkNchl6b15/dvtRD99JlQ54hcSU/fXP8xNXbHO+4gFZSZTM3DpQ==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/good-enough-parser@2.0.1':
@@ -7453,7 +7453,7 @@ snapshots:
     optionalDependencies:
       zod: 4.6.6
 
-  '@renovatebot/detect-tools@4.0.21':
+  '@renovatebot/detect-tools@4.0.22':
     dependencies:
       fs-extra: 11.4.1
       toml-eslint-parser: 1.0.3
