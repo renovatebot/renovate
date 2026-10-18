@@ -220,6 +220,7 @@ export interface GlobalOnlyConfigLegacy {
   redisPrefix?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
+  repositoryDelaySeconds?: number;
   useCloudMetadataServices?: boolean;
   deleteConfigFile?: boolean;
   deleteAdditionalConfigFile?: boolean;

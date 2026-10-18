@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import {
   ATTR_VCS_OWNER_NAME,
   ATTR_VCS_PROVIDER_NAME,
@@ -210,10 +211,19 @@ export async function start(): Promise<number> {
     }
 
     // Iterate through repositories sequentially
+    let isFirstRepository = true;
     for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
         break;
       }
+
+      if (config.repositoryDelaySeconds && !isFirstRepository) {
+        logger.debug(
+          `Waiting ${config.repositoryDelaySeconds}s before the next repository`,
+        );
+        await setTimeout(config.repositoryDelaySeconds * 1000);
+      }
+      isFirstRepository = false;
 
       const { owner, repo } = repositoryToOwnerAndRepo(
         isString(repository) ? repository : repository.repository,

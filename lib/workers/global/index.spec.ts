@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { ERROR, WARN } from 'bunyan';
 import fs from 'fs-extra';
 import type { RenovateConfig } from '~test/util.ts';
@@ -13,6 +14,7 @@ import * as configParser from './config/parse/index.ts';
 import * as globalWorker from './index.ts';
 import * as limits from './limits.ts';
 
+vi.mock('node:timers/promises');
 vi.mock('../repository/index.ts');
 vi.mock('../../util/fs/index.ts');
 
@@ -199,6 +201,27 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
+  });
+
+  it('waits repositoryDelaySeconds between repositories but not before the first', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      repositories: ['a', 'b', 'c'],
+      repositoryDelaySeconds: 5,
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(3);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledWith(5000);
+  });
+
+  it('does not wait between repositories by default', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      repositories: ['a', 'b'],
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(setTimeout).not.toHaveBeenCalled();
   });
 
   it('returns the exit code of the first errored repository when exitCodeForErrors is enabled', async () => {

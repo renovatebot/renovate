@@ -1369,6 +1369,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'repositoryDelaySeconds',
+    description:
+      'Number of seconds to wait between processing repositories. By default there is no delay.',
+    stage: 'global',
+    type: 'integer',
+    default: 0,
+    globalOnly: true,
+  },
+  {
     name: 'repositories',
     description:
       'List of Repositories, or an object that contains a `repository`, and any Global or Repo config to target that specific repository.',
