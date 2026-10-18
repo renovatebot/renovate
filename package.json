@@ -246,7 +246,7 @@
     "node-html-parser": "9.0.4",
     "p-all": "5.0.1",
     "p-map": "7.1.1",
-    "p-queue": "9.3.4",
+    "p-queue": "9.3.5",
     "p-throttle": "8.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "3.9.10",
