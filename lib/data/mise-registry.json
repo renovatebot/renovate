@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.10.7 linux-x64 (2026-10-09)"
+    "version": "2026.10.12 linux-x64 (2026-10-16)"
   },
   "tools": {
     "1password": {
@@ -1245,6 +1245,9 @@
       "asdf": "mise-plugins/mise-gcloud",
       "vfox": "jdx/vfox-gcloud"
     },
+    "gdal": {
+      "conda": "libgdal-core"
+    },
     "gdu": {
       "aqua": "dundee/gdu"
     },
@@ -2226,6 +2229,9 @@
       "aqua": "marp-team/marp-cli",
       "asdf": "xataz/asdf-marp-cli"
     },
+    "martin": {
+      "github": "maplibre/martin"
+    },
     "mas": {
       "aqua": "mas-cli/mas"
     },
@@ -2394,7 +2400,7 @@
       "asdf": "iilyak/asdf-nancy"
     },
     "native-sdk": {
-      "github": "vercel-labs/native"
+      "npm": "@native-sdk/cli"
     },
     "nats-server": {
       "github": "nats-io/nats-server"
@@ -2581,7 +2587,8 @@
       "github": "openbao/openbao"
     },
     "opencode": {
-      "aqua": "anomalyco/opencode"
+      "aqua": "anomalyco/opencode",
+      "npm": "@opencode/cli"
     },
     "openfaas-cli": {
       "aqua": "openfaas/faas-cli",
