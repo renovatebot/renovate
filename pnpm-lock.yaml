@@ -311,8 +311,8 @@ importers:
         specifier: 7.1.1
         version: 7.1.1
       p-queue:
-        specifier: 9.3.4
-        version: 9.3.4
+        specifier: 9.3.5
+        version: 9.3.5
       p-throttle:
         specifier: 8.1.1
         version: 8.1.1
@@ -4877,8 +4877,8 @@ packages:
     resolution: {integrity: sha512-6Lh3jQPLthYujSrlw6ccWXBGZTkoTCz27Hd92g79LH/kjAbgoEu0t442cCCNbegPSJsA0lwDX8z0bcKtkpA32g==}
     engines: {node: '>=18'}
 
-  p-queue@9.3.4:
-    resolution: {integrity: sha512-bpTeG3CuPiOgPcDqn51QUsRYshkiKiaG+hP49tCGI0+nT92h7rqD4LPKZzP8kwab/OniQf+ntA4ta6yCp1eA0Q==}
+  p-queue@9.3.5:
+    resolution: {integrity: sha512-Lki/zhXFVmDhesBUn/yHRLW9Bte7mE7xoFHzTR8sIomV7a2z+LxYAPkGvdfidNiu4fKSfjtawixxSHcZci5QcQ==}
     engines: {node: '>=20'}
 
   p-reduce@3.0.0:
@@ -10492,7 +10492,7 @@ snapshots:
 
   p-map@7.1.1: {}
 
-  p-queue@9.3.4:
+  p-queue@9.3.5:
     dependencies:
       eventemitter3: 5.0.4
       p-timeout: 7.0.2
