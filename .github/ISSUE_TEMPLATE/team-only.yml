@@ -1,0 +1,33 @@
+name: Direct Issue creation is for team members only
+description: Please do not create an Issue if you're not one of the team — start a Discussion first!
+labels: ['priority-3-medium', 'needs-discussion']
+body:
+  - type: markdown
+    attributes:
+      value: '# This form is for core team members only.'
+
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > <h2>Do not create an issue if you're not one of the team.</h2>
+        >
+        > While all repository collaborators have technical access to this form, direct Issue creation is reserved strictly for core team members.
+        >
+        > If you are an external collaborator, please go back a step and select _Start a discussion_ instead. Keeping initial proposals and questions in GitHub Discussions helps us triage and manage our backlog effectively. Thank you for your cooperation!
+
+  - type: textarea
+    id: describe-proposed-changes
+    attributes:
+      label: Describe the proposed change(s).
+      description: 'Do not report any security concerns here. See our [security policy](https://github.com/renovatebot/renovate/security/policy) for how to report an issue that may be security-related.'
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '# Reminder for team members:'
+
+  - type: markdown
+    attributes:
+      value: 'Before submitting the issue: add the correct **type:** label and remove the **needs-discussion** label.'
