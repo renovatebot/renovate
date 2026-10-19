@@ -5,6 +5,8 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
@@ -57,16 +59,42 @@ const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 async function detectMiseVersion(
   execOptions: ExecOptions,
 ): Promise<string | null> {
+  const constraint = execOptions.toolConstraints?.[0]?.constraint ?? 'latest';
+  const cacheKey = buildCacheKey(
+    'mise-version',
+    execOptions.cwdFile,
+    constraint,
+  );
+  const cachedVersion = memCache.get<Promise<string | null>>(cacheKey);
+  if (cachedVersion !== undefined) {
+    return cachedVersion;
+  }
+
+  const versionPromise = detectMiseVersionUncached(execOptions);
+  memCache.set(cacheKey, versionPromise);
+  try {
+    return await versionPromise;
+  } catch (err) {
+    memCache.set(cacheKey, undefined);
+    throw err;
+  }
+}
+
+async function detectMiseVersionUncached(
+  execOptions: ExecOptions,
+): Promise<string | null> {
   try {
     const { stdout } = await exec('mise version', execOptions);
     const version = regEx(/\d+\.\d+\.\d+/).exec(stdout)?.[0];
     if (version && miseVersioning.isVersion(version)) {
-      logger.info(`Using mise version ${version}`);
       return version;
     }
     logger.debug({ stdout }, 'Could not parse mise version output');
     return null;
   } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, 'Failed to determine mise version');
     return null;
   }
@@ -190,6 +218,10 @@ export async function updateArtifacts({
     return null;
   }
 
+  if (miseAllowlisted && miseVersion) {
+    logger.once.debug(`Using mise version ${miseVersion}`);
+  }
+
   const { isLocal, env } = getConfigType(packageFileName);
   const localFlag = isLocal ? ' --local' : '';
 
@@ -235,7 +267,7 @@ export async function updateArtifacts({
     extraEnv,
     toolConstraints: await getMiseLockToolConstraints(
       config,
-      miseConstraint,
+      miseVersion ?? miseConstraint,
       safeMode,
     ),
     docker: {},

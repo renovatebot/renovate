@@ -8,6 +8,7 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
@@ -53,6 +54,7 @@ const safeMiseVersionOutput = {
 
 describe('modules/manager/mise/artifacts', () => {
   beforeEach(() => {
+    memCache.init();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -148,6 +150,9 @@ describe('modules/manager/mise/artifacts', () => {
 
     expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
+    expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+      'Using mise version 2026.7.11',
+    );
   });
 
   it('falls back to conservative behavior when the version probe throws', async () => {
@@ -168,7 +173,7 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
   });
 
-  it('logs the mise version and does not set MISE_SAFE on the allowlisted path', async () => {
+  it('logs the mise version once and does not set MISE_SAFE on the allowlisted path', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
       .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
@@ -181,7 +186,7 @@ describe('modules/manager/mise/artifacts', () => {
       config,
     });
 
-    expect(logger.logger.info).toHaveBeenCalledWith(
+    expect(logger.logger.once.debug).toHaveBeenCalledWith(
       'Using mise version 2026.7.12',
     );
     expect(execSnapshots).toMatchObject([
@@ -194,6 +199,32 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('memoizes the detected mise version for package files using the same constraint', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(
+      execSnapshots.filter(({ cmd }) => cmd === miseVersionCmd),
+    ).toHaveLength(1);
   });
 
   it('returns null if lock file unchanged after exec', async () => {
@@ -467,6 +498,20 @@ describe('modules/manager/mise/artifacts', () => {
     ).rejects.toThrow(TEMPORARY_ERROR);
   });
 
+  it('rethrows TEMPORARY_ERROR from the version probe', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    mockExecSequence([new Error(TEMPORARY_ERROR)]);
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [{ depName: 'node' }],
+        newPackageFileContent: '',
+        config,
+      }),
+    ).rejects.toThrow(TEMPORARY_ERROR);
+  });
+
   it('runs mise lock for lockFileMaintenance', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
@@ -595,7 +640,6 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 2026.6.12' },
       { cmd: miseVersionCmd },
-      { cmd: 'install-tool mise 2026.6.12' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
@@ -630,7 +674,6 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool mise 2026.6.12' },
       { cmd: miseVersionCmd },
-      { cmd: 'install-tool mise 2026.6.12' },
       { cmd: 'install-tool node 24.16.0' },
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
@@ -678,7 +721,6 @@ describe('modules/manager/mise/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool mise 1.0.0' },
         { cmd: miseVersionCmd },
-        { cmd: 'install-tool mise 1.0.0' },
         { cmd: 'install-tool node 1.0.0' },
         { cmd: 'install-tool npm 1.0.0' },
         { cmd: 'install-tool golang 1.0.0' },
