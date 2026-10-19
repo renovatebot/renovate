@@ -1660,16 +1660,19 @@ Secret names must start with an upper or lower case character and can have only 
 
 Used to specify the module path of [the `mod` binary](https://github.com/marwan-at-work/mod) used to perform updates of import paths on major updates, when using [`postUpdateOptions=["gomodUpdateImportPaths"]`](./configuration-options.md#postupdateoptions).
 
-This can only be set in the global self-hosted configuration, as it controls which binary Renovate installs and runs.
+!!! note
+  This is a self-hosted configuration only, as controlling this at a repo level could lead to ["insider attack"](./security-and-permissions.md#execution-of-code-insider-attack).
 
-It is used as part of a `go install` command such as:
+The module path provided will be used as part of a `go install` command such as:
 
 ```sh
 # i.e.
 go install ${toolSettings.gomodModInstallPath}@latest
 ```
 
-Do not include a version in the value, as Renovate appends one itself. Any `@version` suffix is ignored.
+No version is needed **??**
+
+Do not include a version (`@...`) in the value, as Renovate appends one itself. Config validation reports a value that includes one, and any such suffix is ignored.
 
 Use this if you're pointing Renovate to a fork of [`github.com/marwan-at-work/mod`](https://github.com/marwan-at-work/mod).
 
