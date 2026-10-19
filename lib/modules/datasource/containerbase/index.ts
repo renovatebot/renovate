@@ -1,9 +1,15 @@
 import { logger } from '../../../logger/index.ts';
-import { isToolName } from '../../../util/exec/types.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import {
+  type ConstraintName,
+  isConstraintName,
+  isToolName,
+} from '../../../util/exec/types.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
   ContainerbaseFormats,
   ContainerbaseToolVersions,
@@ -13,6 +19,22 @@ import {
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
+
+/**
+ * Converts the runtime constraints of a version, keyed by the parent tool (like
+ * `node`), to release constraints. Unknown constraint names are dropped.
+ */
+function toConstraints(
+  constraints: Record<string, string> | undefined,
+): Partial<Record<ConstraintName, string[]>> | undefined {
+  const result: Partial<Record<ConstraintName, string[]>> = {};
+  for (const [name, constraint] of Object.entries(coerceObject(constraints))) {
+    if (isConstraintName(name)) {
+      result[name] = [constraint];
+    }
+  }
+  return Object.keys(result).length ? result : undefined;
+}
 
 export class ContainerbaseDatasource extends Datasource {
   static readonly id = 'containerbase';
@@ -39,20 +61,23 @@ export class ContainerbaseDatasource extends Datasource {
   private fetchFormats(
     registryUrl: string,
   ): Promise<ContainerbaseFormats | null> {
-    return this.cached({ key: `formats:${registryUrl}` }, async () => {
-      try {
-        return await this.fetchJsonOrNull(
-          joinUrlParts(registryUrl, 'index.json'),
-          ContainerbaseFormats,
-        );
-      } catch (err) {
-        logger.debug(
-          { err, datasource: this.id, registryUrl },
-          'Failed to read the containerbase root index',
-        );
-        return null;
-      }
-    });
+    return this.cached(
+      { key: buildCacheKey('formats', registryUrl) },
+      async () => {
+        try {
+          return await this.fetchJsonOrNull(
+            joinUrlParts(registryUrl, 'index.json'),
+            ContainerbaseFormats,
+          );
+        } catch (err) {
+          logger.debug(
+            { err, datasource: this.id, registryUrl },
+            'Failed to read the containerbase root index',
+          );
+          return null;
+        }
+      },
+    );
   }
 
   /**
@@ -101,11 +126,18 @@ export class ContainerbaseDatasource extends Datasource {
       sourceUrl: body.sourceUrl,
       homepage: body.homepage,
       releases: body.versions.map(
-        ({ version, prerelease, releaseTimestamp }) => ({
-          version,
-          isStable: prerelease !== true,
-          releaseTimestamp: asTimestamp(releaseTimestamp),
-        }),
+        ({ version, prerelease, releaseTimestamp, constraints }) => {
+          const release: Release = {
+            version,
+            isStable: prerelease !== true,
+            releaseTimestamp: asTimestamp(releaseTimestamp),
+          };
+          const releaseConstraints = toConstraints(constraints);
+          if (releaseConstraints) {
+            release.constraints = releaseConstraints;
+          }
+          return release;
+        },
       ),
     };
 
@@ -125,7 +157,7 @@ export class ContainerbaseDatasource extends Datasource {
 
     return this.cached(
       {
-        key: `${registryUrl}:${packageName}`,
+        key: buildCacheKey(registryUrl, packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

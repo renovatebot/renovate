@@ -12,7 +12,12 @@ const rootIndex = {
   defaultDistro: 'noble',
   formats: [{ version: 1, path: 'v1/', status: 'current' }],
 };
-const pnpm = { $schema, tool: 'pnpm', versions: [{ version: '10.0.0' }] };
+const pnpm = {
+  $schema,
+  tool: 'pnpm',
+  updatedAt: '2026-10-09T03:00:00.000Z',
+  versions: [{ version: '10.0.0' }],
+};
 
 describe('modules/datasource/containerbase/index', () => {
   describe('getReleases', () => {
@@ -73,6 +78,38 @@ describe('modules/datasource/containerbase/index', () => {
       });
       expect(logger.once.warn).not.toHaveBeenCalled();
     });
+
+    it.each`
+      node        | versions
+      ${'20.0.0'} | ${['10.0.0']}
+      ${'22.0.0'} | ${['10.0.0', '11.0.0']}
+    `(
+      'filters by the runtime constraints for node $node',
+      async ({ node, versions }) => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            versions: [
+              { version: '11.0.0', constraints: { node: '>=22' } },
+              // an unknown constraint name is dropped
+              { version: '10.0.0', constraints: { foo: '1' } },
+            ],
+          });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'pnpm',
+          constraintsFiltering: 'strict',
+          constraints: { node },
+        });
+
+        expect(res?.releases.map(({ version }) => version)).toEqual(versions);
+      },
+    );
 
     it('uses a custom registry', async () => {
       httpMock

@@ -10,3 +10,4 @@ Set `registryUrls` to the root of a mirror of the site, for example `https://mir
 
 The versions are in exactly the format `install-tool` accepts, for example `21.0.5+11.0.LTS` for `java`.
 Prereleases are marked as unstable.
+Runtime constraints of a version, like the `node` versions an npm tool supports, are passed on as release constraints for `constraintsFiltering`.
