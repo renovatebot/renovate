@@ -399,7 +399,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
     });
 
-    it('uses legacy cache key when gitRef is not set', async () => {
+    it('keeps empty cache key parts when sourceDirectory and gitRef are not set', async () => {
       const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
       githubReleasesMock.mockResolvedValueOnce([
         {
@@ -432,7 +432,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'react/react-native:1.0.0',
+        'react/react-native::1.0.0:',
       );
     });
 
@@ -486,7 +486,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheSetSpy).toHaveBeenCalledExactlyOnceWith(
         'changelog-github-notes@v2',
-        'react/react-native:1.0.0',
+        'react/react-native::1.0.0:',
         { url: 'https://example.com/compare', notesSourceUrl: '' },
         55,
       );
@@ -675,11 +675,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'react/react-native:2.0.0',
+        'react/react-native::2.0.0:',
       );
       expect(packageCacheGetSpy).not.toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'react/react-native:1.0.0',
+        'react/react-native::1.0.0:',
       );
     });
 

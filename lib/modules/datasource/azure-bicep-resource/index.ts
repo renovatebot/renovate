@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -52,7 +53,7 @@ export class AzureBicepResourceDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases-${config.packageName}`,
+        key: buildCacheKey('getReleases', config.packageName),
         fallback: true,
         cacheable: true,
       },

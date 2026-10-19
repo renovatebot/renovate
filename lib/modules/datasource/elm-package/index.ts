@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
@@ -65,7 +66,7 @@ export class ElmPackageDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${ElmPackageDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
         cacheable: true,
       },

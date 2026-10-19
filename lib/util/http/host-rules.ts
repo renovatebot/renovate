@@ -165,6 +165,30 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `go` hostType, which requests to a Go module proxy used until they were split into the `go-proxy` datasource
+  if (hostType === 'go-proxy') {
+    // only inherit the authentication-related fields
+    const {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
+    } = hostRules.find({ hostType: 'go', url });
+    res = {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
+      ...res,
+    };
+  }
+
   return res;
 }
 

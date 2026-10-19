@@ -2430,12 +2430,12 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
     {
-      // `'latest'` is the default `pixi-version`, and is a valid version according to Conda versioning, but not one that can be used to bump the verson
+      // `'latest'` is the default `pixi-version`, which is not a version that can be bumped
       step: {
         uses: 'prefix-dev/setup-pixi@v0.8.3',
         with: {
@@ -2449,7 +2449,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
@@ -3230,6 +3230,28 @@ describe('modules/manager/github-actions/extract', () => {
           packageName: 'ghcr.io/renovatebot/renovate',
           skipStage: 'extract',
           skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // `renovate-image` tag- and digest-pinned, with no `renovate-version`
+      // set: https://github.com/renovatebot/renovate/discussions/46969
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate:44.104.2@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '44.104.2',
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
         },
       ],
     },
