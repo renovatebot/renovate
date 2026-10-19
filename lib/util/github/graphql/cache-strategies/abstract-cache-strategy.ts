@@ -146,6 +146,22 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   }
 
   /**
+   * Add or update the given items in the cache
+   * without marking them as reconciled, so cached items
+   * missing from `items` are kept.
+   */
+  async merge(items: GithubItem[]): Promise<void> {
+    const cachedItems = await this.getItems();
+    for (const item of items) {
+      const oldItem = cachedItems[item.version];
+      if (!oldItem || !dequal(oldItem, item)) {
+        this.hasNovelty = true;
+      }
+      cachedItems[item.version] = item;
+    }
+  }
+
+  /**
    * Handle removed items for packages that are not stabilized
    * and return the list of all items.
    */

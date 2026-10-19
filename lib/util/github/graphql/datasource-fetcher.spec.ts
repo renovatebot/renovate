@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
@@ -457,6 +458,123 @@ describe('util/github/graphql/datasource-fetcher', () => {
           expect(instance).toHaveProperty('isPersistent', isPersistent);
         },
       );
+    });
+
+    describe('refresh', () => {
+      const cacheKey = 'https://api.github.com/:foo:bar';
+      const now = DateTime.now().toUTC();
+      const recent = now.minus({ days: 2 }).toISO() as Timestamp;
+      const fresh = now.minus({ minutes: 5 }).toISO() as Timestamp;
+      const cachedItem = { version: v1, releaseTimestamp: recent, bar: '1' };
+
+      function mockCache(isRefreshed: true | undefined): void {
+        packageCache.get.mockImplementation((_ns, key) => {
+          if (key === `${cacheKey}:is-persistent`) {
+            return Promise.resolve(true);
+          }
+          if (key === `${cacheKey}:is-refreshed`) {
+            return Promise.resolve(isRefreshed);
+          }
+          return Promise.resolve({
+            items: { [v1]: cachedItem },
+            createdAt: recent,
+          });
+        });
+      }
+
+      it('fetches only the first page and keeps cached items', async () => {
+        mockCache(undefined);
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql', graphqlRequestBody(100, null))
+          .reply(
+            200,
+            resp(
+              false,
+              [{ version: v2, releaseTimestamp: fresh, foo: '2' }],
+              'aaa',
+            ),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+
+        const newItem = { version: v2, releaseTimestamp: fresh, bar: '2' };
+        expect(res).toEqual([cachedItem, newItem]);
+        expect(packageCache.set).toHaveBeenCalledWith(
+          '_test-namespace',
+          `${cacheKey}:is-refreshed`,
+          true,
+          5,
+        );
+        expect(packageCache.set).toHaveBeenCalledWith(
+          '_test-namespace',
+          cacheKey,
+          { items: { [v1]: cachedItem, [v2]: newItem }, createdAt: recent },
+          expect.any(Number),
+        );
+        expect(packageCache.set).not.toHaveBeenCalledWith(
+          '_test-namespace',
+          `${cacheKey}:is-persistent`,
+          true,
+          30,
+        );
+      });
+
+      it('returns cached items when refreshed recently', async () => {
+        mockCache(true);
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+
+        expect(res).toEqual([cachedItem]);
+        expect(packageCache.set).not.toHaveBeenCalled();
+      });
+
+      it('performs the regular query when the persistence flag is not set', async () => {
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql', graphqlRequestBody(100, null))
+          .reply(
+            200,
+            resp(
+              false,
+              [{ version: v2, releaseTimestamp: t2, foo: '2' }],
+              'aaa',
+            ),
+          )
+          .post('/graphql', graphqlRequestBody(100, 'aaa'))
+          .reply(
+            200,
+            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+
+        expect(res).toEqual([
+          { version: v2, releaseTimestamp: t2, bar: '2' },
+          { version: v1, releaseTimestamp: t1, bar: '1' },
+        ]);
+        expect(packageCache.set).not.toHaveBeenCalledWith(
+          '_test-namespace',
+          `${cacheKey}:is-refreshed`,
+          true,
+          5,
+        );
+      });
     });
 
     describe('maxItems limit', () => {
