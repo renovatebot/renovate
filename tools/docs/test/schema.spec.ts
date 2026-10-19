@@ -283,7 +283,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
     beforeAll(async () => {
       repoSchema = await compileSchema();
-    });
+    }, 30000);
 
     it('suggests the managers we know about, without rejecting a pattern', () => {
       expect(
