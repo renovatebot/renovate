@@ -128,6 +128,13 @@ export class GithubRunnersDatasource extends Datasource {
         releaseTimestamp: Timestamp.parse('2019-08-08'),
       },
     ],
+    xcode: [
+      { version: '27', releaseTimestamp: Timestamp.parse('2026-10-15') },
+      {
+        version: '27-xlarge',
+        releaseTimestamp: Timestamp.parse('2026-10-15'),
+      },
+    ],
   };
 
   public static isValidRunner(

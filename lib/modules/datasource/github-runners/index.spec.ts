@@ -73,6 +73,24 @@ describe('modules/datasource/github-runners/index', () => {
       });
     });
 
+    it('returns releases for Xcode', async () => {
+      const res = await getPkgReleases({
+        datasource: GithubRunnersDatasource.id,
+        packageName: 'xcode',
+      });
+
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '27-xlarge',
+            releaseTimestamp: '2026-10-15T00:00:00.000Z',
+          },
+          { version: '27', releaseTimestamp: '2026-10-15T00:00:00.000Z' },
+        ],
+        sourceUrl: 'https://github.com/actions/runner-images',
+      });
+    });
+
     it('returns null if package is unknown', async () => {
       const res = await getPkgReleases({
         datasource: GithubRunnersDatasource.id,
