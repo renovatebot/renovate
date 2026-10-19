@@ -15,13 +15,6 @@ export interface CacheContext {
    * @default true
    */
   public: boolean;
-
-  /**
-   * Whether the result should be stored in the cache.
-   * `false` prevents storage even when `cachePrivatePackages` is enabled.
-   * @default true
-   */
-  cacheable: boolean;
 }
 
 export interface CachedOptions {
@@ -57,6 +50,7 @@ export interface CachedOptions {
 
 /**
  * Caches the result of a function.
+ * An `undefined` result is not cached.
  *
  * @param options - Cache options
  * @param fn - The function to cache
@@ -70,12 +64,11 @@ export async function withCache<T>(
 
   const ctx: CacheContext = {
     public: options.public ?? true,
-    cacheable: true,
   };
   const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
 
   function canUseCache(): boolean {
-    return ctx.cacheable && (ctx.public || cachePrivatePackages);
+    return ctx.public || cachePrivatePackages;
   }
 
   if (!canUseCache()) {
