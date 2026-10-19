@@ -11,7 +11,9 @@ import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
@@ -752,6 +754,82 @@ describe('modules/manager/poetry/artifacts', () => {
         { artifactError: { fileName: 'poetry.lock' } },
       ]);
       expect(execSnapshots).toMatchObject([]);
+    });
+
+    it.each`
+      signal       | exitCode     | timedOut
+      ${'SIGTERM'} | ${undefined} | ${true}
+      ${'SIGKILL'} | ${undefined} | ${true}
+      ${undefined} | ${143}       | ${true}
+      ${undefined} | ${1}         | ${false}
+    `(
+      'returns an artifact error with signal=$signal, exitCode=$exitCode, timedOut=$timedOut',
+      async ({ signal, exitCode, timedOut }) => {
+        const timeoutMessage =
+          'Command timed out after 900000 milliseconds: poetry update --lock --no-interaction dep1';
+        const err = new ExecError(
+          timedOut ? timeoutMessage : 'Command failed',
+          {
+            cmd: 'poetry update --lock --no-interaction dep1',
+            stdout: 'Resolving dependencies...',
+            stderr: '',
+            options: { timeout: 900000 },
+            signal,
+            exitCode,
+            timedOut,
+          },
+        );
+        const execSnapshots = mockExecAll(err);
+        fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+
+        await expect(
+          updateArtifacts({
+            packageFileName: 'pyproject.toml',
+            updatedDeps: [{ depName: 'dep1' }],
+            newPackageFileContent: '{}',
+            config,
+          }),
+        ).resolves.toEqual([
+          {
+            artifactError: {
+              fileName: 'poetry.lock',
+              stderr: timedOut ? timeoutMessage : 'Resolving dependencies...',
+              ...(timedOut && { timedOut: true }),
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'poetry update --lock --no-interaction dep1' },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { err },
+          'Failed to update poetry.lock file',
+        );
+      },
+    );
+
+    it('still aborts on an external SIGTERM', async () => {
+      mockExecAll(
+        new ExecError('Interrupted', {
+          cmd: 'poetry update --lock --no-interaction dep1',
+          stdout: '',
+          stderr: '',
+          options: {},
+          signal: 'SIGTERM',
+        }),
+      );
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+
+      await expect(
+        updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1' }],
+          newPackageFileContent: '{}',
+          config,
+        }),
+      ).rejects.toThrow(TEMPORARY_ERROR);
     });
 
     it('returns updated poetry.lock when doing lockfile maintenance', async () => {
