@@ -1,4 +1,8 @@
-import { type ToolMetadata, tools } from '@renovatebot/base-image';
+import {
+  type ToolMetadata,
+  type ToolType,
+  tools,
+} from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global.ts';
@@ -21,55 +25,90 @@ import {
 } from './types.ts';
 
 /**
- * The versioning of the Containerbase tools whose versions are looked up with the `containerbase` datasource.
+ * The Containerbase tools whose versions are looked up with the `containerbase` datasource.
+ */
+const containerbaseTools: readonly ToolName[] = [
+  'apm',
+  'bazelisk',
+  'bun',
+  'bundler',
+  'cocoapods',
+  'composer',
+  'conan',
+  'copier',
+  'corepack',
+  'dart',
+  'deno',
+  'devbox',
+  'dotnet',
+  'elixir',
+  'erlang',
+  'flutter',
+  'flux',
+  'gh',
+  'gleam',
+  'golang',
+  'gradle',
+  'hashin',
+  'helm',
+  'helmfile',
+  'java',
+  'jb',
+  'kustomize',
+  'maven',
+  'mise',
+  'nix',
+  'node',
+  'npm',
+  'pdm',
+  'php',
+  'pip-tools',
+  'pipenv',
+  'pixi',
+  'pnpm',
+  'poetry',
+  'python',
+  'ruby',
+  'uv',
+  'vendir',
+  'yarn',
+  'yarn-slim',
+];
+
+/**
+ * The versioning of the tools which a package manager installs, by its type.
+ */
+const typeVersioning: Record<ToolType, VersioningName> = {
+  dotnet: 'nuget',
+  gem: 'ruby',
+  npm: 'npm',
+  pip: 'pep440',
+};
+
+/**
+ * The tools whose versions or constraints need another versioning than `npm`
+ * or the one of their type.
  */
 const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
-  apm: 'semver',
-  bazelisk: 'semver',
-  bun: 'npm',
-  bundler: 'ruby',
-  cocoapods: 'ruby',
   composer: 'composer',
-  conan: 'pep440',
-  copier: 'pep440',
-  corepack: 'npm',
-  dart: 'npm',
   deno: 'deno',
-  devbox: 'semver',
-  dotnet: 'semver',
-  elixir: 'semver',
   erlang: 'semver-coerced',
-  flutter: 'npm',
-  flux: 'semver',
-  gh: 'semver',
-  gleam: 'semver',
-  golang: 'npm',
   gradle: 'gradle',
-  hashin: 'pep440',
-  helm: 'semver',
-  helmfile: 'semver',
-  java: 'npm',
-  jb: 'semver',
-  kustomize: 'semver',
   maven: 'maven',
-  mise: 'npm',
-  nix: 'semver',
   node: 'node',
-  npm: 'npm',
-  pdm: 'semver',
   php: 'composer',
-  'pip-tools': 'pep440',
-  pipenv: 'pep440',
   pixi: 'conda',
-  pnpm: 'npm',
-  poetry: 'pep440',
   python: 'python',
   ruby: 'ruby',
-  uv: 'pep440',
-  vendir: 'semver',
-  yarn: 'npm',
-  'yarn-slim': 'npm',
 };
+
+/**
+ * Returns the versioning of a tool: its own one, the one of its type, or `npm`.
+ */
+export function getToolVersioning(toolName: ToolName): VersioningName {
+  const { type }: ToolMetadata = tools[toolName];
+  return toolVersioning[toolName] ?? (type ? typeVersioning[type] : 'npm');
+}
 
 /**
  * Builds the lookup config of each supported tool, `rust` keeps its own datasource.
@@ -83,11 +122,11 @@ function getAllToolConfig(): Partial<Record<ToolName, ToolConfig>> {
       versioning: 'rust-release-channel',
     },
   };
-  for (const [toolName, versioning] of Object.entries(toolVersioning)) {
-    toolConfig[toolName as ToolName] = {
+  for (const toolName of containerbaseTools) {
+    toolConfig[toolName] = {
       datasource: 'containerbase',
       packageName: toolName,
-      versioning,
+      versioning: getToolVersioning(toolName),
     };
   }
   return toolConfig;

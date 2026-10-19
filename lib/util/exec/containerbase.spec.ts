@@ -7,6 +7,7 @@ import {
   generateInstallCommands,
   getSupportedToolNames,
   getToolConfig,
+  getToolVersioning,
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
@@ -68,6 +69,40 @@ describe('util/exec/containerbase', () => {
         versioning: 'rust-release-channel',
       });
     });
+
+    it.each`
+      toolName     | versioning
+      ${'helm'}    | ${'npm'}
+      ${'dotnet'}  | ${'npm'}
+      ${'java'}    | ${'npm'}
+      ${'pnpm'}    | ${'npm'}
+      ${'erlang'}  | ${'semver-coerced'}
+      ${'bundler'} | ${'ruby'}
+      ${'pdm'}     | ${'pep440'}
+      ${'node'}    | ${'node'}
+      ${'php'}     | ${'composer'}
+    `(
+      'uses the $versioning versioning for $toolName',
+      ({ toolName, versioning }) => {
+        expect(getToolConfig(toolName)).toEqual({
+          datasource: 'containerbase',
+          packageName: toolName,
+          versioning,
+        });
+      },
+    );
+
+    it.each`
+      toolName    | versioning
+      ${'paket'}  | ${'nuget'}
+      ${'kas'}    | ${'pep440'}
+      ${'docker'} | ${'npm'}
+    `(
+      'derives the $versioning versioning for $toolName',
+      ({ toolName, versioning }) => {
+        expect(getToolVersioning(toolName)).toBe(versioning);
+      },
+    );
 
     it('supports the tools of both datasources', () => {
       expect(getSupportedToolNames()).toIncludeAllMembers(['node', 'rust']);
