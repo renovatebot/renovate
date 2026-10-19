@@ -67,6 +67,22 @@ describe('modules/manager/git-submodules/update', () => {
         upgrade,
       });
       expect(update).toBe('');
+      expect(gitMock.submoduleUpdate).toHaveBeenCalledTimes(2);
+      expect(gitMock.submoduleUpdate).toHaveBeenNthCalledWith(1, [
+        '--checkout',
+        '--init',
+        '--recursive',
+        'renovate',
+      ]);
+      expect(gitMock.submoduleUpdate).toHaveBeenNthCalledWith(2, [
+        '--checkout',
+        '--init',
+        '--recursive',
+        'renovate',
+      ]);
+      expect(
+        gitMock.submoduleUpdate.mock.invocationCallOrder[1],
+      ).toBeGreaterThan(gitMock.checkout.mock.invocationCallOrder[0]);
     });
 
     it('requests Git authentication for submodule commands', async () => {
