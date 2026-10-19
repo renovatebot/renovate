@@ -122,8 +122,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
-        specifier: 13.134.0
-        version: 13.134.0(zod@4.6.6)
+        specifier: 13.134.1
+        version: 13.134.1(zod@4.6.6)
       '@renovatebot/detect-tools':
         specifier: 4.0.22
         version: 4.0.22
@@ -2038,8 +2038,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.134.0':
-    resolution: {integrity: sha512-J9il0GQs9NYSf0+adgBHq6+MobBgklhNX0iNk9k6wAJarG3wds3u6s9vSzvq41qKto59FFcn/vtTfEBtCbri1A==}
+  '@renovatebot/base-image@13.134.1':
+    resolution: {integrity: sha512-IF4pjS+kZgiWxoT06kqILKhmtujmTG275QxR8CYbpn3657Ni/AHlih0hGN81yrtUA2s0MxY7CPcpzNvjGIfUlQ==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -7447,7 +7447,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.134.0(zod@4.6.6)':
+  '@renovatebot/base-image@13.134.1(zod@4.6.6)':
     dependencies:
       '@containerbase/base': 14.43.0(zod@4.6.6)
     optionalDependencies:
