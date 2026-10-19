@@ -1,5 +1,4 @@
 import { partial } from '~test/util.ts';
-import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import type { AllConfig, RenovateConfig } from './types.ts';
@@ -41,24 +40,19 @@ describe('config/validation', () => {
     );
 
     // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
-    it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
-      const config: RenovateConfig = {
-        hostRules: [
-          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
-          {
-            dnsCache: true,
-          } as HostRule,
-        ],
+    it('returns the deprecationMsg for `dockerChildPrefix` as a warning', async () => {
+      const config: AllConfig = {
+        dockerChildPrefix: 'renovate_',
       };
       const { errors, warnings } = await configValidation.validateConfig(
-        'repo',
+        'global',
         config,
       );
       expect(errors).toBeEmptyArray();
       expect(warnings).toMatchObject([
         {
           topic: 'Deprecation Warning',
-          message: `The 'dnsCache' option is deprecated: This option is deprecated and will be removed in a future release.`,
+          message: `The 'dockerChildPrefix' option is deprecated: The usage of \`binarySource=docker\` is deprecated, and will be removed in the future`,
         },
       ]);
     });
