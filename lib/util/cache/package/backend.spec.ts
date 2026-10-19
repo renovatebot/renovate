@@ -66,6 +66,7 @@ describe('util/cache/package/backend', () => {
 
     expect(PackageCacheFile.create).toHaveBeenCalledWith('some-dir');
     expect(backend.getCacheType()).toBe('file');
+    expect(backend.getBackend()).toBe(fileBackend);
   });
 
   it('initializes redis backend', async () => {
@@ -142,5 +143,6 @@ describe('util/cache/package/backend', () => {
 
     expect(redisBackend.destroy).toHaveBeenCalled();
     expect(backend.getCacheType()).toBeUndefined();
+    expect(backend.getBackend()).toBeUndefined();
   });
 });
