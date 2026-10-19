@@ -123,7 +123,7 @@ importers:
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
         specifier: 13.135.0
-        version: 13.135.0(zod@4.6.6)
+        version: 13.135.0(zod@4.6.7)
       '@renovatebot/detect-tools':
         specifier: 4.0.22
         version: 4.0.22
@@ -392,8 +392,8 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       zod:
-        specifier: 4.6.6
-        version: 4.6.6
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.15
@@ -6066,8 +6066,8 @@ packages:
     resolution: {integrity: sha512-t5pANCF6k9rgJre7jk8DMAU4lEoI1oWWZgXk0fcvmCYQquFVWv0rf6Awwt56nnPiHb0E24dhtrpfgf9ChTCbrQ==}
     engines: {node: '>=14.18.0'}
 
-  zod@4.6.6:
-    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -6523,9 +6523,9 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.44.0(zod@4.6.6)':
+  '@containerbase/base@14.44.0(zod@4.6.7)':
     optionalDependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@containerbase/istanbul-reports-html@2.0.22':
     dependencies:
@@ -7447,18 +7447,18 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.135.0(zod@4.6.6)':
+  '@renovatebot/base-image@13.135.0(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.44.0(zod@4.6.6)
+      '@containerbase/base': 14.44.0(zod@4.6.7)
     optionalDependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@renovatebot/detect-tools@4.0.22':
     dependencies:
       fs-extra: 11.4.1
       toml-eslint-parser: 1.0.3
       upath: 3.0.8
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@renovatebot/good-enough-parser@2.0.1':
     dependencies:
@@ -9508,7 +9508,7 @@ snapshots:
       tinyglobby: 0.2.17
       unbash: 5.0.0
       yaml: 2.9.1
-      zod: 4.6.6
+      zod: 4.6.7
 
   lightningcss-android-arm64@1.33.0:
     optional: true
@@ -11698,6 +11698,6 @@ snapshots:
       '@yuku-toolchain/types': 0.18.1
       yuku-core: 0.18.1
 
-  zod@4.6.6: {}
+  zod@4.6.7: {}
 
   zwitch@2.0.4: {}
