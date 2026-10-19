@@ -1705,25 +1705,14 @@ describe('util/exec/index', () => {
         });
       });
 
-      it('has no global config override - it is only settable at the repo config level', () => {
+      it('uses the global config override if set', () => {
         GlobalConfig.set({
-          // no `gomodModInstallPath` field exists on `GlobalToolSettingsOptions`
-          toolSettings: { jvmMaxMemory: 1024 },
+          toolSettings: {
+            gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+          },
         });
 
         const res = getToolSettingsOptions(undefined);
-
-        expect(res).toMatchObject({
-          gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
-        });
-      });
-
-      it('uses the repo config override if set', () => {
-        config.toolSettings = {
-          gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
-        };
-
-        const res = getToolSettingsOptions(config.toolSettings);
 
         expect(res).toMatchObject({
           gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',

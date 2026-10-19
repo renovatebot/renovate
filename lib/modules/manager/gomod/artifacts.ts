@@ -39,6 +39,18 @@ import { getGoModulesInTidyOrder } from './package-tree.ts';
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
 
+/**
+ * `go install` names the binary after the last path element, or the one before it if that is a major version suffix like `v2`
+ */
+function getGoInstalledBinaryName(installPath: string): string {
+  const elements = installPath.split('/').filter((element) => element !== '');
+  let name = elements.pop() ?? installPath;
+  if (regEx(/^v\d+$/).test(name) && elements.length > 0) {
+    name = elements.pop()!;
+  }
+  return name;
+}
+
 async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
   config: UpdateArtifactsConfig,
@@ -56,10 +68,12 @@ async function getUpdateImportPathCmds(
     );
   }
 
-  const { gomodModInstallPath } = getToolSettingsOptions(config.toolSettings);
-  const modBinaryName = quote(
-    gomodModInstallPath.split('/').pop() ?? gomodModInstallPath,
+  const { gomodModInstallPath: configuredInstallPath } = getToolSettingsOptions(
+    config.toolSettings,
   );
+  // `@latest` or the extracted constraint is appended below, so drop any version the admin included
+  const gomodModInstallPath = configuredInstallPath.replace(regEx(/@.*$/), '');
+  const modBinaryName = quote(getGoInstalledBinaryName(gomodModInstallPath));
 
   const updateImportCommands = updatedDeps
     .filter(

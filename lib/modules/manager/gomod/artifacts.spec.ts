@@ -2268,6 +2268,12 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    GlobalConfig.set({
+      ...adminConfig,
+      toolSettings: {
+        gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+      },
+    });
     await expect(
       gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -2280,9 +2286,6 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
           constraints: {},
-          toolSettings: {
-            gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
-          },
         },
       }),
     ).resolves.toEqual([
@@ -2328,6 +2331,13 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    GlobalConfig.set({
+      ...adminConfig,
+      toolSettings: {
+        gomodModInstallPath:
+          'github.com/some-fork/mod/cmd/new-mod; echo "Sorry, $HOME has been hacked"',
+      },
+    });
     await expect(
       gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -2339,10 +2349,6 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
-          toolSettings: {
-            gomodModInstallPath:
-              'github.com/some-fork/mod/cmd/new-mod; echo "Sorry, $HOME has been hacked"',
-          },
         },
       }),
     ).resolves.toEqual([
@@ -2388,6 +2394,12 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    GlobalConfig.set({
+      ...adminConfig,
+      toolSettings: {
+        gomodModInstallPath: 'github.com/some-fork/mod/cmd/new-mod',
+      },
+    });
     await expect(
       gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -2399,9 +2411,6 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
-          toolSettings: {
-            gomodModInstallPath: 'github.com/some-fork/mod/cmd/new-mod',
-          },
         },
       }),
     ).resolves.toEqual([
@@ -2432,6 +2441,52 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
   });
+
+  it.each`
+    installPath                                  | expectedInstall                             | expectedBinary
+    ${'github.com/some-fork/mod/v2/cmd/mod/v2'}  | ${'github.com/some-fork/mod/v2/cmd/mod/v2'} | ${'mod'}
+    ${'github.com/some-fork/mod/cmd/new-mod/'}   | ${'github.com/some-fork/mod/cmd/new-mod/'}  | ${'new-mod'}
+    ${'github.com/some-fork/mod/cmd/mod@v1.2.3'} | ${'github.com/some-fork/mod/cmd/mod'}       | ${'mod'}
+  `(
+    'derives the install target and binary for $installPath',
+    async ({ installPath, expectedInstall, expectedBinary }) => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+      fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+      fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({ modified: ['go.sum'] }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+      GlobalConfig.set({
+        ...adminConfig,
+        toolSettings: { gomodModInstallPath: installPath },
+      });
+
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+        ],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'go get -d -t ./...' },
+        { cmd: `go install ${expectedInstall}@latest` },
+        {
+          cmd: `${expectedBinary} upgrade --mod-name=github.com/google/go-github/v24 -t=28`,
+        },
+        { cmd: 'go mod tidy' },
+        { cmd: 'go mod tidy' },
+      ]);
+    },
+  );
 
   it('updates import paths with latest tool version on invalid version constraint', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');

@@ -921,6 +921,8 @@ export interface GlobalToolSettingsOptions {
   jvmMemory?: number;
   /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
   nodeMaxMemory?: number;
+  /** The module path to `go install` for the `mod` binary used to update import paths on major updates */
+  gomodModInstallPath?: string;
 }
 
 /**
@@ -933,5 +935,4 @@ export interface RepoToolSettingsOptions {
   jvmMemory?: number;
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
-  gomodModInstallPath?: string;
 }

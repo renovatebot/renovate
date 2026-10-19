@@ -1654,6 +1654,28 @@ Secret names must start with an upper or lower case character and can have only 
 
 ## `token`
 
+## `toolSettings`
+
+### `toolSettings.gomodModInstallPath`
+
+Used to specify the module path of [the `mod` binary](https://github.com/marwan-at-work/mod) used to perform updates of import paths on major updates, when using [`postUpdateOptions=["gomodUpdateImportPaths"]`](./configuration-options.md#postupdateoptions).
+
+This can only be set in the global self-hosted configuration, as it controls which binary Renovate installs and runs.
+
+It is used as part of a `go install` command such as:
+
+```sh
+# i.e.
+go install ${toolSettings.gomodModInstallPath}@latest
+```
+
+Do not include a version in the value, as Renovate appends one itself. Any `@version` suffix is ignored.
+
+Use this if you're pointing Renovate to a fork of [`github.com/marwan-at-work/mod`](https://github.com/marwan-at-work/mod).
+
+The binary that's invoked is named the way `go install` names it: after the last element of the module path, or the element before it if that is a major version suffix such as `v2`.
+For example, setting this to `github.com/some-fork/mod/cmd/new-mod` installs and runs a binary named `new-mod`.
+
 ## `unicodeEmoji`
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
