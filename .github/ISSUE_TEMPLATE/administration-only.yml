@@ -10,11 +10,11 @@ body:
     attributes:
       value: |
         > [!CAUTION]
-        > <h2>Do not create an issue if you're not one of the team.</h2>
-        >
         > While all repository collaborators have technical access to this form, direct Issue creation is reserved strictly for core team members.
         >
-        > Please go back a step and select _Start a discussion_ instead. Keeping initial proposals and questions in GitHub Discussions helps us triage and manage our backlog effectively. Thank you for your cooperation!
+        > Please go back a step and select _Start a discussion_ instead of Issue.
+        >
+        > If you ignore these directions, you will be blocked from this repo.
 
   - type: textarea
     id: describe-proposed-changes
