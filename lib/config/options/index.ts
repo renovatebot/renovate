@@ -1481,6 +1481,13 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
     subType: 'string',
+    allowedValues: [
+      ...AllManagersListLiteral,
+      ...CustomManagersListLiteral,
+      ...CustomManagersListLiteral.map(
+        (manager: string) => `custom.${manager}`,
+      ),
+    ],
     mergeable: false,
     stage: 'repository',
   },
