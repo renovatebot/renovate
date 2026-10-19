@@ -146,6 +146,14 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   }
 
   /**
+   * Whether a valid cache record with at least one item exists.
+   */
+  async hasItems(): Promise<boolean> {
+    const cachedItems = await this.getItems();
+    return Object.keys(cachedItems).length > 0;
+  }
+
+  /**
    * Add or update the given items in the cache
    * without marking them as reconciled, so cached items
    * missing from `items` are kept.

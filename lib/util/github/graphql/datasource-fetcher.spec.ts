@@ -482,6 +482,48 @@ describe('util/github/graphql/datasource-fetcher', () => {
         });
       }
 
+      it('performs the regular query when no cached items exist', async () => {
+        packageCache.get.mockImplementation((_ns, key) =>
+          Promise.resolve(
+            key === `${cacheKey}:is-persistent` ? true : undefined,
+          ),
+        );
+        httpMock
+          .scope('https://api.github.com/')
+          .post('/graphql', graphqlRequestBody(100, null))
+          .reply(
+            200,
+            resp(
+              false,
+              [{ version: v2, releaseTimestamp: fresh, foo: '2' }],
+              'aaa',
+            ),
+          )
+          .post('/graphql', graphqlRequestBody(100, 'aaa'))
+          .reply(
+            200,
+            resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+          );
+
+        const res = await Datasource.query(
+          { packageName: 'foo/bar' },
+          http,
+          adapter,
+          { refresh: true },
+        );
+
+        expect(res).toEqual([
+          { version: v2, releaseTimestamp: fresh, bar: '2' },
+          { version: v1, releaseTimestamp: t1, bar: '1' },
+        ]);
+        expect(packageCache.set).not.toHaveBeenCalledWith(
+          '_test-namespace',
+          `${cacheKey}:is-refreshed`,
+          true,
+          5,
+        );
+      });
+
       it('fetches only the first page and keeps cached items', async () => {
         mockCache(undefined);
         httpMock

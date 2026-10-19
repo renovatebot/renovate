@@ -341,8 +341,8 @@ export class GithubGraphqlDatasourceFetcher<
 
   /**
    * Fetches the first page of items and merges it into the cached items while
-   * the persistence flag is set, at most once per `refreshIntervalMinutes`.
-   * Otherwise returns the result of the regular query.
+   * the persistence flag is set and cached items exist, at most once per
+   * `refreshIntervalMinutes`. Otherwise returns the result of the regular query.
    */
   private async doRefreshQuery(): Promise<ResultItem[]> {
     await this.loadPersistenceFlag();
@@ -354,6 +354,11 @@ export class GithubGraphqlDatasourceFetcher<
     const key = buildCacheKey(this.getCacheKey(), 'is-refreshed');
     const isRefreshed = await packageCache.get<true>(ns, key);
     if (isRefreshed) {
+      return this.doUniqueQuery(false);
+    }
+
+    const hasItems = await this.cacheStrategy().hasItems();
+    if (!hasItems) {
       return this.doUniqueQuery(false);
     }
     await packageCache.set(ns, key, true, refreshIntervalMinutes);

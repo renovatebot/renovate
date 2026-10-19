@@ -124,6 +124,7 @@ export interface GithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem,
 > {
   reconcile(items: GithubItem[]): Promise<boolean>;
+  hasItems(): Promise<boolean>;
   merge(items: GithubItem[]): Promise<void>;
   finalizeAndReturn(): Promise<GithubItem[]>;
 }

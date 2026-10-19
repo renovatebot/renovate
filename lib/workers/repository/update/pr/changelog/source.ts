@@ -205,9 +205,14 @@ export abstract class ChangeLogSource {
         }
 
         const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
-        const getRefreshedTags = memoize(() =>
-          this.getRefreshedTags(apiBaseUrl, repository),
-        );
+        const getRefreshedTags = memoize(async () => {
+          try {
+            return await this.getRefreshedTags(apiBaseUrl, repository);
+          } catch (err) {
+            logger.debug({ repository, err }, 'getRefreshedTags error');
+            return null;
+          }
+        });
         // Fetch releases newest-first, matching the order they're shown in the PR body.
         for (let i = validReleases.length - 1; i >= 1; i -= 1) {
           const prev = validReleases[i - 1];

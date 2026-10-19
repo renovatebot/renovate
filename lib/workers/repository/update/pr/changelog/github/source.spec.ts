@@ -435,6 +435,44 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
         );
       });
 
+      it('keeps the cached tags when refetching tags fails', async () => {
+        const freshTimestamp = DateTime.now()
+          .minus({ minutes: 5 })
+          .toISO() as Timestamp;
+        const githubTagsMock = vi
+          .spyOn(githubGraphql, 'queryTags')
+          .mockResolvedValueOnce(
+            partial<GithubTagItem>([
+              { version: 'v1.0.1' },
+              { version: 'v1.0.0' },
+            ]),
+          )
+          .mockRejectedValueOnce(new Error('unknown'));
+
+        const res = await getChangeLogJSON({
+          ...freshUpgrade,
+          newVersion: '1.0.3',
+          releases: [
+            { version: '1.0.0' },
+            { version: '1.0.1', releaseTimestamp: freshTimestamp },
+            { version: '1.0.2', releaseTimestamp: freshTimestamp },
+            { version: '1.0.3', releaseTimestamp: freshTimestamp },
+          ],
+        });
+
+        expect(res?.versions).toMatchObject([
+          { version: '1.0.3', compare: {} },
+          { version: '1.0.2', compare: {} },
+          {
+            version: '1.0.1',
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/v1.0.0...v1.0.1',
+            },
+          },
+        ]);
+        expect(githubTagsMock).toHaveBeenCalledTimes(2);
+      });
+
       it('does not cache a fresh release without compare URL', async () => {
         vi.spyOn(githubGraphql, 'queryTags').mockResolvedValue([]);
         const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
