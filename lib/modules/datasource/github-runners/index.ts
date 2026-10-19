@@ -31,7 +31,7 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '24.04', releaseTimestamp: Timestamp.parse('2024-09-25') },
       {
         version: '24.04-arm',
-        releaseTimestamp: Timestamp.parse('2024-09-25'),
+        releaseTimestamp: Timestamp.parse('2025-08-07'),
       },
       { version: '22.04', releaseTimestamp: Timestamp.parse('2022-08-09') },
       {
@@ -65,7 +65,7 @@ export class GithubRunnersDatasource extends Datasource {
         releaseTimestamp: Timestamp.parse('2026-02-26'),
       },
       { version: '15', releaseTimestamp: Timestamp.parse('2025-04-10') },
-      { version: '15-intel', releaseTimestamp: Timestamp.parse('2025-04-10') },
+      { version: '15-intel', releaseTimestamp: Timestamp.parse('2025-09-19') },
       { version: '15-large', releaseTimestamp: Timestamp.parse('2025-04-10') },
       {
         version: '15-xlarge',
