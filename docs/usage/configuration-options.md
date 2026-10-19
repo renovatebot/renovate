@@ -2344,8 +2344,8 @@ Do not combine with `hostType` in the same rule or it won't work.
 
 ### `hostRules.dnsCache`
 
-Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
+This option is deprecated and has no effect.
+Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
