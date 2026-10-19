@@ -80,7 +80,13 @@ describe('modules/datasource/github-runners/index', () => {
       });
 
       expect(res).toMatchObject({
-        releases: [{ version: '27-xlarge' }, { version: '27' }],
+        releases: [
+          {
+            version: '27-xlarge',
+            releaseTimestamp: '2026-10-15T00:00:00.000Z',
+          },
+          { version: '27', releaseTimestamp: '2026-10-15T00:00:00.000Z' },
+        ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
     });

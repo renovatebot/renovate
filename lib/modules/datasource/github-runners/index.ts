@@ -1,3 +1,4 @@
+import { Timestamp } from '../../../util/timestamp.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -54,7 +55,13 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '2019', isDeprecated: true },
       { version: '2016', isDeprecated: true },
     ],
-    xcode: [{ version: '27' }, { version: '27-xlarge' }],
+    xcode: [
+      { version: '27', releaseTimestamp: Timestamp.parse('2026-10-15') },
+      {
+        version: '27-xlarge',
+        releaseTimestamp: Timestamp.parse('2026-10-15'),
+      },
+    ],
   };
 
   public static isValidRunner(
