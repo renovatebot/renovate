@@ -1660,9 +1660,6 @@ Secret names must start with an upper or lower case character and can have only 
 
 Used to specify the module path of [the `mod` binary](https://github.com/marwan-at-work/mod) used to perform updates of import paths on major updates, when using [`postUpdateOptions=["gomodUpdateImportPaths"]`](./configuration-options.md#postupdateoptions).
 
-!!! note
-  This is a self-hosted configuration only, as controlling this at a repo level could lead to ["insider attack"](./security-and-permissions.md#execution-of-code-insider-attack).
-
 The module path provided will be used as part of a `go install` command such as:
 
 ```sh
@@ -1670,13 +1667,11 @@ The module path provided will be used as part of a `go install` command such as:
 go install ${toolSettings.gomodModInstallPath}@latest
 ```
 
-No version is needed **??**
-
-Do not include a version (`@...`) in the value, as Renovate appends one itself. Config validation reports a value that includes one, and any such suffix is ignored.
+You can control the version with the `gomodMod` [constraint (`constraints.gomodMod`)](./configuration-options.md#constraints).
 
 Use this if you're pointing Renovate to a fork of [`github.com/marwan-at-work/mod`](https://github.com/marwan-at-work/mod).
 
-The binary that's invoked is named the way `go install` names it: after the last element of the module path, or the element before it if that is a major version suffix such as `v2`.
+The binary is invoked based on the tool that was `go installed`.
 For example, setting this to `github.com/some-fork/mod/cmd/new-mod` installs and runs a binary named `new-mod`.
 
 ## `unicodeEmoji`

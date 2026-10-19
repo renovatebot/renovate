@@ -1248,7 +1248,7 @@ async function validateGlobalConfig(
         } else if (key === 'gomodModInstallPath' && val.includes('@')) {
           warnings.push({
             topic: ConfigValidationTopic.Error,
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The module path must not include a version (\`@...\`), as Renovate appends one itself.`,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The module path must not include a version (\`@...\`), as the version is set via \`constraints.gomodMod\`.`,
           });
         }
 

@@ -3069,7 +3069,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           message:
-            'Invalid value `github.com/some-fork/mod/cmd/mod@v1.2.3` for `toolSettings.gomodModInstallPath`. The module path must not include a version (`@...`), as Renovate appends one itself.',
+            'Invalid value `github.com/some-fork/mod/cmd/mod@v1.2.3` for `toolSettings.gomodModInstallPath`. The module path must not include a version (`@...`), as the version is set via `constraints.gomodMod`.',
           topic: 'Configuration Error',
         },
       ]);
