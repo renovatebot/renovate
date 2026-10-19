@@ -442,21 +442,16 @@ export async function buildSchema({
       return isInherit || isGlobal;
     }
 
-    if (o.globalOnly) {
-      if (!isGlobal) {
-        schema.not ??= {
-          anyOf: [],
-        };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
-        schema.not.anyOf.push({
-          required: [o.name],
-        });
-      }
-      return isGlobal;
+    if (!isGlobal) {
+      schema.not ??= {
+        anyOf: [],
+      };
+      // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+      schema.not.anyOf.push({
+        required: [o.name],
+      });
     }
-
-    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
-    throw new Error(`Unhandled case for \`${o.name}\``);
+    return isGlobal;
   });
 
   configurationOptions.sort((a, b) => {
