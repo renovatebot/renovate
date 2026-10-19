@@ -492,14 +492,16 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-architecture',
         key: buildCacheKey(registryHost, dockerRepository, currentDigest),
         ttlMinutes: 1440 * 28,
-        shouldCacheResult: isNonEmptyString,
       },
-      () =>
-        this._getImageArchitecture(
+      async (ctx) => {
+        const architecture = await this._getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
-        ),
+        );
+        ctx.cacheable = isNonEmptyString(architecture);
+        return architecture;
+      },
     );
   }
 
@@ -936,7 +938,7 @@ export class DockerDatasource extends Datasource {
       {
         namespace: 'datasource-docker-tags',
         key: buildCacheKey(registryHost, dockerRepository),
-        cacheable: registryHost === DOCKER_HUB,
+        public: registryHost === DOCKER_HUB,
       },
       () => this._getTags(registryHost, dockerRepository),
     );
@@ -1148,9 +1150,12 @@ export class DockerDatasource extends Datasource {
           config.currentDigest,
         ),
         fallback: true,
-        shouldCacheResult: isNonEmptyString,
       },
-      () => this._getDigest(config, newValue),
+      async (ctx) => {
+        const digest = await this._getDigest(config, newValue);
+        ctx.cacheable = isNonEmptyString(digest);
+        return digest;
+      },
     );
   }
 
@@ -1323,7 +1328,7 @@ export class DockerDatasource extends Datasource {
       {
         namespace: 'datasource-docker-releases-v2',
         key: buildCacheKey(registryHost, dockerRepository),
-        cacheable: registryHost === DOCKER_HUB,
+        public: registryHost === DOCKER_HUB,
         fallback: true,
       },
       () => this._getReleases(config),

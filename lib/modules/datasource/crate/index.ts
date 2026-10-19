@@ -152,7 +152,7 @@ export class CrateDatasource extends Datasource {
       {
         namespace: `datasource-${CrateDatasource.id}`,
         key: buildCacheKey(config.registryUrl, config.packageName),
-        cacheable: CrateDatasource.isCratesIo(config.registryUrl),
+        public: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -324,7 +324,7 @@ export class CrateDatasource extends Datasource {
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
         key: buildCacheKey(info.rawUrl, packageName),
-        cacheable: info.flavor === 'crates.io',
+        public: info.flavor === 'crates.io',
         ttlMinutes: 24 * 60, // 24 hours
       },
       () => this._getCrateMetadata(info, packageName),
@@ -656,7 +656,7 @@ export class CrateDatasource extends Datasource {
           release.version,
         ),
         ttlMinutes: 7 * 24 * 60,
-        cacheable: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
+        public: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
       },
       () => this._postprocessRelease(config, release),
     );

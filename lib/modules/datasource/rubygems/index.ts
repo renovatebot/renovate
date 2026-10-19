@@ -110,7 +110,7 @@ export class RubygemsDatasource extends Datasource {
       {
         key: buildCacheKey('releases', config.registryUrl, config.packageName),
         fallback: true,
-        cacheable: registryHostname === 'rubygems.org',
+        public: registryHostname === 'rubygems.org',
       },
       () => this.fetchReleases(config),
     );
