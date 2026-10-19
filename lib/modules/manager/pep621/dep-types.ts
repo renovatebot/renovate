@@ -33,6 +33,11 @@ export const knownDepTypes = [
     depType: 'tool.uv.sources',
     description: 'Listed under `[tool.uv.sources]`',
   },
+  {
+    depType: 'indirect',
+    description:
+      'Indirect/transitive dependency locked in `uv.lock`, but not directly specified in `pyproject.toml`',
+  },
 ] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =
