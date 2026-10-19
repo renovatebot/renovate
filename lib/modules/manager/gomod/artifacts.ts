@@ -57,7 +57,9 @@ async function getUpdateImportPathCmds(
   }
 
   const { gomodModInstallPath } = getToolSettingsOptions(config.toolSettings);
-  const modBinaryName = quote(gomodModInstallPath.split('/').pop()!);
+  const modBinaryName = quote(
+    gomodModInstallPath.split('/').pop() ?? gomodModInstallPath,
+  );
 
   const updateImportCommands = updatedDeps
     .filter(

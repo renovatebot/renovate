@@ -2279,6 +2279,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
+          constraints: {},
           toolSettings: {
             gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
           },
@@ -2327,8 +2328,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -2344,7 +2345,7 @@ describe('modules/manager/gomod/artifacts', () => {
           },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -2387,8 +2388,8 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
+    await expect(
+      gomod.updateArtifacts({
         packageFileName: 'go.mod',
         updatedDeps: [
           { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
@@ -2403,7 +2404,7 @@ describe('modules/manager/gomod/artifacts', () => {
           },
         },
       }),
-    ).toEqual([
+    ).resolves.toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
