@@ -442,18 +442,16 @@ export async function buildSchema({
       return isInherit || isGlobal;
     }
 
-    if (o.globalOnly) {
-      if (!isGlobal) {
-        schema.not ??= {
-          anyOf: [],
-        };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
-        schema.not.anyOf.push({
-          required: [o.name],
-        });
-      }
-      return isGlobal;
+    if (!isGlobal) {
+      schema.not ??= {
+        anyOf: [],
+      };
+      // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+      schema.not.anyOf.push({
+        required: [o.name],
+      });
     }
+    return isGlobal;
   });
 
   configurationOptions.sort((a, b) => {
