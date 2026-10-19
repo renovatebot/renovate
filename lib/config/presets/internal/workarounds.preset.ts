@@ -26,6 +26,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
+      'workarounds:groupings',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -133,6 +134,22 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
+  groupings: {
+    description: 'Groupings for specific package updates.',
+    packageRules: [
+      {
+        description:
+          'Group SimpleWebAuthn major updates to keep browser and server compatible.',
+        groupName: 'SimpleWebAuthn',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          '@simplewebauthn/browser',
+          '@simplewebauthn/server',
+        ],
+        matchUpdateTypes: ['major'],
       },
     ],
   },
