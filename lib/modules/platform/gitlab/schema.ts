@@ -10,10 +10,27 @@ export const LastPipelineId = z
   })
   .transform(({ last_pipeline }) => last_pipeline.id);
 
+/**
+ * https://docs.gitlab.com/api/merge_trains/#get-the-status-of-a-merge-request-on-a-merge-train
+ */
+export const MergeTrainCarStatus = z
+  .object({
+    status: z.enum(['idle', 'stale', 'fresh', 'merged', 'merging']),
+  })
+  .transform(({ status }) => status);
+
 const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
 });
+
+export const GitLabProjectMembers = LooseArray(
+  z.object({
+    username: z.string(),
+    access_level: z.number().optional(),
+  }),
+);
+export type GitLabProjectMember = z.infer<typeof GitLabProjectMembers>[number];
 
 export const GitLabMergeRequest = DeepNullish(
   z.object({

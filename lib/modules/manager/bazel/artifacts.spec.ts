@@ -4,6 +4,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
+import type { BazelManagerData } from './types.ts';
 
 describe('modules/manager/bazel/artifacts', () => {
   it('updates commit-based http archive', async () => {
@@ -48,7 +49,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -106,7 +107,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -165,7 +166,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -212,7 +213,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(500);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -247,7 +248,7 @@ describe('modules/manager/bazel/artifacts', () => {
       newValue: '0.6.2',
     };
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -275,7 +276,7 @@ describe('modules/manager/bazel/artifacts', () => {
       newValue: '0.6.2',
     };
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -302,7 +303,7 @@ describe('modules/manager/bazel/artifacts', () => {
       newValue: '0.6.2',
     };
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -330,7 +331,7 @@ describe('modules/manager/bazel/artifacts', () => {
       newValue: '0.6.2',
     };
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -388,7 +389,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -455,7 +456,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -522,7 +523,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -589,7 +590,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -659,7 +660,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .replace(inputHash, outputHash);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -731,7 +732,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .replace(inputHash, outputHash);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
@@ -793,7 +794,7 @@ describe('modules/manager/bazel/artifacts', () => {
       .reply(200, tarContent);
 
     const res = await updateArtifacts(
-      partial<UpdateArtifact>({
+      partial<UpdateArtifact<BazelManagerData>>({
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,

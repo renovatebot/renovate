@@ -10,6 +10,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token.ts';
+import { clone } from '../../../util/clone.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
 import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
@@ -146,24 +147,11 @@ export async function extract(
   const configHash = instrument('fingerprint', () =>
     fingerprint(generateFingerprintConfig(config)),
   );
-  // istanbul ignore if
   if (
     overwriteCache &&
     isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
   ) {
-    packageFiles = cachedExtract.packageFiles;
-    try {
-      for (const files of Object.values(packageFiles)) {
-        for (const file of files) {
-          for (const dep of file.deps) {
-            delete dep.updates;
-          }
-        }
-      }
-      logger.debug('Deleted cached dep updates');
-    } catch (err) {
-      logger.info({ err }, 'Error deleting cached dep updates');
-    }
+    packageFiles = clone(cachedExtract.packageFiles);
   } else {
     await instrument(
       'checkoutBranch',
@@ -183,7 +171,7 @@ export async function extract(
         sha: baseBranchSha!,
         configHash,
         extractionFingerprints,
-        packageFiles,
+        packageFiles: clone(packageFiles),
       };
     }
 
@@ -268,7 +256,7 @@ export function reportMaliciousSkippedDependencies(
               manager: manager,
               datasource: dep.datasource,
             },
-            `Dependency ${dep.depName} is currently using a malicious version`,
+            'Dependency is currently using a malicious version',
           );
 
           // and make sure that it then gets updates proposed in the update phase
@@ -287,7 +275,7 @@ export function reportMaliciousSkippedDependencies(
               datasource: dep.datasource,
               newVersions,
             },
-            `Dependency ${dep.depName} has update(s) proposed which would update you to a malicious version - skipping`,
+            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
           );
         }
       }
@@ -295,14 +283,9 @@ export function reportMaliciousSkippedDependencies(
   }
 }
 
-export async function update(
+export function update(
   config: RenovateConfig,
   branches: BranchConfig[],
-): Promise<WriteUpdateResult | undefined> {
-  let res: WriteUpdateResult | undefined;
-  if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, branches);
-  }
-
-  return res;
+): Promise<WriteUpdateResult> {
+  return writeUpdates(config, branches);
 }

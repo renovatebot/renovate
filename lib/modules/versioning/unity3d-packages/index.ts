@@ -1,7 +1,6 @@
 import { regEx } from '../../../util/regex.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { VersioningApi } from '../types.ts';
+import type { GenericVersion, VersioningApi } from '../types.ts';
 
 export const id = 'unity3d-packages';
 export const displayName = 'Unity3D Packages';
@@ -13,9 +12,9 @@ export const supportsRanges = false;
 
 class Unity3dPackagesVersioningApi extends GenericVersioningApi {
   private static readonly parsingRegex = regEx(
-    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-?(?<label>.*))/,
+    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-?(?<label>.*))/,
   );
-  private static readonly unstableRegex = regEx(/^(exp.|pre.|preview.)/);
+  private static readonly unstableRegex = regEx(/^(?:exp.|pre.|preview.)/);
 
   protected _parse(version: string): GenericVersion | null {
     const matches = Unity3dPackagesVersioningApi.parsingRegex.exec(version);

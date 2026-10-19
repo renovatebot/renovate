@@ -18,9 +18,13 @@ export class JenkinsPluginsDatasource extends Datasource {
     super(JenkinsPluginsDatasource.id);
   }
 
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
-  override readonly defaultRegistryUrls = ['https://updates.jenkins.io'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://updates.jenkins.io'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -38,7 +42,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }

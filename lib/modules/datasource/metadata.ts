@@ -15,11 +15,12 @@ import { manualChangelogUrls, manualSourceUrls } from './metadata-manual.ts';
 import type { ReleaseResult } from './types.ts';
 
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
+const gitPlusPrefix = regEx('^git\\+');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
   // Replace git@ sourceUrl with https so hostname can be parsed
-  const massagedUrl = massageGitAtUrl(sourceUrl);
+  const massagedUrl = massageGitPrefixes(sourceUrl);
 
   // Check if URL is valid
   const parsedUrl = parseUrl(massagedUrl);
@@ -34,7 +35,7 @@ export function massageUrl(sourceUrl: string): string {
 }
 
 export function massageGithubUrl(url: string): string {
-  const massagedUrl = massageGitAtUrl(url);
+  const massagedUrl = massageGitPrefixes(url);
 
   return massagedUrl
     .replace('http:', 'https:')
@@ -50,22 +51,24 @@ export function massageGithubUrl(url: string): string {
 }
 
 export function massageGitlabUrl(url: string): string {
-  const massagedUrl = massageGitAtUrl(url);
+  const massagedUrl = massageGitPrefixes(url);
 
   return massagedUrl
     .replace('http:', 'https:')
+    .replace('ssh://git@', 'https://')
     .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
     .replace(regEx(/\.git$/i), '');
 }
 
-function massageGitAtUrl(url: string): string {
-  let massagedUrl = url;
+function massageGitPrefixes(url: string): string {
+  let massagedUrl = url.replace(gitPlusPrefix, '');
 
-  if (url.startsWith('git@')) {
-    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  if (massagedUrl.startsWith('git@')) {
+    massagedUrl = massagedUrl.replace(':', '/').replace('git@', 'https://');
   }
+
   return massagedUrl;
 }
 

@@ -4,6 +4,7 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { expect } from 'vitest';
 import { logger } from '../../../../logger/index.ts';
 import customConfig from './__fixtures__/config.cjs';
@@ -54,9 +55,9 @@ describe('workers/global/config/parse/file', () => {
         './__fixtures__/',
         filePath,
       );
-      expect(
-        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
-      ).toEqual(customConfig);
+      await expect(
+        file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
+      ).resolves.toEqual(customConfig);
     });
 
     it('migrates', async () => {
@@ -67,8 +68,9 @@ describe('workers/global/config/parse/file', () => {
       // for coverage
       const relativePath = upath.relative(process.cwd(), configFile);
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: relativePath });
-      expect(res).toMatchSnapshot();
-      expect(res.rangeStrategy).toBe('bump');
+      expect(res).toEqual({
+        rangeStrategy: 'bump',
+      });
     });
 
     it('warns if config is invalid', async () => {
@@ -79,14 +81,12 @@ describe('workers/global/config/parse/file', () => {
                 "prTitle":"something",
               };
       `;
-      fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, fileContent, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      fs.unlinkSync(configFile);
-    });
-
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
-      expect(await file.getConfig({})).toBeDefined();
+      await fs.promises.unlink(configFile);
     });
 
     it.each([
@@ -113,10 +113,12 @@ describe('workers/global/config/parse/file', () => {
       async (fileName, fileContent) => {
         processExitSpy.mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
-        fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+        await fs.promises.writeFile(configFile, fileContent, {
+          encoding: 'utf8',
+        });
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
         expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-        fs.unlinkSync(configFile);
+        await fs.promises.unlink(configFile);
       },
     );
 
@@ -150,7 +152,12 @@ describe('workers/global/config/parse/file', () => {
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
+        {
+          err: expect.objectContaining({
+            message: 'CI_API_V4_URL is not defined',
+          }),
+        },
+        'Error parsing config file due to unresolved variable(s)',
       );
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
@@ -161,12 +168,44 @@ describe('workers/global/config/parse/file', () => {
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
-      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, `{"token": "abc"}`, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
 
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
+    });
+
+    describe('default config file', () => {
+      let cwdSpy: MockInstance<typeof process.cwd>;
+
+      // resolve the default `config.js` in a directory without such a file
+      beforeEach(() => {
+        cwdSpy = vi
+          .spyOn(process, 'cwd')
+          .mockReturnValue(upath.join(tmp.path, 'no-config'));
+      });
+
+      afterEach(() => {
+        cwdSpy.mockRestore();
+      });
+
+      it('returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+        await expect(file.getConfig({})).resolves.toEqual({});
+      });
+
+      it('skips an unreadable default config file', async () => {
+        fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
+        const res = await file.getConfig({});
+
+        expect(res).toEqual({});
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Error reading or parsing file - skipping',
+        );
+      });
     });
 
     it('exports env variables to environment from processEnv object', async () => {
@@ -179,7 +218,7 @@ describe('workers/global/config/parse/file', () => {
                 "labels": ["renovate"]
               }
       `;
-      fs.writeFileSync(configFile, fileContent1, {
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -190,8 +229,8 @@ describe('workers/global/config/parse/file', () => {
       });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
-      fs.unlinkSync(configFile);
-      delete process.env.SOME_KEY;
+      await fs.promises.unlink(configFile);
+      vi.stubEnv('SOME_KEY', undefined);
     });
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
@@ -206,7 +245,7 @@ describe('workers/global/config/parse/file', () => {
                 "labels": ["renovate"]
               }
       `;
-      fs.writeFileSync(configFile, fileContent1, {
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -219,9 +258,9 @@ describe('workers/global/config/parse/file', () => {
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
-      fs.unlinkSync(configFile);
-      delete process.env.SOME_KEY;
-      delete process.env.valid_Key;
+      await fs.promises.unlink(configFile);
+      vi.stubEnv('SOME_KEY', undefined);
+      vi.stubEnv('valid_Key', undefined);
     });
   });
 

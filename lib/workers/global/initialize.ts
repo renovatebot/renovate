@@ -57,7 +57,7 @@ async function checkVersions(): Promise<void> {
   }
 }
 
-function setGlobalHostRules(config: RenovateConfig): void {
+function setGlobalHostRules(config: AllConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
     applySecretsAndVariablesToConfig({
@@ -65,7 +65,10 @@ function setGlobalHostRules(config: RenovateConfig): void {
       deleteVariables: false,
       deleteSecrets: false,
     });
-    config.hostRules.forEach((rule) => hostRules.add(rule));
+    for (const rule of config.hostRules) {
+      // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host, and exempt from `allowedHeaders` altogether - `allowedHeaders` constrains what a repository or preset may set, not the administrator, mirroring how `allowedEnv` does not constrain the administrator's own `env`
+      hostRules.add(rule, { trusted: true });
+    }
   }
 }
 
@@ -91,6 +94,7 @@ export async function globalInitialize(
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
+  // registered a second time in case initialization changed them
   setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);

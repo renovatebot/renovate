@@ -1,19 +1,13 @@
 import _nodeSchedule from '../../../data/node-js-schedule.json' with { type: 'json' };
 import type { Nullish } from '../../../types/index.ts';
 import semver from '../semver/index.ts';
+import type {
+  NodeJsData,
+  NodeJsSchedule,
+  NodeJsScheduleWithVersion,
+} from './types.ts';
 
-interface NodeJsSchedule {
-  alpha?: string;
-  lts?: string;
-  maintenance?: string;
-  end: string;
-  start: string;
-  codename?: string;
-}
-
-export type NodeJsData = Record<string, NodeJsSchedule>;
 const nodeSchedule: NodeJsData = _nodeSchedule;
-export type NodeJsScheduleWithVersion = { version: string } & NodeJsSchedule;
 
 const nodeCodenames = new Map<string, NodeJsScheduleWithVersion>();
 for (const version of Object.keys(nodeSchedule)) {

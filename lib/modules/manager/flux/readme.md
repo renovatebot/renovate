@@ -61,6 +61,16 @@ Renovate can update `oci` references from `OCIRepository` resources.
 
 The `flux` manager updates `OCIRepository` fields that have a `digest`, `tag` or both keys.
 
+### Helm chart `depType`
+
+Renovate sets the `HelmChart` `depType` on the Helm charts it extracts from:
+
+- `HelmRelease` resources, including charts from OCI `HelmRepository` sources
+- `HelmChart` resources
+- `OCIRepository` resources that set `spec.layerSelector.mediaType` to `application/vnd.cncf.helm.chart.content.v1.tar+gzip`
+
+Other `OCIRepository` resources have no `depType`.
+
 ### Flux system manifests support
 
 Renovate supports updating Flux system manifests generated during [Flux installation](https://fluxcd.io/docs/installation/#customize-flux-manifests).

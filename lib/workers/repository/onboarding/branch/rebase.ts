@@ -19,7 +19,7 @@ export async function rebaseOnboardingBranch(
 
   // skip platforms that do not support html comments in pr
   const platform = GlobalConfig.get('platform');
-  if (!['github', 'gitea', 'gitlab'].includes(platform)) {
+  if (!['github', 'gitea', 'gitlab', 'forgejo'].includes(platform)) {
     logger.debug(
       `Skipping rebase as ${platform} does not support html comments`,
     );

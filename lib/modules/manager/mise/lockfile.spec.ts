@@ -2,6 +2,7 @@ import {
   getConfigType,
   getLockFileName,
   getLockedVersion,
+  getSidecarDir,
 } from './lockfile.ts';
 import type { MiseLockFile } from './schema.ts';
 
@@ -39,6 +40,26 @@ describe('modules/manager/mise/lockfile', () => {
       ${'project/conf.d/node.toml'} | ${'project/mise.lock'}
     `('returns $expected for $configPath', ({ configPath, expected }) => {
       expect(getLockFileName(configPath)).toBe(expected);
+    });
+  });
+
+  describe('getSidecarDir()', () => {
+    it.each`
+      lockFileName                           | expected
+      ${'mise.lock'}                         | ${'.mise/locks'}
+      ${'subdir/mise.lock'}                  | ${'subdir/.mise/locks'}
+      ${'.mise/mise.lock'}                   | ${'.mise/locks'}
+      ${'.config/mise/mise.lock'}            | ${'.config/mise/locks'}
+      ${'.config/mise.lock'}                 | ${'.config/mise/locks'}
+      ${'subdir/.config/mise/mise.lock'}     | ${'subdir/.config/mise/locks'}
+      ${'mise/mise.lock'}                    | ${'mise/.mise/locks'}
+      ${'mise.local.lock'}                   | ${'.mise/locks/mise.local'}
+      ${'mise.test.lock'}                    | ${'.mise/locks/mise.test'}
+      ${'.config/mise/mise.test.local.lock'} | ${'.config/mise/locks/mise.test.local'}
+      ${'.config/mise.local.lock'}           | ${'.config/mise/locks/mise.local'}
+      ${'.mise/mise.local.lock'}             | ${'.mise/locks/mise.local'}
+    `('returns $expected for $lockFileName', ({ lockFileName, expected }) => {
+      expect(getSidecarDir(lockFileName)).toBe(expected);
     });
   });
 

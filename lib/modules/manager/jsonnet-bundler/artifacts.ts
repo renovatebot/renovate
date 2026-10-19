@@ -1,10 +1,10 @@
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type {
@@ -12,8 +12,16 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
+import type { JsonnetBundlerManagerData } from './types.ts';
 
-function dependencyUrl(dep: PackageDependency): string {
+function dependencyUrl(
+  dep: PackageDependency<JsonnetBundlerManagerData>,
+): string {
   const url = dep.packageName!;
   if (dep.managerData?.subdir) {
     return url.concat('/', dep.managerData.subdir);
@@ -22,7 +30,7 @@ function dependencyUrl(dep: PackageDependency): string {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<JsonnetBundlerManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, config } = updateArtifact;
   logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');
@@ -37,7 +45,7 @@ export async function updateArtifacts(
 
   const jsonnetBundlerToolConstraint: ToolConstraint = {
     toolName: 'jb',
-    constraint: config.constraints?.jb,
+    constraint: await resolveToolConstraint(config, 'jb'),
   };
 
   const execOptions: ExecOptions = {
@@ -65,47 +73,11 @@ export async function updateArtifacts(
       return null;
     }
 
-    const res: UpdateArtifactsResult[] = [];
-
-    for (const f of coerceArray(status.modified)) {
-      res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
-      });
-    }
-    for (const f of coerceArray(status.not_added)) {
-      res.push({
-        file: {
-          type: 'addition',
-          path: f,
-          contents: await readLocalFile(f),
-        },
-      });
-    }
-    for (const f of coerceArray(status.deleted)) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
-    }
-
-    return res;
+    return fileChangesToArtifactResults(await collectFileChanges(status));
   } catch (err) /* istanbul ignore next */ {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.stderr,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

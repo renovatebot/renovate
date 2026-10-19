@@ -33,11 +33,12 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     config = await getParsedContent(configFile);
   } catch (err) {
     if (err instanceof SyntaxError || err instanceof TypeError) {
-      logger.fatal({ error: err.stack }, 'Could not parse config file');
+      logger.fatal({ err }, 'Could not parse config file');
       process.exit(1);
     } else if (err instanceof ReferenceError) {
       logger.fatal(
-        `Error parsing config file due to unresolved variable(s): ${err.message}`,
+        { err },
+        'Error parsing config file due to unresolved variable(s)',
       );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {

@@ -12,10 +12,12 @@ export const defaultConfig = {
   ),
 };
 
-export const supportedDatasources = [
-  GithubTagsDatasource.id,
-  GitlabTagsDatasource.id,
-  GiteaTagsDatasource.id,
+export const supportedDatasources = Array.from(
+  new Set([
+    GithubTagsDatasource.id,
+    GitlabTagsDatasource.id,
+    GiteaTagsDatasource.id,
 
-  ...Object.values(allToolConfig).map((conf) => conf.datasource),
-];
+    ...Object.values(allToolConfig).map((conf) => conf.datasource),
+  ]),
+);

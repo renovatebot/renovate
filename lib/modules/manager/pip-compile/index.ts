@@ -7,6 +7,7 @@ export { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['requirements.txt'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const displayName = 'pip-compile';
 export const url =

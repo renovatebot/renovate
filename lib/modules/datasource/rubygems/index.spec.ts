@@ -13,12 +13,59 @@ const rubygemsOrgVersions = codeBlock`
   foobar 1.0.0,2.0.0,3.0.0 01010101010101010101010101010101
 `;
 
-const rubyMarshal = (data: unknown) => Buffer.from(marshal.dump(data));
+function rubyMarshal(data: unknown) {
+  return Buffer.from(marshal.dump(data));
+}
 
 describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       memCache.clear();
+    });
+
+    it('preserves timestamps for packages with generic and native releases', async () => {
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(
+          200,
+          codeBlock`
+          created_at: 2023-01-01T00:00:00.000Z
+          ---
+          foobar 1.0.0,1.0.0-arm64-darwin 01010101010101010101010101010101
+        `,
+        )
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [
+          { number: '1.0.0', platform: 'ruby', created_at: '2023-01-01' },
+          {
+            number: '1.0.0',
+            platform: 'arm64-darwin',
+            created_at: '2023-01-02',
+          },
+        ])
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
+
+      const result = await new RubygemsDatasource().getReleases({
+        packageName: 'foobar',
+        registryUrl: 'https://rubygems.org',
+      });
+
+      expect(result).toEqual({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-01T00:00:00.000Z',
+            constraints: { platform: ['ruby'] },
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-02T00:00:00.000Z',
+            constraints: { platform: ['arm64-darwin'] },
+          },
+        ],
+      });
     });
 
     it('returns null for missing pkg', async () => {
@@ -30,14 +77,14 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, '')
         .get('/api/v1/dependencies?gems=foobar')
         .reply(200, rubyMarshal([]));
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           versioning: rubyVersioning.id,
           datasource: RubygemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for rubygems.org package miss', async () => {

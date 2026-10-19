@@ -44,6 +44,13 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
+}
+
+export interface RepoConfigParams {
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
 }
 
 export interface PrDebugData {
@@ -196,8 +203,7 @@ export interface EnsureCommentRemovalConfigByContent {
   content: string;
 }
 export type EnsureCommentRemovalConfig =
-  | EnsureCommentRemovalConfigByTopic
-  | EnsureCommentRemovalConfigByContent;
+  EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent;
 
 export type EnsureIssueResult = 'updated' | 'created';
 
@@ -235,6 +241,8 @@ export interface Platform {
    * Experimental features might be changed or even removed at any time.
    */
   experimental?: true;
+  /** Applies options read from the repository config after `initRepo`. */
+  applyRepoConfig?(config: RepoConfigParams): void;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -270,21 +278,33 @@ export interface Platform {
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the given branch is protected by a merge queue (GitHub)
+   * or a merge train (GitLab), so PRs targeting it must be merged through
+   * the queue. `mergePr` is then expected to add the PR to the queue instead
+   * of merging it directly.
+   *
+   * Platforms where the feature is configured per repository rather than
+   * per branch may ignore the branch name.
+   */
+  isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the PR is currently waiting in a merge queue, so it must
+   * not be enqueued or modified again.
+   */
+  isPrInMergeQueue?(number: number): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
-  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
-    // TODO: can be undefined or null ? #22198
-    context: string | null | undefined,
+    context: string,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
-      | EnsureCommentRemovalConfigByTopic
-      | EnsureCommentRemovalConfigByContent,
+      EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr | null>;
+  getPr(number: number, refreshCache?: boolean): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   reattemptPlatformAutomerge?(
@@ -313,7 +333,6 @@ export interface Platform {
   tryReuseAutoclosedPr?(pr: Pr, newTitle: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
@@ -328,6 +347,7 @@ export interface PlatformScm {
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
   getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
