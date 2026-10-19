@@ -26,6 +26,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { Lazy } from '../../../util/lazy.ts';
@@ -36,7 +37,12 @@ import { coerceString } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import type { AuthJson } from './types.ts';
 import {
@@ -228,13 +234,7 @@ export async function updateArtifacts({
     }
     logger.debug('Returning updated composer.lock');
     const res: UpdateArtifactsResult[] = [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: await readLocalFile(lockFileName),
-        },
-      },
+      fileAddition(lockFileName, await readLocalFile(lockFileName)),
     ];
 
     if (!commitVendorFiles) {
@@ -242,25 +242,15 @@ export async function updateArtifacts({
     }
 
     logger.debug(`Committing vendor files in ${vendorDir}`);
-    for (const f of [...status.modified, ...status.not_added]) {
-      if (f.startsWith(vendorDir)) {
-        res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
-        });
-      }
-    }
-    for (const f of status.deleted) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
-    }
+    res.push(
+      ...fileChangesToArtifactResults([
+        ...(await collectFileChanges(status, {
+          include: ['modified', 'not_added'],
+          filter: (f) => f.startsWith(vendorDir),
+        })),
+        ...(await collectFileChanges(status, { include: ['deleted'] })),
+      ]),
+    );
 
     return res;
   } catch (err) {
@@ -279,13 +269,6 @@ export async function updateArtifacts({
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

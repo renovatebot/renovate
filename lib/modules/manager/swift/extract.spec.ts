@@ -50,6 +50,46 @@ describe('modules/manager/swift/extract', () => {
       });
     });
 
+    it('ignores a comma where `from` expects a colon', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo", from, "1.0.0")
+          ]
+        )
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: expect.stringContaining('from'),
+          },
+        ],
+      });
+    });
+
+    it('ignores a comma where `from:` expects a version', () => {
+      const content = `
+        let package = Package(
+          name: "MyPackage",
+          dependencies: [
+            .package(url: "https://github.com/example/repo", from:, "1.0.0")
+          ]
+        )
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+        ],
+      });
+    });
+
     it('extracts GitLab dependencies with gitlab-tags datasource', () => {
       const content = `
         let package = Package(

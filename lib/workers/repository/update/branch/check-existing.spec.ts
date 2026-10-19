@@ -59,5 +59,17 @@ describe('workers/repository/update/branch/check-existing', () => {
         `Found closed PR with current title`,
       );
     });
+
+    it('returns null if the branchPrefixOld check also misses', async () => {
+      config.branchPrefixOld = 'deps/';
+      platform.findPr.mockResolvedValue(null);
+
+      await expect(prAlreadyExisted(config)).resolves.toBeNull();
+
+      expect(platform.findPr).toHaveBeenCalledTimes(2);
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        'Found closed PR with branchPrefixOld',
+      );
+    });
   });
 });

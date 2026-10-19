@@ -111,8 +111,6 @@ export function getExtraDepsNotice(
 
   if (otherDepsCount === 1) {
     noticeLines.push(`- ${otherDepsCount} additional dependency was updated`);
-    // NOTE: a zero count adds no line. A coverage-ignore hint cannot suppress
-    // the implicit else on an `else if`.
   } else if (otherDepsCount > 1) {
     noticeLines.push(
       `- ${otherDepsCount} additional dependencies were updated`,

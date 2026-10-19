@@ -185,6 +185,7 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        trustedHeaderNames: [],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
@@ -203,23 +204,24 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({});
     });
 
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      // used when registering rules for a repository before `GlobalConfig` reflects it, i.e. a `repositories[]` entry's own `allowedHeaders` override
+    it('does not filter a trusted rule against allowedHeaders', () => {
+      // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator - mirrors `allowedEnv`'s exemption of the admin's own `env`
+      GlobalConfig.reset();
+
       add(
         {
           matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+          headers: { Authorization: 'from-admin' },
         },
-        { allowedHeaders: ['Authorization'] },
+        { trusted: true },
       );
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { Authorization: 'from-admin' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['Authorization'],
       });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(logger.logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -285,29 +287,6 @@ describe('util/host-rules', () => {
         "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
       );
     });
-
-    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
-      expect(
-        filterAllowedHeaders(
-          [
-            {
-              matchHost: 'registry.example.com',
-              headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
-            },
-          ],
-          ['Authorization'],
-        ),
-      ).toEqual([
-        {
-          matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin' },
-        },
-      ]);
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['X-Dropped'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
-    });
   });
 
   describe('find()', () => {
@@ -318,6 +297,21 @@ describe('util/host-rules', () => {
     it('warns and returns empty for bad search', () => {
       // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
+    });
+
+    it('returns a truly empty object for no match, not one with an undefined trustedHeaderNames', () => {
+      // `toEqual({})` alone would not catch this: it ignores `undefined`-valued properties, but callers elsewhere use `Object.keys(...).length`/`isNonEmptyObject` to detect an empty result
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-From-Admin': 'yes' },
+        },
+        { trusted: true },
+      );
+
+      expect(
+        Object.keys(find({ url: 'https://unrelated.example.com' })),
+      ).toEqual([]);
     });
 
     it('needs exact host matches', () => {
@@ -503,6 +497,27 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
+    it('matches a URL carrying user:pass@ against a matchHost without credentials', () => {
+      add({
+        matchHost: 'https://domain.com',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com' }).token).toBe('def');
+    });
+
+    it('matches a URL carrying user:pass@ against a path-scoped matchHost', () => {
+      add({
+        matchHost: 'https://domain.com/simple/',
+        token: 'def',
+      });
+      expect(find({ url: 'https://user:pass@domain.com/simple/' }).token).toBe(
+        'def',
+      );
+      expect(
+        find({ url: 'https://user:pass@domain.com/other/' }).token,
+      ).toBeUndefined();
+    });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,
@@ -564,6 +579,7 @@ describe('util/host-rules', () => {
         token: 'from-admin',
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -586,6 +602,7 @@ describe('util/host-rules', () => {
       ).toEqual({
         headers: { 'X-Custom': 'from-admin' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Custom'],
       });
     });
 
@@ -604,6 +621,7 @@ describe('util/host-rules', () => {
       // both rules are untrusted, so the second masks the first rather than being applied over it
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Custom': 'from-repo' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -627,10 +645,12 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other': 'yes' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Other'],
       });
       expect(find({ url: 'https://trusted.example.com' })).toEqual({
         headers: { 'X-Api-Key': 'secret' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 
@@ -655,6 +675,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://untrusted.example.com' })).toEqual({
         headers: { 'X-Other-Repo-Header': 'yes', 'X-From-Admin': 'yes' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin'],
       });
     });
 
@@ -676,6 +697,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'from-repo', 'X-Other-Admin-Header': 'yes' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Other-Admin-Header'],
       });
     });
 
@@ -732,6 +754,19 @@ describe('util/host-rules', () => {
       ).toEqual({ 'X-Custom': 'from-inherited' });
     });
 
+    it('keeps `trustedHeaderNames` as an explicit key, set to `[]`, when only untrusted headers match', () => {
+      // an empty array, not an absent key, so that `findMatchingRule`'s hostType fallbacks - which combine results with `{ ...fallbackResult, ...res }` - have this result's `trustedHeaderNames` override a fallback's own, rather than a plain object spread letting the fallback's value show through underneath an unrelated `res.headers`; see "does not let a fallback hostType's trustedHeaderNames leak onto a rule's own untrusted headers" in `lib/util/http/host-rules.spec.ts` for that merge end-to-end
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Custom': 'from-repo' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Custom': 'from-repo' },
+        trustedHeaderNames: [],
+      });
+    });
+
     it('does not let a rule whose headers were all denied suppress another rule of its tier', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
       add({
@@ -747,6 +782,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'yes' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -1093,6 +1129,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'longest' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -1115,6 +1152,7 @@ describe('util/host-rules', () => {
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
         headers: { 'X-Custom': 'longest' },
+        trustedHeaderNames: [],
       });
     });
 
@@ -1135,7 +1173,10 @@ describe('util/host-rules', () => {
           url: 'https://registry.example.com/some/path/resource',
           hostType: NugetDatasource.id,
         }),
-      ).toEqual({ headers: { 'X-Custom': 'from-hostType-rule' } });
+      ).toEqual({
+        headers: { 'X-Custom': 'from-hostType-rule' },
+        trustedHeaderNames: [],
+      });
     });
 
     it('keeps the headers of an earlier matching rule when a later one sets none', () => {
@@ -1151,6 +1192,7 @@ describe('util/host-rules', () => {
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'yes' },
         timeout: 10000,
+        trustedHeaderNames: [],
       });
     });
 

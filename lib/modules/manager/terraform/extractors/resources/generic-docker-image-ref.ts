@@ -93,7 +93,9 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
           },
         ];
       }
-      const test = getDep(parentElement, true, config.registryAliases);
+      const test = getDep(parentElement, {
+        registryAliases: config.registryAliases,
+      });
       const dep: PackageDependency = {
         ...abstractDep,
         ...test,

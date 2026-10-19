@@ -226,5 +226,103 @@ describe('modules/manager/helm-values/extract', () => {
         ],
       });
     });
+
+    it('extracts an inline image with the version in a sibling tag key', () => {
+      const content = codeBlock`
+        cli:
+          image: us-docker.pkg.dev/org/team/flux-cli
+          tag: v2.7.2
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: 'v2.7.2',
+          depName: 'us-docker.pkg.dev/org/team/flux-cli',
+          datasource: 'docker',
+          versioning: 'docker',
+          replaceString: 'v2.7.2',
+        },
+      ]);
+    });
+
+    it('extracts an inline image with the version in a sibling version key', () => {
+      const content = codeBlock`
+        helmController:
+          image: ghcr.io/fluxcd/helm-controller
+          version: v1.4.2
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: 'v1.4.2',
+          depName: 'ghcr.io/fluxcd/helm-controller',
+          datasource: 'docker',
+          versioning: 'docker',
+          replaceString: 'v1.4.2',
+        },
+      ]);
+    });
+
+    it('prefers an embedded inline version over a sibling tag key', () => {
+      const content = codeBlock`
+        cli:
+          image: ghcr.io/fluxcd/flux-cli:v2.7.2
+          tag: v9.9.9
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: 'v2.7.2',
+          depName: 'ghcr.io/fluxcd/flux-cli',
+        },
+      ]);
+      expect(result?.deps).toHaveLength(1);
+    });
+
+    it('extracts an inline image without version or sibling tag key as version-less', () => {
+      const content = codeBlock`
+        cli:
+          image: ghcr.io/fluxcd/flux-cli
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'ghcr.io/fluxcd/flux-cli',
+        },
+      ]);
+      expect(result?.deps[0].currentValue).toBeUndefined();
+    });
+
+    it('ignores a sibling tag key when the inline image has a digest', () => {
+      const content = codeBlock`
+        cli:
+          image: docker.io/library/nginx@sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809
+          tag: 1.18-alpine
+      `;
+      const result = extractPackageFile(content, packageFile, config);
+      expect(result?.deps).toMatchObject([
+        {
+          currentDigest:
+            'sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809',
+          depName: 'docker.io/library/nginx',
+        },
+      ]);
+    });
+
+    it('extracts a sibling-keyed image with registry aliases', () => {
+      const content = codeBlock`
+        cli:
+          image: quay.io/org/flux-cli
+          tag: v2.7.2
+      `;
+      const result = extractPackageFile(content, packageFile, configAliases);
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: 'v2.7.2',
+          depName: 'quay.io/org/flux-cli',
+          packageName: 'registry.internal/mirror/quay.io/org/flux-cli',
+        },
+      ]);
+    });
   });
 });

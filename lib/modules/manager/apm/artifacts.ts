@@ -9,9 +9,14 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -58,19 +63,14 @@ export async function updateArtifacts({
     // instruction files go stale after a bump. `apm_modules/` is the gitignored
     // cache, so it is not reported here.
     const status = await getRepoStatus();
-    const res: UpdateArtifactsResult[] = [];
-    for (const path of [...status.modified, ...status.not_added]) {
-      // the manifest itself is committed as an updated package file
-      if (path === packageFileName) {
-        continue;
-      }
-      res.push({
-        file: { type: 'addition', path, contents: await readLocalFile(path) },
-      });
-    }
-    for (const path of status.deleted) {
-      res.push({ file: { type: 'deletion', path } });
-    }
+    const res = fileChangesToArtifactResults([
+      ...(await collectFileChanges(status, {
+        include: ['modified', 'not_added'],
+        // the manifest itself is committed as an updated package file
+        filter: (path) => path !== packageFileName,
+      })),
+      ...(await collectFileChanges(status, { include: ['deleted'] })),
+    ]);
     if (!res.length) {
       logger.debug('apm: no changed files after install');
       return null;
@@ -81,13 +81,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, `Failed to update ${lockFileName}`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `${err}`,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

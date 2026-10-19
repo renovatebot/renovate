@@ -769,6 +769,17 @@ describe('modules/manager/terraform/extract', () => {
       });
     });
 
+    it('leaves a source too short to be a registry module alone', async () => {
+      const src = codeBlock`
+        module "short" {
+          source = "hashicorp/consul"
+        }
+      `;
+      await expect(extractPackageFile(src, '2.tf', {})).resolves.toMatchObject({
+        deps: [{ depType: 'module' }],
+      });
+    });
+
     it('returns null with only not added resources', async () => {
       const src = codeBlock`
         resource "test_resource" "relative" {
@@ -846,6 +857,27 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'redis',
           depType: 'helm_release',
           registryUrls: ['https://charts.helm.sh/stable'],
+        },
+      ]);
+    });
+
+    it('does not treat a repository qualified chart name as a local chart', async () => {
+      const src = codeBlock`
+        resource "helm_release" "nginx" {
+          name    = "nginx"
+          chart   = "bitnami/nginx"
+          version = "15.0.0"
+        }
+      `;
+
+      const res = await extractPackageFile(src, 'helm.tf', {});
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '15.0.0',
+          datasource: 'helm',
+          depName: 'bitnami/nginx',
+          depType: 'helm_release',
         },
       ]);
     });

@@ -11,6 +11,7 @@ import {
   replaceUrlPath,
   resolveBaseUrl,
   resolveSameOriginUrl,
+  stripUrlCredentials,
   trimSlashes,
   trimTrailingSlash,
 } from './url.ts';
@@ -226,6 +227,37 @@ describe('util/url', () => {
       'https://domain.com/some/path',
     );
     expect(massageHostUrl('https://domain.com')).toBe('https://domain.com');
+  });
+
+  describe('stripUrlCredentials', () => {
+    it('removes username and password', () => {
+      expect(stripUrlCredentials('https://user:pass@example.com/simple/')).toBe(
+        'https://example.com/simple/',
+      );
+    });
+
+    it('removes a placeholder-style userinfo', () => {
+      expect(
+        stripUrlCredentials('https://${USER}:${PASS}@example.com/simple/'),
+      ).toBe('https://example.com/simple/');
+    });
+
+    it('returns the href unchanged when there is no userinfo', () => {
+      expect(stripUrlCredentials('https://example.com/simple/')).toBe(
+        'https://example.com/simple/',
+      );
+    });
+
+    it('returns null for an unparseable URL', () => {
+      expect(stripUrlCredentials('not-a-url')).toBeNull();
+    });
+
+    it('accepts a URL instance without mutating it', () => {
+      const url = parseUrl('https://user:pass@example.com/simple/')!;
+      expect(stripUrlCredentials(url)).toBe('https://example.com/simple/');
+      expect(url.username).toBe('user');
+      expect(url.password).toBe('pass');
+    });
   });
 
   describe('resolveSameOriginUrl', () => {

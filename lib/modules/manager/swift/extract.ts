@@ -354,9 +354,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = '.package(url: [depName], from:';
         } else if (label === SPACE) {
           currentValue += substr;
-          // NOTE: a label that is none of the above ends the manifest, so the
-          // implicit else never runs. A coverage-ignore hint cannot suppress it
-          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -372,9 +369,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = 'dependencies: [';
         } else if (label === SPACE) {
           currentValue += substr;
-          // NOTE: a label that is none of the above ends the manifest, so the
-          // implicit else never runs. A coverage-ignore hint cannot suppress it
-          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -389,9 +383,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = '.package(url: [depName], [rangeFrom][rangeOp]';
         } else if (label === SPACE) {
           currentValue += substr;
-          // NOTE: a label that is none of the above ends the manifest, so the
-          // implicit else never runs. A coverage-ignore hint cannot suppress it
-          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -406,9 +397,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = 'dependencies: [';
         } else if (label === SPACE) {
           currentValue += substr;
-          // NOTE: a label that is none of the above ends the manifest, so the
-          // implicit else never runs. A coverage-ignore hint cannot suppress it
-          // on an `else if`.
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';

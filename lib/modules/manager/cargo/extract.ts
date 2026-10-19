@@ -33,7 +33,7 @@ function extractFromSection(
   dependencies: PackageDependency<CargoManagerData>[] | undefined,
   cargoRegistries: CargoRegistries,
   target?: string,
-): PackageDependency[] {
+): PackageDependency<CargoManagerData>[] {
   if (!dependencies) {
     return [];
   }
@@ -196,7 +196,7 @@ export async function extractPackageFile(
   */
   const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
-  let targetDeps: PackageDependency[] = [];
+  let targetDeps: PackageDependency<CargoManagerData>[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach((target) => {
@@ -224,7 +224,7 @@ export async function extractPackageFile(
   }
 
   const workspaceSection = cargoManifest.workspace;
-  let workspaceDeps: PackageDependency[] = [];
+  let workspaceDeps: PackageDependency<CargoManagerData>[] = [];
   if (workspaceSection) {
     workspaceDeps = extractFromSection(
       workspaceSection.dependencies,
@@ -249,9 +249,6 @@ export async function extractPackageFile(
   if (packageSection) {
     if (isString(packageSection.version)) {
       version = packageSection.version;
-      // NOTE: a version that is neither a string nor a workspace reference
-      // leaves it unset. A coverage-ignore hint cannot suppress the implicit
-      // else on an `else if`.
     } else if (
       isObject(packageSection.version) &&
       cargoManifest.workspace?.package?.version
@@ -265,7 +262,10 @@ export async function extractPackageFile(
     packageFile,
     'Cargo.lock',
   );
-  const res: PackageFileContent = { deps, packageFileVersion: version };
+  const res: PackageFileContent<CargoManagerData> = {
+    deps,
+    packageFileVersion: version,
+  };
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,

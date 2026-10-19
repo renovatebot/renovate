@@ -633,6 +633,7 @@ export async function mergeRenovateConfig(
       migratedConfig.errors,
     );
   }
+  // v8 ignore else -- migration always leaves a warnings array behind
   if (migratedConfig.warnings) {
     returnConfig.warnings = [
       ...coerceArray(returnConfig.warnings),
@@ -742,7 +743,7 @@ export function applyHostRules(
   }
 
   logger.debug('Setting hostRules from config');
-  // `hostRules.add` enforces `allowedHeaders` on every rule it registers
+  // `hostRules.add` enforces `allowedHeaders` on every untrusted rule it registers - a `trusted` rule (see `options`) is exempt
   for (const rule of config.hostRules) {
     try {
       hostRules.add(rule, options);

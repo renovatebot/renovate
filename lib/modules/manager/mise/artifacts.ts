@@ -1,9 +1,10 @@
-import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
@@ -12,6 +13,8 @@ import type {
   ToolConstraint,
 } from '../../../util/exec/types.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
@@ -20,8 +23,13 @@ import type {
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
-import { getConfigType, getLockFileName } from './lockfile.ts';
+import {
+  artifactErrorResult,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
+import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
 
 /**
  * First mise release that supports the features this manager relies on:
@@ -117,6 +125,21 @@ async function getMiseLockToolConstraints(
       constraint: await resolveToolConstraint(config, 'ruby'),
     },
   ];
+}
+
+/**
+ * Collects the native dependency sidecars which `mise lock` wrote beside the
+ * lock file. The lock file records each sidecar's path and digest, so they
+ * have to be committed together. A version change moves a sidecar to a new
+ * directory, so this includes new untracked files and deleted ones.
+ *
+ * @see https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars
+ */
+async function getSidecarChanges(
+  lockFileName: string,
+): Promise<UpdateArtifactsResult[]> {
+  const status = await getRepoStatus(getSidecarDir(lockFileName));
+  return fileChangesToArtifactResults(await collectFileChanges(status));
 }
 
 /**
@@ -230,47 +253,27 @@ export async function updateArtifacts({
     : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
     if (newLockFileContent) {
       await writeLocalFile(lockFileName, newLockFileContent);
     }
-    await exec(commands, execOptions);
-    const refreshedLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (
-      !refreshedLockFileContent ||
-      originalLockFileContent === refreshedLockFileContent
-    ) {
-      return null;
-    }
-
-    logger.debug({ lockFileName }, 'Returning updated mise lock file');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: refreshedLockFileContent,
-        },
-      },
+    const lockFileResults = await updateLockFile({
+      lockFileName,
+      existingLockFileContent: originalLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: () => exec(commands, execOptions),
+    });
+    const results = [
+      ...coerceArray(lockFileResults),
+      ...(await getSidecarChanges(lockFileName)),
     ];
+    return results.length ? results : null;
   } catch (err) {
-    // istanbul ignore if: not worth testing
+    /* v8 ignore if -- defensive rethrow, not worth testing */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
 
-    const errorOutput = [err.stdout, err.stderr, err.message]
-      .filter(isString)
-      .join('\n');
-
     logger.warn({ err, lockFileName }, 'Error updating mise lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: errorOutput,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

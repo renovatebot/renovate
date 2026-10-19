@@ -148,8 +148,6 @@ export const Repos = z
         gitRepos[repo.name] = repo;
       } else if (repo.type === 'path') {
         pathRepos[repo.name] = repo;
-        // NOTE: the union above has no other member, so the implicit else never
-        // runs. A coverage-ignore hint cannot suppress it on an `else if`.
       } else if (repo.type === 'disable-packagist') {
         packagist = false;
       }
@@ -258,7 +256,7 @@ export const ComposerExtract = z
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<ComposerManagerData>[] = [];
 
     const profiles = [
       {
@@ -296,7 +294,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<ComposerManagerData> = {
           depType,
           depName,
           currentValue,

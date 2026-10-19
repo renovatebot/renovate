@@ -52,9 +52,10 @@ function replaceZipEntryName(
 }
 
 const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
-const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
+const releaseBackendUrl =
+  TerraformProviderDatasource.getDefaultRegistryUrls()[1];
 const terraformCloudReleaseBackendUrl =
-  TerraformProviderDatasource.defaultRegistryUrls[0];
+  TerraformProviderDatasource.getDefaultRegistryUrls()[0];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
 const terraformCloudSDCJson = Fixtures.get(
   'service-discovery.json',

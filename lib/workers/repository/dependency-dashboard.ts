@@ -407,7 +407,7 @@ export async function ensureDependencyDashboard(
     for (const [manager, fileNames] of Object.entries(packageFiles)) {
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
-          const name = dep.packageName ?? dep.depName;
+          const name = dep.packageName;
           const replacementUpdate = dep.updates?.find(
             (update) => update.updateType === 'replacement',
           );
@@ -472,7 +472,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'The following dependencies are either deprecated or have replacements available.\n\n';
+      '> The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -728,7 +728,7 @@ export function getAbandonedPackagesMd(
   // Keep the note outside the `<details>` block: GitHub only renders alert
   // callouts at the top level of a body, not inside collapsible sections.
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
@@ -779,11 +779,19 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += '## Vulnerabilities\n\n';
 
-  const vulnerabilityFetcher = await Vulnerabilities.create();
-  const vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
-    config,
-    packageFiles,
-  );
+  let vulnerabilities: Vulnerability[];
+  try {
+    const vulnerabilityFetcher = await Vulnerabilities.create();
+    vulnerabilities = await vulnerabilityFetcher.fetchVulnerabilities(
+      config,
+      packageFiles,
+    );
+  } catch (err) {
+    logger.warn({ err }, 'Unable to read vulnerability information');
+    result +=
+      'Renovate was unable to fetch CVE information from [osv.dev](https://osv.dev) this run.\n\n';
+    return result;
+  }
 
   if (vulnerabilities.length === 0) {
     result +=
