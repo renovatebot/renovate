@@ -7,6 +7,7 @@ import type { ResolvedChildEnv } from '../exec/utils.ts';
 import type { GitNoVerifyOption } from './types.ts';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
+let credentialStoreConfig: GitConfigEntry[] = [];
 
 export function setNoVerify(value: GitNoVerifyOption[]): void {
   if (!isArray(value, isString)) {
@@ -17,6 +18,17 @@ export function setNoVerify(value: GitNoVerifyOption[]): void {
 
 export function getNoVerify(): GitNoVerifyOption[] {
   return noVerify;
+}
+
+/**
+ * Sets the Git config entries which make the credential store the only credential source for Git processes started by Renovate.
+ */
+export function setCredentialStoreConfig(entries: GitConfigEntry[]): void {
+  credentialStoreConfig = [...entries];
+}
+
+export function getCredentialStoreConfig(): GitConfigEntry[] {
+  return credentialStoreConfig;
 }
 
 export function simpleGitConfig(): Partial<SimpleGitOptions> {
