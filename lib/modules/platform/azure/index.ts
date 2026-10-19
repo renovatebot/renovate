@@ -50,6 +50,7 @@ import type {
   PlatformResult,
   Pr,
   ReattemptPlatformAutomergeConfig,
+  RepoConfigParams,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -231,6 +232,14 @@ export async function getJsonFile(
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
+}
+
+export function applyRepoConfig({ azureWorkItemType }: RepoConfigParams): void {
+  if (!azureWorkItemType || azureWorkItemType === config.workItemType) {
+    return;
+  }
+  config.workItemType = azureWorkItemType;
+  issueService = new IssueService(config);
 }
 
 export async function initRepo({
