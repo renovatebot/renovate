@@ -159,7 +159,6 @@ export interface ToolConstraint {
 
 export interface ToolConfig {
   datasource: string;
-  extractVersion?: string;
   packageName: string;
   versioning: VersioningName;
 }

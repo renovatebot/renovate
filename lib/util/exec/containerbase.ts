@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
+import type { VersioningName } from '../../versioning-list.generated.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
@@ -20,244 +21,82 @@ import {
 } from './types.ts';
 
 /**
+ * The versioning of the Containerbase tools whose versions are looked up with the `containerbase` datasource.
+ */
+const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
+  apm: 'semver',
+  bazelisk: 'semver',
+  bun: 'npm',
+  bundler: 'ruby',
+  cocoapods: 'ruby',
+  composer: 'composer',
+  conan: 'pep440',
+  copier: 'pep440',
+  corepack: 'npm',
+  dart: 'npm',
+  deno: 'deno',
+  devbox: 'semver',
+  dotnet: 'semver',
+  elixir: 'semver',
+  erlang: 'semver-coerced',
+  flutter: 'npm',
+  flux: 'semver',
+  gh: 'semver',
+  gleam: 'semver',
+  golang: 'npm',
+  gradle: 'gradle',
+  hashin: 'pep440',
+  helm: 'semver',
+  helmfile: 'semver',
+  java: 'npm',
+  jb: 'semver',
+  kustomize: 'semver',
+  maven: 'maven',
+  mise: 'npm',
+  nix: 'semver',
+  node: 'node',
+  npm: 'npm',
+  pdm: 'semver',
+  php: 'composer',
+  'pip-tools': 'pep440',
+  pipenv: 'pep440',
+  pixi: 'conda',
+  pnpm: 'npm',
+  poetry: 'pep440',
+  python: 'python',
+  ruby: 'ruby',
+  uv: 'pep440',
+  vendir: 'semver',
+  yarn: 'npm',
+  'yarn-slim': 'npm',
+};
+
+/**
+ * Builds the lookup config of each supported tool, `rust` keeps its own datasource.
+ */
+function getAllToolConfig(): Partial<Record<ToolName, ToolConfig>> {
+  const toolConfig: Partial<Record<ToolName, ToolConfig>> = {
+    // the `containerbase` datasource has no nightly releases, which `install-tool` also installs
+    rust: {
+      datasource: 'rust-version',
+      packageName: 'rust',
+      versioning: 'rust-release-channel',
+    },
+  };
+  for (const [toolName, versioning] of Object.entries(toolVersioning)) {
+    toolConfig[toolName as ToolName] = {
+      datasource: 'containerbase',
+      packageName: toolName,
+      versioning,
+    };
+  }
+  return toolConfig;
+}
+
+/**
  * A subset of Containerbase tools that are supported by Renovate to look up version numbers for.
  */
-export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
-  apm: {
-    datasource: 'github-releases',
-    packageName: 'microsoft/apm',
-    versioning: 'semver',
-    extractVersion: '^v(?<version>.*)$',
-  },
-  bazelisk: {
-    datasource: 'github-releases',
-    packageName: 'bazelbuild/bazelisk',
-    versioning: 'semver',
-  },
-  bun: {
-    datasource: 'github-releases',
-    packageName: 'oven-sh/bun',
-    extractVersion: '^bun-v(?<version>.*)$',
-    versioning: 'npm',
-  },
-  bundler: {
-    datasource: 'rubygems',
-    packageName: 'bundler',
-    versioning: 'ruby',
-  },
-  cocoapods: {
-    datasource: 'rubygems',
-    packageName: 'cocoapods',
-    versioning: 'ruby',
-  },
-  composer: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/composer-prebuild',
-    versioning: 'composer',
-  },
-  conan: {
-    datasource: 'pypi',
-    packageName: 'conan',
-    versioning: 'pep440',
-  },
-  copier: {
-    datasource: 'pypi',
-    packageName: 'copier',
-    versioning: 'pep440',
-  },
-  corepack: {
-    datasource: 'npm',
-    packageName: 'corepack',
-    versioning: 'npm',
-  },
-  deno: {
-    datasource: 'github-releases',
-    packageName: 'denoland/deno',
-    versioning: 'deno',
-  },
-  devbox: {
-    datasource: 'github-releases',
-    packageName: 'jetify-com/devbox',
-    versioning: 'semver',
-  },
-  dotnet: {
-    datasource: 'dotnet-version',
-    packageName: 'dotnet-sdk',
-    versioning: 'semver',
-  },
-  erlang: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/erlang-prebuild',
-    versioning: 'semver-coerced',
-  },
-  elixir: {
-    datasource: 'github-releases',
-    packageName: 'elixir-lang/elixir',
-    versioning: 'semver',
-  },
-  flux: {
-    datasource: 'github-releases',
-    packageName: 'fluxcd/flux2',
-    versioning: 'semver',
-  },
-  gh: {
-    datasource: 'github-releases',
-    packageName: 'cli/cli',
-    versioning: 'semver',
-  },
-  gleam: {
-    datasource: 'github-releases',
-    packageName: 'gleam-lang/gleam',
-    versioning: 'semver',
-  },
-  golang: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/golang-prebuild',
-    versioning: 'npm',
-  },
-  gradle: {
-    datasource: 'gradle-version',
-    packageName: 'gradle',
-    versioning: 'gradle',
-  },
-  hashin: {
-    datasource: 'pypi',
-    packageName: 'hashin',
-    versioning: 'pep440',
-  },
-  helm: {
-    datasource: 'github-releases',
-    packageName: 'helm/helm',
-    versioning: 'semver',
-  },
-  helmfile: {
-    datasource: 'github-releases',
-    packageName: 'helmfile/helmfile',
-    versioning: 'semver',
-  },
-  java: {
-    datasource: 'java-version',
-    packageName: 'java?system=true',
-    versioning: 'npm',
-  },
-  jb: {
-    datasource: 'github-releases',
-    packageName: 'jsonnet-bundler/jsonnet-bundler',
-    versioning: 'semver',
-  },
-  kustomize: {
-    datasource: 'github-releases',
-    packageName: 'kubernetes-sigs/kustomize',
-    extractVersion: '^kustomize/v(?<version>.*)$',
-    versioning: 'semver',
-  },
-  maven: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/maven-prebuild',
-    versioning: 'maven',
-  },
-  mise: {
-    datasource: 'github-releases',
-    packageName: 'jdx/mise',
-    versioning: 'npm',
-  },
-  nix: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/nix-prebuild',
-    versioning: 'semver',
-  },
-  node: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/node-prebuild',
-    versioning: 'node',
-  },
-  npm: {
-    datasource: 'npm',
-    packageName: 'npm',
-    versioning: 'npm',
-  },
-  pdm: {
-    datasource: 'github-releases',
-    packageName: 'pdm-project/pdm',
-    versioning: 'semver',
-  },
-  php: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/php-prebuild',
-    versioning: 'composer',
-  },
-  'pip-tools': {
-    datasource: 'pypi',
-    packageName: 'pip-tools',
-    versioning: 'pep440',
-  },
-  pipenv: {
-    datasource: 'pypi',
-    packageName: 'pipenv',
-    versioning: 'pep440',
-  },
-  pnpm: {
-    datasource: 'npm',
-    packageName: 'pnpm',
-    versioning: 'npm',
-  },
-  pixi: {
-    datasource: 'github-releases',
-    packageName: 'prefix-dev/pixi',
-    versioning: 'conda',
-    extractVersion: '^v(?<version>.*)$',
-  },
-  poetry: {
-    datasource: 'pypi',
-    packageName: 'poetry',
-    versioning: 'pep440',
-  },
-  python: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/python-prebuild',
-    versioning: 'python',
-  },
-  ruby: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/ruby-prebuild',
-    versioning: 'ruby',
-  },
-  rust: {
-    datasource: 'rust-version',
-    packageName: 'rust',
-    versioning: 'rust-release-channel',
-  },
-  uv: {
-    datasource: 'pypi',
-    packageName: 'uv',
-    versioning: 'pep440',
-  },
-  yarn: {
-    datasource: 'npm',
-    packageName: 'yarn',
-    versioning: 'npm',
-  },
-  'yarn-slim': {
-    datasource: 'npm',
-    packageName: 'yarn',
-    versioning: 'npm',
-  },
-  dart: {
-    datasource: 'dart-version',
-    packageName: 'dart',
-    versioning: 'npm',
-  },
-  flutter: {
-    datasource: 'github-releases',
-    packageName: 'containerbase/flutter-prebuild',
-    versioning: 'npm',
-  },
-  vendir: {
-    datasource: 'github-releases',
-    packageName: 'carvel-dev/vendir',
-    versioning: 'semver',
-  },
-} as const;
+export const allToolConfig = getAllToolConfig();
 
 /**
  * All Containerbase `tool`s that Renovate supports configuring the version of.
