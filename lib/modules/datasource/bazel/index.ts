@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -87,7 +88,7 @@ export class BazelDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

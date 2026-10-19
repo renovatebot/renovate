@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import {
   defaultRegistryUrl,
@@ -69,8 +70,7 @@ export class GitlabReleasesDatasource extends Datasource<GitlabHttp> {
     return withCache(
       {
         namespace: `datasource-${GitlabReleasesDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}/${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

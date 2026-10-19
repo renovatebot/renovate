@@ -170,6 +170,15 @@
       "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "lib/modules/manager/github-actions/artifacts.spec.ts"
+      ],
+      "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
     }
   ]
 }
