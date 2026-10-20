@@ -453,6 +453,7 @@ export async function validateConfig(
               );
             } else if (type === 'array' && val) {
               if (isArray(val)) {
+                validateStringArray(key, val, currentPath, errors);
                 for (const [subIndex, subval] of val.entries()) {
                   if (isObject(subval)) {
                     const subValidation = await validateConfig(
@@ -1226,6 +1227,7 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val) && key !== 'repositories') {
+        validateStringArray(key, val, currentPath, errors);
         for (const [subIndex, subval] of val.entries()) {
           if (isObject(subval)) {
             const subValidation = await validateConfig(
@@ -1377,6 +1379,27 @@ function getPossibleConfigFileNames({
   }
 
   return filenames;
+}
+
+function validateStringArray(
+  key: string,
+  val: unknown[],
+  currentPath: string | undefined,
+  errors: ValidationMessage[],
+): void {
+  const option = optionsByName.get(key);
+  if (
+    option?.type === 'array' &&
+    option.subType === 'string' &&
+    // these report the invalid entries with a more specific message
+    !['extends', 'commitTrailers'].includes(key) &&
+    !val.every(isString)
+  ) {
+    errors.push({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}\` should be a list of strings`,
+    });
+  }
 }
 
 function describeAllowedValues(option: RenovateOptions): string {
