@@ -1198,6 +1198,17 @@ async function validateGlobalConfig(
     // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
+        if (optionSupportsTemplating.has(key)) {
+          try {
+            template.validate(val);
+          } catch {
+            errors.push({
+              topic: ConfigValidationTopic.Error,
+              message: `Invalid template in config path: ${currentPath}`,
+            });
+          }
+        }
+
         if (
           key === 'onboardingConfigFileName' &&
           !getPossibleConfigFileNames({
