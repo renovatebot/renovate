@@ -1327,6 +1327,22 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
   },
   {
+    name: 'nugetConfig',
+    scopes: sharedScopes,
+    description: 'String copy of `nuget.config` file.',
+    stage: 'branch',
+    type: 'string',
+  },
+  {
+    name: 'nugetConfigMerge',
+    scopes: ['repo', 'manager'],
+    description:
+      'Whether to merge `config.nugetConfig` with repo `nuget.config` content if both are found.',
+    stage: 'branch',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'skipArtifactsUpdate',
     scopes: sharedScopes,
     description: "Skip Renovate's automatic artifact updating.",
