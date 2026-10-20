@@ -4011,6 +4011,18 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'gomodModInstallPath',
+    description:
+      'The full path to `go install` a `mod` binary, for updating import paths on major updates.',
+    type: 'string',
+    default: 'github.com/marwan-at-work/mod/cmd/mod',
+    globalOnly: true,
+    parents: ['toolSettings'],
+    supportedManagers: ['gomod'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'constraintsVersioning',
     scopes: lookupScopes,
     description:

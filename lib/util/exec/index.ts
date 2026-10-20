@@ -1,7 +1,10 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
-import type { RepoToolSettingsOptions } from '../../config/types.ts';
+import type {
+  GlobalToolSettingsOptions,
+  RepoToolSettingsOptions,
+} from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { coerceArray } from '../array.ts';
@@ -225,7 +228,7 @@ export async function exec(
  * We do not have a default that is set for `nodeMaxMemory`, so it must remain as optional.
  */
 type ResolvedToolSettingsOptions = Required<
-  Omit<RepoToolSettingsOptions, 'nodeMaxMemory'>
+  Omit<RepoToolSettingsOptions & GlobalToolSettingsOptions, 'nodeMaxMemory'>
 > &
   Pick<RepoToolSettingsOptions, 'nodeMaxMemory'>;
 
@@ -243,6 +246,8 @@ export function getToolSettingsOptions(
     jvmMaxMemory,
     jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
     nodeMaxMemory: defaults?.nodeMaxMemory,
+    gomodModInstallPath:
+      defaults?.gomodModInstallPath ?? 'github.com/marwan-at-work/mod/cmd/mod',
   };
 
   if (repoConfig !== undefined) {

@@ -6,6 +6,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
+import { getToolSettingsOptions } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -38,6 +39,18 @@ import { getGoModulesInTidyOrder } from './package-tree.ts';
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
 
+/**
+ * `go install` names the binary after the last path element, or the one before it if that is a major version suffix like `v2`
+ */
+function getGoInstalledBinaryName(installPath: string): string {
+  const elements = installPath.split('/').filter((element) => element !== '');
+  let name = elements.pop() ?? installPath;
+  if (regEx(/^v\d+$/).test(name) && elements.length > 0) {
+    name = elements.pop()!;
+  }
+  return name;
+}
+
 async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
   config: UpdateArtifactsConfig,
@@ -54,6 +67,13 @@ async function getUpdateImportPathCmds(
       ),
     );
   }
+
+  const { gomodModInstallPath: configuredInstallPath } = getToolSettingsOptions(
+    config.toolSettings,
+  );
+  // `@latest` or the extracted constraint is appended below, so drop any version the admin included
+  const gomodModInstallPath = configuredInstallPath.replace(regEx(/@.*$/), '');
+  const modBinaryName = quote(getGoInstalledBinaryName(gomodModInstallPath));
 
   const updateImportCommands = updatedDeps
     .filter(
@@ -72,12 +92,11 @@ async function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
+        `${modBinaryName} upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
-    let installMarwanModArgs =
-      'install github.com/marwan-at-work/mod/cmd/mod@latest';
+    let installMarwanModArgs = `install ${quote(gomodModInstallPath)}@latest`;
     const gomodModCompatibility = await resolveToolConstraint(
       config,
       'gomodMod',

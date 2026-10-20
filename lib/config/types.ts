@@ -528,6 +528,10 @@ export interface AllConfig
   password?: string;
   token?: string;
   username?: string;
+  // `RenovateConfig` and `RepoGlobalConfig` declare `toolSettings` with
+  // different (repo-only vs global-only) shapes; this combines both since
+  // `AllConfig` is a superset of both.
+  toolSettings?: GlobalToolSettingsOptions & RepoToolSettingsOptions;
 }
 
 export interface AssigneesAndReviewersConfig {
@@ -946,6 +950,8 @@ export interface GlobalToolSettingsOptions {
   jvmMemory?: number;
   /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
   nodeMaxMemory?: number;
+  /** The module path to `go install` for the `mod` binary used to update import paths on major updates */
+  gomodModInstallPath?: string;
 }
 
 /**

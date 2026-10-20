@@ -1688,6 +1688,37 @@ describe('util/exec/index', () => {
         });
       });
     });
+
+    describe('for gomod mod package settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({});
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('returns the default package if no repo config', () => {
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
+        });
+      });
+
+      it('uses the global config override if set', () => {
+        GlobalConfig.set({
+          toolSettings: {
+            gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+          },
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+        });
+      });
+    });
   });
 
   describe('gradleJvmArg()', () => {

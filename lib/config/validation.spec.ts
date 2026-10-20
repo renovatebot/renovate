@@ -3057,6 +3057,25 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('toolSettings.gomodModInstallPath must not include a version', async () => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        {
+          toolSettings: {
+            gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod@v1.2.3',
+          },
+        },
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'Invalid value `github.com/some-fork/mod/cmd/mod@v1.2.3` for `toolSettings.gomodModInstallPath`. The module path must not include a version (`@...`), as the version is set via `constraints.gomodMod`.',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
     it('binarySource', async () => {
       const config = {
         binarySource: 'invalid' as never,

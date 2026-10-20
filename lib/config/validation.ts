@@ -1247,6 +1247,11 @@ async function validateGlobalConfig(
             topic: ConfigValidationTopic.Error,
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
           });
+        } else if (key === 'gomodModInstallPath' && val.includes('@')) {
+          warnings.push({
+            topic: ConfigValidationTopic.Error,
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The module path must not include a version (\`@...\`), as the version is set via \`constraints.gomodMod\`.`,
+          });
         }
 
         if (
