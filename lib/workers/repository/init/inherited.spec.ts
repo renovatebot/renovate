@@ -89,11 +89,11 @@ describe('workers/repository/init/inherited', () => {
     );
   });
 
-  it('should throw an error if an option which allows a string is a string', async () => {
+  it('should accept a string for an option which allows a string', async () => {
     platform.getRawFile.mockResolvedValue('{"description":"shared"}');
-    await expect(mergeInheritedConfig(config)).rejects.toThrow(
-      CONFIG_VALIDATION,
-    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.description).toBe('shared');
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('should warn if validateConfig returns warnings', async () => {
@@ -336,6 +336,20 @@ describe('workers/repository/init/inherited', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Resolving presets found in inherited config',
     );
+  });
+
+  it('should accept a string for an option which allows a string from a resolved preset', async () => {
+    platform.getRawFile.mockResolvedValue('{"extends":[":automergeAll"]}');
+    presets.resolveConfigPresets.mockResolvedValue({
+      config: { description: 'shared' },
+      visitedPresets: {
+        merged: [],
+        unmerged: [],
+      },
+    });
+    const res = await mergeInheritedConfig(config);
+    expect(res.description).toBe('shared');
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('should warn if presets fails validation with warnings', async () => {
