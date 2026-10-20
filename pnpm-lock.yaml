@@ -122,8 +122,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
-        specifier: 13.135.5
-        version: 13.135.5(zod@4.6.7)
+        specifier: 13.135.6
+        version: 13.135.6(zod@4.6.7)
       '@renovatebot/detect-tools':
         specifier: 4.0.23
         version: 4.0.23
@@ -889,8 +889,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@containerbase/base@14.44.3':
-    resolution: {integrity: sha512-y/SGZrN/E82t0Ntl6TCBnSefz2VYot0U1PrFoyTLCF89g/F7ZtICk47z70tSPipn6RScwQcao6utQ3NtWeHh5Q==}
+  '@containerbase/base@14.44.4':
+    resolution: {integrity: sha512-2vM2ABAkFAEvABH4d8cgz8zeLFaJDMmlleYxpqEokNiD3WBAaYdezeDMlVgsvCYMk3iloMo/uiIonKJb/sTRJQ==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -1514,12 +1514,14 @@ packages:
   '@opentelemetry/sdk-trace-base@2.12.0':
     resolution: {integrity: sha512-JOERgZCxRM06FEJ5kEWxlSRChah6MmXDx3KwCruqEv/iEyLkTokCSemf2y1w8oIHtfrr8EVTpzebq/31vn2Cpg==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.12.0':
     resolution: {integrity: sha512-9DufH1IlmQMoKAfot5y/FhTP1RnmhLb5K6eKmJO/bvzPjYwPAazoiAUbTZFdPbqxOXN0FEbhZx/e6SB1Og4jmg==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -2038,8 +2040,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.135.5':
-    resolution: {integrity: sha512-twoQXgK+mDXb95Zx2AbQ4XJp36uB4cO5nE08WtZSwceoaT5smJbKUx24IecE3ESsd98RC/Vyy16wRE/gI1VZCQ==}
+  '@renovatebot/base-image@13.135.6':
+    resolution: {integrity: sha512-mwS8uDlSfl7hvqBu9v+5en9XFz9ZVR+9JypEcWnisTb9W3R0hJNoJKMhkd/rMRpyr65MaUtEtgsxO1ou5TwRbw==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -6523,7 +6525,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.44.3(zod@4.6.7)':
+  '@containerbase/base@14.44.4(zod@4.6.7)':
     optionalDependencies:
       zod: 4.6.7
 
@@ -7447,9 +7449,9 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.135.5(zod@4.6.7)':
+  '@renovatebot/base-image@13.135.6(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.44.3(zod@4.6.7)
+      '@containerbase/base': 14.44.4(zod@4.6.7)
     optionalDependencies:
       zod: 4.6.7
 
