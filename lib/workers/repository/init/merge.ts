@@ -30,6 +30,7 @@ import {
 import { pkg } from '../../../expose.ts';
 import { logger } from '../../../logger/index.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import * as nugetApi from '../../../modules/datasource/nuget/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -591,6 +592,7 @@ export async function mergeRenovateConfig(
     }
 
     applyNpmrc(resolvedRepoEntry, 'resolvedRepoEntry');
+    applyNugetConfig(resolvedRepoEntry, 'resolvedRepoEntry');
 
     const resolvedRepoEntryWithSecrets = applySecretsAndVariablesToConfig({
       config: resolvedRepoEntry,
@@ -647,6 +649,7 @@ export async function mergeRenovateConfig(
   // Decrypt before resolving in case we need npm authentication for any presets
   const decryptedConfig = await decryptConfig(migratedConfig, repository);
   applyNpmrc(decryptedConfig, 'decrypted');
+  applyNugetConfig(decryptedConfig, 'decrypted');
 
   // NOTE that this should not be used with any other configuration (`resolvedConfig`, etc) below, as they will include addditionally merged configuration
   // Decrypted secrets are sanitised, so should be safe to log
@@ -687,6 +690,15 @@ export async function mergeRenovateConfig(
     );
   }
   applyNpmrc(resolvedConfig, 'resolved');
+  if (
+    isString(resolvedConfig.nugetConfig) &&
+    !resolvedConfig.nugetConfigMerge
+  ) {
+    logger.debug(
+      'Ignoring any nuget.config files in repository due to configured nugetConfig',
+    );
+  }
+  applyNugetConfig(resolvedConfig, 'resolved');
   resolvedConfig = applySecretsAndVariablesToConfig({
     config: resolvedConfig,
     secrets: mergeChildConfig(
@@ -732,6 +744,19 @@ export function applyNpmrc(
     `Setting npmrc from ${configType ? `${configType} ` : ''}config`,
   );
   npmApi.setNpmrc(config.npmrc);
+}
+
+export function applyNugetConfig(
+  config: RenovateConfig,
+  configType?: 'resolved' | 'resolvedRepoEntry' | 'decrypted',
+): void {
+  if (!isString(config.nugetConfig)) {
+    return;
+  }
+  logger.debug(
+    `Setting nugetConfig from ${configType ? `${configType} ` : ''}config`,
+  );
+  nugetApi.setNugetConfig(config.nugetConfig);
 }
 
 export function applyHostRules(

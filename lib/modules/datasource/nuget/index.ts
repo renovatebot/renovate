@@ -10,6 +10,11 @@ import { NugetV3Api } from './v3.ts';
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 export const nugetOrg = 'https://api.nuget.org/v3/index.json';
 
+export {
+  extractAndRegisterPackageSourceCredentials,
+  setNugetConfig,
+} from './nuget-config.ts';
+
 export class NugetDatasource extends Datasource {
   static readonly id = 'nuget';
 

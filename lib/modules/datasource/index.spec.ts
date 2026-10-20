@@ -21,6 +21,7 @@ import {
   getPkgReleases,
   supportsDigests,
 } from './index.ts';
+import * as nugetDatasource from './nuget/index.ts';
 import type {
   DigestConfig,
   GetPkgReleasesConfig,
@@ -318,6 +319,33 @@ describe('modules/datasource/index', () => {
         'Custom registries are not allowed for this datasource and will be ignored',
       );
       expect(res).toMatchObject({ releases: [{ version: '1.2.3' }] });
+    });
+
+    it('sets nugetConfig when datasource is nuget', async () => {
+      const setNugetConfigSpy = vi.spyOn(nugetDatasource, 'setNugetConfig');
+      const mockNuget = new DummyDatasource();
+      datasources.set('nuget', mockNuget);
+
+      await getPkgReleases({
+        datasource: 'nuget',
+        packageName: 'SomePackage',
+        nugetConfig: '<configuration />',
+      });
+
+      expect(setNugetConfigSpy).toHaveBeenCalledWith('<configuration />');
+    });
+
+    it('does not set nugetConfig when datasource is nuget without nugetConfig', async () => {
+      const setNugetConfigSpy = vi.spyOn(nugetDatasource, 'setNugetConfig');
+      const mockNuget = new DummyDatasource();
+      datasources.set('nuget', mockNuget);
+
+      await getPkgReleases({
+        datasource: 'nuget',
+        packageName: 'SomePackage',
+      });
+
+      expect(setNugetConfigSpy).not.toHaveBeenCalled();
     });
   });
 
