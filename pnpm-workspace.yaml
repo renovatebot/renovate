@@ -64,5 +64,7 @@ minimumReleaseAgeExclude:
   - simple-git@4.0.1
   # Renovate security update: handlebars@4.7.10
   - handlebars@4.7.10
+  # Renovate security update: markdown-it@15.0.3
+  - markdown-it@15.0.3
 
 provenance: true
