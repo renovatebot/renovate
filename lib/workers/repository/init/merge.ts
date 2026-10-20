@@ -835,7 +835,8 @@ export async function tryReadStaticRepoFileConfig(
   // validate and log issues here to preserve context, caller handles migration and full validation.
   const { errors, warnings } = await configValidation.validateConfig(
     'repo',
-    staticRepoConfig,
+    // `validateConfig` expects massaged input
+    massageConfig(staticRepoConfig),
   );
 
   if (isNonEmptyArray(errors) || isNonEmptyArray(warnings)) {

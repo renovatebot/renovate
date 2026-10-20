@@ -1977,25 +1977,20 @@ describe('workers/repository/init/merge', () => {
         },
       );
 
-      it('reports an error if an option which allows a string is a string', async () => {
+      it('accepts a string for an option which allows a string', async () => {
         fs.readSystemFile.mockResolvedValueOnce('{"description":"static"}');
 
-        await resolveStaticRepoConfig(
+        const got = await resolveStaticRepoConfig(
           { repositories: ['some/repo'] },
           'static_config.json5',
         );
 
-        expect(logger.logger.info).toHaveBeenCalledWith(
-          {
-            errors: [
-              {
-                topic: 'Configuration Error',
-                message:
-                  'Configuration option `description` should be a list (Array)',
-              },
-            ],
-            warnings: [],
-          },
+        expect(got).toEqual({
+          description: 'static',
+          repositories: ['some/repo'],
+        });
+        expect(logger.logger.info).not.toHaveBeenCalledWith(
+          expect.anything(),
           'Static repo config validation issues detected',
         );
       });
