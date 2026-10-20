@@ -89,6 +89,13 @@ describe('workers/repository/init/inherited', () => {
     );
   });
 
+  it('should throw an error if an option which allows a string is a string', async () => {
+    platform.getRawFile.mockResolvedValue('{"description":"shared"}');
+    await expect(mergeInheritedConfig(config)).rejects.toThrow(
+      CONFIG_VALIDATION,
+    );
+  });
+
   it('should warn if validateConfig returns warnings', async () => {
     platform.getRawFile.mockResolvedValue('{"binarySource": "docker"}');
     const res = await mergeInheritedConfig(config);
