@@ -127,6 +127,34 @@ steps:
       LOG_LEVEL: debug
 ```
 
+Alternatively, if you use an Azure DevOps service connection with Microsoft Entra workload identity, you can obtain an Azure DevOps bearer token with `AzureCLI@3` instead of using `$(System.AccessToken)`:
+
+```yaml
+steps:
+  - task: AzureCLI@3
+    displayName: 'Run Renovate with Microsoft Entra ID'
+    inputs:
+      connectionType: azureDevOps
+      azureDevOpsServiceConnection: 'my-azure-devops-service-connection'
+      scriptType: bash
+      scriptLocation: inlineScript
+      allowNoSubscriptions: true
+      inlineScript: |
+        export RENOVATE_TOKEN="$(
+          az account get-access-token \
+            --resource 499b84ac-1321-427f-aa17-267ca6975798 \
+            --query accessToken \
+            --output tsv
+        )"
+
+        npx --userconfig .npmrc renovate
+    env:
+      RENOVATE_PLATFORM: azure
+      RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_CONFIG_FILE: $(Build.SourcesDirectory)/renovate_bot_config.json
+      LOG_LEVEL: debug
+```
+
 ### Create a .npmrc file
 
 Create a `.npmrc` file in your repository:
