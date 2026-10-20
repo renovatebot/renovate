@@ -1,6 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { migrateConfig } from '../migration.ts';
@@ -71,6 +72,11 @@ describe('config/options/index', () => {
       .map((option) => option.name);
 
     expect(missing).toBeEmptyArray();
+  });
+
+  it('customDatasources `format` allows every format that has a fetcher', () => {
+    const format = getOptions().find((o) => o.name === 'format');
+    expect(format?.allowedValues).toIncludeSameMembers(Object.keys(fetchers));
   });
 
   it('should not contain duplicate option names', () => {

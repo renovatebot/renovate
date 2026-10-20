@@ -16,6 +16,7 @@ import {
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
+  CustomDatasourceFormats,
   type RenovateOptions,
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
@@ -326,7 +327,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['customDatasources'],
     default: 'json',
-    allowedValues: ['json', 'plain'],
+    allowedValues: [...CustomDatasourceFormats],
     cli: false,
     env: false,
   },
