@@ -2001,6 +2001,7 @@ const options: Readonly<RenovateOptions>[] = [
       'pinDigest',
       'digest',
       'lockFileMaintenance',
+      'lockfileUpdate',
       'rollback',
       'bump',
       'replacement',
