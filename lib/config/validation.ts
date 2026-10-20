@@ -280,6 +280,8 @@ export async function validateConfig(
   config: AllConfig,
   isPreset?: boolean,
   parentPath?: string,
+  // the name of the option that `config` is a value of, for when it can't be derived from `parentPath` (i.e. the name of a `customDatasources` entry is the user's choice)
+  parentOptionName?: string,
 ): Promise<ValidationResult> {
   return instrument(
     `validateConfig(${configType}, ${JSON.stringify(parentPath)})`,
@@ -374,9 +376,10 @@ export async function validateConfig(
             }
           }
           const parentName =
-            parentPath && repoEntryRe.test(parentPath)
+            parentOptionName ??
+            (parentPath && repoEntryRe.test(parentPath)
               ? '.'
-              : getParentName(parentPath);
+              : getParentName(parentPath));
           if (
             !isPreset &&
             parentName &&
@@ -884,12 +887,6 @@ export async function validateConfig(
                     }
                   }
                 } else if (key === 'customDatasources') {
-                  const allowedKeys = [
-                    'description',
-                    'defaultRegistryUrlTemplate',
-                    'format',
-                    'transformTemplates',
-                  ];
                   for (const [
                     customDatasourceName,
                     customDatasourceValue,
@@ -901,37 +898,15 @@ export async function validateConfig(
                       });
                       continue;
                     }
-                    for (const [subKey, subValue] of Object.entries(
+                    const subValidation = await validateConfig(
+                      configType,
                       customDatasourceValue,
-                    )) {
-                      if (!allowedKeys.includes(subKey)) {
-                        errors.push({
-                          topic: ConfigValidationTopic.Error,
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
-                        });
-                      } else if (subKey === 'transformTemplates') {
-                        if (!isArray(subValue, isString)) {
-                          errors.push({
-                            topic: ConfigValidationTopic.Error,
-                            message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
-                          });
-                        }
-                      } else if (subKey === 'description') {
-                        if (!(
-                          isString(subValue) || isArray(subValue, isString)
-                        )) {
-                          errors.push({
-                            topic: ConfigValidationTopic.Error,
-                            message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
-                          });
-                        }
-                      } else if (!isString(subValue)) {
-                        errors.push({
-                          topic: ConfigValidationTopic.Error,
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is not a string`,
-                        });
-                      }
-                    }
+                      isPreset,
+                      `${currentPath}.${customDatasourceName}`,
+                      key,
+                    );
+                    warnings = warnings.concat(subValidation.warnings);
+                    errors = errors.concat(subValidation.errors);
                   }
                 } else if (key === 'installTools') {
                   for (const toolName of Object.keys(val)) {
