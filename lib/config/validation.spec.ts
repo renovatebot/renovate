@@ -520,6 +520,43 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it('does not validate the children of customDatasources generically', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            format: 'xml',
+            defaultRegistryUrlTemplate: '{{ unclosed',
+            transformTemplates: ['{{ unclosed'],
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('throws when `enabledManagers` is not an array', async () => {
+      // oxlint-disable-next-line renovate/validate-config-warnings-and-errors -- there is no result, as it throws
+      const result = configValidation.validateConfig('repo', {
+        enabledManagers: 'npm' as never,
+      });
+      await expect(result).rejects.toThrow(
+        'enabledManagers.filter is not a function',
+      );
+    });
+
+    it('throws when `schedule` is not an array', async () => {
+      // oxlint-disable-next-line renovate/validate-config-warnings-and-errors -- there is no result, as it throws
+      const result = configValidation.validateConfig('repo', {
+        schedule: 'nope' as never,
+      });
+      await expect(result).rejects.toThrow('schedule.some is not a function');
+    });
+
     it('catches invalid customDatasources record type', async () => {
       // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid customDatasources record type
       const config = {
@@ -2563,6 +2600,30 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('iterates the characters of a string `headers`', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: 'nope' as never,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors.map((e) => e.message)).toEqual(
+        ['0', '1', '2', '3'].map(
+          (header) =>
+            `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
+        ),
+      );
+    });
+
     it('errors if headers values are not string', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
@@ -3733,6 +3794,31 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('does not validate templates in global config', async () => {
+      const config: AllConfig = {
+        userAgent: '{{ unclosed',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('does not validate the value of reportType', async () => {
+      const config: RenovateConfig = {
+        // @ts-expect-error: contains invalid values
+        reportType: 'nope',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
         config,
       );
       expect(warnings).toBeEmptyArray();
