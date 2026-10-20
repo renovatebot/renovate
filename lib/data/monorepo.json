@@ -654,7 +654,11 @@
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
     "powermock": "https://github.com/powermock/powermock",
-    "prisma": "https://github.com/prisma/prisma",
+    "prisma": [
+      "https://github.com/prisma/orm",
+      "https://github.com/prisma/prisma",
+      "https://github.com/prisma/prisma-cli"
+    ],
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
     "protobuf": "https://github.com/protocolbuffers/protobuf",
