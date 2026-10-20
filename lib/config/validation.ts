@@ -1108,6 +1108,13 @@ export async function validateConfig(
             if (!rule.headers) {
               continue;
             }
+            if (!isPlainObject(rule.headers)) {
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `Invalid hostRules headers configuration: headers must be an object.`,
+              });
+              continue;
+            }
             for (const [header, value] of Object.entries(rule.headers)) {
               if (!isString(value)) {
                 errors.push({

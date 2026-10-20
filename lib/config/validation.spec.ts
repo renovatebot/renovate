@@ -2600,7 +2600,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('iterates the characters of a string `headers`', async () => {
+    it('errors if `headers` is not an object', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
       const config = {
@@ -2616,12 +2616,13 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toBeEmptyArray();
-      expect(errors.map((e) => e.message)).toEqual(
-        ['0', '1', '2', '3'].map(
-          (header) =>
-            `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
-        ),
-      );
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid hostRules headers configuration: headers must be an object.',
+        },
+      ]);
     });
 
     it('errors if headers values are not string', async () => {
