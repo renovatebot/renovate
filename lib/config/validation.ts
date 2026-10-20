@@ -960,7 +960,7 @@ export async function validateConfig(
                       } else if (!isString(subValue)) {
                         errors.push({
                           topic: ConfigValidationTopic.Error,
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
+                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is not a string`,
                         });
                       }
                     }

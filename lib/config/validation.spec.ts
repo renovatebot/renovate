@@ -449,7 +449,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is not a string',
         },
         {
           message:
