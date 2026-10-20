@@ -77,6 +77,28 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   return updateConfig;
 }
 
+// packageRules can set `isVulnerabilityAlert` without forcing `vulnerabilityAlerts`,
+// so the security concurrency limits are applied here
+function applyVulnerabilityConcurrentLimits(
+  updateConfig: BranchUpgradeConfig,
+): void {
+  if (!updateConfig.isVulnerabilityAlert) {
+    return;
+  }
+  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
+  // `branchConcurrentLimit`, even though both are valid nested options
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  const vulnerabilityAlerts = updateConfig.vulnerabilityAlerts as
+    RenovateConfig | undefined;
+  if (!isUndefined(vulnerabilityAlerts?.prConcurrentLimit)) {
+    updateConfig.prConcurrentLimit = vulnerabilityAlerts.prConcurrentLimit;
+  }
+  if (!isUndefined(vulnerabilityAlerts?.branchConcurrentLimit)) {
+    updateConfig.branchConcurrentLimit =
+      vulnerabilityAlerts.branchConcurrentLimit;
+  }
+}
+
 export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
@@ -160,6 +182,7 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
+            applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;

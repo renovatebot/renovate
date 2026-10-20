@@ -5360,6 +5360,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.
