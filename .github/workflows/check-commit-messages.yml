@@ -1,3 +1,5 @@
+# This workflow is managed by gh actions-lock.
+
 name: Check Commit Messages
 
 on:
@@ -22,13 +24,13 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           show-progress: false
 
       - name: Check for closing keywords that would close a Discussion
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             const script = require('./tools/check-closes-discussion.cjs')
@@ -43,7 +45,7 @@ jobs:
     env:
       NODE_VERSION: 24
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           show-progress: false
@@ -52,7 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}

@@ -1,3 +1,5 @@
+# This workflow is managed by gh actions-lock.
+
 name: 'Mend Slack Notifier'
 
 on:
@@ -34,7 +36,7 @@ jobs:
 
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           method: chat.postMessage
           payload: |

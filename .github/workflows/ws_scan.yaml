@@ -1,3 +1,5 @@
+# This workflow is managed by gh actions-lock.
+
 name: whitesource-scan
 
 on:
@@ -11,7 +13,7 @@ jobs:
   WS_SCAN:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           show-progress: false
           persist-credentials: false
