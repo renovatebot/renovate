@@ -10,9 +10,14 @@ import { parseGitUrl } from '../../util/git/url.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { regEx } from '../../util/regex.ts';
 import { asTimestamp } from '../../util/timestamp.ts';
-import { isHttpUrl, parseUrl, trimTrailingSlash } from '../../util/url.ts';
+import {
+  isHttpUrl,
+  parseUrl,
+  trimTrailingSlash,
+  withoutUrlCredentials,
+} from '../../util/url.ts';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual.ts';
-import type { ReleaseResult } from './types.ts';
+import type { Release, ReleaseResult } from './types.ts';
 
 const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPlusPrefix = regEx('^git\\+');
@@ -79,6 +84,47 @@ function massageTimestamps(dep: ReleaseResult): void {
     releaseTimestamp = asTimestamp(releaseTimestamp);
     if (releaseTimestamp) {
       release.releaseTimestamp = releaseTimestamp;
+    }
+  }
+}
+
+/**
+ * The URLs of a {@link ReleaseResult} describing the package.
+ */
+const metadataUrlKeys = [
+  'homepage',
+  'sourceUrl',
+  'changelogUrl',
+  'dependencyUrl',
+] as const satisfies (keyof ReleaseResult)[];
+
+/**
+ * The URLs of a {@link Release}.
+ */
+const releaseUrlKeys = [
+  'changelogUrl',
+  'checksumUrl',
+  'downloadUrl',
+  'registryUrl',
+  'sourceUrl',
+] as const satisfies (keyof Release)[];
+
+/**
+ * Removes the URL credentials from the package URLs of `dep` and from the URLs of its releases.
+ */
+export function stripMetadataUrlCredentials(dep: ReleaseResult): void {
+  for (const urlKey of metadataUrlKeys) {
+    const urlVal = dep[urlKey];
+    if (isString(urlVal)) {
+      dep[urlKey] = withoutUrlCredentials(urlVal);
+    }
+  }
+  for (const release of dep.releases) {
+    for (const urlKey of releaseUrlKeys) {
+      const urlVal = release[urlKey];
+      if (isString(urlVal)) {
+        release[urlKey] = withoutUrlCredentials(urlVal);
+      }
     }
   }
 }
@@ -160,16 +206,11 @@ export function addMetaData(
     delete dep.homepage;
   }
   // Clean up any empty urls
-  const urlKeys: (keyof ReleaseResult)[] = [
-    'homepage',
-    'sourceUrl',
-    'changelogUrl',
-    'dependencyUrl',
-  ];
-  for (const urlKey of urlKeys) {
+  for (const urlKey of metadataUrlKeys) {
     const urlVal = dep[urlKey];
     if (isString(urlVal) && isHttpUrl(urlVal.trim())) {
-      dep[urlKey] = urlVal.trim() as never;
+      // Strip any userinfo credentials so they do not end up in a PR body, also from URLs added or massaged above
+      dep[urlKey] = withoutUrlCredentials(urlVal.trim()) as never;
     } else {
       delete dep[urlKey];
     }

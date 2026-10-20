@@ -122,11 +122,11 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
-        specifier: 13.135.0
-        version: 13.135.0(zod@4.6.7)
+        specifier: 13.135.3
+        version: 13.135.3(zod@4.6.7)
       '@renovatebot/detect-tools':
-        specifier: 4.0.22
-        version: 4.0.22
+        specifier: 4.0.23
+        version: 4.0.23
       '@renovatebot/good-enough-parser':
         specifier: 2.0.1
         version: 2.0.1
@@ -221,8 +221,8 @@ importers:
         specifier: 17.0.0
         version: 17.0.0
       execa:
-        specifier: 10.1.0
-        version: 10.1.0
+        specifier: 10.1.1
+        version: 10.1.1
       find-packages:
         specifier: 10.0.4
         version: 10.0.4
@@ -245,8 +245,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       google-auth-library:
-        specifier: 11.2.0
-        version: 11.2.0(supports-color@7.2.0)
+        specifier: 11.3.0
+        version: 11.3.0(supports-color@7.2.0)
       got:
         specifier: 16.0.0
         version: 16.0.0
@@ -889,8 +889,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@containerbase/base@14.44.0':
-    resolution: {integrity: sha512-tgZcg3rSFPV1VGecAWg2pm/L+wyuUqE76HXBQQxi39dqZgtAmbmBvLYOBkV/Alt714hLQ455r4IqCLM32ZPyAQ==}
+  '@containerbase/base@14.44.2':
+    resolution: {integrity: sha512-s44NgaU6fN3BzI+mLNLa+0TfYDor7/j2Vg5c5lOiMgsd2hiuXvw9HH1urF8ngl/DqoACjllVtIqbSXuDkn4ihQ==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -2038,8 +2038,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.135.0':
-    resolution: {integrity: sha512-JxnT8QYmJn7h0w+v0pB1JqA9caDrBVt1CyUfXP7CCNYoJXkzC+YZKekeAa2BYEHnF9ljTmxPqfrfAQTcbLaa6Q==}
+  '@renovatebot/base-image@13.135.3':
+    resolution: {integrity: sha512-qalmKWakFg1ehsgvOPdxzlhcfJb2Gjwoz6OGDbI1CrJykzJsTuOwEkekaXHy4l005bh4QZ4hNFinb8dz40M7lg==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -2047,8 +2047,8 @@ packages:
       zod:
         optional: true
 
-  '@renovatebot/detect-tools@4.0.22':
-    resolution: {integrity: sha512-WmTPjbvMvrpv2sGaCyMNlBCt+R1pp372mkyFkNchl6b15/dvtRD99JlQ54hcSU/fXP8xNXbHO+4gFZSZTM3DpQ==}
+  '@renovatebot/detect-tools@4.0.23':
+    resolution: {integrity: sha512-+mZxeioZUc1UAs2NO02x5RcPQdvX4B4eJsrFYSIVT8yRdtsc9OV8L/KeYnKatWFd8BxbOyr5mS8I8JbolOPVqg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/good-enough-parser@2.0.1':
@@ -3408,8 +3408,8 @@ packages:
   eventemitter3@5.0.4:
     resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
 
-  execa@10.1.0:
-    resolution: {integrity: sha512-5HT/600HqXEtmkb9mK/PkTWw+bQSCzPnWiZ4/87wD3Hi0wFzCapOuNT9p4M08PDd+KLHdHvFhKjOWmNx/npRNQ==}
+  execa@10.1.1:
+    resolution: {integrity: sha512-yJAC9ulsE6fU0K6wzJBIH+wI+KAtMeu6Ck8rs23OVzvEhqXjGADdI6K+YNIDAjcQQ6AwXTD96cKExJo6xFJXyg==}
     engines: {node: '>=22'}
 
   execa@8.0.1:
@@ -3658,8 +3658,8 @@ packages:
     resolution: {integrity: sha512-c8B/VNLmxRcmqqenRA9t+9IyOjf9+V6lTxPaUJLqOCONdQkWZ0ETYgX0qbtJqPsgCNusT9MZ5Jeidw8Eb9tn2g==}
     engines: {node: '>=20'}
 
-  google-auth-library@11.2.0:
-    resolution: {integrity: sha512-R9/Dwc3swSur04RnizQ6EBUmmcno2cC5cAKtrG/C+pY+W7c5l6rSnFWgMkR7NSYj1n6XWmb/KhcjxGslWm4yIA==}
+  google-auth-library@11.3.0:
+    resolution: {integrity: sha512-gZCyszARHj47WNcKrAcQtimDwtTZpydRZ3HSeb66hObfQU9uaG50ejsZ8LzGISIVAjpsZEouGVs65Q/XRau0Qg==}
     engines: {node: '>=22'}
 
   google-logging-utils@1.1.3:
@@ -6523,7 +6523,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.44.0(zod@4.6.7)':
+  '@containerbase/base@14.44.2(zod@4.6.7)':
     optionalDependencies:
       zod: 4.6.7
 
@@ -7447,13 +7447,13 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.135.0(zod@4.6.7)':
+  '@renovatebot/base-image@13.135.3(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.44.0(zod@4.6.7)
+      '@containerbase/base': 14.44.2(zod@4.6.7)
     optionalDependencies:
       zod: 4.6.7
 
-  '@renovatebot/detect-tools@4.0.22':
+  '@renovatebot/detect-tools@4.0.23':
     dependencies:
       fs-extra: 11.4.1
       toml-eslint-parser: 1.0.3
@@ -8728,7 +8728,7 @@ snapshots:
 
   eventemitter3@5.0.4: {}
 
-  execa@10.1.0:
+  execa@10.1.1:
     dependencies:
       '@sindresorhus/merge-streams': 4.0.0
       figures: 6.1.0
@@ -9054,7 +9054,7 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.4.1
 
-  google-auth-library@11.2.0(supports-color@7.2.0):
+  google-auth-library@11.3.0(supports-color@7.2.0):
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11

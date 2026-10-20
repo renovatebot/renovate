@@ -2440,6 +2440,8 @@ If the value starts with `http(s)` then it will only match against URLs which st
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
 
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
+
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
 ```json
@@ -5358,6 +5360,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.
