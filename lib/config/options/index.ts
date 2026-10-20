@@ -267,6 +267,7 @@ const options: Readonly<RenovateOptions>[] = [
       executionMode: 'update',
       installTools: {},
     },
+    additionalProperties: false,
   },
   {
     name: 'commands',
@@ -3978,6 +3979,7 @@ const options: Readonly<RenovateOptions>[] = [
       jvmMaxMemory: 512,
       jvmMemory: 512,
     },
+    additionalProperties: false,
     cli: false,
   },
   {
