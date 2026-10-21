@@ -1,6 +1,7 @@
 import {
   type ToolMetadata,
   type ToolType,
+  isContainerbase,
   tools,
 } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
@@ -13,7 +14,6 @@ import type { VersioningName } from '../../versioning-list.generated.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
-import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
@@ -123,10 +123,6 @@ export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
 
 export function supportsDynamicInstall(toolName: ToolName): boolean {
   return isSupportedToolName(toolName);
-}
-
-export function isContainerbase(): boolean {
-  return !!getEnv().CONTAINERBASE;
 }
 
 export function isDynamicInstall(
