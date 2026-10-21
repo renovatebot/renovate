@@ -436,7 +436,7 @@ describe('config/validation', () => {
             transformTemplates: [{}],
           },
           bar: {
-            description: 'foo',
+            description: ['foo'],
             defaultRegistryUrlTemplate: 'bar',
             transformTemplates: ['foo = "bar"', 'bar[0'],
           },
@@ -449,19 +449,19 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Configuration option `customDatasources.foo.defaultRegistryUrlTemplate` should be a string',
         },
         {
           message:
-            'Invalid `customDatasources.description` configuration: is not an array of strings',
+            'Configuration option `customDatasources.foo.description` should be a list (Array)',
         },
         {
           message:
-            'Invalid `customDatasources.randomKey` configuration: key is not allowed',
+            'Configuration option `customDatasources.foo.transformTemplates` should be a list of strings',
         },
         {
           message:
-            'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
+            'Invalid configuration option: customDatasources.foo.randomKey',
         },
       ]);
       expect(warnings).toBeEmptyArray();
@@ -518,6 +518,64 @@ describe('config/validation', () => {
         },
       ]);
       expect(warnings).toBeEmptyArray();
+    });
+
+    it('validates the children of customDatasources generically', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            format: 'xml',
+            defaultRegistryUrlTemplate: '{{ unclosed',
+            transformTemplates: ['{{ unclosed'],
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid customDatasources.foo.format: format had a value `"xml"` which was not part of the allowedValues: ["html","json","plain","toml","yaml"]',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid template in config path: customDatasources.foo.defaultRegistryUrlTemplate',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid template in config path: customDatasources.foo.transformTemplates',
+        },
+      ]);
+    });
+
+    it.each([
+      ['enabledManagers', 'npm'],
+      ['schedule', 'nope'],
+    ])('does not throw when `%s` is %j', async (key, value) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { [key]: value },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        { message: expect.stringContaining(`\`${key}\` should be a list`) },
+      ]);
+    });
+
+    it('allows a `.` in the name of a customDatasource', async () => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { customDatasources: { 'foo.bar': { format: 'json' } } },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources record type', async () => {
@@ -660,32 +718,51 @@ describe('config/validation', () => {
     });
 
     it.each([
-      [
-        'single not supported manager',
-        { enabledManagers: ['foo'] },
-        'The following managers configured in enabledManagers are not supported: "foo"',
-      ],
+      ['single not supported manager', { enabledManagers: ['foo'] }, '["foo"]'],
       [
         'multiple not supported managers',
         { enabledManagers: ['foo', 'bar'] },
-        'The following managers configured in enabledManagers are not supported: "foo, bar"',
+        '["foo","bar"]',
       ],
       [
         'combined supported and not supported managers',
         { enabledManagers: ['foo', 'npm', 'gradle', 'maven'] },
-        'The following managers configured in enabledManagers are not supported: "foo"',
+        '["foo"]',
       ],
     ])(
       'errors if included not supported enabled managers for %s',
-      async (_case, config, message) => {
+      async (_case, config, invalidValues) => {
         const { warnings, errors } = await configValidation.validateConfig(
           'repo',
           config,
         );
         expect(warnings).toBeEmptyArray();
-        expect(errors).toMatchObject([{ message }]);
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message: `Invalid enabledManagers: enabledManagers had invalid values \`${invalidValues}\` which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#enabledmanagers`,
+          },
+        ]);
       },
     );
+
+    it.each([
+      ['enabledManagers', [1]],
+      ['schedule', [1]],
+      ['postUpdateOptions', [{}]],
+    ])('errors when `%s` is %j', async (key, value) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { [key]: value },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Configuration option \`${key}\` should be a list of strings`,
+        },
+      ]);
+    });
 
     it('errors for all types', async () => {
       const config: RenovateConfig = {
@@ -721,7 +798,7 @@ describe('config/validation', () => {
         {
           topic: 'allowedVersions',
           message:
-            '"allowedVersions" can\'t be used in ".". Allowed objects: packageRules.',
+            '"allowedVersions" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -801,22 +878,22 @@ describe('config/validation', () => {
         {
           topic: 'ansible.minor.matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'ansible.minor.matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in "minor". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchDepNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in ".". Allowed objects: packageRules.',
+            '"matchPackageNames" can\'t be used at the top level of a config, as it can only be used in `packageRules`.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -984,7 +1061,7 @@ describe('config/validation', () => {
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "message": "Invalid customManagers[0].customType: customType had a value \`"unknown"\` which was not part of the allowedValues: ["jsonata","regex"]",
             "topic": "Configuration Error",
           },
         ]
@@ -1725,13 +1802,13 @@ describe('config/validation', () => {
         {
           topic: 'managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+            `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
           ),
         },
         {
           topic: 'npm.minor.managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in "minor". Allowed objects: `,
+            `"managerFilePatterns" can't be used in "minor", as it can only be used `,
           ),
         },
       ]);
@@ -1776,9 +1853,23 @@ describe('config/validation', () => {
         {
           topic: 'hostType',
           message:
-            '"hostType" can\'t be used in ".". Allowed objects: hostRules.',
+            '"hostType" can\'t be used at the top level of a config, as it can only be used in `hostRules`.',
         },
       ]);
+    });
+
+    it('does not warn about an option with a restricted parent when encrypted at the top level', async () => {
+      const config = {
+        encrypted: {
+          hostType: 'npm',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
     });
 
     it('validates preset values', async () => {
@@ -2549,6 +2640,31 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if `headers` is not an object', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: 'nope' as never,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid hostRules headers configuration: headers must be an object.',
+        },
+      ]);
+    });
+
     it('errors if headers values are not string', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
@@ -2661,6 +2777,11 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
           message: `The "allowInternal" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
       ]);
       expect(errors).toMatchObject([
         {
@@ -2692,7 +2813,13 @@ describe('config/validation', () => {
         config,
       );
 
-      expect(warnings).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          topic: 'packageRules[0].hostRules',
+          message:
+            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+        },
+      ]);
       expect(errors).toMatchObject([
         {
           topic: 'Configuration Error',
@@ -3040,14 +3167,13 @@ describe('config/validation', () => {
         'global',
         config,
       );
-      expect(warnings).toEqual([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
         {
           message:
-            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
-          topic: 'Configuration Error',
+            'Invalid binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
         },
       ]);
-      expect(errors).toBeEmptyArray();
     });
 
     describe('validates string type options', () => {
@@ -3059,14 +3185,13 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
           {
             message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
-            topic: 'Configuration Error',
+              'Invalid binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
 
       it('baseDir', async () => {
@@ -3094,14 +3219,13 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
           {
             message:
-              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored.',
-            topic: 'Configuration Error',
+              'Invalid requireConfig: requireConfig had a value `"invalid"` which was not part of the allowedValues: ["required","optional","ignored"]',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
 
       it('dryRun', async () => {
@@ -3112,14 +3236,13 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
           {
             message:
-              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full.',
-            topic: 'Configuration Error',
+              'Invalid dryRun: dryRun had a value `"invalid"` which was not part of the allowedValues: ["extract","lookup","full"]',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
 
       it('repositoryCache', async () => {
@@ -3130,14 +3253,13 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
           {
             message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
-            topic: 'Configuration Error',
+              'Invalid repositoryCache: repositoryCache had a value `"invalid"` which was not part of the allowedValues: ["disabled","enabled","reset"]',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
 
       it('onboardingConfigFileName', async () => {
@@ -3177,10 +3299,29 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('does not warn about repo config options inside onboardingConfig in inherited config', async () => {
+        const config = {
+          onboardingConfig: {
+            extends: ['config:recommended'],
+            packageRules: [
+              { matchPackageNames: ['foo'], minimumReleaseAge: '3 days' },
+            ],
+          },
+        };
+
+        const { warnings, errors } = await configValidation.validateConfig(
+          'inherit',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
         expect(errors).toBeEmptyArray();
       });
 
@@ -3203,7 +3344,7 @@ describe('config/validation', () => {
           {
             topic: 'managerFilePatterns',
             message: expect.toStartWith(
-              `"managerFilePatterns" can't be used in ".". Allowed objects: `,
+              `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
           },
         ]);
@@ -3218,14 +3359,14 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
           {
             message:
-              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
+              'Invalid gitUrl: gitUrl had a value `"invalid"` which was not part of the allowedValues: ["default","ssh","endpoint"]',
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
     });
 
@@ -3289,18 +3430,19 @@ describe('config/validation', () => {
             'Configuration option `checkedBranches` should be a list (Array).',
           topic: 'Configuration Error',
         },
+      ]);
+      expect(errors).toMatchObject([
         {
-          topic: 'Configuration Error',
           message:
-            'Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems.',
+            'Configuration option `mergeConfidenceDatasources` should be a list of strings',
+          topic: 'Configuration Error',
         },
         {
           message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
+            'Invalid gitNoVerify: gitNoVerify had invalid values `["invalid"]` which are not part of the allowedValues: ["commit","push"]',
           topic: 'Configuration Error',
         },
       ]);
-      expect(errors).toBeEmptyArray();
     });
 
     it('validates repositories[]', async () => {
@@ -3350,16 +3492,15 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'repositories[1]: each repository object entry must have a `repository` string property',
+            'Invalid repositories[0].binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
         },
-      ]);
-      expect(warnings).toEqual([
         {
           topic: 'Configuration Error',
           message:
-            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+            'repositories[1]: each repository object entry must have a `repository` string property',
         },
       ]);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('allows repositories[] as string[]', async () => {
@@ -3714,6 +3855,42 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('errors on an invalid template in global config', async () => {
+      const config: AllConfig = {
+        userAgent: '{{ unclosed',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid template in config path: userAgent',
+        },
+      ]);
+    });
+
+    it('errors on an invalid value of reportType', async () => {
+      const config: RenovateConfig = {
+        // @ts-expect-error: contains invalid values
+        reportType: 'nope',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid reportType: reportType had a value `"nope"` which was not part of the allowedValues: ["logging","file","s3"]',
+        },
+      ]);
+    });
+
     it('fails for missing reportPath if reportType is "s3"', async () => {
       const config: RenovateConfig = {
         reportType: 's3',
@@ -3886,6 +4063,128 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    describe('allowedValues are validated', () => {
+      it('with repo config', async () => {
+        const config: Partial<RenovateConfig> = {
+          // for a single value
+          // @ts-expect-error: contains invalid values
+          mode: 'not-valid',
+          // for an array
+          postUpdateOptions: ['invalid', 'another'],
+          hostRules: [
+            {
+              // this is allowed, as it's the default value
+              artifactAuth: null,
+            },
+          ],
+          packageRules: [
+            // valid and a regex: versioning scheme
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'regex:^(?<major>1)',
+            },
+            // valid and part of allowedValues
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'maven',
+            },
+            // invalid, using an unknown option
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'not-ever-valid-scheme',
+            },
+          ],
+          bumpVersions: [
+            {
+              filePatterns: [],
+              matchStrings: [],
+              bumpType: '{{#if isPatch}}patch{{else}}minor{{/if}}',
+            },
+            {
+              filePatterns: [],
+              matchStrings: [],
+              bumpType: 'not-a-bump-type',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid bumpVersions[1].bumpType: bumpType had a value `"not-a-bump-type"` which was not part of the allowedValues: ["major","minor","patch","sync"]',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid mode: mode had a value `"not-valid"` which was not part of the allowedValues: ["full","silent"]',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid packageRules[2].versioning: versioning had invalid value `"not-ever-valid-scheme"`. versioning can only be a known versioning scheme, or be a string starting with `regex:` for custom regular expression versioning',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid postUpdateOptions: postUpdateOptions had invalid values `["invalid","another"]` which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#postupdateoptions',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('with global config', async () => {
+        const config: Partial<AllConfig> = {
+          // for a single value
+          // @ts-expect-error: contains invalid values
+          autodiscoverRepoOrder: 'middle-out',
+
+          // for a single value, where there are too many to list
+          // @ts-expect-error: contains invalid values
+          platform: 'not-a-platform',
+
+          // for an array
+          // @ts-expect-error: contains invalid values
+          allowedUnsafeExecutions: ['some', 'value'],
+
+          repositories: [
+            {
+              repository: 'some/repo',
+              // @ts-expect-error: contains invalid values
+              allowedUnsafeExecutions: ['some', 'value'],
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid allowedUnsafeExecutions: allowedUnsafeExecutions had invalid values `["some","value"]` which are not part of the allowedValues: ["bazelModDeps","goGenerate","gradleWrapper","mise","pixi"]',
+          },
+          {
+            message:
+              'Invalid autodiscoverRepoOrder: autodiscoverRepoOrder had a value `"middle-out"` which was not part of the allowedValues: ["asc","desc"]',
+          },
+          {
+            message:
+              'Invalid platform: platform had a value `"not-a-platform"` which was not part of the allowedValues, which are listed at https://docs.renovatebot.com/self-hosted-configuration/#platform',
+          },
+          {
+            message:
+              'Invalid repositories[0].allowedUnsafeExecutions: allowedUnsafeExecutions had invalid values `["some","value"]` which are not part of the allowedValues: ["bazelModDeps","goGenerate","gradleWrapper","mise","pixi"]',
+          },
+        ]);
+      });
     });
 
     describe('cacheTtlOverride', () => {

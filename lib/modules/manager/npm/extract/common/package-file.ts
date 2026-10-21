@@ -12,7 +12,11 @@ import { regEx } from '../../../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { loadPackageJson } from '../../utils.ts';
-import type { NpmPackage, NpmPackageDependency } from '../types.ts';
+import type {
+  NpmPackage,
+  NpmPackageDependency,
+  OverrideDependency,
+} from '../types.ts';
 import {
   extractDependency,
   getExtractedConstraints,
@@ -36,7 +40,7 @@ export function extractPackageJson(
   packageFile: string,
 ): PackageFileContent<NpmManagerData> | null {
   logger.trace(`npm.extractPackageJson(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<NpmManagerData>[] = [];
 
   if (packageJson._id && packageJson._args && packageJson._from) {
     logger.debug({ packageFile }, 'Ignoring vendorised package.json');
@@ -83,10 +87,10 @@ export function extractPackageJson(
           dependencies = { [match.groups.name]: match.groups.range };
         }
         for (const [key, val] of Object.entries(
-          dependencies as NpmPackageDependency,
+          dependencies as Partial<OverrideDependency>,
         )) {
           const depName = parseDepName(depType, key);
-          let dep: PackageDependency = {
+          let dep: PackageDependency<NpmManagerData> = {
             depType,
             depName,
           };
@@ -95,13 +99,7 @@ export function extractPackageJson(
           }
           // v8 ignore else -- TODO: add test #40625
           if (depType === 'overrides' && !isString(val)) {
-            // TODO: fix type #22198
-            deps.push(
-              ...extractOverrideDepsRec(
-                [depName],
-                val as unknown as NpmManagerData,
-              ),
-            );
+            deps.push(...extractOverrideDepsRec([depName], val));
           } else if (depType === 'pnpm' && depName === 'overrides') {
             // pnpm overrides
             // https://pnpm.io/package_json#pnpmoverrides
@@ -130,8 +128,7 @@ export function extractPackageJson(
               }
             }
           } else {
-            // TODO: fix type #22198
-            dep = { ...dep, ...extractDependency(depType, depName, val!) };
+            dep = { ...dep, ...extractDependency(depType, depName, val) };
             setNodeCommitTopic(dep);
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
@@ -160,7 +157,7 @@ export function extractPackageJson(
         if (!item?.name || !item.version) {
           continue;
         }
-        const dep: PackageDependency = {
+        const dep: PackageDependency<NpmManagerData> = {
           depType,
           depName: item.name,
           ...extractDependency(depType, item.name, item.version),

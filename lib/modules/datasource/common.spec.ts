@@ -2,12 +2,14 @@ import { logger } from '~test/util.ts';
 import { defaultVersioning } from '../versioning/index.ts';
 import ruby from '../versioning/ruby/index.ts';
 import semverCoerced from '../versioning/semver-coerced/index.ts';
+import datasources from './api.ts';
 import {
   applyConstraintsFiltering,
   applyExtractVersion,
   applyVersionCompatibility,
   filterValidVersions,
   getDatasourceFor,
+  getDatasourceHostType,
   getDefaultVersioning,
   isGetPkgReleasesConfig,
   sortAndRemoveDuplicates,
@@ -33,6 +35,30 @@ describe('modules/datasource/common', () => {
         id: NpmDatasource.id,
       });
     });
+  });
+
+  describe('getDatasourceHostType', () => {
+    it.each`
+      datasource         | expected
+      ${'npm'}           | ${'npm'}
+      ${'custom.foobar'} | ${'custom'}
+      ${'sbt-package'}   | ${'sbt'}
+      ${'sbt-plugin'}    | ${'sbt'}
+      ${'foobar'}        | ${null}
+    `('returns $expected for $datasource', ({ datasource, expected }) => {
+      expect(getDatasourceHostType(datasource)).toBe(expected);
+    });
+
+    it.each([...datasources.keys()])(
+      'returns the host type of the http client of %s',
+      (id) => {
+        const { http } = datasources.get(id) as unknown as {
+          http?: { hostType: string };
+        };
+
+        expect(getDatasourceHostType(id)).toBe(http?.hostType ?? id);
+      },
+    );
   });
 
   describe('getDefaultVersioning', () => {

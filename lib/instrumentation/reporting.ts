@@ -5,6 +5,7 @@ import { GlobalConfig } from '../config/global.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import { prettier } from '../expose.ts';
 import { getProblems, logger } from '../logger/index.ts';
+import { sanitizeValue } from '../logger/utils.ts';
 import type { Pr } from '../modules/platform/index.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import { getInheritedOrGlobal } from '../util/common.ts';
@@ -108,8 +109,11 @@ export function finalizeReport(): void {
   }
 }
 
+/**
+ * Returns the report as JSON, sanitized like a log record.
+ */
 async function getReportBody(config: RenovateConfig): Promise<string> {
-  const json = JSON.stringify(report);
+  const json = JSON.stringify(sanitizeValue(report));
   if (!config.reportFormatting) {
     return json;
   }

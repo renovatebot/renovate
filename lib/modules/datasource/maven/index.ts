@@ -1,6 +1,8 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { compare } from '../../versioning/maven/compare.ts';
@@ -84,8 +86,8 @@ export class MavenDatasource extends Datasource {
   override readonly sourceUrlNote =
     'The source URL is determined from the `scm` tags in the results.';
 
-  constructor(id = MavenDatasource.id) {
-    super(id);
+  constructor(id = MavenDatasource.id, http?: Http) {
+    super(id, http);
   }
 
   async fetchVersionsFromMetadata(
@@ -176,9 +178,13 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = versionOrig
-      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
-      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cacheKey = buildCacheKey(
+      'postprocessRelease',
+      registryUrl,
+      packageName,
+      versionOrig,
+      version,
+    );
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,

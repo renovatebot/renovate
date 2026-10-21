@@ -34,6 +34,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -49,6 +50,7 @@ import type {
   PlatformResult,
   Pr,
   ReattemptPlatformAutomergeConfig,
+  RepoConfigParams,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -232,6 +234,14 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
+export function applyRepoConfig({ azureWorkItemType }: RepoConfigParams): void {
+  if (!azureWorkItemType || azureWorkItemType === config.workItemType) {
+    return;
+  }
+  config.workItemType = azureWorkItemType;
+  issueService = new IssueService(config);
+}
+
 export async function initRepo({
   repository,
   cloneSubmodules,
@@ -345,6 +355,14 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   }
 
   const azureApiGit = await azureApi.gitApi();
+  // the PR list returns descriptions truncated to 400 characters, so read the
+  // full one for the body hash
+  const { description } = await azureApiGit.getPullRequestById(
+    pullRequestId,
+    config.project,
+  );
+  azurePr.bodyStruct = getPrBodyStruct(description);
+
   const labels = await azureApiGit.getPullRequestLabels(
     config.repoId,
     pullRequestId,

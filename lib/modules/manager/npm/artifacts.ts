@@ -12,6 +12,7 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type { NpmManagerData } from './types.ts';
 import { updateDependency } from './update/dependency/index.ts';
 
 // eg. 8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589
@@ -23,7 +24,7 @@ const sriRegString = '^(?<algo>sha\\d+)-(?<hash>[A-Za-z0-9+/]+={0,2})$';
 const packageManagerFieldRegString = '("packageManager"\\s*:\\s*")[^"]*"';
 
 export async function updateArtifacts(
-  updateArtifactsConfig: UpdateArtifact,
+  updateArtifactsConfig: UpdateArtifact<NpmManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`npm.updateArtifacts(${updateArtifactsConfig.packageFileName})`);
   let res: UpdateArtifactsResult[] = [];
@@ -43,7 +44,7 @@ export async function updateArtifacts(
  * @see https://github.com/nodejs/corepack/blob/57bfb67b062ea1b8746b302bcdbf9f8e8438c526/sources/corepackUtils.ts#L300
  */
 function handlePackageManagerUpdates(
-  updateArtifactsConfig: UpdateArtifact,
+  updateArtifactsConfig: UpdateArtifact<NpmManagerData>,
 ): UpdateArtifactsResult | null {
   const { packageFileName, updatedDeps, newPackageFileContent } =
     updateArtifactsConfig;
@@ -117,7 +118,7 @@ function handlePackageManagerUpdates(
  * Update the minimumReleaseAgeExclude setting in pnpm-workspace.yaml if needed
  */
 async function updatePnpmWorkspace(
-  updateArtifactsConfig: UpdateArtifact,
+  updateArtifactsConfig: UpdateArtifact<NpmManagerData>,
 ): Promise<UpdateArtifactsResult | null> {
   const upgrades = updateArtifactsConfig.updatedDeps.filter(
     (u) => u.isVulnerabilityAlert,

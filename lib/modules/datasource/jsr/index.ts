@@ -1,5 +1,6 @@
 import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
@@ -58,16 +59,8 @@ export class JsrDatasource extends Datasource {
       releases: [],
     };
 
-    try {
-      const { body } = await this.http.getJson(
-        packageInfoUrl,
-        JsrPackageMetadata,
-      );
-      result.releases.push(...body);
-    } catch (err) {
-      logger.warn({ err }, 'JSR: failed to get package details');
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(packageInfoUrl, JsrPackageMetadata);
+    result.releases.push(...body);
 
     return result.releases.length ? result : null;
   }
@@ -76,8 +69,11 @@ export class JsrDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${JsrDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         cacheable: true,
         fallback: true,
       },

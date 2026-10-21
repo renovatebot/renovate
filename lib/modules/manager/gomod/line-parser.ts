@@ -2,8 +2,10 @@ import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { GoModManagerData } from './types.ts';
 
 function trimQuotes(str: string): string {
   return str.replace(regEx(/^"(?<value>.*)"$/), '$<value>');
@@ -27,8 +29,6 @@ const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
 
-const pseudoVersionRegex = regEx(GoDatasource.pversionRegexp);
-
 // Go writes this version for a module whose `replace` directive points to a
 // local path, with the major version of the module path, such as
 // `v2.0.0-00010101000000-000000000000` for a `/v2` module
@@ -36,21 +36,18 @@ const placeholderPseudoVersionRegex = regEx(
   /^v\d+\.\d+\.\d+-00010101000000-000000000000$/,
 );
 
-function extractDigest(input: string): string | undefined {
-  const match = pseudoVersionRegex.exec(input);
-  return match?.groups?.digest;
-}
-
 function isPlaceholderPseudoVersion(version: string): boolean {
   return placeholderPseudoVersionRegex.test(version);
 }
 
-export function parseLine(input: string): PackageDependency | null {
+export function parseLine(
+  input: string,
+): PackageDependency<GoModManagerData> | null {
   const goVersionMatches = goVersionRegex.exec(input)?.groups;
   if (goVersionMatches) {
     const { version: currentValue } = goVersionMatches;
 
-    const dep: PackageDependency = {
+    const dep: PackageDependency<GoModManagerData> = {
       datasource: GolangVersionDatasource.id,
       versioning: 'go-mod-directive',
       depType: 'golang',
@@ -70,7 +67,7 @@ export function parseLine(input: string): PackageDependency | null {
   if (toolchainMatches) {
     const { version: currentValue } = toolchainMatches;
 
-    const dep: PackageDependency = {
+    const dep: PackageDependency<GoModManagerData> = {
       datasource: GolangVersionDatasource.id,
       depType: 'toolchain',
       depName: 'go',
@@ -91,7 +88,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(module);
 
-    const dep: PackageDependency = {
+    const dep: PackageDependency<GoModManagerData> = {
       datasource: GoDatasource.id,
       depType: 'require',
       depName,
@@ -99,7 +96,7 @@ export function parseLine(input: string): PackageDependency | null {
     };
 
     if (isVersion(currentValue)) {
-      const digest = extractDigest(currentValue);
+      const digest = parseVersionCommit(currentValue)?.revision;
       if (digest) {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;
@@ -135,7 +132,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(replacement);
 
-    const dep: PackageDependency = {
+    const dep: PackageDependency<GoModManagerData> = {
       datasource: GoDatasource.id,
       depType: 'replace',
       depName,
@@ -143,7 +140,7 @@ export function parseLine(input: string): PackageDependency | null {
     };
 
     if (isVersion(currentValue)) {
-      const digest = extractDigest(currentValue);
+      const digest = parseVersionCommit(currentValue)?.revision;
       if (digest) {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;
@@ -181,7 +178,7 @@ export function parseLine(input: string): PackageDependency | null {
 
     const depName = trimQuotes(module);
 
-    const dep: PackageDependency = {
+    const dep: PackageDependency<GoModManagerData> = {
       datasource: GoDatasource.id,
       depType: 'tool',
       depName,
