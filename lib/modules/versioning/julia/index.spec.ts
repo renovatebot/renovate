@@ -258,14 +258,15 @@ describe('modules/versioning/julia/index', () => {
   // `currentValue` is the string in `[compat]`, `newVersion` the release being
   // proposed, and `expected` what `[compat]` should become. `currentVersion`,
   // the release currently resolved, is left out: no result depends on it.
-  // `bump` raises the floor and keeps the shape.
+  // `bump` raises the floor and keeps the shape; a hyphen range is left alone.
   it.each`
-    currentValue    | rangeStrategy | newVersion  | expected
-    ${'1.2.3'}      | ${'bump'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.4'}  | ${'^1.2.4'}
-    ${'0.10, 0.11'} | ${'bump'}     | ${'0.12.1'} | ${'0.12.1'}
-    ${'1.2, 2'}     | ${'bump'}     | ${'2.5.0'}  | ${'2.5.0'}
-    ${'>= 1.2.3'}   | ${'bump'}     | ${'2.0.0'}  | ${'>= 2.0.0'}
+    currentValue     | rangeStrategy | newVersion  | expected
+    ${'1.2.3'}       | ${'bump'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'^1.2.3'}      | ${'bump'}     | ${'1.2.4'}  | ${'^1.2.4'}
+    ${'0.10, 0.11'}  | ${'bump'}     | ${'0.12.1'} | ${'0.12.1'}
+    ${'1.2, 2'}      | ${'bump'}     | ${'2.5.0'}  | ${'2.5.0'}
+    ${'>= 1.2.3'}    | ${'bump'}     | ${'2.0.0'}  | ${'>= 2.0.0'}
+    ${'1.2.3 - 4.5'} | ${'bump'}     | ${'5.0.0'}  | ${'1.2.3 - 4.5'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (bump)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {
@@ -279,18 +280,20 @@ describe('modules/versioning/julia/index', () => {
     },
   );
 
-  // `replace` only rewrites when the new release does not already fit.
+  // `replace` only rewrites when the new release does not already fit; a
+  // hyphen range is left alone.
   it.each`
-    currentValue    | rangeStrategy | newVersion  | expected
-    ${'^1.2.3'}     | ${'replace'}  | ${'1.5.0'}  | ${'^1.2.3'}
-    ${'^1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'^2.0.0'}
-    ${'^1.2'}       | ${'replace'}  | ${'2.0.0'}  | ${'^2.0'}
-    ${'1.2.3'}      | ${'replace'}  | ${'2.0.0'}  | ${'2.0.0'}
-    ${'=1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'=2.0.0'}
-    ${'= 1.2.3'}    | ${'replace'}  | ${'2.0.0'}  | ${'= 2.0.0'}
-    ${'0.10, 0.11'} | ${'replace'}  | ${'0.12.1'} | ${'0.12'}
-    ${'>= 1.2.3'}   | ${'replace'}  | ${'2.0.0'}  | ${'>= 1.2.3'}
-    ${'< 2.0.0'}    | ${'replace'}  | ${'2.0.0'}  | ${'< 3.0.0'}
+    currentValue     | rangeStrategy | newVersion  | expected
+    ${'^1.2.3'}      | ${'replace'}  | ${'1.5.0'}  | ${'^1.2.3'}
+    ${'^1.2.3'}      | ${'replace'}  | ${'2.0.0'}  | ${'^2.0.0'}
+    ${'^1.2'}        | ${'replace'}  | ${'2.0.0'}  | ${'^2.0'}
+    ${'1.2.3'}       | ${'replace'}  | ${'2.0.0'}  | ${'2.0.0'}
+    ${'=1.2.3'}      | ${'replace'}  | ${'2.0.0'}  | ${'=2.0.0'}
+    ${'= 1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'= 2.0.0'}
+    ${'0.10, 0.11'}  | ${'replace'}  | ${'0.12.1'} | ${'0.12'}
+    ${'>= 1.2.3'}    | ${'replace'}  | ${'2.0.0'}  | ${'>= 1.2.3'}
+    ${'< 2.0.0'}     | ${'replace'}  | ${'2.0.0'}  | ${'< 3.0.0'}
+    ${'1.2.3 - 4.5'} | ${'replace'}  | ${'5.0.0'}  | ${'1.2.3 - 4.5'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (replace)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {

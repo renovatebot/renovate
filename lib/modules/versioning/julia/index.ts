@@ -149,11 +149,6 @@ function isAbove(a: number[], b: number[]): boolean {
 // Julia's convention is to append a new specifier rather than replace the
 // entry, keeping it in ascending order.
 function widen(currentValue: string, newVersion: string): string {
-  // A hyphen range is a deliberate manual constraint. Anchored: a hyphen
-  // without surrounding whitespace is a prerelease tag, not a range.
-  if (regEx(/^\d+(?:\.\d+)*\s+-\s+\d+(?:\.\d+)*$/).test(currentValue)) {
-    return currentValue;
-  }
   if (matches(newVersion, currentValue)) {
     return currentValue;
   }
@@ -184,6 +179,11 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
+    return currentValue;
+  }
+  // A hyphen range is a deliberate manual constraint. Anchored: a hyphen
+  // without surrounding whitespace is a prerelease tag, not a range.
+  if (regEx(/^\d+(?:\.\d+)*\s+-\s+\d+(?:\.\d+)*$/).test(currentValue)) {
     return currentValue;
   }
   // A compat entry carries `major.minor.patch` and nothing else: the
