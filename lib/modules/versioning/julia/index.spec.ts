@@ -24,6 +24,8 @@ describe('modules/versioning/julia/index', () => {
     ${'1.2, 2'}           | ${true}
     ${'1.2.3 - 4.5'}      | ${true}
     ${'=0.10.1, =0.10.3'} | ${true}
+    ${'not a version'}    | ${false}
+    ${'1.2.3beta'}        | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(julia.isValid(version)).toBe(expected);
   });
@@ -33,6 +35,7 @@ describe('modules/versioning/julia/index', () => {
   it.each`
     version    | range       | expected
     ${'1.2.3'} | ${'^1.2.3'} | ${true}
+    ${'1.0.0'} | ${'^1.2.3'} | ${false}
     ${'1.5.0'} | ${'^1.2.3'} | ${true}
     ${'2.0.0'} | ${'^1.2.3'} | ${false}
     ${'1.2.0'} | ${'^1.2'}   | ${true}
@@ -64,6 +67,7 @@ describe('modules/versioning/julia/index', () => {
   it.each`
     version    | range       | expected
     ${'1.2.3'} | ${'~1.2.3'} | ${true}
+    ${'1.2.2'} | ${'~1.2.3'} | ${false}
     ${'1.2.9'} | ${'~1.2.3'} | ${true}
     ${'1.3.0'} | ${'~1.2.3'} | ${false}
     ${'1.2.0'} | ${'~1.2'}   | ${true}
@@ -78,6 +82,12 @@ describe('modules/versioning/julia/index', () => {
     ${'0.0.3'} | ${'~0.0.3'} | ${true}
     ${'0.0.9'} | ${'~0.0.3'} | ${true}
     ${'0.1.0'} | ${'~0.0.3'} | ${false}
+    ${'0.0.0'} | ${'~0.0'}   | ${true}
+    ${'0.0.9'} | ${'~0.0'}   | ${true}
+    ${'0.1.0'} | ${'~0.0'}   | ${false}
+    ${'0.0.0'} | ${'~0'}     | ${true}
+    ${'0.9.9'} | ${'~0'}     | ${true}
+    ${'1.0.0'} | ${'~0'}     | ${false}
   `(
     'matches("$version", "$range") === $expected (tilde)',
     ({ version, range, expected }) => {
@@ -85,37 +95,82 @@ describe('modules/versioning/julia/index', () => {
     },
   );
 
-  // Bare version = caret default; comma = union; ≥ synonym; equality; hyphen.
+  // A bare version is a caret range, unlike npm where it is exact.
+  // https://pkgdocs.julialang.org/v1/compatibility/#Version-specifier-format
+  it.each`
+    version    | range       | expected
+    ${'1.2.5'} | ${'1.2.3'}  | ${true}
+    ${'2.0.0'} | ${'1.2.3'}  | ${false}
+    ${'1.5.0'} | ${'1.2'}    | ${true}
+    ${'1.2.5'} | ${'v1.2.3'} | ${true}
+  `(
+    'matches("$version", "$range") === $expected (bare)',
+    ({ version, range, expected }) => {
+      expect(julia.matches(version, range)).toBe(expected);
+    },
+  );
+
+  // A comma is a union, not an intersection as in Cargo: the `0.2, 1`
+  // rows leave a gap at 0.5.0, which intersection could not produce.
+  it.each`
+    version    | range       | expected
+    ${'2.0.0'} | ${'1.2, 2'} | ${true}
+    ${'2.9.9'} | ${'1.2, 2'} | ${true}
+    ${'3.0.0'} | ${'1.2, 2'} | ${false}
+    ${'0.2.0'} | ${'0.2, 1'} | ${true}
+    ${'0.5.0'} | ${'0.2, 1'} | ${false}
+    ${'1.0.0'} | ${'0.2, 1'} | ${true}
+  `(
+    'matches("$version", "$range") === $expected (union)',
+    ({ version, range, expected }) => {
+      expect(julia.matches(version, range)).toBe(expected);
+    },
+  );
+
+  // Equality pins one release; a union of pins admits only those.
   it.each`
     version     | range                 | expected
-    ${'1.2.5'}  | ${'1.2.3'}            | ${true}
-    ${'2.0.0'}  | ${'1.2.3'}            | ${false}
-    ${'1.5.0'}  | ${'1.2'}              | ${true}
-    ${'2.0.0'}  | ${'1.2, 2'}           | ${true}
-    ${'2.9.9'}  | ${'1.2, 2'}           | ${true}
-    ${'3.0.0'}  | ${'1.2, 2'}           | ${false}
-    ${'0.5.0'}  | ${'0.2, 1'}           | ${false}
-    ${'1.0.0'}  | ${'0.2, 1'}           | ${true}
-    ${'0.2.0'}  | ${'0.2, 1'}           | ${true}
     ${'1.2.3'}  | ${'=1.2.3'}           | ${true}
     ${'1.2.4'}  | ${'=1.2.3'}           | ${false}
     ${'0.10.1'} | ${'=0.10.1, =0.10.3'} | ${true}
     ${'0.10.2'} | ${'=0.10.1, =0.10.3'} | ${false}
     ${'0.10.3'} | ${'=0.10.1, =0.10.3'} | ${true}
-    ${'1.2.3'}  | ${'>= 1.2.3'}         | ${true}
-    ${'9.9.9'}  | ${'>= 1.2.3'}         | ${true}
-    ${'1.2.2'}  | ${'>= 1.2.3'}         | ${false}
-    ${'1.2.3'}  | ${'≥ 1.2.3'}          | ${true}
-    ${'1.2.2'}  | ${'≥ 1.2.3'}          | ${false}
-    ${'1.2.2'}  | ${'< 1.2.3'}          | ${true}
-    ${'1.2.3'}  | ${'< 1.2.3'}          | ${false}
-    ${'1.2.3'}  | ${'1.2.3 - 4.5.6'}    | ${true}
-    ${'4.5.6'}  | ${'1.2.3 - 4.5.6'}    | ${true}
-    ${'4.5.7'}  | ${'1.2.3 - 4.5.6'}    | ${false}
-    ${'4.5.6'}  | ${'1.2.3 - 4.5'}      | ${true}
-    ${'4.6.0'}  | ${'1.2.3 - 4.5'}      | ${false}
   `(
-    'matches("$version", "$range") === $expected',
+    'matches("$version", "$range") === $expected (equality)',
+    ({ version, range, expected }) => {
+      expect(julia.matches(version, range)).toBe(expected);
+    },
+  );
+
+  // Inequalities, with `≥` accepted as a synonym for `>=`.
+  it.each`
+    version    | range         | expected
+    ${'1.2.3'} | ${'>= 1.2.3'} | ${true}
+    ${'9.9.9'} | ${'>= 1.2.3'} | ${true}
+    ${'1.2.2'} | ${'>= 1.2.3'} | ${false}
+    ${'1.2.3'} | ${'≥ 1.2.3'}  | ${true}
+    ${'1.2.2'} | ${'≥ 1.2.3'}  | ${false}
+    ${'1.2.2'} | ${'< 1.2.3'}  | ${true}
+    ${'1.2.3'} | ${'< 1.2.3'}  | ${false}
+  `(
+    'matches("$version", "$range") === $expected (inequality)',
+    ({ version, range, expected }) => {
+      expect(julia.matches(version, range)).toBe(expected);
+    },
+  );
+
+  // Hyphen ranges include both endpoints; a short upper endpoint is a
+  // wildcard, so `1.2.3 - 4.5` runs to 4.6.0.
+  // https://pkgdocs.julialang.org/v1/compatibility/#Hyphen-specifiers
+  it.each`
+    version    | range              | expected
+    ${'1.2.3'} | ${'1.2.3 - 4.5.6'} | ${true}
+    ${'4.5.6'} | ${'1.2.3 - 4.5.6'} | ${true}
+    ${'4.5.7'} | ${'1.2.3 - 4.5.6'} | ${false}
+    ${'4.5.6'} | ${'1.2.3 - 4.5'}   | ${true}
+    ${'4.6.0'} | ${'1.2.3 - 4.5'}   | ${false}
+  `(
+    'matches("$version", "$range") === $expected (hyphen)',
     ({ version, range, expected }) => {
       expect(julia.matches(version, range)).toBe(expected);
     },
@@ -126,6 +181,8 @@ describe('modules/versioning/julia/index', () => {
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '4.2.1', '5.0.0']} | ${'^4.2'}   | ${'4.2.1'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']}          | ${'4.2'}    | ${'4.2.0'}
     ${['1.0.0', '1.5.0', '2.0.0', '3.0.0']}                   | ${'1.2, 2'} | ${'2.0.0'}
+    ${['1.0.0', '1.5.0']}                                     | ${'^9'}     | ${null}
+    ${[]}                                                     | ${'^1'}     | ${null}
   `(
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -136,6 +193,7 @@ describe('modules/versioning/julia/index', () => {
   it.each`
     versions                                | range       | expected
     ${['1.0.0', '1.5.0', '2.0.0', '3.0.0']} | ${'1.2, 2'} | ${'1.5.0'}
+    ${['1.0.0', '1.5.0']}                   | ${'^9'}     | ${null}
   `(
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
@@ -144,12 +202,13 @@ describe('modules/versioning/julia/index', () => {
   );
 
   it.each`
-    constraint   | expected
-    ${'=1.2.3'}  | ${true}
-    ${'= 1.2.3'} | ${true}
-    ${'1.2.3'}   | ${false}
-    ${'^1.2.3'}  | ${false}
-    ${'~1.2.3'}  | ${false}
+    constraint            | expected
+    ${'=1.2.3'}           | ${true}
+    ${'= 1.2.3'}          | ${true}
+    ${'1.2.3'}            | ${false}
+    ${'^1.2.3'}           | ${false}
+    ${'~1.2.3'}           | ${false}
+    ${'=0.10.1, =0.10.3'} | ${false}
   `(
     'isSingleVersion("$constraint") === $expected',
     ({ constraint, expected }) => {
@@ -164,6 +223,8 @@ describe('modules/versioning/julia/index', () => {
     ${'2.0.0'} | ${'^1.2.3'} | ${false}
     ${'0.0.2'} | ${'^0.0.3'} | ${true}
     ${'0.0.3'} | ${'^0.0.3'} | ${false}
+    ${'0.1.0'} | ${'1.2, 2'} | ${true}
+    ${'3.0.0'} | ${'1.2, 2'} | ${false}
   `(
     'isLessThanRange("$version", "$range") === $expected',
     ({ version, range, expected }) => {
@@ -182,6 +243,7 @@ describe('modules/versioning/julia/index', () => {
     ${'0.0.3'}      | ${'0.0.3'}       | ${false}
     ${'1.2.3-rc.1'} | ${'1.2.3'}       | ${true}
     ${'1.2.3'}      | ${'1.2.3-alpha'} | ${true}
+    ${'1.2.3-rc.1'} | ${'1.2.3-rc.2'}  | ${true}
   `(
     'isBreaking("$current", "$version") === $expected',
     ({ current, version, expected }) => {
@@ -193,10 +255,31 @@ describe('modules/versioning/julia/index', () => {
     expect(julia.getPinnedValue!('1.2.3')).toBe('=1.2.3');
   });
 
+  // `currentValue` is the string in `[compat]`, `newVersion` the release being
+  // proposed, and `expected` what `[compat]` should become. `currentVersion`,
+  // the release currently resolved, is left out: no result depends on it.
+  // `bump` raises the floor and keeps the shape.
+  it.each`
+    currentValue  | rangeStrategy | newVersion | expected
+    ${'1.2.3'}    | ${'bump'}     | ${'1.2.4'} | ${'1.2.4'}
+    ${'^1.2.3'}   | ${'bump'}     | ${'1.2.4'} | ${'^1.2.4'}
+    ${'>= 1.2.3'} | ${'bump'}     | ${'2.0.0'} | ${'>= 2.0.0'}
+  `(
+    'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (bump)',
+    ({ currentValue, rangeStrategy, newVersion, expected }) => {
+      expect(
+        julia.getNewValue({
+          currentValue,
+          rangeStrategy,
+          newVersion,
+        }),
+      ).toBe(expected);
+    },
+  );
+
+  // `replace` only rewrites when the new release does not already fit.
   it.each`
     currentValue    | rangeStrategy | newVersion  | expected
-    ${'1.2.3'}      | ${'bump'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.4'}  | ${'^1.2.4'}
     ${'^1.2.3'}     | ${'replace'}  | ${'1.5.0'}  | ${'^1.2.3'}
     ${'^1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'^2.0.0'}
     ${'^1.2'}       | ${'replace'}  | ${'2.0.0'}  | ${'^2.0'}
@@ -204,8 +287,10 @@ describe('modules/versioning/julia/index', () => {
     ${'=1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'=2.0.0'}
     ${'= 1.2.3'}    | ${'replace'}  | ${'2.0.0'}  | ${'= 2.0.0'}
     ${'0.10, 0.11'} | ${'replace'}  | ${'0.12.1'} | ${'0.12'}
+    ${'>= 1.2.3'}   | ${'replace'}  | ${'2.0.0'}  | ${'>= 1.2.3'}
+    ${'< 2.0.0'}    | ${'replace'}  | ${'2.0.0'}  | ${'< 3.0.0'}
   `(
-    'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected',
+    'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (replace)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {
       expect(
         julia.getNewValue({
