@@ -348,7 +348,7 @@ export async function restoreNpmrc(
     } else {
       npmrc = applyConfigNpmrc(config, packageFile.managerData?.repoNpmrc);
     }
-    result.push({ ...packageFile, npmrc });
+    result.push({ ...packageFile, ...(isString(npmrc) && { npmrc }) });
   }
   return result;
 }
