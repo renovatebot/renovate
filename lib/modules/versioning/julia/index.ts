@@ -15,6 +15,7 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
+  'pin',
   'replace',
   'widen',
 ];
