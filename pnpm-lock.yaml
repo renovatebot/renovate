@@ -122,8 +122,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.9.1)
       '@renovatebot/base-image':
-        specifier: 13.138.2
-        version: 13.138.2(zod@4.6.7)
+        specifier: 13.139.0
+        version: 13.139.0(zod@4.6.7)
       '@renovatebot/detect-tools':
         specifier: 4.0.23
         version: 4.0.23
@@ -889,8 +889,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@containerbase/base@14.46.0':
-    resolution: {integrity: sha512-9EKZSxOxJc351SrMF/MqeLUsvrTsoRqc7McVdg7/OoroOOm3KDbUyMO4EckMh3EJ4AsZ1VW+ylwpfxyO4ZBZ4g==}
+  '@containerbase/base@14.49.0':
+    resolution: {integrity: sha512-4CaFLifAV7EH3eeZDdhN0qPisXm50qQaYu/ueaXU+lTbAQRCN7Ncfg5D3DQVLGQgEXOZ61PgEocbVL172jO6/A==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -2040,8 +2040,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.138.2':
-    resolution: {integrity: sha512-SnL3n+WXYrveaU86eyRxpLG/nOP7w5N1y6dLzW1xhoLHkyO4Dg/LyCnye36hPACzIytWTdgEwIw40AGqnjKL4w==}
+  '@renovatebot/base-image@13.139.0':
+    resolution: {integrity: sha512-YleoS1GNqeOs98/g+ZDAh1Kk0KSlUZl61yNaAh6FVAUq1sdVjXn2ADiMKOfqg9PPG678mSdzoHkOWRhKyHSzPw==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -6525,7 +6525,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.46.0(zod@4.6.7)':
+  '@containerbase/base@14.49.0(zod@4.6.7)':
     dependencies:
       semver: 7.8.5
     optionalDependencies:
@@ -7451,9 +7451,9 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/base-image@13.138.2(zod@4.6.7)':
+  '@renovatebot/base-image@13.139.0(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.46.0(zod@4.6.7)
+      '@containerbase/base': 14.49.0(zod@4.6.7)
     optionalDependencies:
       zod: 4.6.7
 
