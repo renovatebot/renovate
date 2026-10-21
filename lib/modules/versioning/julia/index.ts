@@ -66,7 +66,11 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 function isValid(input: string): boolean {
-  return npm.isValid(julia2npm(input));
+  // Pkg rejects an empty specifier, alone or in a union: `""`, `"1.2,"`.
+  return (
+    input.split(',').every((spec) => isNonEmptyString(spec.trim())) &&
+    npm.isValid(julia2npm(input))
+  );
 }
 
 function matches(version: string, range: string): boolean {

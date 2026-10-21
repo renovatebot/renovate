@@ -26,6 +26,9 @@ describe('modules/versioning/julia/index', () => {
     ${'=0.10.1, =0.10.3'} | ${true}
     ${'not a version'}    | ${false}
     ${'1.2.3beta'}        | ${false}
+    ${''}                 | ${false}
+    ${'  '}               | ${false}
+    ${'1.2,'}             | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(julia.isValid(version)).toBe(expected);
   });
