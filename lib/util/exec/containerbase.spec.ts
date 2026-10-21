@@ -6,7 +6,6 @@ import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
   getToolConfig,
-  isContainerbase,
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
@@ -33,8 +32,9 @@ describe('util/exec/containerbase', () => {
     });
 
     it('ignores CONTAINERBASE from the custom env', () => {
+      GlobalConfig.set({ binarySource: 'install' });
       setCustomEnv({ CONTAINERBASE: 'true' });
-      expect(isContainerbase()).toBeFalse();
+      expect(isDynamicInstall()).toBeFalse();
       setCustomEnv({});
     });
 

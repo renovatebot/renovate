@@ -1,6 +1,6 @@
 import {
   type ToolMetadata,
-  isContainerbase as isContainerbaseEnv,
+  isContainerbase,
   tools,
 } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
@@ -303,16 +303,6 @@ export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
 
 export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
-}
-
-/**
- * Checks if Renovate runs in a containerbase image.
- *
- * Reads `CONTAINERBASE` from the process environment only, so
- * `customEnvVariables` or repository `env` can't change it.
- */
-export function isContainerbase(): boolean {
-  return isContainerbaseEnv();
 }
 
 export function isDynamicInstall(
