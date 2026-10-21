@@ -345,10 +345,8 @@ export async function validateConfig(
             continue;
           }
         }
-        if (key === 'enabledManagers' && val) {
-          const unsupportedManagers = getUnsupportedEnabledManagers(
-            val as string[],
-          );
+        if (key === 'enabledManagers' && isArray(val, isString)) {
+          const unsupportedManagers = getUnsupportedEnabledManagers(val);
           if (isNonEmptyArray(unsupportedManagers)) {
             errors.push({
               topic: ConfigValidationTopic.Error,
@@ -426,10 +424,8 @@ export async function validateConfig(
               topic: ConfigValidationTopic.Error,
               message: `Invalid configuration option: ${currentPath}`,
             });
-          } else if (key === 'schedule') {
-            const [validSchedule, errorMessage] = hasValidSchedule(
-              val as string[],
-            );
+          } else if (key === 'schedule' && isArray(val, isString)) {
+            const [validSchedule, errorMessage] = hasValidSchedule(val);
             if (!validSchedule) {
               errors.push({
                 topic: ConfigValidationTopic.Error,

@@ -539,22 +539,18 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
-    it('throws when `enabledManagers` is not an array', async () => {
-      // oxlint-disable-next-line renovate/validate-config-warnings-and-errors -- there is no result, as it throws
-      const result = configValidation.validateConfig('repo', {
-        enabledManagers: 'npm' as never,
-      });
-      await expect(result).rejects.toThrow(
-        'enabledManagers.filter is not a function',
+    it.each([
+      ['enabledManagers', 'npm'],
+      ['schedule', 'nope'],
+    ])('does not throw when `%s` is %j', async (key, value) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { [key]: value },
       );
-    });
-
-    it('throws when `schedule` is not an array', async () => {
-      // oxlint-disable-next-line renovate/validate-config-warnings-and-errors -- there is no result, as it throws
-      const result = configValidation.validateConfig('repo', {
-        schedule: 'nope' as never,
-      });
-      await expect(result).rejects.toThrow('schedule.some is not a function');
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        { message: expect.stringContaining(`\`${key}\` should be a list`) },
+      ]);
     });
 
     it('catches invalid customDatasources record type', async () => {
