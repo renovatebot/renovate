@@ -1,3 +1,4 @@
+import { validateContainerbaseVersion as _validateContainerbaseVersion } from '@renovatebot/base-image';
 import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
@@ -5,10 +6,18 @@ import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
 
+vi.mock('@renovatebot/base-image', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@renovatebot/base-image')>()),
+  validateContainerbaseVersion: vi.fn(),
+}));
+
 const initPlatform = vi.mocked(_initPlatform);
+const validateContainerbaseVersion = vi.mocked(_validateContainerbaseVersion);
 
 describe('workers/global/initialize', () => {
   beforeEach(() => {
+    vi.stubEnv('CONTAINERBASE', undefined);
+    vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', undefined);
     initPlatform.mockImplementationOnce((r) => Promise.resolve(r));
   });
 
@@ -40,6 +49,58 @@ describe('workers/global/initialize', () => {
       };
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
+    });
+  });
+
+  describe('checkContainerbaseVersion()', () => {
+    beforeEach(() => {
+      git.validateGitVersion.mockResolvedValue(true);
+    });
+
+    it('skips the check outside of containerbase', async () => {
+      await expect(globalInitialize({})).toResolve();
+      expect(validateContainerbaseVersion).not.toHaveBeenCalled();
+    });
+
+    it('validates the version in containerbase', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      validateContainerbaseVersion.mockResolvedValueOnce('14.46.0');
+      await expect(globalInitialize({})).toResolve();
+      expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { version: '14.46.0' },
+        'Containerbase image version is compatible',
+      );
+    });
+
+    it('throws if the version is not compatible', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      validateContainerbaseVersion.mockRejectedValueOnce(
+        new Error('containerbase image 13.0.0 is not compatible'),
+      );
+      await expect(globalInitialize({})).rejects.toThrow(
+        'Init: containerbase image 13.0.0 is not compatible',
+      );
+    });
+
+    it('throws if the version file is missing', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      validateContainerbaseVersion.mockRejectedValueOnce(
+        new Error('ENOENT: no such file or directory'),
+      );
+      await expect(globalInitialize({})).rejects.toThrow(
+        'Init: ENOENT: no such file or directory',
+      );
+    });
+
+    it('skips the check if ignored', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', 'true');
+      await expect(globalInitialize({})).toResolve();
+      expect(validateContainerbaseVersion).not.toHaveBeenCalled();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
+      );
     });
   });
 

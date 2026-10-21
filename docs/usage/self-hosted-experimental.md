@@ -102,6 +102,10 @@ This is useful for GitLab configurations where pipelines are only created for me
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
+## `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`
+
+If set to any value, Renovate skips the check that the version of the containerbase image is compatible with Renovate.
+
 ## `RENOVATE_X_IGNORE_RE2`
 
 Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
