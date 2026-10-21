@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fakeSha, fs, logger, partial, scm } from '~test/util.ts';
+import { mergeChildConfig } from '../../../config/utils.ts';
 import { extractPackageFile as extractRegexPackageFile } from '../../../modules/manager/custom/regex/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
 import * as npmrc from '../../../modules/manager/npmrc.ts';
@@ -692,6 +693,73 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
         { baseBranch: 'master' },
         'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+    });
+
+    it('keeps non-string registry URLs', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        kustomize: [
+          {
+            packageFile: 'kustomization.yaml',
+            registryUrls: [undefined as never],
+            additionalRegistryUrls: [null as never],
+            deps: [
+              {
+                depName: 'local-chart',
+                datasource: 'helm',
+                registryUrls: [undefined as never],
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(packageFiles.kustomize[0]).toMatchObject({
+        registryUrls: [undefined],
+        additionalRegistryUrls: [null],
+        deps: [{ registryUrls: [undefined] }],
+      });
+      expect(cache.scan?.master?.packageFiles).toEqual(packageFiles);
+    });
+
+    it('does not add registry URLs to package files and deps without them', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        nuget: [
+          {
+            packageFile: 'test.csproj',
+            deps: [{ depName: 'foo', datasource: 'nuget' }],
+          },
+        ],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+      const registryUrls = ['https://nuget.example.com/v3/index.json'];
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      const [file] = packageFiles.nuget;
+      expect(Object.hasOwn(file, 'registryUrls')).toBeFalse();
+      expect(Object.hasOwn(file, 'additionalRegistryUrls')).toBeFalse();
+      expect(Object.hasOwn(file.deps[0], 'registryUrls')).toBeFalse();
+      const fileConfig = mergeChildConfig({ registryUrls }, file);
+      expect(fileConfig.registryUrls).toEqual(registryUrls);
+      expect(mergeChildConfig(fileConfig, file.deps[0]).registryUrls).toEqual(
+        registryUrls,
       );
     });
 

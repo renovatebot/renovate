@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isTruthy } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
@@ -281,6 +281,10 @@ function detachRegistryUrlCredentials(
   let hadCredentials = false;
 
   function detach(url: string, hostTypes: string[]): string {
+    // managers may yield non-string entries despite the type
+    if (!isString(url)) {
+      return url;
+    }
     hadCredentials ||= hostTypes.length > 0 && hasUrlCredentials(url);
     return detachUrlCredentials(url, hostTypes);
   }
@@ -295,16 +299,23 @@ function detachRegistryUrlCredentials(
           ...file.deps,
         ]),
       );
-      file.registryUrls = file.registryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
-      file.additionalRegistryUrls = file.additionalRegistryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
-      for (const dep of file.deps) {
-        dep.registryUrls = dep.registryUrls?.map((url) =>
-          detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+      // absent fields stay absent, so they don't override configured ones
+      if (isArray(file.registryUrls)) {
+        file.registryUrls = file.registryUrls.map((url) =>
+          detach(url, hostTypes),
         );
+      }
+      if (isArray(file.additionalRegistryUrls)) {
+        file.additionalRegistryUrls = file.additionalRegistryUrls.map((url) =>
+          detach(url, hostTypes),
+        );
+      }
+      for (const dep of file.deps) {
+        if (isArray(dep.registryUrls)) {
+          dep.registryUrls = dep.registryUrls.map((url) =>
+            detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+          );
+        }
       }
     }
   }
