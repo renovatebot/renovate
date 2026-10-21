@@ -3801,7 +3801,7 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
-    it('does not validate templates in global config', async () => {
+    it('errors on an invalid template in global config', async () => {
       const config: AllConfig = {
         userAgent: '{{ unclosed',
       };
@@ -3810,7 +3810,12 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toBeEmptyArray();
-      expect(errors).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid template in config path: userAgent',
+        },
+      ]);
     });
 
     it('does not validate the value of reportType', async () => {
