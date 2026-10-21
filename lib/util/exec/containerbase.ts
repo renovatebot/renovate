@@ -51,6 +51,7 @@ const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
   pixi: 'conda',
   python: 'python',
   ruby: 'ruby',
+  rust: 'rust-release-channel',
 };
 
 /**
@@ -62,24 +63,16 @@ export function getToolVersioning(toolName: ToolName): VersioningName {
 }
 
 /**
- * Builds the lookup config of each supported tool, `rust` keeps its own datasource.
+ * Builds the lookup config of each supported tool.
  */
 function getAllToolConfig(): Partial<Record<SupportedToolName, ToolConfig>> {
   const toolConfig: Partial<Record<SupportedToolName, ToolConfig>> = {};
   for (const toolName of supportedToolNames) {
-    toolConfig[toolName] =
-      toolName === 'rust'
-        ? // the `containerbase` datasource has no nightly releases, which `install-tool` also installs
-          {
-            datasource: 'rust-version',
-            packageName: 'rust',
-            versioning: 'rust-release-channel',
-          }
-        : {
-            datasource: 'containerbase',
-            packageName: toolName,
-            versioning: getToolVersioning(toolName),
-          };
+    toolConfig[toolName] = {
+      datasource: 'containerbase',
+      packageName: toolName,
+      versioning: getToolVersioning(toolName),
+    };
   }
   return toolConfig;
 }

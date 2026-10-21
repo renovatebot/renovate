@@ -334,9 +334,7 @@ Renovate supports three possible ways to access those tools:
 
 If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
-With `install`, Renovate looks up the tool versions with the [`containerbase` datasource](./modules/datasource/containerbase/index.md), so it needs access to `https://containerbase.github.io/tool-versions/`.
-The `rust` versions come from the [`rust-version` datasource](./modules/datasource/rust-version/index.md) instead.
-`install-tool` then downloads the tools from their own hosts.
+With `install`, Renovate looks up the tool versions with the [`containerbase` datasource](./modules/datasource/containerbase/index.md), so it needs access to `https://containerbase.github.io/tool-versions/`.`install-tool` then downloads the tools from their own hosts.
 
 If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
 

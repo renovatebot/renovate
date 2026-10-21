@@ -62,14 +62,6 @@ describe('util/exec/containerbase', () => {
       });
     });
 
-    it('returns config for rust', () => {
-      expect(getToolConfig('rust')).toEqual({
-        datasource: 'rust-version',
-        packageName: 'rust',
-        versioning: 'rust-release-channel',
-      });
-    });
-
     it.each`
       toolName     | versioning
       ${'helm'}    | ${'npm'}
@@ -81,6 +73,7 @@ describe('util/exec/containerbase', () => {
       ${'pdm'}     | ${'pep440'}
       ${'node'}    | ${'node'}
       ${'php'}     | ${'composer'}
+      ${'rust'}    | ${'rust-release-channel'}
     `(
       'uses the $versioning versioning for $toolName',
       ({ toolName, versioning }) => {
@@ -104,7 +97,7 @@ describe('util/exec/containerbase', () => {
       },
     );
 
-    it('supports the tools of both datasources', () => {
+    it('lists the supported tools', () => {
       expect(getSupportedToolNames()).toIncludeAllMembers(['node', 'rust']);
     });
 
@@ -394,6 +387,33 @@ describe('util/exec/containerbase', () => {
       await expect(
         resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
       ).resolves.toBe('11.0.0');
+    });
+
+    it('resolves rust nightlies with the containerbase datasource', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/rust.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'rust',
+          updatedAt: '2026-10-20T03:00:00.000Z',
+          versions: [
+            { version: 'nightly-2026-10-20', prerelease: true },
+            { version: 'nightly-2026-10-19', prerelease: true },
+            { version: '1.91.0' },
+          ],
+        });
+
+      await expect(
+        resolveConstraint({ toolName: 'rust', constraint: 'nightly' }),
+      ).resolves.toBe('nightly-2026-10-20');
     });
   });
 
