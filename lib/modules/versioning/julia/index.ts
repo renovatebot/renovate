@@ -157,7 +157,13 @@ function widen(currentValue: string, newVersion: string): string {
   if (matches(newVersion, currentValue)) {
     return currentValue;
   }
-  const newSpec = simplifiedSpec(newVersion);
+  // Next to a bare major such as `5`, write `6`, not `6.0`: the entry's own
+  // style, and CompatHelper's.
+  const major = npm.getMajor(newVersion)!;
+  const newSpec =
+    major > 0 && regEx(/^\d+$/).test(lastSpecifier(currentValue))
+      ? `${major}`
+      : simplifiedSpec(newVersion);
   const separator =
     currentValue.includes(',') && !currentValue.includes(', ') ? ',' : ', ';
   const specs = currentValue.split(',').map((spec) => spec.trim());
