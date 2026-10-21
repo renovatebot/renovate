@@ -147,7 +147,7 @@ steps:
             --output tsv
         )"
 
-        npx --userconfig .npmrc renovate
+        npx --yes --userconfig .npmrc renovate@44.171.7
     env:
       RENOVATE_PLATFORM: azure
       RENOVATE_ENDPOINT: $(System.CollectionUri)
