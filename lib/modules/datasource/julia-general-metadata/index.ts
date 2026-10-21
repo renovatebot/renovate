@@ -1,5 +1,3 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
@@ -37,37 +35,7 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
 
     const url = joinUrlParts(registryUrl, 'api', packageName, 'versions.json');
 
-    const { val: result, err } = await this.http
-      .getJsonSafe(url, JuliaPackageMetadata)
-      .unwrap();
-
-    if (err instanceof ZodError) {
-      logger.debug(
-        {
-          err,
-          url,
-          datasource: JuliaGeneralMetadataDatasource.id,
-          packageName,
-        },
-        'Failed to parse Julia package versions',
-      );
-      return null;
-    }
-
-    if (err) {
-      logger.debug(
-        {
-          err,
-          url,
-          datasource: JuliaGeneralMetadataDatasource.id,
-          packageName,
-        },
-        'Error fetching Julia package versions',
-      );
-      this.handleGenericErrors(err);
-    }
-
-    return result;
+    return this.fetchJsonOrNull(url, JuliaPackageMetadata);
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
