@@ -349,10 +349,8 @@ export async function validateConfig(
             continue;
           }
         }
-        if (key === 'enabledManagers' && val) {
-          const unsupportedManagers = getUnsupportedEnabledManagers(
-            val as string[],
-          );
+        if (key === 'enabledManagers' && isArray(val, isString)) {
+          const unsupportedManagers = getUnsupportedEnabledManagers(val);
           if (isNonEmptyArray(unsupportedManagers)) {
             errors.push({
               topic: ConfigValidationTopic.Error,
@@ -430,10 +428,8 @@ export async function validateConfig(
               topic: ConfigValidationTopic.Error,
               message: `Invalid configuration option: ${currentPath}`,
             });
-          } else if (key === 'schedule') {
-            const [validSchedule, errorMessage] = hasValidSchedule(
-              val as string[],
-            );
+          } else if (key === 'schedule' && isArray(val, isString)) {
+            const [validSchedule, errorMessage] = hasValidSchedule(val);
             if (!validSchedule) {
               errors.push({
                 topic: ConfigValidationTopic.Error,
@@ -964,7 +960,7 @@ export async function validateConfig(
                       } else if (!isString(subValue)) {
                         errors.push({
                           topic: ConfigValidationTopic.Error,
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
+                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is not a string`,
                         });
                       }
                     }
@@ -1112,6 +1108,13 @@ export async function validateConfig(
             if (!rule.headers) {
               continue;
             }
+            if (!isPlainObject(rule.headers)) {
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `Invalid hostRules headers configuration: headers must be an object.`,
+              });
+              continue;
+            }
             for (const [header, value] of Object.entries(rule.headers)) {
               if (!isString(value)) {
                 errors.push({
@@ -1195,6 +1198,17 @@ async function validateGlobalConfig(
     // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
+        if (optionSupportsTemplating.has(key)) {
+          try {
+            template.validate(val);
+          } catch {
+            errors.push({
+              topic: ConfigValidationTopic.Error,
+              message: `Invalid template in config path: ${currentPath}`,
+            });
+          }
+        }
+
         if (
           key === 'onboardingConfigFileName' &&
           !getPossibleConfigFileNames({
