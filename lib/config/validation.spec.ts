@@ -3306,6 +3306,25 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('does not warn about repo config options inside onboardingConfig in inherited config', async () => {
+        const config = {
+          onboardingConfig: {
+            extends: ['config:recommended'],
+            packageRules: [
+              { matchPackageNames: ['foo'], minimumReleaseAge: '3 days' },
+            ],
+          },
+        };
+
+        const { warnings, errors } = await configValidation.validateConfig(
+          'inherit',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
       it('force', async () => {
         const config = {
           force: {
