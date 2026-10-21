@@ -35,8 +35,9 @@ describe('modules/versioning/vcpkg/index', () => {
       ${''}                             | ${false}
       ${'   '}                          | ${false}
       ${'#1'}                           | ${false}
-      ${'1.2.3#'}                       | ${true}
-      ${'1.2.3#abc'}                    | ${true}
+      ${'1.2.3#'}                       | ${false}
+      ${'1.2.3#abc'}                    | ${false}
+      ${'1.2#3#4'}                      | ${false}
       ${null}                           | ${false}
       ${undefined}                      | ${false}
     `('isValid("$input") === $expected', ({ input, expected }) => {

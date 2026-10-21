@@ -94,7 +94,8 @@ function parse(input: string | undefined | null): ParsedVersion | null {
     return null;
   }
   const { base, portVersion } = splitPortVersion(trimmed);
-  if (base === '') {
+  // `#` only introduces a port-version, so one left in the base is invalid.
+  if (base === '' || base.includes('#')) {
     return null;
   }
   const scheme = detectScheme(base);
