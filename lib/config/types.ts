@@ -503,7 +503,7 @@ export interface RenovateConfig
   toolSettings?: RepoToolSettingsOptions;
 }
 
-const CustomDatasourceFormats = [
+export const CustomDatasourceFormats = [
   'html',
   'json',
   'plain',
