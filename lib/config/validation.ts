@@ -377,7 +377,8 @@ export async function validateConfig(
           }
           const parentName =
             parentOptionName ??
-            (parentPath && repoEntryRe.test(parentPath)
+            (parentPath &&
+            (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
               ? '.'
               : getParentName(parentPath));
           if (
