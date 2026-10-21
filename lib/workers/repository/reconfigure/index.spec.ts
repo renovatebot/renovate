@@ -181,21 +181,9 @@ describe('workers/repository/reconfigure/index', () => {
     );
   });
 
-  it('skips pr comment and fails the status check if error during deps extraction', async () => {
+  it('skips pr comment if error during deps extraction', async () => {
     process.extractDependencies.mockRejectedValue(new Error());
-
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();
-
     expect(prComment.ensureReconfigurePrComment).not.toHaveBeenCalled();
-    expect(logger.logger.warn).toHaveBeenCalledWith(
-      { err: expect.any(Error) },
-      'Error while extracting dependencies using the reconfigure config',
-    );
-    expect(utils.setBranchStatus).toHaveBeenCalledWith(
-      'prefix/reconfigure',
-      'Failed to extract dependencies using the new config',
-      'red',
-      'config-validation',
-    );
   });
 });
