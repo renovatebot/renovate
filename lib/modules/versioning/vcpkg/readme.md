@@ -1,6 +1,6 @@
 Renovate vcpkg versioning targets the per-port version schemes used by the [vcpkg package manager](https://learn.microsoft.com/vcpkg/users/versioning).
 
-A vcpkg port declares one of four version fields, and Renovate dispatches the comparison logic according to which field is in use:
+A vcpkg port declares one of four version fields, each with its own comparison rules:
 
 - `version` is a relaxed dotted-number scheme that allows extra components, like `3.1.4` or `1.2.3.4`
 - `version-semver` is strict [Semantic Versioning](https://semver.org), like `3.1.4-rc.1`
@@ -8,6 +8,8 @@ A vcpkg port declares one of four version fields, and Renovate dispatches the co
 - `version-string` is opaque text without a defined ordering, like `bla-bla-2024-08-fixed-typo`
 
 Renovate detects which scheme applies by inspecting the input, then delegates to the matching underlying versioning module (`semver`, `loose`, or a direct date comparison).
+vcpkg itself takes the scheme from the field a version is published under, not from its text, so the two can disagree.
+A port that publishes dotted text under `version-string`, like `2.3.1`, is treated as a `version` here and ordered against the port's other dotted versions, which vcpkg would refuse to compare.
 
 A vcpkg port can also carry a `port-version` integer for changes that affect packaging without changing the upstream source.
 The canonical text form combines the base version and port-version with a `#` separator, like `1.2.3#1`, and the port-version is omitted when zero.
