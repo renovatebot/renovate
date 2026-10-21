@@ -29,8 +29,10 @@ const portVersionRegex = regEx(/^(?<base>.*)#(?<port>\d+)$/);
 const dateRegex = regEx(
   /^(?<head>\d{4}-\d{2}-\d{2})(?<tail>(?:\.(?:0|[1-9]\d*))*)$/,
 );
+// vcpkg-tool's dot-version grammar: numbers and numeric prerelease
+// identifiers without leading zeros.
 const numericRegex = regEx(
-  /^\d+(?:\.\d+)*(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/,
+  /^(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))*(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/,
 );
 const numericPrereleaseRegex = regEx(/-[0-9A-Za-z.-]+(?:\+[0-9A-Za-z.-]+)?$/);
 const numericBuildRegex = regEx(/\+[0-9A-Za-z.-]+$/);
