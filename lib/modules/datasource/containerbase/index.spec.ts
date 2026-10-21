@@ -1,8 +1,15 @@
 import * as httpMock from '~test/http-mock.ts';
+import { fs } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getPkgReleases } from '../index.ts';
-import { ContainerbaseDatasource, defaultRegistryUrl } from './index.ts';
+import {
+  ContainerbaseDatasource,
+  defaultRegistryUrl,
+  embeddedPath,
+} from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
 
 const datasource = ContainerbaseDatasource.id;
 const baseUrl = 'https://containerbase.github.io';
@@ -204,10 +211,22 @@ describe('modules/datasource/containerbase/index', () => {
       expect(logger.once.warn).not.toHaveBeenCalled();
     });
 
-    it('returns null for an unknown tool without a request', async () => {
+    it('fails for an unknown tool without a request', async () => {
       await expect(
         getPkgReleases({ datasource, packageName: 'not-a-tool' }),
       ).resolves.toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        { datasource, packageName: 'not-a-tool' },
+        'Unknown containerbase tool',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          datasource,
+          packageName: 'not-a-tool',
+          err: new Error('Unknown containerbase tool: not-a-tool'),
+        },
+        'Datasource unknown error',
+      );
     });
 
     it('returns null for a tool without a published file', async () => {
@@ -276,6 +295,73 @@ describe('modules/datasource/containerbase/index', () => {
       await expect(
         getPkgReleases({ datasource, packageName: 'pnpm' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      expect(fs.readSystemFile).not.toHaveBeenCalled();
+    });
+
+    describe('on containerbase', () => {
+      beforeEach(() => {
+        vi.stubEnv('CONTAINERBASE', 'true');
+      });
+
+      it('falls back to the embedded data', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(500)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(500);
+        fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(pnpm));
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases).toEqual([{ version: '10.0.0', isStable: true }]);
+        expect(fs.readSystemFile).toHaveBeenCalledWith(
+          `${embeddedPath}/v1/pnpm.json`,
+          'utf8',
+        );
+      });
+
+      it('prefers the registry', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, pnpm);
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases).toEqual([{ version: '10.0.0', isStable: true }]);
+        expect(fs.readSystemFile).not.toHaveBeenCalled();
+      });
+
+      it('throws when the embedded file is missing', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(500);
+        fs.readSystemFile.mockRejectedValueOnce(new Error('ENOENT'));
+
+        await expect(
+          getPkgReleases({ datasource, packageName: 'pnpm' }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('throws when the embedded file is invalid', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(500);
+        fs.readSystemFile.mockResolvedValueOnce('{"tool":"pnpm"}');
+
+        await expect(
+          getPkgReleases({ datasource, packageName: 'pnpm' }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
     });
   });
 });
