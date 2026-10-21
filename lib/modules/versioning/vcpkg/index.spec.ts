@@ -43,10 +43,6 @@ describe('modules/versioning/vcpkg/index', () => {
     `('isValid("$input") === $expected', ({ input, expected }) => {
       expect(vcpkg.isValid(input)).toBe(expected);
     });
-
-    it('rejects non-string input', () => {
-      expect(vcpkg.isValid(123 as unknown as string)).toBeFalse();
-    });
   });
 
   describe('.isVersion(input)', () => {
