@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import {
   defaultRegistryUrl,
   getApiBaseUrl,
@@ -10,16 +9,16 @@ import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
-import { Datasource } from '../datasource.ts';
-import type {
-  DigestConfig,
-  GetReleasesConfig,
-  ReleaseResult,
-} from '../types.ts';
+import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
+import type { DigestConfig, GetReleasesConfig, GitHostTag } from '../types.ts';
 import { GitlabCommit, GitlabCommits, GitlabTags } from './schema.ts';
 
-export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
+export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp> {
   static readonly id = 'gitlab-tags';
+
+  protected getSourceUrl(packageName: string, registryUrl?: string): string {
+    return getSourceUrl(packageName, registryUrl);
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -36,10 +35,15 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
     return [defaultRegistryUrl];
   }
 
-  private async fetchReleases({
+  /** Strips the `/api/v4` suffix, so both spellings share a cache key. */
+  protected override getRegistryUrl(registryUrl?: string): string {
+    return getDepHost(registryUrl);
+  }
+
+  protected async fetchTags({
     registryUrl,
     packageName: repo,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  }: GetReleasesConfig): Promise<GitHostTag[]> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
 
     const urlEncodedRepo = encodeURIComponent(repo);
@@ -56,97 +60,61 @@ export class GitlabTagsDatasource extends Datasource<GitlabHttp> {
       await this.http.getJson(url, { paginate: true }, GitlabTags)
     ).body;
 
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: [],
-    };
-    dependency.releases = gitlabTags.map(({ name, commit }) => ({
+    return gitlabTags.map(({ name, commit }) => ({
       version: name,
-      gitRef: name,
       releaseTimestamp: asTimestamp(commit.created_at),
     }));
-
-    return dependency;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return this.cached(
-      {
-        key: buildCacheKey(
-          'getReleases',
-          getDepHost(config.registryUrl),
-          config.packageName,
-        ),
-        fallback: true,
-      },
-      () => this.fetchReleases(config),
+  protected async fetchTagCommit(
+    registryUrl: string | undefined,
+    repo: string,
+    tag: string,
+  ): Promise<string | null> {
+    const url = joinUrlParts(
+      getApiBaseUrl(registryUrl),
+      `projects`,
+      encodeURIComponent(repo),
+      `repository/commits/`,
+      encodeURIComponent(tag),
     );
+    const gitlabCommit = await this.http.getJson(url, GitlabCommit);
+    return gitlabCommit.body.id;
   }
 
-  /**
-   * gitlab.getDigest
-   *
-   * Returs the latest commit hash of the repository.
-   */
-  private async fetchDigest(
-    { packageName: repo, registryUrl }: DigestConfig,
+  protected async fetchLatestCommit(
+    registryUrl: string | undefined,
+    repo: string,
+  ): Promise<string | null> {
+    const url = joinUrlParts(
+      getApiBaseUrl(registryUrl),
+      `projects`,
+      encodeURIComponent(repo),
+      `repository/commits?per_page=1`,
+    );
+    const gitlabCommits = await this.http.getJson(url, GitlabCommits);
+    return gitlabCommits.body[0]?.id ?? null;
+  }
+
+  protected override async fetchDigest(
+    config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-
-    const urlEncodedRepo = encodeURIComponent(repo);
-    let digest: string | null = null;
-
     try {
-      if (newValue) {
-        const url = joinUrlParts(
-          apiBaseUrl,
-          `projects`,
-          urlEncodedRepo,
-          `repository/commits/`,
-          encodeURIComponent(newValue),
-        );
-        const gitlabCommit = await this.http.getJson(url, GitlabCommit);
-        digest = gitlabCommit.body.id;
-      } else {
-        const url = joinUrlParts(
-          apiBaseUrl,
-          `projects`,
-          urlEncodedRepo,
-          `repository/commits?per_page=1`,
-        );
-        const gitlabCommits = await this.http.getJson(url, GitlabCommits);
-        digest = gitlabCommits.body[0]?.id ?? null;
-      }
+      return await super.fetchDigest(config, newValue);
     } catch (err) {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         logger.debug(
-          { gitlabRepo: repo, err, registryUrl },
+          {
+            gitlabRepo: config.packageName,
+            err,
+            registryUrl: config.registryUrl,
+          },
           'Gitlab repo or ref not found when getting commit',
         );
         return null;
       }
       this.handleGenericErrors(err);
     }
-
-    return digest;
-  }
-
-  override getDigest(
-    config: DigestConfig,
-    newValue?: string,
-  ): Promise<string | null> {
-    return this.cached(
-      {
-        key: buildCacheKey(
-          'getDigest',
-          getDepHost(config.registryUrl),
-          config.packageName,
-          newValue,
-        ),
-        fallback: true,
-      },
-      () => this.fetchDigest(config, newValue),
-    );
   }
 }

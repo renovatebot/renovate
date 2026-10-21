@@ -1,5 +1,5 @@
 import { isNumber } from '@sindresorhus/is';
-import type { RenovateConfig } from '~test/util.ts';
+import { type RenovateConfig, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { SkipReason } from '../../../types/skip-reason.ts';
@@ -22,6 +22,20 @@ describe('workers/repository/updates/flatten', () => {
         'https-some.host.name-a-path-to.git',
       );
     });
+
+    it.each`
+      depName                                                      | expected
+      ${'https://user:token@git.example.com/org/repo'}             | ${'https-git.example.com-org-repo'}
+      ${'https://glpat-0123456789abcdef@git.example.com/org/repo'} | ${'https-git.example.com-org-repo'}
+      ${'https://token@git.example.com/org/repo'}                  | ${'https-tokengit.example.com-org-repo'}
+      ${'https://${USER}@git.example.com/org/repo'}                | ${'https-git.example.com-org-repo'}
+      ${'ssh://git@git.example.com/org/repo'}                      | ${'ssh-gitgit.example.com-org-repo'}
+    `(
+      'sanitizes url userinfo of $depName',
+      ({ depName, expected }: { depName: string; expected: string }) => {
+        expect(sanitizeDepName(depName)).toBe(expected);
+      },
+    );
 
     it('strips shell-style variable placeholders', () => {
       expect(sanitizeDepName('${DEPENDENCY_PROXY}python')).toBe('python');
@@ -494,6 +508,68 @@ describe('workers/repository/updates/flatten', () => {
 
       expect(res).toHaveLength(1);
       expect(res[0].semanticCommits).toBe('enabled');
+    });
+
+    describe('vulnerabilityAlerts concurrent limits', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'some-dep',
+                packageName: 'some-dep',
+                updates: [{ newValue: '^2.0.0', updateType: 'minor' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        config.prConcurrentLimit = 10;
+        config.packageRules = [
+          { matchPackageNames: ['some-dep'], isVulnerabilityAlert: true },
+        ];
+      });
+
+      it('applies prConcurrentLimit to updates marked by a packageRule', async () => {
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          prConcurrentLimit: 1,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].prConcurrentLimit).toBe(1);
+        expect(res[0].branchConcurrentLimit).toBe(config.branchConcurrentLimit);
+      });
+
+      it('applies branchConcurrentLimit to updates marked by a packageRule', async () => {
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          branchConcurrentLimit: 2,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].branchConcurrentLimit).toBe(2);
+        expect(res[0].prConcurrentLimit).toBe(10);
+      });
+
+      it('keeps the repository-wide limit for regular updates', async () => {
+        config.packageRules = [];
+        config.vulnerabilityAlerts = partial<RenovateConfig>({
+          prConcurrentLimit: 1,
+          branchConcurrentLimit: 2,
+        });
+
+        const res = await flattenUpdates(config, packageFiles);
+
+        expect(res).toHaveLength(1);
+        expect(res[0].prConcurrentLimit).toBe(10);
+        expect(res[0].branchConcurrentLimit).toBe(config.branchConcurrentLimit);
+      });
     });
   });
 });
