@@ -1790,6 +1790,40 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('github-actions: updates one of several tools in a single input', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: taiki-e/install-action@v2
+                with:
+                  tool: cargo-hack@0.6.14,cargo-udeps@0.6.14
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.depName = 'cargo-udeps';
+      upgrade.currentValue = '0.6.14';
+      upgrade.depIndex = 2;
+      upgrade.newValue = '0.6.15';
+      upgrade.packageFile = 'workflow.yml';
+
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: taiki-e/install-action@v2
+                  with:
+                    tool: cargo-hack@0.6.14,cargo-udeps@0.6.15
+        `,
+      );
+    });
+
     it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
       // Regression test for https://github.com/renovatebot/renovate/discussions/38703
       // When doing a replacement where currentDigest === newDigest, the currentDigestShort
