@@ -721,6 +721,24 @@ describe('config/validation', () => {
       },
     );
 
+    it.each([
+      ['enabledManagers', [1]],
+      ['schedule', [1]],
+      ['postUpdateOptions', [{}]],
+    ])('errors when `%s` is %j', async (key, value) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { [key]: value },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Configuration option \`${key}\` should be a list of strings`,
+        },
+      ]);
+    });
+
     it('errors for all types', async () => {
       const config: RenovateConfig = {
         // @ts-expect-error - only allowed in package rules
@@ -3370,6 +3388,11 @@ describe('config/validation', () => {
         },
       ]);
       expect(errors).toMatchObject([
+        {
+          message:
+            'Configuration option `mergeConfidenceDatasources` should be a list of strings',
+          topic: 'Configuration Error',
+        },
         {
           message:
             'Invalid gitNoVerify: gitNoVerify had invalid values `["invalid"]` which are not part of the allowedValues: ["commit","push"]',
