@@ -2082,11 +2082,9 @@ describe('modules/platform/azure/index', () => {
     it('replaces zero-width space entities so they do not mention work item 8203', () => {
       const input =
         '[#&#8203;32124](https://github.com/org/repo/issues/32124) by @&#8203;someone';
-      const result = azure.massageMarkdown(input);
-      expect(result).toBe(
+      expect(azure.massageMarkdown(input)).toBe(
         '[#\u200B32124](https://github.com/org/repo/issues/32124) by @\u200Bsomeone',
       );
-      expect(result).not.toContain('#8203');
     });
   });
 
