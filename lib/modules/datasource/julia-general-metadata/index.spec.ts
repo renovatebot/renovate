@@ -15,7 +15,7 @@ describe('modules/datasource/julia-general-metadata/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returns null for malformed body', async () => {
+    it('returns null when every version is malformed', async () => {
       httpMock
         .scope(baseUrl)
         .get('/Example/versions.json')
