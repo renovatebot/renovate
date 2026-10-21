@@ -1,6 +1,6 @@
+import { isContainerbase, toolVersionsPath } from '@renovatebot/base-image';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
-import { isContainerbase } from '../../../util/exec/containerbase.ts';
 import {
   type ConstraintName,
   isConstraintName,
@@ -22,9 +22,6 @@ import {
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
-
-/** Where the Containerbase image embeds the tool-versions data. */
-export const embeddedPath = '/usr/local/containerbase/tool-versions';
 
 /**
  * Converts the runtime constraints of a version, keyed by the parent tool (like
@@ -118,7 +115,7 @@ export class ContainerbaseDatasource extends Datasource {
     if (!isContainerbase()) {
       return null;
     }
-    const file = `${embeddedPath}/${formatPath}/${packageName}.json`;
+    const file = `${toolVersionsPath}/${formatPath}/${packageName}.json`;
     try {
       const content = await readSystemFile(file, 'utf8');
       return Json.pipe(ContainerbaseToolVersions).parse(content);

@@ -1,13 +1,10 @@
+import { toolVersionsPath } from '@renovatebot/base-image';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getPkgReleases } from '../index.ts';
-import {
-  ContainerbaseDatasource,
-  defaultRegistryUrl,
-  embeddedPath,
-} from './index.ts';
+import { ContainerbaseDatasource, defaultRegistryUrl } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -316,7 +313,7 @@ describe('modules/datasource/containerbase/index', () => {
 
         expect(res?.releases).toEqual([{ version: '10.0.0', isStable: true }]);
         expect(fs.readSystemFile).toHaveBeenCalledWith(
-          `${embeddedPath}/v1/pnpm.json`,
+          `${toolVersionsPath}/v1/pnpm.json`,
           'utf8',
         );
       });
