@@ -271,13 +271,6 @@ function getSatisfyingVersion(
   return versions.find((version) => equals(version, range)) ?? null;
 }
 
-function minSatisfyingVersion(
-  versions: string[],
-  range: string,
-): string | null {
-  return versions.find((version) => equals(version, range)) ?? null;
-}
-
 function getNewValue({ newVersion }: NewValueConfig): string {
   return newVersion;
 }
@@ -295,7 +288,7 @@ export const api: VersioningApi = {
   isVersion: isValid,
   matches,
   getSatisfyingVersion,
-  minSatisfyingVersion,
+  minSatisfyingVersion: getSatisfyingVersion,
   getNewValue,
   sortVersions,
 };
