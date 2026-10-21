@@ -416,7 +416,7 @@ export async function getReleaseNotesMd(
             const hasMatchingReleaseLine = body
               .split('\n')
               .filter((line) => !isHttpUrl(line) && !linkRefDefRegex.test(line))
-              .map((line) => line.replace(regEx(/https?:\/\/\S+/g), ' '))
+              .map((line) => line.replace(regEx(/https?:\/\/\S+/g), ''))
               .some(
                 (line) => line.includes(packageName) && line.includes(version),
               );
