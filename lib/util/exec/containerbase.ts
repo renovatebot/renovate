@@ -12,7 +12,6 @@ import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
-import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
@@ -307,10 +306,13 @@ export function supportsDynamicInstall(toolName: ToolName): boolean {
 }
 
 /**
- * Checks if Renovate runs in a containerbase image, using Renovate's env.
+ * Checks if Renovate runs in a containerbase image.
+ *
+ * Reads `CONTAINERBASE` from the process environment only, so
+ * `customEnvVariables` or repository `env` can't change it.
  */
 export function isContainerbase(): boolean {
-  return isContainerbaseEnv(getEnv());
+  return isContainerbaseEnv();
 }
 
 export function isDynamicInstall(
