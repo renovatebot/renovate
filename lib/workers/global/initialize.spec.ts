@@ -77,20 +77,36 @@ describe('workers/global/initialize', () => {
     it('throws if the version is not compatible', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       validateContainerbaseVersion.mockRejectedValueOnce(
-        new Error('containerbase image 13.0.0 is not compatible'),
+        new Error(
+          'The containerbase image version 13.0.0 is not compatible with @containerbase/base 14.46.0, it needs the same major version and the same or a newer minor or patch version',
+        ),
       );
       await expect(globalInitialize({})).rejects.toThrow(
-        'Init: containerbase image 13.0.0 is not compatible',
+        'Init: containerbase image version check failed: The containerbase image version 13.0.0 is not compatible with @containerbase/base 14.46.0, it needs the same major version and the same or a newer minor or patch version. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
       );
     });
 
     it('throws if the version file is missing', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       validateContainerbaseVersion.mockRejectedValueOnce(
-        new Error('ENOENT: no such file or directory'),
+        new Error(
+          'The containerbase image version file /usr/local/containerbase/version is missing',
+        ),
       );
       await expect(globalInitialize({})).rejects.toThrow(
-        'Init: ENOENT: no such file or directory',
+        'Init: containerbase image version check failed: The containerbase image version file /usr/local/containerbase/version is missing. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
+      );
+    });
+
+    it('throws if the version file is empty', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      validateContainerbaseVersion.mockRejectedValueOnce(
+        new Error(
+          'The containerbase image version file /usr/local/containerbase/version is empty',
+        ),
+      );
+      await expect(globalInitialize({})).rejects.toThrow(
+        'Init: containerbase image version check failed: The containerbase image version file /usr/local/containerbase/version is empty. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
       );
     });
 

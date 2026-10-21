@@ -73,7 +73,9 @@ async function checkContainerbaseVersion(): Promise<void> {
     const version = await validateContainerbaseVersion();
     logger.debug({ version }, 'Containerbase image version is compatible');
   } catch (err) {
-    throw new Error(`Init: ${err.message}`);
+    throw new Error(
+      `Init: containerbase image version check failed: ${err.message}. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
+    );
   }
 }
 
