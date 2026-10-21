@@ -13,7 +13,11 @@ export const urls = [
   '[Pkg.jl - Compatibility](https://pkgdocs.julialang.org/v1/compatibility/)',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'replace',
+  'widen',
+];
 
 function convertToCaret(item: string): string {
   // In Julia, caret is the default specifier — `1.2.3` means `^1.2.3`.
@@ -102,6 +106,71 @@ function componentCount(value: string): number {
   return lastSpecifier(value).split('.').length;
 }
 
+// dependabot's `simplified_version_spec`: `major.minor` above 1.0, `0.minor`
+// for 0.x, `0.0.patch` for 0.0.x, always written plain.
+function simplifiedSpec(version: string): string {
+  /* v8 ignore next -- newVersion is always a full release */
+  const major = npm.getMajor(version) ?? 0;
+  /* v8 ignore next -- newVersion is always a full release */
+  const minor = npm.getMinor(version) ?? 0;
+  /* v8 ignore next -- newVersion is always a full release */
+  const patch = npm.getPatch(version) ?? 0;
+  if (major > 0) {
+    return `${major}.${minor}`;
+  }
+  if (minor > 0) {
+    return `0.${minor}`;
+  }
+  return `0.0.${patch}`;
+}
+
+// The lowest version a single specifier admits, for ordering; a bare upper
+// bound such as `<0.0.1` starts at zero.
+function specLowerBound(spec: string): number[] {
+  if (spec.startsWith('<') || spec.startsWith('\u2264')) {
+    return [0];
+  }
+  /* v8 ignore next -- a specifier without digits never reaches ordering */
+  const digits = regEx(/\d+(?:\.\d+)*/).exec(spec)?.[0] ?? '0';
+  return digits.split('.').map(Number);
+}
+
+function isAbove(a: number[], b: number[]): boolean {
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    const left = a[i] ?? 0;
+    const right = b[i] ?? 0;
+    if (left !== right) {
+      return left > right;
+    }
+  }
+  return false;
+}
+
+// Julia's convention is to append a new specifier rather than replace the
+// entry, keeping it in ascending order.
+function widen(currentValue: string, newVersion: string): string {
+  // A hyphen range is a deliberate manual constraint. Anchored: a hyphen
+  // without surrounding whitespace is a prerelease tag, not a range.
+  if (regEx(/^\d+(?:\.\d+)*\s+-\s+\d+(?:\.\d+)*$/).test(currentValue)) {
+    return currentValue;
+  }
+  if (matches(newVersion, currentValue)) {
+    return currentValue;
+  }
+  const newSpec = simplifiedSpec(newVersion);
+  const separator =
+    currentValue.includes(',') && !currentValue.includes(', ') ? ',' : ', ';
+  const specs = currentValue.split(',').map((spec) => spec.trim());
+  const index = specs.findIndex((spec) =>
+    isAbove(specLowerBound(spec), specLowerBound(newSpec)),
+  );
+  if (index === -1) {
+    return `${currentValue}${separator}${newSpec}`;
+  }
+  specs.splice(index, 0, newSpec);
+  return specs.join(separator);
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -114,6 +183,9 @@ function getNewValue({
   // Bare version `1.2.3` (implicit caret) under bump → simply replace.
   if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
     return newVersion;
+  }
+  if (rangeStrategy === 'widen') {
+    return widen(currentValue, newVersion);
   }
   if (isSingleVersion(currentValue)) {
     let res = '=';
