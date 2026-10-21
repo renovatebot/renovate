@@ -60,7 +60,7 @@ runs:
     - name: Restore `node_modules`
       id: node-modules-restore
       if: inputs.use-cache == 'true'
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      uses: actions/cache/restore@v6.1.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -74,7 +74,7 @@ runs:
         }}' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
-      uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+      uses: pnpm/setup@v3.1.1
       with:
         install: false
         runtime: node@${{ inputs.node-version }}
@@ -86,7 +86,7 @@ runs:
 
     - name: Cache and restore `pnpm store`
       if: inputs.use-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      uses: actions/cache@v6.1.0
       with:
         path: ${{ env.PNPM_STORE }}
         key: |
@@ -100,7 +100,7 @@ runs:
         enableCrossOsArchive: true
 
     - name: Install dependencies
-      uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+      uses: nick-fields/retry@v4.0.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
@@ -109,7 +109,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      uses: actions/cache/save@v6.1.0
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}

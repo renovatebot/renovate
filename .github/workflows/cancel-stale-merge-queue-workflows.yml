@@ -1,3 +1,4 @@
+# This workflow is managed by gh actions-lock.
 # based on https://github.com/PierreRAFFA/cancel-previous-runs-action/blob/main/.github/workflows/test.yaml
 name: Cancel stale merge queue workflows
 on:
@@ -14,6 +15,6 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Cancel Previous Runs
-        uses: pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89 # 1.11
+        uses: pierreraffa/cancel-previous-runs-action@1.11
         with:
           workflow_names: '*'

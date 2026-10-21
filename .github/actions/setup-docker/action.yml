@@ -25,7 +25,7 @@ runs:
     # To avoid disk space issues when performing a multi-platform docker build, we can clear up some disk space ahead of time
     - name: Free Disk Space
       if: ${{ steps.check.outputs.do-cleanup == 'true' }}
-      uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
+      uses: jlumbroso/free-disk-space@v2.0.0
       with:
         # we're likely already using some of the globally installed tools
         preinstalled-runtimes: false
@@ -64,4 +64,4 @@ runs:
         docker info
 
     # allow build cross arch images
-    - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+    - uses: docker/setup-qemu-action@v4.4.0
