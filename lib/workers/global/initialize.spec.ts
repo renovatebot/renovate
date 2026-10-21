@@ -3,6 +3,7 @@ import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
+import { setCustomEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
 
@@ -93,12 +94,21 @@ describe('workers/global/initialize', () => {
       );
     });
 
+    it('does not skip the check if ignored via the custom env', async () => {
+      vi.stubEnv('CONTAINERBASE', 'true');
+      setCustomEnv({ RENOVATE_X_IGNORE_CONTAINERBASE_VERSION: 'true' });
+      validateContainerbaseVersion.mockResolvedValueOnce('14.46.0');
+      await expect(globalInitialize({})).toResolve();
+      expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
+      setCustomEnv({});
+    });
+
     it('skips the check if ignored', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', 'true');
       await expect(globalInitialize({})).toResolve();
       expect(validateContainerbaseVersion).not.toHaveBeenCalled();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
+      expect(logger.logger.info).toHaveBeenCalledWith(
         'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
       );
     });

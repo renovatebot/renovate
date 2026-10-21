@@ -9,7 +9,6 @@ import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
-import { getEnv } from '../../util/env.ts';
 import { isContainerbase } from '../../util/exec/containerbase.ts';
 import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
@@ -55,14 +54,15 @@ function limitCommitsPerRun(config: RenovateConfig): void {
 
 /**
  * Checks that the containerbase image version is compatible with Renovate,
- * unless it is skipped via `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`.
+ * unless it is skipped via `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`, which is
+ * read from the process environment only.
  */
 async function checkContainerbaseVersion(): Promise<void> {
   if (!isContainerbase()) {
     return;
   }
-  if (getEnv().RENOVATE_X_IGNORE_CONTAINERBASE_VERSION) {
-    logger.warn(
+  if (process.env.RENOVATE_X_IGNORE_CONTAINERBASE_VERSION) {
+    logger.info(
       'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
     );
     return;

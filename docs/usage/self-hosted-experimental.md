@@ -105,6 +105,7 @@ See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for backgr
 ## `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`
 
 If set to any value, Renovate skips the check that the version of the containerbase image is compatible with Renovate.
+It must be set in the environment of the Renovate process, not via `customEnvVariables`.
 
 ## `RENOVATE_X_IGNORE_RE2`
 
