@@ -307,26 +307,49 @@ describe('modules/versioning/julia/index', () => {
   // `widen` appends a specifier in ascending position, keeping the entry's
   // style; hyphen ranges and whole-entry pins are not appended to.
   it.each`
-    currentValue        | rangeStrategy | newVersion  | expected
-    ${'0.10, 0.11'}     | ${'widen'}    | ${'0.12.1'} | ${'0.10, 0.11, 0.12'}
-    ${'0.10, 0.11'}     | ${'widen'}    | ${'0.11.5'} | ${'0.10, 0.11'}
-    ${'1.2.3'}          | ${'widen'}    | ${'1.5.0'}  | ${'1.2.3'}
-    ${'>= 1.2.3'}       | ${'widen'}    | ${'2.0.0'}  | ${'>= 1.2.3'}
-    ${'0.10,0.11'}      | ${'widen'}    | ${'0.12.1'} | ${'0.10,0.11,0.12'}
-    ${'1.2.3'}          | ${'widen'}    | ${'2.0.0'}  | ${'1.2.3, 2.0'}
-    ${'0.0.3'}          | ${'widen'}    | ${'0.0.4'}  | ${'0.0.3, 0.0.4'}
-    ${'0.12'}           | ${'widen'}    | ${'0.11.0'} | ${'0.11, 0.12'}
-    ${'1.2.3 - 4.5'}    | ${'widen'}    | ${'5.0.0'}  | ${'1.2.3 - 4.5'}
-    ${'1.2.3 - 4.5, 5'} | ${'widen'}    | ${'6.0.0'}  | ${'1.2.3 - 4.5, 5, 6'}
-    ${'<0.0.1, 1'}      | ${'widen'}    | ${'2.0.0'}  | ${'<0.0.1, 1, 2'}
-    ${'<0.0.1, 0.10'}   | ${'widen'}    | ${'0.12.1'} | ${'<0.0.1, 0.10, 0.12'}
-    ${'1, 2'}           | ${'widen'}    | ${'3.1.0'}  | ${'1, 2, 3'}
-    ${'0'}              | ${'widen'}    | ${'1.0.0'}  | ${'0, 1'}
-    ${'0.12, 5'}        | ${'widen'}    | ${'0.13.0'} | ${'0.12, 0.13, 5'}
-    ${'=0.12.0'}        | ${'widen'}    | ${'0.12.5'} | ${'=0.12.5'}
-    ${'=0.12.0, 1'}     | ${'widen'}    | ${'0.12.5'} | ${'=0.12.0, 0.12, 1'}
+    currentValue        | rangeStrategy | newVersion    | expected
+    ${'0.10, 0.11'}     | ${'widen'}    | ${'0.12.1'}   | ${'0.10, 0.11, 0.12'}
+    ${'0.10, 0.11'}     | ${'widen'}    | ${'0.11.5'}   | ${'0.10, 0.11'}
+    ${'1.2.3'}          | ${'widen'}    | ${'1.5.0'}    | ${'1.2.3'}
+    ${'>= 1.2.3'}       | ${'widen'}    | ${'2.0.0'}    | ${'>= 1.2.3'}
+    ${'0.10,0.11'}      | ${'widen'}    | ${'0.12.1'}   | ${'0.10,0.11,0.12'}
+    ${'1.2.3'}          | ${'widen'}    | ${'2.0.0'}    | ${'1.2.3, 2.0'}
+    ${'0.0.3'}          | ${'widen'}    | ${'0.0.4'}    | ${'0.0.3, 0.0.4'}
+    ${'0.12'}           | ${'widen'}    | ${'0.11.0'}   | ${'0.11, 0.12'}
+    ${'1.2.3 - 4.5'}    | ${'widen'}    | ${'5.0.0'}    | ${'1.2.3 - 4.5'}
+    ${'1.2.3 - 4.5, 5'} | ${'widen'}    | ${'6.0.0'}    | ${'1.2.3 - 4.5, 5, 6'}
+    ${'<0.0.1, 1'}      | ${'widen'}    | ${'2.0.0'}    | ${'<0.0.1, 1, 2'}
+    ${'<0.0.1, 0.10'}   | ${'widen'}    | ${'0.12.1'}   | ${'<0.0.1, 0.10, 0.12'}
+    ${'1, 2'}           | ${'widen'}    | ${'3.1.0'}    | ${'1, 2, 3'}
+    ${'0'}              | ${'widen'}    | ${'1.0.0'}    | ${'0, 1'}
+    ${'0.12, 5'}        | ${'widen'}    | ${'0.13.0'}   | ${'0.12, 0.13, 5'}
+    ${'=0.12.0'}        | ${'widen'}    | ${'0.12.5'}   | ${'=0.12.5'}
+    ${'=0.12.0, 1'}     | ${'widen'}    | ${'0.12.5'}   | ${'=0.12.0, 0.12, 1'}
+    ${'0.10, 0.11'}     | ${'widen'}    | ${'0.12.1+3'} | ${'0.10, 0.11, 0.12'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (widen)',
+    ({ currentValue, rangeStrategy, newVersion, expected }) => {
+      expect(
+        julia.getNewValue({
+          currentValue,
+          rangeStrategy,
+          newVersion,
+        }),
+      ).toBe(expected);
+    },
+  );
+
+  // A compat entry takes digits only, so a prerelease tag or a JLL build
+  // number is dropped from the target before it is written.
+  it.each`
+    currentValue | rangeStrategy | newVersion      | expected
+    ${'1.6.9'}   | ${'bump'}     | ${'1.6.10+0'}   | ${'1.6.10'}
+    ${'=1.6.9'}  | ${'replace'}  | ${'1.6.10+0'}   | ${'=1.6.10'}
+    ${'^1.6'}    | ${'replace'}  | ${'2.0.0+2'}    | ${'^2.0'}
+    ${'1.2.3'}   | ${'bump'}     | ${'1.3.0-rc.1'} | ${'1.3.0'}
+    ${'=1.2.3'}  | ${'replace'}  | ${'1.3.0-rc.1'} | ${'=1.3.0'}
+  `(
+    'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (compat value)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {
       expect(
         julia.getNewValue({

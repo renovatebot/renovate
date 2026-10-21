@@ -186,24 +186,29 @@ function getNewValue({
   if (!currentValue || currentValue === '*') {
     return currentValue;
   }
+  // A compat entry carries `major.minor.patch` and nothing else: the
+  // specifier grammar in Pkg.jl `src/Versions.jl` (`ver_regs`, unchanged from
+  // Julia 1.0 through 1.13) takes digits only, and its bounds compare the
+  // three numbers, so `1.6.10` admits `1.6.10-rc1` and a JLL's `1.6.10+0`.
+  const target = newVersion.replace(regEx(/[-+].*$/), '');
   // Bare version `1.2.3` (implicit caret) under bump → simply replace.
   if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
-    return newVersion;
+    return target;
   }
   if (isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
       res += ' ';
     }
-    res += newVersion;
+    res += target;
     return res;
   }
   // After the single-version branch: an exact pin is a hard constraint, and
   // appending to it would silently relax it.
   if (rangeStrategy === 'widen') {
-    return widen(currentValue, newVersion);
+    return widen(currentValue, target);
   }
-  if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
+  if (rangeStrategy === 'replace' && matches(target, currentValue)) {
     return currentValue;
   }
   // npm bumps every comparator of a union and joins them with a space, which
@@ -216,7 +221,7 @@ function getNewValue({
     currentValue: julia2npm(npmCurrentValue),
     rangeStrategy,
     currentVersion,
-    newVersion,
+    newVersion: target,
   });
   /* v8 ignore if: defensive — npm should always return a value for inputs julia2npm produces */
   if (!newSemver) {
