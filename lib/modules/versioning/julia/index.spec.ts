@@ -194,24 +194,23 @@ describe('modules/versioning/julia/index', () => {
   });
 
   it.each`
-    currentValue    | rangeStrategy | currentVersion | newVersion  | expected
-    ${'1.2.3'}      | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.4'}
-    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'^1.2.4'}
-    ${'^1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'1.5.0'}  | ${'^1.2.3'}
-    ${'^1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'^2.0.0'}
-    ${'^1.2'}       | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'^2.0'}
-    ${'1.2.3'}      | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'2.0.0'}
-    ${'=1.2.3'}     | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'=2.0.0'}
-    ${'= 1.2.3'}    | ${'replace'}  | ${'1.2.3'}     | ${'2.0.0'}  | ${'= 2.0.0'}
-    ${'0.10, 0.11'} | ${'replace'}  | ${'0.11.0'}    | ${'0.12.1'} | ${'0.12'}
+    currentValue    | rangeStrategy | newVersion  | expected
+    ${'1.2.3'}      | ${'bump'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.4'}  | ${'^1.2.4'}
+    ${'^1.2.3'}     | ${'replace'}  | ${'1.5.0'}  | ${'^1.2.3'}
+    ${'^1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'^2.0.0'}
+    ${'^1.2'}       | ${'replace'}  | ${'2.0.0'}  | ${'^2.0'}
+    ${'1.2.3'}      | ${'replace'}  | ${'2.0.0'}  | ${'2.0.0'}
+    ${'=1.2.3'}     | ${'replace'}  | ${'2.0.0'}  | ${'=2.0.0'}
+    ${'= 1.2.3'}    | ${'replace'}  | ${'2.0.0'}  | ${'= 2.0.0'}
+    ${'0.10, 0.11'} | ${'replace'}  | ${'0.12.1'} | ${'0.12'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected',
-    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+    ({ currentValue, rangeStrategy, newVersion, expected }) => {
       expect(
         julia.getNewValue({
           currentValue,
           rangeStrategy,
-          currentVersion,
           newVersion,
         }),
       ).toBe(expected);
@@ -223,7 +222,6 @@ describe('modules/versioning/julia/index', () => {
       julia.getNewValue({
         currentValue: '',
         rangeStrategy: 'bump',
-        currentVersion: '1.2.3',
         newVersion: '1.2.4',
       }),
     ).toBe('');
@@ -231,7 +229,6 @@ describe('modules/versioning/julia/index', () => {
       julia.getNewValue({
         currentValue: '*',
         rangeStrategy: 'bump',
-        currentVersion: '1.2.3',
         newVersion: '1.2.4',
       }),
     ).toBe('*');
