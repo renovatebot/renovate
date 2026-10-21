@@ -5,6 +5,7 @@ import {
   toolVersionsPath,
 } from '@renovatebot/base-image';
 import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import {
   type ConstraintName,
@@ -12,6 +13,7 @@ import {
   isToolName,
 } from '../../../util/exec/types.ts';
 import { readSystemFile } from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -37,6 +39,18 @@ function toConstraints(
     }
   }
   return Object.keys(result).length ? result : undefined;
+}
+
+/**
+ * Checks if a lookup failed because the site can't be reached: a server error,
+ * rate limiting or a connection error, but not an error response like 404 or
+ * 401.
+ */
+function isUnreachable(err: unknown): boolean {
+  return (
+    err instanceof ExternalHostError ||
+    (err instanceof HttpError && !err.response)
+  );
 }
 
 export class ContainerbaseDatasource extends Datasource {
@@ -128,42 +142,13 @@ export class ContainerbaseDatasource extends Datasource {
     }
   }
 
-  private async fetchReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next -- should never happen */
-    if (!registryUrl) {
-      return null;
-    }
-
-    await this.checkFormat(registryUrl);
-
-    let body: ContainerbaseToolVersions | null;
-    try {
-      body = await this.fetchJsonOrNull(
-        joinUrlParts(
-          registryUrl,
-          toolVersionsFormatPath,
-          `${packageName}.json`,
-        ),
-        ContainerbaseToolVersions,
-      );
-    } catch (err) {
-      const embedded = await this.readEmbedded(packageName);
-      if (!embedded) {
-        throw err;
-      }
-      logger.debug(
-        { err, datasource: this.id, packageName, registryUrl },
-        'Using the tool-versions data embedded in the containerbase image',
-      );
-      body = embedded;
-    }
-    if (!body) {
-      return null;
-    }
-
+  /**
+   * Converts a tool file to the release result, or `null` without versions.
+   */
+  private toReleaseResult(
+    body: ContainerbaseToolVersions,
+    registryUrl: string | undefined,
+  ): ReleaseResult | null {
     const result: ReleaseResult = {
       registryUrl,
       sourceUrl: body.sourceUrl,
@@ -187,7 +172,31 @@ export class ContainerbaseDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async fetchReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+
+    // the format check only warns, so it doesn't delay the tool request
+    const [, body] = await Promise.all([
+      this.checkFormat(registryUrl),
+      this.fetchJsonOrNull(
+        joinUrlParts(
+          registryUrl,
+          toolVersionsFormatPath,
+          `${packageName}.json`,
+        ),
+        ContainerbaseToolVersions,
+      ),
+    ]);
+    return body ? this.toReleaseResult(body, registryUrl) : null;
+  }
+
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName, registryUrl } = config;
     // the package name is a containerbase tool, nothing else is published
     if (!isToolName(packageName)) {
@@ -195,17 +204,32 @@ export class ContainerbaseDatasource extends Datasource {
         { datasource: this.id, packageName },
         'Unknown containerbase tool',
       );
-      return Promise.reject(
-        new Error(`Unknown containerbase tool: ${packageName}`),
-      );
+      throw new Error(`Unknown containerbase tool: ${packageName}`);
     }
 
-    return this.cached(
-      {
-        key: buildCacheKey(registryUrl, packageName),
-        fallback: true,
-      },
-      () => this.fetchReleases(config),
-    );
+    try {
+      return await this.cached(
+        {
+          key: buildCacheKey(registryUrl, packageName),
+          fallback: true,
+        },
+        () => this.fetchReleases(config),
+      );
+    } catch (err) {
+      // only when the site can't be reached and there is no cached result,
+      // other errors like a wrong token must stay visible
+      if (!isUnreachable(err)) {
+        throw err;
+      }
+      const embedded = await this.readEmbedded(packageName);
+      if (!embedded) {
+        throw err;
+      }
+      logger.debug(
+        { err, datasource: this.id, packageName, registryUrl },
+        'Using the tool-versions data embedded in the containerbase image',
+      );
+      return this.toReleaseResult(embedded, registryUrl);
+    }
   }
 }
