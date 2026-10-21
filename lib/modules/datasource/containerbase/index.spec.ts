@@ -359,6 +359,37 @@ describe('modules/datasource/containerbase/index', () => {
           getPkgReleases({ datasource, packageName: 'pnpm' }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
+
+      it('falls back on a connection error', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .replyWithError('connection refused')
+          .get('/tool-versions/v1/pnpm.json')
+          .replyWithError('connection refused');
+        fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(pnpm));
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases).toEqual([{ version: '10.0.0', isStable: true }]);
+      });
+
+      it.each([401, 403, 404])(
+        'does not fall back on a %d response',
+        async (status) => {
+          httpMock
+            .scope(baseUrl)
+            .get('/tool-versions/index.json')
+            .reply(200, rootIndex)
+            .get('/tool-versions/v1/pnpm.json')
+            .reply(status);
+
+          await expect(
+            getPkgReleases({ datasource, packageName: 'pnpm' }),
+          ).resolves.toBeNull();
+          expect(fs.readSystemFile).not.toHaveBeenCalled();
+        },
+      );
     });
   });
 });
