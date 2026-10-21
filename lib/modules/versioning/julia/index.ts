@@ -190,9 +190,6 @@ function getNewValue({
   if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
     return newVersion;
   }
-  if (rangeStrategy === 'widen') {
-    return widen(currentValue, newVersion);
-  }
   if (isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -200,6 +197,11 @@ function getNewValue({
     }
     res += newVersion;
     return res;
+  }
+  // After the single-version branch: an exact pin is a hard constraint, and
+  // appending to it would silently relax it.
+  if (rangeStrategy === 'widen') {
+    return widen(currentValue, newVersion);
   }
   if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
     return currentValue;

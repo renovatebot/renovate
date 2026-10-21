@@ -305,7 +305,7 @@ describe('modules/versioning/julia/index', () => {
   );
 
   // `widen` appends a specifier in ascending position, keeping the entry's
-  // style; hyphen ranges are not appended to.
+  // style; hyphen ranges and whole-entry pins are not appended to.
   it.each`
     currentValue        | rangeStrategy | newVersion  | expected
     ${'0.10, 0.11'}     | ${'widen'}    | ${'0.12.1'} | ${'0.10, 0.11, 0.12'}
@@ -323,6 +323,8 @@ describe('modules/versioning/julia/index', () => {
     ${'1, 2'}           | ${'widen'}    | ${'3.1.0'}  | ${'1, 2, 3'}
     ${'0'}              | ${'widen'}    | ${'1.0.0'}  | ${'0, 1'}
     ${'0.12, 5'}        | ${'widen'}    | ${'0.13.0'} | ${'0.12, 0.13, 5'}
+    ${'=0.12.0'}        | ${'widen'}    | ${'0.12.5'} | ${'=0.12.5'}
+    ${'=0.12.0, 1'}     | ${'widen'}    | ${'0.12.5'} | ${'=0.12.0, 0.12, 1'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (widen)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {
