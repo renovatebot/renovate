@@ -15,18 +15,14 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
-function isVersion(input: string): boolean {
-  return npm.isVersion(input);
-}
-
 function convertToCaret(item: string): string {
   // In Julia, caret is the default specifier — `1.2.3` means `^1.2.3`.
   // See: https://pkgdocs.julialang.org/v1/compatibility/#Version-specifier-format
   const trimmed = item.trim();
   if (
-    isVersion(trimmed) ||
-    isVersion(`${trimmed}.0`) ||
-    isVersion(`${trimmed}.0.0`)
+    npm.isVersion(trimmed) ||
+    npm.isVersion(`${trimmed}.0`) ||
+    npm.isVersion(`${trimmed}.0.0`)
   ) {
     return `^${trimmed}`;
   }
@@ -89,7 +85,7 @@ function minSatisfyingVersion(
 
 function isSingleVersion(constraint: string): boolean {
   const trimmed = constraint.trim();
-  return trimmed.startsWith('=') && isVersion(trimmed.substring(1).trim());
+  return trimmed.startsWith('=') && npm.isVersion(trimmed.substring(1).trim());
 }
 
 function getPinnedValue(newVersion: string): string {
