@@ -449,7 +449,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is not a string',
         },
         {
           message:
@@ -518,6 +518,39 @@ describe('config/validation', () => {
         },
       ]);
       expect(warnings).toBeEmptyArray();
+    });
+
+    it('does not validate the children of customDatasources generically', async () => {
+      const config = {
+        customDatasources: {
+          foo: {
+            format: 'xml',
+            defaultRegistryUrlTemplate: '{{ unclosed',
+            transformTemplates: ['{{ unclosed'],
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it.each([
+      ['enabledManagers', 'npm'],
+      ['schedule', 'nope'],
+    ])('does not throw when `%s` is %j', async (key, value) => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { [key]: value },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        { message: expect.stringContaining(`\`${key}\` should be a list`) },
+      ]);
     });
 
     it('catches invalid customDatasources record type', async () => {
@@ -2563,6 +2596,31 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if `headers` is not an object', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: 'nope' as never,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid hostRules headers configuration: headers must be an object.',
+        },
+      ]);
+    });
+
     it('errors if headers values are not string', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
@@ -3733,6 +3791,36 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on an invalid template in global config', async () => {
+      const config: AllConfig = {
+        userAgent: '{{ unclosed',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid template in config path: userAgent',
+        },
+      ]);
+    });
+
+    it('does not validate the value of reportType', async () => {
+      const config: RenovateConfig = {
+        // @ts-expect-error: contains invalid values
+        reportType: 'nope',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
         config,
       );
       expect(warnings).toBeEmptyArray();
