@@ -1,11 +1,14 @@
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { isContainerbase } from '../../../util/exec/containerbase.ts';
 import {
   type ConstraintName,
   isConstraintName,
   isToolName,
 } from '../../../util/exec/types.ts';
+import { readSystemFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -19,6 +22,9 @@ import {
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
+
+/** Where the Containerbase image embeds the tool-versions data. */
+export const embeddedPath = '/usr/local/containerbase/tool-versions';
 
 /**
  * Converts the runtime constraints of a version, keyed by the parent tool (like
@@ -102,6 +108,29 @@ export class ContainerbaseDatasource extends Datasource {
     }
   }
 
+  /**
+   * Reads the tool file embedded in the Containerbase image, or `null` when
+   * Renovate doesn't run on Containerbase or the file is missing or invalid.
+   */
+  private async readEmbedded(
+    packageName: string,
+  ): Promise<ContainerbaseToolVersions | null> {
+    if (!isContainerbase()) {
+      return null;
+    }
+    const file = `${embeddedPath}/${formatPath}/${packageName}.json`;
+    try {
+      const content = await readSystemFile(file, 'utf8');
+      return Json.pipe(ContainerbaseToolVersions).parse(content);
+    } catch (err) {
+      logger.debug(
+        { err, datasource: this.id, file },
+        'Failed to read the embedded containerbase tool-versions data',
+      );
+      return null;
+    }
+  }
+
   private async fetchReleases({
     packageName,
     registryUrl,
@@ -113,10 +142,23 @@ export class ContainerbaseDatasource extends Datasource {
 
     await this.checkFormat(registryUrl);
 
-    const body = await this.fetchJsonOrNull(
-      joinUrlParts(registryUrl, formatPath, `${packageName}.json`),
-      ContainerbaseToolVersions,
-    );
+    let body: ContainerbaseToolVersions | null;
+    try {
+      body = await this.fetchJsonOrNull(
+        joinUrlParts(registryUrl, formatPath, `${packageName}.json`),
+        ContainerbaseToolVersions,
+      );
+    } catch (err) {
+      const embedded = await this.readEmbedded(packageName);
+      if (!embedded) {
+        throw err;
+      }
+      logger.debug(
+        { err, datasource: this.id, packageName, registryUrl },
+        'Using the tool-versions data embedded in the containerbase image',
+      );
+      body = embedded;
+    }
     if (!body) {
       return null;
     }
@@ -148,11 +190,13 @@ export class ContainerbaseDatasource extends Datasource {
     const { packageName, registryUrl } = config;
     // the package name is a containerbase tool, nothing else is published
     if (!isToolName(packageName)) {
-      logger.debug(
+      logger.warn(
         { datasource: this.id, packageName },
         'Unknown containerbase tool',
       );
-      return Promise.resolve(null);
+      return Promise.reject(
+        new Error(`Unknown containerbase tool: ${packageName}`),
+      );
     }
 
     return this.cached(

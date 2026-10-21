@@ -405,7 +405,9 @@ export async function validateConfig(
             !isPreset &&
             parentName &&
             optionParents[key] &&
-            !optionParents[key].includes(parentName as AllowedParents)
+            !optionParents[key].includes(parentName as AllowedParents) &&
+            /* an object which may only be top-level is already reported above, with a message which says so more precisely */
+            !topLevelObjects.includes(key)
           ) {
             const usedIn =
               parentName === '.'

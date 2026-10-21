@@ -1,7 +1,7 @@
 import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { coerceArray } from '../../util/array.ts';
 import type { AllowedParents, ConfigScope, RenovateOptions } from '../types.ts';
-import { UpdateTypesOptions, configScopes } from '../types.ts';
+import { UpdateTypesOptions, configScopes, namedParents } from '../types.ts';
 
 const scopeDescriptions: Record<ConfigScope, string> = {
   repo: 'at the top level of a config',
@@ -10,6 +10,7 @@ const scopeDescriptions: Record<ConfigScope, string> = {
   updateType: "in an update type's config",
   vulnerabilityAlert: 'in `vulnerabilityAlerts`',
   group: 'in `group`',
+  any: 'anywhere in a config',
 };
 
 const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
@@ -19,6 +20,7 @@ const scopeParents: Record<ConfigScope, readonly AllowedParents[]> = {
   updateType: UpdateTypesOptions,
   vulnerabilityAlert: ['vulnerabilityAlerts'],
   group: ['group'],
+  any: ['.', ...namedParents, ...AllManagersListLiteral, ...UpdateTypesOptions],
 };
 
 /**

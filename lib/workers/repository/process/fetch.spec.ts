@@ -743,5 +743,38 @@ describe('workers/repository/process/fetch', () => {
         ],
       });
     });
+
+    it('removes URL credentials from external host warnings', async () => {
+      config.rangeStrategy = 'auto';
+      const depName = 'https://user:secret@git.example.com/org/repo';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName,
+                packageName: depName,
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(
+        new Error(`failed to fetch ${depName}/maven-metadata.xml`),
+      );
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await fetchUpdates({ ...config, repoIsOnboarded: false }, packageFiles);
+
+      expect(packageFiles.maven[0].deps[0].warnings).toEqual([
+        {
+          topic: 'Lookup Error',
+          message:
+            'https://git.example.com/org/repo: failed to fetch https://git.example.com/org/repo/maven-metadata.xml',
+        },
+      ]);
+    });
   });
 });

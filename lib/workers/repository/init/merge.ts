@@ -311,7 +311,8 @@ function headersByIdentity(
  */
 function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
   const url = parseUrl(matchHost) ? matchHost : `https://${matchHost}`;
-  return hostRules.matchesHost(url, adminMatchHost);
+  // by prefix only: a `matchHost` such as `https://host/path` reaches `https://host/path-other/` as well, which the admin's `https://host/path/` does not
+  return hostRules.matchesHost(url, adminMatchHost, { prefixOnly: true });
 }
 
 /**

@@ -957,6 +957,53 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(4);
     });
 
+    it('extracts multiple xcode action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowXcode = codeBlock`
+      jobs:
+        test1:
+          runs-on: xcode-27
+        test2:
+          runs-on: xcode-27-xlarge
+        test3:
+          runs-on: xcode-latest
+      `;
+      const res = await extractPackageFile(
+        runnerTestWorkflowXcode,
+        'workflow.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'xcode',
+          currentValue: '27',
+          replaceString: 'xcode-27',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: '27-xlarge',
+          replaceString: 'xcode-27-xlarge',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: 'latest',
+          replaceString: 'xcode-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
       const runnerTestWorkflowUbuntu = codeBlock`
       jobs:
