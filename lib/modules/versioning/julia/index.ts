@@ -96,11 +96,14 @@ function getPinnedValue(newVersion: string): string {
   return `=${newVersion}`;
 }
 
-// Components of the last specifier; a union like `0.10, 0.11` must not be
-// counted as one value.
+// A union like `0.10, 0.11` is several specifiers; the last one carries the
+// precision and the lower bound an upgrade moves.
+function lastSpecifier(value: string): string {
+  return value.split(',').at(-1)!.trim();
+}
+
 function componentCount(value: string): number {
-  const lastSpecifier = value.split(',').at(-1)!.trim();
-  return lastSpecifier.split('.').length;
+  return lastSpecifier(value).split('.').length;
 }
 
 function getNewValue({
@@ -127,8 +130,14 @@ function getNewValue({
   if (rangeStrategy === 'replace' && matches(newVersion, currentValue)) {
     return currentValue;
   }
+  // npm bumps every comparator of a union and joins them with a space, which
+  // is not Julia syntax; bump the last specifier instead.
+  const npmCurrentValue =
+    rangeStrategy === 'bump' && currentValue.includes(',')
+      ? lastSpecifier(currentValue)
+      : currentValue;
   const newSemver = npm.getNewValue({
-    currentValue: julia2npm(currentValue),
+    currentValue: julia2npm(npmCurrentValue),
     rangeStrategy,
     currentVersion,
     newVersion,
@@ -157,8 +166,15 @@ function getNewValue({
   // Julia's bare-version-is-caret default.
   if (newJulia.startsWith('^') && !currentValue.startsWith('^')) {
     const withoutCaret = newJulia.substring(1);
-    const components = componentCount(currentValue);
-    newJulia = withoutCaret.split('.').slice(0, components).join('.');
+    // Cutting to the current precision is a `replace` behaviour; under `bump`
+    // it would throw the bump away.
+    newJulia =
+      rangeStrategy === 'replace'
+        ? withoutCaret
+            .split('.')
+            .slice(0, componentCount(currentValue))
+            .join('.')
+        : withoutCaret;
   }
 
   return newJulia;

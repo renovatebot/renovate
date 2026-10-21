@@ -260,10 +260,12 @@ describe('modules/versioning/julia/index', () => {
   // the release currently resolved, is left out: no result depends on it.
   // `bump` raises the floor and keeps the shape.
   it.each`
-    currentValue  | rangeStrategy | newVersion | expected
-    ${'1.2.3'}    | ${'bump'}     | ${'1.2.4'} | ${'1.2.4'}
-    ${'^1.2.3'}   | ${'bump'}     | ${'1.2.4'} | ${'^1.2.4'}
-    ${'>= 1.2.3'} | ${'bump'}     | ${'2.0.0'} | ${'>= 2.0.0'}
+    currentValue    | rangeStrategy | newVersion  | expected
+    ${'1.2.3'}      | ${'bump'}     | ${'1.2.4'}  | ${'1.2.4'}
+    ${'^1.2.3'}     | ${'bump'}     | ${'1.2.4'}  | ${'^1.2.4'}
+    ${'0.10, 0.11'} | ${'bump'}     | ${'0.12.1'} | ${'0.12.1'}
+    ${'1.2, 2'}     | ${'bump'}     | ${'2.5.0'}  | ${'2.5.0'}
+    ${'>= 1.2.3'}   | ${'bump'}     | ${'2.0.0'}  | ${'>= 2.0.0'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected (bump)',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {
