@@ -436,7 +436,7 @@ describe('config/validation', () => {
             transformTemplates: [{}],
           },
           bar: {
-            description: 'foo',
+            description: ['foo'],
             defaultRegistryUrlTemplate: 'bar',
             transformTemplates: ['foo = "bar"', 'bar[0'],
           },
@@ -449,19 +449,19 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is not a string',
+            'Configuration option `customDatasources.foo.defaultRegistryUrlTemplate` should be a string',
         },
         {
           message:
-            'Invalid `customDatasources.description` configuration: is not an array of strings',
+            'Configuration option `customDatasources.foo.description` should be a list (Array)',
         },
         {
           message:
-            'Invalid `customDatasources.randomKey` configuration: key is not allowed',
+            'Configuration option `customDatasources.foo.transformTemplates` should be a list of strings',
         },
         {
           message:
-            'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
+            'Invalid configuration option: customDatasources.foo.randomKey',
         },
       ]);
       expect(warnings).toBeEmptyArray();
@@ -520,7 +520,7 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
-    it('does not validate the children of customDatasources generically', async () => {
+    it('validates the children of customDatasources generically', async () => {
       const config = {
         customDatasources: {
           foo: {
@@ -536,7 +536,23 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toBeEmptyArray();
-      expect(errors).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid customDatasources.foo.format: format had a value `"xml"` which was not part of the allowedValues: ["html","json","plain","toml","yaml"]',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid template in config path: customDatasources.foo.defaultRegistryUrlTemplate',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid template in config path: customDatasources.foo.transformTemplates',
+        },
+      ]);
     });
 
     it.each([
@@ -551,6 +567,15 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         { message: expect.stringContaining(`\`${key}\` should be a list`) },
       ]);
+    });
+
+    it('allows a `.` in the name of a customDatasource', async () => {
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        { customDatasources: { 'foo.bar': { format: 'json' } } },
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources record type', async () => {
