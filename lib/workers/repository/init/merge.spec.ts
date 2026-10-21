@@ -1977,6 +1977,24 @@ describe('workers/repository/init/merge', () => {
         },
       );
 
+      it('accepts a string for an option which allows a string', async () => {
+        fs.readSystemFile.mockResolvedValueOnce('{"description":"static"}');
+
+        const got = await resolveStaticRepoConfig(
+          { repositories: ['some/repo'] },
+          'static_config.json5',
+        );
+
+        expect(got).toEqual({
+          description: 'static',
+          repositories: ['some/repo'],
+        });
+        expect(logger.logger.info).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Static repo config validation issues detected',
+        );
+      });
+
       describe('resolveStaticRepoConfig termination cases', () => {
         it.each([
           {
