@@ -1,5 +1,8 @@
 import os from 'node:os';
-import { validateContainerbaseVersion } from '@renovatebot/base-image';
+import {
+  isContainerbase,
+  validateContainerbaseVersion,
+} from '@renovatebot/base-image';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
@@ -9,7 +12,6 @@ import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
-import { isContainerbase } from '../../util/exec/containerbase.ts';
 import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
