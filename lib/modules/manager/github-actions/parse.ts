@@ -130,7 +130,7 @@ export function parseActionReference(uses: string): ActionReference | null {
 }
 
 const pinTokenRe = regEx(
-  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+(?:\/[.\w-]+)*))?@?(?<version>(?:[\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?(?:-[a-zA-Z0-9.]+)?)/,
+  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?<ratchet>ratchet:[\w-]+\/[.\w-]+(?:\/[.\w-]+)*))?@?(?<version>(?:[\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?(?:-[a-zA-Z0-9.]+)?)/,
 );
 
 export const versionLikeRe = regEx(/^v?\d+/);
@@ -146,11 +146,17 @@ export function parseComment(commentBody: string): CommentData {
   // We use commentBody (with leading spaces) to get the correct index relative to the comment start
   const match = pinTokenRe.exec(commentBody);
   if (match?.groups?.version) {
-    return {
-      pinnedVersion: match.groups.version,
+    const { version, ratchet } = match.groups;
+    const result: CommentData = {
+      pinnedVersion: version,
       matchedString: match[0],
       index: match.index,
     };
+    if (ratchet) {
+      // e.g. `ratchet:actions/checkout@` - kept verbatim when the version is updated
+      result.ratchetPrefix = match[0].trimStart().slice(0, -version.length);
+    }
+    return result;
   }
 
   const bareMatch = bareTokenRe.exec(commentBody);
