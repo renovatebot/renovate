@@ -164,7 +164,7 @@ export function extractHelmChart(
     return null;
   }
 
-  if (isOCIRegistry(helmChart.repo)) {
+  if (helmChart.repo && isOCIRegistry(helmChart.repo)) {
     return {
       ...getOciChartDep(helmChart.repo, helmChart.name, aliases),
       depName: helmChart.name,
@@ -175,7 +175,7 @@ export function extractHelmChart(
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [helmChart.repo],
+    ...(helmChart.repo ? { registryUrls: [helmChart.repo] } : {}),
     datasource: HelmDatasource.id,
   };
 }

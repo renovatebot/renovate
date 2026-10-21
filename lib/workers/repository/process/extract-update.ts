@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isTruthy } from '@sindresorhus/is';
+import { isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
@@ -295,16 +295,18 @@ function detachRegistryUrlCredentials(
           ...file.deps,
         ]),
       );
-      file.registryUrls = file.registryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
-      file.additionalRegistryUrls = file.additionalRegistryUrls?.map((url) =>
-        detach(url, hostTypes),
-      );
+      file.registryUrls = file.registryUrls
+        ?.filter(isString)
+        .map((url) => detach(url, hostTypes));
+      file.additionalRegistryUrls = file.additionalRegistryUrls
+        ?.filter(isString)
+        .map((url) => detach(url, hostTypes));
       for (const dep of file.deps) {
-        dep.registryUrls = dep.registryUrls?.map((url) =>
-          detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
-        );
+        dep.registryUrls = dep.registryUrls
+          ?.filter(isString)
+          .map((url) =>
+            detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+          );
       }
     }
   }

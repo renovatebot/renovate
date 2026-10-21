@@ -297,6 +297,9 @@ export function isCredentialUserinfo(
  * Whether `text` contains a URL with a `user:password@` or `token@` userinfo.
  */
 export function hasUrlCredentials(text: string): boolean {
+  if (!isString(text)) {
+    return false;
+  }
   for (const match of text.matchAll(urlUserinfoRegex)) {
     const { scheme, userinfo } = match.groups!;
     const rest = text.slice(match.index + match[0].length);
@@ -324,6 +327,9 @@ export function containsUrlCredentials(value: unknown): boolean {
  * Removes the `user:password@` or `token@` userinfo of every URL inside `text` that carries a credential, leaving the rest of `text` unchanged.
  */
 export function withoutUrlCredentials(text: string): string {
+  if (!isString(text)) {
+    return text;
+  }
   return text.replace(urlUserinfoRegex, (match: string, ...args: unknown[]) => {
     // the offset, the input and the named groups are the last arguments of a `replace()` callback
     const offset = args.at(-3) as number;

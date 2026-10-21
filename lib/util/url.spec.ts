@@ -334,6 +334,11 @@ describe('util/url', () => {
     `('returns $expected for $text', ({ text, expected }) => {
       expect(hasUrlCredentials(text)).toBe(expected);
     });
+
+    it('returns false for non-string input', () => {
+      expect(hasUrlCredentials(undefined as never)).toBe(false);
+      expect(hasUrlCredentials(null as never)).toBe(false);
+    });
   });
 
   describe('isUserinfoPlaceholder', () => {
@@ -442,6 +447,11 @@ describe('util/url', () => {
       ${'https://user:pass@a.example.com/ https://user2:pass2@b.example.com/'} | ${'https://a.example.com/ https://b.example.com/'}
     `('returns $expected for $text', ({ text, expected }) => {
       expect(withoutUrlCredentials(text)).toBe(expected);
+    });
+
+    it('returns non-string input unchanged', () => {
+      expect(withoutUrlCredentials(undefined as never)).toBeUndefined();
+      expect(withoutUrlCredentials(null as never)).toBeNull();
     });
   });
 

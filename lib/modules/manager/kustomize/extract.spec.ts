@@ -835,6 +835,8 @@ describe('modules/manager/kustomize/extract', () => {
         releaseName: redis
         version: 18.12.1
         repo: oci://registry-1.docker.io/bitnamicharts
+      - name: chart-without-repo
+        version: 1.0.0
       `;
       const res = extractPackageFile(content, 'kustomization.yaml', {});
       expect(res).toEqual({
@@ -853,6 +855,12 @@ describe('modules/manager/kustomize/extract', () => {
             datasource: DockerDatasource.id,
             packageName: 'registry-1.docker.io/bitnamicharts/redis',
             pinDigests: false,
+          },
+          {
+            depType: 'HelmChart',
+            depName: 'chart-without-repo',
+            currentValue: '1.0.0',
+            datasource: HelmDatasource.id,
           },
         ],
       });

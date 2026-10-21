@@ -7,7 +7,7 @@ export interface Image {
 
 export interface HelmChart {
   name: string;
-  repo: string;
+  repo?: string;
   version: string;
 }
 

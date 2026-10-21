@@ -695,6 +695,37 @@ describe('workers/repository/process/extract-update', () => {
       );
     });
 
+    it('handles undefined or null registry URLs gracefully', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        kustomize: [
+          {
+            packageFile: 'kustomization.yaml',
+            registryUrls: [undefined as never],
+            deps: [
+              {
+                depName: 'foo',
+                datasource: 'helm',
+                registryUrls: [undefined as never],
+              },
+            ],
+          },
+        ],
+      };
+      const cache: RepoCacheData = { scan: {} };
+      repositoryCache.getCache.mockReturnValueOnce(cache);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
+      extractAll.extractAllDependencies.mockResolvedValueOnce({
+        packageFiles,
+        extractionFingerprints: {},
+      });
+
+      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+
+      expect(packageFiles.kustomize[0].registryUrls).toEqual([]);
+      expect(packageFiles.kustomize[0].deps[0].registryUrls).toEqual([]);
+    });
+
     describe('cached package files', () => {
       const config = { repoIsOnboarded: true, baseBranch: 'master' };
       let cache: { scan: Record<string, BaseBranchCache> };
