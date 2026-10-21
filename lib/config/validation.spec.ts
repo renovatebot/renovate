@@ -716,7 +716,14 @@ describe('config/validation', () => {
           config,
         );
         expect(warnings).toBeEmptyArray();
-        expect(errors).toMatchObject([{ message }]);
+        expect(errors).toMatchObject([
+          {
+            message: expect.stringContaining(
+              'Invalid enabledManagers: enabledManagers had invalid values',
+            ),
+          },
+          { message },
+        ]);
       },
     );
 
@@ -1016,6 +1023,10 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
       expect(errors).toMatchInlineSnapshot(`
         [
+          {
+            "message": "Invalid customManagers[0].customType: customType had a value \`"unknown"\` which was not part of the allowedValues: ["jsonata","regex"]",
+            "topic": "Configuration Error",
+          },
           {
             "message": "Invalid customType: unknown. Key is not a custom manager",
             "topic": "Configuration Error",
@@ -3130,7 +3141,12 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
-      expect(errors).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
+        },
+      ]);
     });
 
     describe('validates string type options', () => {
@@ -3149,7 +3165,12 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
+          },
+        ]);
       });
 
       it('baseDir', async () => {
@@ -3184,7 +3205,12 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid requireConfig: requireConfig had a value `"invalid"` which was not part of the allowedValues: ["required","optional","ignored"]',
+          },
+        ]);
       });
 
       it('dryRun', async () => {
@@ -3202,7 +3228,12 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid dryRun: dryRun had a value `"invalid"` which was not part of the allowedValues: ["extract","lookup","full"]',
+          },
+        ]);
       });
 
       it('repositoryCache', async () => {
@@ -3220,7 +3251,12 @@ describe('config/validation', () => {
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid repositoryCache: repositoryCache had a value `"invalid"` which was not part of the allowedValues: ["disabled","enabled","reset"]',
+          },
+        ]);
       });
 
       it('onboardingConfigFileName', async () => {
@@ -3301,14 +3337,19 @@ describe('config/validation', () => {
           'global',
           config,
         );
-        expect(warnings).toEqual([
+        expect(warnings).toMatchObject([
           {
             message:
               'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
+          },
+        ]);
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid gitUrl: gitUrl had a value `"invalid"` which was not part of the allowedValues: ["default","ssh","endpoint"]',
             topic: 'Configuration Error',
           },
         ]);
-        expect(errors).toBeEmptyArray();
       });
     });
 
@@ -3378,12 +3419,18 @@ describe('config/validation', () => {
             'Invalid value `1` for `mergeConfidenceDatasources`. The allowed values are go, maven, npm, nuget, packagist, pypi, rubygems.',
         },
         {
+          topic: 'Configuration Error',
           message:
             'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
+        },
+      ]);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid gitNoVerify: gitNoVerify had invalid values `["invalid"]` which are not part of the allowedValues: ["commit","push"]',
           topic: 'Configuration Error',
         },
       ]);
-      expect(errors).toBeEmptyArray();
     });
 
     it('validates repositories[]', async () => {
@@ -3429,6 +3476,11 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message: 'Invalid configuration option: repositories[0].foo',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid repositories[0].binarySource: binarySource had a value `"invalid"` which was not part of the allowedValues: ["global","docker","install","hermit"]',
         },
         {
           topic: 'Configuration Error',
@@ -3814,7 +3866,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('does not validate the value of reportType', async () => {
+    it('errors on an invalid value of reportType', async () => {
       const config: RenovateConfig = {
         // @ts-expect-error: contains invalid values
         reportType: 'nope',
@@ -3824,7 +3876,13 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toBeEmptyArray();
-      expect(errors).toBeEmptyArray();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid reportType: reportType had a value `"nope"` which was not part of the allowedValues: ["logging","file","s3"]',
+        },
+      ]);
     });
 
     it('fails for missing reportPath if reportType is "s3"', async () => {
@@ -3999,6 +4057,128 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    describe('allowedValues are validated', () => {
+      it('with repo config', async () => {
+        const config: Partial<RenovateConfig> = {
+          // for a single value
+          // @ts-expect-error: contains invalid values
+          mode: 'not-valid',
+          // for an array
+          postUpdateOptions: ['invalid', 'another'],
+          hostRules: [
+            {
+              // this is allowed, as it's the default value
+              artifactAuth: null,
+            },
+          ],
+          packageRules: [
+            // valid and a regex: versioning scheme
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'regex:^(?<major>1)',
+            },
+            // valid and part of allowedValues
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'maven',
+            },
+            // invalid, using an unknown option
+            {
+              matchDepNames: ['/.*/'],
+              versioning: 'not-ever-valid-scheme',
+            },
+          ],
+          bumpVersions: [
+            {
+              filePatterns: [],
+              matchStrings: [],
+              bumpType: '{{#if isPatch}}patch{{else}}minor{{/if}}',
+            },
+            {
+              filePatterns: [],
+              matchStrings: [],
+              bumpType: 'not-a-bump-type',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid bumpVersions[1].bumpType: bumpType had a value `"not-a-bump-type"` which was not part of the allowedValues: ["major","minor","patch","sync"]',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid mode: mode had a value `"not-valid"` which was not part of the allowedValues: ["full","silent"]',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid packageRules[2].versioning: versioning had invalid value `"not-ever-valid-scheme"`. versioning can only be a known versioning scheme, or be a string starting with `regex:` for custom regular expression versioning',
+            topic: 'Configuration Error',
+          },
+          {
+            message:
+              'Invalid postUpdateOptions: postUpdateOptions had invalid values `["invalid","another"]` which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#postupdateoptions',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('with global config', async () => {
+        const config: Partial<AllConfig> = {
+          // for a single value
+          // @ts-expect-error: contains invalid values
+          autodiscoverRepoOrder: 'middle-out',
+
+          // for a single value, where there are too many to list
+          // @ts-expect-error: contains invalid values
+          platform: 'not-a-platform',
+
+          // for an array
+          // @ts-expect-error: contains invalid values
+          allowedUnsafeExecutions: ['some', 'value'],
+
+          repositories: [
+            {
+              repository: 'some/repo',
+              // @ts-expect-error: contains invalid values
+              allowedUnsafeExecutions: ['some', 'value'],
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid allowedUnsafeExecutions: allowedUnsafeExecutions had invalid values `["some","value"]` which are not part of the allowedValues: ["bazelModDeps","goGenerate","gradleWrapper","mise","pixi"]',
+          },
+          {
+            message:
+              'Invalid autodiscoverRepoOrder: autodiscoverRepoOrder had a value `"middle-out"` which was not part of the allowedValues: ["asc","desc"]',
+          },
+          {
+            message:
+              'Invalid platform: platform had a value `"not-a-platform"` which was not part of the allowedValues, which are listed at https://docs.renovatebot.com/self-hosted-configuration/#platform',
+          },
+          {
+            message:
+              'Invalid repositories[0].allowedUnsafeExecutions: allowedUnsafeExecutions had invalid values `["some","value"]` which are not part of the allowedValues: ["bazelModDeps","goGenerate","gradleWrapper","mise","pixi"]',
+          },
+        ]);
+      });
     });
 
     describe('cacheTtlOverride', () => {
