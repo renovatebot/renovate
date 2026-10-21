@@ -12,6 +12,7 @@ import { safeStringify } from '../../../util/stringify.ts';
 import * as template from '../../../util/template/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
@@ -90,7 +91,9 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade,
   );
   upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-  upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+  upgrade.commitMessage = withoutUrlCredentials(
+    template.compile(upgrade.commitMessage, upgrade),
+  );
   // istanbul ignore if
   if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
     logger.debug(
@@ -123,10 +126,12 @@ function compilePrTitle(
   if (upgrade.prTitle) {
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-    upgrade.prTitle = template
-      .compile(upgrade.prTitle, upgrade)
-      .trim()
-      .replace(regEx(/\s+/g), ' ');
+    upgrade.prTitle = withoutUrlCredentials(
+      template
+        .compile(upgrade.prTitle, upgrade)
+        .trim()
+        .replace(regEx(/\s+/g), ' '),
+    );
     // istanbul ignore if
     if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
       logger.debug(
@@ -164,7 +169,9 @@ function compilePrTitle(
     }
   }
   // Compile again to allow for nested templates
-  upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+  upgrade.prTitle = withoutUrlCredentials(
+    template.compile(upgrade.prTitle, upgrade),
+  );
   logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
 }
 
@@ -554,7 +561,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += `\n\n${markdownTable(table)}\n`;
+    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
   }
   const additionalReviewers = uniq(
     config.upgrades

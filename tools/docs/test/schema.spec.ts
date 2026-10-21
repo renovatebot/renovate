@@ -4,6 +4,7 @@ import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
 import { groups } from '../../../lib/config/presets/internal/index.ts';
 import type {
+  ConfigScope,
   RenovateOptions,
   RenovateStringOption,
 } from '../../../lib/config/types.ts';
@@ -20,11 +21,26 @@ const addFormats = _addFormats as unknown as typeof _addFormats.default;
 
 const managers = new Set<string>(allManagersList);
 
-function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
-  return partial<RenovateStringOption>({
+function option(
+  overrides: Partial<RenovateStringOption & { scopes: ConfigScope[] }>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { scopes: ConfigScope[] }>({
     name: 'anOption',
     description: 'A description',
     type: 'string',
+    ...overrides,
+  });
+}
+
+/** a self-hosted option, which doesn't have to say where it can be used */
+function globalOption(
+  overrides: Partial<RenovateStringOption>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { globalOnly: true }>({
+    name: 'aGlobalOption',
+    description: 'A description',
+    type: 'string',
+    globalOnly: true,
     ...overrides,
   });
 }
@@ -109,7 +125,7 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     it('links a global option to the self-hosted page', () => {
       expect(
         getOptionDocsUrl(
-          option({ name: 'onboarding', globalOnly: true }),
+          globalOption({ name: 'onboarding' }),
           headings(['onboarding'], ['onboarding']),
         ),
       ).toBe(
@@ -270,8 +286,83 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       expect(schemaErrors(repoSchema, { extends: 123 })).toEqual([
         'must be array',
         'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
         'must match exactly one schema in oneOf',
       ]);
+    });
+  });
+
+  describe('suggested values', () => {
+    let repoSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+    }, 30000);
+
+    it('suggests the managers we know about, without rejecting a pattern', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: ['npm', 'custom.regex'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: ['/^npm$/', 'not-a-manager'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, { packageRules: [{ matchManagers: [123] }] }),
+      ).toEqual([
+        'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
+        'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
+        'must match exactly one schema in oneOf',
+      ]);
+    });
+
+    it('suggests the host types we know about, without constraining them', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 'github', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 'something-we-do-not-know', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 123, matchHost: 'x' }],
+        }),
+      ).toEqual(['must be string']);
+    });
+
+    it('suggests the datasources and categories we know about', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [
+            { matchDatasources: ['npm'], matchCategories: ['js'] },
+          ],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchDatasources: ['/^np/'] }],
+        }),
+      ).toBeUndefined();
     });
   });
 
