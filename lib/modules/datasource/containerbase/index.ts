@@ -1,4 +1,9 @@
-import { isContainerbase, toolVersionsPath } from '@renovatebot/base-image';
+import {
+  isContainerbase,
+  toolVersionsFormat,
+  toolVersionsFormatPath,
+  toolVersionsPath,
+} from '@renovatebot/base-image';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import {
@@ -13,12 +18,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import {
-  ContainerbaseFormats,
-  ContainerbaseToolVersions,
-  formatPath,
-  formatVersion,
-} from './schema.ts';
+import { ContainerbaseFormats, ContainerbaseToolVersions } from './schema.ts';
 
 export const defaultRegistryUrl =
   'https://containerbase.github.io/tool-versions';
@@ -90,14 +90,14 @@ export class ContainerbaseDatasource extends Datasource {
   private async checkFormat(registryUrl: string): Promise<void> {
     const formats = await this.fetchFormats(registryUrl);
     const format = formats?.formats.find(
-      ({ version }) => version === formatVersion,
+      ({ version }) => version === toolVersionsFormat,
     );
     if (format?.status === 'deprecated') {
       logger.once.warn(
         {
           datasource: this.id,
           registryUrl,
-          format: formatPath,
+          format: toolVersionsFormatPath,
           removalDate: format.removalDate,
         },
         'The containerbase tool-versions format is deprecated, update Renovate',
@@ -115,7 +115,7 @@ export class ContainerbaseDatasource extends Datasource {
     if (!isContainerbase()) {
       return null;
     }
-    const file = `${toolVersionsPath}/${formatPath}/${packageName}.json`;
+    const file = `${toolVersionsPath}/${toolVersionsFormatPath}/${packageName}.json`;
     try {
       const content = await readSystemFile(file, 'utf8');
       return Json.pipe(ContainerbaseToolVersions).parse(content);
@@ -142,7 +142,11 @@ export class ContainerbaseDatasource extends Datasource {
     let body: ContainerbaseToolVersions | null;
     try {
       body = await this.fetchJsonOrNull(
-        joinUrlParts(registryUrl, formatPath, `${packageName}.json`),
+        joinUrlParts(
+          registryUrl,
+          toolVersionsFormatPath,
+          `${packageName}.json`,
+        ),
         ContainerbaseToolVersions,
       );
     } catch (err) {
