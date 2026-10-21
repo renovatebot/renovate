@@ -44,13 +44,17 @@ function toConstraints(
 /**
  * Checks if a lookup failed because the site can't be reached: a server error,
  * rate limiting or a connection error, but not an error response like 404 or
- * 401.
+ * 401. An `ExternalHostError` is checked by its cause, because `abortOnError`
+ * host rules wrap every error in it.
  */
 function isUnreachable(err: unknown): boolean {
-  return (
-    err instanceof ExternalHostError ||
-    (err instanceof HttpError && !err.response)
-  );
+  const cause = err instanceof ExternalHostError ? err.err : err;
+  /* v8 ignore next -- the lookup only throws http errors, anything else is a bug */
+  if (!(cause instanceof HttpError)) {
+    return false;
+  }
+  const status = cause.response?.statusCode;
+  return !status || status === 429 || status >= 500;
 }
 
 export class ContainerbaseDatasource extends Datasource {
@@ -72,12 +76,13 @@ export class ContainerbaseDatasource extends Datasource {
     'The source URL is taken from the `sourceUrl` field of the tool file, when it is known.';
 
   /**
-   * Reads the root index of the registry, or `null` when it can't be read.
-   * The index is optional, so errors don't fail the lookup.
+   * Reads the root index of the registry, `null` when it has none, or
+   * `undefined` when it can't be read. The index is optional, so errors don't
+   * fail the lookup, and `undefined` isn't cached, so the next lookup retries.
    */
   private fetchFormats(
     registryUrl: string,
-  ): Promise<ContainerbaseFormats | null> {
+  ): Promise<ContainerbaseFormats | null | undefined> {
     return this.cached(
       { key: buildCacheKey('formats', registryUrl) },
       async () => {
@@ -91,7 +96,7 @@ export class ContainerbaseDatasource extends Datasource {
             { err, datasource: this.id, registryUrl },
             'Failed to read the containerbase root index',
           );
-          return null;
+          return undefined;
         }
       },
     );
@@ -225,6 +230,11 @@ export class ContainerbaseDatasource extends Datasource {
       if (!embedded) {
         throw err;
       }
+      // warn once, so an outage or a broken mirror doesn't go unnoticed
+      logger.once.warn(
+        { datasource: this.id, registryUrl },
+        "The containerbase tool-versions site can't be reached, using the data embedded in the image",
+      );
       logger.debug(
         { err, datasource: this.id, packageName, registryUrl },
         'Using the tool-versions data embedded in the containerbase image',

@@ -215,7 +215,7 @@ export async function extractPackageFile(
 
   return {
     ...res,
-    npmrc,
+    ...(isString(npmrc) && { npmrc }),
     managerData: {
       ...res.managerData,
       ...lockFiles,

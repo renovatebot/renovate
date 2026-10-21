@@ -3,6 +3,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { ContainerbaseDatasource, defaultRegistryUrl } from './index.ts';
 
@@ -316,6 +317,29 @@ describe('modules/datasource/containerbase/index', () => {
           `${toolVersionsPath}/v1/pnpm.json`,
           'utf8',
         );
+        expect(logger.once.warn).toHaveBeenCalledWith(
+          { datasource, registryUrl: defaultRegistryUrl },
+          "The containerbase tool-versions site can't be reached, using the data embedded in the image",
+        );
+      });
+
+      it('does not fall back on a 401 wrapped by abortOnError', async () => {
+        hostRules.add({
+          matchHost: 'containerbase.github.io',
+          abortOnError: true,
+        });
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(401);
+
+        await expect(
+          getPkgReleases({ datasource, packageName: 'pnpm' }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+        expect(fs.readSystemFile).not.toHaveBeenCalled();
+        hostRules.clear();
       });
 
       it('prefers the registry', async () => {
