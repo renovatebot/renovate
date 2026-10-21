@@ -121,9 +121,15 @@ export async function checkReconfigureBranch(
     await scm.checkoutBranch(config.defaultBranch!);
     extractResult = await extractDependencies(newConfig, false);
   } catch (err) {
-    logger.debug(
+    logger.warn(
       { err },
       'Error while extracting dependencies using the reconfigure config',
+    );
+    await setBranchStatus(
+      reconfigureBranch,
+      'Failed to extract dependencies using the new config',
+      'red',
+      context,
     );
     setReconfigureBranchCache(branchSha, true);
     await scm.checkoutBranch(config.defaultBranch!); // being cautious
