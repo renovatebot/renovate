@@ -671,6 +671,31 @@ describe('modules/manager/renovate-config/extract', () => {
         });
       });
 
+      it('sets skipReason=unsupported for a Containerbase tool which Renovate does not support', () => {
+        expect(
+          extractPackageFile(
+            codeBlock`
+            {
+              "constraints": {
+                "kubectl": "1.30.0"
+              }
+            }
+          `,
+            'renovate.json',
+          ),
+        ).toEqual({
+          deps: [
+            {
+              depName: 'kubectl',
+              skipReason: 'unsupported',
+              currentValue: '1.30.0',
+              depType: 'constraint',
+              commitMessageTopic: '{{{depName}}} constraint',
+            },
+          ],
+        });
+      });
+
       it('supports JSON5', () => {
         expect(
           extractPackageFile(

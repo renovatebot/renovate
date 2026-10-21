@@ -18,62 +18,13 @@ import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
   type Opt,
+  type SupportedToolName,
   type ToolConfig,
   type ToolConstraint,
   type ToolName,
-  isToolName,
+  isSupportedToolName,
+  supportedToolNames,
 } from './types.ts';
-
-/**
- * The Containerbase tools whose versions are looked up with the `containerbase` datasource.
- */
-const containerbaseTools: readonly ToolName[] = [
-  'apm',
-  'bazelisk',
-  'bun',
-  'bundler',
-  'cocoapods',
-  'composer',
-  'conan',
-  'copier',
-  'corepack',
-  'dart',
-  'deno',
-  'devbox',
-  'dotnet',
-  'elixir',
-  'erlang',
-  'flutter',
-  'flux',
-  'gh',
-  'gleam',
-  'golang',
-  'gradle',
-  'hashin',
-  'helm',
-  'helmfile',
-  'java',
-  'jb',
-  'kustomize',
-  'maven',
-  'mise',
-  'nix',
-  'node',
-  'npm',
-  'pdm',
-  'php',
-  'pip-tools',
-  'pipenv',
-  'pixi',
-  'pnpm',
-  'poetry',
-  'python',
-  'ruby',
-  'uv',
-  'vendir',
-  'yarn',
-  'yarn-slim',
-];
 
 /**
  * The versioning of the tools which a package manager installs, by its type.
@@ -113,21 +64,22 @@ export function getToolVersioning(toolName: ToolName): VersioningName {
 /**
  * Builds the lookup config of each supported tool, `rust` keeps its own datasource.
  */
-function getAllToolConfig(): Partial<Record<ToolName, ToolConfig>> {
-  const toolConfig: Partial<Record<ToolName, ToolConfig>> = {
-    // the `containerbase` datasource has no nightly releases, which `install-tool` also installs
-    rust: {
-      datasource: 'rust-version',
-      packageName: 'rust',
-      versioning: 'rust-release-channel',
-    },
-  };
-  for (const toolName of containerbaseTools) {
-    toolConfig[toolName] = {
-      datasource: 'containerbase',
-      packageName: toolName,
-      versioning: getToolVersioning(toolName),
-    };
+function getAllToolConfig(): Partial<Record<SupportedToolName, ToolConfig>> {
+  const toolConfig: Partial<Record<SupportedToolName, ToolConfig>> = {};
+  for (const toolName of supportedToolNames) {
+    toolConfig[toolName] =
+      toolName === 'rust'
+        ? // the `containerbase` datasource has no nightly releases, which `install-tool` also installs
+          {
+            datasource: 'rust-version',
+            packageName: 'rust',
+            versioning: 'rust-release-channel',
+          }
+        : {
+            datasource: 'containerbase',
+            packageName: toolName,
+            versioning: getToolVersioning(toolName),
+          };
   }
   return toolConfig;
 }
@@ -140,8 +92,8 @@ export const allToolConfig = getAllToolConfig();
 /**
  * All Containerbase `tool`s that Renovate supports configuring the version of.
  */
-export function getSupportedToolNames(): readonly ToolName[] {
-  return Object.keys(allToolConfig) as readonly ToolName[];
+export function getSupportedToolNames(): readonly SupportedToolName[] {
+  return supportedToolNames;
 }
 
 let _getPkgReleases: Promise<
@@ -173,11 +125,11 @@ async function getPkgReleases(
 }
 
 export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
-  return allToolConfig[toolName];
+  return isSupportedToolName(toolName) ? allToolConfig[toolName] : undefined;
 }
 
 export function supportsDynamicInstall(toolName: ToolName): boolean {
-  return !!allToolConfig[toolName];
+  return isSupportedToolName(toolName);
 }
 
 export function isContainerbase(): boolean {
@@ -221,7 +173,7 @@ export async function resolveConstraint(
   resolvedTools: Partial<Record<ConstraintName, string>> = {},
 ): Promise<string> {
   const { toolName } = toolConstraint;
-  const toolConfig = allToolConfig[toolName];
+  const toolConfig = getToolConfig(toolName);
   if (!toolConfig) {
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
@@ -312,7 +264,7 @@ export async function generateInstallCommands(
       const { toolName } = toolConstraint;
       const { parent }: ToolMetadata = tools[toolName];
       const parentConstraint: Partial<Record<ConstraintName, string>> = {};
-      if (isToolName(parent) && resolvedTools[parent]) {
+      if (isSupportedToolName(parent) && resolvedTools[parent]) {
         parentConstraint[parent] = resolvedTools[parent];
       }
       const toolVersion = await resolveConstraint(

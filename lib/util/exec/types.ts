@@ -20,7 +20,7 @@ export const toolDefinitionDocumentation = [
     description: 'Also used in the `rubygems` Datasource',
   },
 ] as const satisfies readonly (ConstraintDefinition & {
-  name: ContainerbaseToolName;
+  name: SupportedToolName;
 })[];
 
 /**
@@ -30,6 +30,71 @@ export type ToolName = (typeof toolNames)[number];
 
 export function isToolName(value: unknown): value is ContainerbaseToolName {
   return isString(value) && (toolNames as readonly string[]).includes(value);
+}
+
+/**
+ * The Containerbase tools that Renovate supports looking up and installing, and so the tools usable as constraint names.
+ */
+export const supportedToolNames = [
+  'apm',
+  'bazelisk',
+  'bun',
+  'bundler',
+  'cocoapods',
+  'composer',
+  'conan',
+  'copier',
+  'corepack',
+  'dart',
+  'deno',
+  'devbox',
+  'dotnet',
+  'elixir',
+  'erlang',
+  'flutter',
+  'flux',
+  'gh',
+  'gleam',
+  'golang',
+  'gradle',
+  'hashin',
+  'helm',
+  'helmfile',
+  'java',
+  'jb',
+  'kustomize',
+  'maven',
+  'mise',
+  'nix',
+  'node',
+  'npm',
+  'pdm',
+  'php',
+  'pip-tools',
+  'pipenv',
+  'pixi',
+  'pnpm',
+  'poetry',
+  'python',
+  'ruby',
+  'rust',
+  'uv',
+  'vendir',
+  'yarn',
+  'yarn-slim',
+] as const satisfies readonly ContainerbaseToolName[];
+
+/**
+ * A Containerbase `tool` that Renovate supports.
+ */
+export type SupportedToolName = (typeof supportedToolNames)[number];
+
+export function isSupportedToolName(
+  value: unknown,
+): value is SupportedToolName {
+  return (
+    isString(value) && (supportedToolNames as readonly string[]).includes(value)
+  );
 }
 
 type NotContainerbaseToolName<Name extends string> =
@@ -144,12 +209,12 @@ export function isAdditionalConstraintName(
 }
 
 /**
- * A name usable as a key in a `constraints` record, which may be tools that Containerbase supports.
+ * A name usable as a key in a `constraints` record, which may be tools that Renovate supports.
  */
-export type ConstraintName = ContainerbaseToolName | AdditionalConstraintName;
+export type ConstraintName = SupportedToolName | AdditionalConstraintName;
 
 export function isConstraintName(value: unknown): value is ConstraintName {
-  return isToolName(value) || isAdditionalConstraintName(value);
+  return isSupportedToolName(value) || isAdditionalConstraintName(value);
 }
 
 export interface ToolConstraint {

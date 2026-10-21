@@ -108,6 +108,10 @@ describe('util/exec/containerbase', () => {
       expect(getSupportedToolNames()).toIncludeAllMembers(['node', 'rust']);
     });
 
+    it('returns undefined for a Containerbase tool which Renovate does not support', () => {
+      expect(getToolConfig('kubectl')).toBeUndefined();
+    });
+
     it('returns undefined for an unknown tool', () => {
       // @ts-expect-error -- intentionally using invalid tool name
       expect(getToolConfig('unknown-tool')).toBeUndefined();

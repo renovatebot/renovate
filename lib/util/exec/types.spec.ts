@@ -1,7 +1,29 @@
 import { tools as containerbaseTools } from '@renovatebot/base-image';
-import { toolDefinitionDocumentation } from './types.ts';
+import {
+  isConstraintName,
+  isSupportedToolName,
+  isToolName,
+  toolDefinitionDocumentation,
+} from './types.ts';
 
 describe('util/exec/types', () => {
+  it.each`
+    name         | toolName | supportedToolName | constraintName
+    ${'node'}    | ${true}  | ${true}           | ${true}
+    ${'rust'}    | ${true}  | ${true}           | ${true}
+    ${'kubectl'} | ${true}  | ${false}          | ${false}
+    ${'jenkins'} | ${false} | ${false}          | ${true}
+    ${'unknown'} | ${false} | ${false}          | ${false}
+    ${1}         | ${false} | ${false}          | ${false}
+  `(
+    'classifies $name',
+    ({ name, toolName, supportedToolName, constraintName }) => {
+      expect(isToolName(name)).toBe(toolName);
+      expect(isSupportedToolName(name)).toBe(supportedToolName);
+      expect(isConstraintName(name)).toBe(constraintName);
+    },
+  );
+
   it('only defines tools that Containerbase actually supports', () => {
     const unsupported = toolDefinitionDocumentation
       .map(({ name }) => name)

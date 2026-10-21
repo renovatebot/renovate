@@ -1421,6 +1421,28 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('warns if a constraint is a Containerbase tool which Renovate does not support', async () => {
+        const config = {
+          constraints: {
+            kubectl: '1.30.0',
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          // @ts-expect-error: kubectl is not a constraint name
+          config,
+          true,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Configuration option `constraints.kubectl`: `kubectl` is not a supported constraint name',
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
       it('warns if a constraint is not valid', async () => {
         const config: RenovateConfig = {
           constraints: {
