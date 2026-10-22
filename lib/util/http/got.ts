@@ -44,7 +44,7 @@ export async function fetch(
     // Otherwise it doesn't typecheck.
     const resp = await got(url, { ...options } as GotBufferOptions);
     statusCode = resp.statusCode;
-    duration = coerceNumber(resp.timings.phases.total, 0);
+    duration = coerceNumber(resp.timings?.phases.total, 0);
     return resp;
   } catch (error) {
     // v8 ignore else -- TODO: add test #40625
