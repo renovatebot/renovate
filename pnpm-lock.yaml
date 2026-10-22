@@ -378,8 +378,8 @@ importers:
         specifier: 3.0.8
         version: 3.0.8
       url-join:
-        specifier: 5.0.0
-        version: 5.0.0
+        specifier: 5.1.1
+        version: 5.1.1
       validate-npm-package-name:
         specifier: 7.0.2
         version: 7.0.2
@@ -5787,8 +5787,8 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  url-join@5.0.0:
-    resolution: {integrity: sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA==}
+  url-join@5.1.1:
+    resolution: {integrity: sha512-5+M4YX5pEFeXSdMyt3J5iXr949UC+j6yHRkZUEv6ljTusAfdCdS4pSTudnYGzYEbKkdK5xIE0E3i5xzIzoiFrQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   util-deprecate@1.0.2:
@@ -7587,7 +7587,7 @@ snapshots:
       semantic-release: 25.0.9(supports-color@7.2.0)(typescript@7.0.2)
       tinyglobby: 0.2.17
       undici: 7.30.0
-      url-join: 5.0.0
+      url-join: 5.1.1
     transitivePeerDependencies:
       - kerberos
       - supports-color
@@ -11432,7 +11432,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  url-join@5.0.0: {}
+  url-join@5.1.1: {}
 
   util-deprecate@1.0.2: {}
 
