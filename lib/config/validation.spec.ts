@@ -879,12 +879,12 @@ describe('config/validation', () => {
         {
           topic: 'ansible.minor.matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
+            '"matchDepNames" can\'t be used in "ansible.minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'ansible.minor.matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
+            '"matchPackageNames" can\'t be used in "ansible.minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchDepNames',
@@ -1809,7 +1809,7 @@ describe('config/validation', () => {
         {
           topic: 'npm.minor.managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in "minor", as it can only be used `,
+            `"managerFilePatterns" can't be used in "npm.minor", as it can only be used `,
           ),
         },
       ]);
@@ -1859,6 +1859,56 @@ describe('config/validation', () => {
 
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
+    });
+
+    it('names the object an option was wrongly used in', async () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          { matchPackageNames: ['foo'], enabled: false },
+          { matchPackageNames: ['bar'], managerFilePatterns: ['bar'] },
+        ],
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['Dockerfile'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'docker',
+          },
+          {
+            customType: 'regex',
+            managerFilePatterns: ['build.gradle'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            // @ts-expect-error -- intentionally invalid
+            enabledManagers: ['npm'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Custom Manager contains disallowed fields: enabledManagers',
+        },
+      ]);
+      expect(warnings).toEqual([
+        {
+          topic: 'customManagers[1].enabledManagers',
+          message: expect.toStartWith(
+            `"enabledManagers" can't be used in "custom.regex[1]", as it can only be used `,
+          ),
+        },
+        {
+          topic: 'packageRules[1].managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in "packageRules[1]", as it can only be used `,
+          ),
+        },
+      ]);
     });
 
     it('errors if manager objects are nested', async () => {
@@ -2827,7 +2877,7 @@ describe('config/validation', () => {
         {
           topic: 'packageRules[0].hostRules',
           message:
-            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+            '"hostRules" can\'t be used in "packageRules[0]", as it can only be used at the top level of a config.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -2864,7 +2914,7 @@ describe('config/validation', () => {
         {
           topic: 'packageRules[0].hostRules',
           message:
-            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+            '"hostRules" can\'t be used in "packageRules[0]", as it can only be used at the top level of a config.',
         },
       ]);
       expect(errors).toMatchObject([

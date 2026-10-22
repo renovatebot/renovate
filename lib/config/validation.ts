@@ -391,10 +391,16 @@ export async function validateConfig(
             /* an object which may only be top-level is already reported above, with a message which says so more precisely */
             !topLevelObjects.includes(key)
           ) {
+            /* the path of the parent, like `packageRules[1]`, naming a custom manager like we do in `enabledManagers` */
+            const { customType } = config as Partial<CustomManager>;
+            const parent =
+              parentName === 'customManagers' && isString(customType)
+                ? parentPath?.replace('customManagers', `custom.${customType}`)
+                : parentPath;
             const usedIn =
               parentName === '.'
                 ? 'at the top level of a config'
-                : `in "${parentName}"`;
+                : `in "${parent}"`;
             const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
               topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
