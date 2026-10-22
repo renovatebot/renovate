@@ -361,7 +361,7 @@ describe('modules/manager/github-actions/artifacts', () => {
           options: { cwd: '/tmp/github/some/repo' },
         },
         {
-          cmd: 'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
+          cmd: 'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -626,7 +626,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       // the administrator owns the extension, so we must not re-pin it
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
+          cmd: 'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
         },
       ]);
       // ... but say so, since the constraint is silently inert otherwise
