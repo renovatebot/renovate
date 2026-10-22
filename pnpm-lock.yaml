@@ -99,8 +99,8 @@ importers:
         specifier: 0.58.0
         version: 0.58.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
       '@opentelemetry/resource-detector-github':
-        specifier: 0.32.0
-        version: 0.32.0(@opentelemetry/api@1.9.1)
+        specifier: 0.33.0
+        version: 0.33.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources':
         specifier: 2.12.0
         version: 2.12.0(@opentelemetry/api@1.9.1)
@@ -1488,8 +1488,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/resource-detector-github@0.32.0':
-    resolution: {integrity: sha512-CwaKgoukIcEUZfOXf1c9W37ixRT3dhanSqG5P1hZx8zr13A4xZQHTuS4rn03v+RewIJWTkAfi7Ei1eI1rgRfaQ==}
+  '@opentelemetry/resource-detector-github@0.33.0':
+    resolution: {integrity: sha512-AdKVoyZjCcMO4s2rZH4s3Cf1Opse3/Xdg0dTGFQqTapBNBGZyoNfE2cT0R9qcaPcxCYPMfFCkmauhRmdefhJ+w==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -7087,7 +7087,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/resource-detector-github@0.32.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/resource-detector-github@0.33.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/resources': 2.12.0(@opentelemetry/api@1.9.1)
