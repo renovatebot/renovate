@@ -104,10 +104,22 @@ See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for backgr
 
 ## `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`
 
-If set to any value, Renovate skips the check that the version of the containerbase image is compatible with Renovate.
+If set to any value, Renovate skips the check that the version of the Containerbase image is compatible with Renovate.
 An image is compatible when it has the same major version as the `@containerbase/base` package bundled with Renovate and the same or a newer minor or patch version.
+
+For instance, when Renovate bundles `@containerbase/base` `14.46.0`:
+
+| Image version | Compatible | Reason              |
+| ------------- | ---------- | ------------------- |
+| `14.46.0`     | yes        | same version        |
+| `14.46.1`     | yes        | newer patch version |
+| `14.50.0`     | yes        | newer minor version |
+| `14.45.0`     | no         | older minor version |
+| `13.20.0`     | no         | other major version |
+| `15.0.0`      | no         | other major version |
+
 Development images are not checked.
-It must be set in the environment of the Renovate process, not via `customEnvVariables`.
+This must be set in the environment of the Renovate process, not via `customEnvVariables`.
 
 ## `RENOVATE_X_IGNORE_RE2`
 

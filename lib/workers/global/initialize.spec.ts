@@ -88,14 +88,14 @@ describe('workers/global/initialize', () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       Fixtures.mock({ [containerbaseVersionFile]: '1.0.0\n' });
       await expect(globalInitialize({})).rejects.toThrow(
-        `Init: containerbase image version check failed: The containerbase image version 1.0.0 is not compatible with @containerbase/base ${packageVersion}, it needs the same major version and the same or a newer minor or patch version. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
+        `Init: containerbase image version check failed: The containerbase image version 1.0.0 is not compatible with @containerbase/base ${packageVersion}, it needs the same major version and the same or a newer minor or patch version. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
 
     it('throws if the version file is missing', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       await expect(globalInitialize({})).rejects.toThrow(
-        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is missing. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
+        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is missing. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
 
@@ -103,11 +103,11 @@ describe('workers/global/initialize', () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       Fixtures.mock({ [containerbaseVersionFile]: '' });
       await expect(globalInitialize({})).rejects.toThrow(
-        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is empty. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
+        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is empty. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
       );
     });
 
-    it('does not skip the check if ignored via the custom env', async () => {
+    it('still checks the version if the bypass is only set via customEnvVariables', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       setCustomEnv({ RENOVATE_X_IGNORE_CONTAINERBASE_VERSION: 'true' });
       Fixtures.mock({ [containerbaseVersionFile]: `${packageVersion}\n` });

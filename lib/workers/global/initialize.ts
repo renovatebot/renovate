@@ -55,8 +55,9 @@ function limitCommitsPerRun(config: RenovateConfig): void {
 }
 
 /**
- * Checks that the containerbase image version is compatible with Renovate,
- * unless it is skipped via `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`, which is
+ * Checks that the Containerbase image version is compatible with Renovate.
+ *
+ * Can be skipped using `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`, which is
  * read from the process environment only.
  */
 async function checkContainerbaseVersion(): Promise<void> {
@@ -74,7 +75,7 @@ async function checkContainerbaseVersion(): Promise<void> {
     logger.debug({ version }, 'Containerbase image version is compatible');
   } catch (err) {
     throw new Error(
-      `Init: containerbase image version check failed: ${err.message}. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
+      `Init: containerbase image version check failed: ${err.message}. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
     );
   }
 }
