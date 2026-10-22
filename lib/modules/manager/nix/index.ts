@@ -14,7 +14,7 @@ export const url = 'https://nix.dev';
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)flake\\.nix$/'],
-  commitMessageTopic: 'nix',
+  commitMessageTopic: '{{depName}}',
   commitMessageExtra: 'to {{newValue}}',
   enabled: false,
 };

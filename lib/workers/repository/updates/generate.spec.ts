@@ -3,6 +3,7 @@ import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
+import { defaultConfig as nixDefaultConfig } from '../../../modules/manager/nix/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
@@ -29,6 +30,52 @@ beforeEach(() => {
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
+    it('names Nix version updates after the flake input', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          ...nixDefaultConfig,
+          manager: 'nix',
+          depName: 'otterwiki-source',
+          currentValue: 'v2.24.1',
+          newValue: 'v2.26.0',
+          newVersion: 'v2.26.0',
+          isSingleVersion: true,
+          branchName: 'renovate/otterwiki-source-2.x',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const result = generateBranchConfig(branch);
+
+      expect(result.prTitle).toBe('Update otterwiki-source to v2.26.0');
+      expect(result.commitMessage).toBe('Update otterwiki-source to v2.26.0');
+      expect(result.branchName).toBe('renovate/otterwiki-source-2.x');
+    });
+
+    it('preserves the existing Nix digest update title', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          ...nixDefaultConfig,
+          ...getConfig().digest,
+          manager: 'nix',
+          depName: 'nixpkgs',
+          currentValue: 'nixos-26.05',
+          newValue: 'nixos-26.05',
+          currentDigest: 'b3fe9581c9061c749abef42b6d4ee7b7c05c33fa',
+          newDigest: 'f3a73bcf5d1c5b75a66cf35a48957e30d41d647a',
+          isDigest: true,
+          branchName: 'renovate/nixpkgs-digest',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const result = generateBranchConfig(branch);
+
+      expect(result.prTitle).toBe('Update nixpkgs digest to f3a73bc');
+      expect(result.commitMessage).toBe('Update nixpkgs digest to f3a73bc');
+      expect(result.branchName).toBe('renovate/nixpkgs-digest');
+    });
+
     it('does not group single upgrade by default', () => {
       const { groupSingleUpdates } = getConfig();
       const branch = [
