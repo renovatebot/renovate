@@ -84,6 +84,14 @@ export class HelmDatasource extends Datasource {
       return null;
     }
 
+    if (helmRepository.startsWith('oci://')) {
+      logger.warn(
+        { packageName, registryUrl: helmRepository },
+        'The `helm` datasource does not support `oci://` registries, use the `docker` datasource with the full chart path as `packageName`',
+      );
+      return null;
+    }
+
     const repositoryData = await this.getRepositoryData(helmRepository);
     const releases = repositoryData[packageName];
     if (!releases) {
