@@ -27,6 +27,7 @@ import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
   anyMatchRegexOrGlobList,
+  getRegexOrGlobPredicate,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -1390,6 +1391,24 @@ function describeAllowedValues(option: RenovateOptions): string {
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }
 
+function isAllowedValue(
+  option: RenovateOptions,
+  allowedValues: readonly string[],
+  val: string,
+): boolean {
+  if (allowedValues.includes(val)) {
+    return true;
+  }
+  if (!option.patternMatch) {
+    return false;
+  }
+  // pattern matching options also accept negation, globs and regexes, which are valid if they can match any of the allowed values
+  const predicate = getRegexOrGlobPredicate(
+    val.startsWith('!') ? val.slice(1) : val,
+  );
+  return allowedValues.some((allowed) => predicate(allowed));
+}
+
 function validateAllowedValues(
   key: string,
   val: unknown,
@@ -1406,7 +1425,9 @@ function validateAllowedValues(
     if (val === null && option.default === null) {
       // do nothing
     } else if (isArray(val, isString)) {
-      const invalidOptions = val.filter((v) => !allowedValues.includes(v));
+      const invalidOptions = val.filter(
+        (v) => !isAllowedValue(option, allowedValues, v),
+      );
       if (invalidOptions.length) {
         errors.push({
           topic: ConfigValidationTopic.Error,
@@ -1422,7 +1443,7 @@ function validateAllowedValues(
           });
         }
       } else if (
-        !allowedValues.includes(val) &&
+        !isAllowedValue(option, allowedValues, val) &&
         // a templated value can't be checked until it's been rendered
         !(option.supportsTemplating && val.includes('{{'))
       ) {
