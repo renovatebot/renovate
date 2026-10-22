@@ -1,41 +1,28 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
-import type { FilterConfig } from '../../../workers/repository/process/lookup/types.ts';
 import type { PackageRule, RenovateConfig } from '../../types.ts';
 import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
+const php2shellPatchedVersions = { '8.2': 35, '8.3': 36, '8.4': 27, '8.5': 12 };
+
+const php2shellVulnerableVersion = `(
+  $value := (manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue;
+  $version := $match(datasource = "docker" ? $split($value, "-")[0] : $value, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+  $not(vulnerabilityAlerts.enabled = false) and $exists($version)
+    and $number($version[1]) < $lookup(${JSON.stringify(php2shellPatchedVersions)}, $version[0])
+)`;
+
 // Renovate accepts these options in package rules, but PackageRule omits them.
 // We extend the type only in this emergency preset.
-const php2shellBranchConfig = {
-  automerge: false,
-  branchConcurrentLimit: 0,
-  commitMessageAction: 'Patch',
-  commitMessageTopic: 'PHP2Shell vulnerabilities',
-  dependencyDashboardApproval: false,
-  minimumGroupSize: 1,
-  prConcurrentLimit: 0,
-  prCreation: 'immediate',
-  prHourlyLimit: 0,
-  schedule: [],
-} satisfies PackageRule &
-  Pick<
-    RenovateConfig,
-    | 'branchConcurrentLimit'
-    | 'minimumGroupSize'
-    | 'prConcurrentLimit'
-    | 'prHourlyLimit'
-  >;
-
 const php2shellRule = {
-  ...php2shellBranchConfig,
-  enabled: true,
-  followTag: '',
-  group: php2shellBranchConfig,
-  groupName: 'PHP2Shell security fixes',
-  groupSingleUpdates: true,
-  ignoreUnstable: true,
-  matchJsonata: ['$not(vulnerabilityAlerts.enabled = false)'],
-  minimumReleaseAge: null,
+  branchConcurrentLimit: 0,
+  matchJsonata: [
+    `${php2shellVulnerableVersion} and (
+      $version := $match(datasource = "docker" ? $split(newVersion, "-")[0] : newVersion, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+      $exists($version) and $number($version[1]) >= $lookup(${JSON.stringify(php2shellPatchedVersions)}, $version[0])
+    )`,
+  ],
+  matchUpdateTypes: ['patch', 'minor', 'major'],
   prBodyNotes: [
     [
       '> ⚠️ PHP2Shell vulnerabilities can allow remote code execution. This PR updates affected PHP versions to patched releases. Rebuild affected images, deploy the updates, and restart PHP workers.',
@@ -43,26 +30,14 @@ const php2shellRule = {
       '> Details: [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) and [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp).',
     ].join('\n'),
   ],
-  rangeStrategy: 'bump',
-  separateMinorPatch: false,
-  updatePinnedDependencies: true,
-} satisfies PackageRule & Pick<FilterConfig, 'updatePinnedDependencies'>;
-
-const php2shellGithubRule: PackageRule = {
-  ...php2shellRule,
-  matchDatasources: ['github-tags'],
-  matchPackageNames: ['containerbase/php-prebuild', 'php/php-src'],
-  rangeStrategy: 'update-lockfile',
-  versioning: 'semver',
-};
-
-const php2shellDockerRule: PackageRule = {
-  ...php2shellRule,
-  matchDatasources: ['docker'],
-  matchPackageNames: [
-    '/^(?:(?:docker\\.io|index\\.docker\\.io)\\/)?(?:library\\/)?php$/',
-  ],
-};
+  prConcurrentLimit: 0,
+  prHourlyLimit: 0,
+  schedule: [],
+} satisfies PackageRule &
+  Pick<
+    RenovateConfig,
+    'branchConcurrentLimit' | 'prConcurrentLimit' | 'prHourlyLimit'
+  >;
 
 interface MinimumReleaseAgeDatasource {
   description: string;
@@ -273,69 +248,23 @@ export const presets: Record<string, Preset> = {
         matchManagers: ['custom.regex', 'custom.jsonata'],
       },
       {
-        ...php2shellGithubRule,
-        allowedVersions: '>=8.2.35 <8.3.0',
-        matchJsonata: [
-          '$not(vulnerabilityAlerts.enabled = false) and $exists($match((manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue, /^8\\.2\\.(?:[0-9]|[12][0-9]|3[0-4])$/))',
-        ],
+        enabled: true,
+        matchDepTypes: ['php2shell-runtime'],
+        matchJsonata: [php2shellVulnerableVersion],
+        matchManagers: ['custom.regex', 'custom.jsonata'],
       },
       {
-        ...php2shellGithubRule,
-        allowedVersions: '>=8.3.36 <8.4.0',
-        matchJsonata: [
-          '$not(vulnerabilityAlerts.enabled = false) and $exists($match((manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue, /^8\\.3\\.(?:[0-9]|[12][0-9]|3[0-5])$/))',
-        ],
+        ...php2shellRule,
+        matchDatasources: ['github-tags'],
+        matchPackageNames: ['containerbase/php-prebuild', 'php/php-src'],
       },
       {
-        ...php2shellGithubRule,
-        allowedVersions: '>=8.4.27 <8.5.0',
-        matchJsonata: [
-          '$not(vulnerabilityAlerts.enabled = false) and $exists($match((manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue, /^8\\.4\\.(?:[0-9]|1[0-9]|2[0-6])$/))',
+        ...php2shellRule,
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          '/^(?:(?:docker\\.io|index\\.docker\\.io)\\/)?(?:library\\/)?php$/',
         ],
       },
-      {
-        ...php2shellGithubRule,
-        allowedVersions: '>=8.5.12 <8.6.0',
-        matchJsonata: [
-          '$not(vulnerabilityAlerts.enabled = false) and $exists($match((manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue, /^8\\.5\\.(?:[0-9]|1[01])$/))',
-        ],
-      },
-      ...[
-        {
-          ...php2shellDockerRule,
-          allowedVersions:
-            '/^8\\.2\\.(?:3[5-9]|[4-9][0-9]|[1-9][0-9]{2,})(?:-.+)?$/',
-          matchCurrentValue: '/^8\\.2\\.(?:[0-9]|[12][0-9]|3[0-4])(?:-.+)?$/',
-        },
-        {
-          ...php2shellDockerRule,
-          allowedVersions:
-            '/^8\\.3\\.(?:3[6-9]|[4-9][0-9]|[1-9][0-9]{2,})(?:-.+)?$/',
-          matchCurrentValue: '/^8\\.3\\.(?:[0-9]|[12][0-9]|3[0-5])(?:-.+)?$/',
-        },
-        {
-          ...php2shellDockerRule,
-          allowedVersions:
-            '/^8\\.4\\.(?:2[7-9]|[3-9][0-9]|[1-9][0-9]{2,})(?:-.+)?$/',
-          matchCurrentValue: '/^8\\.4\\.(?:[0-9]|1[0-9]|2[0-6])(?:-.+)?$/',
-        },
-        {
-          ...php2shellDockerRule,
-          allowedVersions:
-            '/^8\\.5\\.(?:1[2-9]|[2-9][0-9]|[1-9][0-9]{2,})(?:-.+)?$/',
-          matchCurrentValue: '/^8\\.5\\.(?:[0-9]|1[01])(?:-.+)?$/',
-        },
-      ].flatMap((rule): PackageRule[] => [
-        rule,
-        {
-          enabled: false,
-          matchCurrentValue: rule.matchCurrentValue,
-          matchDatasources: rule.matchDatasources,
-          matchJsonata: rule.matchJsonata,
-          matchPackageNames: rule.matchPackageNames,
-          matchUpdateTypes: ['digest', 'pinDigest'],
-        },
-      ]),
     ],
   },
 };
