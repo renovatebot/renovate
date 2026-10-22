@@ -271,7 +271,7 @@ export class HexDatasource extends Datasource {
       {
         namespace: `datasource-${HexDatasource.id}`,
         key: buildCacheKey(registryUrl, config.packageName),
-        cacheable: isDefault,
+        public: isDefault,
         fallback: true,
       },
       () => this._getReleases(config),

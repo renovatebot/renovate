@@ -149,7 +149,7 @@ export class PackagistDatasource extends Datasource {
           PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
         ),
         ttlMinutes: 1440,
-        cacheable: !PackagistDatasource.isPrivatePackage(regUrl),
+        public: !PackagistDatasource.isPrivatePackage(regUrl),
       },
       () => this._getPackagistFile(regUrl, regFile),
     );

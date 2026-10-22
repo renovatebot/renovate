@@ -8,6 +8,22 @@ import { buildCacheKey } from './key.ts';
 import { resolveTtlValues } from './ttl.ts';
 import type { CachedRecord, PackageCacheNamespace } from './types.ts';
 
+export interface CacheContext {
+  /**
+   * Whether the result may be shared through the package cache.
+   * `cachePrivatePackages` allows storage when this is `false`.
+   * @default true
+   */
+  public: boolean;
+
+  /**
+   * Whether the result should be stored in the cache.
+   * `false` prevents storage even when `cachePrivatePackages` is enabled.
+   * @default true
+   */
+  cacheable: boolean;
+}
+
 export interface CachedOptions {
   /**
    * The cache namespace.
@@ -26,17 +42,10 @@ export interface CachedOptions {
   ttlMinutes?: number;
 
   /**
-   * Whether caching is enabled for this call.
-   * When false, the function is called directly without caching.
+   * Whether the result may be shared through the package cache.
    * @default true
    */
-  cacheable?: boolean;
-
-  /**
-   * Whether a cache result is safe to use and store for this call.
-   * @default value !== undefined
-   */
-  shouldCacheResult?: (value: unknown) => boolean;
+  public?: boolean;
 
   /**
    * Enable extended hard TTL for graceful degradation.
@@ -47,39 +56,35 @@ export interface CachedOptions {
 }
 
 /**
- * Caches the result of an async function.
+ * Caches the result of a function.
  *
  * @param options - Cache options
- * @param fn - The async function to cache
+ * @param fn - The function to cache
  * @returns The cached or fresh result
  */
 export async function withCache<T>(
   options: CachedOptions,
-  fn: () => T | Promise<T>,
-): Promise<T> {
-  const {
-    namespace,
-    key,
-    ttlMinutes = 30,
-    cacheable = true,
-    fallback = false,
-  } = options;
+  fn: (ctx: CacheContext) => T | PromiseLike<T>,
+): Promise<Awaited<T>> {
+  const { namespace, key, ttlMinutes = 30, fallback = false } = options;
 
+  const ctx: CacheContext = {
+    public: options.public ?? true,
+    cacheable: true,
+  };
   const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
-  const isCacheable = cachePrivatePackages || cacheable;
-  if (!isCacheable) {
-    return fn();
+
+  function canUseCache(): boolean {
+    return ctx.cacheable && (ctx.public || cachePrivatePackages);
   }
 
-  function defaultShouldCacheResult(_value: unknown): boolean {
-    return true;
+  if (!canUseCache()) {
+    return await fn(ctx);
   }
-  const shouldCacheResult =
-    options.shouldCacheResult ?? defaultShouldCacheResult;
 
   // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {
-    return fn();
+    return await fn(ctx);
   }
 
   const cacheKey = buildCacheKey('cache-decorator', key);
@@ -108,13 +113,13 @@ export async function withCache<T>(
     const hardTtlMinutes = fallback ? resolvedHardTtl : softTtlMinutes;
 
     let fallbackValue: unknown;
-    if (cachedRecord && shouldCacheResult(cachedRecord.value)) {
+    if (cachedRecord) {
       const now = DateTime.local();
       const cachedAt = DateTime.fromISO(cachedRecord.cachedAt);
 
       const softDeadline = cachedAt.plus({ minutes: softTtlMinutes });
       if (now < softDeadline) {
-        return cachedRecord.value as T;
+        return cachedRecord.value as Awaited<T>;
       }
 
       const hardDeadline = cachedAt.plus({ minutes: hardTtlMinutes });
@@ -123,21 +128,21 @@ export async function withCache<T>(
       }
     }
 
-    let newValue: T;
+    let newValue: Awaited<T>;
     try {
-      newValue = await fn();
+      newValue = await fn(ctx);
     } catch (err) {
       if (!isUndefined(fallbackValue)) {
         logger.debug(
           { err },
           'Package cache: callback error, returning stale data',
         );
-        return fallbackValue as T;
+        return fallbackValue as Awaited<T>;
       }
       throw err;
     }
 
-    if (!isUndefined(newValue) && shouldCacheResult(newValue)) {
+    if (!isUndefined(newValue) && canUseCache()) {
       const newRecord: CachedRecord = {
         cachedAt: DateTime.local().toISO(),
         value: newValue,
