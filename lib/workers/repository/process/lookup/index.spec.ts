@@ -16,6 +16,7 @@ import { GoDatasource } from '../../../../modules/datasource/go/index.ts';
 import { MavenDatasource } from '../../../../modules/datasource/maven/index.ts';
 import { defaultRegistryUrl as npmDefaultRegistryUrl } from '../../../../modules/datasource/npm/common.ts';
 import { NpmDatasource } from '../../../../modules/datasource/npm/index.ts';
+import { NugetDatasource } from '../../../../modules/datasource/nuget/index.ts';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist/index.ts';
 import { PypiDatasource } from '../../../../modules/datasource/pypi/index.ts';
 import { id as composerVersioningId } from '../../../../modules/versioning/composer/index.ts';
@@ -98,6 +99,39 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   describe('.lookupUpdates()', () => {
+    it.each`
+      rangeStrategy | currentValue | versions                            | newValues
+      ${'replace'}  | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'bump'}     | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${['18.*']}
+      ${'bump'}     | ${'17.*'}    | ${['17.0.0', '17.14.1']}            | ${[]}
+      ${'bump'}     | ${'4.*'}     | ${['4.0.0', '4.15.0']}              | ${[]}
+      ${'replace'}  | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'bump'}     | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${['17.2.*']}
+      ${'bump'}     | ${'17.1.*'}  | ${['17.1.0', '17.1.99']}            | ${[]}
+    `(
+      'updates native NuGet $currentValue with rangeStrategy=$rangeStrategy',
+      async ({ rangeStrategy, currentValue, versions, newValues }) => {
+        config.manager = 'nuget';
+        config.datasource = NugetDatasource.id;
+        config.versioning = 'nuget';
+        config.packageName = 'Example.Package';
+        config.currentValue = currentValue;
+        config.rangeStrategy = rangeStrategy;
+        vi.spyOn(
+          NugetDatasource.prototype,
+          'getReleases',
+        ).mockResolvedValueOnce({
+          releases: versions.map((version: string) => ({ version })),
+        });
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates.map((update) => update.newValue)).toEqual(newValues);
+      },
+    );
+
     it('returns null if invalid currentValue', async () => {
       // @ts-expect-error: testing invalid currentValue
       config.currentValue = 3;
