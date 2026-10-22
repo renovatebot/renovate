@@ -1,5 +1,5 @@
 import type { DatasourceName } from '../../../datasource-list.generated.ts';
-import type { PackageRule, RenovateConfig } from '../../types.ts';
+import type { PackageRule } from '../../types.ts';
 import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
@@ -19,10 +19,8 @@ const php2shellVulnerableVersion = `(
     and $number($parts[1]) < $lookup(${php2shellPatchedVersions}, $parts[0])
 )`;
 
-// Renovate accepts these options in package rules, but PackageRule omits them.
-// We extend the type only in this emergency preset.
 const php2shellRule = {
-  branchConcurrentLimit: 0,
+  isVulnerabilityAlert: true,
   matchJsonata: [
     `${php2shellVulnerableVersion} and (
       $version := datasource = "docker" ? $split(newVersion, "-")[0] : newVersion;
@@ -39,14 +37,8 @@ const php2shellRule = {
       '> Details: [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) and [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp).',
     ].join('\n'),
   ],
-  prConcurrentLimit: 0,
-  prHourlyLimit: 0,
   schedule: [],
-} satisfies PackageRule &
-  Pick<
-    RenovateConfig,
-    'branchConcurrentLimit' | 'prConcurrentLimit' | 'prHourlyLimit'
-  >;
+} satisfies PackageRule;
 
 interface MinimumReleaseAgeDatasource {
   description: string;
