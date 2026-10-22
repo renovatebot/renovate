@@ -390,14 +390,14 @@ describe('modules/manager/mise/artifacts', () => {
 
   it('updates mise.lock and its sidecars together for a dependency update', async () => {
     const updatedLockFile =
-      '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.132.2~aa673d8d", digest = "sha256:new" }\n';
+      '[[tools."npm:renovate"]]\nversion = "44.134.1"\naube = { path = ".mise/locks/npm-renovate/44.134.1~aa673d8d", digest = "sha256:new" }\n';
     fs.readLocalFile
       .mockResolvedValueOnce('original lockfile')
       .mockResolvedValueOnce(updatedLockFile)
       .mockResolvedValueOnce('updated generated package manifest');
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
-        modified: ['.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json'],
+        modified: ['.mise/locks/npm-renovate/44.134.1~aa673d8d/package.json'],
         not_added: [],
         deleted: [],
       }),
@@ -423,7 +423,7 @@ describe('modules/manager/mise/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: '.mise/locks/npm-renovate/44.132.2~aa673d8d/package.json',
+          path: '.mise/locks/npm-renovate/44.134.1~aa673d8d/package.json',
           contents: 'updated generated package manifest',
         },
       },

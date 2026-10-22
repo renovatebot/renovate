@@ -70,7 +70,7 @@ async function detectMiseVersion(
 }
 
 /** True when `version` is at or above the safe-mode release. */
-function versionSupportsSafeFeatures(version: string | null): boolean {
+function versionSupportsSafeMode(version: string | null): boolean {
   return (
     !!version &&
     (miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
@@ -166,22 +166,22 @@ export async function updateArtifacts({
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
 
-  // The mise version is needed to decide safe mode (untrusted path). Detect it at runtime rather
-  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
-  // change the outcome: an allowlisted run behaves the same
-  // regardless of version.
+  // The mise version is needed to decide safe mode (untrusted path). Detect it
+  // at runtime rather than requiring a pinned `constraints.mise`. Skip the
+  // probe when it cannot change the outcome: an allowlisted run behaves the
+  // same regardless of version.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
-  let miseSupportsSafeFeatures = false;
+  let miseSupportsSafeMode = false;
   if (!miseAllowlisted) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
       toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
       docker: {},
     });
-    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
+    miseSupportsSafeMode = versionSupportsSafeMode(miseVersion);
   }
 
-  const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
+  const safeMode = !miseAllowlisted && miseSupportsSafeMode;
   if (!miseAllowlisted && !safeMode) {
     logger.once.warn(
       { safeModeMinVersion: MISE_SAFE_MODE_MIN_VERSION },
