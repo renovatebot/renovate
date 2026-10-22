@@ -77,10 +77,13 @@ Renovate installs the [`gh-actions-lock`](https://github.com/github/gh-actions-l
 
 ```sh
 gh extension install github/gh-actions-lock --pin <version> --force
-gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions
+gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions
 ```
 
 Renovate opts out of two rewrites that `gh actions-lock` performs by default, as both would change more than the dependency being updated: narrowing a ref like `@v4` to `@v4.2.1`, which would contradict the version in the pull request and defeat a deliberately floating major tag, and migrating same-repo `uses: ./…` references to the `uses: $/…` form.
+
+Since `gh-actions-lock` v0.2.0, locked pins are sticky, so a plain run fails with `Ref changed` once a workflow's ref no longer matches the lockfile.
+Renovate passes `--relock` so that the lockfile is rebuilt for the updated refs, which also advances any floating refs (like `@v4`) in the lockfile to their current commit.
 
 You do not need to configure anything: if there's no `actions.lock` file, then there's nothing to update.
 Workflows which are not onboarded to the lockfile are skipped.
