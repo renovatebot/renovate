@@ -85,10 +85,10 @@ function parseAndPushDependencyLine(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig,
+  config: ExtractConfig,
 ): Promise<PackageFileContent> {
   const deps: NugetPackageDependency[] = [];
-  const registries = await getConfiguredRegistries(packageFile);
+  const registries = await getConfiguredRegistries(packageFile, config);
 
   lexer.reset(content);
   let token = lexer.next();

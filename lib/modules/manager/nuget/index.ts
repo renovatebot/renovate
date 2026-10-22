@@ -4,6 +4,7 @@ import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.t
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { detectGlobalConfig } from './detect.ts';
 export { extractPackageFile } from './extract.ts';
 export { bumpPackageVersion } from './update.ts';
 

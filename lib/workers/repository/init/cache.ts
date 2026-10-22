@@ -1,4 +1,5 @@
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import * as nugetApi from '../../../modules/datasource/nuget/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repositoryCache from '../../../util/cache/repository/index.ts';
 import { initRepoCache } from '../../../util/cache/repository/init.ts';
@@ -18,4 +19,6 @@ export async function initializeCaches(
   await ensureDir(privateCacheDir());
   npmApi.setNpmrc();
   npmApi.setNpmrc(config.npmrc);
+  nugetApi.setNugetConfig();
+  nugetApi.setNugetConfig(config.nugetConfig);
 }
