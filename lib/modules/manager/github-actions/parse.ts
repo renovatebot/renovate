@@ -130,11 +130,11 @@ export function parseActionReference(uses: string): ActionReference | null {
 }
 
 const pinTokenRe = regEx(
-  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+(?:\/[.\w-]+)*))?@?(?<version>(?:v?\d[\w.-]*|[\w-]+\/v?\d[\w.-]*|[\w-]+-\d[\w.-]*))/,
+  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+(?:\/[.\w-]+)*))?@?(?<version>(?:v?\d[\w.+-]*|[\w-]+\/v?\d[\w.-]*|[\w-]+-\d[\w.-]*))/,
 );
 
 export const versionLikeRe = regEx(
-  /^(?:v?\d[\w.-]*|[\w-]+[/-]v?\d+\.\d[\w.-]*)$/,
+  /^(?:v?\d[\w.+-]*|[\w-]+[/-]v?\d+\.\d[\w.-]*)$/,
 );
 
 const bareTokenRe = regEx(/^\s*(?<token>\S+)\s*$/);

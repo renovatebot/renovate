@@ -689,6 +689,63 @@ describe('modules/manager/github-actions/extract', () => {
       },
     );
 
+    it.each(['release/1.2', 'release-2.0', 'releases/v1.2'])(
+      'routes ambiguous dotted branch-style ref %s to github-tags',
+      async (ref) => {
+        const res = await extractPackageFile(
+          `
+        jobs:
+          build:
+            steps:
+              - uses: some-org/some-action@823ed150196915a86971ab4beb899b0c80d835fe # ${ref}
+        `,
+          'workflow.yml',
+        );
+
+        expect(res?.deps[0]).toMatchObject({
+          currentValue: ref,
+          datasource: 'github-tags',
+          versioning: 'github-actions',
+        });
+      },
+    );
+
+    it('routes unprefixed semantic versions with build metadata to github-tags', async () => {
+      const res = await extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: some-org/some-action@823ed150196915a86971ab4beb899b0c80d835fe # v1.2.3+build
+        `,
+        'workflow.yml',
+      );
+
+      expect(res?.deps[0]).toMatchObject({
+        currentValue: 'v1.2.3+build',
+        datasource: 'github-tags',
+        versioning: 'github-actions',
+      });
+    });
+
+    it('recognizes an unprefixed build-metadata action ref as version-like', async () => {
+      const res = await extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: some-org/some-action@v1.2.3+build
+        `,
+        'workflow.yml',
+      );
+
+      expect(res?.deps[0]).toMatchObject({
+        currentValue: 'v1.2.3+build',
+        datasource: 'github-tags',
+        versioning: 'github-actions',
+      });
+    });
+
     it.each(['lint-pr-title/v1.2.3', 'actions-runner-controller-0.23.5'])(
       'routes component-prefixed version-like ref %s to github-tags',
       async (ref) => {
