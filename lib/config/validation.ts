@@ -174,7 +174,8 @@ function initOptions(): void {
     optionsByName.set(option.name, option);
 
     const parents = getAllowedParents(option);
-    if (parents) {
+    /* an option which can be used anywhere is valid in any object, even one which `any` doesn't (yet) expand to */
+    if (parents && !option.scopes?.includes('any')) {
       optionParents[option.name] = parents;
       // TODO: types (#22198)
       optionLocations[option.name] = describeAllowedLocations(option)!;
