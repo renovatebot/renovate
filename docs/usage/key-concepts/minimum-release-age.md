@@ -141,6 +141,7 @@ DEBUG: Branch renovate/actions-checkout-5.x creation is disabled because interna
 In this case, no branch is created.
 
 If you have a Dependency Dashboard enabled, it will be found in the Dependency Dashboard in the "Pending Status Checks".
+If the update is in a group with other updates that are not pending, Renovate creates the group branch without it, and lists the held update in that section with the name of the branch it will join.
 
 You can force the dependency update by requesting it via the Dependency Dashboard, or if you are self-hosting, you can use the [`checkedBranches`](../self-hosted-configuration.md#checkedbranches) to force the branch creation.
 

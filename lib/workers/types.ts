@@ -189,6 +189,8 @@ export interface BranchConfig
   rebaseRequested?: boolean;
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
+  /** Upgrades held out of this branch by pending checks */
+  pendingUpgrades?: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;

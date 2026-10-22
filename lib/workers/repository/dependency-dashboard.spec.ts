@@ -1318,6 +1318,158 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(body).toContain(' - [ ] <!-- unpend-branch=branchName1 -->pr1');
     });
 
+    it('lists upgrades held out of their branch', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          pendingUpgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2', newVersion: '2.0.0' },
+          ],
+          prCreation: 'not-pending',
+          result: 'pending',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
+          pendingUpgrades: [
+            {
+              ...mock<PrUpgrade>(),
+              depName: 'dep4',
+              newValue: '1.0.0',
+              newDigestShort: 'abcdef1',
+            },
+            {
+              ...mock<PrUpgrade>(),
+              depName: 'dep5',
+              isDigest: true,
+              newVersion: '1.0.0',
+              newDigestShort: 'abcdef2',
+            },
+            { ...mock<PrUpgrade>(), depName: 'dep6', newValue: '^3.0.0' },
+            { ...mock<PrUpgrade>(), depName: 'dep6', newValue: '^3.0.0' },
+            { ...mock<PrUpgrade>(), depName: 'dep7' },
+          ],
+          result: 'done',
+          branchName: 'branchName2',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr3',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
+          pendingUpgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep9', newVersion: '4.0.0' },
+          ],
+          result: 'pr-edited',
+          branchName: 'branchName3',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(codeBlock`
+        ## Pending Status Checks
+
+        The following updates await pending status checks. To force their creation now, click on a checkbox below.
+
+         - [ ] <!-- unpend-branch=branchName1 -->pr1
+
+        The following updates await pending status checks and will be added to their branch once these pass.
+
+         - \`dep2\` to \`2.0.0\` for branch \`branchName1\`
+         - \`dep4\` to \`abcdef1\` for branch \`branchName2\`
+         - \`dep5\` to \`abcdef2\` for branch \`branchName2\`
+         - \`dep6\` to \`^3.0.0\` for branch \`branchName2\`
+         - \`dep7\` for branch \`branchName2\`
+      `);
+      expect(body).not.toContain('unpend-branch=branchName2');
+      expect(body).not.toContain('dep9');
+    });
+
+    it('adds a sub-heading for held upgrades after categorized pending branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          dependencyDashboardCategory: 'Category #1',
+          result: 'pending',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          pendingUpgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep3', newVersion: '2.0.0' },
+          ],
+          result: 'done',
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(codeBlock`
+        ### Category #1
+
+         - [ ] <!-- unpend-branch=branchName1 -->pr1
+
+        ### Held Updates
+
+        The following updates await pending status checks and will be added to their branch once these pass.
+
+         - \`dep3\` to \`2.0.0\` for branch \`branchName2\`
+      `);
+    });
+
+    it('adds the pending status checks header for held upgrades only', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
+          pendingUpgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep2', newVersion: '2.0.0' },
+          ],
+          result: 'done',
+          branchName: 'branchName1',
+        },
+      ];
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+      expect(body).toContain(codeBlock`
+        ## Pending Status Checks
+
+        The following updates await pending status checks and will be added to their branch once these pass.
+
+         - \`dep2\` to \`2.0.0\` for branch \`branchName1\`
+      `);
+      expect(body).not.toContain('unpend-branch');
+    });
+
     it('dependency Dashboard All Pending Approval', async () => {
       const branches: BranchConfig[] = [
         {
