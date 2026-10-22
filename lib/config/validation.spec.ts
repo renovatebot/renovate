@@ -3445,6 +3445,28 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('allows negation, globs and regexes for pattern matching options with allowedValues', async () => {
+      const config: Record<string, unknown> = {
+        packageRules: [
+          { matchUpdateTypes: ['!major'], enabled: false },
+          { matchUpdateTypes: ['/^m/', 'pin*'], enabled: false },
+          { matchUpdateTypes: ['!majr', 'unknown'], enabled: false },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid packageRules[2].matchUpdateTypes: matchUpdateTypes had invalid values `["!majr","unknown"]`',
+          ),
+        },
+      ]);
+    });
+
     it('validates repositories[]', async () => {
       const config = {
         repositories: [
