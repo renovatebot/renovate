@@ -2342,11 +2342,6 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
 
-### `hostRules.dnsCache`
-
-This option is deprecated and has no effect.
-Renovate removed its DNS cache in v38.0.0.
-
 ### `hostRules.enableHttp2`
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
