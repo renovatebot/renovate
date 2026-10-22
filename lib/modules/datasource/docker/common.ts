@@ -1,4 +1,5 @@
 import { isNonEmptyString, isString, isUndefined } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import {
   HOST_BLOCKED,
   HOST_DISABLED,
@@ -7,6 +8,8 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { toSha256 } from '../../../util/hash.ts';
@@ -51,6 +54,73 @@ export const DOCKER_HUB = 'https://index.docker.io';
 export function isDockerHost(host: string): boolean {
   const regex = regEx(/(?:^|\.)docker\.io$/);
   return regex.test(host);
+}
+
+// The token lifetime when the token response omits `expires_in`, per the
+// distribution token specification.
+const defaultTokenLifetimeSeconds = 60;
+
+// A cached token is replaced this long before it expires, so that it is still
+// valid when a request that waited in the host's queue reaches the registry.
+const tokenRefreshMarginSeconds = 30;
+
+interface RegistryToken {
+  token: string | undefined;
+  refreshAt: DateTime;
+}
+
+async function fetchRegistryToken(
+  http: Http,
+  authUrl: string,
+  opts: HttpOptions,
+): Promise<RegistryToken> {
+  const requestedAt = DateTime.now();
+  const authResponse = (
+    await http.getJson(authUrl, { ...opts, memCache: false }, RegistryAuthToken)
+  ).body;
+
+  const token = authResponse.token ?? authResponse.access_token;
+  addSecretForSanitizing(token);
+  const lifetime = authResponse.expires_in ?? defaultTokenLifetimeSeconds;
+  return {
+    token,
+    refreshAt: requestedAt.plus({
+      seconds: lifetime - tokenRefreshMarginSeconds,
+    }),
+  };
+}
+
+/**
+ * Returns the registry token issued by `authUrl`, reusing a token from earlier in the repository run until it is due for refresh.
+ */
+async function getRegistryToken(
+  http: Http,
+  authUrl: string,
+  opts: HttpOptions,
+): Promise<string | undefined> {
+  const cacheKey = buildCacheKey(
+    'datasource-docker',
+    'registry-token',
+    authUrl,
+  );
+  const cachedToken = memCache.get<Promise<RegistryToken> | undefined>(
+    cacheKey,
+  );
+  if (cachedToken) {
+    const registryToken = await cachedToken;
+    if (DateTime.now() < registryToken.refreshAt) {
+      return registryToken.token;
+    }
+  }
+
+  const pendingToken = fetchRegistryToken(http, authUrl, opts);
+  memCache.set(cacheKey, pendingToken);
+  try {
+    return (await pendingToken).token;
+  } catch (err) {
+    memCache.set(cacheKey, undefined);
+    throw err;
+  }
 }
 
 export async function getAuthHeaders(
@@ -217,19 +287,12 @@ export async function getAuthHeaders(
       `Obtaining docker registry token`,
     );
     opts.noAuth = true;
-    opts.cacheProvider = memCacheProvider;
-    const authResponse = (
-      await http.getJson(authUrl.href, opts, RegistryAuthToken)
-    ).body;
-
-    const token = authResponse.token ?? authResponse.access_token;
+    const token = await getRegistryToken(http, authUrl.href, opts);
     /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return undefined;
     }
-    // sanitize token
-    addSecretForSanitizing(token);
     return {
       authorization: `Bearer ${token}`,
     };
