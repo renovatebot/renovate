@@ -317,7 +317,7 @@
     "@types/validate-npm-package-name": "4.0.2",
     "@types/yauzl": "3.4.0",
     "@types/yazl": "3.3.1",
-    "@vitest/coverage-v8": "4.1.11",
+    "@vitest/coverage-v8": "4.1.12",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "aws-sdk-client-mock": "4.1.0",
@@ -347,7 +347,7 @@
     "typescript": "7.0.2",
     "unified": "11.0.5",
     "vite": "catalog:",
-    "vitest": "4.1.11",
+    "vitest": "4.1.12",
     "vitest-mock-extended": "5.1.1",
     "yazl": "3.3.1"
   },
