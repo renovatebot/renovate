@@ -12,15 +12,19 @@ import * as hostRules from '../../../util/host-rules.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
+import { DOCKER_HUB } from '../docker/common.ts';
+import { DockerDatasource } from '../docker/index.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { HelmRepository } from './schema.ts';
 
 export class HelmDatasource extends Datasource {
   static readonly id = 'helm';
+
+  private readonly docker = new DockerDatasource();
 
   constructor() {
     super(HelmDatasource.id);
@@ -85,11 +89,14 @@ export class HelmDatasource extends Datasource {
     }
 
     if (helmRepository.startsWith('oci://')) {
-      logger.warn(
-        { packageName, registryUrl: helmRepository },
-        'The `helm` datasource does not support `oci://` registries, use the `docker` datasource with the full chart path as `packageName`',
+      const ociPackageName = `${trimTrailingSlash(helmRepository.replace('oci://', ''))}/${packageName}`;
+      logger.debug(
+        `Looking up Helm chart ${packageName} in OCI registry ${helmRepository} using the docker datasource`,
       );
-      return null;
+      return await this.docker.getReleases({
+        packageName: ociPackageName,
+        registryUrl: DOCKER_HUB, // fallback
+      });
     }
 
     const repositoryData = await this.getRepositoryData(helmRepository);
