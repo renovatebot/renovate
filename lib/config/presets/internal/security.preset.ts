@@ -5,8 +5,7 @@ import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
 // Renovate accepts these options in package rules, but PackageRule omits them.
-// We extend the type only in this emergency preset. If other presets need these
-// options, add them to the shared types.
+// We extend the type only in this emergency preset.
 const php2shellBranchConfig = {
   automerge: false,
   branchConcurrentLimit: 0,
