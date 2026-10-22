@@ -46,6 +46,22 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
+/**
+ * Returns the OCI chart reference of a Fleet helm block, if any.
+ * An OCI `repo` takes precedence over `chart`, which Fleet then ignores.
+ */
+function getOciChartReference(doc: FleetHelmBlock): string | undefined {
+  if (isOCIRegistry(doc.repo)) {
+    return doc.repo;
+  }
+
+  if (isOCIRegistry(doc.chart)) {
+    return doc.chart;
+  }
+
+  return undefined;
+}
+
 function extractFleetHelmBlock(
   doc: FleetHelmBlock,
   config: ExtractConfig,
@@ -55,18 +71,12 @@ function extractFleetHelmBlock(
     datasource: HelmDatasource.id,
   };
 
-  if (!doc.chart) {
-    return {
-      ...dep,
-      skipReason: 'missing-depname',
-    };
-  }
-
-  if (isOCIRegistry(doc.chart)) {
+  const ociChart = getOciChartReference(doc);
+  if (ociChart) {
     const ociDep: PackageDependency = {
       ...dep,
-      ...getOciChartDep(doc.chart, undefined, config.registryAliases),
-      depName: removeOCIPrefix(doc.chart),
+      ...getOciChartDep(ociChart, undefined, config.registryAliases),
+      depName: removeOCIPrefix(ociChart),
     };
     if (!doc.version) {
       return {
@@ -77,6 +87,13 @@ function extractFleetHelmBlock(
     return {
       ...ociDep,
       currentValue: doc.version,
+    };
+  }
+
+  if (!doc.chart) {
+    return {
+      ...dep,
+      skipReason: 'missing-depname',
     };
   }
 
