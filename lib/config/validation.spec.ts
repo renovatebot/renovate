@@ -1,4 +1,5 @@
 import { partial } from '~test/util.ts';
+import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -1812,6 +1813,26 @@ describe('config/validation', () => {
           ),
         },
       ]);
+    });
+
+    it('allows manager options in a custom manager config', async () => {
+      const config: RenovateConfig &
+        Partial<Record<CustomManagerName, RenovateConfig>> = {
+        regex: {
+          description: ['Clear ignorePaths for regex custom managers.'],
+          ignorePaths: [],
+        },
+        jsonata: {
+          ignorePaths: [],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
     });
 
     it('errors if manager objects are nested', async () => {
