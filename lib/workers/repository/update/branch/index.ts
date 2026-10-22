@@ -836,6 +836,15 @@ export async function processBranch(
       }
     }
     if (!commitSha && !branchExists) {
+      // Artifact errors are normally reported on the PR. With nothing to commit
+      // there is no PR, e.g. when lock file maintenance fails, so warn instead.
+      // Avoid the `artifactErrors` key so the Dependency Dashboard shows it.
+      if (config.artifactErrors?.length) {
+        logger.warn(
+          { errors: config.artifactErrors },
+          'Branch not created because artifact update failed',
+        );
+      }
       return {
         branchExists,
         result: 'no-work',
