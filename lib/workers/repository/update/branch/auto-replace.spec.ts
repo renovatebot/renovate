@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
+import { extractPackageFile as extractGithubActionsPackageFile } from '../../../../modules/manager/github-actions/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
@@ -1789,6 +1790,49 @@ describe('workers/repository/update/branch/auto-replace', () => {
         `,
       );
     });
+
+    it.each`
+      newValue | expected
+      ${'v4'}  | ${'ratchet:actions/setup-java@v4'}
+      ${'v5'}  | ${'ratchet:actions/setup-java@v5'}
+    `(
+      'github-actions: keeps ratchet comment prefix when updating to $newValue',
+      async ({ newValue, expected }) => {
+        const content = codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: "actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93" # ratchet:actions/setup-java@v4
+        `;
+        const dep = (await extractGithubActionsPackageFile(
+          content,
+          'workflow.yml',
+          {},
+        ))!.deps[0];
+        upgrade = {
+          ...upgrade,
+          depName: dep.depName,
+          currentValue: dep.currentValue!,
+          currentDigest: dep.currentDigest,
+          replaceString: dep.replaceString,
+          autoReplaceStringTemplate: dep.autoReplaceStringTemplate,
+          manager: 'github-actions',
+          packageFile: 'workflow.yml',
+          depIndex: 0,
+          newValue,
+          newDigest: '99b8673ff64fbf99d8d325f52d9a5bdedb8483e9',
+        };
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+        expect(res).toBe(
+          codeBlock`
+            jobs:
+              build:
+                steps:
+                  - uses: "actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9" # ${expected}
+          `,
+        );
+      },
+    );
 
     it('docker: replacement with same digest should not corrupt digest via currentDigestShort', async () => {
       // Regression test for https://github.com/renovatebot/renovate/discussions/38703
