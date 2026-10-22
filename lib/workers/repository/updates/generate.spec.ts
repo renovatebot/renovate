@@ -53,11 +53,16 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('preserves the existing Nix digest update title', () => {
+      const {
+        commitMessageTopic: digestTopic,
+        commitMessageExtra: digestExtra,
+      } = getConfig().digest!;
       const branch = [
         {
           ...requiredDefaultOptions,
           ...nixDefaultConfig,
-          ...getConfig().digest,
+          commitMessageTopic: digestTopic,
+          commitMessageExtra: digestExtra,
           manager: 'nix',
           depName: 'nixpkgs',
           currentValue: 'nixos-26.05',
