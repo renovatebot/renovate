@@ -3,13 +3,20 @@ import type { PackageRule, RenovateConfig } from '../../types.ts';
 import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
-const php2shellPatchedVersions = { '8.2': 35, '8.3': 36, '8.4': 27, '8.5': 12 };
+const php2shellPatchedVersions = JSON.stringify({
+  '8.2': 35,
+  '8.3': 36,
+  '8.4': 27,
+  '8.5': 12,
+});
 
 const php2shellVulnerableVersion = `(
   $value := (manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue;
-  $version := $match(datasource = "docker" ? $split($value, "-")[0] : $value, /^(8\\.[2-5])\\.(\\d+)$/).groups;
-  $not(vulnerabilityAlerts.enabled = false) and $exists($version)
-    and $number($version[1]) < $lookup(${JSON.stringify(php2shellPatchedVersions)}, $version[0])
+  $version := datasource = "docker" ? $split($value, "-")[0] : $value;
+  $parts := $match($version, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+
+  $not(vulnerabilityAlerts.enabled = false) and $exists($parts)
+    and $number($parts[1]) < $lookup(${php2shellPatchedVersions}, $parts[0])
 )`;
 
 // Renovate accepts these options in package rules, but PackageRule omits them.
@@ -18,8 +25,10 @@ const php2shellRule = {
   branchConcurrentLimit: 0,
   matchJsonata: [
     `${php2shellVulnerableVersion} and (
-      $version := $match(datasource = "docker" ? $split(newVersion, "-")[0] : newVersion, /^(8\\.[2-5])\\.(\\d+)$/).groups;
-      $exists($version) and $number($version[1]) >= $lookup(${JSON.stringify(php2shellPatchedVersions)}, $version[0])
+      $version := datasource = "docker" ? $split(newVersion, "-")[0] : newVersion;
+      $parts := $match($version, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+
+      $exists($parts) and $number($parts[1]) >= $lookup(${php2shellPatchedVersions}, $parts[0])
     )`,
   ],
   matchUpdateTypes: ['patch', 'minor', 'major'],
