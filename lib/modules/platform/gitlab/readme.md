@@ -116,6 +116,15 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Add automerged MRs to merge trains since `v17.11.0` (when [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/) are enabled on the project)
 - With `platformAutomerge=false`, Renovate adds MRs to the merge train itself once all checks have passed, see [GitLab Merge Trains](../../../key-concepts/automerge.md#gitlab-merge-trains)
 
+## Automerge with "Require a commit SHA on the merge requests API"
+
+Since `v19.2`, GitLab can reject merges through the API that do not include the commit SHA of the MR (group or instance setting `require_sha_for_merge`).
+Renovate always sends the MR's current head SHA when it merges or enables auto-merge, so automerge works whether this setting is on or off.
+You don't need to change your Renovate config.
+
+If the source branch changed after Renovate checked the MR, GitLab refuses the merge.
+Renovate skips the merge and tries again on its next run.
+
 ## Multiple merge request assignees
 
 [Multiple assignees](https://docs.gitlab.com/ee/user/project/issues/multiple_assignees_for_issues.html) are only available on GitLab Premium and Ultimate tiers.
