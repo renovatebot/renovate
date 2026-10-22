@@ -6,6 +6,7 @@ import type { BunyanRecord } from '../logger/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import type { GitOperationType } from '../util/git/types.ts';
+import type { ProcessStatus } from '../workers/repository/result.ts';
 
 export type RenovateSpanOptions = {
   attributes?: RenovateSpanAttributes;
@@ -73,9 +74,9 @@ interface RepoReport {
    */
   configFileName?: string;
   /**
-   * Whether the repository has already been onboarded (has a merged Renovate config).
+   * The repository's processing status (ex: `onboarding`, `onboarded`, `activated`).
    */
-  repoIsOnboarded?: boolean;
+  status?: ProcessStatus;
   /**
    * The number of the open (unmerged) onboarding PR, or `null` if none exists.
    */

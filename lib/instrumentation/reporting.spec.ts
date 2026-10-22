@@ -15,6 +15,7 @@ import {
   addExtractionStats,
   addLibYears,
   addRepositoryMetadata,
+  addRepositoryStatus,
   exportStats,
   finalizeReport,
   getReport,
@@ -91,6 +92,7 @@ describe('instrumentation/reporting', () => {
       dependencyStatus: { outdated: 0, total: 0 },
     });
     addRepositoryMetadata(config, 'renovate.json', []);
+    addRepositoryStatus(config, 'onboarded');
 
     expect(getReport()).toEqual({
       problems: [],
@@ -159,7 +161,6 @@ describe('instrumentation/reporting', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-      repoIsOnboarded: false,
     };
     const prList: Pr[] = [
       partial<Pr>({
@@ -179,7 +180,6 @@ describe('instrumentation/reporting', () => {
     addRepositoryMetadata(config, undefined, prList);
 
     const repoReport = getReport().repositories['myOrg/myRepo'];
-    expect(repoReport.repoIsOnboarded).toBe(false);
     expect(repoReport.onboardingPrNumber).toBe(7);
   });
 
@@ -188,7 +188,6 @@ describe('instrumentation/reporting', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-      repoIsOnboarded: true,
     };
     const prList: Pr[] = [
       partial<Pr>({
@@ -202,8 +201,18 @@ describe('instrumentation/reporting', () => {
     addRepositoryMetadata(config, undefined, prList);
 
     const repoReport = getReport().repositories['myOrg/myRepo'];
-    expect(repoReport.repoIsOnboarded).toBe(true);
     expect(repoReport.onboardingPrNumber).toBeNull();
+  });
+
+  it('adds the repository status to the report', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+    };
+
+    addRepositoryStatus(config, 'activated');
+
+    expect(getReport().repositories['myOrg/myRepo'].status).toBe('activated');
   });
 
   it('return report if reportType is set to logging', () => {

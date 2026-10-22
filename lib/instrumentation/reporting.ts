@@ -12,6 +12,7 @@ import { getInheritedOrGlobal } from '../util/common.ts';
 import { writeSystemFile } from '../util/fs/index.ts';
 import { getS3Client, parseS3Url } from '../util/s3.ts';
 import type { ExtractResult } from '../workers/repository/process/extract-update.ts';
+import type { ProcessStatus } from '../workers/repository/result.ts';
 import type { LibYearsWithStatus, Report } from './types.ts';
 
 const report: Report = {
@@ -58,13 +59,24 @@ export function addRepositoryMetadata(
   if (configFileName) {
     repoReport.configFileName = configFileName;
   }
-  repoReport.repoIsOnboarded = config.repoIsOnboarded;
 
   const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
   const onboardingPr = prList.find(
     (pr) => pr.sourceBranch === onboardingBranch && pr.state === 'open',
   );
   repoReport.onboardingPrNumber = onboardingPr?.number ?? null;
+}
+
+export function addRepositoryStatus(
+  config: RenovateConfig,
+  status: ProcessStatus,
+): void {
+  if (isNullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  report.repositories[config.repository!].status = status;
 }
 
 export function addExtractionStats(
