@@ -1,4 +1,9 @@
-import { validateContainerbaseVersion as _validateContainerbaseVersion } from '@renovatebot/base-image';
+import {
+  validateContainerbaseVersion as _validateContainerbaseVersion,
+  containerbaseVersionFile,
+  packageVersion,
+} from '@renovatebot/base-image';
+import { Fixtures } from '~test/fixtures.ts';
 import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
@@ -7,10 +12,11 @@ import { setCustomEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
 
-vi.mock('@renovatebot/base-image', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@renovatebot/base-image')>()),
-  validateContainerbaseVersion: vi.fn(),
-}));
+vi.mock('@renovatebot/base-image', { spy: true });
+vi.mock('node:fs/promises', async () => {
+  const { fs } = await vi.importActual<typeof import('memfs')>('memfs');
+  return { ...fs.promises, default: fs.promises };
+});
 
 const initPlatform = vi.mocked(_initPlatform);
 const validateContainerbaseVersion = vi.mocked(_validateContainerbaseVersion);
@@ -58,6 +64,10 @@ describe('workers/global/initialize', () => {
       git.validateGitVersion.mockResolvedValue(true);
     });
 
+    afterEach(() => {
+      Fixtures.reset();
+    });
+
     it('skips the check outside of containerbase', async () => {
       await expect(globalInitialize({})).toResolve();
       expect(validateContainerbaseVersion).not.toHaveBeenCalled();
@@ -65,55 +75,42 @@ describe('workers/global/initialize', () => {
 
     it('validates the version in containerbase', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
-      validateContainerbaseVersion.mockResolvedValueOnce('14.46.0');
+      Fixtures.mock({ [containerbaseVersionFile]: `${packageVersion}\n` });
       await expect(globalInitialize({})).toResolve();
       expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { version: '14.46.0' },
+        { version: packageVersion },
         'Containerbase image version is compatible',
       );
     });
 
     it('throws if the version is not compatible', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
-      validateContainerbaseVersion.mockRejectedValueOnce(
-        new Error(
-          'The containerbase image version 13.0.0 is not compatible with @containerbase/base 14.46.0, it needs the same major version and the same or a newer minor or patch version',
-        ),
-      );
+      Fixtures.mock({ [containerbaseVersionFile]: '1.0.0\n' });
       await expect(globalInitialize({})).rejects.toThrow(
-        'Init: containerbase image version check failed: The containerbase image version 13.0.0 is not compatible with @containerbase/base 14.46.0, it needs the same major version and the same or a newer minor or patch version. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
+        `Init: containerbase image version check failed: The containerbase image version 1.0.0 is not compatible with @containerbase/base ${packageVersion}, it needs the same major version and the same or a newer minor or patch version. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
       );
     });
 
     it('throws if the version file is missing', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
-      validateContainerbaseVersion.mockRejectedValueOnce(
-        new Error(
-          'The containerbase image version file /usr/local/containerbase/version is missing',
-        ),
-      );
       await expect(globalInitialize({})).rejects.toThrow(
-        'Init: containerbase image version check failed: The containerbase image version file /usr/local/containerbase/version is missing. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
+        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is missing. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
       );
     });
 
     it('throws if the version file is empty', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
-      validateContainerbaseVersion.mockRejectedValueOnce(
-        new Error(
-          'The containerbase image version file /usr/local/containerbase/version is empty',
-        ),
-      );
+      Fixtures.mock({ [containerbaseVersionFile]: '' });
       await expect(globalInitialize({})).rejects.toThrow(
-        'Init: containerbase image version check failed: The containerbase image version file /usr/local/containerbase/version is empty. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.',
+        `Init: containerbase image version check failed: The containerbase image version file ${containerbaseVersionFile} is empty. Set RENOVATE_X_IGNORE_CONTAINERBASE_VERSION to skip the check.`,
       );
     });
 
     it('does not skip the check if ignored via the custom env', async () => {
       vi.stubEnv('CONTAINERBASE', 'true');
       setCustomEnv({ RENOVATE_X_IGNORE_CONTAINERBASE_VERSION: 'true' });
-      validateContainerbaseVersion.mockResolvedValueOnce('14.46.0');
+      Fixtures.mock({ [containerbaseVersionFile]: `${packageVersion}\n` });
       await expect(globalInitialize({})).toResolve();
       expect(validateContainerbaseVersion).toHaveBeenCalledOnce();
       setCustomEnv({});
