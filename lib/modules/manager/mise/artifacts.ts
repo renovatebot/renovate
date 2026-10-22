@@ -5,6 +5,8 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type {
@@ -57,6 +59,30 @@ const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 async function detectMiseVersion(
   execOptions: ExecOptions,
 ): Promise<string | null> {
+  const constraint = execOptions.toolConstraints?.[0]?.constraint ?? 'latest';
+  const cacheKey = buildCacheKey(
+    'mise-version',
+    execOptions.cwdFile,
+    constraint,
+  );
+  const cachedVersion = memCache.get<Promise<string | null>>(cacheKey);
+  if (cachedVersion !== undefined) {
+    return cachedVersion;
+  }
+
+  const versionPromise = detectMiseVersionUncached(execOptions);
+  memCache.set(cacheKey, versionPromise);
+  try {
+    return await versionPromise;
+  } catch (err) {
+    memCache.set(cacheKey, undefined);
+    throw err;
+  }
+}
+
+async function detectMiseVersionUncached(
+  execOptions: ExecOptions,
+): Promise<string | null> {
   try {
     const { stdout } = await exec('mise version', execOptions);
     const version = regEx(/\d+\.\d+\.\d+/).exec(stdout)?.[0];
@@ -66,6 +92,9 @@ async function detectMiseVersion(
     logger.debug({ stdout }, 'Could not parse mise version output');
     return null;
   } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, 'Failed to determine mise version');
     return null;
   }
@@ -168,21 +197,17 @@ export async function updateArtifacts({
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
 
-  // The mise version is needed to decide safe mode (untrusted path) and
-  // `mise lock --bump` (lock file maintenance). Detect it at runtime rather
-  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
-  // change the outcome: an allowlisted, non-maintenance run behaves the same
-  // regardless of version.
+  // Detect the mise version at runtime rather than requiring a pinned
+  // `constraints.mise`. Besides deciding safe mode (untrusted path) and
+  // `mise lock --bump` (lock file maintenance), this logs the version used to
+  // update the lock file.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
-  let miseSupportsSafeFeatures = false;
-  if (!miseAllowlisted || config.isLockFileMaintenance) {
-    const miseVersion = await detectMiseVersion({
-      cwdFile: packageFileName,
-      toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
-      docker: {},
-    });
-    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
-  }
+  const miseVersion = await detectMiseVersion({
+    cwdFile: packageFileName,
+    toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
+    docker: {},
+  });
+  const miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
 
   const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
   if (!miseAllowlisted && !safeMode) {
@@ -191,6 +216,10 @@ export async function updateArtifacts({
       '`mise lock` requires either `mise` in `allowedUnsafeExecutions`, or a mise version that supports safe mode',
     );
     return null;
+  }
+
+  if (miseAllowlisted && miseVersion) {
+    logger.once.debug(`Using mise version ${miseVersion}`);
   }
 
   const { isLocal, env } = getConfigType(packageFileName);
@@ -238,7 +267,7 @@ export async function updateArtifacts({
     extraEnv,
     toolConstraints: await getMiseLockToolConstraints(
       config,
-      miseConstraint,
+      miseVersion ?? miseConstraint,
       safeMode,
     ),
     docker: {},
