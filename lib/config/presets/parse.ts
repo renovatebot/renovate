@@ -2,7 +2,32 @@ import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { regEx } from '../../util/regex.ts';
 import { isHttpUrl } from '../../util/url.ts';
 import type { ParsedPreset } from './types.ts';
-import { PRESET_INVALID, PRESET_PROHIBITED_SUBPRESET } from './util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_PATH_TRAVERSAL,
+  PRESET_PROHIBITED_SUBPRESET,
+} from './util.ts';
+
+/**
+ * Throws if any `/`-separated segment of the given preset `repo`, `presetPath` or `tag` is `.` or `..` (after a single percent-decode, so an encoded `%2e%2e` segment is caught too).
+ *
+ * None of these identifiers ever legitimately need a dot segment: a repository identifier is always exactly its own owner/name segments, a subdirectory path only needs to go down from the repository root, and git disallows `..` in ref names outright. Rejecting the segment outright (rather than normalizing the value and only rejecting a net escape) also matters here, because a normalized `owner/repo/../../other-owner/other-repo` collapses to `other-owner/other-repo` with no leading `../`, silently retargeting the request to a different repository without ever looking like an "escape".
+ *
+ * @throws {Error} {@link PRESET_PATH_TRAVERSAL} if a segment is `.` or `..`, e.g. `owner/repo//../../other-owner/other-repo` or `owner/repo/../../other-owner/other-repo`.
+ */
+function assertNoDotSegment(value: string): void {
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    // not a valid percent-encoding, fall through with the raw value
+  }
+  if (
+    decoded.split('/').some((segment) => segment === '.' || segment === '..')
+  ) {
+    throw new Error(PRESET_PATH_TRAVERSAL);
+  }
+}
 
 const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<repo>~?[\w\-. /%]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
@@ -204,6 +229,14 @@ export function parsePreset(input: string): ParsedPreset {
     if (!isNonEmptyString(presetName)) {
       presetName = 'default';
     }
+  }
+
+  assertNoDotSegment(repo);
+  if (isNonEmptyString(presetPath)) {
+    assertNoDotSegment(presetPath);
+  }
+  if (isNonEmptyString(tag)) {
+    assertNoDotSegment(tag);
   }
 
   return {
