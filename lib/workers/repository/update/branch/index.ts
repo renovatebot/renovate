@@ -723,6 +723,9 @@ export async function processBranch(
             logger.debug(
               'PR is less than 2 hours old - raise error instead of PR',
             );
+            if (config.artifactErrors.some((error) => error.timedOut)) {
+              return { branchExists, result: 'error', commitSha };
+            }
             throw new Error(MANAGER_LOCKFILE_ERROR);
           }
         } else {
