@@ -1626,6 +1626,14 @@ This helps you identify dependencies that may need attention due to lack of main
 
 Set this to `false` if you prefer not to see abandoned packages in your dependency dashboard.
 
+## `dependencyDashboardReportSchedules`
+
+Controls whether schedule descriptions are reported in the Dependency Dashboard.
+
+When enabled, Renovate groups updates awaiting schedule under headings that describe each schedule and its timezone.
+
+This option defaults to `false` to avoid increasing the size of the Dependency Dashboard.
+
 ## `dependencyDashboardTitle`
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
