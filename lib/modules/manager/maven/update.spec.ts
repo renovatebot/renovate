@@ -212,6 +212,37 @@ describe('modules/manager/maven/update', () => {
   });
 
   describe('bumpPackageVersion', () => {
+    it('preserves whitespace around the project version when bumping', () => {
+      const content =
+        '<project><version>\n  1.1.9-SNAPSHOT\n</version></project>';
+
+      const result = bumpPackageVersion(content, '1.1.9-SNAPSHOT', 'patch');
+
+      expect(result.bumpedContent).toBe(
+        '<project><version>\n  1.1.10-SNAPSHOT\n</version></project>',
+      );
+    });
+
+    it.each`
+      version             | bumpedVersion        | bump
+      ${'1.1.9-SNAPSHOT'} | ${'1.1.10-SNAPSHOT'} | ${'patch'}
+      ${'1.0.99'}         | ${'1.0.100'}         | ${'patch'}
+      ${'9.99.99'}        | ${'10.0.0'}          | ${'major'}
+    `(
+      'does not repeat a length-changing bump of $version',
+      ({ version, bumpedVersion, bump }) => {
+        const content = `<project><version>${version}</version></project>`;
+
+        const first = bumpPackageVersion(content, version, bump);
+        const second = bumpPackageVersion(first.bumpedContent!, version, bump);
+
+        expect(first.bumpedContent).toBe(
+          `<project><version>${bumpedVersion}</version></project>`,
+        );
+        expect(second).toEqual(first);
+      },
+    );
+
     it('bumps pom.xml version', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,

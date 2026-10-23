@@ -198,6 +198,26 @@ export async function getUpdatedPackageFiles(
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
+  const packageVersionBumps = new Map<
+    string,
+    { content: string; upgrade: BranchUpgradeConfig }
+  >();
+
+  function queuePackageVersionBump(
+    content: string,
+    upgrade: BranchUpgradeConfig,
+  ): void {
+    if (
+      !upgrade.bumpVersion ||
+      !upgrade.packageFileVersion ||
+      !get(upgrade.manager, 'bumpPackageVersion') ||
+      packageVersionBumps.has(upgrade.packageFile!)
+    ) {
+      return;
+    }
+    packageVersionBumps.set(upgrade.packageFile!, { content, upgrade });
+  }
+
   let firstUpdate = true;
   for (const upgrade of config.upgrades) {
     const manager = upgrade.manager;
@@ -326,7 +346,7 @@ export async function getUpdatedPackageFiles(
     } else {
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
-        let res = await doAutoReplace(
+        const res = await doAutoReplace(
           upgrade,
           packageFileContent!,
           reuseExistingBranch,
@@ -334,7 +354,7 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
-          res = await applyManagerBumpPackageVersion(res, upgrade);
+          queuePackageVersionBump(res, upgrade);
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
           } else {
@@ -352,12 +372,11 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const newContent = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -375,6 +394,7 @@ export async function getUpdatedPackageFiles(
         );
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
+      queuePackageVersionBump(newContent, upgrade);
       if (newContent !== packageFileContent) {
         if (reuseExistingBranch) {
           // This ensure it's always 1 commit from Renovate
@@ -402,6 +422,30 @@ export async function getUpdatedPackageFiles(
       }
     }
   }
+  // Dependency offsets refer to the original file. Bumping its own version
+  // earlier could shift the positions of dependency edits still to come.
+  for (const [packageFile, { content, upgrade }] of packageVersionBumps) {
+    const packageFileContent = updatedFileContents[packageFile] ?? content;
+    const bumpPackageVersion = get(upgrade.manager, 'bumpPackageVersion')!;
+    const { bumpedContent } = await bumpPackageVersion(
+      packageFileContent,
+      upgrade.packageFileVersion!,
+      upgrade.bumpVersion!,
+      packageFile,
+    );
+    if (bumpedContent === packageFileContent) {
+      continue;
+    }
+    if (reuseExistingBranch) {
+      return getUpdatedPackageFiles({ ...config, reuseExistingBranch: false });
+    }
+    if (!bumpedContent) {
+      throw new Error(WORKER_FILE_UPDATE_FAILED);
+    }
+    updatedFileContents[packageFile] = bumpedContent;
+    delete nonUpdatedFileContents[packageFile];
+  }
+
   const updatedPackageFiles: FileAddition[] = Object.keys(
     updatedFileContents,
   ).map((name) => ({
@@ -794,28 +838,4 @@ async function checkForPendingVersions(
       });
     }
   }
-}
-
-async function applyManagerBumpPackageVersion(
-  packageFileContent: string | null,
-  upgrade: BranchUpgradeConfig,
-): Promise<string | null> {
-  const bumpPackageVersion = get(upgrade.manager, 'bumpPackageVersion');
-  if (
-    !bumpPackageVersion ||
-    !packageFileContent ||
-    !upgrade.bumpVersion ||
-    !upgrade.packageFileVersion
-  ) {
-    return packageFileContent;
-  }
-
-  const result = await bumpPackageVersion(
-    packageFileContent,
-    upgrade.packageFileVersion,
-    upgrade.bumpVersion,
-    upgrade.packageFile!,
-  );
-
-  return result.bumpedContent;
 }

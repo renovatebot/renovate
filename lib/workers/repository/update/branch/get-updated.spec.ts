@@ -1,4 +1,5 @@
 import { isArray } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
@@ -8,6 +9,10 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import {
+  extractPackage,
+  resolveParents,
+} from '../../../../modules/manager/maven/extract.ts';
 import * as _mise from '../../../../modules/manager/mise/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
@@ -1231,6 +1236,215 @@ describe('workers/repository/update/branch/get-updated', () => {
         }
       `);
     });
+
+    it.each`
+      version             | bumpedVersion
+      ${'1.1.9-SNAPSHOT'} | ${'1.1.10-SNAPSHOT'}
+      ${'1.0.99'}         | ${'1.0.100'}
+      ${'1.0.35'}         | ${'1.0.36'}
+    `(
+      'bumps Maven $version after grouped dependency edits',
+      async ({ version, bumpedVersion }) => {
+        const content = codeBlock`
+        <project>
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>org.example</groupId>
+          <artifactId>demo</artifactId>
+          <version>${version}</version>
+          <properties>
+            <compiler-plugin.version>3.12.1</compiler-plugin.version>
+            <surefire-plugin.version>3.2.3</surefire-plugin.version>
+          </properties>
+          <build>
+            <plugins>
+              <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>\${compiler-plugin.version}</version>
+              </plugin>
+              <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>\${surefire-plugin.version}</version>
+              </plugin>
+              <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <version>3.2.2</version>
+              </plugin>
+            </plugins>
+          </build>
+        </project>
+      `;
+        const [extracted] = resolveParents([
+          extractPackage(content, 'pom.xml', {})!,
+        ]);
+        const newValues: Record<string, string> = {
+          'org.apache.maven.plugins:maven-compiler-plugin': '3.16.0',
+          'org.apache.maven.plugins:maven-surefire-plugin': '3.5.4',
+          'io.smallrye:jandex-maven-plugin': '3.5.0',
+        };
+        expect(extracted.deps).toHaveLength(3);
+        config.upgrades = extracted.deps.map((dep) => ({
+          ...dep,
+          manager: 'maven',
+          branchName: '',
+          packageFile: 'pom.xml',
+          packageFileVersion: version,
+          bumpVersion: 'patch',
+          newValue: newValues[dep.depName!],
+        }));
+        config.upgrades.sort(
+          (left, right) =>
+            right.fileReplacePosition! - left.fileReplacePosition!,
+        );
+        git.getFile.mockReset().mockResolvedValue(content);
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(result.artifactErrors).toEqual([]);
+        expect(result.updatedPackageFiles).toEqual([
+          {
+            type: 'addition',
+            path: 'pom.xml',
+            contents: content
+              .replace(
+                `<version>${version}</version>`,
+                `<version>${bumpedVersion}</version>`,
+              )
+              .replace('>3.12.1<', '>3.16.0<')
+              .replace('>3.2.3<', '>3.5.4<')
+              .replace('>3.2.2<', '>3.5.0<'),
+          },
+        ]);
+      },
+    );
+
+    it('bumps each grouped package file once after its dependency edits', async () => {
+      git.getFile.mockReset().mockResolvedValue('version: 1.0.9');
+      for (const newValue of ['one', 'two']) {
+        for (const packageFile of ['a/package.json', 'b/package.json']) {
+          config.upgrades.push({
+            packageFile,
+            manager: 'npm',
+            branchName: '',
+            newValue,
+            bumpVersion: 'patch',
+            packageFileVersion: '1.0.9',
+          });
+        }
+      }
+      npm.updateDependency.mockImplementation(
+        ({ fileContent, upgrade }) => `${fileContent}; ${upgrade.newValue}`,
+      );
+      npm.bumpPackageVersion.mockImplementation((content) => ({
+        bumpedContent: content.replace('1.0.9', '1.0.10'),
+      }));
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(npm.bumpPackageVersion).toHaveBeenCalledTimes(2);
+      for (const packageFile of ['a/package.json', 'b/package.json']) {
+        expect(npm.bumpPackageVersion).toHaveBeenCalledWith(
+          'version: 1.0.9; one; two',
+          '1.0.9',
+          'patch',
+          packageFile,
+        );
+        expect(result.updatedPackageFiles).toContainEqual({
+          type: 'addition',
+          path: packageFile,
+          contents: 'version: 1.0.10; one; two',
+        });
+      }
+      expect(result.updatedPackageFiles).toHaveLength(2);
+    });
+
+    it('rebases when only the package version still needs bumping', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: '',
+        bumpVersion: 'patch',
+        packageFileVersion: '1.0.9',
+      });
+      git.getFile.mockReset().mockResolvedValue('existing content');
+      npm.updateDependency.mockReturnValue('existing content');
+      npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.reuseExistingBranch).toBeFalse();
+      expect(result.updatedPackageFiles).toEqual([
+        { type: 'addition', path: 'package.json', contents: 'new version' },
+      ]);
+      expect(npm.bumpPackageVersion).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps a reused branch when dependencies and package version are already updated', async () => {
+      config.reuseExistingBranch = true;
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: '',
+        bumpVersion: 'patch',
+        packageFileVersion: '1.0.9',
+      });
+      npm.updateDependency.mockReturnValue('existing content');
+      npm.bumpPackageVersion.mockReturnValue({
+        bumpedContent: 'existing content',
+      });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.reuseExistingBranch).toBeTrue();
+      expect(result.updatedPackageFiles).toEqual([]);
+    });
+
+    it('reports a failed package version bump', async () => {
+      config.upgrades.push({
+        packageFile: 'package.json',
+        manager: 'npm',
+        branchName: '',
+        bumpVersion: 'patch',
+        packageFileVersion: '1.0.9',
+      });
+      npm.updateDependency.mockReturnValue('existing content');
+      npm.bumpPackageVersion.mockReturnValue({ bumpedContent: null });
+
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
+    });
+
+    it.each`
+      manager   | packageFileVersion
+      ${'npm'}  | ${undefined}
+      ${'html'} | ${'1.0.9'}
+    `(
+      'keeps dependency updates without an applicable bump for $manager',
+      async ({ manager, packageFileVersion }) => {
+        config.upgrades.push({
+          packageFile: 'package.json',
+          manager,
+          branchName: '',
+          bumpVersion: 'patch',
+          packageFileVersion,
+        });
+        npm.updateDependency.mockReturnValue('updated content');
+        autoReplace.doAutoReplace.mockResolvedValue('updated content');
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(npm.bumpPackageVersion).not.toHaveBeenCalled();
+        expect(result.updatedPackageFiles).toEqual([
+          {
+            type: 'addition',
+            path: 'package.json',
+            contents: 'updated content',
+          },
+        ]);
+      },
+    );
 
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
