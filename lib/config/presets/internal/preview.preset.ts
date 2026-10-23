@@ -1,12 +1,6 @@
 import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {
-  buildkite: {
-    buildkite: {
-      enabled: true,
-    },
-    description: 'Enable Buildkite functionality.',
-  },
   dockerCompose: {
     description: 'Enable Docker Compose image updating.',
     'docker-compose': {
