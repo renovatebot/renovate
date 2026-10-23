@@ -84,7 +84,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven', currentValue: '2.0.0' },
       ],
       config: {
-        newValue: '3.3.1',
         constraints: undefined,
       },
     });
@@ -111,7 +110,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.3.1', newValue: '3.3.1' },
+      config: {},
     });
 
     const expected = [
@@ -159,7 +158,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       // maven-wrapper.properties
       newPackageFileContent: 'distributionType=script;touch pwned',
       updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.3.1', newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots[0]).toMatchObject({
@@ -174,7 +173,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { newValue: '3.3.1' },
+      config: {},
     });
     expect(updatedDeps).toEqual([]);
     expect(execSnapshots).toEqual([
@@ -218,7 +217,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven-wrapper' },
         { depName: 'maven', currentValue: '3.3.0' },
       ],
-      config: { newValue: '3.3.1' },
+      config: {},
     });
     expect(result).toEqual([
       {
@@ -277,7 +276,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { newValue: '3.3.1' },
+      config: {},
     });
     expect(updatedDeps).toBeNull();
     expect(execSnapshots).toMatchObject([]);
@@ -290,7 +289,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       packageFileName: 'maven',
       newPackageFileContent: '',
       updatedDeps: [{ depName: 'maven-wrapper' }],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      config: {},
     });
 
     expect(updatedDeps).toEqual([
@@ -318,7 +317,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven-wrapper' },
         { depName: 'maven', currentValue: '3.0.0' },
       ],
-      config: { newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots).toMatchObject([
@@ -375,7 +374,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven-wrapper' },
         { depName: 'maven', currentValue: '3.0.0' },
       ],
-      config: { currentValue: '2.0.0', newValue: '2.1.0' },
+      config: {},
     });
 
     expect(execSnapshots[0]).toMatchObject({ cmd: 'install-tool java 17.0.0' });
@@ -397,7 +396,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven', currentValue: '3.0.0' },
       ],
       config: {
-        newValue: '3.3.1',
         extractedConstraints: { java: '8.0.1' },
       },
     });
@@ -422,7 +420,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { depName: 'maven-wrapper' },
         { depName: 'maven', currentValue: '3.0.0' },
       ],
-      config: { newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots).toMatchObject([
@@ -466,7 +464,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
             'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
         },
       ],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots).toMatchObject([
@@ -508,7 +506,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
             'https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar',
         },
       ],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots).toMatchObject([
@@ -549,7 +547,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           replaceString: 'not a good url',
         },
       ],
-      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+      config: {},
     });
 
     expect(execSnapshots).toMatchObject([
@@ -601,7 +599,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -624,7 +622,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       // Verify writeLocalFile was called twice (initial write, then checksum update)
@@ -649,7 +647,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       expect(withCacheSpy).toHaveBeenCalledWith(
@@ -675,7 +673,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
@@ -708,7 +706,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithChecksums,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       // writeLocalFile called twice: initial write, then after checksum update
@@ -748,7 +746,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: 'mvnw',
         newPackageFileContent: propertiesWithChecksums,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(fs.deleteLocalFile).not.toHaveBeenCalled();
@@ -771,7 +769,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       // writeLocalFile called twice: initial write, then checksum update (even if fetch fails, it still writes)
@@ -798,7 +796,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithDistributionChecksumOnly,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -819,7 +817,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithoutChecksums,
         updatedDeps: [{ depName: 'maven-wrapper' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       // File should still be written (for wrapper update)
@@ -834,7 +832,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithoutChecksums,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       expect(result).toBeNull();
@@ -862,7 +860,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithWrapperVersion,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       // writeLocalFile called twice: initial write, then after checksum update
@@ -892,7 +890,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           distributionSha256Sum=oldhash123
         `,
         updatedDeps: [{ depName: 'maven-wrapper' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       // writeLocalFile called twice: initial write (stripped), then after checksum update
@@ -927,7 +925,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           wrapperSha256Sum=oldwrapperhash456
         `,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       // writeLocalFile called twice: initial write (stripped), then after checksum update
@@ -957,7 +955,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithWrapperChecksumOnly,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -988,7 +986,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithWrapperChecksumOnly,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -1025,7 +1023,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithEscapedUrlsAndType,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(execSnapshots[0].cmd).toContain('-Dtype=bin');
@@ -1045,7 +1043,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithoutDistributionUrl,
         updatedDeps: [{ depName: 'maven' }],
-        config: { currentValue: '3.9.8', newValue: '3.9.9' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -1064,7 +1062,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         packageFileName: '.mvn/wrapper/maven-wrapper.properties',
         newPackageFileContent: propertiesWithoutWrapperInfo,
         updatedDeps: [{ depName: 'maven-wrapper', newValue: '3.3.2' }],
-        config: { currentValue: '3.3.1', newValue: '3.3.2' },
+        config: {},
       });
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
