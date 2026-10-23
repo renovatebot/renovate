@@ -26,10 +26,14 @@ _`VERSION`_ can include the major, minor, and patch components and may optionall
 Here are the examples of valid GitHub tags:
 `1.0.1`, `1.0`, `1`,
 `v1.0.1`, `v1.0`, `v1`,
-`prefix-1.0.1`, `prefix-1.0`, `prefix-1`,
-`prefix-v1.0.1`, `prefix-v1.0`, `prefix-v1`.
-`prefix/1.0.1`, `prefix/1.0`, `prefix/1`,
-`prefix/v1.0.1`, `prefix/v1.0`, `prefix/v1`.
+`prefix-1.0.1`, `prefix-1.0`,
+`prefix-v1.0.1`, `prefix-v1.0`,
+`prefix/1.0.1`, `prefix/1.0`,
+`prefix/v1.0.1`, `prefix/v1.0`.
+
+For component-prefixed tags, Renovate requires at least a major and minor
+version component. A prefixed ref such as `prefix/v1` is not treated as a
+version tag.
 
 If you want to automatically pin action digests add the `helpers:pinGitHubActionDigests` preset to the `extends` array:
 
@@ -150,13 +154,25 @@ You can also control the `gh` CLI version using `constraints.gh`.
 
 Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
 
-When the action reference doesn't look like a version number (i.e., doesn't match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches.
-Since these refs have no version ordering, only digest pinning updates are supported.
+Unprefixed refs beginning with a version number (including build metadata, for
+example `v1.2.3+build`) and component-prefixed refs with at least major and
+minor components (for example `prefix/v1.2`) route to `github-tags` and support
+version updates. Other refs route to `github-digest`, which fetches both tags
+and branches; since these refs have no version ordering, only digest pinning
+updates are supported.
+
+GitHub does not distinguish branch names from tag names by syntax. A branch
+whose name looks like a component-prefixed version (for example,
+`release/1.2`) is therefore routed to `github-tags`, and digest updates for
+that branch are not supported. Avoid version-like branch names when digest
+updates are required.
 
 **Routing logic:**
 
 - `actions/checkout@v4.2.0` → `github-tags` datasource (version updates)
 - `actions/checkout@v4` → `github-tags` datasource (version updates)
+- `grafana/shared-workflows/actions/lint-pr-title@lint-pr-title/v1.2.3` → `github-tags` datasource (version updates)
+- `some-org/some-action@prefix/v1` → `github-digest` datasource (digest pinning only)
 - `taiki-e/install-action@cargo-llvm-cov` → `github-digest` datasource (digest pinning only)
 - `actions/checkout@main` → `github-digest` datasource (digest pinning only)
 
