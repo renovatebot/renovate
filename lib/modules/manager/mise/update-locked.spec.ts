@@ -79,6 +79,38 @@ describe('modules/manager/mise/update-locked', () => {
     });
   });
 
+  it('updates only the matching Java selector entry', () => {
+    const lockFileContent = codeBlock`
+      [[tools.java]]
+      version = "temurin-25.0.3+9.0.LTS"
+      backend = "core:java"
+      specifiers = ["temurin-25"]
+
+      [[tools.java]]
+      version = "oracle-graalvm-25.0.4.1.1"
+      backend = "core:java"
+      specifiers = ["oracle-graalvm-25"]
+    `;
+    const config: UpdateLockedConfig = {
+      packageFile: 'mise.toml',
+      lockFile: 'mise.lock',
+      lockFileContent,
+      depName: 'java',
+      currentVersion: '25.0.4.1.1',
+      newVersion: '25.0.5.2.1',
+    };
+
+    expect(updateLockedDependency(config)).toEqual({
+      status: 'updated',
+      files: {
+        'mise.lock': lockFileContent.replace(
+          'oracle-graalvm-25.0.4.1.1',
+          'oracle-graalvm-25.0.5.2.1',
+        ),
+      },
+    });
+  });
+
   it('recognizes an already-updated multi-version tool entry', () => {
     const config: UpdateLockedConfig = {
       packageFile: 'mise.toml',
