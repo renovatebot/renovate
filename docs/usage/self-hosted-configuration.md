@@ -1573,6 +1573,13 @@ Read more about [the default credential provider chain for AWS SDK for JavaScrip
 !!! note
   S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
+## `repositoryDelaySeconds`
+
+Number of seconds to wait between processing repositories.
+Use this to spread the load on your Git server and CI system when you self-host Renovate for many repositories.
+Set as an integer.
+Default is no delay.
+
 ## `requireConfig`
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
