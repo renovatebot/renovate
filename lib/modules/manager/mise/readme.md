@@ -100,6 +100,10 @@ When a lock file is present:
 
 When `mise lock` pins a tool's dependencies in a [native dependency sidecar](https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars) (for example `.mise/locks/npm-prettier/3.3.3/aube-lock.yaml`), Renovate commits the sidecar changes together with the lock file, including new sidecar directories and the removal of ones that `mise lock` deleted.
 
+For PyPI-backed tool updates, mise versions supporting `--bump` first regenerate Python sidecars with the exact versions selected by Renovate (for example, `mise lock --bump ansible@14.5.0`).
+This preserves configured selectors such as `latest` and does not bump tools outside the update.
+Older mise versions, or a failed version probe, retain the plain `mise lock` behavior.
+
 Renovate recognizes environment-specific lock files:
 
 - `mise.lock` - default lock file
