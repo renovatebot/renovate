@@ -3,7 +3,7 @@ import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { AllConfig, RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -1830,6 +1830,32 @@ describe('config/validation', () => {
         'repo',
         config,
       );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows options which can be used anywhere, even in an object the `any` scope misses', async () => {
+      vi.resetModules();
+      vi.doMock('./options/scopes.ts', async (importOriginal) => {
+        const scopes =
+          await importOriginal<typeof import('./options/scopes.ts')>();
+        return {
+          ...scopes,
+          // simulate the `any` scope not (yet) expanding to `packageRules`
+          getAllowedParents: (option: RenovateOptions) =>
+            option.scopes?.includes('any')
+              ? ['.']
+              : scopes.getAllowedParents(option),
+        };
+      });
+      const { validateConfig } = await import('./validation.ts');
+
+      const { warnings, errors } = await validateConfig('repo', {
+        packageRules: [
+          { description: ['Disable foo'], matchPackageNames: ['foo'] },
+        ],
+      });
 
       expect(errors).toBeEmptyArray();
       expect(warnings).toBeEmptyArray();
