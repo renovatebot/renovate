@@ -68,6 +68,14 @@ export interface GithubPackageConfig {
   registryUrl?: string | undefined;
 }
 
+export interface GithubGraphqlQueryOptions {
+  /**
+   * Fetch the first page of items even while the cached items are considered
+   * up to date, and merge it into the cache.
+   */
+  refresh?: boolean;
+}
+
 /**
  * Result of GraphQL response transformation for releases (via adapter)
  */
@@ -116,5 +124,7 @@ export interface GithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem,
 > {
   reconcile(items: GithubItem[]): Promise<boolean>;
+  hasItems(): Promise<boolean>;
+  merge(items: GithubItem[]): Promise<void>;
   finalizeAndReturn(): Promise<GithubItem[]>;
 }

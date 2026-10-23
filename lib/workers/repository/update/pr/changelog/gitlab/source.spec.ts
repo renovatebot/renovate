@@ -1,6 +1,8 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import * as semverVersioning from '../../../../../../modules/versioning/semver/index.ts';
+import * as packageCache from '../../../../../../util/cache/package/index.ts';
 import * as hostRules from '../../../../../../util/host-rules.ts';
 import type { Timestamp } from '../../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../../types.ts';
@@ -132,6 +134,31 @@ describe('workers/repository/update/pr/changelog/gitlab/source', () => {
         ...expectedChangeLog(),
         hasReleaseNotes: true,
       });
+    });
+
+    it('keeps the tags of a fresh release without a tag', async () => {
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        currentVersion: '5.2.0',
+        newVersion: '5.3.0',
+        releases: [
+          { version: '5.2.0' },
+          {
+            version: '5.3.0',
+            releaseTimestamp: DateTime.now().toISO() as Timestamp,
+          },
+        ],
+      });
+
+      expect(res?.versions).toMatchObject([{ version: '5.3.0', compare: {} }]);
+      expect(packageCacheSetSpy).not.toHaveBeenCalledWith(
+        'changelog-gitlab-release',
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+      );
     });
 
     it('handles empty GitLab tags response', async () => {
