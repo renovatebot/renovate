@@ -1,3 +1,4 @@
+import { ApmDatasource } from '../../datasource/apm/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -18,6 +19,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
+  ApmDatasource.id,
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   GitTagsDatasource.id,

@@ -1,14 +1,16 @@
-import { isTruthy } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
+import { ApmDatasource } from '../../datasource/apm/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { ApmRegistries, ApmRegistryEntry } from './schema.ts';
 import { ApmManifest } from './schema.ts';
 
 interface DatasourceResult {
@@ -168,9 +170,77 @@ function createPinnedTailFinder(
 }
 
 /**
+ * Build a dependency which is installed from a registry (`source: registry`
+ * in APM terms) rather than from a Git host. The registry is `registryName`
+ * or, when omitted, the manifest's default registry. A registry whose URL is
+ * not declared in `apm.yml` (for example one configured only in
+ * `~/.apm/config.json`) can't be looked up, so the entry is skipped.
+ */
+function registryDependency(
+  base: PackageDependency,
+  packageName: string,
+  registryName: string | undefined,
+  currentValue: string,
+  registries: ApmRegistries,
+  replaceString: string,
+  autoReplaceStringTemplate: string,
+): PackageDependency {
+  const name = registryName ?? registries.defaultName;
+  const registryUrl = name ? registries.urls.get(name) : undefined;
+  const dep: PackageDependency = {
+    ...base,
+    datasource: ApmDatasource.id,
+    packageName,
+    currentValue,
+  };
+  if (!registryUrl) {
+    logger.debug(
+      { depName: base.depName, registry: name },
+      'apm: registry url is not declared in the manifest',
+    );
+    return { ...dep, skipReason: 'unknown-registry' };
+  }
+  return {
+    ...dep,
+    registryUrls: [registryUrl],
+    replaceString,
+    autoReplaceStringTemplate,
+  };
+}
+
+/**
+ * Parse an object-form registry entry (`- id: owner/repo`, `version:`,
+ * optional `registry:`). Only the version is replaced, so the dependency
+ * updates no matter how the entry is laid out or quoted.
+ */
+export function parseApmRegistryEntry(
+  entry: ApmRegistryEntry,
+  depType: string,
+  registries: ApmRegistries,
+): PackageDependency {
+  const base: PackageDependency = { depName: entry.id, depType };
+  if (!entry.version) {
+    return { ...base, skipReason: 'unspecified-version' };
+  }
+  return registryDependency(
+    base,
+    entry.id,
+    entry.registry,
+    entry.version,
+    registries,
+    entry.version,
+    '{{{newValue}}}',
+  );
+}
+
+/**
  * Parse a single APM dependency string of the form
  * `[host/]owner/repo[/subpath...][#<ref>]`, where `<ref>` is a semver tag/range,
  * a branch, or a commit SHA.
+ *
+ * When the manifest declares a default registry, APM routes every such entry
+ * to that registry and `<ref>` selects a published version, so the entry is
+ * looked up with the `apm` datasource instead of the Git host's tags.
  *
  * For a SHA-pinned entry the release tag lives in a trailing YAML comment; when
  * present it is recovered from `content` so the entry updates as a digest
@@ -181,6 +251,7 @@ export function parseApmDependency(
   entry: string,
   depType: string,
   findPinnedTail: (value: string) => PinnedTail | undefined,
+  registries: ApmRegistries,
 ): PackageDependency {
   const hashIndex = entry.indexOf('#');
   const pathPart = hashIndex === -1 ? entry : entry.slice(0, hashIndex);
@@ -214,6 +285,19 @@ export function parseApmDependency(
       currentValue: ref,
       skipReason: 'invalid-dependency-specification',
     };
+  }
+
+  if (registries.defaultName) {
+    // the package identity at the registry keeps the host prefix, if any
+    return registryDependency(
+      base,
+      hasHost ? `${host}/${repoPath}` : repoPath,
+      undefined,
+      ref,
+      registries,
+      entry,
+      autoReplaceStringTemplate,
+    );
   }
 
   const { datasource, packageName, registryUrls } = determineDatasource(
@@ -257,12 +341,15 @@ export function parseApmDependency(
 }
 
 function extractSection(
-  entries: string[] | undefined,
+  entries: (string | ApmRegistryEntry)[] | undefined,
   depType: string,
   findPinnedTail: (value: string) => PinnedTail | undefined,
+  registries: ApmRegistries,
 ): PackageDependency[] {
   return coerceArray(entries).map((entry) =>
-    parseApmDependency(entry, depType, findPinnedTail),
+    isString(entry)
+      ? parseApmDependency(entry, depType, findPinnedTail, registries)
+      : parseApmRegistryEntry(entry, depType, registries),
   );
 }
 
@@ -279,9 +366,20 @@ export function extractPackageFile(
   }
 
   const findPinnedTail = createPinnedTailFinder(content);
+  const registries: ApmRegistries = manifest.registries ?? { urls: new Map() };
   const deps = [
-    ...extractSection(manifest.dependencies?.apm, 'apm', findPinnedTail),
-    ...extractSection(manifest.devDependencies?.apm, 'apm-dev', findPinnedTail),
+    ...extractSection(
+      manifest.dependencies?.apm,
+      'apm',
+      findPinnedTail,
+      registries,
+    ),
+    ...extractSection(
+      manifest.devDependencies?.apm,
+      'apm-dev',
+      findPinnedTail,
+      registries,
+    ),
   ];
 
   if (!deps.length) {
