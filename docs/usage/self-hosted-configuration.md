@@ -999,15 +999,6 @@ The first rule permits HTTP presets from that server, the second `npm:` presets 
 
 Cloud instance-metadata endpoints are always blocked, and cannot be permitted with this field.
 
-## `httpCacheTtlDays`
-
-This option sets the number of days that Renovate will cache HTTP responses.
-The default value is 90 days.
-Value of `0` means no caching.
-
-!!! warning
-  When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
-
 ## `ignorePrAuthor`
 
 This is usually needed if someone needs to migrate the account Renovate runs as, including from the Mend Renovate App to self-hosted.
@@ -1553,6 +1544,18 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 If set to `true`, Renovate will persist repository cache locally after uploading to S3.
 
 This is useful if you want to keep a local copy of the cache for debugging purposes or for faster access to the cache.
+
+## `repositoryCacheMaximumHttpDays`
+
+This option sets the maximum number of days that Renovate will cache HTTP responses within the Repository Cache.
+
+This option sets the number of days that Renovate will cache HTTP responses.
+The default value is 90 days.
+Value of `0` means no caching.
+
+<!-- prettier-ignore -->
+!!! warning
+  When you set `repositoryCacheMaximumHttpDays` to `0`, Renovate will remove the cached HTTP data.
 
 ## `repositoryCacheType`
 
