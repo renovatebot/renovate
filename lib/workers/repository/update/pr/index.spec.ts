@@ -1177,6 +1177,138 @@ describe('workers/repository/update/pr/index', () => {
         ).toEqual(['bar notes', undefined, 'baz notes', undefined]);
       });
 
+      function embeddedUpgrade(
+        body: string,
+        upgrade: Partial<BranchUpgradeConfig>,
+      ): BranchUpgradeConfig {
+        return {
+          ...dummyUpgrade,
+          ...upgrade,
+          logJSON: {
+            ...dummyUpgrade.logJSON!,
+            perDependencyNotes: true,
+            versions: [
+              {
+                ...dummyRelease,
+                releaseNotes: {
+                  body,
+                  notesSourceUrl: 'https://github.com/some/repo',
+                  url: 'https://github.com/some/repo/releases',
+                },
+              },
+            ],
+          },
+        };
+      }
+
+      it('attaches dependency-specific notes once per dependency and new version', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade('bar 2.0.0 notes', { newVersion: '2.0.0' }),
+            embeddedUpgrade('bar 2.0.0 notes', {
+              newVersion: '2.0.0',
+              currentValue: '2.3.4',
+            }),
+            embeddedUpgrade('bar 5.0.0 notes', { newVersion: '5.0.0' }),
+            embeddedUpgrade('baz notes', {
+              depName: 'baz',
+              newVersion: '2.0.0',
+            }),
+            embeddedUpgrade('bar 6.0.0 notes', {
+              datasource: 'custom',
+              packageName: 'bar',
+              newVersion: undefined,
+              newValue: '6.0.0',
+            }),
+            embeddedUpgrade('bar 6.0.0 notes', {
+              datasource: 'custom',
+              packageName: 'bar',
+              newVersion: undefined,
+              newValue: '6.0.0',
+              currentValue: '2.3.4',
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(
+          bodyConfig.upgrades.map(
+            (upgrade) => upgrade.releases?.[0]?.releaseNotes?.body,
+          ),
+        ).toEqual([
+          'bar 2.0.0 notes',
+          undefined,
+          'bar 5.0.0 notes',
+          'baz notes',
+          'bar 6.0.0 notes',
+          undefined,
+        ]);
+      });
+
+      it('keeps dependency-specific notes when package and version contain the key separator', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade('foo-1.0.0 notes', {
+              datasource: 'unity3d-packages',
+              packageName: 'com.unity.foo-1.0.0',
+              newVersion: '2.0.0',
+            }),
+            embeddedUpgrade('foo notes', {
+              datasource: 'unity3d-packages',
+              packageName: 'com.unity.foo',
+              newVersion: '1.0.0-2.0.0',
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(
+          bodyConfig.upgrades.map(
+            (upgrade) => upgrade.releases?.[0]?.releaseNotes?.body,
+          ),
+        ).toEqual(['foo-1.0.0 notes', 'foo notes']);
+      });
+
+      it('keeps dependency-specific notes from different registries', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            embeddedUpgrade('registry a notes', {
+              registryUrl: 'https://a.example.com',
+              newVersion: '2.0.0',
+            }),
+            embeddedUpgrade('registry b notes', {
+              registryUrl: 'https://b.example.com',
+              newVersion: '2.0.0',
+              currentValue: '2.3.4',
+            }),
+            embeddedUpgrade('registry a notes', {
+              registryUrl: 'https://a.example.com',
+              newVersion: '2.0.0',
+              currentValue: '3.4.5',
+            }),
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(
+          bodyConfig.upgrades.map(
+            (upgrade) => upgrade.releases?.[0]?.releaseNotes?.body,
+          ),
+        ).toEqual(['registry a notes', 'registry b notes', undefined]);
+      });
+
       it('handles missing GitHub token', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
