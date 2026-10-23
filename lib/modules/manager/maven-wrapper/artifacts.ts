@@ -307,7 +307,13 @@ export async function updateArtifacts({
     // Run wrapper:wrapper if the wrapper itself is being updated
     if (hasWrapperUpdate && cmd) {
       const extraEnv = getExtraEnvOptions(updatedDeps);
-      await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
+      await executeWrapperCommand(
+        cmd,
+        config,
+        packageFileName,
+        extraEnv,
+        updatedDeps,
+      );
     }
 
     // Now update checksums AFTER wrapper:wrapper has run (if it ran)
@@ -399,6 +405,7 @@ async function executeWrapperCommand(
   config: UpdateArtifactsConfig,
   packageFileName: string,
   extraEnv: ExtraEnv,
+  updatedDeps: PackageDependency[],
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
@@ -411,7 +418,9 @@ async function executeWrapperCommand(
       {
         toolName: 'java',
         constraint: await resolveToolConstraint(config, 'java', () =>
-          getJavaConstraint(config.currentValue),
+          getJavaConstraint(
+            updatedDeps.find((dep) => dep.depName === 'maven')?.currentValue,
+          ),
         ),
       },
     ],
