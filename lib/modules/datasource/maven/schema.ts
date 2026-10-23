@@ -146,11 +146,17 @@ function trimPomXml(project: XmlDocument, input: string): string {
     'distributionManagement.relocation',
   );
   const parent = project.childNamed('parent');
+  const javaVersion = project
+    .childNamed('properties')
+    ?.childNamed('java.version')?.val;
 
   const xml = new XmlWriter();
   xml.node('project', () => {
     xml.value('groupId', groupId);
     xml.value('url', homepage);
+    xml.node('properties', () => {
+      xml.value('java.version', javaVersion);
+    });
     xml.node('scm', () => {
       xml.value('url', sourceUrl);
     });
