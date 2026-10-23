@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { fs, scm } from '~test/util.ts';
 import {
   getGoModulesInTidyOrder,
+  getGoModulesTidyPlan,
   parseLocalReplacePaths,
 } from './package-tree.ts';
 
@@ -76,6 +77,93 @@ describe('modules/manager/gomod/package-tree', () => {
         'api/go.mod',
         'cmd/go.mod',
       ]);
+    });
+
+    it('preserves the existing order for acyclic graphs', async () => {
+      const branchedMonorepo: Record<string, string> = {
+        'unrelated/go.mod': codeBlock`
+          module example.com/unrelated
+        `,
+        'dependent-a/go.mod': codeBlock`
+          module example.com/dependent-a
+
+          replace example.com/source => ../source
+        `,
+        'dependent-b/go.mod': codeBlock`
+          module example.com/dependent-b
+
+          replace example.com/source => ../source
+          replace example.com/unrelated => ../unrelated
+        `,
+        'source/go.mod': codeBlock`
+          module example.com/source
+        `,
+      };
+      scm.getFileList.mockResolvedValue(Object.keys(branchedMonorepo));
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(branchedMonorepo[f]),
+      );
+
+      await expect(getGoModulesTidyPlan('source/go.mod')).resolves.toEqual({
+        modules: ['dependent-a/go.mod', 'dependent-b/go.mod'],
+        containsCycle: false,
+      });
+    });
+
+    it('returns dependents when local replacements contain a cycle', async () => {
+      const cyclicMonorepo: Record<string, string> = {
+        'tooling/go.mod': codeBlock`
+          module example.com/tooling
+
+          replace example.com/service => ../service
+        `,
+        'service/go.mod': codeBlock`
+          module example.com/service
+
+          replace example.com/tooling => ../tooling
+        `,
+        'app/go.mod': codeBlock`
+          module example.com/app
+
+          replace example.com/service => ../service
+        `,
+      };
+      scm.getFileList.mockResolvedValue(Object.keys(cyclicMonorepo));
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(cyclicMonorepo[f]),
+      );
+
+      await expect(getGoModulesTidyPlan('tooling/go.mod')).resolves.toEqual({
+        modules: ['service/go.mod', 'app/go.mod'],
+        containsCycle: true,
+      });
+    });
+
+    it('ignores cycles which are unrelated to the given module', async () => {
+      const monorepoWithUnrelatedCycle: Record<string, string> = {
+        ...monorepo,
+        'cycle-a/go.mod': codeBlock`
+          module example.com/cycle-a
+
+          replace example.com/cycle-b => ../cycle-b
+        `,
+        'cycle-b/go.mod': codeBlock`
+          module example.com/cycle-b
+
+          replace example.com/cycle-a => ../cycle-a
+        `,
+      };
+      scm.getFileList.mockResolvedValue(
+        Object.keys(monorepoWithUnrelatedCycle),
+      );
+      fs.readLocalFile.mockImplementation((f: string) =>
+        Promise.resolve(monorepoWithUnrelatedCycle[f]),
+      );
+
+      await expect(getGoModulesTidyPlan('shared/go.mod')).resolves.toEqual({
+        modules: ['api/go.mod', 'cmd/go.mod'],
+        containsCycle: false,
+      });
     });
 
     it('returns empty array when the module has no dependents or is unknown', async () => {
