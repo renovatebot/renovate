@@ -24,6 +24,7 @@ export function extractRubyVersion(txt: string): string | null {
 async function getRubyConstraintFromFiles(
   packageFileName: string,
   newPackageFileContent: string,
+  lockFileName: string,
 ): Promise<string | null> {
   const rubyMatch = extractRubyVersion(newPackageFileContent);
   if (rubyMatch) {
@@ -40,16 +41,12 @@ async function getRubyConstraintFromFiles(
       return rubyVersion;
     }
   }
-  const lockFile = await getLockFilePath(packageFileName);
-  // v8 ignore else -- `getLockFilePath()` always returns a path
-  if (lockFile) {
-    const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
-      regEx(/^ {3}ruby (?<version>\d[\d.]*)(?:[a-z]|\s|$)/m),
-    )?.groups?.version;
-    if (rubyVersion) {
-      logger.debug(`Using ruby version specified in lock file`);
-      return rubyVersion;
-    }
+  const rubyVersion = (await readLocalFile(lockFileName, 'utf8'))?.match(
+    regEx(/^ {3}ruby (?<version>\d[\d.]*)(?:[a-z]|\s|$)/m),
+  )?.groups?.version;
+  if (rubyVersion) {
+    logger.debug(`Using ruby version specified in lock file`);
+    return rubyVersion;
   }
 
   return null;
@@ -57,10 +54,15 @@ async function getRubyConstraintFromFiles(
 
 export async function getRubyConstraint(
   updateArtifact: UpdateArtifact,
+  lockFileName: string,
 ): Promise<string | undefined> {
   const { packageFileName, config, newPackageFileContent } = updateArtifact;
   return await resolveToolConstraint(config, 'ruby', () =>
-    getRubyConstraintFromFiles(packageFileName, newPackageFileContent),
+    getRubyConstraintFromFiles(
+      packageFileName,
+      newPackageFileContent,
+      lockFileName,
+    ),
   );
 }
 
