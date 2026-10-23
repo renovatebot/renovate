@@ -3,8 +3,6 @@ import type {
   PackageRuleInputConfig,
 } from '../../config/types.ts';
 
-export type MatchType = 'matches' | 'excludes';
-
 export interface MatcherApi {
   matches(
     inputConfig: PackageRuleInputConfig,

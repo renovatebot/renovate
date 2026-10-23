@@ -39,21 +39,17 @@ export class NodeVersionDatasource extends Datasource {
       registryUrl,
       releases: [],
     };
-    try {
-      const resp = await this.http.getJson(
-        joinUrlParts(registryUrl, 'index.json'),
-        NodeReleases,
-      );
-      result.releases.push(
-        ...resp.body.map(({ version, date, lts }) => ({
-          version,
-          releaseTimestamp: asTimestamp(date),
-          isStable: lts !== false,
-        })),
-      );
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(
+      joinUrlParts(registryUrl, 'index.json'),
+      NodeReleases,
+    );
+    result.releases.push(
+      ...body.map(({ version, date, lts }) => ({
+        version,
+        releaseTimestamp: asTimestamp(date),
+        isStable: lts !== false,
+      })),
+    );
 
     return result.releases.length ? result : null;
   }
@@ -61,8 +57,7 @@ export class NodeVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `${config.registryUrl}`,
+        key: config.registryUrl!,
         fallback: true,
       },
       () => this.fetchReleases(config),

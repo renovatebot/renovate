@@ -89,8 +89,11 @@ const bitbucketUrlRegex = regEx(
   /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 
+const helmChartLayerMediaType =
+  'application/vnd.cncf.helm.chart.content.v1.tar+gzip';
+
 function resolveGitRepositoryPerSourceTag(
-  dep: PackageDependency,
+  dep: PackageDependency<FluxManagerData>,
   gitUrl: string,
 ): void {
   const githubMatchGroups = githubUrlRegex.exec(gitUrl)?.groups;
@@ -125,7 +128,7 @@ function resolveGitRepositoryPerSourceTag(
 }
 
 function resolveHelmRepository(
-  dep: PackageDependency,
+  dep: PackageDependency<FluxManagerData>,
   matchingRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
   sourceRefName?: string,
@@ -299,9 +302,9 @@ function resolveResourceManifest(
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
   content: string,
-): PackageDependency[] {
+): PackageDependency<FluxManagerData>[] {
   let docs: Document.Parsed[] | undefined;
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<FluxManagerData>[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
@@ -312,10 +315,11 @@ function resolveResourceManifest(
         } else if (resource.spec.chart) {
           const chartSpec = resource.spec.chart.spec;
           const depName = chartSpec.chart;
-          const dep: PackageDependency = {
+          const dep: PackageDependency<FluxManagerData> = {
             depName,
             currentValue: resource.spec.chart.spec.version,
             datasource: HelmDatasource.id,
+            depType: 'HelmChart',
           };
 
           if (isLocalChartPath(depName)) {
@@ -359,8 +363,9 @@ function resolveResourceManifest(
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<FluxManagerData> = {
           depName: resource.spec.chart,
+          depType: 'HelmChart',
         };
 
         if (resource.spec.sourceRef.kind === 'HelmRepository') {
@@ -388,7 +393,7 @@ function resolveResourceManifest(
       }
 
       case 'GitRepository': {
-        const dep: PackageDependency = {
+        const dep: PackageDependency<FluxManagerData> = {
           depName: resource.metadata.name,
         };
 
@@ -415,10 +420,14 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
+        const depType =
+          resource.spec.layerSelector?.mediaType === helmChartLayerMediaType
+            ? 'HelmChart'
+            : undefined;
         if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
           const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
-            { specifyReplaceString: false, registryAliases },
+            { specifyReplaceString: false, registryAliases, depType },
           );
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
@@ -452,12 +461,14 @@ function resolveResourceManifest(
           const dep = getDep(`${container}@${resource.spec.ref.digest}`, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           deps.push(dep);
         } else if (resource.spec.ref?.tag) {
           const dep = getDep(`${container}:${resource.spec.ref.tag}`, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           const refTagRange = extractOCIRefTagRange(
             (docs ??= parseAllDocuments(content, { strict: false })),
@@ -484,6 +495,7 @@ function resolveResourceManifest(
           const dep = getDep(container, {
             specifyReplaceString: false,
             registryAliases,
+            depType,
           });
           dep.skipReason = 'unversioned-reference';
           deps.push(dep);
@@ -515,7 +527,7 @@ export function extractPackageFile(
     return null;
   }
   const helmRepositories = collectHelmRepos([manifest]);
-  let deps: PackageDependency[] | null = null;
+  let deps: PackageDependency<FluxManagerData>[] | null = null;
   switch (manifest.kind) {
     case 'system':
       deps = resolveSystemManifest(manifest);
@@ -553,7 +565,7 @@ export async function extractAllPackageFiles(
   const helmRepositories = collectHelmRepos(manifests);
 
   for (const manifest of manifests) {
-    let deps: PackageDependency[] | null = null;
+    let deps: PackageDependency<FluxManagerData>[] | null = null;
     switch (manifest.kind) {
       case 'system':
         deps = resolveSystemManifest(manifest);

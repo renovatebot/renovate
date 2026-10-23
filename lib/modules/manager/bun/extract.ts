@@ -22,7 +22,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 export async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
-): Promise<NpmrcPackageFile | null> {
+): Promise<NpmrcPackageFile<NpmManagerData> | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
     logger.warn({ fileName: packageFile }, 'Could not read file content');
@@ -41,18 +41,28 @@ export async function processPackageFile(
     return null;
   }
 
-  const { npmrc } = await resolveNpmrc(packageFile, config);
+  const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+    packageFile,
+    config,
+  );
 
   return {
     ...result,
     packageFile,
-    npmrc,
+    ...(isString(npmrc) && { npmrc }),
+    managerData: {
+      ...result.managerData,
+      // store npmrc file name so that a repository `.npmrc` which is not cached is read from disk again
+      npmrcFileName,
+      // stored instead of `npmrc` in the repository cache, from which `npmrc` is rebuilt
+      ...(repoNpmrc && { repoNpmrc }),
+    },
   };
 }
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
-): Promise<NpmrcPackageFile[]> {
+): Promise<NpmrcPackageFile<NpmManagerData>[]> {
   const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   const allLockFiles = matchedFiles.filter(
     (file) =>
