@@ -87,6 +87,10 @@ describe('workers/repository/update/pr/automerge', () => {
       platform.mergePr.mockResolvedValueOnce(true);
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
       platform.isPrInMergeQueue.mockResolvedValueOnce(false);
+      pr = partial<Pr>({ number: 123 });
+      platform.getPr.mockResolvedValueOnce(
+        partial<Pr>({ number: 123, state: 'open' }),
+      );
 
       const res = await prAutomerge.checkAutoMerge(pr, config);
 
@@ -95,7 +99,44 @@ describe('workers/repository/update/pr/automerge', () => {
         prAutomergeBlockReason: 'InMergeQueue',
       });
       expect(platform.mergePr).toHaveBeenCalledOnce();
+      expect(platform.getPr).toHaveBeenCalledWith(123);
       expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
+    it('should not report automerged if the PR cannot be read after adding it to a merge queue', async () => {
+      config.automerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      platform.isPrInMergeQueue.mockResolvedValueOnce(false);
+      platform.getPr.mockResolvedValueOnce(null);
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({
+        automerged: false,
+        prAutomergeBlockReason: 'InMergeQueue',
+      });
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
+    it('should report automerged if the PR was merged directly on a merge queue branch', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      platform.isPrInMergeQueue.mockResolvedValueOnce(false);
+      pr = partial<Pr>({ number: 123 });
+      platform.getPr.mockResolvedValueOnce(
+        partial<Pr>({ number: 123, state: 'merged' }),
+      );
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({ automerged: true, branchRemoved: true });
+      expect(platform.getPr).toHaveBeenCalledWith(123);
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith('renovate/pin');
     });
 
     it('should skip a PR which is already in the merge queue', async () => {
