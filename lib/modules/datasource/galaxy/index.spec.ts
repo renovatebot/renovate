@@ -5,6 +5,7 @@ import { getPkgReleases } from '../index.ts';
 import { GalaxyDatasource } from './index.ts';
 
 const baseUrl = 'https://galaxy.ansible.com/';
+const customBaseUrl = 'https://artifactory.example.com';
 
 describe('modules/datasource/galaxy/index', () => {
   describe('getReleases', () => {
@@ -84,7 +85,7 @@ describe('modules/datasource/galaxy/index', () => {
       });
       expect(res).toEqual({
         dependencyUrl: 'https://galaxy.ansible.com/yatesr/timezone',
-        registryUrl: 'https://galaxy.ansible.com/',
+        registryUrl: 'https://galaxy.ansible.com',
         releases: [
           {
             releaseTimestamp: '2015-11-17T00:47:51.891Z',
@@ -125,7 +126,7 @@ describe('modules/datasource/galaxy/index', () => {
       });
       expect(res).toEqual({
         dependencyUrl: 'https://galaxy.ansible.com/yatesr/timezone',
-        registryUrl: 'https://galaxy.ansible.com/',
+        registryUrl: 'https://galaxy.ansible.com',
         releases: [{ version: '1.0.0' }],
       });
     });
@@ -190,6 +191,44 @@ describe('modules/datasource/galaxy/index', () => {
         packageName: 'foo.bar',
       });
       expect(res).toBeNull();
+    });
+
+    it('supports a custom registry with a path prefix', async () => {
+      httpMock
+        .scope(customBaseUrl)
+        .get(
+          '/artifactory/api/ansible/ansible-remote/api/v1/roles/?owner__username=yatesr&name=timezone',
+        )
+        .reply(200, Fixtures.get('timezone.json'));
+      const res = await getPkgReleases({
+        datasource: GalaxyDatasource.id,
+        packageName: 'yatesr.timezone',
+        registryUrls: [
+          `${customBaseUrl}/artifactory/api/ansible/ansible-remote/`,
+        ],
+      });
+      expect(res?.releases).not.toBeEmpty();
+      expect(res?.dependencyUrl).toBeUndefined();
+    });
+
+    it('hunts through registries until a role is found', async () => {
+      httpMock
+        .scope(customBaseUrl)
+        .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
+        .reply(200, Fixtures.get('empty'));
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
+        .reply(200, Fixtures.get('timezone.json'));
+      const res = await getPkgReleases({
+        datasource: GalaxyDatasource.id,
+        packageName: 'yatesr.timezone',
+        registryUrls: [customBaseUrl, baseUrl],
+      });
+      expect(res?.releases).not.toBeEmpty();
+      expect(res?.dependencyUrl).toBe(
+        'https://galaxy.ansible.com/yatesr/timezone',
+      );
     });
   });
 });
