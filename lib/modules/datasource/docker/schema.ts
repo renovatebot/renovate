@@ -221,14 +221,22 @@ export const RegistryTagsList = z.object({
 export type RegistryTagsList = z.infer<typeof RegistryTagsList>;
 
 /**
+ * Quay registry tag entry (Quay v1 API).
+ * `start_ts` is the primary timestamp source (unix seconds, TZ-independent).
+ * `last_modified` is a fallback (HTTP date with `-0000` offset, e.g. `Tue, 13 Oct 2026 14:08:18 -0000`).
+ */
+export const QuayTag = z.object({
+  name: z.string(),
+  last_modified: z.string().nullable().catch(null),
+  start_ts: z.number().nullable().catch(null),
+});
+export type QuayTag = z.infer<typeof QuayTag>;
+
+/**
  * Quay registry tags list response (Quay v1 API).
  */
 export const QuayTagsResponse = z.object({
-  tags: LooseArray(
-    z.object({
-      name: z.string(),
-    }),
-  ),
+  tags: LooseArray(QuayTag),
   has_additional: z.boolean().default(false),
 });
 export type QuayTagsResponse = z.infer<typeof QuayTagsResponse>;

@@ -339,7 +339,7 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |
 | `docker`             | (not Docker Hub)                                   | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38656)    |
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
-| `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
+| `docker`             | `https://quay.io`                                  | ✅        | From `start_ts` field, `last_modified` fallback                  |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
 | `terraform-module`   | `https://registry.terraform.io`                    | ✅        |                                                                  |
 | `terraform-module`   | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
