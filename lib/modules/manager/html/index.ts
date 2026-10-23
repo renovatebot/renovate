@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { CdnjsDatasource } from '../../datasource/cdnjs/index.ts';
+import { UnpkgDatasource } from '../../datasource/unpkg/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -17,4 +18,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const supportedDatasources = [CdnjsDatasource.id];
+export const supportedDatasources = [CdnjsDatasource.id, UnpkgDatasource.id];
