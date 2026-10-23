@@ -56,7 +56,7 @@ describe('modules/manager/deno/compat', () => {
   });
 
   describe('collectPackageJson()', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       GlobalConfig.set({ localDir: '' });
     });
 
