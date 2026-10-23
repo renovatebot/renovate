@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { LooseArray, Yaml } from '../../../util/schema-utils/index.ts';
 
 /**
  * APM dependencies are declared under `dependencies.apm` / `devDependencies.apm`
@@ -15,3 +15,17 @@ export const ApmManifest = z.object({
 });
 
 export type ApmManifest = z.infer<typeof ApmManifest>;
+
+/**
+ * The files `apm install` deployed for each dependency, as `apm.lock.yaml`
+ * lists them, relative to the lockfile's directory.
+ */
+export const ApmLockFile = Yaml.pipe(
+  z.object({
+    dependencies: LooseArray(
+      z.object({
+        deployed_files: LooseArray(z.string()).catch([]),
+      }),
+    ).catch([]),
+  }),
+);
