@@ -25,4 +25,7 @@ cli:
   version: v1.0.0
 ```
 
+Renovate skips an image whose `tag` or `version` is empty (`""` or `null`).
+Charts often leave the tag empty so that it defaults to the chart's `appVersion`, so Renovate has no version to update or pin.
+
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
