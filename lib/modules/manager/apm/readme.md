@@ -24,3 +24,6 @@ A SHA pin without a tag comment is skipped, as there is no version to track.
 
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
+
+For private dependencies on github.com, Renovate passes `apm install` the token its `github-tags` lookups use, as `GITHUB_APM_PAT`: that of a `github-tags` host rule for `https://api.github.com/`, or else of the `github` one.
+Dependencies on other hosts get no credentials from Renovate.
