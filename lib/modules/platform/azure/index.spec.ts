@@ -269,7 +269,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('initRepo URL encoding', () => {
-    it('doesn not manually encode whitespace in org/collection when falling back to manualUrl', async () => {
+    it('does not manually encode whitespace in org/collection when falling back to manualUrl', async () => {
       await azure.initPlatform({
         endpoint: 'https://dev.azure.com/my org/',
         token: 'token',
