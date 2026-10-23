@@ -143,9 +143,11 @@ export function extractPackageFile(
   return { deps };
 }
 
-export function getDep(currentFrom: string): PackageDependency | null {
+export function getDep<T = never>(
+  currentFrom: string,
+): PackageDependency<T> | null {
   if (currentFrom.includes('@')) {
-    const dep: PackageDependency = {
+    const dep: PackageDependency<T> = {
       datasource: BuildpacksRegistryDatasource.id,
       packageName: currentFrom.split('@')[0],
       autoReplaceStringTemplate:
