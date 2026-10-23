@@ -38,7 +38,7 @@ describe('config/options/index', () => {
 
   it('supportedManagers should have valid names', () => {
     const opts = getOptions();
-    const managerList = Array.from(manager.getManagers().keys());
+    const managerList = manager.allManagersList;
 
     opts
       .filter((option) => option.supportedManagers)
