@@ -1284,7 +1284,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         };
         expect(extracted.deps).toHaveLength(3);
         config.upgrades = extracted.deps.map((dep) => ({
-          ...dep,
+          depName: dep.depName,
+          datasource: dep.datasource,
+          fileReplacePosition: dep.fileReplacePosition,
+          sharedVariableName: dep.sharedVariableName,
+          currentValue: dep.currentValue ?? undefined,
           manager: 'maven',
           branchName: '',
           packageFile: 'pom.xml',
