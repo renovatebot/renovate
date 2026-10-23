@@ -161,7 +161,7 @@ export function parseUrl(url: URL | string | undefined | null): URL | null {
 // Matches either a valid percent-encoded triplet (%XX) or a single stray '%'.
 // Used to escape stray '%' characters so decodeURIComponent cannot throw,
 // e.g. the literal '%' in "50% off" becomes '%25'.
-const invalidPercentEncoding = regEx(/%[0-9a-fA-F]{2}|%/g);
+const percentSequence = regEx(/%[0-9a-fA-F]{2}|%/g);
 
 export function encodeUrlPathSegments(inputUrl: string): string {
   // Parsing the URL is not enough. URL doesn't encode
@@ -175,9 +175,8 @@ export function encodeUrlPathSegments(inputUrl: string): string {
     .split('/')
     .map((segment) =>
       encodeURIComponent(
-        // Escape stray % so decodeURIComponent cannot throw.
         decodeURIComponent(
-          segment.replace(invalidPercentEncoding, (match) =>
+          segment.replace(percentSequence, (match) =>
             match.length === 3 ? match : '%25',
           ),
         ),
