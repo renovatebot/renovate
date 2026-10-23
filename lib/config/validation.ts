@@ -21,7 +21,11 @@ import { coerceArray } from '../util/array.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
-import { isConstraintName, isToolName } from '../util/exec/types.ts';
+import {
+  isConstraintName,
+  isSupportedToolName,
+  isToolName,
+} from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
@@ -936,7 +940,7 @@ export async function validateConfig(
                         topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a supported constraint name`,
                       });
-                    } else if (isToolName(k)) {
+                    } else if (isSupportedToolName(k)) {
                       // TODO: #31831
                       const versioningId = getToolConfig(k)?.versioning;
                       const versioning = getVersioning(versioningId);

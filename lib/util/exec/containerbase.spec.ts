@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
@@ -5,7 +6,9 @@ import * as memCache from '../cache/memory/index.ts';
 import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
+  getSupportedToolNames,
   getToolConfig,
+  getToolVersioning,
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
@@ -23,6 +26,7 @@ describe('util/exec/containerbase', () => {
     });
 
     it('returns false if binarySource is not install', () => {
+      GlobalConfig.set({ binarySource: 'global' });
       expect(isDynamicInstall()).toBeFalse();
     });
 
@@ -59,12 +63,54 @@ describe('util/exec/containerbase', () => {
 
   describe('getToolConfig()', () => {
     it('returns config for a known tool', () => {
-      const config = getToolConfig('npm');
-      expect(config).toBeDefined();
-      expect(config).toMatchObject({
-        datasource: expect.toBeString(),
-        versioning: expect.toBeString(),
+      expect(getToolConfig('npm')).toEqual({
+        datasource: 'containerbase',
+        packageName: 'npm',
+        versioning: 'npm',
       });
+    });
+
+    it.each`
+      toolName     | versioning
+      ${'helm'}    | ${'npm'}
+      ${'dotnet'}  | ${'npm'}
+      ${'java'}    | ${'npm'}
+      ${'pnpm'}    | ${'npm'}
+      ${'erlang'}  | ${'semver-coerced'}
+      ${'bundler'} | ${'ruby'}
+      ${'pdm'}     | ${'pep440'}
+      ${'node'}    | ${'node'}
+      ${'php'}     | ${'composer'}
+      ${'rust'}    | ${'rust-release-channel'}
+    `(
+      'uses the $versioning versioning for $toolName',
+      ({ toolName, versioning }) => {
+        expect(getToolConfig(toolName)).toEqual({
+          datasource: 'containerbase',
+          packageName: toolName,
+          versioning,
+        });
+      },
+    );
+
+    it.each`
+      toolName    | versioning
+      ${'paket'}  | ${'nuget'}
+      ${'kas'}    | ${'pep440'}
+      ${'docker'} | ${'npm'}
+    `(
+      'derives the $versioning versioning for $toolName',
+      ({ toolName, versioning }) => {
+        expect(getToolVersioning(toolName)).toBe(versioning);
+      },
+    );
+
+    it('lists the supported tools', () => {
+      expect(getSupportedToolNames()).toIncludeAllMembers(['node', 'rust']);
+    });
+
+    it('returns undefined for a Containerbase tool which Renovate does not support', () => {
+      expect(getToolConfig('kubectl')).toBeUndefined();
     });
 
     it('returns undefined for an unknown tool', () => {
@@ -313,10 +359,69 @@ describe('util/exec/containerbase', () => {
         resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
       ).resolves.toBe('12.0.0');
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
-        datasource: 'npm',
+        datasource: 'containerbase',
         packageName: 'npm',
         versioning: 'npm',
       });
+    });
+
+    it('filters the releases of the containerbase datasource', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/npm.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'npm',
+          updatedAt: '2026-10-09T03:00:00.000Z',
+          versions: [
+            {
+              version: '12.0.0',
+              constraints: { node: '^22.22.2 || >=24.15.0' },
+            },
+            {
+              version: '11.0.0',
+              constraints: { node: '^20.17.0 || >=22.9.0' },
+            },
+          ],
+        });
+
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('11.0.0');
+    });
+
+    it('resolves rust nightlies with the containerbase datasource', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/rust.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'rust',
+          updatedAt: '2026-10-20T03:00:00.000Z',
+          versions: [
+            { version: 'nightly-2026-10-20', prerelease: true },
+            { version: 'nightly-2026-10-19', prerelease: true },
+            { version: '1.91.0' },
+          ],
+        });
+
+      await expect(
+        resolveConstraint({ toolName: 'rust', constraint: 'nightly' }),
+      ).resolves.toBe('nightly-2026-10-20');
     });
   });
 
@@ -354,8 +459,8 @@ describe('util/exec/containerbase', () => {
         'install-tool composer 2.1.0',
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
-        datasource: 'github-releases',
-        packageName: 'containerbase/composer-prebuild',
+        datasource: 'containerbase',
+        packageName: 'composer',
         versioning: 'composer',
       });
     });
@@ -370,7 +475,7 @@ describe('util/exec/containerbase', () => {
         'install-tool npm 2.1.0',
       ]);
       expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
-        datasource: 'npm',
+        datasource: 'containerbase',
         packageName: 'npm',
         versioning: 'npm',
         constraintsFiltering: 'strict',

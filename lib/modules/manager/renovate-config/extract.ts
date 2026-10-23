@@ -4,7 +4,7 @@ import type { ParsedPreset } from '../../../config/presets/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getToolConfig } from '../../../util/exec/containerbase.ts';
-import { isToolName } from '../../../util/exec/types.ts';
+import { isSupportedToolName } from '../../../util/exec/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
@@ -84,7 +84,7 @@ export function extractPackageFile(
   for (const [constraint, value] of Object.entries(
     coerceObject(config.data.constraints),
   )) {
-    if (isToolName(constraint)) {
+    if (isSupportedToolName(constraint)) {
       const toolConfig = getToolConfig(constraint);
       deps.push({
         ...toolConfig,
@@ -108,7 +108,7 @@ export function extractPackageFile(
     for (const [constraint, value] of Object.entries(
       coerceObject(packageRule.constraints),
     )) {
-      if (isToolName(constraint)) {
+      if (isSupportedToolName(constraint)) {
         const toolConfig = getToolConfig(constraint);
         deps.push({
           ...toolConfig,
