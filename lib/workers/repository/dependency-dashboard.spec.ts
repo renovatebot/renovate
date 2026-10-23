@@ -2331,6 +2331,45 @@ None detected
       expect(result).not.toContain('GHSA-29mw-wpgm-hmr9');
     });
 
+    it('counts a vulnerability with only a last_affected version as unresolved', async () => {
+      const fetchVulnerabilitiesMock = vi.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'lodash.pick',
+          depVersion: '4.4.0',
+          fixedVersion: '> 4.4.0',
+          lastAffectedVersion: '4.4.0',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-p6mc-m468-83gw',
+          },
+        },
+      ]);
+
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles,
+      );
+
+      expect(result).toStartWith(
+        '## Vulnerabilities\n\n> ❗ **Important**\n> \n' +
+          '> `0`/`1` CVEs have Renovate fixes.\n\n',
+      );
+      expect(result).toContain(
+        '- [GHSA-p6mc-m468-83gw](https://osv.dev/vulnerability/GHSA-p6mc-m468-83gw) (no fixed version known, last affected 4.4.0)',
+      );
+    });
+
     it('returns a fallback message instead of throwing when the OSV database is unavailable', async () => {
       createVulnerabilitiesMock.mockRejectedValueOnce(
         new Error('Request failed with status code 404 (Not Found)'),

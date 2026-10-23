@@ -1608,7 +1608,7 @@ Use this option to control if the Dependency Dashboard lists the OSV-sourced CVE
 You can choose from:
 
 - `none` (default) do not list any CVEs
-- `unresolved` list CVEs that have no fixes
+- `unresolved` list CVEs for which no fixed version is known
 - `all` list all CVEs
 
 You will only get OSV-based vulnerability alerts for direct dependencies.

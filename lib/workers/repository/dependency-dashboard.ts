@@ -802,8 +802,10 @@ export async function getDashboardMarkdownVulnerabilities(
     return result;
   }
 
-  const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
-    isNullOrUndefined(value.fixedVersion),
+  const unresolvedVulnerabilities = vulnerabilities.filter(
+    (value) =>
+      isNullOrUndefined(value.fixedVersion) ||
+      isNonEmptyString(value.lastAffectedVersion),
   );
   const resolvedVulnerabilitiesLength =
     vulnerabilities.length - unresolvedVulnerabilities.length;
@@ -860,9 +862,12 @@ export async function getDashboardMarkdownVulnerabilities(
         result += `<details><summary>${packageName}</summary>\n<blockquote>\n\n`;
         for (const vul of cves) {
           const id = vul.vulnerability.id;
-          const suffix = isNonEmptyString(vul.fixedVersion)
-            ? ` (fixed in ${vul.fixedVersion})`
-            : '';
+          let suffix = '';
+          if (isNonEmptyString(vul.lastAffectedVersion)) {
+            suffix = ` (no fixed version known, last affected ${vul.lastAffectedVersion})`;
+          } else if (isNonEmptyString(vul.fixedVersion)) {
+            suffix = ` (fixed in ${vul.fixedVersion})`;
+          }
           result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;
         }
         result += `</blockquote>\n</details>\n\n`;
