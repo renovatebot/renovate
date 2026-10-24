@@ -400,6 +400,16 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
+      // Nix digests may live only in flake.lock. Digest lookup does not set
+      // isLockfileUpdate, so explicitly regenerate artifacts for these updates.
+      if (
+        newContent === packageFileContent &&
+        upgrade.manager === 'nix' &&
+        upgrade.updateType === 'digest' &&
+        !updatedFileContents[packageFile]
+      ) {
+        nonUpdatedFileContents[packageFile] = newContent;
+      }
     }
   }
   const updatedPackageFiles: FileAddition[] = Object.keys(

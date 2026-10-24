@@ -1,4 +1,5 @@
 import { isArray } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
@@ -9,6 +10,7 @@ import * as _gitSubmodules from '../../../../modules/manager/git-submodules/inde
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
 import * as _mise from '../../../../modules/manager/mise/index.ts';
+import * as nix from '../../../../modules/manager/nix/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
@@ -99,6 +101,153 @@ describe('workers/repository/update/branch/get-updated', () => {
           { type: 'addition', path: 'index.html', contents: 'updated-file' },
         ],
       });
+    });
+
+    it.each`
+      reuseExistingBranch
+      ${false}
+      ${true}
+    `(
+      'regenerates flake.lock for a digest update with reuseExistingBranch=$reuseExistingBranch',
+      async ({ reuseExistingBranch }) => {
+        const fileContent = codeBlock`
+          {
+            inputs = {
+              nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-26.05";
+            };
+            outputs = _: { };
+          }
+        `;
+        git.getFile.mockReset().mockResolvedValue(fileContent);
+        const updateArtifacts = vi
+          .spyOn(nix, 'updateArtifacts')
+          .mockResolvedValueOnce([
+            {
+              file: {
+                type: 'addition',
+                path: 'flake.lock',
+                contents: 'updated lock',
+              },
+            },
+          ]);
+        config.reuseExistingBranch = reuseExistingBranch;
+        config.upgrades.push({
+          manager: 'nix',
+          packageFile: 'flake.nix',
+          depName: 'nixpkgs',
+          branchName: 'renovate/nixpkgs-digest',
+          updateType: 'digest',
+          currentValue: 'nixos-26.05',
+          newValue: 'nixos-26.05',
+          currentDigest: 'b3fe9581c9061c749abef42b6d4ee7b7c05c33fa',
+          newDigest: 'f3a73bcf5d1c5b75a66cf35a48957e30d41d647a',
+        });
+
+        const result = await getUpdatedPackageFiles(config);
+
+        expect(updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            packageFileName: 'flake.nix',
+            newPackageFileContent: fileContent,
+            updatedDeps: config.upgrades,
+          }),
+        );
+        expect(result.updatedArtifacts).toEqual([
+          { type: 'addition', path: 'flake.lock', contents: 'updated lock' },
+        ]);
+        expect(result.artifactErrors).toEqual([]);
+      },
+    );
+
+    it('does not regenerate artifacts for an unsupported Nix version declaration', async () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            otterwiki-source = {
+              flake = false;
+              url = "github:redimp/otterwiki?ref=v2.24.1";
+            };
+          };
+        }
+      `;
+      git.getFile.mockReset().mockResolvedValue(fileContent);
+      const updateArtifacts = vi.spyOn(nix, 'updateArtifacts');
+      config.upgrades.push({
+        manager: 'nix',
+        packageFile: 'flake.nix',
+        depName: 'otterwiki-source',
+        branchName: 'renovate/otterwiki-source-2.x',
+        updateType: 'minor',
+        currentValue: 'v2.24.1',
+        newValue: 'v2.26.0',
+      });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(updateArtifacts).not.toHaveBeenCalled();
+      expect(result.updatedPackageFiles).toEqual([]);
+      expect(result.updatedArtifacts).toEqual([]);
+    });
+
+    it('keeps an earlier Nix version update when a digest update follows it', async () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            otterwiki-source.url = "github:redimp/otterwiki?ref=v2.24.1";
+            nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-26.05";
+          };
+        }
+      `;
+      git.getFile.mockReset().mockResolvedValue(fileContent);
+      const updateArtifacts = vi
+        .spyOn(nix, 'updateArtifacts')
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'flake.lock',
+              contents: 'updated lock',
+            },
+          },
+        ]);
+      config.upgrades.push(
+        {
+          manager: 'nix',
+          packageFile: 'flake.nix',
+          depName: 'otterwiki-source',
+          branchName: 'renovate/nix',
+          updateType: 'minor',
+          currentValue: 'v2.24.1',
+          newValue: 'v2.26.0',
+        },
+        {
+          manager: 'nix',
+          packageFile: 'flake.nix',
+          depName: 'nixpkgs',
+          branchName: 'renovate/nix',
+          updateType: 'digest',
+          currentValue: 'nixos-26.05',
+          newValue: 'nixos-26.05',
+          currentDigest: 'b3fe9581c9061c749abef42b6d4ee7b7c05c33fa',
+          newDigest: 'f3a73bcf5d1c5b75a66cf35a48957e30d41d647a',
+        },
+      );
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(updateArtifacts).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          newPackageFileContent: fileContent.replace('v2.24.1', 'v2.26.0'),
+          updatedDeps: config.upgrades,
+        }),
+      );
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: 'flake.nix',
+          contents: fileContent.replace('v2.24.1', 'v2.26.0'),
+        },
+      ]);
     });
 
     it('handles autoreplace branch no update', async () => {
