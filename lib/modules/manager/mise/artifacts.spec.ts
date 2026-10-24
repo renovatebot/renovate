@@ -316,6 +316,193 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  describe('Python sidecar updates', () => {
+    const originalLock = '[[tools.ansible]]\nversion = "14.4.0"\n';
+    const updatedLock = '[[tools.ansible]]\nversion = "14.5.0"\n';
+    const packageFileContent =
+      '[tools]\nansible = { version = "latest", expose = ["ansible-core"] }\n';
+
+    it.each([true, false])(
+      'regenerates the selected version and returns sidecars (allowlisted: %s)',
+      async (allowlisted) => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowedUnsafeExecutions: allowlisted ? ['mise'] : [],
+        });
+        fs.readLocalFile
+          .mockResolvedValueOnce(originalLock)
+          .mockResolvedValueOnce(updatedLock)
+          .mockResolvedValueOnce('updated Python lock');
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['.mise/locks/ansible/14.4.0/uv.lock'],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+        const result = await updateArtifacts({
+          packageFileName: 'mise.toml',
+          updatedDeps: [
+            {
+              depName: 'ansible',
+              datasource: 'pypi',
+              newValue: 'latest',
+              newVersion: '14.5.0',
+            },
+          ],
+          newPackageFileContent: packageFileContent,
+          newLockFileContent: updatedLock,
+          config,
+        });
+
+        expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+          miseVersionCmd,
+          ...(allowlisted ? [trustCmd] : []),
+          'mise lock --bump ansible@14.5.0',
+          'mise lock ansible',
+        ]);
+        expect(result).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.lock',
+              contents: updatedLock,
+            },
+          },
+          {
+            file: {
+              type: 'addition',
+              path: '.mise/locks/ansible/14.4.0/uv.lock',
+              contents: 'updated Python lock',
+            },
+          },
+        ]);
+        expect(fs.writeLocalFile).toHaveBeenCalledWith(
+          'mise.toml',
+          packageFileContent,
+        );
+      },
+    );
+
+    it('bumps only Python tools in a mixed local-environment update', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.test.local.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+          {
+            depName: 'node',
+            datasource: 'node-version',
+            newVersion: '24.16.0',
+          },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustEnvLocalCmd,
+        'mise lock --local --bump ansible@14.5.0',
+        'mise lock --local ansible node',
+      ]);
+      expect(execSnapshots.at(-2)?.options?.env).toMatchObject({
+        MISE_ENV: 'test',
+      });
+    });
+
+    it.each(['2026.7.11 linux-x64', 'unparseable'])(
+      'keeps the existing command when mise cannot support --bump: %s',
+      async (stdout) => {
+        fs.readLocalFile.mockResolvedValue(originalLock);
+        const execSnapshots = mockExecAll({ stdout, stderr: '' });
+
+        await updateArtifacts({
+          packageFileName: 'mise.toml',
+          updatedDeps: [
+            { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+          ],
+          newPackageFileContent: packageFileContent,
+          config,
+        });
+
+        expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+          miseVersionCmd,
+          trustCmd,
+          'mise lock ansible',
+        ]);
+      },
+    );
+
+    it('does not bump a Python selector without a selected version', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newValue: 'latest' },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        trustCmd,
+        'mise lock ansible',
+      ]);
+    });
+
+    it('quotes the complete Python tool and version argument', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          {
+            depName: 'pypi:ansible',
+            datasource: 'pypi',
+            newVersion: '14.5.0; echo unwanted',
+          },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustCmd,
+        "mise lock --bump 'pypi:ansible@14.5.0; echo unwanted'",
+        'mise lock pypi:ansible',
+      ]);
+    });
+
+    it('does not add a targeted Python bump during maintenance', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+        ],
+        newPackageFileContent: packageFileContent,
+        config: lockMaintenanceConfig,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustCmd,
+        'mise lock --bump',
+      ]);
+    });
+  });
+
   it('returns restored sidecars when the lock file is unchanged', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')

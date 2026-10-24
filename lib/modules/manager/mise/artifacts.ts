@@ -17,6 +17,7 @@ import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
 import type {
   ToolConstraintsConfig,
@@ -168,14 +169,22 @@ export async function updateArtifacts({
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
 
+  const pythonTools = updatedDeps.flatMap(
+    ({ datasource, depName, newVersion }) =>
+      !config.isLockFileMaintenance &&
+      datasource === PypiDatasource.id &&
+      isNonEmptyStringAndNotWhitespace(depName) &&
+      isNonEmptyStringAndNotWhitespace(newVersion)
+        ? [quote(`${depName}@${newVersion}`)]
+        : [],
+  );
+
   // The mise version is needed to decide safe mode (untrusted path) and
-  // `mise lock --bump` (lock file maintenance). Detect it at runtime rather
-  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
-  // change the outcome: an allowlisted, non-maintenance run behaves the same
-  // regardless of version.
+  // `mise lock --bump` (maintenance and Python sidecar regeneration). Skip
+  // the probe for allowlisted updates that do not need either feature.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
   let miseSupportsSafeFeatures = false;
-  if (!miseAllowlisted || config.isLockFileMaintenance) {
+  if (!miseAllowlisted || config.isLockFileMaintenance || pythonTools.length) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
       toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
@@ -249,8 +258,14 @@ export async function updateArtifacts({
   // can neither execute code nor inject environment), so the trust step is
   // unnecessary and is skipped.
   const commands = safeMode
-    ? [lockCmd]
-    : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
+    ? []
+    : [`mise trust ${quote(upath.basename(packageFileName))}`];
+  if (miseSupportsSafeFeatures && pythonTools.length) {
+    // Rebuild Python sidecars at the selected versions before validating the
+    // updated lock. Bare tool names with --bump could advance fuzzy selectors.
+    commands.push(`mise lock${localFlag} --bump ${pythonTools.join(' ')}`);
+  }
+  commands.push(lockCmd);
 
   try {
     if (newLockFileContent) {
