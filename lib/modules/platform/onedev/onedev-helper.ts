@@ -1,6 +1,7 @@
 import type { ZodType } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { OnedevHttp } from '../../../util/http/onedev.ts';
+import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   type Build,
@@ -39,12 +40,19 @@ export function resetCredentials(): void {
   credentials = undefined;
 }
 
-function authOptions(): OneDevCredentials {
+function authOptions(): OneDevCredentials & Pick<HttpOptions, 'memCache'> {
   /* v8 ignore next -- credentials are always set by initPlatform first */
   if (!credentials) {
     throw new Error('OneDev helper called before credentials were set');
   }
-  return credentials;
+  return {
+    ...credentials,
+    // Renovate's HTTP layer memoizes every GET request unless this is
+    // disabled. The platform relies on re-fetching list endpoints (e.g. the
+    // pull request list right after creating one), so responses must never
+    // come from the memory cache.
+    memCache: false,
+  };
 }
 
 /**

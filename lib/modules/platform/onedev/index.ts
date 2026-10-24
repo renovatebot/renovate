@@ -911,15 +911,22 @@ export function massageMarkdown(prBody: string): string {
   return smartTruncate(prBody, maxBodyLength());
 }
 
-export function getRawFile(
-  _fileName: string,
-  _repoName?: string,
-  _branchOrTag?: string,
+export async function getRawFile(
+  fileName: string,
+  repoName?: string,
+  branchOrTag?: string,
 ): Promise<string | null> {
-  logger.debug(
-    'OneDev does not support fetching file contents over REST - skipping',
-  );
-  return Promise.resolve(null);
+  // OneDev has no file-contents REST resource; content is served from the
+  // git clone. That only works for the currently initialized repository -
+  // presets living in another project cannot be resolved over REST.
+  if (repoName && repoName !== config.repository) {
+    logger.debug(
+      { repoName },
+      'OneDev local presets are limited to the current repository - skipping',
+    );
+    return null;
+  }
+  return (await git.getFile(fileName, branchOrTag)) ?? null;
 }
 
 export async function getJsonFile(

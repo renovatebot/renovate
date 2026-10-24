@@ -29,17 +29,17 @@ REST suffix is added automatically if missing).
 Because OneDev has not enabled this integration officially, some features work
 differently or not at all:
 
-| Feature                | Status                                                                                          |
-| ---------------------- | ----------------------------------------------------------------------------------------------- |
-| Branch updating        | Fully supported                                                                                 |
-| PR creation            | Fully supported                                                                                 |
-| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                            |
-| Find/update PR         | Fully supported                                                                                 |
-| Comments               | Not implemented (OneDev's REST API does not expose PR comment creation)                         |
-| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)  |
-| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support) |
-| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                             |
-| File contents via REST | Not implemented; files are read from the git clone                                              |
+| Feature                | Status                                                                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Branch updating        | Fully supported                                                                                                                  |
+| PR creation            | Fully supported                                                                                                                  |
+| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                                                             |
+| Find/update PR         | Fully supported                                                                                                                  |
+| Comments               | Not implemented (OneDev's REST API does not expose PR comment creation)                                                          |
+| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)                                   |
+| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support)                                  |
+| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                                                              |
+| File contents via REST | Not implemented; files of the _current_ repository are read from the git clone (`getRawFile` supports only the initialized repo) |
 
 ## Known limitations
 

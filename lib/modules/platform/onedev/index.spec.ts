@@ -1104,14 +1104,26 @@ describe('modules/platform/onedev/index', () => {
   });
 
   describe('files', () => {
-    it('returns no files over REST', async () => {
+    it('serves the initialized repository from git and returns null for other repos', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
 
-      await expect(onedev.getRawFile('renovate.json')).resolves.toBeNull();
-      await expect(onedev.getJsonFile('renovate.json')).resolves.toBeNull();
+      git.getFile.mockResolvedValue('{"foo": "bar"}');
+      await expect(onedev.getRawFile('renovate.json')).resolves.toBe(
+        '{"foo": "bar"}',
+      );
+      await expect(onedev.getJsonFile('renovate.json')).resolves.toEqual({
+        foo: 'bar',
+      });
+
+      await expect(
+        onedev.getRawFile('renovate.json', 'other/repo'),
+      ).resolves.toBeNull();
+      await expect(
+        onedev.getJsonFile('renovate.json', 'other/repo'),
+      ).resolves.toBeNull();
     });
   });
 
