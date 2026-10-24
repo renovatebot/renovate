@@ -6,6 +6,7 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
@@ -501,6 +502,25 @@ export function generateBranchConfig(
       logger.warn(
         'Grouping lockfile maintenance with other update types is not supported',
       );
+    }
+  }
+
+  // a branch which updates a tool constraint should use its new value, i.e. when installing tools for `postUpgradeTasks` or artifact updates
+  const constraintUpdates = config.upgrades.flatMap(
+    ({ manager, depType, depName, currentValue, newValue }) =>
+      manager === 'renovate-config' &&
+      depType === 'tool-constraint' &&
+      isConstraintName(depName) &&
+      newValue
+        ? [{ depName, currentValue, newValue }]
+        : [],
+  );
+  for (const upgrade of config.upgrades) {
+    for (const { depName, currentValue, newValue } of constraintUpdates) {
+      // only replace the constraint being updated, not a different value which may have been configured i.e. via `packageRules`
+      if (upgrade.constraints?.[depName] === currentValue) {
+        upgrade.constraints = { ...upgrade.constraints, [depName]: newValue };
+      }
     }
   }
 
