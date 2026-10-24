@@ -322,16 +322,15 @@ export async function ensurePr(
         upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
         const shared = !logJSON.perDependencyNotes;
+        const repoNameWithSourceDirectory =
+          getRepoNameWithSourceDirectory(upgrade);
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !(
-            shared &&
-            commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
-          )
+          !(shared && commitRepos.includes(repoNameWithSourceDirectory))
         ) {
           if (shared) {
-            commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+            commitRepos.push(repoNameWithSourceDirectory);
           }
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {

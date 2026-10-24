@@ -1,6 +1,11 @@
 import { partial } from '~test/util.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { getChangeLogJSON } from '../update/pr/changelog/index.ts';
+import type {
+  ChangeLogRelease,
+  ChangeLogResult,
+} from '../update/pr/changelog/types.ts';
 import { embedChangelogs } from './index.ts';
 
 vi.mock('../update/pr/changelog/index.ts');
@@ -112,4 +117,352 @@ describe('workers/repository/changelog/index', () => {
       expect.objectContaining({ groupName: 'fetchChangeLogs is off' }),
     );
   });
+
+  it('embeds every release with content in the update range newest-first', async () => {
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        branchName: 'update/example',
+        changelogContent: 'targetContent',
+        changelogReleases: [
+          {
+            changelogContent: 'oldContent',
+            changelogUrl: 'https://example.com/releases/0.9.0',
+            version: '0.9.0',
+          },
+          {
+            changelogContent: 'currentContent',
+            changelogUrl: 'https://example.com/releases/1.0.0',
+            version: '1.0.0',
+          },
+          {
+            changelogContent: 'intermediateContent',
+            changelogUrl: 'https://example.com/releases/1.1.0',
+            gitRef: 'release-1.1.0',
+            releaseTimestamp: '2026-01-02T00:00:00.000Z' as Timestamp,
+            version: '1.1.0',
+          },
+          {
+            changelogContent: 'prereleaseContent',
+            version: '1.2.1-rc.1',
+          },
+          {
+            changelogContent: 'targetContent',
+            changelogUrl: 'https://example.com/releases/1.3.0',
+            name: 'RHSA-2026:66358',
+            releaseTimestamp: '2026-01-04T00:00:00.000Z' as Timestamp,
+            version: '1.3.0',
+          },
+          {
+            changelogContent: 'futureContent',
+            changelogUrl: 'https://example.com/releases/1.4.0',
+            version: '1.4.0',
+          },
+        ],
+        currentVersion: '1.0.0',
+        depName: 'example',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.3.0',
+        packageName: 'example',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning: 'npm',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(getChangeLogJSON).not.toHaveBeenCalled();
+    expect(upgrades[0].logJSON).toEqual({
+      hasReleaseNotes: true,
+      perDependencyNotes: true,
+      project: {
+        apiBaseUrl: undefined,
+        baseUrl: undefined,
+        depName: 'example',
+        packageName: 'example',
+        repository: undefined,
+        sourceDirectory: undefined,
+        sourceUrl: 'https://github.com/example/repo',
+        type: undefined,
+      },
+      versions: [
+        {
+          changes: [],
+          compare: {},
+          date: '2026-01-04T00:00:00.000Z',
+          gitRef: undefined,
+          releaseNotes: {
+            body: 'targetContent',
+            name: 'RHSA-2026:66358',
+            notesSourceUrl: undefined,
+            url: 'https://example.com/releases/1.3.0',
+          },
+          version: '1.3.0',
+        },
+        {
+          changes: [],
+          compare: {},
+          date: '2026-01-02T00:00:00.000Z',
+          gitRef: 'release-1.1.0',
+          releaseNotes: {
+            body: 'intermediateContent',
+            notesSourceUrl: undefined,
+            url: 'https://example.com/releases/1.1.0',
+          },
+          version: '1.1.0',
+        },
+      ],
+    });
+  });
+
+  it('uses intermediate content without repository retrieval when no source URL is available', async () => {
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          {
+            changelogContent: 'intermediateContent',
+            changelogUrl: 'https://example.com/releases/1.1.0',
+            version: '1.1.0',
+          },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        versioning: 'npm',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(getChangeLogJSON).not.toHaveBeenCalled();
+    expect(upgrades[0].logJSON?.versions).toEqual([
+      expect.objectContaining({
+        releaseNotes: {
+          body: 'intermediateContent',
+          notesSourceUrl: undefined,
+          url: 'https://example.com/releases/1.1.0',
+        },
+        version: '1.1.0',
+      }),
+    ]);
+  });
+
+  it.each`
+    versioning
+    ${'semver'}
+    ${'unity3d-packages'}
+  `(
+    'prefers repository content when the target has no embedded notes with $versioning versioning',
+    async ({ versioning }) => {
+      const repositoryChangelog: ChangeLogResult = {
+        hasReleaseNotes: true,
+        versions: [
+          partial<ChangeLogRelease>({ version: '1.1.0' }),
+          partial<ChangeLogRelease>({
+            version: '1.2.0',
+            releaseNotes: {
+              body: 'target repository notes',
+              notesSourceUrl: 'https://github.com/example/repo/releases',
+              url: 'https://github.com/example/repo/releases/tag/1.2.0',
+            },
+          }),
+        ],
+      };
+      vi.mocked(getChangeLogJSON).mockResolvedValueOnce(repositoryChangelog);
+      const upgrade = partial<BranchUpgradeConfig>({
+        changelogContent: 'intermediateContent',
+        changelogReleases: [
+          { changelogContent: 'intermediateContent', version: '1.1.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning,
+      });
+
+      await embedChangelogs({ upgrades: [upgrade], stage: 'pr' });
+
+      expect(getChangeLogJSON).toHaveBeenCalledExactlyOnceWith(upgrade);
+      expect(upgrade.logJSON).toBe(repositoryChangelog);
+    },
+  );
+
+  it.each`
+    result                  | repositoryChangelog
+    ${'null'}               | ${null}
+    ${'missing token'}      | ${{ error: 'MissingGithubToken' }}
+    ${'no versions'}        | ${{ hasReleaseNotes: false }}
+    ${'empty versions'}     | ${{ hasReleaseNotes: false, versions: [] }}
+    ${'compare-only notes'} | ${{ hasReleaseNotes: true, versions: [partial<ChangeLogRelease>({ version: '1.2.0', releaseNotes: { notesSourceUrl: '', url: 'https://github.com/example/repo/compare/1.0.0...1.2.0' } })] }}
+    ${'empty content'}      | ${{ hasReleaseNotes: true, versions: [partial<ChangeLogRelease>({ version: '1.2.0', releaseNotes: { body: '', notesSourceUrl: '', url: 'https://github.com/example/repo/releases/tag/1.2.0' } })] }}
+  `(
+    'retains intermediate embedded notes when repository retrieval returns $result',
+    async ({ repositoryChangelog }) => {
+      vi.mocked(getChangeLogJSON).mockResolvedValueOnce(repositoryChangelog);
+      const upgrade = partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          { changelogContent: 'intermediateContent', version: '1.1.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning: 'semver',
+      });
+
+      await embedChangelogs({ upgrades: [upgrade], stage: 'pr' });
+
+      expect(getChangeLogJSON).toHaveBeenCalledExactlyOnceWith(upgrade);
+      expect(upgrade.logJSON).toMatchObject({
+        hasReleaseNotes: true,
+        perDependencyNotes: true,
+        versions: [
+          { version: '1.1.0', releaseNotes: { body: 'intermediateContent' } },
+        ],
+      });
+    },
+  );
+
+  it('normalizes versions and excludes incompatible release content', async () => {
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          {
+            changelogContent: 'alpineContent',
+            version: '1.0.1-alpine',
+          },
+          {
+            changelogContent: 'bookwormContent',
+            version: '1.0.2-bookworm',
+          },
+          {
+            changelogContent: 'targetContent',
+            version: '1.0.3-alpine',
+          },
+        ],
+        currentValue: '1.0.0-alpine',
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.0.3',
+        sourceUrl: 'https://github.com/example/repo',
+        versioning: 'docker',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(getChangeLogJSON).not.toHaveBeenCalled();
+    expect(upgrades[0].logJSON?.versions).toEqual([
+      expect.objectContaining({
+        releaseNotes: expect.objectContaining({ body: 'targetContent' }),
+        version: '1.0.3',
+      }),
+      expect.objectContaining({
+        releaseNotes: expect.objectContaining({ body: 'alpineContent' }),
+        version: '1.0.1',
+      }),
+    ]);
+  });
+
+  it('filters release content independently for each update target', async () => {
+    const changelogReleases = [
+      { changelogContent: 'oneOne', version: '1.1.0' },
+      { changelogContent: 'oneTwo', version: '1.2.0' },
+      { changelogContent: 'twoZero', version: '2.0.0' },
+    ];
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        changelogReleases,
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.2.0',
+        versioning: 'npm',
+      }),
+      partial<BranchUpgradeConfig>({
+        changelogReleases,
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '2.0.0',
+        versioning: 'npm',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(
+      upgrades[0].logJSON?.versions?.map(({ version }) => version),
+    ).toEqual(['1.2.0', '1.1.0']);
+    expect(
+      upgrades[1].logJSON?.versions?.map(({ version }) => version),
+    ).toEqual(['2.0.0', '1.2.0', '1.1.0']);
+  });
+
+  it('falls back to the normal changelog lookup when no content is in range', async () => {
+    const expected = { hasReleaseNotes: true };
+    vi.mocked(getChangeLogJSON).mockResolvedValueOnce(expected);
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          { changelogContent: 'oldContent', version: '0.9.0' },
+          { changelogContent: 'futureContent', version: '2.0.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.1.0',
+        versioning: 'npm',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(getChangeLogJSON).toHaveBeenCalledExactlyOnceWith(upgrades[0]);
+    expect(upgrades[0].logJSON).toBe(expected);
+  });
+
+  it('deduplicates versions which are equal under the configured versioning', async () => {
+    const upgrades = [
+      partial<BranchUpgradeConfig>({
+        changelogReleases: [
+          { changelogContent: 'releaseContent', version: '1.1.0' },
+          { changelogContent: 'releaseContent', version: 'v1.1.0' },
+        ],
+        currentVersion: '1.0.0',
+        fetchChangeLogs: 'pr',
+        newVersion: '1.1.0',
+        versioning: 'npm',
+      }),
+    ];
+
+    await embedChangelogs({ upgrades, stage: 'pr' });
+
+    expect(upgrades[0].logJSON?.versions).toHaveLength(1);
+  });
+
+  it.each`
+    missing             | upgrade
+    ${'versioning'}     | ${{ currentVersion: '1.0.0', newVersion: '1.1.0' }}
+    ${'currentVersion'} | ${{ newVersion: '1.1.0', versioning: 'npm' }}
+    ${'newVersion'}     | ${{ currentVersion: '1.0.0', versioning: 'npm' }}
+  `(
+    'uses the single-release fallback when $missing is missing',
+    async ({ upgrade }) => {
+      const upgrades = [
+        partial<BranchUpgradeConfig>({
+          ...upgrade,
+          changelogContent: 'fallbackContent',
+          changelogReleases: [
+            { changelogContent: 'releaseContent', version: '1.1.0' },
+          ],
+          fetchChangeLogs: 'pr',
+        }),
+      ];
+
+      await embedChangelogs({ upgrades, stage: 'pr' });
+
+      expect(upgrades[0].logJSON?.versions?.[0].releaseNotes?.body).toBe(
+        'fallbackContent',
+      );
+      expect(getChangeLogJSON).not.toHaveBeenCalled();
+    },
+  );
 });

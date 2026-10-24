@@ -21,7 +21,10 @@ import type {
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
-import type { RegistryStrategy } from '../datasource/index.ts';
+import type {
+  ChangelogRelease,
+  RegistryStrategy,
+} from '../datasource/index.ts';
 import type { CustomExtractConfig } from './custom/types.ts';
 
 export interface ManagerData<T> {
@@ -208,6 +211,7 @@ export interface PackageDependency<
   packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string | null;
+  changelogReleases?: ChangelogRelease[];
   pinDigests?: boolean;
   currentRawValue?: string;
   /**

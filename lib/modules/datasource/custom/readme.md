@@ -68,8 +68,10 @@ All available options:
   "releases": [
     {
       "version": "v1.0.0",
+      "name": "Release title",
       "isDeprecated": true,
       "releaseTimestamp": "2022-12-24T18:21Z",
+      "changelogContent": "Release notes in Markdown.",
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
@@ -83,6 +85,40 @@ All available options:
   "homepage": "https://demo.org"
 }
 ```
+
+### Embedded release notes
+
+`name` is an optional human-readable release title, not an alternative to `version`.
+When supplied with `changelogContent`, it appears alongside the version in the release-notes heading.
+`changelogContent` is optional Markdown describing only its release.
+Do not include cumulative history in each entry: Renovate combines applicable entries, which would repeat that history.
+Use `changelogUrl` on each release to link to its full notes.
+Providing a URL alone does not make Renovate fetch Markdown from that URL.
+
+When the current and target versions are available, Renovate combines supplied notes in `(currentVersion, newVersion]`: after the current version, up to and including the selected target.
+It applies the configured versioning's compatibility and prerelease rules, orders releases newest first, and includes at most one entry per equivalent version.
+For example, an update from `1.0.0` to `1.3.0` can display notes for `1.3.0`, `1.2.0`, and `1.1.0`, but not `1.0.0` or `1.4.0`.
+Only releases returned by the datasource can contribute embedded notes.
+
+If the selected target has embedded notes, the combined entries take precedence over normal repository changelog retrieval, even when `sourceUrl` points to GitHub or GitLab.
+If only intermediate releases have embedded notes and a `sourceUrl` is available, Renovate attempts normal repository changelog retrieval.
+Repository notes containing Markdown replace the embedded notes; if retrieval fails or returns no content, the intermediate embedded notes are retained.
+Without a `sourceUrl`, the intermediate embedded notes are used directly.
+Renovate does not merge fetched and embedded notes to complete a partially supplied changelog.
+If no applicable embedded entries are available, Renovate falls back to the selected target's supplied content, when present, and otherwise to normal changelog retrieval.
+Omitted or empty `changelogContent` does not, by itself, suppress normal changelog retrieval.
+
+Missing, empty, or non-string content is excluded from the combined release notes without removing the release from update consideration.
+Non-string content is discarded during custom datasource validation.
+An update can therefore still be proposed when its changelog is unavailable.
+
+In grouped PRs, supplied notes are kept separately for each dependency, even when dependencies share a repository or source URL.
+Renovate does not compare the supplied text for duplicates across dependencies.
+Notes fetched through normal repository retrieval retain their existing deduplication behavior.
+
+Embedded notes respect [`fetchChangeLogs`](../../../configuration-options.md#fetchchangelogs), including `"off"`.
+They use Renovate's existing Markdown sanitization, PR template, and platform-specific body truncation.
+The final PR body limit does not limit the earlier datasource response or the memory used to retain supplied content.
 
 ### Debugging
 
