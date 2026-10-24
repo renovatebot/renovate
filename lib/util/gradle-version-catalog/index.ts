@@ -1,0 +1,368 @@
+import { isPlainObject, isString } from '@sindresorhus/is';
+import deepmerge from 'deepmerge';
+import type { PackageDependency } from '../../modules/manager/types.ts';
+import type { SkipReason } from '../../types/index.ts';
+import { coerceObject, hasKey } from '../object.ts';
+import { regEx } from '../regex.ts';
+import { massage, parse as parseToml } from '../toml.ts';
+import type {
+  GradleCatalog,
+  GradleCatalogArtifactDescriptor,
+  GradleCatalogModuleDescriptor,
+  GradleVersionCatalogVersion,
+  GradleVersionPointerTarget,
+  VersionCatalogManagerData,
+  VersionCatalogVariables,
+  VersionPointer,
+} from './types.ts';
+
+function findVersionIndex(
+  content: string,
+  depName: string,
+  version: string,
+): number {
+  const eDn = RegExp.escape(depName);
+  const eVer = RegExp.escape(version);
+  const re = regEx(
+    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`,
+  );
+  const match = re.exec(content);
+  // v8 ignore else -- the fallback below is already marked unreachable
+  if (match) {
+    return match.index + content.slice(match.index).indexOf(version);
+  }
+  // ignoring Fallback because I can't reach it in tests, and code is not supposed to reach it but just in case.
+  /* istanbul ignore next */
+  return findIndexAfter(content, depName, version);
+}
+
+function findIndexAfter(
+  content: string,
+  sliceAfter: string,
+  find: string,
+): number {
+  const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
+  return slicePoint + content.slice(slicePoint).indexOf(find);
+}
+
+function isArtifactDescriptor(
+  obj: GradleCatalogArtifactDescriptor | GradleCatalogModuleDescriptor,
+): obj is GradleCatalogArtifactDescriptor {
+  return hasKey('group', obj);
+}
+
+function isVersionPointer(
+  obj: GradleVersionCatalogVersion | undefined,
+): obj is VersionPointer {
+  return hasKey('ref', obj);
+}
+
+function normalizeAlias(alias: string): string {
+  return alias.replace(regEx(/[-_]/g), '.');
+}
+
+function findOriginalAlias(
+  versions: Record<string, GradleVersionPointerTarget>,
+  alias: string,
+): string {
+  const normalizedAlias = normalizeAlias(alias);
+  for (const sectionKey of Object.keys(versions)) {
+    if (normalizeAlias(sectionKey) === normalizedAlias) {
+      return sectionKey;
+    }
+  }
+
+  return alias;
+}
+
+interface VersionExtract {
+  currentValue?: string;
+  fileReplacePosition?: number;
+  skipReason?: SkipReason;
+}
+
+interface CatalogOptions {
+  includePlugins?: boolean;
+  allowRichVersions?: boolean;
+  includeLibraryAliases?: boolean;
+}
+
+function extractVersion({
+  version,
+  versions,
+  depStartIndex,
+  depSubContent,
+  depName,
+  versionStartIndex,
+  versionSubContent,
+  allowRichVersions,
+}: {
+  version: GradleVersionCatalogVersion | undefined;
+  versions: Record<string, GradleVersionPointerTarget>;
+  depStartIndex: number;
+  depSubContent: string;
+  depName: string;
+  versionStartIndex: number;
+  versionSubContent: string;
+  allowRichVersions: boolean;
+}): VersionExtract {
+  if (isVersionPointer(version)) {
+    const originalAlias = findOriginalAlias(versions, version.ref);
+    return extractLiteralVersion({
+      version: versions[originalAlias],
+      depStartIndex: versionStartIndex,
+      depSubContent: versionSubContent,
+      sectionKey: originalAlias,
+      allowRichVersions,
+    });
+  }
+  return extractLiteralVersion({
+    version,
+    depStartIndex,
+    depSubContent,
+    sectionKey: depName,
+    allowRichVersions,
+  });
+}
+
+function extractLiteralVersion({
+  version,
+  depStartIndex,
+  depSubContent,
+  sectionKey,
+  allowRichVersions,
+}: {
+  version: GradleVersionPointerTarget | undefined;
+  depStartIndex: number;
+  depSubContent: string;
+  sectionKey: string;
+  allowRichVersions: boolean;
+}): VersionExtract {
+  if (!version) {
+    return { skipReason: 'unspecified-version' };
+  }
+  if (isString(version)) {
+    const fileReplacePosition =
+      depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
+    return { currentValue: version, fileReplacePosition };
+  }
+  // v8 ignore else -- a version is either a string, handled above, or a table
+  if (isPlainObject(version)) {
+    if (!allowRichVersions) {
+      return { skipReason: 'unsupported-version' };
+    }
+    // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
+    // https://docs.gradle.org/current/userguide/rich_versions.html
+    // https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
+    const versionKeys = ['require', 'prefer', 'strictly'];
+    let found = false;
+    let currentValue: string | undefined;
+    let fileReplacePosition: number | undefined;
+
+    if (version.reject || version.rejectAll) {
+      return { skipReason: 'unsupported-version' };
+    }
+
+    for (const key of versionKeys) {
+      if (key in version) {
+        if (found) {
+          // Currently, we only support one version constraint at a time
+          return { skipReason: 'multiple-constraint-dep' };
+        }
+        found = true;
+
+        currentValue = version[key] as string;
+        fileReplacePosition =
+          depStartIndex +
+          findIndexAfter(depSubContent, sectionKey, currentValue);
+      }
+    }
+
+    if (found) {
+      return { currentValue, fileReplacePosition };
+    }
+  }
+
+  return { skipReason: 'unspecified-version' };
+}
+
+function extractDependency({
+  descriptor,
+  versions,
+  depStartIndex,
+  depSubContent,
+  depName,
+  versionStartIndex,
+  versionSubContent,
+  allowRichVersions,
+}: {
+  descriptor:
+    string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
+  versions: Record<string, GradleVersionPointerTarget>;
+  depStartIndex: number;
+  depSubContent: string;
+  depName: string;
+  versionStartIndex: number;
+  versionSubContent: string;
+  allowRichVersions: boolean;
+}): PackageDependency<VersionCatalogManagerData> {
+  if (isString(descriptor)) {
+    const [group, name, currentValue] = descriptor.split(':');
+    if (!currentValue) {
+      return {
+        depName,
+        skipReason: 'unspecified-version',
+      };
+    }
+    return {
+      depName: `${group}:${name}`,
+      currentValue,
+      managerData: {
+        fileReplacePosition:
+          depStartIndex + findIndexAfter(depSubContent, depName, currentValue),
+      },
+    };
+  }
+
+  const { currentValue, fileReplacePosition, skipReason } = extractVersion({
+    version: descriptor.version,
+    versions,
+    depStartIndex,
+    depSubContent,
+    depName,
+    versionStartIndex,
+    versionSubContent,
+    allowRichVersions,
+  });
+
+  if (skipReason) {
+    return {
+      depName,
+      skipReason,
+    };
+  }
+
+  const dependency: PackageDependency<VersionCatalogManagerData> = {
+    currentValue,
+    managerData: { fileReplacePosition },
+  };
+
+  if (isArtifactDescriptor(descriptor)) {
+    const { group, name } = descriptor;
+    dependency.depName = `${group}:${name}`;
+  } else {
+    const [depGroupName, name] = descriptor.module.split(':');
+    dependency.depName = `${depGroupName}:${name}`;
+  }
+
+  if (isVersionPointer(descriptor.version)) {
+    dependency.sharedVariableName = normalizeAlias(descriptor.version.ref);
+  }
+
+  return dependency;
+}
+
+export function parseCatalog(
+  packageFile: string,
+  content: string,
+  {
+    includePlugins = true,
+    allowRichVersions = true,
+    includeLibraryAliases = false,
+  }: CatalogOptions = {},
+): {
+  vars: VersionCatalogVariables;
+  deps: PackageDependency<VersionCatalogManagerData>[];
+} {
+  const tomlContent = parseToml(massage(content)) as GradleCatalog;
+  const versions = coerceObject(tomlContent.versions);
+  const libs = coerceObject(tomlContent.libraries);
+  const libStartIndex = content.indexOf('libraries');
+  const libSubContent = content.slice(libStartIndex);
+  const versionStartIndex = content.indexOf('versions');
+  const versionSubContent = content.slice(versionStartIndex);
+  const extractedDeps: PackageDependency<VersionCatalogManagerData>[] = [];
+  const vars: VersionCatalogVariables = {};
+
+  for (const [key, version] of Object.entries(versions)) {
+    const { currentValue, fileReplacePosition } = extractLiteralVersion({
+      version,
+      depStartIndex: versionStartIndex,
+      depSubContent: versionSubContent,
+      sectionKey: key,
+      allowRichVersions,
+    });
+    if (currentValue && fileReplacePosition !== undefined) {
+      vars[normalizeAlias(key)] = {
+        key: normalizeAlias(key),
+        value: currentValue,
+        fileReplacePosition,
+        packageFile,
+      };
+    }
+  }
+
+  for (const libraryName of Object.keys(libs)) {
+    const libDescriptor = libs[libraryName];
+    const dependency = extractDependency({
+      descriptor: libDescriptor,
+      versions,
+      depStartIndex: libStartIndex,
+      depSubContent: libSubContent,
+      depName: libraryName,
+      versionStartIndex,
+      versionSubContent,
+      allowRichVersions,
+    });
+    if (includeLibraryAliases) {
+      dependency.managerData = {
+        ...dependency.managerData,
+        libraryAlias: libraryName,
+      };
+    }
+    extractedDeps.push(dependency);
+  }
+
+  const plugins = includePlugins ? coerceObject(tomlContent.plugins) : {};
+  const pluginsStartIndex = content.indexOf('[plugins]');
+  const pluginsSubContent = content.slice(pluginsStartIndex);
+  for (const pluginName of Object.keys(plugins)) {
+    const pluginDescriptor = plugins[pluginName];
+    const [depName, version] = isString(pluginDescriptor)
+      ? pluginDescriptor.split(':')
+      : [pluginDescriptor.id, pluginDescriptor.version];
+    const { currentValue, fileReplacePosition, skipReason } = extractVersion({
+      version,
+      versions,
+      depStartIndex: pluginsStartIndex,
+      depSubContent: pluginsSubContent,
+      depName,
+      versionStartIndex,
+      versionSubContent,
+      allowRichVersions,
+    });
+
+    const dependency: PackageDependency<VersionCatalogManagerData> = {
+      depType: 'plugin',
+      depName,
+      packageName: `${depName}:${depName}.gradle.plugin`,
+      currentValue,
+      commitMessageTopic: `plugin ${pluginName}`,
+      managerData: { fileReplacePosition },
+    };
+    if (skipReason) {
+      dependency.skipReason = skipReason;
+    }
+    if (isVersionPointer(version) && dependency.commitMessageTopic) {
+      dependency.sharedVariableName = normalizeAlias(version.ref);
+      delete dependency.commitMessageTopic;
+    }
+
+    extractedDeps.push(dependency);
+  }
+
+  const deps = extractedDeps.map((dep) => {
+    return deepmerge(dep, { managerData: { packageFile } });
+  });
+  return { vars, deps };
+}
