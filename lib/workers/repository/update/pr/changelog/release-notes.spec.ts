@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import MarkdownIt from 'markdown-it';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -2343,6 +2344,36 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).not.toContain(
         'Ensure stack is present for custom errors',
       );
+    });
+
+    it('parses the changelog only once across versions of a project', async () => {
+      memCache.init();
+      httpMock
+        .scope('https://api.github.com')
+        .get('/repos/nodeca/js-yaml')
+        .reply(200)
+        .get('/repos/nodeca/js-yaml/git/trees/HEAD')
+        .reply(200, githubTreeResponse)
+        .get('/repos/nodeca/js-yaml/git/blobs/abcd')
+        .reply(200, {
+          content: toBase64(jsYamlChangelogMd),
+        });
+      const parse = vi.spyOn(MarkdownIt.prototype, 'parse');
+      const project = { ...githubProject, repository: 'nodeca/js-yaml' };
+
+      const first = await getReleaseNotesMd(
+        project,
+        partial<ChangeLogRelease>({ version: '3.10.0', gitRef: '3.10.0' }),
+      );
+      const second = await getReleaseNotesMd(
+        project,
+        partial<ChangeLogRelease>({ version: '3.11.0', gitRef: '3.11.0' }),
+      );
+
+      expect(parse).toHaveBeenCalledOnce();
+      expect(first?.url).toEndWith('#3100--2017-09-10');
+      expect(second?.url).toEndWith('#3110--2018-03-05');
+      memCache.reset();
     });
 
     it('ignores invalid', async () => {
