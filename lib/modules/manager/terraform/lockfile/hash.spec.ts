@@ -13,6 +13,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { getFixturePath, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import * as packageCache from '../../../../util/cache/package/index.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/schema.ts';
@@ -76,6 +77,153 @@ describe('modules/manager/terraform/lockfile/hash', () => {
   });
 
   afterEach(() => cacheDir.cleanup());
+
+  describe('hash caching', () => {
+    const cachedAt = '2026-01-01T00:00:00.000Z';
+
+    beforeEach(() => {
+      vi.spyOn(Date, 'now').mockReturnValue(Date.parse(cachedAt));
+      vi.spyOn(
+        TerraformProviderHash.terraformDatasource,
+        'getBuilds',
+      ).mockResolvedValue([
+        partial<TerraformBuild>({
+          name: 'example/provider',
+          version: '1.0.0',
+          url: 'https://example.com/provider.zip',
+        }),
+      ]);
+      vi.spyOn(
+        TerraformProviderHash.terraformDatasource,
+        'getProviderPackages',
+      ).mockResolvedValue(null);
+      vi.spyOn(fs, 'ensureCacheDir').mockResolvedValue(cacheDir.path);
+      vi.spyOn(TerraformProviderHash.http, 'stream').mockReturnValue(
+        partial<ReturnType<typeof TerraformProviderHash.http.stream>>(),
+      );
+      vi.spyOn(fs, 'createCacheWriteStream').mockReturnValue(
+        partial<ReturnType<typeof fs.createCacheWriteStream>>(),
+      );
+      vi.spyOn(fs, 'pipeline').mockResolvedValue(undefined);
+      vi.spyOn(fs, 'rmCache').mockResolvedValue(undefined);
+      vi.spyOn(TerraformProviderHash, 'hashOfZipContent').mockResolvedValue(
+        'computed-hash',
+      );
+      vi.spyOn(packageCache, 'get').mockResolvedValue(undefined);
+      vi.spyOn(packageCache, 'setWithRawTtl').mockResolvedValue(undefined);
+    });
+
+    it.each`
+      registryUrl                                     | cachePrivatePackages | cacheCalls
+      ${'https://registry.terraform.io'}              | ${false}             | ${1}
+      ${'https://releases.hashicorp.com'}             | ${false}             | ${1}
+      ${'https://registry.opentofu.org'}              | ${false}             | ${1}
+      ${'https://api.opentofu.org'}                   | ${false}             | ${1}
+      ${'https://registry.example.com'}               | ${false}             | ${0}
+      ${'https://registry.example.com'}               | ${true}              | ${1}
+      ${'https://registry.terraform.io.example.com'}  | ${false}             | ${0}
+      ${'https://releases.hashicorp.com.example.com'} | ${false}             | ${0}
+      ${'https://registry.opentofu.org.example.com'}  | ${false}             | ${0}
+      ${'https://api.opentofu.org.example.com'}       | ${false}             | ${0}
+    `(
+      'uses the package cache $cacheCalls times for $registryUrl with cachePrivatePackages=$cachePrivatePackages',
+      async ({ registryUrl, cachePrivatePackages, cacheCalls }) => {
+        GlobalConfig.set({ cacheDir: cacheDir.path, cachePrivatePackages });
+
+        const result = await TerraformProviderHash.createHashes(
+          registryUrl,
+          'example/provider',
+          '1.0.0',
+        );
+
+        expect(result).toEqual(['h1:computed-hash']);
+        expect(packageCache.get).toHaveBeenCalledTimes(cacheCalls);
+        expect(packageCache.setWithRawTtl).toHaveBeenCalledTimes(cacheCalls);
+      },
+    );
+
+    it('does not cache a private registry hash even when the ZIP host is public', async () => {
+      GlobalConfig.set({
+        cacheDir: cacheDir.path,
+        cachePrivatePackages: false,
+      });
+      const downloadUrl = 'https://releases.hashicorp.com/provider.zip';
+      vi.mocked(
+        TerraformProviderHash.terraformDatasource.getBuilds,
+      ).mockResolvedValue([
+        partial<TerraformBuild>({
+          name: 'example/provider',
+          version: '1.0.0',
+          url: downloadUrl,
+        }),
+      ]);
+
+      const result = await TerraformProviderHash.createHashes(
+        'https://registry.example.com',
+        'example/provider',
+        '1.0.0',
+      );
+
+      expect(result).toEqual(['h1:computed-hash']);
+      expect(packageCache.get).not.toHaveBeenCalled();
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+      expect(TerraformProviderHash.http.stream).toHaveBeenCalledExactlyOnceWith(
+        downloadUrl,
+      );
+    });
+
+    it.each`
+      registryUrl                        | cachePrivatePackages
+      ${'https://registry.terraform.io'} | ${false}
+      ${'https://registry.example.com'}  | ${true}
+    `(
+      'reuses a cached hash for $registryUrl with cachePrivatePackages=$cachePrivatePackages',
+      async ({ registryUrl, cachePrivatePackages }) => {
+        GlobalConfig.set({ cacheDir: cacheDir.path, cachePrivatePackages });
+        vi.mocked(packageCache.get).mockResolvedValue({
+          cachedAt,
+          value: 'cached-hash',
+        });
+
+        const result = await TerraformProviderHash.createHashes(
+          registryUrl,
+          'example/provider',
+          '1.0.0',
+        );
+
+        expect(result).toEqual(['h1:cached-hash']);
+        expect(packageCache.get).toHaveBeenCalledExactlyOnceWith(
+          'terraform-provider-hash',
+          'cache-decorator:calculateSingleHash:https://example.com/provider.zip',
+        );
+        expect(TerraformProviderHash.http.stream).not.toHaveBeenCalled();
+        expect(TerraformProviderHash.hashOfZipContent).not.toHaveBeenCalled();
+        expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+      },
+    );
+
+    it('does not reuse a cached hash for a private registry', async () => {
+      GlobalConfig.set({
+        cacheDir: cacheDir.path,
+        cachePrivatePackages: false,
+      });
+      vi.mocked(packageCache.get).mockResolvedValue({
+        cachedAt,
+        value: 'cached-hash',
+      });
+
+      const result = await TerraformProviderHash.createHashes(
+        'https://registry.example.com',
+        'example/provider',
+        '1.0.0',
+      );
+
+      expect(result).toEqual(['h1:computed-hash']);
+      expect(packageCache.get).not.toHaveBeenCalled();
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+      expect(TerraformProviderHash.http.stream).toHaveBeenCalledOnce();
+    });
+  });
 
   it('returns null if getBuilds returns null', async () => {
     httpMock
@@ -827,8 +975,16 @@ describe('modules/manager/terraform/lockfile/hash', () => {
 
       await expect(
         Promise.all([
-          TerraformProviderHash.calculateSingleHash(firstBuild, cacheDir.path),
-          TerraformProviderHash.calculateSingleHash(secondBuild, cacheDir.path),
+          TerraformProviderHash.calculateSingleHash(
+            firstBuild,
+            cacheDir.path,
+            false,
+          ),
+          TerraformProviderHash.calculateSingleHash(
+            secondBuild,
+            cacheDir.path,
+            false,
+          ),
         ]),
       ).resolves.toEqual([
         'g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=',
@@ -872,7 +1028,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       );
 
       await expect(
-        TerraformProviderHash.calculateSingleHash(build, cacheDir.path),
+        TerraformProviderHash.calculateSingleHash(build, cacheDir.path, false),
       ).rejects.toThrow('entry stream failed');
 
       expect(close).toHaveBeenCalledOnce();
