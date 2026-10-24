@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as rustVersioning from '../../versioning/rust-release-channel/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -8,10 +9,6 @@ import type { ParsedManifestUrl } from './types.ts';
 
 export class RustVersionDatasource extends Datasource {
   static readonly id = 'rust-version';
-
-  override supportsCustomRegistry(_packageName: string): boolean {
-    return false;
-  }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://static.rust-lang.org'];
@@ -53,7 +50,20 @@ export class RustVersionDatasource extends Datasource {
   async fetchReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const url = new URL('manifests.txt', registryUrl);
+    /* should never happen as there is a default registry URL */
+    if (!registryUrl) {
+      return null;
+    }
+
+    const parsedUrl = parseUrl(ensureTrailingSlash(registryUrl));
+    if (!parsedUrl) {
+      logger.warn(
+        { registryUrl },
+        'rust-version datasource: Invalid registryUrl',
+      );
+      return null;
+    }
+    const url = new URL('manifests.txt', parsedUrl);
 
     let parsedResults: ParsedManifestUrl[];
     try {
