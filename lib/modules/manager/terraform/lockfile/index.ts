@@ -1,15 +1,18 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import * as p from '../../../../util/promises.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
+import type { Release } from '../../../datasource/types.ts';
 import { get as getVersioning } from '../../../versioning/index.ts';
 import type {
   UpdateArtifact,
+  UpdateArtifactsConfig,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
@@ -26,8 +29,78 @@ import {
   writeLockUpdates,
 } from './util.ts';
 
+function getLatestAllowedVersion(
+  lock: ProviderLock,
+  releases: Release[],
+  config: UpdateArtifactsConfig,
+): string | null {
+  const versioning = getVersioning(getDefaultVersioning('terraform-provider'));
+  const minimumReleaseAgeBehaviour =
+    config.minimumReleaseAgeBehaviour ?? 'timestamp-required';
+  const ageConfig = { ...config, minimumReleaseAgeBehaviour };
+  const versionsWithoutTimestamp: string[] = [];
+
+  const candidates = releases.filter(
+    (release) =>
+      !versioning.isGreaterThan(lock.version, release.version) &&
+      versioning.matches(release.version, lock.constraints),
+  );
+
+  const allowedVersions = candidates
+    .filter((release) => {
+      const { isPending, minimumReleaseAgeMs, hasTimestamp } =
+        checkMinimumReleaseAge(ageConfig, release.releaseTimestamp);
+
+      if (minimumReleaseAgeMs && !hasTimestamp) {
+        versionsWithoutTimestamp.push(release.version);
+      }
+
+      if (isPending) {
+        logger.trace(
+          {
+            depName: lock.packageName,
+            version: release.version,
+            hasTimestamp,
+            check: 'minimumReleaseAge',
+          },
+          'Release is pending minimumReleaseAge',
+        );
+        return false;
+      }
+
+      return true;
+    })
+    .map((release) => release.version);
+
+  if (versionsWithoutTimestamp.length) {
+    const logMeta = {
+      manager: 'terraform',
+      depName: lock.packageName,
+      versions: versionsWithoutTimestamp,
+      check: 'minimumReleaseAge',
+    };
+    if (minimumReleaseAgeBehaviour === 'timestamp-optional') {
+      logger.once.warn(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+      logger.once.debug(
+        logMeta,
+        `${versionsWithoutTimestamp.length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+      );
+    } else {
+      logger.once.debug(
+        logMeta,
+        `Marking ${versionsWithoutTimestamp.length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+      );
+    }
+  }
+
+  return versioning.getSatisfyingVersion(allowedVersions, lock.constraints);
+}
+
 async function updateAllLocks(
   locks: ProviderLock[],
+  config: UpdateArtifactsConfig,
 ): Promise<ProviderLockUpdate[]> {
   const updates = await p.map(
     locks,
@@ -41,14 +114,7 @@ async function updateAllLocks(
       if (!releases) {
         return null;
       }
-      const versioning = getVersioning(
-        getDefaultVersioning('terraform-provider'),
-      );
-      const versionsList = releases.map((release) => release.version);
-      const newVersion = versioning.getSatisfyingVersion(
-        versionsList,
-        lock.constraints,
-      );
+      const newVersion = getLatestAllowedVersion(lock, releases, config);
 
       // if the new version is the same as the last, signal that no update is needed
       if (!newVersion || newVersion === lock.version) {
@@ -165,7 +231,7 @@ export async function updateArtifacts({
     const updates: ProviderLockUpdate[] = [];
     if (config.isLockFileMaintenance) {
       // update all locks in the file during maintenance --> only update version in constraints
-      const maintenanceUpdates = await updateAllLocks(locks);
+      const maintenanceUpdates = await updateAllLocks(locks, config);
       updates.push(...maintenanceUpdates);
     } else {
       const providerDeps = updatedDeps.filter((dep) =>

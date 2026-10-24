@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  MinimumReleaseAgeBehaviour,
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -74,6 +75,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
   ignoreScripts?: boolean;
