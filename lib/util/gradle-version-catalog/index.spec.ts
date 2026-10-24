@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { parseCatalog } from './catalog.ts';
+import { parseCatalog } from './index.ts';
 
-describe('modules/manager/gradle/extract/catalog', () => {
+describe('util/gradle-version-catalog/index', () => {
   it('supports versions declared as single string', () => {
     const input = codeBlock`
       [versions]
