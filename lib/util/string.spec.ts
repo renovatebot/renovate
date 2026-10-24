@@ -48,6 +48,17 @@ describe('util/string', () => {
   });
 
   describe('stripTemplates', () => {
+    it('reports the original ranges of removed templates', () => {
+      const onRemove = vi.fn();
+
+      expect(stripTemplates('a{{ b }}c{% d %}e', onRemove)).toBe('ace');
+
+      expect(onRemove.mock.calls).toEqual([
+        [1, 8],
+        [9, 16],
+      ]);
+    });
+
     it.each`
       input                                                        | expected
       ${'This is {% template %} text.'}                            | ${'This is  text.'}

@@ -1,7 +1,40 @@
 import { codeBlock } from 'common-tags';
-import { massage, parseTOMLDocument, parse as parseToml } from './toml.ts';
+import {
+  massage,
+  massageWithSourceMap,
+  parseTOMLDocument,
+  parse as parseToml,
+} from './toml.ts';
 
 describe('util/toml', () => {
+  it('maps offsets through removed template keys and expressions', () => {
+    const input = codeBlock`
+      before = "1"
+      {{ key }} = "{{ value }}"
+      {% if enabled %}
+      middle = "2"
+      {# multiline
+      {{ nested }} = "ignored"
+      comment #}
+      after = "3"
+      {% endif %}
+    `;
+
+    const { content, toOriginalOffset } = massageWithSourceMap(input);
+
+    expect(parseToml(content)).toEqual({
+      before: '1',
+      middle: '2',
+      after: '3',
+    });
+    for (const value of ['1', '2', '3']) {
+      expect(toOriginalOffset(content.indexOf(value))).toBe(
+        input.indexOf(value),
+      );
+    }
+    expect(toOriginalOffset(content.length)).toBe(input.length);
+  });
+
   it('exposes source ranges from the TOML AST', () => {
     const document = parseTOMLDocument('[[tools.node]]\nversion = "20.11.0"\n');
 
