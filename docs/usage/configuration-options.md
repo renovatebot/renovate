@@ -285,6 +285,21 @@ Example use:
 }
 ```
 
+## `automergeLabel`
+
+Use this only if you configure `automergeType="label"`.
+Renovate adds this label to the PR once it is ready to automerge, so that a merge bot or platform rule that watches for the label can merge it.
+
+Example use:
+
+```json
+{
+  "automerge": true,
+  "automergeType": "label",
+  "automergeLabel": "merge"
+}
+```
+
 ## `automergeSchedule`
 
 Use the `automergeSchedule` option to define times of week or month during which Renovate may automerge its PRs.
@@ -343,6 +358,8 @@ If the push is rejected, Renovate falls back to creating a PR.
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
+
+The value `"label"` is similar: Renovate adds a label (default `automerge`, configurable with [`automergeLabel`](#automergelabel)) to the PR once it is ready to merge, and a merge bot or platform rule that watches for that label does the actual merge.
 
 ## `azureWorkItemId`
 
