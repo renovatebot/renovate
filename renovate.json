@@ -177,8 +177,7 @@
         "lib/modules/manager/github-actions/readme.md"
       ],
       "matchStrings": [
-        "ghActionsLock: '(?<currentValue>.*)'",
-        "\"ghActionsLock\": \"(?<currentValue>v[^\"]+)\""
+        "['\"]?ghActionsLock['\"]?: ['\"](?<currentValue>v[^'\"]+)['\"]"
       ],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
