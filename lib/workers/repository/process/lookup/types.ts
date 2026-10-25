@@ -2,6 +2,7 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types.ts';
+import type { DatasourceName } from '../../../../datasource-list.generated.ts';
 import type {
   LookupUpdate,
   RangeConfig,
@@ -34,6 +35,8 @@ export interface RollbackConfig {
 export interface LookupUpdateConfig
   extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
+  /** Whether the dependency should only be updated in the lockfile. */
+  isLockfileOnly?: boolean;
 
   digestOneAndOnly?: boolean;
   /**
@@ -74,6 +77,7 @@ export interface UpdateResult {
   lookupName?: string;
   skipReason?: SkipReason;
   registryUrl?: string;
+  effectiveDatasource?: DatasourceName;
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];

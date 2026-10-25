@@ -42,10 +42,6 @@ describe('modules/manager/vendir/artifacts', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns null if no vendir.lock.yml found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
     await expect(
@@ -401,16 +397,17 @@ describe('modules/manager/vendir/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '9',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_6:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_7:
@@ -538,6 +535,34 @@ describe('modules/manager/vendir/artifacts', () => {
           },
         },
       },
+    ]);
+  });
+
+  it('falls back to the extracted constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    await expect(
+      vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: vendirFile,
+        config: {
+          ...config,
+          extractedConstraints: { vendir: '0.35.0', helm: '3.17.0' },
+        },
+      }),
+    ).resolves.not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool vendir 0.35.0' },
+      { cmd: 'install-tool helm 3.17.0' },
+      { cmd: 'vendir sync' },
     ]);
   });
 

@@ -6,6 +6,7 @@ import type {
   TerraformRequiredProvider,
 } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
+import type { TerraformManagerData } from '../../types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
   getCheckList(): string[] {
@@ -33,7 +34,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         requiredProviders.flatMap(Object.entries);
       for (const [requiredProviderName, value] of entries) {
         // name = version declaration method
-        let dep: PackageDependency;
+        let dep: PackageDependency<TerraformManagerData>;
         if (isString(value)) {
           dep = {
             currentValue: value,

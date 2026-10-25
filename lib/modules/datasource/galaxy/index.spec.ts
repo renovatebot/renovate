@@ -103,6 +103,33 @@ describe('modules/datasource/galaxy/index', () => {
       });
     });
 
+    it('omits the source url if the github fields are empty', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
+        .reply(200, {
+          results: [
+            {
+              id: 1,
+              github_user: '',
+              github_repo: '',
+              summary_fields: {
+                versions: [{ name: '1.0.0', release_date: null }],
+              },
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: GalaxyDatasource.id,
+        packageName: 'yatesr.timezone',
+      });
+      expect(res).toEqual({
+        dependencyUrl: 'https://galaxy.ansible.com/yatesr/timezone',
+        registryUrl: 'https://galaxy.ansible.com/',
+        releases: [{ version: '1.0.0' }],
+      });
+    });
+
     it('handles multiple results when one user matches exactly', async () => {
       httpMock
         .scope(baseUrl)

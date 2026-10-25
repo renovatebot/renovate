@@ -169,7 +169,7 @@ export class Vulnerabilities {
       return null;
     }
 
-    const packageName = dep.packageName ?? dep.depName!;
+    const packageName = dep.packageName!;
     let osvPackageName = packageName;
     let depType: string | undefined;
     if (ecosystem === 'PyPI') {

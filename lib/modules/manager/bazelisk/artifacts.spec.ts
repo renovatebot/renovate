@@ -130,6 +130,29 @@ describe('modules/manager/bazelisk/artifacts', () => {
     );
   });
 
+  it('passes the extracted bazelisk constraint to updateBazelLockfile', async () => {
+    const { updateBazelLockfile } = await import('../bazel-module/lockfile.ts');
+    vi.mocked(updateBazelLockfile).mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel');
+    fs.readLocalFile.mockResolvedValueOnce('module(name = "my_project")');
+    fs.getSiblingFileName.mockReturnValueOnce('MODULE.bazel.lock');
+    fs.readLocalFile.mockResolvedValueOnce('old lock content');
+
+    await updateArtifacts({
+      packageFileName: '.bazelversion',
+      updatedDeps: [{ depName: 'bazel' }],
+      newPackageFileContent: '7.7.1\n',
+      config: { ...config, extractedConstraints: { bazelisk: '>=1.19.0' } },
+    });
+
+    expect(updateBazelLockfile).toHaveBeenCalledWith(
+      'MODULE.bazel.lock',
+      'MODULE.bazel',
+      undefined,
+      '>=1.19.0',
+    );
+  });
+
   it('passes isLockFileMaintenance to updateBazelLockfile', async () => {
     const { updateBazelLockfile } = await import('../bazel-module/lockfile.ts');
     vi.mocked(updateBazelLockfile).mockResolvedValueOnce(null);

@@ -44,7 +44,6 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 describe('modules/manager/copier/artifacts', () => {
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    hostRules.clear();
 
     // Mock git repo status
     git.getRepoStatus.mockResolvedValue(
@@ -205,9 +204,12 @@ describe('modules/manager/copier/artifacts', () => {
             cwd: '/tmp/github/some/repo',
             env: {
               GIT_CONFIG_COUNT: '6',
-              GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_0:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:abc123@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
                 'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
               GIT_CONFIG_KEY_4:
@@ -293,6 +295,30 @@ describe('modules/manager/copier/artifacts', () => {
         ]);
       },
     );
+
+    it('falls back to the extracted constraints', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+
+      await updateArtifacts({
+        packageFileName: '.copier-answers.yml',
+        updatedDeps: upgrades,
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          constraints: {},
+          extractedConstraints: { python: '3.11.3', copier: '9.1.0' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool python 3.11.3' },
+        { cmd: 'install-tool copier 9.1.0' },
+        {
+          cmd: 'copier update --skip-answered --defaults --answers-file .copier-answers.yml --vcs-ref 1.1.0',
+        },
+      ]);
+    });
 
     it('includes --trust when allowScripts is true and ignoreScripts is false', async () => {
       GlobalConfig.set({ ...adminConfig, allowScripts: true });

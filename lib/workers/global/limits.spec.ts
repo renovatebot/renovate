@@ -67,6 +67,12 @@ describe('workers/global/limits', () => {
     expect(isLimitReached('Commits')).toBeTrue();
   });
 
+  it('throws when a concurrent limit is asked for without a branch config', () => {
+    expect(() => isLimitReached('Branches', undefined!)).toThrow(
+      'Config is required for computing limits for Branches and PullRequests',
+    );
+  });
+
   describe('calcLimit', () => {
     it('handles single upgrade', () => {
       const upgrades = partial<BranchUpgradeConfig>([

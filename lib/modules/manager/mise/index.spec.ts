@@ -1,5 +1,10 @@
 import { matchRegexOrGlobList } from '../../../util/string-match.ts';
-import { defaultConfig } from './index.ts';
+import {
+  defaultConfig,
+  maybeSupportedBackendDatasources,
+  supportedBackendDatasources,
+} from './index.ts';
+import { parsedMiseRegistry } from './upgradeable-tooling.ts';
 
 describe('modules/manager/mise/index', () => {
   describe('managerFilePatterns', () => {
@@ -45,6 +50,30 @@ describe('modules/manager/mise/index', () => {
       expect(
         matchRegexOrGlobList(path, defaultConfig.managerFilePatterns),
       ).toBe(expected);
+    });
+  });
+
+  describe('mise registry', () => {
+    // mise backends that Renovate doesn't currently support
+    const knownUnsupportedBackends = new Set(['http', 'packslip']);
+
+    it('recognises every backend type used in the bundled mise registry data', () => {
+      const usedBackends = new Set<string>();
+      for (const backends of Object.values(parsedMiseRegistry.tools)) {
+        for (const backend of Object.keys(backends)) {
+          usedBackends.add(backend);
+        }
+      }
+
+      const unknownBackends = new Set(
+        [...usedBackends].filter(
+          (backend) =>
+            !supportedBackendDatasources.has(backend) &&
+            !maybeSupportedBackendDatasources.has(backend),
+        ),
+      );
+
+      expect(unknownBackends).toEqual(knownUnsupportedBackends);
     });
   });
 });

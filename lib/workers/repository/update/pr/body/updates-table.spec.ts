@@ -15,6 +15,27 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     expect(result).toBe('');
   });
 
+  it('skips an upgrade that defines no body columns', () => {
+    const configObj: BranchConfig = {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [
+        partial<BranchUpgradeConfig>({
+          manager: 'some-manager',
+          branchName: 'some-branch',
+        }),
+      ],
+      prBodyColumns: ['Package'],
+    };
+
+    const result = getPrUpdatesTable(configObj);
+
+    // the upgrade contributes no cells, so the table renders empty
+    expect(result).toContain('This PR contains the following updates:');
+    expect(result).not.toContain('Package');
+  });
+
   it('checks results for getPrUpdatesTable', () => {
     const upgrade0 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',

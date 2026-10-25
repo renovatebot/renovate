@@ -1,7 +1,9 @@
 // TODO: types (#22198)
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { isPseudoVersion } from '../../versioning/gomod/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
+import type { GoModManagerData } from './types.ts';
 
 function getNameWithNoVersion(name: string): string {
   // remove version suffixes like /v1 or /v2
@@ -16,7 +18,7 @@ function getNameWithNoVersion(name: string): string {
 export function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): string | null {
+}: UpdateDependencyConfig<GoModManagerData>): string | null {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depType, updateType } = upgrade;
@@ -25,18 +27,20 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
+    const lineNumber = upgrade.managerData?.lineNumber;
+    const multiLine = upgrade.managerData?.multiLine;
     /* v8 ignore next -- should never happen */
-    if (!currentName || !upgrade.managerData) {
+    if (!currentName || lineNumber === undefined) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
     /* v8 ignore next -- hard to test */
-    if (lines.length <= upgrade.managerData.lineNumber) {
+    if (lines.length <= lineNumber) {
       logger.warn('go.mod current line no longer exists after update');
       return null;
     }
-    const lineToChange = lines[upgrade.managerData.lineNumber];
+    const lineToChange = lines[lineNumber];
     logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
       !lineToChange.includes(currentNameNoVersion) &&
@@ -56,7 +60,7 @@ export function updateDependency({
       );
     }
     if (depType === 'replace') {
-      if (upgrade.managerData.multiLine) {
+      if (multiLine) {
         updateLineExp = regEx(
           /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
@@ -66,7 +70,7 @@ export function updateDependency({
         );
       }
     } else if (depType === 'require' || depType === 'indirect') {
-      if (upgrade.managerData.multiLine) {
+      if (multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
         updateLineExp = regEx(
@@ -87,7 +91,7 @@ export function updateDependency({
       // has no data and newValue may equal currentValue. In that case, fall
       // through to the bare hash path so that gomodTidy can resolve it.
       if (
-        upgrade.newValue?.startsWith('v0.0.0-') &&
+        isPseudoVersion(upgrade.newValue) &&
         upgrade.newValue !== upgrade.currentValue
       ) {
         logger.debug(
@@ -182,7 +186,7 @@ export function updateDependency({
       );
     }
 
-    lines[upgrade.managerData.lineNumber] = newLine;
+    lines[lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {
     logger.debug({ err }, 'Error setting new go.mod version');

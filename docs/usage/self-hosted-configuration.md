@@ -24,7 +24,7 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 !!! note
   Config options with `type=string` are always non-mergeable, so `mergeable=false`.
 
-## `allowCustomCrateRegistries`
+## `allowCustomCrateGitRegistries`
 
 ## `allowPlugins`
 
@@ -126,10 +126,16 @@ Any set `allowedHeaders` overrides the default "X-" allowed headers, so you shou
 The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+`allowedHeaders` constrains what a repository, and the presets it extends, may set - it does not constrain you, the self-hosted administrator.
+
+The `headers` you set in your own `hostRules` - whether in your global config or in a `repositories[]` entry - are always applied, regardless of `allowedHeaders`, as is any `headers` set by a preset a `repositories[]` entry chose to `extends`.
+
 !!! note
-  Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
-  So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
-  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value.
+  This does not (yet) extend to a preset your global config itself chooses to `extends` when no `repositories[]` entry is involved: those `headers` are still constrained by `allowedHeaders`, unlike the equivalent case for `env`.
+
+Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
+So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
+Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value, and can only set a header name of its own where it is permitted by `allowedHeaders`.
 
 Examples:
 
@@ -431,7 +437,7 @@ In this example:
 - `changelog-github-release` gets 45 minutes (matches `/^changelog-/` regex)
 - `preset` gets 30 minutes (matches `*` wildcard - shortest pattern)
 
-Namespaces of special interest follow the pattern `datasource-releases-{datasource}`.
+Namespaces of special interest follow the pattern `datasource-{datasource}`.
 When releases for a datasource are fetched, they are stored in this namespace.
 Whether caching is enabled for a particular datasource depends on whether it's private or caching is forced with [`cachePrivatePackages`](./self-hosted-configuration.md#cacheprivatepackages).
 
@@ -875,10 +881,14 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+!!! note
+  Renovate applies your own `hostRules`, `internalHostAccess`, `platform` and `endpoint` when it fetches `globalExtends` presets.
+  A `globalExtends` preset on an internal host is judged like any other preset, so a scoped `allowInternal` grant permits it.
+  The `hostRules`, `internalHostAccess` and `secrets` set inside a `globalExtends` preset do not apply when Renovate fetches that preset, or the presets it extends.
+
 !!! warning
-  `globalExtends` presets can't be private.
-  When Renovate resolves `globalExtends` it does not fully process the configuration.
-  This means that Renovate does not have the authentication it needs to fetch private things.
+  Renovate resolves `globalExtends` before it initializes the platform, so it does not have the platform `token` yet.
+  To fetch a private `globalExtends` preset, including a `local>` preset, add a `hostRules` entry with the credentials for its host.
 
 ## `hostRules`
 
@@ -1024,21 +1034,7 @@ If `inheritConfig` is `true` but the inherited config file does _not_ exist then
 If the file exists but cannot be parsed, then Renovate will raise a config warning issue and abort the job.
 
 The inherited config may include all valid repository config and these config options:
-
-- `bbUseDevelopmentBranch`
-- `onboarding`
-- `onboardingBranch`
-- `onboardingCommitMessage`
-- `onboardingConfig`
-- `onboardingConfigFileName`
-- `onboardingNoDeps`
-- `onboardingPrTitle`
-- `onboardingRebaseCheckbox`
-- `requireConfig`
-
-!!! note
-  The above list is prepared manually and may become out of date.
-  Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+<!-- Autogenerate inheritConfigSupport-list -->
 
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 

@@ -13,9 +13,13 @@ export class GalaxyDatasource extends Datasource {
     super(GalaxyDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://galaxy.ansible.com/'];
+  }
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -37,13 +41,7 @@ export class GalaxyDatasource extends Datasource {
     const galaxyAPIUrl = `${registryUrl}api/v1/roles/?owner__username=${userName}&name=${projectName}`;
     const galaxyProjectUrl = `${registryUrl}${userName}/${projectName}`;
 
-    let body: GalaxyV1 | null = null;
-    try {
-      const raw = await this.http.getJson(galaxyAPIUrl, GalaxyV1);
-      body = raw.body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(galaxyAPIUrl, GalaxyV1);
 
     if (body.results.length > 1) {
       body.results = body.results.filter(
@@ -93,6 +91,7 @@ export class GalaxyDatasource extends Datasource {
       {
         namespace: 'datasource-galaxy',
         key: config.packageName,
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

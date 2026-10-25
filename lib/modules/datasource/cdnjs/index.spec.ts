@@ -100,6 +100,21 @@ describe('modules/datasource/cdnjs/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('processes data without homepage and repository', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('d3-force/d3-force.js'))
+        .reply(200, { versions: ['1.0.0', '2.0.0'] });
+      const res = await getPkgReleases({
+        datasource: CdnjsDatasource.id,
+        packageName: 'd3-force/d3-force.js',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://api.cdnjs.com/',
+        releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
     it('processes real data', async () => {
       httpMock
         .scope(baseUrl)

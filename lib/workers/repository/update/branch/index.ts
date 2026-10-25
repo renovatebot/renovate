@@ -39,9 +39,9 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
-import { coerceNumber } from '../../../../util/number.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
+import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import * as template from '../../../../util/template/index.ts';
+import { withoutUrlCredentials } from '../../../../util/url.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
@@ -458,9 +458,7 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
-          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
-          : 0;
+        const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
 
         if (minimumReleaseAgeMs) {
           const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
@@ -764,14 +762,12 @@ export async function processBranch(
       // compile commit message with body, which maybe needs changelogs
       if (config.commitBody) {
         // changelog is on first upgrade
-        config.commitMessage = `${config.commitMessage!}\n\n${template.compile(
-          config.commitBody,
-          {
-            ...config,
-            logJSON: config.upgrades[0].logJSON,
-            releases: config.upgrades[0].releases,
-          },
-        )}`;
+        const commitBody = template.compile(config.commitBody, {
+          ...config,
+          logJSON: config.upgrades[0].logJSON,
+          releases: config.upgrades[0].releases,
+        });
+        config.commitMessage = `${config.commitMessage!}\n\n${withoutUrlCredentials(commitBody)}`;
 
         logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
       }
@@ -780,7 +776,7 @@ export async function processBranch(
         // Template expansions can produce broken trailers
         config.commitTrailers = filterValidCommitTrailers(
           config.commitTrailers.map((trailer) =>
-            template.compile(trailer, config),
+            withoutUrlCredentials(template.compile(trailer, config)),
           ),
         );
         logger.trace(

@@ -337,6 +337,9 @@ jobs:
       - name: Lint project file structure
         run: pnpm ls-lint
 
+      - name: Check unused dependencies
+        run: pnpm knip
+
       - name: Check git version
         run: pnpm git-check
 
@@ -368,9 +371,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
-          version: 1.30.1
+          version: 1.31.1
 
   test:
     needs: [setup, prefetch]
@@ -430,6 +433,15 @@ jobs:
               matrix.cache-key
             }}-
 
+      # git-ignored canary, tests must not read a `config.js` from the working directory
+      - name: Create canary config.js
+        shell: bash
+        run: |
+          cat > config.js <<'EOF'
+          globalThis.__RENOVATE_CONFIG_JS_CANARY__ = true;
+          export default { token: 'canary-config-js-must-not-be-read-by-tests' };
+          EOF
+
       - name: Unit tests
         shell: bash
         run: |
@@ -442,7 +454,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           report_type: test_results
@@ -464,7 +476,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -488,7 +500,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
@@ -496,7 +508,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -526,7 +538,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
@@ -542,7 +554,7 @@ jobs:
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
             --statements 100 \
-            --branches 98.71 \
+            --branches 100 \
             --functions 100 \
             --lines 100 \
 
@@ -685,7 +697,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: renovate-dist
           path: dist/
@@ -708,7 +720,7 @@ jobs:
         uses: ./.github/actions/setup-docker
 
       - name: Download dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
@@ -731,7 +743,7 @@ jobs:
         if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_RELEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_TOKEN: ${{ github.token }}
 
       - run: df -h
         if: ${{ !cancelled() }}
@@ -756,9 +768,9 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: 0.12.13
+          version: 0.13.5
           enable-cache: true
           cache-python: true
 
@@ -768,14 +780,14 @@ jobs:
       - name: Build
         run: pnpm build:docs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event.repository.has_issues == false) && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docs
           path: tmp/docs/
@@ -806,13 +818,16 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
 
       - name: Pack
         run: pnpm test-e2e:pack
+
+      - name: Check npm install
+        run: pnpm test-e2e:npm
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -853,7 +868,7 @@ jobs:
       # right at the start of the job, make sure we're not seeing another commit that's landed
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: renovatebot/renovate
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
@@ -893,16 +908,16 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$REPOSITORY_OWNER" --password-stdin
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: 0.12.13
+          version: 0.13.5
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -924,7 +939,7 @@ jobs:
       # and one final check, in case preparing the environment has taken long enough for new commits
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
@@ -940,7 +955,7 @@ jobs:
         run: |
           pnpm semantic-release --dry-run "$DRY_RUN"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           LOG_LEVEL: debug
 
       - name: Build mkdocs site for deployment
@@ -952,12 +967,12 @@ jobs:
           mkdir -p tmp
           tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mkdocs-site
           path: tmp/mkdocs-site.tgz
@@ -983,7 +998,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download mkdocs site from release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: mkdocs-site
           path: tmp

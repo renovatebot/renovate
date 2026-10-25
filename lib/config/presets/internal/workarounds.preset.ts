@@ -24,6 +24,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
       'workarounds:groupings',
+      'workarounds:helmDocs',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -149,6 +150,15 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  helmDocs: {
+    description: 'Block helm-docs calver-like versions from 2019',
+    packageRules: [
+      {
+        allowedVersions: '!/^19\\.(0614|0110)$/',
+        matchPackageNames: ['norwoodj/helm-docs'],
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -260,10 +270,10 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
-          'Use partial semver versioning for partial mise Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
+          'Use partial semver versioning for partial mise and GitHub Actions Java versions so rolling versions (e.g. 21) are not upgraded to full-precision versions (e.g. 21.0.11+9.0.LTS).',
         matchCurrentValue: '/^\\d+(?:\\.\\d+)?$/',
         matchDatasources: ['java-version'],
-        matchManagers: ['mise'],
+        matchManagers: ['github-actions', 'mise'],
         versioning: 'semver-partial',
       },
       {

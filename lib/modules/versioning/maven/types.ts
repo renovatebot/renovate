@@ -1,13 +1,13 @@
 export interface BaseToken {
   prefix: string;
   type: 'TYPE_NUMBER' | 'TYPE_QUALIFIER';
-  val: number | string;
+  val: bigint | string;
   isTransition?: boolean;
 }
 
 export interface NumberToken extends BaseToken {
   type: 'TYPE_NUMBER';
-  val: number;
+  val: bigint;
 }
 
 export interface QualifierToken extends BaseToken {

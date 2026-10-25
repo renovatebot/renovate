@@ -5,6 +5,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
@@ -51,7 +52,9 @@ function findPackageInResponse(
 export class RepologyDatasource extends Datasource {
   static readonly id = 'repology';
 
-  override readonly defaultRegistryUrls = ['https://repology.org/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://repology.org/'];
+  }
 
   override readonly registryStrategy = 'hunt';
 
@@ -133,6 +136,7 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
+        // v8 ignore else -- the resolver either returns a body or throws
         if (response) {
           const pkg = findPackageInResponse(response, repoName, pkgName, [
             pkgType,
@@ -193,7 +197,7 @@ export class RepologyDatasource extends Datasource {
       {
         ttlMinutes: 60,
         namespace: `datasource-${RepologyDatasource.id}`,
-        key: joinUrlParts(registryUrl, repoName, pkgName),
+        key: buildCacheKey(registryUrl, repoName, pkgName),
       },
       () => this._queryPackage(registryUrl, repoName, pkgName),
     );

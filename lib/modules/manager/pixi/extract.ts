@@ -58,6 +58,7 @@ export function getUserPixiConfig(
     logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
     return null;
   }
+  /* v8 ignore next -- a successful parse always yields a value */
   return val ?? null;
 }
 

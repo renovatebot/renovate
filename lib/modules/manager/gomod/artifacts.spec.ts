@@ -87,7 +87,6 @@ describe('modules/manager/gomod/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
   });
 
   afterEach(() => {
@@ -1019,16 +1018,17 @@ describe('modules/manager/gomod/artifacts', () => {
           env: {
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
-              'url.https://ssh:some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_1:
-              'url.https://git:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_2:
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_3:
-              'url.https://ssh:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_4:
-              'url.https://git:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_5:
-              'url.https://some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
             GIT_CONFIG_VALUE_1: 'git@github.com:',
             GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -1091,16 +1091,17 @@ describe('modules/manager/gomod/artifacts', () => {
           env: {
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
-              'url.https://ssh:some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_1:
-              'url.https://git:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_2:
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_3:
-              'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+              'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
             GIT_CONFIG_KEY_4:
-              'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+              'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
             GIT_CONFIG_KEY_5:
-              'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+              'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
             GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
             GIT_CONFIG_VALUE_1: 'git@github.com:',
             GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -1363,16 +1364,17 @@ describe('modules/manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '9',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_6:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_7:
@@ -1444,10 +1446,11 @@ describe('modules/manager/gomod/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -2191,6 +2194,66 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
+  it('updates import paths with the extracted tool version constraint', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'main.go'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    await expect(
+      gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+        ],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+          constraints: {},
+          extractedConstraints: {
+            gomodMod: 'v1.2.3',
+          },
+        },
+      }),
+    ).resolves.toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@v1.2.3',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('updates import paths with latest tool version on invalid version constraint', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
@@ -2897,49 +2960,71 @@ describe('modules/manager/gomod/artifacts', () => {
   });
 
   describe('deriveGoToolchainConstraints', () => {
-    it('returns config constraint when set', () => {
-      expect(
+    it('returns config constraint when set', async () => {
+      await expect(
         deriveGoToolchainConstraints({ constraints: { go: '1.21' } }, ''),
-      ).toBe('1.21');
+      ).resolves.toBe('1.21');
     });
 
-    it('config constraint takes precedence over go.mod content', () => {
-      expect(
+    it('config constraint takes precedence over go.mod content', async () => {
+      await expect(
         deriveGoToolchainConstraints(
           { constraints: { go: '1.20' } },
           'go 1.23.5',
         ),
-      ).toBe('1.20');
+      ).resolves.toBe('1.20');
     });
 
-    it('returns toolchain version when toolchain directive is present', () => {
-      expect(
+    it('returns toolchain version when toolchain directive is present', async () => {
+      await expect(
         deriveGoToolchainConstraints({}, 'go 1.13\ntoolchain go1.23.6'),
-      ).toBe('1.23.6');
+      ).resolves.toBe('1.23.6');
     });
 
-    it('returns full go version when only full go directive is present (no toolchain)', () => {
-      expect(deriveGoToolchainConstraints({}, 'go 1.23.5')).toBe('1.23.5');
+    it('returns full go version when only full go directive is present (no toolchain)', async () => {
+      await expect(deriveGoToolchainConstraints({}, 'go 1.23.5')).resolves.toBe(
+        '1.23.5',
+      );
     });
 
-    it('returns range constraint for major.minor go directive', () => {
-      expect(deriveGoToolchainConstraints({}, 'go 1.17')).toBe('^1.17');
+    it('returns range constraint for major.minor go directive', async () => {
+      await expect(deriveGoToolchainConstraints({}, 'go 1.17')).resolves.toBe(
+        '^1.17',
+      );
     });
 
-    it('returns undefined when no go version in content and no config constraint', () => {
-      expect(
+    it('returns undefined when no go version in content and no config constraint', async () => {
+      await expect(
         deriveGoToolchainConstraints({}, 'module example.com/foo'),
-      ).toBeUndefined();
+      ).resolves.toBeUndefined();
+    });
+
+    it('falls back to the extracted constraint when go.mod has no go version', async () => {
+      await expect(
+        deriveGoToolchainConstraints(
+          { extractedConstraints: { go: '1.22' } },
+          'module example.com/foo',
+        ),
+      ).resolves.toBe('1.22');
+    });
+
+    it('prefers the go.mod content over the extracted constraint', async () => {
+      await expect(
+        deriveGoToolchainConstraints(
+          { extractedConstraints: { go: '1.22' } },
+          'go 1.23.5',
+        ),
+      ).resolves.toBe('1.23.5');
     });
 
     // TODO #42601
-    it('ignores constraints.golang and falls back to go.mod content', () => {
-      expect(
+    it('ignores constraints.golang and falls back to go.mod content', async () => {
+      await expect(
         deriveGoToolchainConstraints(
           { constraints: { golang: '1.21' } },
           'go 1.23.5',
         ),
-      ).toBe('1.23.5');
+      ).resolves.toBe('1.23.5');
     });
   });
 });

@@ -16,9 +16,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { EnsureIssueConfig, RepoParams } from '../index.ts';
-import * as helper from './forgejo-helper.ts';
-import * as forgejo from './index.ts';
+import * as helper from '../gitea/gitea-helper.ts';
 import type {
   Comment,
   CommitStatus,
@@ -28,7 +26,9 @@ import type {
   PR,
   Repo,
   User,
-} from './schema.ts';
+} from '../gitea/schema.ts';
+import type { EnsureIssueConfig, RepoParams } from '../index.ts';
+import * as forgejo from './index.ts';
 
 /**
  * latest tested forgejo version.
@@ -247,7 +247,6 @@ describe('modules/platform/forgejo/index', () => {
     repoCache.resetCache();
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules.clear();
   });
 
   async function initFakePlatform(
@@ -804,9 +803,10 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
+          url: `https://${token}:x-oauth-basic@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
       );
     });
@@ -834,6 +834,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );
@@ -1310,7 +1311,7 @@ describe('modules/platform/forgejo/index', () => {
       const res1 = await forgejo.getPrList();
       expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
-      memCache.set('forgejo-pr-cache-synced', false);
+      memCache.set('forgejo:pr-cache-synced', false);
 
       const res2 = await forgejo.getPrList();
       expect(res2).toMatchObject([
@@ -1605,7 +1606,7 @@ describe('modules/platform/forgejo/index', () => {
   describe('createPr', () => {
     beforeEach(() => {
       vi.restoreAllMocks();
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
     });
 
     const mockNewPR: MockPr = {
@@ -1931,13 +1932,13 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        expect.objectContaining({ prNumber: 42 }),
-        'Forgejo-native automerge: fail',
+        expect.objectContaining({ prNumber: 42, platform: 'forgejo' }),
+        'Platform-native automerge: fail',
       );
     });
 
     it('continues if platform automerge is not supported', async () => {
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')

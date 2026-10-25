@@ -41,3 +41,27 @@ export function matchesHelmValuesInlineImage(
 ): data is string {
   return !!(parentKeyRe.test(parentKey) && data && isString(data));
 }
+
+/**
+ * Returns the version defined by a sibling `tag` or `version` key of the given
+ * object, if any:
+ *
+ * cli:
+ *   image: 'something'
+ *   tag: v1.0.0
+ * cli:
+ *   image: 'something'
+ *   version: v1.0.0
+ */
+export function getHelmValuesSiblingVersion(
+  data: Record<string, unknown> | HelmDockerImageDependency,
+): string | undefined {
+  const { tag, version } = data as Record<string, unknown>;
+  if (isString(tag) && tag) {
+    return tag;
+  }
+  if (isString(version) && version) {
+    return version;
+  }
+  return undefined;
+}

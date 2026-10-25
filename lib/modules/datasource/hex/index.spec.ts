@@ -277,6 +277,24 @@ describe('modules/datasource/hex/index', () => {
       expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
     });
 
+    it('handles a package with no html_url and no github link', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/no_links')
+        .reply(200, {
+          releases: [
+            { version: '1.0.0', inserted_at: '2021-08-04T15:26:26.500Z' },
+          ],
+        });
+      const res = await getPkgReleases({ datasource, packageName: 'no_links' });
+      expect(res).toEqual({
+        registryUrl: 'https://hex.pm',
+        releases: [
+          { version: '1.0.0', releaseTimestamp: '2021-08-04T15:26:26.500Z' },
+        ],
+      });
+    });
+
     it('processes a private repo with auth', async () => {
       httpMock
         .scope(baseUrl, {

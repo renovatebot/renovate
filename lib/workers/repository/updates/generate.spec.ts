@@ -352,6 +352,92 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
     });
 
+    it('merges extractedConstraints of all upgrades', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { python: '==3.11' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { poetry: '1.8.0' },
+        },
+        {
+          manager: 'some-manager',
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.extractedConstraints).toEqual({
+        python: '==3.11',
+        poetry: '1.8.0',
+      });
+    });
+
+    it('uses the new value of a tool constraint which the branch updates', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'renovate-config',
+          depName: 'golang',
+          depType: 'tool-constraint',
+          branchName: 'some-branch',
+          currentValue: '1.25',
+          newValue: '1.27',
+          constraints: { golang: '1.25', node: '22' },
+        },
+        {
+          manager: 'mise',
+          depName: 'go',
+          branchName: 'some-branch',
+          currentValue: '1.24.4',
+          newValue: '1.27.0',
+          constraints: { golang: '1.25' },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades.map((upgrade) => upgrade.constraints)).toEqual([
+        { golang: '1.27' },
+        { golang: '1.27', node: '22' },
+      ]);
+    });
+
+    it('keeps a different constraint value configured via `packageRules`', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'renovate-config',
+          depName: 'golang',
+          depType: 'tool-constraint',
+          branchName: 'some-branch',
+          currentValue: '1.25',
+          newValue: '1.27',
+          constraints: { golang: '1.25' },
+        },
+        {
+          manager: 'gomod',
+          depName: 'github.com/some/module',
+          branchName: 'some-branch',
+          currentValue: 'v1.0.0',
+          newValue: 'v1.1.0',
+          constraints: { golang: '1.24' },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(
+        res.upgrades.map((upgrade) => upgrade.constraints),
+      ).toIncludeSameMembers([{ golang: '1.27' }, { golang: '1.24' }]);
+    });
+
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {
@@ -817,6 +903,28 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
+    it('uses semantic commits without a scope', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          semanticCommits: 'enabled',
+          semanticCommitType: 'chore',
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          newVersion: '1.2.0',
+          branchName: 'some-branch',
+        },
+      ] satisfies BranchUpgradeConfig[];
+
+      const res = generateBranchConfig(branch);
+
+      expect(res.commitMessage).toBe(
+        'chore: update dependency some-dep to v1.2.0',
+      );
+    });
+
     it('calculates the highest priority semanticCommitType', () => {
       const branch = [
         {
@@ -1088,6 +1196,126 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('upgrade some-dep');
       expect(res.commitMessage).toBe('update dependency some-dep to');
+    });
+
+    describe('url userinfo in dependency names', () => {
+      it.each`
+        depName                                          | expected
+        ${'https://user:token@git.example.com/org/repo'} | ${'https://git.example.com/org/repo'}
+        ${'https://${USER}@git.example.com/org/repo'}    | ${'https://${USER}@git.example.com/org/repo'}
+        ${'ssh://git@git.example.com/org/repo'}          | ${'ssh://git@git.example.com/org/repo'}
+      `(
+        'uses $expected in commit message and PR title',
+        ({ depName, expected }: { depName: string; expected: string }) => {
+          const branch = [
+            {
+              ...requiredDefaultOptions,
+              manager: 'some-manager',
+              depName,
+              newValue: '1.2.0',
+              isSingleVersion: true,
+              newVersion: '1.2.0',
+              branchName: 'some-branch',
+            },
+          ] satisfies BranchUpgradeConfig[];
+
+          const res = generateBranchConfig(branch);
+
+          expect(res.commitMessage).toBe(
+            `Update dependency ${expected} to v1.2.0`,
+          );
+          expect(res.prTitle).toBe(`Update dependency ${expected} to v1.2.0`);
+        },
+      );
+
+      it('removes credentials from a lowercased commit message and manual PR title', () => {
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://User:Token@git.example.com/org/repo',
+            semanticCommits: 'enabled',
+            semanticCommitType: 'chore',
+            prTitle: 'Upgrade {{depName}}',
+            newValue: '1.2.0',
+            isSingleVersion: true,
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.commitMessage).toBe(
+          'chore: update dependency https://git.example.com/org/repo to v1.2.0',
+        );
+        expect(res.prTitle).toBe('upgrade https://git.example.com/org/repo');
+      });
+
+      it('removes credentials from a group PR title and commit message', () => {
+        const group = {
+          commitMessageTopic: '{{{groupName}}}',
+          prTitle: 'Update {{{groupName}}} to {{{newValue}}}',
+        };
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://user:token@git.example.com/org/repo',
+            groupName: 'https://user:token@git.example.com/org/repo',
+            groupSingleUpdates: true,
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+            group,
+          },
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            depName: 'https://user:token@git.example.com/org/other',
+            groupName: 'https://user:token@git.example.com/org/repo',
+            groupSingleUpdates: true,
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+            group,
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.isGroup).toBeTrue();
+        expect(res.prTitle).toBe(
+          'Update https://git.example.com/org/repo to 1.2.0',
+        );
+        expect(res.commitMessage).not.toContain('token');
+        expect(res.commitMessage).toContain('https://git.example.com/org/repo');
+      });
+
+      it('removes credentials from the commit body table', () => {
+        const branch = [
+          {
+            ...requiredDefaultOptions,
+            manager: 'some-manager',
+            commitBodyTable: true,
+            datasource: 'git-tags',
+            depName: 'repo',
+            packageName: 'https://user:token@git.example.com/org/repo',
+            currentValue: '1.0.0',
+            currentVersion: '1.0.0',
+            newValue: '1.2.0',
+            newVersion: '1.2.0',
+            branchName: 'some-branch',
+          },
+        ] satisfies BranchUpgradeConfig[];
+
+        const res = generateBranchConfig(branch);
+
+        expect(res.commitMessage).toContain(
+          '| https://git.example.com/org/repo |',
+        );
+        expect(res.commitMessage).not.toContain('token');
+      });
     });
 
     it('handles @types specially', () => {
@@ -1603,6 +1831,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1614,6 +1843,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: 'docker',
           depName: 'some-dep',
+          packageName: 'some-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1625,6 +1855,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -1636,6 +1867,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           datasource: NpmDatasource.id,
           depName: 'another-dep',
+          packageName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
