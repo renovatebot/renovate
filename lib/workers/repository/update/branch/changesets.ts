@@ -1,0 +1,298 @@
+import { isString, isTruthy } from '@sindresorhus/is';
+import type { Minimatch } from 'minimatch';
+import upath from 'upath';
+import { z } from 'zod/v4';
+import { logger } from '../../../../logger/index.ts';
+import type { PackageFile } from '../../../../modules/manager/types.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { readLocalFile } from '../../../../util/fs/index.ts';
+import { getFile } from '../../../../util/git/index.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import { hash } from '../../../../util/hash.ts';
+import { minimatch } from '../../../../util/minimatch.ts';
+import { coerceObject } from '../../../../util/object.ts';
+import { regEx } from '../../../../util/regex.ts';
+import {
+  Json,
+  LooseArray,
+  LooseRecord,
+} from '../../../../util/schema-utils/index.ts';
+import type { BranchConfig } from '../../../types.ts';
+
+const changesetConfigFile = '.changeset/config.json';
+
+const ChangesetConfig = Json.pipe(
+  z.object({
+    ignore: LooseArray(z.string()).catch([]),
+  }),
+);
+
+const DependencySpecs = LooseRecord(z.string()).catch({});
+
+const PackageJson = Json.pipe(
+  z.object({
+    name: z.string().optional().catch(undefined),
+    private: z.boolean().optional().catch(undefined),
+    dependencies: DependencySpecs.optional(),
+    optionalDependencies: DependencySpecs.optional(),
+    peerDependencies: DependencySpecs.optional(),
+  }),
+);
+type PackageJson = z.infer<typeof PackageJson>;
+
+const productionDepTypes = ['dependencies', 'optionalDependencies'] as const;
+
+const catalogDepTypeRegex = regEx(/^(?:pnpm|yarn)\.catalog\.(?<catalog>.+)$/);
+
+type BumpType = 'major' | 'patch';
+
+interface DependencyChange {
+  depName: string;
+  catalog?: string;
+  from?: string;
+  to?: string;
+}
+
+interface Release {
+  name: string;
+  type: BumpType;
+  changes: DependencyChange[];
+}
+
+/** Catalog name -> dependency name -> change, from the catalog upgrades in the branch */
+type CatalogChanges = Map<string, Map<string, DependencyChange>>;
+
+/**
+ * Generates a changesets file which bumps every published workspace package
+ * whose `dependencies`, `optionalDependencies` or `peerDependencies` changed
+ * in the branch.
+ */
+export async function generateChangeset(
+  config: BranchConfig,
+  packageFiles: Record<string, PackageFile[]> | undefined,
+): Promise<FileChange[]> {
+  if (!config.postUpdateOptions?.includes('changesets')) {
+    return [];
+  }
+
+  const ignore = await getChangesetIgnore();
+  if (!ignore) {
+    return [];
+  }
+
+  const releases = await getReleases(config, packageFiles, ignore);
+  if (!releases.length) {
+    logger.debug('No changeset generated: no published package changed');
+    return [];
+  }
+
+  const contents = formatChangeset(releases);
+  const path = `.changeset/renovate-${hash(contents, 'sha256').slice(0, 10)}.md`;
+  logger.debug(
+    `Generated changeset ${path} for ${releases.map(({ name, type }) => `${name} (${type})`).join(', ')}`,
+  );
+  return [{ type: 'addition', path, contents }];
+}
+
+async function getChangesetIgnore(): Promise<string[] | null> {
+  const content = await readLocalFile(changesetConfigFile, 'utf8');
+  if (!content) {
+    logger.debug(
+      `No changeset generated: ${changesetConfigFile} does not exist`,
+    );
+    return null;
+  }
+
+  const parsed = ChangesetConfig.safeParse(content);
+  if (!parsed.success) {
+    logger.debug(
+      { err: parsed.error },
+      `No changeset generated: ${changesetConfigFile} is invalid`,
+    );
+    return null;
+  }
+
+  return parsed.data.ignore;
+}
+
+async function getReleases(
+  config: BranchConfig,
+  packageFiles: Record<string, PackageFile[]> | undefined,
+  ignore: string[],
+): Promise<Release[]> {
+  const updatedContents = new Map<string, string>();
+  for (const file of coerceArray(config.updatedPackageFiles)) {
+    if (
+      file.type === 'addition' &&
+      upath.basename(file.path) === 'package.json' &&
+      isString(file.contents)
+    ) {
+      updatedContents.set(file.path, file.contents);
+    }
+  }
+
+  const catalogChanges = getCatalogChanges(config);
+
+  // A catalog update changes every package consuming it, not only the updated package files
+  const paths = new Set(updatedContents.keys());
+  if (catalogChanges.size) {
+    for (const packageFile of Object.values(
+      coerceObject(packageFiles),
+    ).flat()) {
+      if (upath.basename(packageFile.packageFile) === 'package.json') {
+        paths.add(packageFile.packageFile);
+      }
+    }
+  }
+
+  const ignoreMatchers = ignore.map((pattern) => minimatch(pattern));
+  const releases: (Release | null)[] = [];
+  for (const path of [...paths].sort()) {
+    releases.push(
+      await getPackageRelease(
+        path,
+        updatedContents.get(path),
+        config.baseBranch,
+        ignoreMatchers,
+        catalogChanges,
+      ),
+    );
+  }
+
+  return releases.filter(isTruthy).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function getPackageRelease(
+  path: string,
+  updatedContent: string | undefined,
+  baseBranch: string,
+  ignoreMatchers: Minimatch[],
+  catalogChanges: CatalogChanges,
+): Promise<Release | null> {
+  const after = parsePackageJson(
+    updatedContent ?? (await readLocalFile(path, 'utf8')),
+  );
+  const name = after?.name;
+  if (
+    !name ||
+    after.private ||
+    ignoreMatchers.some((matcher) => matcher.match(name))
+  ) {
+    return null;
+  }
+
+  const before = updatedContent
+    ? coerceObject(parsePackageJson(await getFile(path, baseBranch)))
+    : after;
+  return getRelease(name, before, after, catalogChanges);
+}
+
+function parsePackageJson(content: string | null): PackageJson | null {
+  const parsed = PackageJson.safeParse(content);
+  return parsed.success ? parsed.data : null;
+}
+
+function getCatalogChanges(config: BranchConfig): CatalogChanges {
+  const catalogChanges: CatalogChanges = new Map();
+  for (const upgrade of config.upgrades) {
+    const catalog = catalogDepTypeRegex.exec(upgrade.depType ?? '')?.groups
+      ?.catalog;
+    if (!catalog || !upgrade.depName) {
+      continue;
+    }
+    const changes = catalogChanges.get(catalog) ?? new Map();
+    changes.set(upgrade.depName, {
+      depName: upgrade.depName,
+      catalog,
+      from: upgrade.currentValue,
+      to: upgrade.newValue,
+    });
+    catalogChanges.set(catalog, changes);
+  }
+  return catalogChanges;
+}
+
+function getRelease(
+  name: string,
+  before: PackageJson,
+  after: PackageJson,
+  catalogChanges: CatalogChanges,
+): Release | null {
+  const peerChanges = getDependencyChanges(
+    before.peerDependencies,
+    after.peerDependencies,
+    catalogChanges,
+  );
+  const productionChanges = productionDepTypes.flatMap((depType) =>
+    getDependencyChanges(before[depType], after[depType], catalogChanges),
+  );
+
+  if (peerChanges.length) {
+    // peer dependency changes can break existing consumers
+    return {
+      name,
+      type: 'major',
+      changes: [...peerChanges, ...productionChanges],
+    };
+  }
+
+  if (productionChanges.length) {
+    return { name, type: 'patch', changes: productionChanges };
+  }
+
+  return null;
+}
+
+function getDependencyChanges(
+  before: Record<string, string> = {},
+  after: Record<string, string> = {},
+  catalogChanges: CatalogChanges,
+): DependencyChange[] {
+  const changes: DependencyChange[] = [];
+  const depNames = new Set([...Object.keys(before), ...Object.keys(after)]);
+  for (const depName of depNames) {
+    const from = before[depName];
+    const to = after[depName];
+    if (from !== to) {
+      changes.push({ depName, from, to });
+      continue;
+    }
+
+    if (to?.startsWith('catalog:')) {
+      const catalog = to.slice('catalog:'.length) || 'default';
+      const catalogChange = catalogChanges.get(catalog)?.get(depName);
+      if (catalogChange) {
+        changes.push(catalogChange);
+      }
+    }
+  }
+  return changes;
+}
+
+function formatChange({
+  depName,
+  catalog,
+  from,
+  to,
+}: DependencyChange): string {
+  const dep = catalog
+    ? `\`${depName}\` (catalog \`${catalog}\`)`
+    : `\`${depName}\``;
+  if (!from) {
+    return `- Added ${dep} at \`${to}\``;
+  }
+  if (!to) {
+    return `- Removed ${dep}`;
+  }
+  return `- Updated ${dep} from \`${from}\` to \`${to}\``;
+}
+
+function formatChangeset(releases: Release[]): string {
+  const bumps = releases.map(
+    ({ name, type }) => `${JSON.stringify(name)}: ${type}`,
+  );
+  const changes = new Set(
+    releases.flatMap(({ changes }) => changes.map(formatChange)),
+  );
+  return `---\n${bumps.join('\n')}\n---\n\nUpdated dependencies:\n\n${[...changes].join('\n')}\n`;
+}

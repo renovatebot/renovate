@@ -4193,6 +4193,37 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 Enable conservative mode for `bundler` (Ruby dependencies).
 This will only update the immediate dependency in the lockfile instead of all subdependencies.
 
+### `changesets`
+
+Add a [changesets](https://github.com/changesets/changesets) file to the branch, for repositories which use changesets to version their packages.
+This works for every package manager which uses `package.json` files, like npm, pnpm, Yarn and Bun.
+
+Renovate compares each `package.json` file in the branch with the base branch, and bumps the packages whose published dependencies changed:
+
+- `major` when `peerDependencies` changed, because that can break existing consumers
+- `patch` when `dependencies` or `optionalDependencies` changed
+
+Packages which use an updated pnpm or Yarn catalog entry through the `catalog:` protocol are bumped too.
+Changes to `devDependencies` and lock file only updates never add a changeset.
+
+Renovate skips private packages, packages without a `name`, and the packages listed in the `ignore` array of `.changeset/config.json`.
+Renovate only adds a changeset if the repository has a `.changeset/config.json` file in its root.
+
+The changeset is named `.changeset/renovate-<hash>.md` and lists the updated dependencies, for example:
+
+```md
+---
+'@my-org/app': patch
+'@my-org/plugin': major
+---
+
+Updated dependencies:
+
+- Updated `react` from `^18.3.1` to `^19.0.0`
+```
+
+This behaves like [`pnpm update --changeset`](https://pnpm.io/cli/update#--changeset), which can't be used by Renovate because Renovate updates the `package.json` files itself.
+
 ### `composerNoMinimalChanges`
 
 Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).

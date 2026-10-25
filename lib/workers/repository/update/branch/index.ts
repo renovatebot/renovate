@@ -54,6 +54,7 @@ import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 import { bumpVersions } from './bump-versions.ts';
+import { generateChangeset } from './changesets.ts';
 import { prAlreadyExisted } from './check-existing.ts';
 import { commitFilesToBranch } from './commit.ts';
 import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
@@ -668,6 +669,7 @@ export async function processBranch(
       );
       config.updatedArtifacts = config.updatedArtifacts.concat(
         actionsLockfile.updatedArtifacts,
+        await generateChangeset(config, branchConfig.packageFiles),
       );
       if (config.updatedArtifacts?.length) {
         logger.debug(
