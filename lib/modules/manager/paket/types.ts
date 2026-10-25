@@ -11,7 +11,7 @@ export interface DependenciesFilePackage {
   versionConstraint?: string;
 }
 
-export interface PaketManagerData extends Record<string, any> {
+export interface PaketManagerData {
   group: string;
 }
 
