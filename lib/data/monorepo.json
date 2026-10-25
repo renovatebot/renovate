@@ -155,6 +155,8 @@
       "https://github.com/microsoft/ClearScript",
       "https://github.com/Microsoft/ClearScript"
     ],
+    "cloudevents-sdk-csharp": "https://github.com/cloudevents/sdk-csharp",
+    "cloudevents-sdk-java": "https://github.com/cloudevents/sdk-java",
     "commitlint": "https://github.com/conventional-changelog/commitlint",
     "confect": "https://github.com/rjdellecese/confect",
     "conform": "https://github.com/edmundhung/conform",
