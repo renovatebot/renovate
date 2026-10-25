@@ -64,11 +64,11 @@ interface Release {
 type CatalogChanges = Map<string, Map<string, DependencyChange>>;
 
 /**
- * Generates a changesets file which bumps every published workspace package
- * whose `dependencies`, `optionalDependencies` or `peerDependencies` changed
- * in the branch.
+ * Generates changesets which bump every published workspace package whose
+ * `dependencies`, `optionalDependencies` or `peerDependencies` changed in the
+ * branch, with one changeset per distinct set of dependency changes.
  */
-export async function generateChangeset(
+export async function generateChangesets(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
 ): Promise<FileChange[]> {
@@ -87,12 +87,16 @@ export async function generateChangeset(
     return [];
   }
 
-  const contents = formatChangeset(releases);
-  const path = `.changeset/renovate-${hash(contents, 'sha256').slice(0, 10)}.md`;
-  logger.debug(
-    `Generated changeset ${path} for ${releases.map(({ name, type }) => `${name} (${type})`).join(', ')}`,
-  );
-  return [{ type: 'addition', path, contents }];
+  const changesets: FileChange[] = [];
+  for (const [summary, group] of groupBySummary(releases)) {
+    const contents = formatChangeset(group, summary);
+    const path = `.changeset/renovate-${hash(contents, 'sha256').slice(0, 10)}.md`;
+    logger.debug(
+      `Generated changeset ${path} for ${group.map(({ name, type }) => `${name} (${type})`).join(', ')}`,
+    );
+    changesets.push({ type: 'addition', path, contents });
+  }
+  return changesets;
 }
 
 async function getChangesetIgnore(): Promise<string[] | null> {
@@ -286,12 +290,30 @@ function formatChange({
   return `- Updated ${dep} from \`${from}\` to \`${to}\``;
 }
 
-function formatChangeset(releases: Release[]): string {
+/**
+ * Groups the releases by their summary, because changesets adds the summary
+ * of a changeset to the changelog of every package it bumps.
+ */
+function groupBySummary(releases: Release[]): Map<string, Release[]> {
+  const groups = new Map<string, Release[]>();
+  for (const release of releases) {
+    const summary = formatSummary(release.changes);
+    groups.set(summary, [...coerceArray(groups.get(summary)), release]);
+  }
+  return groups;
+}
+
+function formatSummary(changes: DependencyChange[]): string {
+  const sortedChanges = [...changes].sort((a, b) =>
+    a.depName.localeCompare(b.depName),
+  );
+  const lines = new Set(sortedChanges.map(formatChange));
+  return `Updated dependencies:\n\n${[...lines].join('\n')}`;
+}
+
+function formatChangeset(releases: Release[], summary: string): string {
   const bumps = releases.map(
     ({ name, type }) => `${JSON.stringify(name)}: ${type}`,
   );
-  const changes = new Set(
-    releases.flatMap(({ changes }) => changes.map(formatChange)),
-  );
-  return `---\n${bumps.join('\n')}\n---\n\nUpdated dependencies:\n\n${[...changes].join('\n')}\n`;
+  return `---\n${bumps.join('\n')}\n---\n\n${summary}\n`;
 }

@@ -40,7 +40,7 @@ import {
   parseLockFile,
   withNpmrcHostRules,
 } from '../utils.ts';
-import { generateChangeset } from './changesets.ts';
+import { generateChangesets } from './changesets.ts';
 import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
 import { processHostRules } from './rules.ts';
@@ -735,7 +735,7 @@ async function getAdditionalFilesInner(
     });
   }
 
-  updatedArtifacts.push(...(await generateChangeset(config, packageFiles)));
+  updatedArtifacts.push(...(await generateChangesets(config, packageFiles)));
 
   return { artifactErrors, artifactNotices, updatedArtifacts };
 }

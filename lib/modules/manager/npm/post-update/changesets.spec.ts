@@ -3,7 +3,7 @@ import { fs, git, partial } from '~test/util.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
-import { generateChangeset } from './changesets.ts';
+import { generateChangesets } from './changesets.ts';
 import type { AdditionalPackageFiles } from './types.ts';
 
 vi.mock('../../../../util/fs/index.ts');
@@ -45,30 +45,30 @@ function getPackageFiles(...paths: string[]): AdditionalPackageFiles {
 }
 
 describe('modules/manager/npm/post-update/changesets', () => {
-  describe('generateChangeset', () => {
+  describe('generateChangesets', () => {
     it('does nothing if the option is disabled', async () => {
       const config = getConfig({ postUpdateOptions: [] });
 
-      await expect(generateChangeset(config, {})).resolves.toEqual([]);
+      await expect(generateChangesets(config, {})).resolves.toEqual([]);
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
     it('does nothing without postUpdateOptions', async () => {
       const config = getConfig({ postUpdateOptions: undefined });
 
-      await expect(generateChangeset(config, {})).resolves.toEqual([]);
+      await expect(generateChangesets(config, {})).resolves.toEqual([]);
     });
 
     it('does nothing without a changesets config', async () => {
       mockFiles({});
 
-      await expect(generateChangeset(getConfig({}), {})).resolves.toEqual([]);
+      await expect(generateChangesets(getConfig({}), {})).resolves.toEqual([]);
     });
 
     it('does nothing with an invalid changesets config', async () => {
       mockFiles({ '.changeset/config.json': '{' });
 
-      await expect(generateChangeset(getConfig({}), {})).resolves.toEqual([]);
+      await expect(generateChangesets(getConfig({}), {})).resolves.toEqual([]);
     });
 
     it('does nothing if no published dependencies changed', async () => {
@@ -91,7 +91,7 @@ describe('modules/manager/npm/post-update/changesets', () => {
       });
 
       await expect(
-        generateChangeset(config, getPackageFiles('package.json')),
+        generateChangesets(config, getPackageFiles('package.json')),
       ).resolves.toEqual([]);
     });
 
@@ -189,7 +189,7 @@ describe('modules/manager/npm/post-update/changesets', () => {
         ],
       };
 
-      const result = await generateChangeset(config, packageFiles);
+      const result = await generateChangesets(config, packageFiles);
 
       expect(result).toEqual([
         {
@@ -200,16 +200,44 @@ describe('modules/manager/npm/post-update/changesets', () => {
           contents: `${codeBlock`
             ---
             "@my-org/a": patch
+            ---
+
+            Updated dependencies:
+
+            - Updated \`bar\` from \`1.0.0\` to \`2.0.0\`
+            - Updated \`foo\` from \`^1.0.0\` to \`^2.0.0\`
+            - Added \`new\` at \`1.0.0\`
+            - Removed \`old\`
+          `}\n`,
+        },
+        {
+          type: 'addition',
+          path: expect.stringMatching(
+            /^\.changeset\/renovate-[0-9a-f]{10}\.md$/,
+          ),
+          contents: `${codeBlock`
+            ---
             "@my-org/b": major
+            ---
+
+            Updated dependencies:
+
+            - Updated \`bar\` from \`1.0.0\` to \`2.0.0\`
+            - Updated \`foo\` from \`^1.0.0\` to \`^2.0.0\`
+          `}\n`,
+        },
+        {
+          type: 'addition',
+          path: expect.stringMatching(
+            /^\.changeset\/renovate-[0-9a-f]{10}\.md$/,
+          ),
+          contents: `${codeBlock`
+            ---
             "@my-org/new": patch
             ---
 
             Updated dependencies:
 
-            - Updated \`foo\` from \`^1.0.0\` to \`^2.0.0\`
-            - Removed \`old\`
-            - Added \`new\` at \`1.0.0\`
-            - Updated \`bar\` from \`1.0.0\` to \`2.0.0\`
             - Added \`foo\` at \`^2.0.0\`
           `}\n`,
         },
@@ -222,6 +250,113 @@ describe('modules/manager/npm/post-update/changesets', () => {
         'packages/not-updated/package.json',
         'utf8',
       );
+    });
+
+    it('only lists the changes of its packages in each changeset', async () => {
+      const before = {
+        a: { name: 'a', dependencies: { dep1: '1.0.0', dep2: '1.0.0' } },
+        b: { name: 'b', dependencies: { dep2: '1.0.0', dep3: '1.0.0' } },
+        c: { name: 'c', dependencies: { dep1: '1.0.0', dep2: '1.0.0' } },
+      };
+      mockFiles(
+        { '.changeset/config.json': '{}' },
+        {
+          'a/package.json': packageJson(before.a),
+          'b/package.json': packageJson(before.b),
+          'c/package.json': packageJson(before.c),
+        },
+      );
+      const config = getConfig({
+        updatedPackageFiles: [
+          updatedPackageJson('a/package.json', {
+            name: 'a',
+            dependencies: { dep1: '2.0.0', dep2: '2.0.0' },
+          }),
+          updatedPackageJson('b/package.json', {
+            name: 'b',
+            dependencies: { dep2: '2.0.0', dep3: '2.0.0' },
+          }),
+          updatedPackageJson('c/package.json', {
+            name: 'c',
+            dependencies: { dep2: '2.0.0', dep1: '2.0.0' },
+          }),
+        ],
+      });
+
+      const result = await generateChangesets(
+        config,
+        getPackageFiles('a/package.json', 'b/package.json', 'c/package.json'),
+      );
+
+      expect(result).toMatchObject([
+        {
+          contents: `${codeBlock`
+          ---
+          "a": patch
+          "c": patch
+          ---
+
+          Updated dependencies:
+
+          - Updated \`dep1\` from \`1.0.0\` to \`2.0.0\`
+          - Updated \`dep2\` from \`1.0.0\` to \`2.0.0\`
+        `}\n`,
+        },
+        {
+          contents: `${codeBlock`
+          ---
+          "b": patch
+          ---
+
+          Updated dependencies:
+
+          - Updated \`dep2\` from \`1.0.0\` to \`2.0.0\`
+          - Updated \`dep3\` from \`1.0.0\` to \`2.0.0\`
+        `}\n`,
+        },
+      ]);
+      expect(new Set(result.map(({ path }) => path)).size).toBe(2);
+    });
+
+    it('lists a dependency once if it changed in several dependency types', async () => {
+      mockFiles(
+        { '.changeset/config.json': '{}' },
+        {
+          'package.json': packageJson({
+            name: 'lib',
+            dependencies: { foo: '^1.0.0' },
+            peerDependencies: { foo: '^1.0.0' },
+          }),
+        },
+      );
+      const config = getConfig({
+        updatedPackageFiles: [
+          updatedPackageJson('package.json', {
+            name: 'lib',
+            dependencies: { foo: '^2.0.0' },
+            peerDependencies: { foo: '^2.0.0' },
+          }),
+        ],
+      });
+
+      const result = await generateChangesets(
+        config,
+        getPackageFiles('package.json'),
+      );
+
+      expect(result).toMatchObject([
+        {
+          contents: `${codeBlock`
+            ---
+            "lib": major
+            ---
+
+            Updated dependencies:
+
+            - Updated \`foo\` from \`^1.0.0\` to \`^2.0.0\`
+          `}\n`,
+        },
+      ]);
     });
 
     it('uses a stable file name for the same changes', async () => {
@@ -239,8 +374,8 @@ describe('modules/manager/npm/post-update/changesets', () => {
       });
       const packageFiles = getPackageFiles('package.json');
 
-      const [first] = await generateChangeset(config, packageFiles);
-      const [second] = await generateChangeset(config, packageFiles);
+      const [first] = await generateChangesets(config, packageFiles);
+      const [second] = await generateChangesets(config, packageFiles);
 
       expect(first.path).toBe(second.path);
     });
@@ -292,19 +427,28 @@ describe('modules/manager/npm/post-update/changesets', () => {
         'packages/c/package.json',
       );
 
-      const result = await generateChangeset(config, packageFiles);
+      const result = await generateChangesets(config, packageFiles);
 
       expect(result).toMatchObject([
         {
           contents: `${codeBlock`
             ---
             "a": patch
-            "b": major
             ---
 
             Updated dependencies:
 
             - Updated \`foo\` (catalog \`default\`) from \`1.0.0\` to \`1.1.0\`
+          `}\n`,
+        },
+        {
+          contents: `${codeBlock`
+            ---
+            "b": major
+            ---
+
+            Updated dependencies:
+
             - Updated \`react\` (catalog \`react17\`) from \`17.0.1\` to \`17.0.2\`
           `}\n`,
         },
@@ -323,7 +467,7 @@ describe('modules/manager/npm/post-update/changesets', () => {
         ],
       });
 
-      await expect(generateChangeset(config, {})).resolves.toEqual([]);
+      await expect(generateChangesets(config, {})).resolves.toEqual([]);
     });
   });
 });

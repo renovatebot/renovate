@@ -4214,7 +4214,8 @@ Renovate never adds a changeset for:
 This option works with npm, pnpm and Yarn.
 Your repository needs a `.changeset/config.json` file in its root, otherwise Renovate does not add a changeset.
 
-The changeset lists the updated dependencies, which end up in the changelogs of your packages.
+Each changeset lists the updated dependencies of its packages, which end up in their changelogs.
+Packages with the same dependency updates share a changeset.
 For example:
 
 ```md
