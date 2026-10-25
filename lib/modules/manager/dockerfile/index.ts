@@ -4,6 +4,7 @@ import { DebDatasource } from '../../datasource/deb/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { extractPackageFile } from './extract.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile };
 
