@@ -197,17 +197,17 @@ export async function updateActionsLockfile(
     (upgrade) => upgrade.updateType === 'replacement',
   );
 
-  // `--no-interactive`: we have no terminal to answer prompts with
   // No `--relock`: a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance
-  // `--no-onboard`: do not add workflows which the lockfile does not track yet, as that is unrelated to the update. Omitted for a replacement, as the new action is not in the workflow's lockfile entry yet
-  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-  // `--ignore-local-actions`: warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
-  // `--json=findings`: print the findings as JSON on stdout, so a failure can be reported readably
   const flags = [
+    // we have no terminal to answer prompts with
     '--no-interactive',
+    // do not add workflows which the lockfile does not track yet, as that is unrelated to the update. Omitted for a replacement, as the new action is not in the workflow's lockfile entry yet
     ...(hasReplacement ? [] : ['--no-onboard']),
+    // keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
     '--no-narrow',
+    // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
     '--ignore-local-actions',
+    // print the findings as JSON on stdout, so a failure can be reported readably
     '--json=findings',
   ];
   const commands = [`gh actions-lock ${flags.join(' ')}`];
