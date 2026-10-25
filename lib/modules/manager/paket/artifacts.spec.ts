@@ -256,6 +256,63 @@ describe('modules/manager/paket/artifacts', () => {
       ]);
     });
 
+    it('return artifact error with the cmd output', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockRejectedValue(
+        Object.assign(new Error('Cmd error'), {
+          stdout: 'Paket error',
+          stderr: '',
+        }),
+      );
+      fs.readLocalFile.mockResolvedValue('Old fake lock file content');
+
+      const result = await updateArtifacts(updateArtifact);
+
+      expect(result).toEqual([
+        { artifactError: { fileName: lockFileName, stderr: 'Paket error' } },
+      ]);
+    });
+
+    it('prefers stderr over stdout in artifact error', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockRejectedValue(
+        Object.assign(new Error('Cmd error'), {
+          stdout: 'Paket output',
+          stderr: 'Dotnet error',
+        }),
+      );
+      fs.readLocalFile.mockResolvedValue('Old fake lock file content');
+
+      const result = await updateArtifacts(updateArtifact);
+
+      expect(result).toEqual([
+        { artifactError: { fileName: lockFileName, stderr: 'Dotnet error' } },
+      ]);
+    });
+
+    it('uses configured and extracted tool constraints', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
+
+      await updateArtifacts({
+        ...updateArtifact,
+        config: {
+          constraints: { paket: '9.0.2' },
+          extractedConstraints: { dotnet: '8.0.100', paket: '8.0.0' },
+        },
+      });
+
+      expect(toolSpy).toHaveBeenCalledExactlyOnceWith(
+        lockFileName,
+        [{ packageName: 'xunit', version: '2.9.3', group: 'Main' }],
+        [
+          { toolName: 'dotnet', constraint: '8.0.100' },
+          { toolName: 'paket', constraint: '9.0.2' },
+        ],
+      );
+    });
+
     it('rethrow temporary error', async () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockRejectedValue(new Error(TEMPORARY_ERROR));
