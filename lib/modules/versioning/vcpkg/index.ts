@@ -256,7 +256,8 @@ function sortVersions(version: string, other: string): number {
   if (!a || !b) {
     return 0;
   }
-  // Unorderable pairs are filtered out by `isCompatible` before sorting.
+  // Lookup sorts only releases that `isGreaterThan` the current version,
+  // and those order against each other.
   return compare(a, b) ?? 0;
 }
 
