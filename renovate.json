@@ -166,13 +166,8 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": [
-        "lib/config/options/index.ts",
-        "lib/modules/manager/github-actions/readme.md"
-      ],
-      "matchStrings": [
-        "['\"]?ghActionsLock['\"]?: ['\"](?<currentValue>v[^'\"]+)['\"]"
-      ],
+      "managerFilePatterns": ["lib/config/options/index.ts"],
+      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
     },
