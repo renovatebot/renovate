@@ -101,9 +101,12 @@ export function decideBranchReuse({
     return { action: 'no-reuse', userRebaseRequested };
   }
 
-  if (config.cacheFingerprintMatch === 'no-match') {
+  if (
+    config.cacheFingerprintMatch === 'no-match' ||
+    config.cacheFingerprintMatch === 'no-fingerprint'
+  ) {
     logger.debug(
-      'Cache fingerprint does not match, cannot reuse existing branch',
+      'Cache fingerprint missing or changed, cannot reuse existing branch',
     );
     return { action: 'no-reuse', userRebaseRequested };
   }

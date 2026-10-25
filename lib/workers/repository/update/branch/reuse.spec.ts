@@ -422,6 +422,7 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('skips the update if rebaseWhen=never', () => {
       input.config.rebaseWhen = 'never';
+      input.config.cacheFingerprintMatch = 'no-fingerprint';
       expect(decideBranchReuse(input)).toEqual({
         action: 'skip-update',
         userRebaseRequested: false,
@@ -446,15 +447,23 @@ describe('workers/repository/update/branch/reuse', () => {
       });
     });
 
-    it('does not reuse the branch if the cache fingerprint does not match', () => {
-      input.config.cacheFingerprintMatch = 'no-match';
-      expect(decideBranchReuse(input)).toEqual({
-        action: 'no-reuse',
-        userRebaseRequested: false,
-      });
-    });
+    it.each`
+      cacheFingerprintMatch
+      ${'no-match'}
+      ${'no-fingerprint'}
+    `(
+      'does not reuse the branch when fingerprint is $cacheFingerprintMatch',
+      ({ cacheFingerprintMatch }) => {
+        input.config.cacheFingerprintMatch = cacheFingerprintMatch;
+        expect(decideBranchReuse(input)).toEqual({
+          action: 'no-reuse',
+          userRebaseRequested: false,
+        });
+      },
+    );
 
     it('checks the branch itself otherwise', () => {
+      input.config.cacheFingerprintMatch = 'matched';
       expect(decideBranchReuse(input)).toEqual({
         action: 'check-reuse',
         userRebaseRequested: false,
