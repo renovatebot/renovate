@@ -1,6 +1,5 @@
 import { z } from 'zod/v4';
 import {
-  Json,
   LooseArray,
   LooseRecord,
   Yaml,
@@ -82,27 +81,6 @@ export const ActionsLockfile = Yaml.pipe(
   }),
 );
 export type ActionsLockfile = z.infer<typeof ActionsLockfile>;
-
-/**
- * The error findings of `gh actions-lock --json=findings`, as written to stdout.
- */
-export const FindingsOutput = Json.pipe(
-  z.object({
-    findings: LooseArray(
-      z.object({
-        severity: z.string(),
-        workflow: z.string(),
-        // omitted for findings about the workflow as a whole, like `invalid-workflow`
-        dependency: z.string().optional(),
-        detail: z.string(),
-        remediation: z.string().optional(),
-      }),
-    ),
-  }),
-).transform(({ findings }) =>
-  findings.filter(({ severity }) => severity === 'error'),
-);
-export type Finding = z.infer<typeof FindingsOutput>[number];
 
 export const CommunityActions = z.union(
   Object.entries(knownActions).map(([name, cfg]) =>
