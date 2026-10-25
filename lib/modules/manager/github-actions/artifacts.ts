@@ -12,7 +12,7 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { PackageFile, PostUpdateConfig } from '../types.ts';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../types.ts';
 import {
   artifactErrorMessageFromExecError,
   resolveToolConstraint,
@@ -77,7 +77,7 @@ function getTokenEnv(): ExtraEnv {
 function getLockedUpgrades(
   config: PostUpdateConfig,
   onboardedWorkflows: OnboardedWorkflows,
-): PostUpdateConfig['upgrades'] {
+): Upgrade[] {
   return config.upgrades.filter((upgrade) => {
     if (upgrade.manager !== 'github-actions') {
       return false;
