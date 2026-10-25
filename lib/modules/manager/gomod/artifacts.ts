@@ -9,9 +9,11 @@ import { getEnv } from '../../../util/env.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   findLocalSiblingOrParent,
   isValidLocalPath,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
@@ -27,16 +29,56 @@ import type {
   UpdateArtifactsResult,
 } from '../types.ts';
 import {
+  artifactError,
   artifactErrorResult,
   fileAddition,
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
 import { getExtraDepsNotice } from './artifacts-extra.ts';
-import { getGoModulesInTidyOrder } from './package-tree.ts';
+import { getGoModulesTidyPlan } from './package-tree.ts';
 
 const { major, valid } = semver;
 const gitExec = withGitEnvironment(['go']);
+const maxTidyAllPasses = 3;
+
+type TidyFileContents = Map<string, string | null>;
+
+async function readTidyFileContents(
+  fileNames: string[],
+): Promise<TidyFileContents> {
+  const result: TidyFileContents = new Map();
+  for (const fileName of fileNames) {
+    const content = await readLocalFile(fileName, 'utf8');
+    if (content === null && (await localPathExists(fileName))) {
+      throw new Error(`Failed to read ${fileName}`);
+    }
+    result.set(fileName, content);
+  }
+  return result;
+}
+
+function tidyFileContentsEqual(
+  fileNames: string[],
+  left: TidyFileContents,
+  right: TidyFileContents,
+): boolean {
+  return fileNames.every(
+    (fileName) => left.get(fileName) === right.get(fileName),
+  );
+}
+
+async function restoreTidyFileContents(
+  contents: TidyFileContents,
+): Promise<void> {
+  for (const [fileName, content] of contents) {
+    if (content === null) {
+      await deleteLocalFile(fileName);
+    } else {
+      await writeLocalFile(fileName, content);
+    }
+  }
+}
 
 async function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -314,10 +356,14 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         isGoModTidyAllRequired ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
+    // Keep setup (go get and import updates) outside the speculative tidy passes.
+    const tidyCommandsStart = execCommands.length;
+    let sourceTidyCommand: string | undefined;
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
+      sourceTidyCommand = `${cmd} ${args}`;
+      execCommands.push(sourceTidyCommand);
     }
 
     let goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
@@ -347,32 +393,49 @@ export async function updateArtifacts({
         execCommands.push(`${cmd} ${args}`);
       }
 
-      if (isGoModTidyRequired) {
-        args = `mod tidy${modFileFlag}${tidyOpts}`;
+      if (sourceTidyCommand) {
         logger.debug('go mod tidy command included');
-        execCommands.push(`${cmd} ${args}`);
+        execCommands.push(sourceTidyCommand);
       }
     }
 
     // We tidy one more time as a solution for #6795
-    if (isGoModTidyRequired) {
-      args = `mod tidy${modFileFlag}${tidyOpts}`;
+    if (sourceTidyCommand) {
       logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
+      execCommands.push(sourceTidyCommand);
     }
 
     let dependentModules: string[] = [];
+    let containsCycle = false;
+    let tidyAllFiles: string[] = [];
+    let retryTidyCommands: string[] = [];
     if (isGoModTidyAllRequired) {
       try {
-        dependentModules = await getGoModulesInTidyOrder(goModFileName);
-        for (const dependent of dependentModules) {
-          const dir = upath.relative(goModDir, upath.dirname(dependent));
-          execCommands.push(`${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`);
-        }
-        logger.debug({ dependentModules }, 'go mod tidy commands included');
+        const tidyPlan = await getGoModulesTidyPlan(goModFileName);
+        dependentModules = tidyPlan.modules;
+        containsCycle = tidyPlan.containsCycle;
       } catch (err) {
         logger.warn({ err }, 'Failed to find dependent Go modules');
       }
+      const dependentTidyCommands = dependentModules.map((dependent) => {
+        const dir = upath.relative(goModDir, upath.dirname(dependent));
+        return `${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`;
+      });
+      execCommands.push(...dependentTidyCommands);
+      if (containsCycle) {
+        tidyAllFiles = [goModFileName, ...dependentModules].flatMap((f) => [
+          f,
+          f.replace(regEx(/\.mod$/), '.sum'),
+        ]);
+        retryTidyCommands = [
+          ...(sourceTidyCommand ? [sourceTidyCommand] : []),
+          ...dependentTidyCommands,
+        ];
+      }
+      logger.debug(
+        { containsCycle, dependentModules },
+        'go mod tidy commands included',
+      );
     }
 
     if (useGoGenerate) {
@@ -383,6 +446,47 @@ export async function updateArtifacts({
         logger.once.warn(
           `go generate command requested as a post update action, but goGenerate is not permitted in the allowedUnsafeExecutions`,
         );
+      }
+    }
+
+    let tidyAllArtifactError: string | undefined;
+    if (containsCycle) {
+      await gitExec(execCommands.splice(0, tidyCommandsStart), execOptions);
+      const initialTidyAllContents = await readTidyFileContents(tidyAllFiles);
+      let previousTidyAllContents = initialTidyAllContents;
+      let stabilized = false;
+
+      // Only tidy during resolution: vendor, workspace sync and generation may
+      // write files outside this snapshot. Run their normal sequence once below.
+      try {
+        for (let pass = 1; pass <= maxTidyAllPasses; pass += 1) {
+          logger.debug(
+            `Resolving cyclic go mod tidy dependencies, pass ${pass}`,
+          );
+          await gitExec(retryTidyCommands, execOptions);
+          const currentTidyAllContents =
+            await readTidyFileContents(tidyAllFiles);
+          stabilized = tidyFileContentsEqual(
+            tidyAllFiles,
+            previousTidyAllContents,
+            currentTidyAllContents,
+          );
+          previousTidyAllContents = currentTidyAllContents;
+          if (stabilized) {
+            break;
+          }
+        }
+      } finally {
+        if (!stabilized) {
+          // Discard every speculative pass, including partial command failures.
+          await restoreTidyFileContents(initialTidyAllContents);
+        }
+      }
+
+      if (!stabilized) {
+        // The normal pass below visits each dependent once and produces all
+        // artifacts from the fallback state.
+        tidyAllArtifactError = `go mod tidy did not stabilize after ${maxTidyAllPasses} passes`;
       }
     }
 
@@ -398,7 +502,8 @@ export async function updateArtifacts({
       !status.modified.includes(sumFileName) &&
       !status.modified.includes(goModFileName) &&
       !status.modified.includes(goWorkSumFileName) &&
-      !dependentFiles.some((f) => status.modified.includes(f))
+      !dependentFiles.some((f) => status.modified.includes(f)) &&
+      !tidyAllArtifactError
     ) {
       return null;
     }
@@ -502,6 +607,9 @@ export async function updateArtifacts({
           })),
         ]),
       );
+    }
+    if (tidyAllArtifactError) {
+      res.push(artifactError(sumFileName, tidyAllArtifactError));
     }
     return res;
   } catch (err) {
