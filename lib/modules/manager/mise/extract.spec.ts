@@ -34,6 +34,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       erlang = '23.3'
       node = '16'
+      swift = '6.3.3'
     `;
       const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -49,6 +50,14 @@ describe('modules/manager/mise/extract', () => {
             depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
+          },
+          {
+            depName: 'swift',
+            depType: 'tools',
+            currentValue: '6.3.3',
+            datasource: 'github-releases',
+            packageName: 'swiftlang/swift',
+            extractVersion: '^swift-(?<version>.+)-RELEASE$',
           },
         ],
       });
