@@ -416,6 +416,7 @@ describe('config/presets/index', () => {
           'stylelint**',
           'codelyzer',
           '/\\btslint\\b/',
+          '@biomejs/**',
           '@oxlint/**',
           'oxlint',
           'prettier',
@@ -431,7 +432,7 @@ describe('config/presets/index', () => {
       expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(23);
+      expect(rule.matchPackageNames).toHaveLength(24);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1567,6 +1568,7 @@ describe('config/presets/index', () => {
           'packages:tslint',
         ],
         matchPackageNames: [
+          '@biomejs/**',
           '@oxlint/**',
           'oxlint',
           'prettier',
