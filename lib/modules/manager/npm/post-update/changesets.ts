@@ -16,6 +16,7 @@ import {
   LooseArray,
   LooseRecord,
 } from '../../../../util/schema-utils/index.ts';
+import { api as semver } from '../../../versioning/npm/index.ts';
 import type { PostUpdateConfig } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { AdditionalPackageFiles } from './types.ts';
@@ -230,20 +231,31 @@ function getRelease(
     getDependencyChanges(before[depType], after[depType], catalogChanges),
   );
 
-  if (peerChanges.length) {
-    // peer dependency changes can break existing consumers
-    return {
-      name,
-      type: 'major',
-      changes: [...peerChanges, ...productionChanges],
-    };
+  const changes = [...peerChanges, ...productionChanges];
+  if (!changes.length) {
+    return null;
   }
 
-  if (productionChanges.length) {
-    return { name, type: 'patch', changes: productionChanges };
-  }
+  const type = peerChanges.some(isBreakingPeerChange) ? 'major' : 'patch';
+  return { name, type, changes };
+}
 
-  return null;
+/**
+ * A peer dependency change only breaks consumers if they now have to install
+ * it, or if it no longer accepts a version they may use.
+ */
+function isBreakingPeerChange({ from, to }: DependencyChange): boolean {
+  if (!to) {
+    return false;
+  }
+  if (!from) {
+    return true;
+  }
+  return !(
+    semver.isValid(from) &&
+    semver.isValid(to) &&
+    semver.subset!(from, to)
+  );
 }
 
 function getDependencyChanges(

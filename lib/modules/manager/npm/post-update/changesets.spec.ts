@@ -359,6 +359,78 @@ describe('modules/manager/npm/post-update/changesets', () => {
       ]);
     });
 
+    it.each`
+      description                        | from                           | to                             | type
+      ${'widened'}                       | ${'^18.0.0'}                   | ${'^18.0.0 || ^19.0.0'}        | ${'patch'}
+      ${'narrowed'}                      | ${'^18.0.0 || ^19.0.0'}        | ${'^19.0.0'}                   | ${'major'}
+      ${'replaced'}                      | ${'^18.0.0'}                   | ${'^19.0.0'}                   | ${'major'}
+      ${'added'}                         | ${undefined}                   | ${'^19.0.0'}                   | ${'major'}
+      ${'removed'}                       | ${'^18.0.0'}                   | ${undefined}                   | ${'patch'}
+      ${'changed to an invalid range'}   | ${'^18.0.0'}                   | ${'github:facebook/react#v19'} | ${'major'}
+      ${'changed from an invalid range'} | ${'github:facebook/react#v18'} | ${'^19.0.0'}                   | ${'major'}
+    `(
+      'bumps $type if a peer dependency is $description',
+      async ({ from, to, type }) => {
+        mockFiles(
+          { '.changeset/config.json': '{}' },
+          {
+            'package.json': packageJson({
+              name: 'lib',
+              peerDependencies: { react: from },
+            }),
+          },
+        );
+        const config = getConfig({
+          updatedPackageFiles: [
+            updatedPackageJson('package.json', {
+              name: 'lib',
+              peerDependencies: { react: to },
+            }),
+          ],
+        });
+
+        const result = await generateChangesets(
+          config,
+          getPackageFiles('package.json'),
+        );
+
+        expect(result).toMatchObject([
+          { contents: expect.stringContaining(`"lib": ${type}\n`) },
+        ]);
+      },
+    );
+
+    it('bumps major if any peer dependency change breaks consumers', async () => {
+      mockFiles(
+        { '.changeset/config.json': '{}' },
+        {
+          'package.json': packageJson({
+            name: 'lib',
+            dependencies: { foo: '^1.0.0' },
+            peerDependencies: { react: '^18.0.0', vue: '^2.0.0' },
+          }),
+        },
+      );
+      const config = getConfig({
+        updatedPackageFiles: [
+          updatedPackageJson('package.json', {
+            name: 'lib',
+            dependencies: { foo: '^2.0.0' },
+            peerDependencies: { react: '^18.0.0 || ^19.0.0', vue: '^3.0.0' },
+          }),
+        ],
+      });
+
+      const result = await generateChangesets(
+        config,
+        getPackageFiles('package.json'),
+      );
+
+      expect(result).toMatchObject([
+        { contents: expect.stringContaining('"lib": major\n') },
+      ]);
+    });
+
     it('uses a stable file name for the same changes', async () => {
       mockFiles(
         { '.changeset/config.json': '{}' },

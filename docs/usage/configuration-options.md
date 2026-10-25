@@ -4200,8 +4200,11 @@ Then a dependency update that affects your published packages gets released, wit
 
 Renovate adds a changeset when a branch changes the dependencies of one of your packages:
 
-- a `major` bump when `peerDependencies` change, because that can break the consumers of your package
-- a `patch` bump when `dependencies` or `optionalDependencies` change, including through an updated pnpm or Yarn catalog entry
+- a `major` bump when a peer dependency is added, or when a `peerDependencies` range no longer accepts every version it used to, because the consumers of your package may have to change their dependencies
+- a `patch` bump for any other change to `dependencies`, `optionalDependencies` or `peerDependencies`, including through an updated pnpm or Yarn catalog entry
+
+For example, widening a peer dependency from `^18.0.0` to `^18.0.0 || ^19.0.0`, which Renovate does by default, is a `patch` bump.
+Replacing `^18.0.0` with `^19.0.0` is a `major` bump.
 
 Renovate does not add a changeset for updates to `devDependencies`, or for lock file only updates, because they don't change what you publish.
 
