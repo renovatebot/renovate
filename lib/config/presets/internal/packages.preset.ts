@@ -106,6 +106,7 @@ export const presets: Record<string, Preset> = {
     ],
     matchPackageNames: [
       '@oxlint/**',
+      'oxfmt',
       'oxlint',
       'prettier',
       'remark-lint',
