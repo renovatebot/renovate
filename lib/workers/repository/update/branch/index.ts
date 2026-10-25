@@ -669,7 +669,6 @@ export async function processBranch(
       );
       config.updatedArtifacts = config.updatedArtifacts.concat(
         actionsLockfile.updatedArtifacts,
-        await generateChangeset(config, branchConfig.packageFiles),
       );
       if (config.updatedArtifacts?.length) {
         logger.debug(
@@ -703,6 +702,11 @@ export async function processBranch(
         config.updatedArtifacts = updatedArtifacts;
         config.artifactErrors = artifactErrors;
       }
+
+      // after the post-upgrade tasks, so that the changeset describes the package files as they are committed
+      config.updatedArtifacts = config.updatedArtifacts.concat(
+        await generateChangeset(config, branchConfig.packageFiles),
+      );
 
       // modifies the file changes in place to allow having a version bump in a packageFile or artifact
       await bumpVersions(config);

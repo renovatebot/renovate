@@ -208,6 +208,77 @@ describe('workers/repository/update/branch/changesets', () => {
       );
     });
 
+    it('uses the package files as rewritten by post-upgrade tasks', async () => {
+      mockFiles(
+        { '.changeset/config.json': '{}' },
+        {
+          'packages/a/package.json': packageJson({
+            name: 'a',
+            dependencies: { foo: '^1.0.0' },
+          }),
+          'packages/b/package.json': packageJson({
+            name: 'b',
+            dependencies: { foo: '^1.0.0' },
+          }),
+          'packages/c/package.json': packageJson({
+            name: 'c',
+            dependencies: { foo: '^1.0.0' },
+          }),
+        },
+      );
+      const config = getConfig({
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'packages/a/package.json',
+            contents: packageJson({
+              name: 'a',
+              dependencies: { foo: '^2.0.0' },
+            }),
+          },
+          {
+            type: 'addition',
+            path: 'packages/b/package.json',
+            contents: packageJson({
+              name: 'b',
+              dependencies: { foo: '^2.0.0' },
+            }),
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'packages/a/package.json',
+            contents: Buffer.from(
+              packageJson({ name: 'a', dependencies: { foo: '^2.1.0' } }),
+            ),
+          },
+          { type: 'deletion', path: 'packages/b/package.json' },
+          {
+            type: 'addition',
+            path: 'packages/c/package.json',
+            contents: null,
+          },
+        ],
+      });
+
+      const result = await generateChangeset(config, {});
+
+      expect(result).toMatchObject([
+        {
+          contents: `${codeBlock`
+            ---
+            "a": patch
+            ---
+
+            Updated dependencies:
+
+            - Updated \`foo\` from \`^1.0.0\` to \`^2.1.0\`
+          `}\n`,
+        },
+      ]);
+    });
+
     it('uses a stable file name for the same changes', async () => {
       mockFiles(
         { '.changeset/config.json': '{}' },

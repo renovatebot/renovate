@@ -4195,21 +4195,27 @@ This will only update the immediate dependency in the lockfile instead of all su
 
 ### `changesets`
 
-Add a [changesets](https://github.com/changesets/changesets) file to the branch, for repositories which use changesets to version their packages.
-This works for every package manager which uses `package.json` files, like npm, pnpm, Yarn and Bun.
+If you version your packages with [changesets](https://github.com/changesets/changesets), enable this option to let Renovate add a changeset to its branches.
+Then a dependency update that affects your published packages gets released, without you having to add a changeset to each Renovate PR yourself.
 
-Renovate compares each `package.json` file in the branch with the base branch, and bumps the packages whose published dependencies changed:
+Renovate adds a changeset when a branch changes the dependencies of one of your packages:
 
-- `major` when `peerDependencies` changed, because that can break existing consumers
-- `patch` when `dependencies` or `optionalDependencies` changed
+- a `major` bump when `peerDependencies` change, because that can break the consumers of your package
+- a `patch` bump when `dependencies` or `optionalDependencies` change, including through an updated pnpm or Yarn catalog entry
 
-Packages which use an updated pnpm or Yarn catalog entry through the `catalog:` protocol are bumped too.
-Changes to `devDependencies` and lock file only updates never add a changeset.
+Renovate does not add a changeset for updates to `devDependencies`, or for lock file only updates, because they don't change what you publish.
 
-Renovate skips private packages, packages without a `name`, and the packages listed in the `ignore` array of `.changeset/config.json`.
-Renovate only adds a changeset if the repository has a `.changeset/config.json` file in its root.
+Renovate never adds a changeset for:
 
-The changeset is named `.changeset/renovate-<hash>.md` and lists the updated dependencies, for example:
+- private packages
+- packages without a `name`
+- packages that match the `ignore` list in your `.changeset/config.json`
+
+This option works with npm, pnpm, Yarn and Bun.
+Your repository needs a `.changeset/config.json` file in its root, otherwise Renovate does not add a changeset.
+
+The changeset lists the updated dependencies, which end up in the changelogs of your packages.
+For example:
 
 ```md
 ---
@@ -4221,8 +4227,6 @@ Updated dependencies:
 
 - Updated `react` from `^18.3.1` to `^19.0.0`
 ```
-
-This behaves like [`pnpm update --changeset`](https://pnpm.io/cli/update#--changeset), which can't be used by Renovate because Renovate updates the `package.json` files itself.
 
 ### `composerNoMinimalChanges`
 

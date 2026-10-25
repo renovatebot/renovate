@@ -1,4 +1,4 @@
-import { isString, isTruthy } from '@sindresorhus/is';
+import { isTruthy } from '@sindresorhus/is';
 import type { Minimatch } from 'minimatch';
 import upath from 'upath';
 import { z } from 'zod/v4';
@@ -120,14 +120,19 @@ async function getReleases(
   packageFiles: Record<string, PackageFile[]> | undefined,
   ignore: string[],
 ): Promise<Release[]> {
+  // artifacts come last, because post-upgrade tasks may have rewritten an updated package file
   const updatedContents = new Map<string, string>();
-  for (const file of coerceArray(config.updatedPackageFiles)) {
-    if (
-      file.type === 'addition' &&
-      upath.basename(file.path) === 'package.json' &&
-      isString(file.contents)
-    ) {
-      updatedContents.set(file.path, file.contents);
+  for (const file of [
+    ...coerceArray(config.updatedPackageFiles),
+    ...coerceArray(config.updatedArtifacts),
+  ]) {
+    if (upath.basename(file.path) !== 'package.json') {
+      continue;
+    }
+    if (file.type === 'deletion') {
+      updatedContents.delete(file.path);
+    } else if (file.contents) {
+      updatedContents.set(file.path, file.contents.toString());
     }
   }
 
