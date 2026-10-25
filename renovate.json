@@ -140,6 +140,17 @@
       "semanticCommitType": "fix"
     },
     {
+      "description": "Do not automerge breaking `gh-actions-lock` updates, as they can change how the lockfile is generated or verified",
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "automerge": false
+    },
+    {
+      "description": "Only automerge `gh-actions-lock` updates which are not breaking, which excludes every v0.x release",
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchJsonata": ["isBreaking != true"],
+      "automerge": true
+    },
+    {
       "description": "Group commander major updates, they depend on each other.",
       "matchDatasources": ["npm"],
       "matchPackageNames": ["@commander-js/extra-typings", "commander"],
