@@ -1,9 +1,8 @@
-import { isTruthy } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import type { Minimatch } from 'minimatch';
 import upath from 'upath';
 import { z } from 'zod/v4';
 import { logger } from '../../../../logger/index.ts';
-import type { PackageFile } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { getFile } from '../../../../util/git/index.ts';
@@ -17,7 +16,9 @@ import {
   LooseArray,
   LooseRecord,
 } from '../../../../util/schema-utils/index.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
+import type { AdditionalPackageFiles } from './types.ts';
 
 const changesetConfigFile = '.changeset/config.json';
 
@@ -68,8 +69,8 @@ type CatalogChanges = Map<string, Map<string, DependencyChange>>;
  * in the branch.
  */
 export async function generateChangeset(
-  config: BranchConfig,
-  packageFiles: Record<string, PackageFile[]> | undefined,
+  config: PostUpdateConfig<NpmManagerData>,
+  packageFiles: AdditionalPackageFiles,
 ): Promise<FileChange[]> {
   if (!config.postUpdateOptions?.includes('changesets')) {
     return [];
@@ -116,37 +117,28 @@ async function getChangesetIgnore(): Promise<string[] | null> {
 }
 
 async function getReleases(
-  config: BranchConfig,
-  packageFiles: Record<string, PackageFile[]> | undefined,
+  config: PostUpdateConfig<NpmManagerData>,
+  packageFiles: AdditionalPackageFiles,
   ignore: string[],
 ): Promise<Release[]> {
-  // artifacts come last, because post-upgrade tasks may have rewritten an updated package file
   const updatedContents = new Map<string, string>();
-  for (const file of [
-    ...coerceArray(config.updatedPackageFiles),
-    ...coerceArray(config.updatedArtifacts),
-  ]) {
-    if (upath.basename(file.path) !== 'package.json') {
-      continue;
-    }
-    if (file.type === 'deletion') {
-      updatedContents.delete(file.path);
-    } else if (file.contents) {
-      updatedContents.set(file.path, file.contents.toString());
+  for (const file of coerceArray(config.updatedPackageFiles)) {
+    if (file.type === 'addition' && isString(file.contents)) {
+      updatedContents.set(file.path, file.contents);
     }
   }
 
   const catalogChanges = getCatalogChanges(config);
 
-  // A catalog update changes every package consuming it, not only the updated package files
-  const paths = new Set(updatedContents.keys());
-  if (catalogChanges.size) {
-    for (const packageFile of Object.values(
-      coerceObject(packageFiles),
-    ).flat()) {
-      if (upath.basename(packageFile.packageFile) === 'package.json') {
-        paths.add(packageFile.packageFile);
-      }
+  // a catalog update also changes the packages consuming it, which are not updated package files themselves
+  const paths = new Set<string>();
+  for (const { packageFile } of coerceArray(packageFiles.npm)) {
+    if (
+      isString(packageFile) &&
+      upath.basename(packageFile) === 'package.json' &&
+      (updatedContents.has(packageFile) || catalogChanges.size > 0)
+    ) {
+      paths.add(packageFile);
     }
   }
 
@@ -197,7 +189,9 @@ function parsePackageJson(content: string | null): PackageJson | null {
   return parsed.success ? parsed.data : null;
 }
 
-function getCatalogChanges(config: BranchConfig): CatalogChanges {
+function getCatalogChanges(
+  config: PostUpdateConfig<NpmManagerData>,
+): CatalogChanges {
   const catalogChanges: CatalogChanges = new Map();
   for (const upgrade of config.upgrades) {
     const catalog = catalogDepTypeRegex.exec(upgrade.depType ?? '')?.groups

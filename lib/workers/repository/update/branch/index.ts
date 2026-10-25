@@ -54,7 +54,6 @@ import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 import { bumpVersions } from './bump-versions.ts';
-import { generateChangeset } from './changesets.ts';
 import { prAlreadyExisted } from './check-existing.ts';
 import { commitFilesToBranch } from './commit.ts';
 import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
@@ -702,11 +701,6 @@ export async function processBranch(
         config.updatedArtifacts = updatedArtifacts;
         config.artifactErrors = artifactErrors;
       }
-
-      // after the post-upgrade tasks, so that the changeset describes the package files as they are committed
-      config.updatedArtifacts = config.updatedArtifacts.concat(
-        await generateChangeset(config, branchConfig.packageFiles),
-      );
 
       // modifies the file changes in place to allow having a version bump in a packageFile or artifact
       await bumpVersions(config);

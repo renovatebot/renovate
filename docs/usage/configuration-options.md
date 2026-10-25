@@ -4211,7 +4211,7 @@ Renovate never adds a changeset for:
 - packages without a `name`
 - packages that match the `ignore` list in your `.changeset/config.json`
 
-This option works with npm, pnpm, Yarn and Bun.
+This option works with npm, pnpm and Yarn.
 Your repository needs a `.changeset/config.json` file in its root, otherwise Renovate does not add a changeset.
 
 The changeset lists the updated dependencies, which end up in the changelogs of your packages.

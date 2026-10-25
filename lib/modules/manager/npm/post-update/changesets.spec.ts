@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { fs, git, partial } from '~test/util.ts';
-import type { PackageFile } from '../../../../modules/manager/types.ts';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import type { FileChange } from '../../../../util/git/types.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import { generateChangeset } from './changesets.ts';
+import type { AdditionalPackageFiles } from './types.ts';
 
 vi.mock('../../../../util/fs/index.ts');
-
-const changesetConfig = '{"ignore": ["@my-org/ignored-*"]}';
 
 function mockFiles(
   local: Record<string, string>,
@@ -22,8 +22,17 @@ function packageJson(content: Record<string, unknown>): string {
   return JSON.stringify(content);
 }
 
-function getConfig(config: Partial<BranchConfig>): BranchConfig {
-  return partial<BranchConfig>({
+function updatedPackageJson(
+  path: string,
+  content: Record<string, unknown>,
+): FileChange {
+  return { type: 'addition', path, contents: packageJson(content) };
+}
+
+function getConfig(
+  config: Partial<PostUpdateConfig<NpmManagerData>>,
+): PostUpdateConfig<NpmManagerData> {
+  return partial<PostUpdateConfig<NpmManagerData>>({
     baseBranch: 'main',
     postUpdateOptions: ['changesets'],
     upgrades: [],
@@ -31,17 +40,21 @@ function getConfig(config: Partial<BranchConfig>): BranchConfig {
   });
 }
 
-describe('workers/repository/update/branch/changesets', () => {
+function getPackageFiles(...paths: string[]): AdditionalPackageFiles {
+  return { npm: paths.map((packageFile) => ({ packageFile })) };
+}
+
+describe('modules/manager/npm/post-update/changesets', () => {
   describe('generateChangeset', () => {
     it('does nothing if the option is disabled', async () => {
-      const config = partial<BranchConfig>({ postUpdateOptions: [] });
+      const config = getConfig({ postUpdateOptions: [] });
 
       await expect(generateChangeset(config, {})).resolves.toEqual([]);
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
     it('does nothing without postUpdateOptions', async () => {
-      const config = partial<BranchConfig>({});
+      const config = getConfig({ postUpdateOptions: undefined });
 
       await expect(generateChangeset(config, {})).resolves.toEqual([]);
     });
@@ -70,23 +83,21 @@ describe('workers/repository/update/branch/changesets', () => {
       );
       const config = getConfig({
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'package.json',
-            contents: packageJson({
-              name: 'app',
-              devDependencies: { foo: '2.0.0' },
-            }),
-          },
+          updatedPackageJson('package.json', {
+            name: 'app',
+            devDependencies: { foo: '2.0.0' },
+          }),
         ],
       });
 
-      await expect(generateChangeset(config, {})).resolves.toEqual([]);
+      await expect(
+        generateChangeset(config, getPackageFiles('package.json')),
+      ).resolves.toEqual([]);
     });
 
     it('bumps the packages whose dependencies changed', async () => {
       mockFiles(
-        { '.changeset/config.json': changesetConfig },
+        { '.changeset/config.json': '{"ignore": ["@my-org/ignored-*"]}' },
         {
           'package.json': packageJson({
             name: 'root',
@@ -111,73 +122,74 @@ describe('workers/repository/update/branch/changesets', () => {
             dependencies: { foo: '^1.0.0' },
           }),
           'packages/new/package.json': '{',
+          'packages/other-manager/package.json': packageJson({
+            name: '@my-org/other-manager',
+            dependencies: { foo: '^1.0.0' },
+          }),
         },
       );
       const config = getConfig({
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'package.json',
-            contents: packageJson({
-              name: 'root',
-              private: true,
-              dependencies: { foo: '^2.0.0' },
-            }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/a/package.json',
-            contents: packageJson({
-              name: '@my-org/a',
-              dependencies: { foo: '^2.0.0', new: '1.0.0' },
-              optionalDependencies: { bar: '2.0.0' },
-            }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/b/package.json',
-            contents: packageJson({
-              name: '@my-org/b',
-              peerDependencies: { foo: '^2.0.0' },
-              dependencies: { bar: '2.0.0' },
-            }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/ignored-c/package.json',
-            contents: packageJson({
-              name: '@my-org/ignored-c',
-              dependencies: { foo: '^2.0.0' },
-            }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/unnamed/package.json',
-            contents: packageJson({ dependencies: { foo: '^2.0.0' } }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/new/package.json',
-            contents: packageJson({
-              name: '@my-org/new',
-              dependencies: { foo: '^2.0.0' },
-            }),
-          },
+          updatedPackageJson('package.json', {
+            name: 'root',
+            private: true,
+            dependencies: { foo: '^2.0.0' },
+          }),
+          updatedPackageJson('packages/a/package.json', {
+            name: '@my-org/a',
+            dependencies: { foo: '^2.0.0', new: '1.0.0' },
+            optionalDependencies: { bar: '2.0.0' },
+          }),
+          updatedPackageJson('packages/b/package.json', {
+            name: '@my-org/b',
+            peerDependencies: { foo: '^2.0.0' },
+            dependencies: { bar: '2.0.0' },
+          }),
+          updatedPackageJson('packages/ignored-c/package.json', {
+            name: '@my-org/ignored-c',
+            dependencies: { foo: '^2.0.0' },
+          }),
+          updatedPackageJson('packages/unnamed/package.json', {
+            dependencies: { foo: '^2.0.0' },
+          }),
+          updatedPackageJson('packages/new/package.json', {
+            name: '@my-org/new',
+            dependencies: { foo: '^2.0.0' },
+          }),
+          updatedPackageJson('packages/other-manager/package.json', {
+            name: '@my-org/other-manager',
+            dependencies: { foo: '^2.0.0' },
+          }),
           {
             type: 'addition',
             path: 'packages/invalid/package.json',
             contents: '{',
           },
-          { type: 'deletion', path: 'packages/deleted/package.json' },
           {
             type: 'addition',
-            path: 'Dockerfile',
-            contents: 'FROM node:24',
+            path: 'packages/buffer/package.json',
+            contents: Buffer.from('{}'),
           },
+          { type: 'deletion', path: 'packages/deleted/package.json' },
         ],
       });
+      const packageFiles: AdditionalPackageFiles = {
+        npm: [
+          { packageFile: 'package.json' },
+          { packageFile: 'packages/a/package.json' },
+          { packageFile: 'packages/b/package.json' },
+          { packageFile: 'packages/ignored-c/package.json' },
+          { packageFile: 'packages/unnamed/package.json' },
+          { packageFile: 'packages/new/package.json' },
+          { packageFile: 'packages/invalid/package.json' },
+          { packageFile: 'packages/buffer/package.json' },
+          { packageFile: 'packages/deleted/package.json' },
+          { packageFile: 'packages/not-updated/package.json' },
+          {},
+        ],
+      };
 
-      const result = await generateChangeset(config, {});
+      const result = await generateChangeset(config, packageFiles);
 
       expect(result).toEqual([
         {
@@ -206,77 +218,10 @@ describe('workers/repository/update/branch/changesets', () => {
         'packages/a/package.json',
         'main',
       );
-    });
-
-    it('uses the package files as rewritten by post-upgrade tasks', async () => {
-      mockFiles(
-        { '.changeset/config.json': '{}' },
-        {
-          'packages/a/package.json': packageJson({
-            name: 'a',
-            dependencies: { foo: '^1.0.0' },
-          }),
-          'packages/b/package.json': packageJson({
-            name: 'b',
-            dependencies: { foo: '^1.0.0' },
-          }),
-          'packages/c/package.json': packageJson({
-            name: 'c',
-            dependencies: { foo: '^1.0.0' },
-          }),
-        },
+      expect(fs.readLocalFile).not.toHaveBeenCalledWith(
+        'packages/not-updated/package.json',
+        'utf8',
       );
-      const config = getConfig({
-        updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'packages/a/package.json',
-            contents: packageJson({
-              name: 'a',
-              dependencies: { foo: '^2.0.0' },
-            }),
-          },
-          {
-            type: 'addition',
-            path: 'packages/b/package.json',
-            contents: packageJson({
-              name: 'b',
-              dependencies: { foo: '^2.0.0' },
-            }),
-          },
-        ],
-        updatedArtifacts: [
-          {
-            type: 'addition',
-            path: 'packages/a/package.json',
-            contents: Buffer.from(
-              packageJson({ name: 'a', dependencies: { foo: '^2.1.0' } }),
-            ),
-          },
-          { type: 'deletion', path: 'packages/b/package.json' },
-          {
-            type: 'addition',
-            path: 'packages/c/package.json',
-            contents: null,
-          },
-        ],
-      });
-
-      const result = await generateChangeset(config, {});
-
-      expect(result).toMatchObject([
-        {
-          contents: `${codeBlock`
-            ---
-            "a": patch
-            ---
-
-            Updated dependencies:
-
-            - Updated \`foo\` from \`^1.0.0\` to \`^2.1.0\`
-          `}\n`,
-        },
-      ]);
     });
 
     it('uses a stable file name for the same changes', async () => {
@@ -286,19 +231,16 @@ describe('workers/repository/update/branch/changesets', () => {
       );
       const config = getConfig({
         updatedPackageFiles: [
-          {
-            type: 'addition',
-            path: 'package.json',
-            contents: packageJson({
-              name: 'lib',
-              dependencies: { foo: '1.0.0' },
-            }),
-          },
+          updatedPackageJson('package.json', {
+            name: 'lib',
+            dependencies: { foo: '1.0.0' },
+          }),
         ],
       });
+      const packageFiles = getPackageFiles('package.json');
 
-      const [first] = await generateChangeset(config, {});
-      const [second] = await generateChangeset(config, {});
+      const [first] = await generateChangeset(config, packageFiles);
+      const [second] = await generateChangeset(config, packageFiles);
 
       expect(first.path).toBe(second.path);
     });
@@ -321,34 +263,34 @@ describe('workers/repository/update/branch/changesets', () => {
       });
       const config = getConfig({
         upgrades: [
-          partial<BranchUpgradeConfig>({
+          partial<Upgrade<NpmManagerData>>({
             depName: 'foo',
             depType: 'pnpm.catalog.default',
             currentValue: '1.0.0',
             newValue: '1.1.0',
           }),
-          partial<BranchUpgradeConfig>({
+          partial<Upgrade<NpmManagerData>>({
             depName: 'react',
             depType: 'yarn.catalog.react17',
             currentValue: '17.0.1',
             newValue: '17.0.2',
           }),
-          partial<BranchUpgradeConfig>({ depType: 'pnpm.catalog.default' }),
-          partial<BranchUpgradeConfig>({
+          partial<Upgrade<NpmManagerData>>({
+            depType: 'pnpm.catalog.default',
+          }),
+          partial<Upgrade<NpmManagerData>>({
             depName: 'bar',
             depType: 'dependencies',
           }),
-          partial<BranchUpgradeConfig>({ depName: 'baz' }),
+          partial<Upgrade<NpmManagerData>>({ depName: 'baz' }),
         ],
       });
-      const packageFiles: Record<string, PackageFile[]> = {
-        npm: [
-          partial<PackageFile>({ packageFile: 'pnpm-workspace.yaml' }),
-          partial<PackageFile>({ packageFile: 'packages/a/package.json' }),
-          partial<PackageFile>({ packageFile: 'packages/c/package.json' }),
-        ],
-        bun: [partial<PackageFile>({ packageFile: 'packages/b/package.json' })],
-      };
+      const packageFiles = getPackageFiles(
+        'pnpm-workspace.yaml',
+        'packages/a/package.json',
+        'packages/b/package.json',
+        'packages/c/package.json',
+      );
 
       const result = await generateChangeset(config, packageFiles);
 
@@ -370,18 +312,18 @@ describe('workers/repository/update/branch/changesets', () => {
       expect(git.getFile).not.toHaveBeenCalled();
     });
 
-    it('handles catalog updates without package files', async () => {
+    it('handles catalog updates without npm package files', async () => {
       mockFiles({ '.changeset/config.json': '{}' });
       const config = getConfig({
         upgrades: [
-          partial<BranchUpgradeConfig>({
+          partial<Upgrade<NpmManagerData>>({
             depName: 'foo',
             depType: 'pnpm.catalog.default',
           }),
         ],
       });
 
-      await expect(generateChangeset(config, undefined)).resolves.toEqual([]);
+      await expect(generateChangeset(config, {})).resolves.toEqual([]);
     });
   });
 });
