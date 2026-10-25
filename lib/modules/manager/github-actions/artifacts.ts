@@ -18,7 +18,7 @@ import {
   resolveToolConstraint,
 } from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import { ActionsLockfile } from './schema.ts';
+import { ActionsLockfile, type Finding, FindingsOutput } from './schema.ts';
 import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 
 /** The `gh` CLI extension that generates and verifies the lockfile. */
@@ -72,13 +72,13 @@ function getTokenEnv(): ExtraEnv {
 }
 
 /**
- * Whether any updated dependency is one the lockfile records an edge for, and sits in a file `gh actions-lock` will look at.
+ * The updated dependencies which the lockfile records an edge for, and which sit in a file `gh actions-lock` will look at.
  */
-function hasLockedUpdate(
+function getLockedUpgrades(
   config: PostUpdateConfig,
   onboardedWorkflows: OnboardedWorkflows,
-): boolean {
-  return config.upgrades.some((upgrade) => {
+): PostUpdateConfig['upgrades'] {
+  return config.upgrades.filter((upgrade) => {
     if (upgrade.manager !== 'github-actions') {
       return false;
     }
@@ -94,6 +94,17 @@ function hasLockedUpdate(
 
     return isLockfileManaged(packageFile, onboardedWorkflows);
   });
+}
+
+/** One line per finding, followed by how the tool suggests fixing it. */
+function formatFindings(findings: Finding[]): string {
+  return findings
+    .map(({ workflow, dependency, detail, remediation }) => {
+      const location = dependency ? `${workflow}: ${dependency}` : workflow;
+      const fix = remediation ? ` (${remediation})` : '';
+      return `${location}: ${detail}${fix}`;
+    })
+    .join('\n');
 }
 
 /**
@@ -136,7 +147,11 @@ export async function updateActionsLockfile(
     return empty;
   }
 
-  if (!hasLockedUpdate(config, parsedLockfile.data.workflows)) {
+  const lockedUpgrades = getLockedUpgrades(
+    config,
+    parsedLockfile.data.workflows,
+  );
+  if (!lockedUpgrades.length) {
     logger.debug(`No locked dependencies updated for ${actionsLockFile}`);
     return empty;
   }
@@ -177,13 +192,25 @@ export async function updateActionsLockfile(
     docker: {},
   };
 
+  // A replacement introduces a package the workflow did not use before, which `--no-onboard` refuses to add
+  const hasReplacement = lockedUpgrades.some(
+    (upgrade) => upgrade.updateType === 'replacement',
+  );
+
   // `--no-interactive`: we have no terminal to answer prompts with
-  // `--relock`: locked pins are sticky, so without it a changed ref fails with `Ref changed`
+  // No `--relock`: a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance
+  // `--no-onboard`: do not add workflows which the lockfile does not track yet, as that is unrelated to the update. Omitted for a replacement, as the new action is not in the workflow's lockfile entry yet
   // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
-  const commands = [
-    'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
+  // `--ignore-local-actions`: warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
+  // `--json=findings`: print the findings as JSON on stdout, so a failure can be reported readably
+  const flags = [
+    '--no-interactive',
+    ...(hasReplacement ? [] : ['--no-onboard']),
+    '--no-narrow',
+    '--ignore-local-actions',
+    '--json=findings',
   ];
+  const commands = [`gh actions-lock ${flags.join(' ')}`];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
   // They own the extension version, and `constraints.ghActionsLock` does not apply.
@@ -212,13 +239,17 @@ export async function updateActionsLockfile(
       throw err;
     }
     logger.debug({ err }, `Error updating ${actionsLockFile}`);
+    const findings = FindingsOutput.safeParse(err.stdout);
     return {
       updatedArtifacts: [],
       artifactErrors: [
         {
           fileName: actionsLockFile,
           // an `ExecError` always carries a `stderr`, so fall back to the message rather than rendering an artifact error with nothing in it
-          stderr: artifactErrorMessageFromExecError(err, err.message),
+          stderr:
+            findings.success && findings.data.length
+              ? formatFindings(findings.data)
+              : artifactErrorMessageFromExecError(err, err.message),
         },
       ],
     };
