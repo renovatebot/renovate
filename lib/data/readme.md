@@ -124,12 +124,12 @@ This will be added to the `orb` group in the `source-urls.json` file since the p
 ## Node.js Versioning Schedule `node-schedule.json`
 
 This file is automatically updated by a scheduled workflow.
-It can be manually updated by running `pnpm update-static-data:node-schedule`.
+It can be manually updated by running `pnpm update-static-data node-schedule`.
 
 ## Mise tool registry (`mise-registry.json`)
 
 This file is automatically updated by a scheduled workflow.
-It can be manually updated by running `pnpm update-static-data:mise-registry`.
+It can be manually updated by running `pnpm update-static-data mise-registry`.
 
 It maps `mise` tool short names (e.g. `zola`) to their available backends (e.g. `["aqua:getzola/zola", "asdf:salasrod/asdf-zola"]`).
 The data is generated from `mise registry --json` using the [mise CLI](https://mise.jdx.dev).
