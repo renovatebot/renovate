@@ -319,6 +319,29 @@ describe('modules/platform/azure/index', () => {
         }),
       );
     });
+
+    it('falls back to manualUrl when repo.remoteUrl is invalid', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getRepositories: vi.fn().mockResolvedValue([
+            {
+              name: 'my-repo',
+              defaultBranch: 'main',
+              project: { name: 'my-project' },
+              remoteUrl: 'not a valid URL',
+            },
+          ]),
+        }),
+      );
+
+      await azure.initRepo({ repository: 'my-project/my-repo' });
+
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://dev.azure.com/renovate12345/my-project/_git/my-repo',
+        }),
+      );
+    });
   });
 
   describe('findPr(branchName, prTitle, state, targetBranch)', () => {
