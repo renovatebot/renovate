@@ -195,6 +195,26 @@ jobs:
               go-version: '1.23'
 ```
 
+### Docker container actions
+
+For a [Docker container action](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runs-for-docker-container-actions), Renovate extracts the image from `runs.image`:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0'
+```
+
+Renovate can also pin and update the image's digest:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627'
+```
+
+Renovate ignores a `runs.image` which points at a local `Dockerfile`.
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.
