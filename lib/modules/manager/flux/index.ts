@@ -29,3 +29,5 @@ export const supportedDatasources = [
   HelmDatasource.id,
   DockerDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

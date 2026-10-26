@@ -1491,6 +1491,7 @@ describe('config/presets/index', () => {
           'mergeConfidence:age-confidence-badges',
           'replacements:all',
           'workarounds:all',
+          'security:php2shell',
           'helpers:forgejoDigestChangelogs',
           'helpers:giteaDigestChangelogs',
           'helpers:githubDigestChangelogs',

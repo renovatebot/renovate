@@ -178,10 +178,11 @@ export async function updateActionsLockfile(
   };
 
   // `--no-interactive`: we have no terminal to answer prompts with
+  // `--relock`: locked pins are sticky, so without it a changed ref fails with `Ref changed`
   // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
   // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
   const commands = [
-    'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
+    'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
   ];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.

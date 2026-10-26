@@ -42,3 +42,4 @@ Similarly, a lightweight git tag has no creation time of its own and always matc
 ## Fallback to direct lookups
 
 If no result is found from Go proxy lookups then Renovate will fall back to direct lookups.
+A direct lookup reports the datasource which served it, such as `github-tags` or `git-tags`, as `effectiveDatasource`, which templates and `matchJsonata` can read.
