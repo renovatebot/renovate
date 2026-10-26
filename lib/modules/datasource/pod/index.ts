@@ -5,6 +5,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
@@ -245,8 +246,7 @@ export class PodDatasource extends Datasource {
       {
         ttlMinutes: 30,
         namespace: `datasource-${PodDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),

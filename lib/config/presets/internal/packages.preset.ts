@@ -105,6 +105,7 @@ export const presets: Record<string, Preset> = {
       'packages:tslint',
     ],
     matchPackageNames: [
+      '@biomejs/**',
       '@oxlint/**',
       'oxlint',
       'prettier',

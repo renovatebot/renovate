@@ -16,6 +16,7 @@ import { getFile } from '../../../../util/git/index.ts';
 import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { coerceString } from '../../../../util/string.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
 export interface PackageFilesResult {
@@ -635,7 +636,15 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        updatedArtifacts.push(file);
+        // several updateArtifacts() calls can return the same file, keep only the latest
+        const existingIndex = updatedArtifacts.findIndex(
+          (artifact) => artifact.path === file.path,
+        );
+        if (existingIndex === -1) {
+          updatedArtifacts.push(file);
+        } else {
+          updatedArtifacts[existingIndex] = file;
+        }
       }
 
       if (artifactError) {
@@ -696,7 +705,9 @@ async function checkForPendingVersions(
   }
 
   for (const dep of extracted.deps) {
-    const depName = dep.depName ?? dep.packageName;
+    // the re-extracted deps have not been through the extract phase, so their names need normalizing before they can be matched against the upgrades
+    normalizeDepNames(dep);
+    const { depName } = dep;
     // shouldn't ever happen
     if (!depName) {
       logger.error(

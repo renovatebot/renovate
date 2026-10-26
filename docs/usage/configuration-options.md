@@ -2344,8 +2344,8 @@ Do not combine with `hostType` in the same rule or it won't work.
 
 ### `hostRules.dnsCache`
 
-Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
+This option is deprecated and has no effect.
+Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
@@ -2358,8 +2358,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
@@ -2437,6 +2439,8 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
 
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
@@ -3051,6 +3055,7 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ read checkboxes from an existing Dependency Dashboard: use `checkedBranches` to request branches instead
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
@@ -4621,6 +4626,7 @@ It usually doesn't _know_ why they're there, instead it simply knows that it has
 
 If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+Read the [Abandoned PRs](./key-concepts/pull-requests.md#abandoned-prs) docs to learn more.
 
 If a branch appears stale and hasn't been modified, then:
 
@@ -5336,6 +5342,10 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
 
+!!! note
+  Some managers disable certain dependencies by default, such as `indirect` Go modules or Gradle `strictly` constraints.
+  Renovate still raises vulnerability-fix PRs for those dependencies, unless you disable them yourself with a `packageRules` entry that sets `enabled=false`.
+
 If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
 Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
 
@@ -5351,6 +5361,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.

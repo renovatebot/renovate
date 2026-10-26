@@ -100,11 +100,9 @@ function getCNBDependencies(
   for (const node of nodes) {
     const depString = node.val.trim();
     if (isDockerRef(depString)) {
-      const dep = getDockerDep(
-        depString.replace(DOCKER_PREFIX, ''),
-        true,
-        config.registryAliases,
-      );
+      const dep = getDockerDep(depString.replace(DOCKER_PREFIX, ''), {
+        registryAliases: config.registryAliases,
+      });
 
       dep.fileReplacePosition = node.position!; // TODO: should not be null
       // v8 ignore else -- the extractor always populates this field

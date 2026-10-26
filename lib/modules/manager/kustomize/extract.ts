@@ -1,5 +1,5 @@
 import querystring from 'node:querystring';
-import { isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -78,10 +78,10 @@ export function extractResource(base: string): PackageDependency | null {
   };
 }
 
-export function extractImage(
+export function extractImage<T = never>(
   image: Image,
   aliases?: Record<string, string>,
-): PackageDependency | null {
+): PackageDependency<T> | null {
   if (!image.name) {
     return null;
   }
@@ -90,7 +90,10 @@ export function extractImage(
     logger.debug({ image }, 'Invalid image name');
     return null;
   }
-  const nameDep = getDep(nameToSplit, false, aliases);
+  const nameDep = getDep(nameToSplit, {
+    specifyReplaceString: false,
+    registryAliases: aliases,
+  });
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
@@ -131,7 +134,10 @@ export function extractImage(
       };
     }
 
-    const dep = getDep(`${depName}:${newTag}`, false, aliases);
+    const dep = getDep(`${depName}:${newTag}`, {
+      specifyReplaceString: false,
+      registryAliases: aliases,
+    });
     return {
       ...dep,
       replaceString: newTag,
@@ -158,9 +164,10 @@ export function extractHelmChart(
     return null;
   }
 
-  if (isOCIRegistry(helmChart.repo)) {
+  const { repo } = helmChart;
+  if (isNonEmptyString(repo) && isOCIRegistry(repo)) {
     return {
-      ...getOciChartDep(helmChart.repo, helmChart.name, aliases),
+      ...getOciChartDep(repo, helmChart.name, aliases),
       depName: helmChart.name,
       currentValue: helmChart.version,
     };
@@ -169,7 +176,7 @@ export function extractHelmChart(
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [helmChart.repo],
+    ...(isNonEmptyString(repo) && { registryUrls: [repo] }),
     datasource: HelmDatasource.id,
   };
 }

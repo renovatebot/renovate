@@ -202,6 +202,18 @@ const TflintWith: ActionSchema = z
     return [parseValue(version)];
   });
 
+/**
+ * An Action which pins a version of `slsa-framework/verifier`
+ */
+const SlsaVerifierWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    repo: z.string().min(1).catch('slsa-framework/verifier'),
+  })
+  .transform(({ version, repo }) => [
+    { packageName: repo, ...parseValue(version) },
+  ]);
+
 export const githubReleasesDynamicActions: Record<string, KnownActionConfig> = {
   // https://github.com/conda-incubator/setup-miniconda
   'conda-incubator/setup-miniconda': {
@@ -236,6 +248,30 @@ export const githubReleasesDynamicActions: Record<string, KnownActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/install/verifier
+  'slsa-framework/actions/install/verifier': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/build
+  'slsa-framework/actions/verify/build': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/source
+  'slsa-framework/actions/verify/source': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
+  },
+  // https://github.com/slsa-framework/actions/tree/main/verify/vsa
+  'slsa-framework/actions/verify/vsa': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: '', // determined from `repo` input, defaults to slsa-framework/verifier
+    withSchema: SlsaVerifierWith,
   },
   // https://github.com/terraform-linters/setup-tflint
   'terraform-linters/setup-tflint': {
