@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -59,8 +60,10 @@ function extractDockerAction(
   actionRef: DockerReference,
   config: ExtractConfig,
 ): PackageDependency {
-  const dep = getDep(actionRef.originalRef, true, config.registryAliases);
-  dep.depType = 'docker';
+  const dep = getDep(actionRef.originalRef, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   dep.replaceString = actionRef.originalRef;
   return dep;
 }
@@ -288,21 +291,21 @@ function extractWithYAMLParser(
 
   for (const job of Object.values(obj.jobs)) {
     if (job.container) {
-      const dep = getDep(job.container, true, config.registryAliases);
-      // v8 ignore else -- `getDep()` always returns a dep
-      if (dep) {
-        dep.depType = 'container';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(job.container, {
+          registryAliases: config.registryAliases,
+          depType: 'container',
+        }),
+      );
     }
 
     for (const service of job.services) {
-      const dep = getDep(service, true, config.registryAliases);
-      // v8 ignore else -- `getDep()` always returns a dep
-      if (dep) {
-        dep.depType = 'service';
-        deps.push(dep);
-      }
+      deps.push(
+        getDep(service, {
+          registryAliases: config.registryAliases,
+          depType: 'service',
+        }),
+      );
     }
 
     for (const runner of job['runs-on']) {
@@ -338,7 +341,7 @@ async function readLockfile(): Promise<LockfileState> {
  * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
  */
 function getLockfile(): Promise<LockfileState> {
-  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cacheKey = buildCacheKey('github-actions', actionsLockFile);
   const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
   if (cached !== undefined) {
     return cached;

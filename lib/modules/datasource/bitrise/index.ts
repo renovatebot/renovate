@@ -1,5 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
@@ -11,15 +12,11 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { BitriseStepFile } from './schema.ts';
 
-export class BitriseDatasource extends Datasource {
+export class BitriseDatasource extends Datasource<GithubHttp> {
   static readonly id = 'bitrise';
 
-  override readonly http: GithubHttp;
-
   constructor() {
-    super(BitriseDatasource.id);
-
-    this.http = new GithubHttp(this.id);
+    super(BitriseDatasource.id, new GithubHttp(BitriseDatasource.id));
   }
 
   override supportsCustomRegistry(_packageName: string): boolean {
@@ -130,7 +127,7 @@ export class BitriseDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}/${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

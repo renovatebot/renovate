@@ -89,6 +89,67 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    describe('dependency disabled by its manager', () => {
+      const vulnerabilityAlertRule = {
+        matchPackageNames: ['foo:bar'],
+        isVulnerabilityAlert: true,
+      };
+
+      function packageFiles(): Record<string, PackageFile[]> {
+        return {
+          gradle: [
+            {
+              packageFile: 'build.gradle',
+              deps: [
+                {
+                  depName: 'foo:bar',
+                  packageName: 'foo:bar',
+                  datasource: MavenDatasource.id,
+                  currentValue: '1.0.0',
+                  enabled: false,
+                },
+              ],
+            },
+          ],
+        };
+      }
+
+      it('skips it without a vulnerability alert', async () => {
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0].skipReason).toBe('disabled');
+        expect(lookupUpdates).not.toHaveBeenCalled();
+      });
+
+      it('looks it up for a vulnerability alert', async () => {
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+        config.packageRules = [vulnerabilityAlertRule];
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0]).toMatchObject({ enabled: true });
+        expect(files.gradle[0].deps[0]).not.toHaveProperty('skipReason');
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            enabled: true,
+            isVulnerabilityAlert: true,
+          }),
+        );
+      });
+
+      it('skips it for a vulnerability alert if a package rule disabled it too', async () => {
+        config.packageRules = [
+          { matchPackageNames: ['foo:bar'], enabled: false },
+          vulnerabilityAlertRule,
+        ];
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0].skipReason).toBe('disabled');
+        expect(lookupUpdates).not.toHaveBeenCalled();
+      });
+    });
+
     it('keeps skipping an unknown-registry dep which config gives no registry', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         dockerfile: [
@@ -681,6 +742,39 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       });
+    });
+
+    it('removes URL credentials from external host warnings', async () => {
+      config.rangeStrategy = 'auto';
+      const depName = 'https://user:secret@git.example.com/org/repo';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName,
+                packageName: depName,
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(
+        new Error(`failed to fetch ${depName}/maven-metadata.xml`),
+      );
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await fetchUpdates({ ...config, repoIsOnboarded: false }, packageFiles);
+
+      expect(packageFiles.maven[0].deps[0].warnings).toEqual([
+        {
+          topic: 'Lookup Error',
+          message:
+            'https://git.example.com/org/repo: failed to fetch https://git.example.com/org/repo/maven-metadata.xml',
+        },
+      ]);
     });
   });
 });

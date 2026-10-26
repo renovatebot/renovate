@@ -12,7 +12,7 @@ import { keepAliveAgents } from './keep-alive.ts';
 import type { GotOptions } from './types.ts';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions & InternalHttpOptions,
+  GotOptions & Omit<InternalHttpOptions, 'headers'>,
   | 'hostType'
   | 'noAuth'
   | 'headers'
@@ -61,31 +61,12 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
-  const platform = GlobalConfig.get('platform');
-  const platformEndpoint = GlobalConfig.get('endpoint');
-
-  // in the case that an API URL is used for GitHub.com, fallback to `github` hostType, and use the `url`'s host to find a `matchHost: api.github.com` (or `matchHost: github.com`)
-  if (url.startsWith('https://api.github.com/')) {
+  // Fallback to `github` hostType for the GitHub.com API and the host of the GitHub platform endpoint, such as GitHub Enterprise Server or GitHub Enterprise Cloud
+  if (hostRules.usesGithubUrlFallback(url)) {
     res = {
-      ...hostRules.find({
-        hostType: 'github',
-        url,
-      }),
+      ...hostRules.find({ hostType: 'github', url }),
       ...res,
     };
-  } else if (platform === 'github' && platformEndpoint) {
-    // Fallback to `github` hostType when the request URL targets the same host
-    // as the configured GitHub platform endpoint.
-    //
-    // This covers GHES without hardcoding URLs.
-    const requestHost = parseUrl(url)?.hostname;
-    const endpointHost = parseUrl(platformEndpoint)?.hostname;
-    if (requestHost && endpointHost && requestHost === endpointHost) {
-      res = {
-        ...hostRules.find({ hostType: 'github', url }),
-        ...res,
-      };
-    }
   }
 
   // Fallback to `gitlab` hostType
@@ -161,6 +142,30 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
         hostType: 'gitea',
         url,
       }),
+      ...res,
+    };
+  }
+
+  // Fallback to `go` hostType, which requests to a Go module proxy used until they were split into the `go-proxy` datasource
+  if (hostType === 'go-proxy') {
+    // only inherit the authentication-related fields
+    const {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
+    } = hostRules.find({ hostType: 'go', url });
+    res = {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
       ...res,
     };
   }

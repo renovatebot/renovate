@@ -2,6 +2,7 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  PostUpgradeTasks,
   RenovateConfig,
   RenovateSharedConfig,
   UpdateType,
@@ -20,7 +21,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
-import type { ConstraintName } from '../util/exec/types.ts';
+import type { ConstraintName, ToolName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -291,9 +292,11 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+  constraints?: Partial<Record<ToolName, string>>;
   postUpgradeTasks?: {
     commands?: string[];
     fileFilters?: string[];
+    installTools?: PostUpgradeTasks['installTools'];
   };
 }
 

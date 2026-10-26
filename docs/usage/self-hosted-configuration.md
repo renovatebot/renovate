@@ -881,10 +881,14 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+!!! note
+  Renovate applies your own `hostRules`, `internalHostAccess`, `platform` and `endpoint` when it fetches `globalExtends` presets.
+  A `globalExtends` preset on an internal host is judged like any other preset, so a scoped `allowInternal` grant permits it.
+  The `hostRules`, `internalHostAccess` and `secrets` set inside a `globalExtends` preset do not apply when Renovate fetches that preset, or the presets it extends.
+
 !!! warning
-  `globalExtends` presets can't be private.
-  When Renovate resolves `globalExtends` it does not fully process the configuration.
-  This means that Renovate does not have the authentication it needs to fetch private things.
+  Renovate resolves `globalExtends` before it initializes the platform, so it does not have the platform `token` yet.
+  To fetch a private `globalExtends` preset, including a `local>` preset, add a `hostRules` entry with the credentials for its host.
 
 ## `hostRules`
 

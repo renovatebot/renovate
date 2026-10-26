@@ -74,7 +74,6 @@ function expectedChangeLog({
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'https://api.github.com/',
