@@ -1,5 +1,5 @@
 import type { StaticDataSource } from '../types.ts';
-import { fetchText } from '../utils.ts';
+import { describeKeys, fetchText } from '../utils.ts';
 
 type DistroInfo = Record<string, Record<string, string | undefined>>;
 
@@ -52,5 +52,13 @@ export function distroInfo(
         `https://debian.pages.debian.net/distro-info-data/${distro}.csv`,
       ),
     generate: csvToJson,
+    commitMessage: (before, after) => {
+      const name = distro === 'ubuntu' ? 'Ubuntu' : 'Debian';
+      return describeKeys(before ?? {}, after, (added) =>
+        added.length > 0
+          ? `add ${added.map((v) => `${name} ${v}`).join(', ')}`
+          : `update ${name} distro info`,
+      );
+    },
   };
 }

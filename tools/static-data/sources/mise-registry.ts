@@ -3,6 +3,7 @@ import { MiseRegistryJson } from '../../../lib/modules/manager/mise/schema.ts';
 import { Json } from '../../../lib/util/schema-utils/index.ts';
 import { exec } from '../../utils/exec.ts';
 import type { StaticDataSource } from '../types.ts';
+import { describeKeys } from '../utils.ts';
 
 const MiseVersion = z.object({ version: z.string() });
 const MiseRegistry = z.array(
@@ -47,4 +48,10 @@ export const miseRegistry: StaticDataSource<
           .sort(([a], [b]) => a.localeCompare(b)),
       ),
     }),
+  commitMessage: (before, after) =>
+    describeKeys(before?.tools ?? {}, after.tools, (added) =>
+      added.length > 0
+        ? `add ${added.length} new mise tool${added.length === 1 ? '' : 's'}`
+        : 'update mise registry',
+    ),
 };

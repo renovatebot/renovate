@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { Json } from '../../../lib/util/schema-utils/index.ts';
 import type { StaticDataSource } from '../types.ts';
-import { fetchText } from '../utils.ts';
+import { describeKeys, fetchText } from '../utils.ts';
 
 const NodeSchedule = z.record(z.string(), z.unknown());
 type NodeSchedule = z.infer<typeof NodeSchedule>;
@@ -16,4 +16,10 @@ export const nodeSchedule: StaticDataSource<NodeSchedule, NodeSchedule> = {
       ),
     ),
   generate: (schedule) => schedule,
+  commitMessage: (before, after) =>
+    describeKeys(before ?? {}, after, (added) =>
+      added.length > 0
+        ? `add Node.js ${added.join(', ')} to the release schedule`
+        : 'update Node.js release schedule',
+    ),
 };
