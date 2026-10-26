@@ -62,7 +62,6 @@ describe('util/http/github', () => {
   });
 
   afterEach(() => {
-    hostRules.clear();
     GlobalConfig.reset();
   });
 
@@ -557,8 +556,6 @@ describe('util/http/github', () => {
       });
 
       it('when the rate limit is exceeded, but no host rules are set for GitHub.com, a warn is logged', async () => {
-        hostRules.clear();
-
         await expect(
           fail(403, {
             message:
@@ -579,7 +576,6 @@ describe('util/http/github', () => {
         GlobalConfig.set({
           productLinks: { documentation: 'https://custom.example.com/' },
         });
-        hostRules.clear();
 
         await expect(
           fail(403, {
@@ -623,7 +619,6 @@ describe('util/http/github', () => {
           await githubApi.getJsonUnchecked(url);
         }
 
-        hostRules.clear();
         setBaseUrl('https://github.enterprise.example.com');
 
         await expect(

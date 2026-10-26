@@ -311,7 +311,8 @@ function headersByIdentity(
  */
 function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
   const url = parseUrl(matchHost) ? matchHost : `https://${matchHost}`;
-  return hostRules.matchesHost(url, adminMatchHost);
+  // by prefix only: a `matchHost` such as `https://host/path` reaches `https://host/path-other/` as well, which the admin's `https://host/path/` does not
+  return hostRules.matchesHost(url, adminMatchHost, { prefixOnly: true });
 }
 
 /**
@@ -743,7 +744,7 @@ export function applyHostRules(
   }
 
   logger.debug('Setting hostRules from config');
-  // `hostRules.add` enforces `allowedHeaders` on every rule it registers
+  // `hostRules.add` enforces `allowedHeaders` on every untrusted rule it registers - a `trusted` rule (see `options`) is exempt
   for (const rule of config.hostRules) {
     try {
       hostRules.add(rule, options);
@@ -834,7 +835,8 @@ export async function tryReadStaticRepoFileConfig(
   // validate and log issues here to preserve context, caller handles migration and full validation.
   const { errors, warnings } = await configValidation.validateConfig(
     'repo',
-    staticRepoConfig,
+    // `validateConfig` expects massaged input
+    massageConfig(staticRepoConfig),
   );
 
   if (isNonEmptyArray(errors) || isNonEmptyArray(warnings)) {

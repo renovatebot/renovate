@@ -18,7 +18,7 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
-import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
+import { isPseudoVersion } from '../../../../modules/versioning/gomod/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
@@ -28,6 +28,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { safeStringify } from '../../../../util/stringify.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
+import { withoutUrlCredentials } from '../../../../util/url.ts';
 import { calculateAbandonment } from './abandonment.ts';
 import { groupReleasesIntoBuckets } from './bucket.ts';
 import { getNewestMatchingVersion, resolveCurrentVersion } from './current.ts';
@@ -114,11 +115,17 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
-    if (
-      !isGetPkgReleasesConfig(config) ||
-      !getDatasourceFor(config.datasource)
-    ) {
+    if (!isGetPkgReleasesConfig(config)) {
       res.skipReason = 'invalid-config';
+      return Result.ok(res);
+    }
+    if (!getDatasourceFor(config.datasource)) {
+      res.skipReason = 'invalid-config';
+      const packageName = withoutUrlCredentials(config.packageName);
+      res.warnings.push({
+        topic: packageName,
+        message: `Unknown datasource "${config.datasource}" for package ${packageName}`,
+      });
       return Result.ok(res);
     }
     let compareValue =
@@ -164,9 +171,10 @@ export async function lookupUpdates(
 
       if (lookupError) {
         // If dependency lookup fails then warn and return
+        const packageName = withoutUrlCredentials(config.packageName);
         const warning: ValidationMessage = {
-          topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
+          topic: packageName,
+          message: `Failed to look up ${config.datasource} package ${packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -192,6 +200,7 @@ export async function lookupUpdates(
         'deprecationMessage',
         'sourceUrl',
         'registryUrl',
+        'effectiveDatasource',
         'sourceDirectory',
         'homepage',
         'changelogUrl',
@@ -230,15 +239,20 @@ export async function lookupUpdates(
       }
       // Reapply package rules in case we missed something from sourceUrl
       config = await applyPackageRules(
-        { ...config, sourceUrl: res.sourceUrl },
+        {
+          ...config,
+          sourceUrl: res.sourceUrl,
+          effectiveDatasource: res.effectiveDatasource,
+        },
         'source-url',
       );
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
+          const packageName = withoutUrlCredentials(config.packageName);
           res.warnings.push({
-            topic: config.packageName,
-            message: `Can't find version with tag ${config.followTag} for ${config.datasource} package ${config.packageName}`,
+            topic: packageName,
+            message: `Can't find version with tag ${config.followTag} for ${config.datasource} package ${packageName}`,
           });
           return Result.ok(res);
         }
@@ -269,12 +283,13 @@ export async function lookupUpdates(
         const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
+          const packageName = withoutUrlCredentials(config.packageName);
           res.warnings.push({
-            topic: config.packageName,
+            topic: packageName,
             // TODO: types (#22198)
             message: `Can't find version matching ${compareValue!} for ${
               config.datasource
-            } package ${config.packageName}`,
+            } package ${packageName}`,
           });
           return Result.ok(res);
         }
@@ -451,11 +466,12 @@ export async function lookupUpdates(
           allReleaseVersions,
         );
 
-        // #29034
+        // An update between two pseudo-versions of the same module changes the
+        // commit and nothing else, so it is a digest update - see #29034
         if (
           config.manager === 'gomod' &&
-          compareValue?.startsWith('v0.0.0-') &&
-          update.newValue?.startsWith('v0.0.0-') &&
+          isPseudoVersion(compareValue) &&
+          isPseudoVersion(update.newValue) &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
@@ -500,17 +516,19 @@ export async function lookupUpdates(
         res.isSingleVersion ??=
           isString(update.newValue) &&
           versioningApi.isSingleVersion(update.newValue);
-        // Guards against a docker downgrade, which the datasources used in
-        // these tests never produce - see #40625
-        // istanbul ignore if
+        // Nothing but a rollback should ever propose a lower version, so a
+        // downgrade means the lookup went wrong and the update is dropped - see
+        // #29921. A versioning which reports each value as greater than the
+        // other has no order between them (e.g. aws-machine-image relies on the
+        // datasource order), so no downgrade can be claimed.
         if (
-          config.versioning === dockerVersioningId &&
           update.updateType !== 'rollback' &&
           update.newValue &&
           versioningApi.isVersion(update.newValue) &&
           compareValue &&
           versioningApi.isVersion(compareValue) &&
-          versioningApi.isGreaterThan(compareValue, update.newValue)
+          versioningApi.isGreaterThan(compareValue, update.newValue) &&
+          !versioningApi.isGreaterThan(update.newValue, compareValue)
         ) {
           logger.warn(
             {

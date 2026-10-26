@@ -9,6 +9,7 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
@@ -46,6 +47,7 @@ describe('modules/manager/kustomize/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache',
     );
     git.getRepoStatus.mockResolvedValue(partial<StatusResult>({}));
+    hostRules.clear();
   });
 
   it('returns null if newPackageFileContent is not parseable', async () => {
@@ -413,6 +415,60 @@ describe('modules/manager/kustomize/artifacts', () => {
     ]);
   });
 
+  it('passes the host rule credentials of a helm repository to helm pull', async () => {
+    const execSnapshots = mockExecAll();
+    hostRules.add({
+      hostType: HelmDatasource.id,
+      matchHost: 'charts.example.com',
+      username: 'user',
+      password: 'pass word',
+    });
+    hostRules.add({
+      hostType: HelmDatasource.id,
+      matchHost: 'other.example.com',
+      username: 'user',
+    });
+    fs.localPathExists.mockResolvedValue(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        currentVersion: '1.0.0',
+        registryUrls: ['https://charts.example.com'],
+        datasource: HelmDatasource.id,
+      },
+      {
+        depType: 'HelmChart',
+        depName: 'other',
+        currentVersion: '1.0.0',
+        registryUrls: ['https://other.example.com/charts?a=1&b=2'],
+        datasource: HelmDatasource.id,
+      },
+    ];
+
+    await kustomize.updateArtifacts({
+      packageFileName,
+      updatedDeps,
+      newPackageFileContent,
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 --repo https://charts.example.com --username user --password 'pass word' example",
+      },
+      {
+        cmd: "helm pull --untar --untardir charts/other-1.0.0 --version 1.0.0 --repo 'https://other.example.com/charts?a=1&b=2' other",
+      },
+    ]);
+  });
+
   it('handles OCI repositories', async () => {
     const execSnapshots = mockExecAll();
 
@@ -453,6 +509,48 @@ describe('modules/manager/kustomize/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example',
+      },
+    ]);
+  });
+
+  it('logs in to an OCI registry with its host rule credentials before pulling', async () => {
+    const execSnapshots = mockExecAll();
+    hostRules.add({
+      hostType: DockerDatasource.id,
+      matchHost: 'registry.example.com',
+      username: 'user',
+      password: 'pass word',
+    });
+    fs.localPathExists.mockResolvedValueOnce(false);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.0.0/example/Chart.yaml'],
+        deleted: [],
+      }),
+    );
+    const updatedDeps = [
+      {
+        depType: 'HelmChart',
+        depName: 'example',
+        currentVersion: '1.0.0',
+        packageName: 'registry.example.com/charts/example',
+        datasource: DockerDatasource.id,
+      },
+    ];
+
+    await kustomize.updateArtifacts({
+      packageFileName,
+      updatedDeps,
+      newPackageFileContent,
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "helm registry login --username user --password 'pass word' registry.example.com",
+      },
+      {
+        cmd: 'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://registry.example.com/charts/example',
       },
     ]);
   });

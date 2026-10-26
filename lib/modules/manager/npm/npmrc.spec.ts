@@ -1,7 +1,16 @@
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { applyConfigNpmrc, resolveNpmrc } from './npmrc.ts';
+import type { NpmrcPackageFile } from '../types.ts';
+import {
+  applyConfigNpmrc,
+  hasNpmrcCredentials,
+  hasUncachedNpmrc,
+  resolveNpmrc,
+  restoreNpmrc,
+  stripNpmrc,
+} from './npmrc.ts';
+import type { NpmManagerData } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -48,6 +57,19 @@ describe('modules/manager/npm/npmrc', () => {
       });
     });
 
+    it('returns undefined next to config.npmrc if the discovered .npmrc cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValue('.npmrc');
+
+      const res = await resolveNpmrc('package.json', {
+        npmrc: 'config-npmrc',
+      });
+
+      expect(res).toStrictEqual({
+        npmrc: undefined,
+        npmrcFileName: '.npmrc',
+      });
+    });
+
     it('uses config.npmrc if no .npmrc is found', async () => {
       const res = await resolveNpmrc('package.json', {
         npmrc: 'config-npmrc',
@@ -74,6 +96,11 @@ describe('modules/manager/npm/npmrc', () => {
       expect(res).toStrictEqual({
         npmrc: 'save-exact = true\n',
         npmrcFileName: '.npmrc',
+        repoNpmrc: {
+          fileName: '.npmrc',
+          content: 'save-exact = true\n',
+          detectedLineEnding: '\n',
+        },
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Stripping package-lock setting from .npmrc',
@@ -289,6 +316,11 @@ describe('modules/manager/npm/npmrc', () => {
       expect(res).toStrictEqual({
         npmrc: 'registry=https://registry.npmjs.org\n',
         npmrcFileName: '.npmrc',
+        repoNpmrc: {
+          fileName: '.npmrc',
+          content: 'registry=https://registry.npmjs.org\n',
+          detectedLineEnding: '\n',
+        },
       });
       expect(logger.debug).toHaveBeenCalledWith(
         { npmrcFileName: '.npmrc' },
@@ -522,6 +554,12 @@ describe('modules/manager/npm/npmrc', () => {
         npmrc:
           'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken="prefix${NPM_AUTH_TOKEN}"\n',
         npmrcFileName: '.npmrc',
+        repoNpmrc: {
+          fileName: '.npmrc',
+          content:
+            'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken="prefix${NPM_AUTH_TOKEN}"\n',
+          detectedLineEnding: '\n',
+        },
       });
       expect(logger.debug).not.toHaveBeenCalledWith(
         { npmrcFileName: '.npmrc' },
@@ -532,6 +570,7 @@ describe('modules/manager/npm/npmrc', () => {
 
   describe('applyConfigNpmrc', () => {
     const repoNpmrc = {
+      fileName: '.npmrc',
       content: 'registry=https://reg.example.com/\n',
       detectedLineEnding: '\n' as const,
     };
@@ -552,13 +591,372 @@ describe('modules/manager/npm/npmrc', () => {
     });
 
     it('ignores the repo npmrc when npmrcMerge is not set', () => {
-      expect(applyConfigNpmrc({ npmrc: 'config' }, repoNpmrc, '.npmrc')).toBe(
-        'config',
-      );
+      expect(applyConfigNpmrc({ npmrc: 'config' }, repoNpmrc)).toBe('config');
       expect(logger.info).toHaveBeenCalledWith(
         { npmrcFileName: '.npmrc' },
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
       );
+    });
+  });
+
+  describe('hasNpmrcCredentials', () => {
+    it.each`
+      content                                                            | expected
+      ${'registry=https://reg.example.com/'}                             | ${false}
+      ${'@scope:registry=https://reg.example.com/'}                      | ${false}
+      ${'//reg.example.com/:always-auth=true'}                           | ${false}
+      ${'//reg.example.com/:_authToken=abc'}                             | ${true}
+      ${'//reg.example.com/:_auth=abc'}                                  | ${true}
+      ${'//reg.example.com/:_password=abc'}                              | ${true}
+      ${'_authToken=abc'}                                                | ${true}
+      ${'registry=https://user:pass@reg.example.com/'}                   | ${true}
+      ${'registry=https://npm_0123456789abcdef@reg.example.com/'}        | ${true}
+      ${'registry=https://token@reg.example.com/'}                       | ${false}
+      ${'//reg.example.com/:_authToken=${NPM_TOKEN}'}                    | ${false}
+      ${'//reg.example.com/:_authToken="${NPM_TOKEN}"'}                  | ${false}
+      ${'//reg.example.com/:_authToken = ${NPM_TOKEN} '}                 | ${false}
+      ${'_auth="prefix${NPM_AUTH}"'}                                     | ${true}
+      ${'//npm.corp/:_authToken=npm_abc123${SUFFIX}'}                    | ${true}
+      ${'//reg.example.com/:_authToken=${NPM_TOKEN}x'}                   | ${true}
+      ${'//reg.example.com/:_authToken=${A}${B}'}                        | ${true}
+      ${'//reg.example.com/:_authToken=npm_abc123'}                      | ${true}
+      ${'registry=${REGISTRY}'}                                          | ${false}
+      ${'registry=https://user:${PASS}@reg.example.com/'}                | ${false}
+      ${'registry=https://${USER}:${PASS}@reg.example.com/'}             | ${false}
+      ${'registry=https://user:pre${PASS}@reg.example.com/'}             | ${true}
+      ${'registry=https://${TOKEN}@reg.example.com/'}                    | ${false}
+      ${'@scope:registry=https://${TOKEN}@reg.example.com/'}             | ${false}
+      ${'@scope:registry=https://npm_0123456789abcdef@reg.example.com/'} | ${true}
+      ${'# _authToken=abc'}                                              | ${false}
+      ${'//reg.example.com/:_AUTHTOKEN=abc'}                             | ${true}
+      ${'//${HOST}/:_authToken=abc'}                                     | ${true}
+      ${'registry=//user:pass@reg.example.com/'}                         | ${true}
+      ${'key=-----BEGIN PRIVATE KEY-----'}                               | ${true}
+      ${'//reg.example.com/:key=-----BEGIN PRIVATE KEY-----'}            | ${true}
+      ${'cert=-----BEGIN CERTIFICATE-----'}                              | ${false}
+      ${'keyfile=~/.npm/key.pem'}                                        | ${false}
+      ${'//user:s3cr3t@npm.example.com/:always-auth=true'}               | ${true}
+      ${'//user:s3cr3t@npm.example.com/:_authToken=${NPM_TOKEN}'}        | ${true}
+      ${'https://user:s3cr3t@npm.example.com/:always-auth=true'}         | ${true}
+      ${'//npm.example.com/:_authToken=${NPM_TOKEN}'}                    | ${false}
+      ${'//${USER}:${PASS}@npm.example.com/:always-auth=true'}           | ${false}
+      ${'//npm.example.com:8443/:always-auth=true'}                      | ${false}
+    `('returns $expected for $content', ({ content, expected }) => {
+      expect(
+        hasNpmrcCredentials({
+          fileName: '.npmrc',
+          content,
+          detectedLineEnding: null,
+        }),
+      ).toBe(expected);
+    });
+  });
+
+  describe('package file helpers', () => {
+    const repoNpmrc = {
+      fileName: '.npmrc',
+      content: 'registry=https://reg.example.com/\n',
+      detectedLineEnding: '\n' as const,
+    };
+    const withRepoNpmrc: NpmrcPackageFile<NpmManagerData> = {
+      packageFile: 'package.json',
+      npmrc: 'merged',
+      managerData: { npmrcFileName: '.npmrc', repoNpmrc },
+      deps: [],
+    };
+    const withoutRepoNpmrc: NpmrcPackageFile<NpmManagerData> = {
+      packageFile: 'other/package.json',
+      npmrc: 'config',
+      managerData: { npmrcFileName: null },
+      deps: [],
+    };
+    const withCredentials: NpmrcPackageFile<NpmManagerData> = {
+      packageFile: 'private/package.json',
+      npmrc: '//reg.example.com/:_authToken=abc\n',
+      managerData: {
+        npmrcFileName: 'private/.npmrc',
+        repoNpmrc: {
+          fileName: 'private/.npmrc',
+          content: '//reg.example.com/:_authToken=abc\n',
+          detectedLineEnding: '\n',
+        },
+      },
+      deps: [],
+    };
+
+    it('stripNpmrc removes the npmrc from copies', () => {
+      expect(stripNpmrc([withRepoNpmrc, withoutRepoNpmrc])).toEqual([
+        {
+          packageFile: 'package.json',
+          managerData: { npmrcFileName: '.npmrc', repoNpmrc },
+          deps: [],
+        },
+        {
+          packageFile: 'other/package.json',
+          managerData: { npmrcFileName: null },
+          deps: [],
+        },
+      ]);
+      expect(withRepoNpmrc.npmrc).toBe('merged');
+    });
+
+    it('stripNpmrc drops a repository npmrc with credentials and marks the copy', () => {
+      const stripped = {
+        packageFile: 'private/package.json',
+        managerData: {
+          npmrcFileName: 'private/.npmrc',
+          uncachedNpmrcFileName: 'private/.npmrc',
+        },
+        deps: [],
+      };
+
+      // the same `.npmrc` of two workspaces is classified once
+      expect(stripNpmrc([withCredentials, withCredentials])).toEqual([
+        stripped,
+        stripped,
+      ]);
+      expect(withCredentials.managerData?.repoNpmrc).toBeDefined();
+      expect(logger.once.warn).toHaveBeenCalledWith(
+        { npmrcFileName: 'private/.npmrc' },
+        'A repository .npmrc contains credentials, which are not cached: configure them through hostRules or the npmrc option instead',
+      );
+    });
+
+    it('restoreNpmrc rebuilds the npmrc on copies', async () => {
+      const stripped = stripNpmrc([withRepoNpmrc, withoutRepoNpmrc]);
+
+      const [first, second] = await restoreNpmrc(stripped, {
+        npmrc: 'config',
+        npmrcMerge: true,
+      });
+
+      expect(first.npmrc).toBe(`config\n${repoNpmrc.content}`);
+      expect(second.npmrc).toBe('config');
+      expect(stripped[0].npmrc).toBeUndefined();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('restoreNpmrc reads a marked npmrc from disk again', async () => {
+      const stripped = stripNpmrc([withCredentials, withCredentials]);
+      fs.readLocalFile.mockResolvedValueOnce(
+        '//reg.example.com/:_authToken=abc\n',
+      );
+
+      const [restored, workspace] = await restoreNpmrc(stripped, {
+        npmrc: 'config',
+        npmrcMerge: true,
+      });
+
+      expect(restored.npmrc).toBe(
+        'config\n//reg.example.com/:_authToken=abc\n',
+      );
+      expect(restored.managerData?.uncachedNpmrcFileName).toBe(
+        'private/.npmrc',
+      );
+      // the same `.npmrc` of two workspaces is read once
+      expect(workspace.npmrc).toBe(restored.npmrc);
+      expect(fs.readLocalFile).toHaveBeenCalledExactlyOnceWith(
+        'private/.npmrc',
+        'utf8',
+      );
+      expect(fs.findLocalSiblingOrParent).not.toHaveBeenCalled();
+    });
+
+    it('stripNpmrc marks a copy with an npmrcFileName but without npmrc to be read from disk again', () => {
+      const unreadable: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: 'package.json',
+        managerData: { npmrcFileName: '.npmrc' },
+        deps: [],
+      };
+      const withoutNpmrc: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: 'other/package.json',
+        managerData: { npmrcFileName: null },
+        deps: [],
+      };
+
+      expect(stripNpmrc([unreadable, withoutNpmrc])).toEqual([
+        {
+          packageFile: 'package.json',
+          managerData: {
+            npmrcFileName: '.npmrc',
+            uncachedNpmrcFileName: '.npmrc',
+          },
+          deps: [],
+        },
+        withoutNpmrc,
+      ]);
+      expect(unreadable.managerData).toEqual({ npmrcFileName: '.npmrc' });
+      expect(logger.once.warn).not.toHaveBeenCalled();
+    });
+
+    it('restoreNpmrc restores the npmrc of an unreadable .npmrc as a fresh extract', async () => {
+      const config = { npmrc: 'config' };
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.npmrc');
+      fs.readLocalFile.mockResolvedValue(null);
+      const { npmrc, npmrcFileName } = await resolveNpmrc(
+        'package.json',
+        config,
+      );
+      const extracted: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: 'package.json',
+        npmrc,
+        managerData: { npmrcFileName },
+        deps: [],
+      };
+
+      const [restored] = await restoreNpmrc(stripNpmrc([extracted]), config);
+
+      expect(npmrc).toBeUndefined();
+      expect(restored).not.toHaveProperty('npmrc');
+      expect(fs.readLocalFile).toHaveBeenNthCalledWith(2, '.npmrc', 'utf8');
+    });
+
+    it('restoreNpmrc leaves the npmrc of a marked npmrc unset once it cannot be read', async () => {
+      const stripped = stripNpmrc([withCredentials]);
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const [restored] = await restoreNpmrc(stripped, { npmrc: 'config' });
+
+      expect(restored).not.toHaveProperty('npmrc');
+    });
+
+    it('restoreNpmrc leaves the package files extracted without npmrc without one', async () => {
+      const pnpmWorkspace: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: 'pnpm-workspace.yaml',
+        deps: [],
+      };
+      const yarnrc: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: '.yarnrc.yml',
+        managerData: { yarnZeroInstall: false },
+        deps: [],
+      };
+      const extracted = [withRepoNpmrc, pnpmWorkspace, yarnrc];
+      const config = { npmrc: 'config', npmrcMerge: true };
+
+      const restored = await restoreNpmrc(stripNpmrc(extracted), config);
+
+      expect(restored).toEqual([
+        { ...withRepoNpmrc, npmrc: `config\n${repoNpmrc.content}` },
+        pnpmWorkspace,
+        yarnrc,
+      ]);
+      expect(restored[1]).not.toHaveProperty('npmrc');
+      expect(restored[2]).not.toHaveProperty('npmrc');
+      // as the repository cache stores them
+      const cached = JSON.parse(JSON.stringify(stripNpmrc(extracted)));
+      await expect(restoreNpmrc(cached, config)).resolves.toEqual(restored);
+    });
+
+    it.each`
+      description                     | line
+      ${'a whole-line comment'}       | ${'# //reg.example.com/:_authToken=npm_0123456789abcdef'}
+      ${'a semicolon comment'}        | ${'; //reg.example.com/:_authToken=npm_0123456789abcdef'}
+      ${'an inline comment'}          | ${'registry=https://reg.example.com/ # old: npm_0123456789abcdef'}
+      ${'a line which is no setting'} | ${'=npm_0123456789abcdef'}
+    `(
+      'stripNpmrc does not cache a repository npmrc with $description',
+      async ({ line }) => {
+        const content = `${line}\n\nregistry=https://reg.example.com/\n`;
+        const config = { npmrc: 'config', npmrcMerge: true };
+        mockRepoNpmrc(content);
+        const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+          'package.json',
+          config,
+        );
+        const extracted: NpmrcPackageFile<NpmManagerData> = {
+          packageFile: 'package.json',
+          npmrc,
+          managerData: { npmrcFileName, repoNpmrc },
+          deps: [],
+        };
+
+        const stripped = stripNpmrc([extracted]);
+        const [restored] = await restoreNpmrc(stripped, config);
+
+        expect(stripped).toEqual([
+          {
+            packageFile: 'package.json',
+            managerData: {
+              npmrcFileName: '.npmrc',
+              uncachedNpmrcFileName: '.npmrc',
+            },
+            deps: [],
+          },
+        ]);
+        expect(JSON.stringify(stripped)).not.toContain('npm_0123456789abcdef');
+        // read from disk again on a cached run
+        expect(restored.npmrc).toBe(npmrc);
+        expect(logger.once.debug).toHaveBeenCalledWith(
+          { npmrcFileName: '.npmrc' },
+          'A repository .npmrc contains comments or lines which are not settings, so it is not cached',
+        );
+        expect(logger.once.warn).not.toHaveBeenCalled();
+      },
+    );
+
+    it('stripNpmrc caches a repository npmrc with settings and sections only verbatim', async () => {
+      const content =
+        'registry=https://reg.example.com/\n\n[scope]\nalways-auth=true\n';
+      mockRepoNpmrc(content);
+      const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+        'package.json',
+        {},
+      );
+
+      const [stripped] = stripNpmrc([
+        {
+          packageFile: 'package.json',
+          npmrc,
+          managerData: { npmrcFileName, repoNpmrc },
+          deps: [],
+        },
+      ]);
+
+      expect(stripped.managerData).toEqual({
+        npmrcFileName: '.npmrc',
+        repoNpmrc: {
+          fileName: '.npmrc',
+          content,
+          detectedLineEnding: '\n',
+        },
+      });
+    });
+
+    it('hasUncachedNpmrc finds a marked package file', () => {
+      expect(hasUncachedNpmrc([withRepoNpmrc, withoutRepoNpmrc])).toBeFalse();
+      expect(
+        hasUncachedNpmrc([withoutRepoNpmrc, ...stripNpmrc([withCredentials])]),
+      ).toBeTrue();
+    });
+
+    it('restoreNpmrc restores the config npmrc of a package file whose repository npmrc is ignored', async () => {
+      const config = { npmrc: 'config' };
+      mockRepoNpmrc(repoNpmrc.content);
+      const { npmrc, npmrcFileName } = await resolveNpmrc(
+        'package.json',
+        config,
+      );
+      const extracted: NpmrcPackageFile<NpmManagerData> = {
+        packageFile: 'package.json',
+        npmrc,
+        managerData: { npmrcFileName },
+        deps: [],
+      };
+      const stripped = stripNpmrc([extracted]);
+      fs.readLocalFile.mockClear();
+
+      const [restored] = await restoreNpmrc(stripped, config);
+
+      expect(stripped).toEqual([
+        {
+          packageFile: 'package.json',
+          managerData: { npmrcFileName: '.npmrc' },
+          deps: [],
+        },
+      ]);
+      expect(restored.npmrc).toBe('config');
+      expect(hasUncachedNpmrc(stripped)).toBeFalse();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
   });
 });

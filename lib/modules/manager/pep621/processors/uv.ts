@@ -14,7 +14,7 @@ import {
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
-import { parseUrl } from '../../../../util/url.ts';
+import { parseUrl, stripUrlCredentials } from '../../../../util/url.ts';
 import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
@@ -286,10 +286,23 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
 }
 
+/**
+ * Returns `url` without its userinfo, placeholders included, or `url` unchanged when it cannot be parsed.
+ */
+function withoutAnyUserinfo(url: string): string {
+  return stripUrlCredentials(url) ?? url;
+}
+
 async function getUvExtraIndexUrl(
   project: PyProject,
   deps: Upgrade[],
 ): Promise<NodeJS.ProcessEnv> {
+  // compared without any userinfo, which the registry URLs of the deps may no longer carry
+  const configuredIndexUrls = new Set(
+    coerceArray(project.tool?.uv?.index).map(({ url }) =>
+      withoutAnyUserinfo(url),
+    ),
+  );
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
     .filter((dep) => {
@@ -302,12 +315,9 @@ async function getUvExtraIndexUrl(
     .filter(isString)
     .filter((registryUrl) => {
       // Check if the registry URL is not the default one and not already configured
-      const configuredIndexUrls = coerceArray(
-        project.tool?.uv?.index?.map(({ url }) => url),
-      );
       return (
         registryUrl !== PypiDatasource.defaultURL &&
-        !configuredIndexUrls.includes(registryUrl)
+        !configuredIndexUrls.has(withoutAnyUserinfo(registryUrl))
       );
     });
 
