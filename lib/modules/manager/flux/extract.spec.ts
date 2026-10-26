@@ -624,6 +624,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
@@ -650,6 +651,7 @@ describe('modules/manager/flux/extract', () => {
           },
         ],
       });
+
       const chartDep = result!.deps[0];
       expect(
         compile(
@@ -657,7 +659,7 @@ describe('modules/manager/flux/extract', () => {
           { newValue: '6.6.0', newDigest: 'sha256:abcd' },
           false,
         ),
-      ).toBe('tag: 6.6.0\n        digest: sha256:abcd');
+      ).toEqual('tag: 6.6.0\n        digest: sha256:abcd');
     });
 
     it('extracts HelmRelease with an OCIRepository chart template using a tag and digest', () => {
@@ -679,6 +681,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
@@ -716,6 +719,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
@@ -749,6 +753,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
@@ -796,6 +801,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
@@ -851,6 +857,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
+
       expect(result).toEqual({
         deps: [
           {
