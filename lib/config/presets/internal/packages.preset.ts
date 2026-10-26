@@ -110,6 +110,7 @@ export const presets: Record<string, Preset> = {
       'oxlint',
       'prettier',
       'remark-lint',
+      'rumdl',
       'standard',
     ],
   },
