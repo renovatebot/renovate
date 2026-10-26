@@ -1,7 +1,21 @@
 import { codeBlock } from 'common-tags';
+import { logger, partial } from '~test/util.ts';
+import type { UpdateDependencyConfig } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
+import { updatePnpmWorkspaceDependency } from './pnpm.ts';
 
 describe('modules/manager/npm/update/dependency/pnpm', () => {
+  it('returns null on invalid input', () => {
+    expect(
+      updatePnpmWorkspaceDependency(
+        partial<UpdateDependencyConfig>({ upgrade: {} }),
+      ),
+    ).toBeNull();
+    expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
+      'No catalogName or override was found; this is likely an extraction error.',
+    );
+  });
+
   it('handles implicit default catalog dependency', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
@@ -17,6 +31,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -44,6 +59,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -75,6 +91,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -106,6 +123,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(pnpmWorkspaceYaml);
@@ -127,6 +145,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -155,6 +174,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -184,6 +204,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -212,6 +233,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -240,6 +262,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -266,6 +289,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toBeNull();
@@ -283,6 +307,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toBeNull();
@@ -296,6 +321,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     };
     const testContent = npmUpdater.updateDependency({
       fileContent: null as never,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toBeNull();
@@ -316,6 +342,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -342,6 +369,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -370,6 +398,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -398,6 +427,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -428,6 +458,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -455,6 +486,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -481,6 +513,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -509,6 +542,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toEqual(codeBlock`
@@ -544,6 +578,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toBeNull();
@@ -567,8 +602,39 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
       upgrade,
     });
     expect(testContent).toBeNull();
+  });
+
+  it('handles workspace overrides', () => {
+    const upgrade = {
+      depType: 'pnpm-workspace.overrides',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      overrides:
+        react: 18.3.1
+
+      catalogs:
+        react17:
+          react: 19.0.0
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      overrides:
+        react: 19.0.0
+
+      catalogs:
+        react17:
+          react: 19.0.0
+
+    `);
   });
 });

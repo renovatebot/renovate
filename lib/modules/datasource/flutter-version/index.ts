@@ -3,7 +3,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { FlutterResponse } from './types.ts';
+import { FlutterResponse } from './schema.ts';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 
@@ -14,9 +14,13 @@ export class FlutterVersionDatasource extends Datasource {
     super(FlutterVersionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly defaultRegistryUrls = ['https://storage.googleapis.com'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://storage.googleapis.com'];
+  }
 
   override readonly caching = true;
 
@@ -32,7 +36,7 @@ export class FlutterVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -42,29 +46,25 @@ export class FlutterVersionDatasource extends Datasource {
       registryUrl,
       releases: [],
     };
-    try {
-      const resp = (
-        await this.http.getJsonUnchecked<FlutterResponse>(
-          `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
-        )
-      ).body;
-      result.releases = resp.releases
-        // The API response contains a stable version being released as a non-stable
-        // release. And so we filter out these releases here.
-        .filter(({ version, channel }) => {
-          if (stableVersionRegex.test(version)) {
-            return channel === 'stable';
-          }
-          return true;
-        })
-        .map(({ version, release_date, channel }) => ({
-          version,
-          releaseTimestamp: asTimestamp(release_date),
-          isStable: channel === 'stable',
-        }));
-      return result.releases.length ? result : null;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const resp = await this.fetchJson(
+      `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
+      FlutterResponse,
+    );
+    result.releases = resp.releases
+      // The API response contains a stable version being released as a non-stable
+      // release. And so we filter out these releases here.
+      .filter(({ version, channel }) => {
+        if (stableVersionRegex.test(version)) {
+          return channel === 'stable';
+        }
+        return true;
+      })
+      .map(({ version, release_date, channel }) => ({
+        version,
+        releaseTimestamp: asTimestamp(release_date),
+        isStable: channel === 'stable',
+      }));
+
+    return result.releases.length ? result : null;
   }
 }

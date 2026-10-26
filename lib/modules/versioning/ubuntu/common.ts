@@ -33,8 +33,8 @@ function getDatedContainerImageSuffix(version: string): null | string {
 }
 
 export {
-  isDatedCodeName,
   getDatedContainerImageCodename,
-  getDatedContainerImageVersion,
   getDatedContainerImageSuffix,
+  getDatedContainerImageVersion,
+  isDatedCodeName,
 };

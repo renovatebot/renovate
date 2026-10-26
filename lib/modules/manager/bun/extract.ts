@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -10,7 +10,7 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, PackageFile } from '../types.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -22,7 +22,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 export async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
-): Promise<PackageFile | null> {
+): Promise<NpmrcPackageFile<NpmManagerData> | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
     logger.warn({ fileName: packageFile }, 'Could not read file content');
@@ -41,19 +41,29 @@ export async function processPackageFile(
     return null;
   }
 
-  const { npmrc } = await resolveNpmrc(packageFile, config);
+  const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+    packageFile,
+    config,
+  );
 
   return {
     ...result,
     packageFile,
-    npmrc,
+    ...(isString(npmrc) && { npmrc }),
+    managerData: {
+      ...result.managerData,
+      // store npmrc file name so that a repository `.npmrc` which is not cached is read from disk again
+      npmrcFileName,
+      // stored instead of `npmrc` in the repository cache, from which `npmrc` is rebuilt
+      ...(repoNpmrc && { repoNpmrc }),
+    },
   };
 }
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
-): Promise<PackageFile[]> {
-  const packageFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<NpmrcPackageFile<NpmManagerData>[]> {
+  const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [];
   const allLockFiles = matchedFiles.filter(
     (file) =>
       matchesFileName(file, 'bun.lock') || matchesFileName(file, 'bun.lockb'),
@@ -72,7 +82,12 @@ export async function extractAllPackageFiles(
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
     // Check if package.json contains workspaces
-    const workspaces = res?.managerData?.workspaces;
+    let workspaces = res?.managerData?.workspaces;
+
+    // Check for nested packages property https://bun.com/docs/pm/catalogs#1-define-catalogs-in-root-package-json
+    if (isObject(workspaces) && 'packages' in workspaces) {
+      workspaces = workspaces.packages;
+    }
 
     if (!isArray(workspaces, isString)) {
       continue;

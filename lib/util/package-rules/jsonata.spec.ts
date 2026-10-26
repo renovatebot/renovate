@@ -83,4 +83,44 @@ describe('util/package-rules/jsonata', () => {
     );
     expect(result).toBeFalse();
   });
+
+  describe('$detectPlatform', () => {
+    it('should return true when sourceUrl matches platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://github.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false when sourceUrl does not match platform', async () => {
+      const result = await matcher.matches(
+        { sourceUrl: 'https://gitlab.com/foo/bar' },
+        { matchJsonata: ['$detectPlatform(sourceUrl) = "github"'] },
+      );
+      expect(result).toBeFalse();
+    });
+  });
+
+  describe('$matchRegexOrGlob', () => {
+    const matchJsonata = [
+      '$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://example.com/**"])',
+    ];
+
+    it.each`
+      packageName          | registryUrls                                    | expected
+      ${'@myorg/foo'}      | ${undefined}                                    | ${true}
+      ${'lodash'}          | ${['https://npm.org', 'https://example.com/x']} | ${true}
+      ${'@myorg-labs/foo'} | ${['https://registry.npmjs.org']}               | ${false}
+    `(
+      'returns $expected for $packageName with $registryUrls',
+      async ({ packageName, registryUrls, expected }) => {
+        const result = await matcher.matches(
+          { packageName, registryUrls },
+          { matchJsonata },
+        );
+        expect(result).toBe(expected);
+      },
+    );
+  });
 });

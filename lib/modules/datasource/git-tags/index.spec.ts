@@ -1,18 +1,24 @@
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
-import { add, clear } from '../../../util/host-rules.ts';
+import { clearEnv } from '~test/util.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
 
-vi.mock('simple-git');
-const simpleGitFactoryMock = vi.mocked(simpleGit);
+const createSimpleGit = vi.mocked(git.createSimpleGit);
 
 const packageName = 'https://github.com/example/example.git';
 
 const lsRemote1 = Fixtures.get('ls-remote-1.txt', '../git-refs');
+
+// a lightweight tag shadowed by a branch of the same name
+const lsRemoteShadowedTag = [
+  'a1d9b3fa58c5d9b7bd0b1bd8b0aa4b44b0b4a1d9\trefs/heads/v3.0.0',
+  'b2e0c4fb69d6e0c8ce1c2ce9c1bb5c55c1c5b2e0\trefs/tags/v3.0.0',
+].join('\n');
 
 const datasource = GitTagsDatasource.id;
 const datasourceInstance = new GitTagsDatasource();
@@ -21,20 +27,14 @@ describe('modules/datasource/git-tags/index', () => {
   let gitMock: MockProxy<SimpleGit>;
 
   beforeEach(() => {
-    // clear host rules
-    clear();
-
-    // clear environment variables
-    process.env = {};
+    clearEnv();
 
     // reset git mock
     gitMock = mock<SimpleGit>({
-      env: vi.fn(),
       listRemote: vi.fn(),
     });
 
-    simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockReturnValue(gitMock);
+    createSimpleGit.mockReturnValue(gitMock);
   });
 
   describe('getReleases', () => {
@@ -59,7 +59,72 @@ describe('modules/datasource/git-tags/index', () => {
         datasource,
         packageName,
       });
-      expect(versions).toMatchSnapshot();
+      expect(versions).toEqual({
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            newDigest: '7b756026fb2de270240a889a413e7e3a9d4d4d85',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.0.1',
+            newDigest: 'e173183f932ba8a31d0e4f23cc1070e8ebfa59d6',
+            version: 'v1.0.1',
+          },
+          {
+            gitRef: 'v1.0.2',
+            newDigest: '3936a6bced3587dc9fd464b0a910e0dfd4cfe10d',
+            version: 'v1.0.2',
+          },
+          {
+            gitRef: 'v1.0.3',
+            newDigest: '125ca9f3df4151e50046e5327ecb29ec4c13efab',
+            version: 'v1.0.3',
+          },
+          {
+            gitRef: 'v1.0.4',
+            newDigest: '3ed9e7d7094fd4ee7751c24a3e6b706060f461ff',
+            version: 'v1.0.4',
+          },
+          {
+            gitRef: 'v1.0.5',
+            newDigest: '6d7a933c2e6b7b39e992b1f93b6b42de083b28f0',
+            version: 'v1.0.5',
+          },
+        ],
+        sourceUrl: 'https://github.com/example/example',
+      });
+    });
+
+    it('caches the source URL without the URL credentials of the package name', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemote1);
+      const setWithRawTtl = vi.spyOn(packageCache, 'setWithRawTtl');
+      const credentialedPackageName =
+        'https://user:glpat-abcdefghijklmnop@gitlab.example.com/grp/mod.git';
+
+      const versions = await getPkgReleases({
+        datasource,
+        packageName: credentialedPackageName,
+      });
+
+      expect(versions?.sourceUrl).toBe('https://gitlab.example.com/grp/mod');
+      expect(gitMock.listRemote).toHaveBeenCalledWith([
+        credentialedPackageName,
+      ]);
+      expect(setWithRawTtl).toHaveBeenCalledWith(
+        'datasource-git-tags',
+        expect.any(String),
+        {
+          cachedAt: expect.any(String),
+          value: expect.objectContaining({
+            sourceUrl: 'https://gitlab.example.com/grp/mod',
+          }),
+        },
+        expect.any(Number),
+      );
+      // the keys are sanitized by the package cache itself
+      const cachedValues = setWithRawTtl.mock.calls.map(([, , value]) => value);
+      expect(JSON.stringify(cachedValues)).not.toContain('glpat-');
     });
   });
 
@@ -74,6 +139,16 @@ describe('modules/datasource/git-tags/index', () => {
       expect(digest).toBeNull();
     });
 
+    it('returns null if there are no refs', async () => {
+      gitMock.listRemote.mockResolvedValue('');
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'a tag to look up' },
+        'v1.0.2',
+      );
+      expect(digest).toBeNull();
+    });
+
     it('returns digest for tag', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
 
@@ -81,7 +156,17 @@ describe('modules/datasource/git-tags/index', () => {
         { packageName: 'a tag to look up' },
         'v1.0.2',
       );
-      expect(digest).toBe('9cb93e0b236385a4e2efd089d7c6a458f5ff321f');
+      expect(digest).toBe('3936a6bced3587dc9fd464b0a910e0dfd4cfe10d');
+    });
+
+    it('ignores a branch with the same name as the tag', async () => {
+      gitMock.listRemote.mockResolvedValue(lsRemoteShadowedTag);
+
+      const digest = await datasourceInstance.getDigest(
+        { packageName: 'a tag to look up' },
+        'v3.0.0',
+      );
+      expect(digest).toBe('b2e0c4fb69d6e0c8ce1c2ce9c1bb5c55c1c5b2e0');
     });
 
     it('returns digest for HEAD', async () => {
@@ -94,53 +179,16 @@ describe('modules/datasource/git-tags/index', () => {
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
 
-    it('returns digest for HEAD with authentication environment variables', async () => {
+    it('requests authentication for git-tags lookups', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'github',
-        matchHost: 'api.github.com',
-        token: 'token123',
-      });
 
       const digest = await datasourceInstance.getDigest(
         { packageName: 'another tag to look up' },
         undefined,
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
-      });
-    });
-
-    it('returns digest for HEAD with authentication environment variables for datasource type git-tags', async () => {
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'git-tags',
-        matchHost: 'git.example.com',
-        token: 'token123',
-      });
-
-      const digest = await datasourceInstance.getDigest(
-        { packageName: 'another tag to look up' },
-        undefined,
-      );
-      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(gitMock.env).toHaveBeenCalledExactlyOnceWith({
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@git.example.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
-        GIT_CONFIG_VALUE_1: 'git@git.example.com:',
-        GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+        authentication: { hostTypes: ['git-tags'] },
       });
     });
   });

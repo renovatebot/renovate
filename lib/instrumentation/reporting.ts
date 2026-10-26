@@ -2,7 +2,9 @@ import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types.ts';
+import { prettier } from '../expose.ts';
 import { getProblems, logger } from '../logger/index.ts';
+import { sanitizeValue } from '../logger/utils.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import { writeSystemFile } from '../util/fs/index.ts';
 import { getS3Client, parseS3Url } from '../util/s3.ts';
@@ -77,6 +79,17 @@ export function finalizeReport(): void {
   }
 }
 
+/**
+ * Returns the report as JSON, sanitized like a log record.
+ */
+async function getReportBody(config: RenovateConfig): Promise<string> {
+  const json = JSON.stringify(sanitizeValue(report));
+  if (!config.reportFormatting) {
+    return json;
+  }
+  return prettier().format(json, { parser: 'json' });
+}
+
 export async function exportStats(config: RenovateConfig): Promise<void> {
   try {
     if (isNullOrUndefined(config.reportType)) {
@@ -90,7 +103,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
 
     if (config.reportType === 'file') {
       const path = config.reportPath!;
-      await writeSystemFile(path, JSON.stringify(report));
+      await writeSystemFile(path, await getReportBody(config));
       logger.debug({ path }, 'Writing report');
       return;
     }
@@ -109,7 +122,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       const s3Params: PutObjectCommandInput = {
         Bucket: s3Url.Bucket,
         Key: s3Url.Key,
-        Body: JSON.stringify(report),
+        Body: await getReportBody(config),
         ContentType: 'application/json',
       };
 

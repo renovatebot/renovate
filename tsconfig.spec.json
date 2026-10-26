@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig",
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "module": "CommonJS",
-    "allowJs": false,
-    "checkJs": false
-  }
-}

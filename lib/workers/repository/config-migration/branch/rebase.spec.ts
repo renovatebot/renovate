@@ -23,12 +23,10 @@ describe('workers/repository/config-migration/branch/rebase', () => {
   });
 
   describe('rebaseMigrationBranch()', () => {
-    const repoConfig = Fixtures.getJson('./renovate.json');
+    const repoConfig = Fixtures.getJsonc('./renovate.json');
     const indent = '  ';
-    const renovateConfigJson =
-      JSON.stringify(repoConfig, undefined, indent) + '\n';
-    const renovateConfigJson5 =
-      JSON5.stringify(repoConfig, undefined, indent) + '\n';
+    const renovateConfigJson = `${JSON.stringify(repoConfig, undefined, indent)}\n`;
+    const renovateConfigJson5 = `${JSON5.stringify(repoConfig, undefined, indent)}\n`;
     let config: RenovateConfig;
     const migratedConfigData: MigratedData = {
       content: '',
@@ -110,7 +108,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
           message: `Migrate config ${filename}`,
           platformCommit: 'auto',
           baseBranch: 'dev',
-          labels: [],
+          prTitle: 'Migrate Renovate config',
         });
       },
     );

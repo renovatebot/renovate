@@ -1,8 +1,13 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
+import type { NpmManagerData } from '../../types.ts';
 
-const readFixture = (x: string): string => Fixtures.get(x, '../..');
+function readFixture(x: string): string {
+  return Fixtures.get(x, '../..');
+}
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
@@ -19,6 +24,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -39,6 +45,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -63,6 +70,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -86,6 +94,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(res).toBeJsonString();
@@ -109,9 +118,12 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       const res = npmUpdater.updateDependency({
         fileContent: input,
+        packageFile: 'package.json',
         upgrade,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toBe(
+        '{"dependencies":{"n":"git+https://github.com/owner/n#v1.1.0"}}',
+      );
       expect(res).toContain('v1.1.0');
     });
 
@@ -123,6 +135,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
@@ -137,6 +150,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01GlobContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe('1.22.0');
@@ -152,6 +166,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).resolutions['**/@angular/cli']).toBe(
@@ -168,6 +183,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -182,6 +198,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/013.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -195,9 +212,68 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(input01Content);
+    });
+
+    it('replaces when version is not changing', () => {
+      const upgrade = {
+        depType: 'peerDependencies',
+        depName: 'request',
+        newValue: '>=2.0.0',
+        newName: 'got',
+      };
+      const packageContent = codeBlock`
+        {
+                "peerDependencies": {
+                  "request": ">=2.0.0"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: packageContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
+
+    it('handles the case when version and name are not changing', () => {
+      const upgrade = {
+        depType: 'peerDependencies',
+        depName: 'got',
+        newValue: '>=2.0.0',
+        newName: 'got',
+      };
+      const packageContent = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: packageContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
     });
 
     it('returns null if throws error', () => {
@@ -208,6 +284,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -222,6 +299,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/014.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: input01PMContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -235,6 +313,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: null as never,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -249,14 +328,30 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBeUndefined();
       expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
     });
 
+    it('replaces a package version only', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'browserify',
+        newName: 'browserify',
+        newValue: '12.2.3', // downgrade via replacement.
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!).dependencies.browserify).toBe('12.2.3');
+    });
+
     it('supports alias-based replacement', () => {
-      const upgrade: Upgrade = {
+      const upgrade: Upgrade<NpmManagerData> = {
         depType: 'dependencies',
         depName: 'config',
         newName: 'abc',
@@ -265,6 +360,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01Content,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).dependencies.config).toBe(
@@ -281,10 +377,26 @@ describe('modules/manager/npm/update/dependency/index', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: input01GlobContent,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(JSON.parse(testContent!).resolutions.config).toBeUndefined();
       expect(JSON.parse(testContent!).resolutions['**/abc']).toBe('2.0.0');
+    });
+
+    it('version-only replaces glob package resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'config',
+        newValue: '1.10.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!).resolutions['**/config']).toBe('1.10.0');
     });
 
     it('pins also the version in patch with npm protocol in resolutions', () => {
@@ -296,6 +408,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/patch1o.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch1.json'),
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -310,6 +423,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       const outputContent = readFixture('outputs/patch2o.json');
       const testContent = npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch2.json'),
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
@@ -321,18 +435,23 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'typescript',
         newValue: '0.60.0',
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "typescript": "0.0.5"
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "typescript": "0.60.0"
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "typescript": "0.0.5"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "typescript": "0.60.0"
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -345,22 +464,27 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '0.60.0',
         managerData: { parents: ['awesome-typescript-loader'] },
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "awesome-typescript-loader": {
-           "typescript": "3.0.0"
-         }
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "awesome-typescript-loader": {
-           "typescript": "0.60.0"
-         }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "awesome-typescript-loader": {
+                   "typescript": "3.0.0"
+                 }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "awesome-typescript-loader": {
+                   "typescript": "0.60.0"
+                 }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -373,22 +497,27 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '0.60.0',
         managerData: { parents: ['typescript'] },
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "typescript": {
-           ".": "3.0.0"
-         }
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "typescript": {
-           ".": "0.60.0"
-         }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "typescript": {
+                   ".": "3.0.0"
+                 }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "typescript": {
+                   ".": "0.60.0"
+                 }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -400,22 +529,27 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'typescript',
         newValue: '0.60.0',
       };
-      const overrideDependencies = `{
-        "pnpm": {
-          "overrides": {
-            "typescript": "0.0.5"
-          }
-        }
-      }`;
-      const expected = `{
-        "pnpm": {
-          "overrides": {
-            "typescript": "0.60.0"
-          }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "pnpm": {
+                  "overrides": {
+                    "typescript": "0.0.5"
+                  }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "pnpm": {
+                  "overrides": {
+                    "typescript": "0.60.0"
+                  }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: 'package.json',
         upgrade,
       });
       expect(testContent).toEqual(expected);
@@ -441,9 +575,274 @@ describe('modules/manager/npm/update/dependency/index', () => {
 
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(expected);
+    });
+
+    it('updates devEngines.packageManager single object', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const input = JSON.stringify(
+        {
+          name: 'demo',
+          devEngines: {
+            packageManager: {
+              name: 'pnpm',
+              version: '9.0.0',
+              onFail: 'error',
+            },
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeJsonString();
+      expect(JSON.parse(res!)).toEqual({
+        name: 'demo',
+        devEngines: {
+          packageManager: {
+            name: 'pnpm',
+            version: '9.5.0',
+            onFail: 'error',
+          },
+        },
+      });
+    });
+
+    it('updates devEngines.runtime single object', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.runtime',
+        depName: 'node',
+        newValue: '22.12.0',
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            runtime: { name: 'node', version: '22.11.0' },
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!).devEngines.runtime.version).toBe('22.12.0');
+    });
+
+    it('updates devEngines.packageManager array form by index', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 1 },
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            packageManager: [
+              { name: 'pnpm', version: '9.0.0' },
+              { name: 'yarn', version: '4.5.0' },
+            ],
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!)).toEqual({
+        devEngines: {
+          packageManager: [
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn', version: '4.6.0' },
+          ],
+        },
+      });
+    });
+
+    it('returns same content if devEngines version already matches', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.0.0',
+      };
+      const input = JSON.stringify({
+        devEngines: { packageManager: { name: 'pnpm', version: '9.0.0' } },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBe(input);
+    });
+
+    it('returns null if devEngines depName mismatch', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+      };
+      const input = JSON.stringify({
+        devEngines: { packageManager: { name: 'pnpm', version: '9.0.0' } },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          actualName: 'pnpm',
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+        },
+        'No matching devEngines dependency found; this is likely an extraction error.',
+      );
+    });
+
+    it('returns null if devEngines section missing', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const res = npmUpdater.updateDependency({
+        fileContent: '{}',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+        },
+        'No devEngines block found; this is likely an extraction error.',
+      );
+    });
+
+    it('skips a wrong-position match when updating devEngines.packageManager array', () => {
+      // Both items share version "9.0.0"; when updating index 1, the first
+      // string-level "9.0.0" hit belongs to index 0 and must be rejected by
+      // the dequal verification so the loop finds the correct occurrence.
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 1 },
+      };
+      const input = JSON.stringify(
+        {
+          devEngines: {
+            packageManager: [
+              { name: 'pnpm', version: '9.0.0' },
+              { name: 'yarn', version: '9.0.0' },
+            ],
+          },
+        },
+        null,
+        2,
+      );
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(res!)).toEqual({
+        devEngines: {
+          packageManager: [
+            { name: 'pnpm', version: '9.0.0' },
+            { name: 'yarn', version: '4.6.0' },
+          ],
+        },
+      });
+    });
+
+    it('returns null for devEngines array form when name mismatches index', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'yarn',
+        newValue: '4.6.0',
+        managerData: { devEnginesIndex: 0 },
+      };
+      const input = JSON.stringify({
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          actualName: 'pnpm',
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+          devEnginesIndex: 0,
+        },
+        'No matching devEngines dependency found; this is likely an extraction error.',
+      );
+    });
+
+    it('returns null for devEngines array form when index missing', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.packageManager',
+        depName: 'pnpm',
+        newValue: '9.5.0',
+      };
+      const input = JSON.stringify({
+        devEngines: {
+          packageManager: [{ name: 'pnpm', version: '9.0.0' }],
+        },
+      });
+      const res = npmUpdater.updateDependency({
+        fileContent: input,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+        },
+        'No devEngines index found; this is likely an extraction error.',
+      );
+    });
+
+    it('returns null if devEngines content throws error', () => {
+      const upgrade: Upgrade<NpmManagerData> = {
+        depType: 'devEngines.runtime',
+        depName: 'node',
+        newValue: '22.12.0',
+      };
+      const res = npmUpdater.updateDependency({
+        fileContent: '{invalid',
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(res).toBeNull();
     });
   });
 });

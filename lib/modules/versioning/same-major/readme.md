@@ -9,7 +9,7 @@ It needs to be compatible with any version in the `3.x.x` range but _not_ with v
 
 For example:
 
-```json
+```json {configType=none}
 {
   "sdk": {
     "version": "6.0.300",

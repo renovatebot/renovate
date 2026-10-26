@@ -104,7 +104,14 @@ export const presets: Record<string, Preset> = {
       'packages:stylelint',
       'packages:tslint',
     ],
-    matchPackageNames: ['oxlint', 'prettier', 'remark-lint', 'standard'],
+    matchPackageNames: [
+      '@biomejs/**',
+      '@oxlint/**',
+      'oxlint',
+      'prettier',
+      'remark-lint',
+      'standard',
+    ],
   },
   mapbox: {
     description: 'All Mapbox-related packages.',
@@ -162,5 +169,9 @@ export const presets: Record<string, Preset> = {
     description: 'All Vite related packages',
     matchDatasources: ['npm'],
     matchPackageNames: ['vite', '**vite-plugin**', '@vitejs/**'],
+  },
+  vitePlus: {
+    description: 'All Vite+ related packages',
+    extends: ['monorepo:vite-plus', 'monorepo:vitest'],
   },
 };

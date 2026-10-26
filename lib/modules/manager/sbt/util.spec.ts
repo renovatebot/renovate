@@ -17,6 +17,14 @@ describe('modules/manager/sbt/util', () => {
   });
 
   describe('normalizeScalaVersion()', () => {
+    it('leaves a range untouched', () => {
+      expect(normalizeScalaVersion('[2.13,)')).toBe('[2.13,)');
+    });
+
+    it('leaves a version without a patch part untouched', () => {
+      expect(normalizeScalaVersion('2.13')).toBe('2.13');
+    });
+
     it('does not normalize prior to 2.10', () => {
       const version = '2.9.3';
       expect(normalizeScalaVersion(version)).toBe('2.9.3');

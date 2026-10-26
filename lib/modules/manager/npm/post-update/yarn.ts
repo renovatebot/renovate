@@ -22,10 +22,12 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -55,7 +57,10 @@ export async function checkYarnrc(
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+        yarnPath = pathLine.replace(
+          regEx(/^yarn-path\s+"?(?<path>.+?)"?$/),
+          '$<path>',
+        );
       }
       if (yarnPath) {
         // resolve binary relative to `yarnrc`
@@ -94,14 +99,18 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+  return (
+    (upgrade.depType === 'packageManager' ||
+      upgrade.depType === 'devEngines.packageManager') &&
+    upgrade.depName === 'yarn'
+  );
 }
 
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = [],
+  upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
@@ -113,12 +122,16 @@ export async function generateLockFile(
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility =
-      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-      getYarnVersionFromLock(await getYarnLock(lockFileName));
-    const minYarnVersion =
-      semver.validRange(yarnCompatibility) &&
-      semver.minVersion(yarnCompatibility);
+      yarnUpdate?.newValue ??
+      (await resolveToolConstraint(
+        config,
+        'yarn',
+        async () =>
+          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
+          getYarnVersionFromLock(await getYarnLock(lockFileName)),
+      ));
+    const yarnRange = semver.validRange(yarnCompatibility);
+    const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
     const isYarnDedupeAvailable =
       minYarnVersion && semver.gte(minYarnVersion, '2.2.0');
@@ -138,7 +151,7 @@ export async function generateLockFile(
     if (!isYarn1 && hasPackageManager) {
       toolConstraints.push({
         toolName: 'corepack',
-        constraint: config.constraints?.corepack,
+        constraint: await resolveToolConstraint(config, 'corepack'),
       });
     } else {
       toolConstraints.push(yarnTool);
@@ -150,7 +163,6 @@ export async function generateLockFile(
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
-      CI: 'true',
     };
 
     const commands: (string | CommandWithOptions)[] = [];
@@ -158,6 +170,7 @@ export async function generateLockFile(
     if (config.skipInstalls !== false) {
       if (isYarn1) {
         const { offlineMirror, yarnPath } = await checkYarnrc(lockFileDir);
+        // v8 ignore else -- TODO: add test #40625
         if (!offlineMirror) {
           logger.debug('Updating yarn.lock only - skipping node_modules');
           // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -183,7 +196,11 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
-      if (!config.managerData?.yarnZeroInstall) {
+      // check upgrades too, see #17786
+      const yarnZeroInstall =
+        !!config.managerData?.yarnZeroInstall ||
+        upgrades.some((upgrade) => !!upgrade.managerData?.yarnZeroInstall);
+      if (!yarnZeroInstall) {
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
@@ -212,7 +229,7 @@ export async function generateLockFile(
       docker: {},
       toolConstraints,
     };
-    /* v8 ignore next 4 -- needs test */
+    /* v8 ignore next -- needs test */
     if (GlobalConfig.get('exposeAllEnv')) {
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
@@ -226,12 +243,14 @@ export async function generateLockFile(
 
     const allEnv = getEnv();
     if (allEnv.RENOVATE_X_YARN_PROXY) {
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTP_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpProxy');
         commands.push(
           `yarn config set --home httpProxy ${quote(allEnv.HTTP_PROXY)}`,
         );
       }
+      // v8 ignore else -- TODO: add test #40625
       if (allEnv.HTTPS_PROXY && !isYarn1) {
         commands.push('yarn config unset --home httpsProxy');
         commands.push(
@@ -304,8 +323,8 @@ export async function generateLockFile(
       // https://github.com/yarnpkg/berry/blob/20612e82d26ead5928cc27bf482bb8d62dde87d3/packages/yarnpkg-core/sources/Project.ts#L284.
       try {
         await writeLocalFile(lockFileName, '');
-        /* v8 ignore next -- needs test */
       } catch (err) {
+        // v8 ignore next -- TODO: add test #40625
         logger.debug(
           { err, lockFileName },
           'Error clearing `yarn.lock` for lock file maintenance',
@@ -318,8 +337,8 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
@@ -331,12 +350,14 @@ export async function generateLockFile(
       'lock file error',
     );
     const stdouterr = String(err.stdout) + String(err.stderr);
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('ENOSPC: no space left on device') ||
       stdouterr.includes('Out of diskspace')
     ) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
+    // v8 ignore if -- TODO: add test #40625
     if (
       stdouterr.includes('The registry may be down.') ||
       stdouterr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
@@ -353,17 +374,19 @@ export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
   const keys = new Map(
-    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
-      x.replace(/\/$/, '').replace(/^https?:/, ''),
+    Object.keys(coerceObject(existingYarnrRcYml.npmRegistries)).map((x) => [
+      x.replace(regEx(/\/$/), '').replace(regEx(/^https?:/), ''),
       x,
     ]),
   );
 
   return {
     ...additionalYarnRcYml,
-    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+    npmRegistries: Object.entries(
+      coerceObject(additionalYarnRcYml.npmRegistries),
+    )
       .map(([k, v]) => {
-        const key = keys.get(k.replace(/\/$/, '')) ?? k;
+        const key = keys.get(k.replace(regEx(/\/$/), '')) ?? k;
         return { [key]: v };
       })
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}),

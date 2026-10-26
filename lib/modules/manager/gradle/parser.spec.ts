@@ -382,17 +382,20 @@ describe('modules/manager/gradle/parser', () => {
   describe('dependencies', () => {
     describe('simple dependency strings', () => {
       it.each`
-        input                          | output
-        ${'"foo:bar:1.2.3"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-        ${'"foo:bar:1.2+"'}            | ${{ depName: 'foo:bar', currentValue: '1.2+' }}
-        ${'"foo:bar:1.2.3@zip"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
-        ${'"foo:bar:1.2.3:docs@jar"'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'jar' }}
-        ${'"foo:bar1:1"'}              | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 10 } }}
-        ${'"foo:bar:[1.2.3, )"'}       | ${{ depName: 'foo:bar', currentValue: '[1.2.3, )', managerData: { fileReplacePosition: 9 } }}
-        ${'"foo:bar:[1.2.3, 1.2.4)"'}  | ${{ depName: 'foo:bar', currentValue: '[1.2.3, 1.2.4)', managerData: { fileReplacePosition: 9 } }}
-        ${'"foo:bar:[,1.2.4)"'}        | ${{ depName: 'foo:bar', currentValue: '[,1.2.4)', managerData: { fileReplacePosition: 9 } }}
-        ${'"foo:bar:x86@x86"'}         | ${{ depName: 'foo:bar', currentValue: 'x86', managerData: { fileReplacePosition: 9 } }}
-        ${'foo.bar = "foo:bar:1.2.3"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        input                                | output
+        ${'"foo:bar:1.2.3"'}                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+        ${'"foo:bar:1.2+"'}                  | ${{ depName: 'foo:bar', currentValue: '1.2+' }}
+        ${'"foo:bar:1.2.3@zip"'}             | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+        ${'"foo:bar:1.2.3:docs@jar"'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'jar' }}
+        ${'"foo:bar1:1"'}                    | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 10 } }}
+        ${'"foo:bar:[1.2.3, )"'}             | ${{ depName: 'foo:bar', currentValue: '[1.2.3, )', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:[1.2.3, 1.2.4)"'}        | ${{ depName: 'foo:bar', currentValue: '[1.2.3, 1.2.4)', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:[,1.2.4)"'}              | ${{ depName: 'foo:bar', currentValue: '[,1.2.4)', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:[1.2.3, )!!1.2.3"'}      | ${{ depName: 'foo:bar', currentValue: '[1.2.3, )!!1.2.3', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:[1.2.3, 1.2.4)!!1.2.3"'} | ${{ depName: 'foo:bar', currentValue: '[1.2.3, 1.2.4)!!1.2.3', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:[,1.2.4)!!1.2.4"'}       | ${{ depName: 'foo:bar', currentValue: '[,1.2.4)!!1.2.4', managerData: { fileReplacePosition: 9 } }}
+        ${'"foo:bar:x86@x86"'}               | ${{ depName: 'foo:bar', currentValue: 'x86', managerData: { fileReplacePosition: 9 } }}
+        ${'foo.bar = "foo:bar:1.2.3"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([output]);
@@ -607,6 +610,39 @@ describe('modules/manager/gradle/parser', () => {
           const { deps } = parseGradle([def, str].join('\n'));
           expect(deps).toMatchObject(output);
         });
+      });
+    });
+
+    describe('rich version constraints', () => {
+      it.each`
+        def                   | str                                                                                   | output
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '1.2.3' } }"}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly', fileReplacePosition: 48 } }}
+        ${''}                 | ${'implementation("foo:bar") { version { strictly("1.2.3") } }'}                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly', fileReplacePosition: 48 } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '[1.7, 1.8[' } }"}                  | ${{ depName: 'foo:bar', currentValue: '[1.7, 1.8[', enabled: false, managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3' } }"}                        | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'require', fileReplacePosition: 47 } }}
+        ${''}                 | ${"implementation('foo:bar') { version { prefer '1.2.3' } }"}                         | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'prefer' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '[1.0, 2.0['; prefer '1.5' } }"}     | ${{ depName: 'foo:bar', currentValue: '[1.0, 2.0[', managerData: { versionConstraint: 'require' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '1.2.3'; prefer '1.2.0' } }"}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', enabled: false, managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly '[1.7, 1.8['; prefer '1.7.25' } }"} | ${{ depName: 'foo:bar', skipReason: 'multiple-constraint-dep' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; strictly '1.2.4' } }"}      | ${{ depName: 'foo:bar', skipReason: 'multiple-constraint-dep' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; reject '1.2.4' } }"}        | ${{ depName: 'foo:bar', skipReason: 'unsupported-version' }}
+        ${''}                 | ${"implementation('foo:bar') { version { require '1.2.3'; rejectAll() } }"}           | ${{ depName: 'foo:bar', skipReason: 'unsupported-version' }}
+        ${''}                 | ${"implementation('foo:bar') { exclude group: 'baz'; version { strictly '1.2.3' } }"} | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${"implementation(group: 'foo', name: 'bar') { version { strictly '1.2.3' } }"}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${''}                 | ${'implementation(group = "foo", name = "bar") { version { strictly("1.2.3") } }'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', managerData: { versionConstraint: 'strictly' } }}
+        ${'baz = "1.2.3"'}    | ${"implementation('foo:bar') { version { strictly baz } }"}                           | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz', managerData: { fileReplacePosition: 7 } }}
+        ${'baz = "1.2.3"'}    | ${'implementation("foo:bar") { version { strictly("${baz}") } }'}                     | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz', managerData: { fileReplacePosition: 7 } }}
+        ${'a = "1"; b = "2"'} | ${'implementation("foo:bar") { version { strictly("$a.$b.3") } }'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'unspecified-version' }}
+        ${''}                 | ${"implementation('foo:bar') { version { strictly baz } }"}                           | ${null}
+        ${''}                 | ${'implementation("${baz}") { version { strictly("1.2.3") } }'}                       | ${null}
+        ${''}                 | ${"implementation(group: 'foo', name: baz) { version { strictly '1.2.3' } }"}         | ${null}
+        ${''}                 | ${"implementation('foo:bar:baz:qux') { version { strictly '1.2.3' } }"}               | ${null}
+        ${''}                 | ${'implementation(libs.foo) { version { strictly "1.2.3" } }'}                        | ${null}
+        ${''}                 | ${"implementation('foo:bar') { version { } }"}                                        | ${null}
+        ${''}                 | ${"implementation('foo:bar:1.2.3') { version { strictly '1.2.4' } }"}                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      `('$def | $str', ({ def, str, output }) => {
+        const { deps } = parseGradle([def, str].filter(isTruthy).join('\n'));
+        expect(deps).toMatchObject([output].filter(isTruthy));
       });
     });
 
@@ -1025,11 +1061,14 @@ describe('modules/manager/gradle/parser', () => {
       ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'library("foo.bar", property("f"), "${b}").version(v)'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}" + f, "${b}").version("1.2.3")'}    | ${{ depName: 'foofoo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', sharedVariableName: 'baz' }}
+      ${''}                                         | ${'library("foo.bar", "foo:bar:1.2.3")'}                        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'group = "foo"; artifact = "bar"'}          | ${'library("foo.bar", group + ":" + artifact + ":1.2.3")'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${libs.foo.bar.baz.qux}:1.2.3"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${''}                                         | ${'library(["foo.bar", "foo", "bar"]).version("1.2.3")'}        | ${null}
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
+      ${''}                                         | ${'library("foo", "bar" + baz).version("1.2.3")'}               | ${null}
       ${''}                                         | ${'plugin("foo.bar", "foo")'}                                   | ${null}
       ${''}                                         | ${'plugin("foo.bar", "foo").version("1.2.3")'}                  | ${{ depName: 'foo', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -1054,6 +1093,8 @@ describe('modules/manager/gradle/parser', () => {
       ${'(["foo", "bar", "1.2.3"])'}                                           | ${null}
       ${'someMethod("foo", "bar", "1.2.3")'}                                   | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'listOf("foo", "bar", "baz")'}                                         | ${null}
+      ${'resValue("string", "google_maps_key", "FakeGoogleMapsApiKey123")'}    | ${null}
+      ${'buildConfigField("int", "MAX_RETRIES", "3")'}                         | ${null}
       ${'java { registerFeature(foo) { capability("foo", "bar", "1.2.3") } }'} | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
@@ -1255,7 +1296,7 @@ describe('modules/manager/gradle/parser', () => {
     };
 
     const fileContents = {
-      'foo/bar.gradle': key + ' = "' + value + '"',
+      'foo/bar.gradle': `${key} = "${value}"`,
     };
 
     it.each`

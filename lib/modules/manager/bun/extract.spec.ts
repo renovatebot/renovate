@@ -1,4 +1,6 @@
 import { fs } from '~test/util.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { stripNpmrc } from '../npm/npmrc.ts';
 import { extractAllPackageFiles } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -6,17 +8,23 @@ vi.mock('../../../util/fs/index.ts');
 describe('modules/manager/bun/extract', () => {
   describe('extractAllPackageFiles()', () => {
     it('ignores non-bun files', async () => {
-      expect(await extractAllPackageFiles({}, ['package.json'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['package.json']),
+      ).resolves.toEqual([]);
     });
 
     describe('when using the .lockb lockfile format', () => {
       it('ignores missing package.json file', async () => {
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('ignores invalid package.json file', async () => {
         vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('handles null response', async () => {
@@ -29,7 +37,9 @@ describe('modules/manager/bun/extract', () => {
             _from: 1,
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lockb'])).toEqual([]);
+        await expect(
+          extractAllPackageFiles({}, ['bun.lockb']),
+        ).resolves.toEqual([]);
       });
 
       it('parses valid package.json file', async () => {
@@ -70,12 +80,16 @@ describe('modules/manager/bun/extract', () => {
 
     describe('when using the .lock lockfile format', () => {
       it('ignores missing package.json file', async () => {
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        await expect(extractAllPackageFiles({}, ['bun.lock'])).resolves.toEqual(
+          [],
+        );
       });
 
       it('ignores invalid package.json file', async () => {
         vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toEqual([]);
+        await expect(extractAllPackageFiles({}, ['bun.lock'])).resolves.toEqual(
+          [],
+        );
       });
 
       it('handles null response', async () => {
@@ -103,7 +117,9 @@ describe('modules/manager/bun/extract', () => {
             },
           }),
         );
-        expect(await extractAllPackageFiles({}, ['bun.lock'])).toMatchObject([
+        await expect(
+          extractAllPackageFiles({}, ['bun.lock']),
+        ).resolves.toMatchObject([
           {
             deps: [
               {
@@ -175,6 +191,50 @@ describe('modules/manager/bun/extract', () => {
       ]);
     });
 
+    it('adds nothing when no file matches the declared workspaces', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: ['packages/*'],
+        }),
+      );
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
+    });
+
+    it('skips a workspace package file that yields nothing', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+      vi.mocked(fs.readLocalFile)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'test',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: ['packages/*'],
+          }),
+        )
+        // the workspace package file cannot be read
+        .mockResolvedValueOnce(null);
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([{ packageFile: 'package.json' }]);
+    });
+
     it('skips workspace processing when workspaces is not a valid array', async () => {
       vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce(
@@ -214,7 +274,78 @@ describe('modules/manager/bun/extract', () => {
         },
       ]);
     });
+
+    it('processes workspace package files when workspaces is an object with packages property', async () => {
+      vi.mocked(fs.getSiblingFileName).mockReturnValue('package.json');
+
+      vi.mocked(fs.readLocalFile)
+        // First call: main package file (with workspaces as object)
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: {
+              packages: ['packages/*'],
+            },
+          }),
+        )
+        // Second call: workspace package file
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { dep2: '2.0.0' },
+          }),
+        );
+
+      vi.mocked(fs.getParentDir).mockReturnValueOnce('');
+
+      const matchedFiles = [
+        'bun.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ];
+
+      const packageFiles = await extractAllPackageFiles({}, matchedFiles);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['bun.lock'],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          packageFileVersion: '1.0.0',
+          lockFiles: ['bun.lock'],
+        },
+      ]);
+    });
   });
+
+  it.each([false, true])(
+    'extracts the devEngines bun constraint with array form: %s',
+    async (arrayForm) => {
+      const runtime = { name: 'bun', version: '1.4.0' };
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          engines: { bun: '1.2.0' },
+          devEngines: {
+            runtime: arrayForm ? [runtime] : runtime,
+          },
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+      expect(packageFiles).toMatchObject([
+        { extractedConstraints: { bun: '1.4.0' } },
+      ]);
+    },
+  );
 
   it('extracts .npmrc from sibling or parent directory', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('package.json');
@@ -247,5 +378,44 @@ describe('modules/manager/bun/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
+    expect(packageFiles[0].managerData?.repoNpmrc).toMatchObject({
+      fileName: '.npmrc',
+      content: 'registry=https://custom.registry.com\n',
+    });
+    expect(packageFiles[0].managerData?.npmrcFileName).toBe('.npmrc');
+  });
+
+  it('marks an unreadable repository .npmrc to be read from disk again', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue('.npmrc');
+    fs.readLocalFile
+      .mockResolvedValueOnce(
+        JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+      )
+      .mockResolvedValueOnce(null);
+
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+    expect(packageFiles[0]).not.toHaveProperty('npmrc');
+    expect(stripNpmrc(packageFiles)[0].managerData).toMatchObject({
+      npmrcFileName: '.npmrc',
+      uncachedNpmrcFileName: '.npmrc',
+    });
+  });
+
+  it('does not store a repository .npmrc when there is none', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue(null);
+    fs.readLocalFile.mockResolvedValueOnce(
+      JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+    );
+
+    const packageFiles = await extractAllPackageFiles({}, ['bun.lockb']);
+
+    expect(packageFiles).toHaveLength(1);
+    expect(
+      Object.keys(coerceObject(packageFiles[0].managerData)),
+    ).not.toContain('repoNpmrc');
+    expect(packageFiles[0].managerData?.npmrcFileName).toBeNull();
   });
 });

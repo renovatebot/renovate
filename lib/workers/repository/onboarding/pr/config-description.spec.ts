@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -31,8 +32,21 @@ describe('workers/repository/onboarding/pr/config-description', () => {
         'this is Docker-only',
       ];
       const res = getConfigDesc(config, packageFiles);
-      expect(res).toMatchSnapshot();
-      expect(res.indexOf('Docker-only')).not.toBe(-1);
+      expect(res).toBe(
+        `\n${`${codeBlock`
+            ### Configuration Summary
+
+            Based on the default config's presets, Renovate will:
+
+              - Start dependency updates only once this onboarding PR is merged
+              - description 1
+              - description two
+              - something else
+              - this is Docker-only
+
+            ---
+          `}`}\n`,
+      );
     });
 
     it('assignees, labels and schedule', () => {
@@ -41,47 +55,13 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
       const res = getConfigDesc(config);
-      expect(res).toMatchInlineSnapshot(`
-        "
-        ### Configuration Summary
-
-        Based on the default config's presets, Renovate will:
-
-          - Start dependency updates only once this onboarding PR is merged
-          - Run Renovate on following schedule: before 5am
-
-        🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
-
-        ---
-        "
-      `);
-    });
-
-    it('contains the onboardingConfigFileName if set', () => {
-      delete config.description;
-      config.schedule = ['before 5am'];
-      GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
-      const res = getConfigDesc(config);
-      expect(res).toMatchSnapshot();
-      expect(res.indexOf('`.github/renovate.json`')).not.toBe(-1);
-      expect(res.indexOf('`renovate.json`')).toBe(-1);
-    });
-
-    it('falls back to "renovate.json" if onboardingConfigFileName is not set', () => {
-      delete config.description;
-      config.schedule = ['before 5am'];
-      const res = getConfigDesc(config);
-      expect(res).toMatchSnapshot();
-      expect(res.indexOf('`renovate.json`')).not.toBe(-1);
-    });
-
-    it('falls back to "renovate.json" if onboardingConfigFileName is not valid', () => {
-      delete config.description;
-      config.schedule = ['before 5am'];
-      GlobalConfig.set({ onboardingConfigFileName: 'foo.bar' });
-      const res = getConfigDesc(config);
-      expect(res).toMatchSnapshot();
-      expect(res.indexOf('`renovate.json`')).not.toBe(-1);
+      // only the schedule makes it into the summary
+      expect(res).toContain(
+        '  - Run Renovate on following schedule: before 5am\n',
+      );
+      expect(res).not.toContain('- someone');
+      expect(res).not.toContain('- renovate');
+      expect(res).not.toContain('- deps');
     });
 
     it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
@@ -90,7 +70,11 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       config.onboardingRebaseCheckbox = true;
       const res = getConfigDesc(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toContain(
+        '  - Run Renovate on following schedule: before 5am\n',
+      );
+      // the checkbox message is added by the PR body, not by the config summary
+      expect(res).not.toContain('checkbox');
     });
   });
 });

@@ -7,7 +7,7 @@ import type { RangeStrategy } from '../../../../types/index.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { getMergeConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
-import { getUpdateType } from './update-type.ts';
+import { classifyRelease } from './update-type.ts';
 
 export async function generateUpdate(
   config: LookupUpdateConfig,
@@ -17,32 +17,29 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
+  allVersions: Set<string>,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {
     bucket,
     newVersion,
     newValue: null!,
+    hasAttestation: release.attestation,
   };
 
-  // istanbul ignore if
   if (release.checksumUrl !== undefined) {
     update.checksumUrl = release.checksumUrl;
   }
-  // istanbul ignore if
   if (release.downloadUrl !== undefined) {
     update.downloadUrl = release.downloadUrl;
   }
-  // istanbul ignore if
   if (release.newDigest !== undefined) {
     update.newDigest = release.newDigest;
   }
-  // istanbul ignore if
   if (release.releaseTimestamp) {
     update.releaseTimestamp = release.releaseTimestamp;
     update.newVersionAgeInDays = getElapsedDays(release.releaseTimestamp);
   }
-  // istanbul ignore if
   if (release.registryUrl !== undefined) {
     /**
      * This means:
@@ -54,13 +51,18 @@ export async function generateUpdate(
 
   if (currentValue) {
     try {
-      update.newValue = versioningApi.getNewValue({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-      })!;
-    } catch (err) /* istanbul ignore next */ {
+      if (config.isLockfileOnly) {
+        update.newValue = currentValue;
+      } else {
+        update.newValue = versioningApi.getNewValue({
+          currentValue,
+          rangeStrategy,
+          currentVersion,
+          newVersion,
+          allVersions,
+        })!;
+      }
+    } catch (err) {
       logger.warn(
         { err, currentValue, rangeStrategy, currentVersion, newVersion },
         'getNewValue error',
@@ -73,7 +75,6 @@ export async function generateUpdate(
   update.newMajor = versioningApi.getMajor(newVersion)!;
   update.newMinor = versioningApi.getMinor(newVersion)!;
   update.newPatch = versioningApi.getPatch(newVersion)!;
-  // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
     update.newValue = currentValue!;
@@ -81,7 +82,7 @@ export async function generateUpdate(
   }
   update.updateType =
     update.updateType ??
-    getUpdateType(config, versioningApi, currentVersion, newVersion);
+    classifyRelease(versioningApi, currentVersion, newVersion);
   if (versioningApi.isBreaking) {
     // This versioning scheme has breaking awareness
     update.isBreaking = versioningApi.isBreaking(currentVersion, newVersion);
@@ -104,7 +105,10 @@ export async function generateUpdate(
   if (!versioningApi.isVersion(update.newValue)) {
     update.isRange = true;
   }
-  if (rangeStrategy === 'update-lockfile' && currentValue === update.newValue) {
+  if (
+    (config.isLockfileOnly || rangeStrategy === 'update-lockfile') &&
+    currentValue === update.newValue
+  ) {
     update.isLockfileUpdate = true;
   }
   if (

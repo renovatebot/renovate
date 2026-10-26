@@ -4,6 +4,10 @@
     "dockerfile": "Dockerfile"
   },
   "init": true,
+  "containerEnv": {
+    // The devcontainer image is updated separately from the base image used by Renovate
+    "RENOVATE_X_IGNORE_CONTAINERBASE_VERSION": "true"
+  },
   "hostRequirements": {
     "cpus": 4,
     "memory": "8gb",
@@ -13,13 +17,13 @@
     "vscode": {
       "terminal.integrated.defaultProfile.linux": "bash",
       "extensions": [
-        "dbaeumer.vscode-eslint",
         "oxc.oxc-vscode",
         "esbenp.prettier-vscode",
         "vitest.explorer",
         "editorconfig.editorconfig",
         "github.vscode-github-actions",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "TypeScriptTeam.native-preview"
       ]
     }
   },

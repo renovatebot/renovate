@@ -1,10 +1,11 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
-import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -19,6 +20,7 @@ import type {
   ReleaseResult,
 } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
+import { isPublicGoPackage } from './common.ts';
 import { parseGoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
@@ -36,22 +38,19 @@ export class GoDatasource extends Datasource {
     commitMessageTopic: 'module {{depName}}',
   };
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead.';
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time or git tag creation time takes precedence over both.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
-
-  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
-  static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
-  );
 
   private _getReleases(
     config: GetReleasesConfig,
@@ -60,11 +59,17 @@ export class GoDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const constraintsFilteringKey =
+      config.constraintsFiltering === 'none' ? '' : config.constraintsFiltering;
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.packageName,
+          constraintsFilteringKey,
+        ),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -100,9 +105,7 @@ export class GoDatasource extends Datasource {
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      newValue &&
-      !GoDatasource.pversionRegexp.test(newValue) &&
-      newValue !== 'v0.0.0'
+      newValue && !parseVersionCommit(newValue) && newValue !== 'v0.0.0'
         ? newValue
         : undefined;
 
@@ -125,7 +128,7 @@ export class GoDatasource extends Datasource {
       case GitlabTagsDatasource.id: {
         return this.direct.gitlab.getDigest(source, tag);
       }
-      /* v8 ignore next 3: can never happen, makes lint happy */
+      /* v8 ignore next: can never happen, makes lint happy */
       default: {
         return null;
       }
@@ -139,7 +142,8 @@ export class GoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GoDatasource.id}`,
-        key: `getDigest:${config.packageName}:${newValue}`,
+        key: buildCacheKey('getDigest', config.packageName, newValue),
+        cacheable: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

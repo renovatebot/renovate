@@ -1,9 +1,8 @@
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -17,7 +16,7 @@ async function getUrl(
   submoduleName: string,
 ): Promise<string> {
   const path = (
-    await simpleGit(simpleGitConfig()).raw([
+    await createSimpleGit().raw([
       'config',
       '--file',
       gitModulesPath,
@@ -25,7 +24,7 @@ async function getUrl(
       `submodule.${submoduleName}.url`,
     ])
   )?.trim();
-  if (!path?.startsWith('../')) {
+  if (!path?.startsWith('../') && !path?.startsWith('./')) {
     return path;
   }
   const remoteUrl = (
@@ -40,7 +39,7 @@ async function getBranch(
   submoduleName: string,
 ): Promise<string | null> {
   const branchFromConfig = (
-    await simpleGit(simpleGitConfig()).raw([
+    await createSimpleGit().raw([
       'config',
       '--file',
       gitModulesPath,
@@ -61,20 +60,22 @@ async function getModules(
   const res: GitModule[] = [];
   try {
     const modules = (
-      (await git.raw([
+      await git.raw([
         'config',
         '--file',
         gitModulesPath,
         '--get-regexp',
         '\\.path',
-      ])) ?? /* istanbul ignore next: should never happen */ ''
+      ])
     )
       .trim()
       .split(regEx(/\n/))
       .filter((s) => !!s);
 
     for (const line of modules) {
-      const [, name, path] = line.split(regEx(/submodule\.(.+?)\.path\s(.+)/));
+      const [, name, path] = line.split(
+        regEx(/submodule\.(?<name>.+?)\.path\s(?<path>.+)/),
+      );
       res.push({ name, path });
     }
   } catch (err) /* istanbul ignore next */ {
@@ -89,7 +90,7 @@ export default async function extractPackageFile(
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
-  const git = simpleGit(localDir, simpleGitConfig());
+  const git = createSimpleGit({ config: { baseDir: localDir } });
   const gitModulesPath = upath.join(localDir, packageFile);
 
   const depNames = await getModules(git, gitModulesPath);
@@ -113,7 +114,7 @@ export default async function extractPackageFile(
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
-        sourceUrl: httpSubModuleUrl,
+        sourceUrl: httpSubModuleUrl.replace(regEx(/\.git$/), ''),
         currentValue: branch ?? undefined,
         currentDigest,
         ...(semVerVersioning.api.isVersion(branch)

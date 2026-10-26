@@ -15,6 +15,7 @@ describe('modules/manager/maven/update', () => {
     it('should update version', () => {
       const res = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'patch',
           depName: 'org.example:foo',
@@ -35,6 +36,7 @@ describe('modules/manager/maven/update', () => {
     it('should do simple replacement', () => {
       const res = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.example:foo',
@@ -56,6 +58,7 @@ describe('modules/manager/maven/update', () => {
     it('should do full replacement', () => {
       const res = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.example:foo',
@@ -99,6 +102,7 @@ describe('modules/manager/maven/update', () => {
               </dependencyManagement>
             </project>
           `,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.example:foo',
@@ -130,6 +134,7 @@ describe('modules/manager/maven/update', () => {
     it('should ignore replacement if name does not match', () => {
       const res = updateDependency({
         fileContent: simpleContent,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'replacement',
           depName: 'org.example.old:bar',
@@ -146,6 +151,7 @@ describe('modules/manager/maven/update', () => {
     it('should update a cloud native buildpack version', () => {
       const res = updateDependency({
         fileContent: cnbContent,
+        packageFile: 'pom.xml',
         upgrade: {
           datasource: 'docker',
           updateType: 'patch',
@@ -167,6 +173,7 @@ describe('modules/manager/maven/update', () => {
     it('should update a cloud native buildpack digest', () => {
       const res = updateDependency({
         fileContent: cnbContent,
+        packageFile: 'pom.xml',
         upgrade: {
           updateType: 'patch',
           currentDigest:

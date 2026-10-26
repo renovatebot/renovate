@@ -34,11 +34,24 @@ function handleDepInMintfile(line: string): PackageDependency {
       skipReason: 'unspecified-version',
     };
   }
-  const [depName, currentVersion] = line.split('@').map((s) => s.trim());
+  const [depDefinition, currentVersion] = line.split('@').map((s) => s.trim());
+  let depName = depDefinition;
+  let packageName = `https://github.com/${depName}.git`;
+
+  if (
+    depDefinition.startsWith('http://') ||
+    depDefinition.startsWith('https://')
+  ) {
+    packageName = depDefinition.endsWith('.git')
+      ? depDefinition
+      : `${depDefinition}.git`;
+    depName = packageName.replace('.git', '').split('/').slice(-2).join('/');
+  }
+
   return {
     depName,
     currentValue: currentVersion,
     datasource: GitTagsDatasource.id,
-    packageName: `https://github.com/${depName}.git`,
+    packageName,
   };
 }

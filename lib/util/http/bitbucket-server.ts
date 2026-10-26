@@ -6,9 +6,9 @@ const MAX_LIMIT = 100;
 const MAX_PAGES = 100;
 
 let baseUrl: string;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface BitbucketServerHttpOptions extends HttpOptions {
   paginate?: boolean;

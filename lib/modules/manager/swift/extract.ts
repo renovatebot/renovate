@@ -1,5 +1,7 @@
 import { detectPlatform } from '../../../util/common.ts';
+import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -8,7 +10,7 @@ import type { MatchResult } from './types.ts';
 
 const regExps = {
   wildcard: regEx(/^.*?/),
-  space: regEx(/(\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
+  space: regEx(/(?:\s+|\/\/[^\n]*|\/\*.*\*\/)+/s),
   depsKeyword: regEx(/dependencies/),
   colon: regEx(/:/),
   beginSection: regEx(/\[/),
@@ -130,41 +132,47 @@ function getMatch(str: string, state: string | null): MatchResult | null {
   return result;
 }
 
-function parseUrl(
+function parseDependencyUrl(
   url: string | null,
 ): { depName: string; datasource: string; registryUrls?: string[] } | null {
   // istanbul ignore if
   if (!url) {
     return null;
   }
+
+  let normalizedUrl: string;
   try {
-    const parsedUrl = new URL(url);
-    const { host, pathname, protocol } = parsedUrl;
-    const platform = detectPlatform(url);
-    if (platform === 'github' || platform === 'gitlab') {
-      const depName = pathname
-        .replace(regEx(/^\//), '')
-        .replace(regEx(/\.git$/), '')
-        .replace(regEx(/\/$/), '');
-      const datasource =
-        platform === 'github'
-          ? GithubTagsDatasource.id
-          : GitlabTagsDatasource.id;
-
-      const isGitHubPublic = host === 'github.com';
-      const isGitLabPublic = host === 'gitlab.com';
-
-      if (!isGitHubPublic && !isGitLabPublic) {
-        const baseUrl = `${protocol}//${host}`;
-        return { depName, datasource, registryUrls: [baseUrl] };
-      }
-
-      return { depName, datasource };
-    }
-    return { depName: url, datasource: GitTagsDatasource.id };
+    normalizedUrl = getHttpUrl(url);
   } catch {
     return null;
   }
+
+  const parsedUrl = parseUrl(normalizedUrl);
+  // v8 ignore if -- getHttpUrl always returns a parseable URL
+  if (!parsedUrl) {
+    return null;
+  }
+  const { host, pathname, protocol } = parsedUrl;
+  const platform = detectPlatform(normalizedUrl);
+  if (platform === 'github' || platform === 'gitlab') {
+    const depName = pathname
+      .replace(regEx(/^\//), '')
+      .replace(regEx(/\.git$/), '')
+      .replace(regEx(/\/$/), '');
+    const datasource =
+      platform === 'github' ? GithubTagsDatasource.id : GitlabTagsDatasource.id;
+
+    const isGitHubPublic = host === 'github.com';
+    const isGitLabPublic = host === 'gitlab.com';
+
+    if (!isGitHubPublic && !isGitLabPublic) {
+      const baseUrl = `${protocol}//${host}`;
+      return { depName, datasource, registryUrls: [baseUrl] };
+    }
+
+    return { depName, datasource };
+  }
+  return { depName: url, datasource: GitTagsDatasource.id };
 }
 
 export function extractPackageFile(content: string): PackageFileContent | null {
@@ -189,7 +197,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     if (!packageName) {
       return;
     }
-    const parsedUrl = parseUrl(packageName);
+    const parsedUrl = parseDependencyUrl(packageName);
     if (parsedUrl && currentValue) {
       const { depName, datasource, registryUrls } = parsedUrl;
 
@@ -214,6 +222,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         if (deps.length) {
           break;
         }
+        // v8 ignore else -- this state is only re-entered at a deps boundary
         if (label === DEPS) {
           state = 'dependencies';
         }

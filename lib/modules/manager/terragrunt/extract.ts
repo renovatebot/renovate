@@ -49,6 +49,7 @@ export function extractPackageFile(
             );
             break;
         }
+        // v8 ignore else -- only the ignored default case leaves this unset
         if (result) {
           lineNumber = result.lineNumber;
           deps = deps.concat(result.dependencies);

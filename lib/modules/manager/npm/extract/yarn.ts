@@ -36,7 +36,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
             const { selector } = structUtils.parseRange(range);
 
             logger.trace({ entry, version: val.version });
-            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            lockedVersions[`${packageName}@${selector}`] = parsed[key].version;
           } catch (err) {
             logger.debug(
               { entry, err },
@@ -68,10 +68,11 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
+  // TODO: fix type #22198
   let conf: any;
   try {
-    conf = parseSyml(yarnrcYml); /* v8 ignore next -- needs test */
-  } catch (err) {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.warn({ err }, 'Error parsing .yarnrc.yml');
   }
   const paths = [
@@ -91,6 +92,7 @@ export function getZeroInstallPaths(yarnrcYml: string): string[] {
 
 export async function isZeroInstall(yarnrcYmlPath: string): Promise<boolean> {
   const yarnrcYml = await readLocalFile(yarnrcYmlPath, 'utf8');
+  // v8 ignore else -- TODO: add test #40625
   if (isString(yarnrcYml)) {
     const paths = getZeroInstallPaths(yarnrcYml);
     for (const p of paths) {
@@ -118,7 +120,8 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   if (lockfileVersion && lockfileVersion >= 8) {
     // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
     return '^3.0.0';
-  } else if (lockfileVersion && lockfileVersion >= 6) {
+  }
+  if (lockfileVersion && lockfileVersion >= 6) {
     // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
     return '^2.2.0';
   }

@@ -28,3 +28,5 @@ export const supportedDatasources = [
   SbtPluginDatasource.id,
   GithubReleasesDatasource.id, // For sbt itself
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

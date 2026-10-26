@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { KubernetesResource } from '../kubernetes/schema.ts';
 
 export const HelmRelease = KubernetesResource.extend({
@@ -27,7 +27,7 @@ export const HelmRelease = KubernetesResource.extend({
         namespace: z.string().optional(),
       })
       .optional(),
-    values: z.record(z.unknown()).optional(),
+    values: z.record(z.string(), z.unknown()).optional(),
   }),
 });
 export type HelmRelease = z.infer<typeof HelmRelease>;
@@ -65,6 +65,7 @@ export const GitRepository = KubernetesResource.extend({
       .object({
         tag: z.string().optional(),
         commit: z.string().optional(),
+        branch: z.string().optional(),
       })
       .optional(),
   }),
@@ -81,6 +82,12 @@ export const OCIRepository = KubernetesResource.extend({
         digest: z.string().optional(),
       })
       .optional(),
+    layerSelector: z
+      .object({
+        mediaType: z.string().optional(),
+      })
+      .optional()
+      .catch(undefined),
   }),
 });
 

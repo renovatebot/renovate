@@ -1,16 +1,18 @@
-import type { ExecaChildProcess } from 'execa';
+import type { ResultPromise } from 'execa';
 
 export interface CliArgs {
-  noFix: boolean;
+  all: boolean;
+  fix: boolean;
   noTest: boolean;
-  full: boolean;
-  base: string;
+  coverageDir: string;
+  targets: string[];
 }
 
 export interface ParallelCheck {
   name: string;
   cmd: string;
   args: string[];
+  env?: Record<string, string>;
 }
 
 export interface CheckResult {
@@ -32,7 +34,7 @@ export interface CheckResultWithCoverage {
 }
 
 export interface ProcessManager {
-  subprocesses: Set<ExecaChildProcess>;
+  subprocesses: Set<ResultPromise>;
   abortController: AbortController;
   renderInterval: ReturnType<typeof setInterval> | null;
 }

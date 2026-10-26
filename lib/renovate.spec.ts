@@ -4,6 +4,7 @@ import * as renovateWorker from './workers/global/index.ts';
 vi.mock('./instrumentation/index.ts');
 vi.mock('./proxy.ts');
 vi.mock('./workers/global/index.ts');
+vi.mock('./workers/global/config/parse/cli.ts');
 
 describe('renovate', () => {
   it('starts', async () => {

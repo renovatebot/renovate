@@ -13,3 +13,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [GitlabTagsDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

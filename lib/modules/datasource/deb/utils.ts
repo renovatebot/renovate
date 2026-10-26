@@ -1,4 +1,4 @@
-import { createUnzip } from 'zlib';
+import { createUnzip } from 'node:zlib';
 import * as fs from '../../../util/fs/index.ts';
 
 /**

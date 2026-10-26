@@ -5,17 +5,15 @@ In addition to standard dependencies, these toolsets are also supported:
 - `pdm` (including `pdm.lock` files)
 - `uv` (including `uv.lock` files and `uv` workspaces)
 - `hatch`
+- `pixi` (including `pixi.lock` files)
 
-Available `depType`s:
+### Trust model for pixi lock file updates
 
-- `project.dependencies`
-- `project.optional-dependencies`
-- `dependency-groups`
-- `build-system.requires`
-- `tool.pdm.dev-dependencies`
-- `tool.uv.dev-dependencies`
-- `tool.uv.sources`
-- `tool.hatch.envs.<env-name>`
+Running `pixi lock` can execute arbitrary code from conda package hooks, so Renovate treats `pixi.lock` refreshes as an unsafe execution.
+See [pixi's security documentation](https://pixi.prefix.dev/latest/security/#4-treat-package-hooks-as-code-execution) for details.
+
+Self-hosted administrators must explicitly allow this path by including `pixi` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+When `pixi` is not allowed, dependencies in `pyproject.toml` are still updated, but `pixi.lock` is left unchanged.
 
 ### Private Modules Authentication
 

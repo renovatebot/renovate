@@ -1,11 +1,12 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import {
   findGithubToken,
   takePersonalAccessTokenIfPossible,
@@ -25,21 +26,29 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { Lazy } from '../../../util/lazy.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { coerceString } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import type { AuthJson } from './types.ts';
 import {
   extractConstraints,
   getComposerArguments,
   getComposerUpdateArguments,
-  getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
 } from './utils.ts';
@@ -77,14 +86,15 @@ function getAuthJson(): string | null {
       continue;
     }
 
+    // v8 ignore else -- a rule without a token does not pass the check above
     if (gitlabHostRule?.token) {
       const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
-      authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
+      authJson['gitlab-token'] = coerceObject(authJson['gitlab-token']);
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
       authJson['gitlab-domains'] = [
         host,
-        ...(authJson['gitlab-domains'] ?? []),
+        ...coerceArray(authJson['gitlab-domains']),
       ];
     }
   }
@@ -98,10 +108,10 @@ function getAuthJson(): string | null {
 
     const { resolvedHost, username, password, token } = packagistHostRule;
     if (resolvedHost && username && password) {
-      authJson['http-basic'] = authJson['http-basic'] ?? {};
+      authJson['http-basic'] = coerceObject(authJson['http-basic']);
       authJson['http-basic'][resolvedHost] = { username, password };
     } else if (resolvedHost && token) {
-      authJson.bearer = authJson.bearer ?? {};
+      authJson.bearer = coerceObject(authJson.bearer);
       authJson.bearer[resolvedHost] = token;
     }
   }
@@ -139,19 +149,27 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const constraints = {
-      ...extractConstraints(file, lockfile),
-      ...config.constraints,
-    };
+    // `extractConstraints()` re-reads the updated package file, so its values win
+    // over what extraction saw on the base branch. It only runs when a user
+    // constraint is missing for at least one of the tools.
+    const fileConstraints = new Lazy(() => extractConstraints(file, lockfile));
 
     const composerToolConstraint: ToolConstraint = {
       toolName: 'composer',
-      constraint: constraints.composer,
+      constraint: await resolveToolConstraint(
+        config,
+        'composer',
+        () => fileConstraints.getValue().composer,
+      ),
     };
 
     const phpToolConstraint: ToolConstraint = {
       toolName: 'php',
-      constraint: getPhpConstraint(constraints),
+      constraint: await resolveToolConstraint(
+        config,
+        'php',
+        () => fileConstraints.getValue().php,
+      ),
     };
 
     const execOptions: ExecOptions = {
@@ -169,8 +187,7 @@ export async function updateArtifacts({
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
-      const preArgs =
-        'install' + getComposerArguments(config, composerToolConstraint);
+      const preArgs = `install${getComposerArguments(config, composerToolConstraint)}`;
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
@@ -217,13 +234,7 @@ export async function updateArtifacts({
     }
     logger.debug('Returning updated composer.lock');
     const res: UpdateArtifactsResult[] = [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: await readLocalFile(lockFileName),
-        },
-      },
+      fileAddition(lockFileName, await readLocalFile(lockFileName)),
     ];
 
     if (!commitVendorFiles) {
@@ -231,25 +242,15 @@ export async function updateArtifacts({
     }
 
     logger.debug(`Committing vendor files in ${vendorDir}`);
-    for (const f of [...status.modified, ...status.not_added]) {
-      if (f.startsWith(vendorDir)) {
-        res.push({
-          file: {
-            type: 'addition',
-            path: f,
-            contents: await readLocalFile(f),
-          },
-        });
-      }
-    }
-    for (const f of status.deleted) {
-      res.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
-    }
+    res.push(
+      ...fileChangesToArtifactResults([
+        ...(await collectFileChanges(status, {
+          include: ['modified', 'not_added'],
+          filter: (f) => f.startsWith(vendorDir),
+        })),
+        ...(await collectFileChanges(status, { include: ['deleted'] })),
+      ]),
+    );
 
     return res;
   } catch (err) {
@@ -268,13 +269,6 @@ export async function updateArtifacts({
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

@@ -1,20 +1,15 @@
+import * as fragments from './fragments.ts';
 import type {
   AllFragments,
   ArrayFragment,
+  CtxCompatible,
   ExtensionTagFragment,
   PreparedExtensionTagFragment,
   RepoRuleCallFragment,
   ResultFragment,
   RuleFragment,
   UseRepoRuleFragment,
-} from './fragments.ts';
-import * as fragments from './fragments.ts';
-
-// Represents the fields that the context must have.
-export interface CtxCompatible {
-  results: ResultFragment[];
-  stack: AllFragments[];
-}
+} from './types.ts';
 
 export class CtxProcessingError extends Error {
   readonly current: AllFragments;
@@ -131,6 +126,7 @@ export class Ctx implements CtxCompatible {
         parent.items.push(current);
         return true;
       }
+      // v8 ignore else -- TODO: add test #40625
       if (
         (parent.type === 'rule' ||
           parent.type === 'extensionTag' ||

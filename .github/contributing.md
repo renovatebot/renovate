@@ -2,9 +2,13 @@
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
+
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+
+For more information, see [security policy](https://github.com/renovatebot/renovate/security/policy) for how to report an issue that may be security-related.
 
 Please do not create GitHub issues for security-related doubts or problems.
 
@@ -102,7 +106,14 @@ For a local check that mirrors CI:
 pnpm check
 ```
 
-This runs all checks in parallel: auto-fixes, lint, type-check, and only the test shards affected by your changes.
+You can scope checks to specific files or directories for faster iteration:
+
+```bash
+pnpm check lib/util/http
+pnpm check lib/util/hash.ts
+```
+
+Use `--fix` to auto-fix (oxlint, biome, prettier) and `--no-test` to skip tests.
 
 ## Do not force push to your pull request branch
 
@@ -111,13 +122,19 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch, but please batch apply review suggestions.
 
-If you're updating your PR branch from within the GitHub PR interface, use the default "Update branch" button.
-This is the "Update with merge commit" option in the dropdown.
-
-Force pushing a PR, or using the "Update with rebase" button is OK when you:
+Force pushing a PR is OK when you:
 
 - make large changes on a PR which require a full review anyway
 - bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+
+The maintainers recommend not periodically updating your PR branch with changes from `main`.
+As we use a Merge Queue, once we've approved and set your PR to merge, it'll apply on top of `main` (and any other pending changes) and tested accordingly.
+
+The maintainers will merge `main` into PRs that we believe need it.
+
+That being said, if you notice that your branch is conflicted with `main`, we very much do recommend updating that, to make sure that you apply the latest changes, and make it an easier merge when it's reviewed and ready.
+
+Alternatively, if your PR was put into the Merge Queue, and subsequently removed due to a status check failure, but these issues didn't appear on your PR, you may need to merge `main` in, and then fix any issues appearing.
 
 ## Apply maintainer provided review suggestions
 

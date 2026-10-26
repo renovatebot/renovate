@@ -22,7 +22,10 @@ The manager's `index.ts` file supports the following values or functions:
 | `extractAllPackageFiles`      | yes      | yes   |
 | `getRangeStrategy`            | yes      |       |
 | `categories`                  | yes      |       |
+| `knownDepTypes`               | yes      |       |
+| `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
+| `supportsNpmrc`               | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
@@ -83,9 +86,32 @@ The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` 
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
 
+### `knownDepTypes` (optional)
+
+Use this to document any dependency types (`depType`) that the manager can extract.
+
+Only set the `prettyDepType` if the Manager sets it on the `Upgrade`.
+
+Use `description` to provide a human-readable description which will be found in the documentation for the Manager.
+
+This should be placed in `dep-types.ts`.
+
+### `supportsDynamicDepTypesNote` (optional)
+
+Use this to provide a Markdown note about dynamically generated `depType` values that can't be listed in `knownDepTypes`.
+
+This note will be rendered after the `knownDepTypes` table (regardless of whether any known `depTypes` are present).
+
+This should be placed in `dep-types.ts`.
+
 ### `supportsLockFileMaintenance` (optional)
 
 Set to `true` if this package manager needs to update lock files in addition to package files.
+
+### `supportsNpmrc` (optional)
+
+Set to `true` if the manager's returned values carry an `npmrc` resolved from the repository's `.npmrc` and the `npmrc` config.
+Only such a manager may return `NpmrcPackageFileContent` / `NpmrcPackageFile`, the types which have the `npmrc` field; this is checked at compile time.
 
 ### `updateArtifacts` (async, optional)
 
@@ -98,6 +124,21 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
+
+#### Tool constraints
+
+When `updateArtifacts` runs a tool through `exec()`, resolve the tool's version constraint with `resolveToolConstraint()` from `lib/modules/manager/util.ts` instead of reading `config.constraints` yourself.
+The helper applies, in this order:
+
+1. the user's `constraints` config
+2. a value your manager derives from the updated package files, if you pass a callback
+3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+
+The third step matters during `lockFileMaintenance`.
+Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
+The value collected during extraction keeps the tool version constrained in that case.
+
+The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
 
 ### `updateDependency` (optional)
 

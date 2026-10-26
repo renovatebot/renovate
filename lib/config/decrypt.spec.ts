@@ -16,8 +16,8 @@ describe('config/decrypt', () => {
     beforeEach(() => {
       config = {};
       GlobalConfig.reset();
-      delete process.env.MEND_HOSTED;
-      delete process.env.RENOVATE_X_ENCRYPTED_STRICT;
+      vi.stubEnv('MEND_HOSTED', undefined);
+      vi.stubEnv('RENOVATE_X_ENCRYPTED_STRICT', undefined);
     });
 
     it('returns empty with no privateKey', async () => {
@@ -41,7 +41,7 @@ describe('config/decrypt', () => {
     it('throws exception if encrypted found but no privateKey', async () => {
       config.encrypted = { a: '1' };
 
-      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+      vi.stubEnv('RENOVATE_X_ENCRYPTED_STRICT', 'true');
       await expect(decryptConfig(config, repository)).rejects.toThrow(
         'config-validation',
       );
@@ -51,11 +51,30 @@ describe('config/decrypt', () => {
     it('throws exception if encrypted found but no privateKey- Mend Hosted', async () => {
       config.encrypted = { a: '1' };
 
-      process.env.MEND_HOSTED = 'true';
-      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        'config-validation',
-      );
+      vi.stubEnv('MEND_HOSTED', 'true');
+      vi.stubEnv('RENOVATE_X_ENCRYPTED_STRICT', 'true');
+
+      await expect(decryptConfig(config, repository)).rejects.toMatchObject({
+        message: 'config-validation',
+        validationMessage: expect.stringContaining(
+          'https://docs.renovatebot.com/mend-hosted/migrating-secrets/',
+        ),
+      });
+    });
+
+    it('uses productLinks.documentation in Mend Hosted error URL', async () => {
+      config.encrypted = { a: '1' };
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://custom.example.com/' },
+      });
+      vi.stubEnv('MEND_HOSTED', 'true');
+      vi.stubEnv('RENOVATE_X_ENCRYPTED_STRICT', 'true');
+
+      await expect(decryptConfig(config, repository)).rejects.toMatchObject({
+        validationMessage: expect.stringContaining(
+          'https://custom.example.com/mend-hosted/migrating-secrets/',
+        ),
+      });
     });
   });
 

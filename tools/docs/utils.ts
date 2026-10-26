@@ -6,8 +6,7 @@ import { readFile } from '../utils/index.ts';
 
 const defaultReplaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
-const defaultReplaceStop = '<!-- Autogenerate end -->';
-const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
+const goodUrlRegex = regEx(/\[(?:.+?)\]\((?:.+?)\)/);
 
 export function formatName(input: string): string {
   return input.split('-').map(capitalize).join(' ');
@@ -34,23 +33,18 @@ export function getNameWithUrl(
 export function replaceContent(
   content: string,
   txt: string,
-  opts: {
-    replaceStart: string;
-    replaceStop: string;
-  } = { replaceStart: defaultReplaceStart, replaceStop: defaultReplaceStop },
+  replaceStart = defaultReplaceStart,
 ): string {
-  const replaceStartIndex = content.indexOf(opts.replaceStart);
-  const replaceStopIndex = content.indexOf(opts.replaceStop);
+  const startIndex = content.indexOf(replaceStart);
 
-  if (replaceStartIndex < 0) {
+  if (startIndex < 0) {
     logger.error('Missing replace placeholder');
     return content;
   }
-  return (
-    content.slice(0, replaceStartIndex) +
-    txt +
-    content.slice(replaceStopIndex + opts.replaceStop.length)
-  );
+
+  const endOfLine = content.indexOf('\n', startIndex);
+  const after = endOfLine < 0 ? '' : content.slice(endOfLine + 1);
+  return content.slice(0, startIndex) + txt + after;
 }
 
 export function formatUrls(urls: string[] | null | undefined): string {
@@ -103,4 +97,40 @@ export function formatCell(row: string[], colIndex: number): string {
 
   // Default cell
   return `<td>${col}</td>`;
+}
+
+/**
+ * Indexes the `##` and `###` headings of a config docs page, mapping each option's heading to the lines of its section.
+ *
+ * Child options are indexed as `parent.optionName`, matching how they are documented.
+ */
+export function indexMarkdown(
+  lines: string[],
+): Record<string, [number, number]> {
+  const indexed: Record<string, [number, number]> = {};
+
+  let optionName = '';
+  let start = 0;
+  for (const [i, line] of lines.entries()) {
+    if (line.startsWith('## ') || line.startsWith('### ')) {
+      if (optionName) {
+        indexed[optionName] = [start, i - 1];
+      }
+      start = i;
+      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
+    }
+  }
+  indexed[optionName] = [start, lines.length - 1];
+
+  return indexed;
+}
+
+/**
+ * The headings which document config options on the given page, e.g. `enabled` or `packageRules.matchPackageNames`.
+ */
+export async function readDocsHeadings(
+  configFile: string,
+): Promise<Set<string>> {
+  const content = await readFile(`docs/usage/${configFile}`);
+  return new Set(Object.keys(indexMarkdown(content.split('\n'))));
 }

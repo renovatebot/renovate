@@ -29,10 +29,8 @@ function getNonEmptyColumns(
   const res: string[] = [];
   for (const header of prBodyColumns) {
     for (const row of rows) {
-      if (row[header]?.length) {
-        if (!res.includes(header)) {
-          res.push(header);
-        }
+      if (row[header]?.length && !res.includes(header)) {
+        res.push(header);
       }
     }
   }
@@ -92,8 +90,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   let res = '\n\nThis PR contains the following updates:\n\n';
   const headerCells = tableColumns.map((col) => getHeaderLabel(col, config));
 
-  res += '| ' + headerCells.join(' | ') + ' |\n';
-  res += '|' + tableColumns.map(() => '---|').join('') + '\n';
+  res += `| ${headerCells.join(' | ')} |\n`;
+  res += `|${tableColumns.map(() => '---|').join('')}\n`;
   const rows = [];
   for (const row of tableValues) {
     let val = '|';

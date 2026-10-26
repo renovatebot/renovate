@@ -36,7 +36,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency in a named capture group
+- Capture the `currentValue` or `currentDigest` of the dependency in a named capture group
 - Set a `depName` or `packageName` capture group. Or use a template field: `depNameTemplate` and `packageNameTemplate`
 - Set a `datasource` capture group, or a `datasourceTemplate` config field
 
@@ -47,7 +47,6 @@ You may use any of these items:
 - A `depType` capture group, or a `depTypeTemplate` config field
 - A `versioning` capture group, or a `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
 - An `extractVersion` capture group, or an `extractVersionTemplate` config field
-- A `currentDigest` capture group
 - A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - An `indentation` capture group. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
 
@@ -93,7 +92,7 @@ something:4.7.2    something-else:4.7.2
 
 If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 You must select the `ECMAScript (JavaScript)` flavor of regex.
-Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
+Backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` → `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
 ##### Renovate's regex differs from the online tools

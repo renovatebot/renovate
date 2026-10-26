@@ -73,6 +73,9 @@ export async function getJavaConstraint(
         return `^${languageVersion}.0.0`;
       }
     }
+    if (major > 9 || (major === 9 && minor && minor >= 1)) {
+      return '^25.0.0';
+    }
     if (major > 8 || (major === 8 && minor && minor >= 5)) {
       return '^21.0.0';
     }
@@ -108,6 +111,7 @@ export async function getJvmConfiguration(
       'm',
     );
     const toolChainMatch = TOOLCHAIN_VERSION_REGEX.exec(daemonJvm);
+    // v8 ignore else -- needs a daemon-jvm file without a toolchain version
     if (toolChainMatch?.groups) {
       return toolChainMatch.groups.version;
     }

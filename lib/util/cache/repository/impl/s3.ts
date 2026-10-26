@@ -91,7 +91,7 @@ export class RepoCacheS3 extends RepoCacheBase {
       { pathname },
       'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname',
     );
-    return pathname + '/';
+    return `${pathname}/`;
   }
 
   private getCacheFileName(): string {

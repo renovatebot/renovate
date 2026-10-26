@@ -9,7 +9,7 @@
   "ignorePresets": [":ignoreModulesAndTests"],
   "ignorePaths": ["**/node_modules/**", "**/__fixtures__/**", "test/**"],
   "rebaseWhen": "conflicted",
-  "baseBranchPatterns": ["$default", "next"],
+  "baseBranchPatterns": ["$default", "/^disable-next$/"],
   "dockerfile": {
     "semanticCommitType": "build"
   },
@@ -35,31 +35,51 @@
       "enabled": false
     },
     {
+      "description": "group base image docker and npm updates, they must stay on the same version",
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
+      "groupName": "renovate-base-image"
+    },
+    {
       "description": "set fix scope for base image",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "semanticCommitType": "fix"
     },
     {
       "description": "set feat scope for base image major and minor",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
     },
     {
       "description": "use `feat` semantic commit scope with breaking change for for base image major",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major"],
       "commitMessagePrefix": "feat(deps)!:"
     },
     {
       "description": "allow prereleases for base image on next branch",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchBaseBranches": ["next"],
       "ignoreUnstable": false
     },
     {
       "description": "set build scope for node updates",
-      "matchPackageNames": ["node"],
+      "matchDepNames": ["node"],
       "matchFileNames": [".nvmrc", "tools/docker/Dockerfile"],
       "semanticCommitType": "build"
     },
@@ -99,9 +119,38 @@
       "separateMultipleMajor": true
     },
     {
-      "description": "Don't upgrade Vite automagically, due to a possible issue with flakey tests due to the upgrade: https://github.com/renovatebot/renovate/discussions/39921",
-      "matchDepNames": ["vite"],
-      "dependencyDashboardApproval": true
+      "description": "Zizmor's GitHub Action doesn't immediately support the latest Zizmor container image until there's an explicit update",
+      "groupName": "zizmor",
+      "matchPackageNames": [
+        "ghcr.io/zizmorcore/zizmor",
+        "zizmorcore/zizmor-action"
+      ],
+      "minimumGroupSize": 2
+    },
+    {
+      "description": "Only update the major version constraint for Erlang",
+      "matchFileNames": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchPackageNames": ["containerbase/erlang-prebuild"],
+      "extractVersion": "^(?<version>\\d+)",
+      "separateMultipleMajor": true
+    },
+    {
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchFileNames": ["lib/config/options/index.ts"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "Do not automerge breaking `gh-actions-lock` updates, which includes every v0.x release, as they can change how the lockfile is generated or verified",
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchJsonata": ["isBreaking = true"],
+      "automerge": false
+    },
+    {
+      "description": "Group commander major updates, they depend on each other.",
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@commander-js/extra-typings", "commander"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "commander"
     }
   ],
   "customManagers": [
@@ -112,6 +161,39 @@
         "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchStrings": ["const erlangVersion = '(?<currentValue>[\\^0-9]*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "containerbase/erlang-prebuild",
+      "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/config/options/index.ts"],
+      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "lib/modules/manager/github-actions/artifacts.spec.ts"
+      ],
+      "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "description": "Update pinned `gh` CLI extensions",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": [
+        "gh extension install (?<depName>[\\w.-]+/[\\w.-]+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
     }
   ]
 }

@@ -23,13 +23,13 @@ export async function generateDatasources(
       id,
       urls,
       defaultConfig,
-      customRegistrySupport,
       defaultVersioning,
       releaseTimestampSupport,
       releaseTimestampNote,
       sourceUrlSupport,
       sourceUrlNote,
     } = definition;
+    const customRegistrySupport = definition.supportsCustomRegistry(id);
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `* ${getModuleLink(
       datasource,
@@ -61,15 +61,12 @@ export async function generateDatasources(
     tableContent += `| Release timestamp support | ${releaseTimestampSupport ? 'Yes' : 'No'} | ${releaseTimestampNote ?? ''} |\n`;
     tableContent += `| Source URL support | ${sourceUrlSupport === 'none' ? 'No' : 'Yes'} | ${sourceUrlNote ?? ''} |\n`;
 
-    md += tableContent + '\n';
+    md += `${tableContent}\n`;
     md += formatUrls(urls);
     md += await formatDescription('datasource', datasource);
 
     if (defaultConfig) {
-      md +=
-        '## Default configuration\n\n```json\n' +
-        JSON.stringify(defaultConfig, undefined, 2) +
-        '\n```\n';
+      md += `## Default configuration\n\n\`\`\`json\n${JSON.stringify(defaultConfig, undefined, 2)}\n\`\`\`\n`;
     }
 
     md += generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);

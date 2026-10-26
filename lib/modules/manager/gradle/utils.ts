@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as gradleVersioning } from '../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -12,7 +13,7 @@ const artifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
-const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+ ]+)');
+const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+! ]+)');
 
 // Extracts version-like and range-like strings from the beginning of input
 export function versionLikeSubstring(
@@ -59,6 +60,24 @@ export function isDependencyString(input: string): boolean {
   );
 }
 
+// Matches the `group:artifact` notation used by dependencies whose version is
+// declared separately, e.g. inside a rich version constraint block
+export function isGroupArtifactString(input: string): boolean {
+  const parts = input.split(':');
+  if (parts.length !== 2) {
+    return false;
+  }
+
+  const [groupId, artifactId] = parts;
+
+  return !!(
+    groupId &&
+    artifactId &&
+    artifactRegex.test(groupId) &&
+    artifactRegex.test(artifactId)
+  );
+}
+
 export function parseDependencyString(
   input: string,
 ): PackageDependency<GradleManagerData> | null {
@@ -78,6 +97,7 @@ export function parseDependencyString(
 
 const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
 const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
+const gradleSettingsFileRegex = regEx('^settings\\.gradle(?:\\.kts)?$', 'i');
 
 export function isGradleScriptFile(path: string): boolean {
   const filename = upath.basename(path).toLowerCase();
@@ -92,6 +112,15 @@ export function isGradleVersionsFile(path: string): boolean {
 export function isGradleBuildFile(path: string): boolean {
   const filename = upath.basename(path);
   return gradleBuildFileRegex.test(filename);
+}
+
+export function isGradleSettingsFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleSettingsFileRegex.test(filename);
+}
+
+export function isGradleDefaultCatalogFile(path: string): boolean {
+  return path.endsWith('/gradle/libs.versions.toml');
 }
 
 export function isPropsFile(path: string): boolean {
@@ -117,33 +146,43 @@ function getFileRank(filename: string): number {
   if (isPropsFile(filename)) {
     return 0;
   }
-  if (isGradleVersionsFile(filename)) {
+  if (isGradleSettingsFile(filename)) {
     return 1;
   }
-  if (isGradleBuildFile(filename)) {
+  if (isGradleDefaultCatalogFile(filename)) {
+    return 2;
+  }
+  if (isGradleVersionsFile(filename)) {
     return 3;
   }
-  return 2;
+  if (isGradleBuildFile(filename)) {
+    return 5;
+  }
+  return 4;
 }
 
 export function reorderFiles(packageFiles: string[]): string[] {
   return packageFiles
     .map((path) => {
       const absPath = toAbsolutePath(path);
+      const currentDir = upath.dirname(absPath);
+
       return {
         path,
         absPath,
-        dir: upath.dirname(absPath),
+        dir: isGradleDefaultCatalogFile(absPath)
+          ? upath.dirname(currentDir)
+          : currentDir,
         rank: getFileRank(absPath),
       };
     })
     .sort((a, b) => {
       // Different directories: check parent-child relationship
       if (a.dir !== b.dir) {
-        if (a.dir.startsWith(b.dir + '/')) {
+        if (a.dir.startsWith(`${b.dir}/`)) {
           return 1;
         }
-        if (b.dir.startsWith(a.dir + '/')) {
+        if (b.dir.startsWith(`${a.dir}/`)) {
           return -1;
         }
         return a.dir.localeCompare(b.dir);
@@ -174,6 +213,35 @@ export function updateVars(
   dir: string,
   newVars: PackageVariables,
 ): void {
-  const oldVars = registry[dir] ?? {};
+  const oldVars = coerceObject(registry[dir]);
   registry[dir] = { ...oldVars, ...newVars };
+}
+
+export function updateVarsFromDefaultCatalog(
+  registry: VariableRegistry,
+  dir: string,
+  packageFile: string,
+  newVars: PackageVariables,
+): void {
+  if (!isGradleDefaultCatalogFile(toAbsolutePath(packageFile))) {
+    return;
+  }
+
+  const rootDir = upath.dirname(dir);
+  const oldVars = coerceObject(registry[rootDir]);
+  let defaultLibsExtName = 'libs';
+  if (
+    oldVars.defaultLibrariesExtensionName?.packageFile &&
+    isGradleSettingsFile(oldVars.defaultLibrariesExtensionName.packageFile)
+  ) {
+    defaultLibsExtName = oldVars.defaultLibrariesExtensionName.value;
+  }
+
+  const newVarsRemapped: PackageVariables = {};
+  for (const [oldKey, variableData] of Object.entries(newVars)) {
+    const key = `${defaultLibsExtName}.versions.${oldKey}`;
+    newVarsRemapped[key] = { ...variableData, key };
+  }
+
+  registry[rootDir] = { ...oldVars, ...newVarsRemapped };
 }

@@ -1,7 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -41,8 +41,10 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -64,6 +66,8 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
+  BitbucketCommitStatus,
+  BitbucketStatus,
 } from './types.ts';
 import * as utils from './utils.ts';
 import {
@@ -97,7 +101,7 @@ const defaults: {
   version: '0.0.0',
 };
 
-/* v8 ignore next */
+/* v8 ignore next -- exercised only via mocked call sites, direct coverage tracked in #40625 */
 function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) ?? 0, version);
   config.prVersions.set(pr, res);
@@ -144,7 +148,7 @@ export async function initPlatform({
       );
       config.username = headers['x-ausername'];
     }
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    logger.debug(`Bitbucket Server version is: ${bitbucketServerVersion}`);
 
     // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
@@ -211,7 +215,7 @@ export async function getRepos(): Promise<string[]> {
     const result = repos.map((repo) => `${repo.project.key}/${repo.slug}`);
     logger.debug({ result }, 'result of getRepos()');
     return result;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -224,9 +228,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl =
-    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
-    (branchOrTag ? '&at=' + branchOrTag : '');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000${branchOrTag ? `&at=${branchOrTag}` : ''}`;
   const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -267,7 +269,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {
@@ -313,7 +315,7 @@ export async function initRepo({
     };
 
     return repoConfig;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping (404, empty repo) is not mocked in specs */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -379,7 +381,7 @@ export async function getPr(
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -391,7 +393,7 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
 function isRelevantPr(
   branchName: string,
   prTitle: string | null | undefined,
@@ -416,7 +418,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- pr-cache-backed lookup paths lack direct specs, tracked in #40625 */
 export async function findPr({
   branchName,
   prTitle,
@@ -457,7 +459,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch ${branchName}`);
   }
   return pr ?? null;
 }
@@ -472,7 +474,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- real-time propagation delay helper, sleeping 1s in specs is not worthwhile */
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
   await setTimeout(1000);
@@ -483,7 +485,7 @@ export async function refreshPr(number: number): Promise<void> {
 async function getStatus(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketCommitStatus> {
+): Promise<BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
   /* v8 ignore next: temporary code */
@@ -492,7 +494,7 @@ async function getStatus(
     : { memCache: false };
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       opts,
@@ -534,7 +536,7 @@ export async function getBranchStatus(
 async function getStatusCheck(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
   const opts: BitbucketServerHttpOptions = { paginate: true };
@@ -546,7 +548,7 @@ async function getStatusCheck(
   }
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketStatus[]>(
       `./rest/build-status/1.0/commits/${branchCommit!}`,
       opts,
     )
@@ -635,7 +637,7 @@ export async function setBranchStatus({
 
 // Issue
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -646,7 +648,7 @@ export function findIssue(title: string): Promise<Issue | null> {
   return Promise.resolve(null);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -659,7 +661,7 @@ export function ensureIssue({
   return Promise.resolve(null);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // This is used by Renovate when creating its own issues,
@@ -670,7 +672,7 @@ export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -792,7 +794,15 @@ async function updatePRAndAddReviewers(
         const filteredReviewers = reviewers.filter(
           (name) => !invalidReviewers.includes(name),
         );
-        await updatePRAndAddReviewers(prNo, filteredReviewers);
+        if (filteredReviewers.length < reviewers.length) {
+          await updatePRAndAddReviewers(prNo, filteredReviewers);
+        } else {
+          logger.warn(
+            { invalidReviewers, reviewers },
+            'Could not filter invalid reviewers from list, aborting to prevent infinite recursion',
+          );
+          throw err;
+        }
       } else {
         logger.debug(
           '409 response to adding reviewers - has repository changed?',
@@ -957,10 +967,18 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.text.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.text.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -978,27 +996,26 @@ export async function ensureCommentRemoval(
     let commentId: number | null | undefined = null;
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.text.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {
       await deleteComment(prNo, commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }
 
 // Pull Request
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 export async function createPr({
   sourceBranch,
@@ -1052,7 +1069,7 @@ export async function createPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- EmptyPullRequestException handling is not mocked in specs */ {
     if (
       err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'
@@ -1081,11 +1098,28 @@ export async function createPr({
     pr,
   );
 
-  if (platformPrOptions?.usePlatformAutomerge) {
-    await tryPrAutomerge(pr.number, pr.version!);
-  }
+  await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
 
   return pr;
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  logger.debug(`reattemptPlatformAutomerge(${number})`);
+
+  try {
+    const pr = await getPr(number, true);
+    if (!pr) {
+      throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
 }
 
 export async function updatePr({
@@ -1234,8 +1268,13 @@ export async function mergePr({
 async function tryPrAutomerge(
   prNumber: number,
   prVersion: number,
+  platformPrOptions?: PlatformPrOptions,
 ): Promise<void> {
-  logger.debug(`automergePr(${prNumber})`);
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  logger.debug(`tryPrAutomerge(${prNumber})`);
 
   if (semver.lt(defaults.version, '8.15.0')) {
     logger.debug(
@@ -1386,9 +1425,9 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<!--.*?-->/gs), '')
     .replace(
       regEx(
-        /(!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
+        /(?<badge>!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
       ),
-      '$1{height=20}',
+      '$<badge>{height=20}',
     );
 }
 

@@ -18,3 +18,20 @@ If you use predefined GitLab CI variables like `CI_REGISTRY` or `CI_SERVER_FQDN`
   }
 }
 ```
+
+Variables with default values (using the `:-` syntax) are also supported:
+
+```json
+{
+  "registryAliases": {
+    "${CI_REGISTRY:-}": "registry.example.com"
+  }
+}
+```
+
+Both image reference formats work:
+
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.

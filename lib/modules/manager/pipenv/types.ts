@@ -1,3 +1,7 @@
+export interface PipenvManagerData {
+  nestedVersion?: boolean;
+}
+
 export interface PipSource {
   name: string;
   url: string;

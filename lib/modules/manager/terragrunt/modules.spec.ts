@@ -1,4 +1,10 @@
-import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules.ts';
+import type { PackageDependency } from '../types.ts';
+import {
+  analyseTerragruntModule,
+  gitTagsRefMatchRegex,
+  githubRefMatchRegex,
+} from './modules.ts';
+import type { TerraformManagerData } from './types.ts';
 
 describe('modules/manager/terragrunt/modules', () => {
   describe('githubRefMatchRegex', () => {
@@ -76,5 +82,19 @@ describe('modules/manager/terragrunt/modules', () => {
         tag: 'v1.0.0',
       });
     });
+  });
+});
+
+describe('modules/manager/terragrunt/modules', () => {
+  it('sets skipReason for invalid git tags URL', () => {
+    const dep: PackageDependency<TerraformManagerData> = {
+      managerData: {
+        source: 'ssh://[/path?ref=v1.0.0',
+        terragruntDependencyType: 'terraform',
+        moduleName: 'terragrunt',
+      },
+    };
+    analyseTerragruntModule(dep);
+    expect(dep.skipReason).toBe('invalid-url');
   });
 });

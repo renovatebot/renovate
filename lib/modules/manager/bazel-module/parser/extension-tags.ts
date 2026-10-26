@@ -51,6 +51,7 @@ export const extensionTags = q
       maxDepth: 1,
       search: kvParams,
       postHandler: (ctx, tree) => {
+        // v8 ignore else -- TODO: add test #40625
         if (tree.type === 'wrapped-tree') {
           const { endsWith } = tree;
           const endOffset = endsWith.offset + endsWith.value.length;

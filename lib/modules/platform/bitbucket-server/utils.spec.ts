@@ -1,6 +1,7 @@
 import type { Response } from 'got';
 import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type {
   BbsRestRepo,
   BitbucketError,
@@ -13,7 +14,7 @@ import {
   getRepoGitUrl,
 } from './utils.ts';
 
-vi.unmock('../../../util/git');
+vi.unmock('../../../util/git/index.ts');
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -69,23 +70,20 @@ function infoMock(
       origin: { name: repositorySlug, slug: repositorySlug },
       links,
     };
-  } else {
-    // This mimics the behavior of bb-server which does not include the clone property at all
-    // if ssh and https are both turned off
-    return {
-      id: 1,
-      slug: repositorySlug,
-      project: { key: projectKey },
-      origin: { name: repositorySlug, slug: repositorySlug },
-      links: { clone: undefined },
-    };
   }
+  // This mimics the behavior of bb-server which does not include the clone property at all
+  // if ssh and https are both turned off
+  return {
+    id: 1,
+    slug: repositorySlug,
+    project: { key: projectKey },
+    origin: { name: repositorySlug, slug: repositorySlug },
+    links: { clone: undefined },
+  };
 }
 
 describe('modules/platform/bitbucket-server/utils', () => {
-  function createError(
-    body: Partial<BitbucketErrorResponse> | undefined = undefined,
-  ) {
+  function createError(body?: Partial<BitbucketErrorResponse>) {
     return partial<BitbucketError>({
       response: partial<Response<BitbucketErrorResponse>>({ body }),
     });
@@ -116,7 +114,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
 
   describe('getRepoGitUrl', () => {
     describe('endpoint with path', () => {
-      const url = new URL('https://stash.renovatebot.com/vcs/');
+      const url = parseUrl('https://stash.renovatebot.com/vcs/')!;
       const username = 'abc';
       const password = '123';
       const opts = {
@@ -283,7 +281,7 @@ describe('modules/platform/bitbucket-server/utils', () => {
     });
 
     describe('endpoint with no path', () => {
-      const url = new URL('https://stash.renovatebot.com');
+      const url = parseUrl('https://stash.renovatebot.com')!;
       const username = 'abc';
       const password = '123';
       const opts = {
@@ -327,6 +325,18 @@ describe('modules/platform/bitbucket-server/utils', () => {
           {},
         ),
       ).toBe(httpLink('https://some.external.url/', 'SOME', 'repo'));
+    });
+
+    it('throws on invalid endpoint URL', () => {
+      expect(() =>
+        getRepoGitUrl(
+          'SOME/repo',
+          'not-a-valid-url',
+          'endpoint',
+          infoMock('https://stash.renovatebot.com/vcs/', 'SOME', 'repo'),
+          {},
+        ),
+      ).toThrow('Invalid Bitbucket Server endpoint: not-a-valid-url');
     });
   });
 

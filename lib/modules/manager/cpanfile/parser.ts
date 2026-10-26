@@ -30,6 +30,7 @@ const perlVersionMatch = q
   )
   .op(';')
   .handler((ctx) => {
+    // v8 ignore else -- the matched alternatives above always set it
     if (ctx.perlVersion) {
       ctx.deps.push({
         depName: 'perl',
@@ -48,9 +49,11 @@ const requirementMatch = q.sym<Ctx>(
 );
 
 const phasedRequiresMatch = q.sym<Ctx>(
-  /^(?:configure|build|test|author)_requires$/,
+  regEx(/^(?:configure|build|test|author)_requires$/),
   (ctx, { value: phase }) => {
-    ctx.tempPhase = phase.replace(/_requires/, '').replace(/author/, 'develop');
+    ctx.tempPhase = phase
+      .replace(regEx(/_requires/), '')
+      .replace(regEx(/author/), 'develop');
     return ctx;
   },
 );
@@ -72,7 +75,10 @@ const moduleMatch = q
     q.alt<Ctx>(q.op(','), q.op('=>')).alt(
       q.num<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
       q.str<Ctx>((ctx, { value }) => {
-        const currentValue = value.replace(/^(?:\s*(?:==|>=|>))?\s*v?/, '');
+        const currentValue = value.replace(
+          regEx(/^(?:\s*(?:==|>=|>))?\s*v?/),
+          '',
+        );
         return { ...ctx, currentValue };
       }),
     ),
@@ -85,6 +91,7 @@ const moduleMatch = q
     delete ctx.depName;
     delete ctx.currentValue;
 
+    // v8 ignore else -- the handler only runs once a module name matched
     if (depName) {
       const dep: PackageDependency = {
         depName,
@@ -107,7 +114,7 @@ const moduleMatch = q
     return ctx;
   });
 
-const phaseRegex = /^(?:configure|build|test|runtime|develop)/;
+const phaseRegex = regEx(/^(?:configure|build|test|runtime|develop)/);
 
 const phaseMatch = q.alt<Ctx>(
   q.sym(phaseRegex, (ctx, { value: phase }) => ({ ...ctx, phase })),

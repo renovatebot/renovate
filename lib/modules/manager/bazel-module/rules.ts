@@ -1,39 +1,23 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import parseGithubUrl from 'github-url-from-git';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { SkipReason } from '../../../types/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { clone } from '../../../util/clone.ts';
 import { regEx } from '../../../util/regex.ts';
 import { BazelDatasource } from '../../datasource/bazel/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { RuleFragment, StringFragment } from './parser/fragments.ts';
+import type {
+  BasePackageDep,
+  BazelModulePackageDep,
+  MergePackageDep,
+  OverridePackageDep,
+} from './types.ts';
 
 // Rule Schemas
-
-export interface BasePackageDep extends PackageDependency {
-  depType: string;
-  depName: string;
-}
-
-type BasePackageDepMergeKeys = Extract<keyof BasePackageDep, 'registryUrls'>;
-
-export interface MergePackageDep extends BasePackageDep {
-  // The fields that should be copied from this struct to the bazel_dep
-  // PackageDependency.
-  bazelDepMergeFields: BasePackageDepMergeKeys[];
-}
-
-export interface OverridePackageDep extends BasePackageDep {
-  // This value is set as the skipReason on the bazel_dep PackageDependency.
-  bazelDepSkipReason: SkipReason;
-}
-
-export type BazelModulePackageDep =
-  | BasePackageDep
-  | OverridePackageDep
-  | MergePackageDep;
 
 function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
   return 'bazelDepSkipReason' in value;
@@ -52,6 +36,7 @@ export function bazelModulePackageDepToPackageDependency(
   bmpd: BazelModulePackageDep,
 ): PackageDependency {
   const copy: BazelModulePackageDep = clone(bmpd);
+  // v8 ignore else -- TODO: add test #40625
   if (isOverride(copy)) {
     const partial = copy as Partial<OverridePackageDep>;
     delete partial.bazelDepSkipReason;
@@ -69,15 +54,13 @@ const BazelDepToPackageDep = RuleFragment.extend({
     name: StringFragment,
     version: StringFragment.optional(),
   }),
-}).transform(
-  ({ rule, children: { name, version } }): BasePackageDep => ({
-    datasource: BazelDatasource.id,
-    depType: rule,
-    depName: name.value,
-    currentValue: version?.value,
-    ...(version ? {} : { skipReason: 'unspecified-version' }),
-  }),
-);
+}).transform(({ rule, children: { name, version } }): BasePackageDep => ({
+  datasource: BazelDatasource.id,
+  depType: rule,
+  depName: name.value,
+  currentValue: version?.value,
+  ...(version ? {} : { skipReason: 'unspecified-version' }),
+}));
 
 const GitOverrideToPackageDep = RuleFragment.extend({
   rule: z.literal('git_override'),
@@ -132,6 +115,7 @@ const SingleVersionOverrideToPackageDep = RuleFragment.extend({
       override.currentValue = version.value;
     }
     // If a registry is specified, then merge it into the bazel_dep
+    // v8 ignore else -- TODO: add test #40625
     if (registry) {
       const merge = base as MergePackageDep;
       merge.bazelDepMergeFields = ['registryUrls'];
@@ -185,7 +169,7 @@ function collectByModule(
 ): BazelModulePackageDep[][] {
   const rulesByModule = new Map<string, BasePackageDep[]>();
   for (const pkgDep of packageDeps) {
-    const bmi = rulesByModule.get(pkgDep.depName) ?? [];
+    const bmi = coerceArray(rulesByModule.get(pkgDep.depName));
     bmi.push(pkgDep);
     rulesByModule.set(pkgDep.depName, bmi);
   }
