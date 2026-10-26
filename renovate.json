@@ -185,6 +185,15 @@
       "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "description": "Update pinned `gh` CLI extensions",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": [
+        "gh extension install (?<depName>[\\w.-]+/[\\w.-]+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
     }
   ]
 }

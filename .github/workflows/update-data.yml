@@ -43,14 +43,36 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
       - name: Update static data
+        id: update
         run: pnpm run update-static-data --commit
 
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        with:
-          author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-          branch: 'chore/update-static-data'
-          commit-message: 'feat(data): automatic update of static data'
-          committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-          title: 'feat(data): automatic update of static data'
-          assignees: viceice,secustor,jamietanna
+      - name: Create stacked pull requests
+        if: steps.update.outputs.branches != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCHES: ${{ steps.update.outputs.branches }}
+        run: |
+          gh extension install github/gh-stack --pin v0.2.1
+          gh auth setup-git
+
+          # any unmerged PRs from a previous run are superseded by this run
+          gh pr list --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("chore/static-data/")) | "\(.number) \(.headRefName)"' |
+            while read -r pr branch; do
+              gh pr close "$pr" --comment 'Superseded by a newer static data update.'
+              # not via `--delete-branch`, as that would also delete the new local branch
+              git push origin --delete "$branch"
+            done
+
+          read -ra branches <<< "$BRANCHES"
+          git push --force origin "${branches[@]}"
+          if [ "${#branches[@]}" -eq 1 ]; then
+            # a stack needs at least two PRs
+            gh pr create --head "${branches[0]}" --fill
+          else
+            gh stack link --open "${branches[@]}"
+          fi
+
+          for branch in "${branches[@]}"; do
+            gh pr edit "$branch" --add-assignee viceice,secustor,jamietanna
+          done
