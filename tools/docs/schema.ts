@@ -1,5 +1,8 @@
+import { isPlainObject } from '@sindresorhus/is';
 import { getOptions } from '../../lib/config/options/index.ts';
+import { getAllowedParents } from '../../lib/config/options/scopes.ts';
 import type {
+  AllowedParents,
   RenovateOptions,
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
@@ -20,18 +23,6 @@ import { readDocsHeadings } from './utils.ts';
 type JsonSchemaBasicType =
   'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
-
-/* These are sorted in priority order, but editors may not suggest in that order */
-const presetsToSuggest = [
-  'config:best-practices',
-  'config:recommended',
-  'mergeConfidence:all-badges',
-  'abandonments:recommended',
-  'group:all',
-  'replacements:all',
-  'security:minimumReleaseAgeNpm',
-  'security:only-security-updates',
-];
 
 const docsPages = {
   repo: 'configuration-options',
@@ -83,23 +74,13 @@ export function getOptionDocsUrl(
 }
 
 /**
- * When suggesting presets in `extends`, suggest a number of values that users may want to use
+ * Suggests values in an editor, while still accepting anything else matching `items`.
  */
-function createExtendsSchema(items: Record<string, any>): any[] {
-  return [
-    {
-      type: 'array',
-      items: {
-        anyOf: [
-          {
-            enum: presetsToSuggest,
-          },
-          items,
-        ],
-      },
-    },
-    { ...items },
-  ];
+function suggestValues(
+  values: string[],
+  items: Record<string, unknown>,
+): Record<string, any> {
+  return { anyOf: [{ enum: values }, items] };
 }
 
 function createSingleConfig(
@@ -132,17 +113,19 @@ function createSingleConfig(
         } else {
           temp.items.enum = option.allowedValues;
         }
+      } else if (option.suggestedValues) {
+        /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+        Object.assign(
+          temp.items,
+          suggestValues(option.suggestedValues, { type: option.subType }),
+        );
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
-      if (option.name === 'extends') {
-        temp.oneOf = createExtendsSchema(items);
-      } else {
-        temp.oneOf = [{ type: 'array', items }, { ...items }];
-      }
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
     }
   } else {
     if (hasKey('format', option) && option.format) {
@@ -159,6 +142,12 @@ function createSingleConfig(
       } else {
         temp.enum = option.allowedValues;
       }
+    } else if (option.suggestedValues) {
+      /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+      Object.assign(
+        temp,
+        suggestValues(option.suggestedValues, { type: option.type }),
+      );
     }
   }
   if (option.default !== undefined) {
@@ -168,9 +157,16 @@ function createSingleConfig(
     hasKey('additionalProperties', option) &&
     option.additionalProperties !== undefined
   ) {
-    temp.additionalProperties = option.additionalProperties;
+    /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
+    temp.additionalProperties = isPlainObject(option.additionalProperties)
+      ? { ...option.additionalProperties }
+      : option.additionalProperties;
   }
-  if (option.default === null) {
+  if (hasKey('properties', option) && option.properties !== undefined) {
+    /* the option's metadata is frozen, so we need our own copy to be able to declare any children on it */
+    temp.properties = { ...option.properties };
+  }
+  if (option.default === null || option.nullable) {
     temp.type = [option.type, 'null'];
   }
   if (
@@ -280,64 +276,53 @@ function createSchemaForParentConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (!option.parents || option.parents.includes('.')) {
+    const parents = getAllowedParents(option);
+    if (!parents || parents.includes('.')) {
       properties[option.name] = { $ref: `#/definitions/${option.name}` };
     }
   }
 }
 
-function addChildrenArrayInParents(
+/**
+ * The objects an option can be used in, other than the top level of a config.
+ */
+function getNestedParents(option: RenovateOptions): AllowedParents[] {
+  return (getAllowedParents(option) ?? []).filter((parent) => parent !== '.');
+}
+
+/**
+ * The schema which a parent's children are declared on, which differs depending on whether the parent is an array of configs, a map of configs, or a config itself.
+ */
+function getChildrenSchema(
+  definition: Record<string, any>,
+): Record<string, any> {
+  const type: JsonSchemaType | undefined = definition.type;
+  if (type === 'array' || (Array.isArray(type) && type.includes('array'))) {
+    definition.items ??= {};
+    return definition.items;
+  }
+
+  /* a map of configs declares its children on its values, rather than on the map itself */
+  if (isPlainObject(definition.additionalProperties)) {
+    return definition.additionalProperties;
+  }
+
+  return definition;
+}
+
+function addChildrenToParents(
   options: RenovateOptions[],
   properties: Record<string, any>,
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        definitions[parent].items = {
-          allOf: [
-            {
-              type: 'object',
-              properties: {
-                description: {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                        description:
-                          'A custom description for this configuration object',
-                      },
-                    },
-                    {
-                      type: 'string',
-                      description:
-                        'A custom description for this configuration object',
-                    },
-                  ],
-                },
-                overrideDescription: {
-                  oneOf: [
-                    {
-                      type: 'array',
-                      items: {
-                        type: 'string',
-                        description:
-                          'Description which replaces the descriptions of any presets which this config extends',
-                      },
-                    },
-                    {
-                      type: 'string',
-                      description:
-                        'Description which replaces the descriptions of any presets which this config extends',
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        };
-      }
+    for (const parent of getNestedParents(option)) {
+      getChildrenSchema(definitions[parent]).allOf = [
+        {
+          type: 'object',
+          properties: {},
+        },
+      ];
     }
   }
 }
@@ -370,16 +355,15 @@ function createSchemaForChildConfigs(
   definitions: Record<string, any>,
 ): void {
   for (const option of options) {
-    if (option.parents) {
-      for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        definitions[parent].items.allOf[0].properties[option.name] = {
+    for (const parent of getNestedParents(option)) {
+      {
+        const children = getChildrenSchema(definitions[parent]);
+        children.allOf[0].properties[option.name] = {
           $ref: `#/definitions/${option.name}`,
         };
 
         for (const prop of option.requiredIf ?? []) {
-          definitions[parent].items.allOf.push(
-            toRequiredPropertiesRule(prop, option),
-          );
+          children.allOf.push(toRequiredPropertiesRule(prop, option));
         }
       }
     }
@@ -457,21 +441,16 @@ export async function buildSchema({
       return isInherit || isGlobal;
     }
 
-    if (o.globalOnly) {
-      if (!isGlobal) {
-        schema.not ??= {
-          anyOf: [],
-        };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
-        schema.not.anyOf.push({
-          required: [o.name],
-        });
-      }
-      return isGlobal;
+    if (!isGlobal) {
+      schema.not ??= {
+        anyOf: [],
+      };
+      // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+      schema.not.anyOf.push({
+        required: [o.name],
+      });
     }
-
-    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
-    throw new Error(`Unhandled case for \`${o.name}\``);
+    return isGlobal;
   });
 
   configurationOptions.sort((a, b) => {
@@ -492,7 +471,7 @@ export async function buildSchema({
   const properties = schema.properties as Record<string, any>;
 
   createSchemaForParentConfigs(configurationOptions, properties, definitions);
-  addChildrenArrayInParents(configurationOptions, properties, definitions);
+  addChildrenToParents(configurationOptions, properties, definitions);
   createSchemaForChildConfigs(configurationOptions, properties, definitions);
 
   return schema;

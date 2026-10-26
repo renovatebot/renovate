@@ -64,6 +64,21 @@ const autoReplaceStringTemplate =
   '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}';
 
 /**
+ * Match `<name>--v<version>`, `<name>-v<version>`, and `<name>_v<version>` tags.
+ */
+const packageTagRegex = regEx(
+  /^(?<compatibility>.+?[-_])v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/,
+);
+
+function packageTagConfig(
+  currentValue: string,
+): Pick<PackageDependency, 'versionCompatibility'> {
+  return packageTagRegex.test(currentValue)
+    ? { versionCompatibility: packageTagRegex.source }
+    : {};
+}
+
+/**
  * APM virtual-package subpaths (skills/prompts/etc.) begin at one of these
  * "primitive" directories or at a file with a virtual extension. APM only uses
  * these to find where a repo path ends for hosts with nested namespaces; see
@@ -229,6 +244,7 @@ export function parseApmDependency(
       currentValue: tail.currentValue,
       currentDigest: ref,
       replaceString: tail.replaceString,
+      ...packageTagConfig(tail.currentValue),
     };
   }
 
@@ -236,6 +252,7 @@ export function parseApmDependency(
     ...dep,
     currentValue: ref,
     replaceString: entry,
+    ...packageTagConfig(ref),
   };
 }
 

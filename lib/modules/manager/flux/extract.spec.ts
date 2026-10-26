@@ -41,6 +41,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '1.7.0',
             datasource: HelmDatasource.id,
             depName: 'external-dns',
+            depType: 'HelmChart',
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
           },
           {
@@ -196,6 +197,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: 'helm',
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -218,6 +220,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -240,6 +243,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://example.com/charts'],
           },
         ],
@@ -262,6 +266,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: DockerDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             packageName: 'ghcr.io/charts/sealed-secrets',
             pinDigests: false,
           },
@@ -295,6 +300,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -360,6 +366,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             depName: './charts/cert-manager-config',
+            depType: 'HelmChart',
             skipReason: 'local-chart',
           },
         ],
@@ -389,6 +396,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             depName: '../charts/cert-manager-config',
+            depType: 'HelmChart',
             skipReason: 'local-chart',
           },
         ],
@@ -445,6 +453,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -490,6 +499,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -515,6 +525,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -547,6 +558,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
           },
         ],
@@ -603,6 +615,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
           },
         ],
@@ -634,6 +647,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -656,6 +670,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -678,6 +693,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://example.com/charts'],
           },
         ],
@@ -735,6 +751,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             depName: './helm/sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unsupported-datasource',
           },
         ],
@@ -1643,6 +1660,169 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('extracts OCIRepository selecting the Helm chart layer as a HelmChart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+            operation: copy
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            tag: 6.5.4
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.5.4',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository selecting the Helm chart layer as a HelmChart with a digest or without a ref', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-digest
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-tag-digest
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            tag: 6.5.4
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-unversioned
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+        `,
+        'test.yaml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          currentDigest:
+            'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          depType: 'HelmChart',
+        },
+        {
+          currentDigest:
+            'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          currentValue: '6.5.4',
+          depType: 'HelmChart',
+          replaceString:
+            'tag: 6.5.4\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+        },
+        { depType: 'HelmChart', skipReason: 'unversioned-reference' },
+      ]);
+    });
+
+    it('does not set a depType for OCIRepository selecting another layer', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: manifests
+          namespace: flux-system
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.flux.content.v1.tar+gzip
+            operation: extract
+          url: oci://ghcr.io/example/manifests
+          ref:
+            tag: v1.0.0
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/example/manifests',
+            packageName: 'ghcr.io/example/manifests',
+            replaceString: 'tag: v1.0.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with an empty layerSelector without a depType', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          layerSelector:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: 'tag: v1.8.2',
+          },
+        ],
+      });
+    });
+
     it('extracts Kustomization', () => {
       const result = extractPackageFile(
         codeBlock`
@@ -1756,6 +1936,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.0.2',
               datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
+              depType: 'HelmChart',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
@@ -1824,6 +2005,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '0.4.0',
               datasource: DockerDatasource.id,
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              depType: 'HelmChart',
               packageName:
                 'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
               pinDigests: false,
@@ -1847,6 +2029,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.6.0',
               datasource: DockerDatasource.id,
               depName: 'kyverno',
+              depType: 'HelmChart',
               packageName: 'ghcr.io/kyverno/charts/kyverno',
               pinDigests: false,
             },
@@ -1884,6 +2067,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.0.2',
               datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
+              depType: 'HelmChart',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],

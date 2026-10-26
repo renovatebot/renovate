@@ -23,10 +23,11 @@ import { buildCacheKey } from '../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
+import { detachUrlCredentials } from '../../util/host-rules.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
 import { safeStringify } from '../../util/stringify.ts';
-import { trimTrailingSlash } from '../../util/url.ts';
+import { trimTrailingSlash, withoutUrlCredentials } from '../../util/url.ts';
 import * as versioning from '../versioning/index.ts';
 import datasources from './api.ts';
 import {
@@ -35,9 +36,10 @@ import {
   applyVersionCompatibility,
   filterValidVersions,
   getDatasourceFor,
+  getDatasourceHostType,
   sortAndRemoveDuplicates,
 } from './common.ts';
-import { addMetaData } from './metadata.ts';
+import { addMetaData, stripMetadataUrlCredentials } from './metadata.ts';
 import { setNpmrc } from './npm/index.ts';
 import { resolveRegistryUrl } from './npm/npmrc.ts';
 import type {
@@ -163,6 +165,9 @@ async function getRegistryReleases(
   if (!res) {
     return null;
   }
+
+  // for the cached and the returned result alike
+  stripMetadataUrlCredentials(res);
 
   let cache = false;
   if (cacheForced) {
@@ -355,8 +360,29 @@ async function mergeRegistries(
   return combinedRes;
 }
 
-function massageRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.filter(isTruthy).map(trimTrailingSlash);
+function massageRegistryUrls(
+  datasource: DatasourceApi,
+  registryUrls: string[],
+): string[] {
+  const hostTypes = [getDatasourceHostType(datasource.id)].filter(isTruthy);
+  return (
+    registryUrls
+      .filter(isTruthy)
+      // the custom datasource detaches the credentials of a URL template from the URL it compiles, which is the one it requests
+      .map((url) =>
+        isCustomUrlTemplate(hostTypes, url)
+          ? url
+          : detachUrlCredentials(url, hostTypes),
+      )
+      .map(trimTrailingSlash)
+  );
+}
+
+/**
+ * Whether `url` requested with `hostTypes` is a URL template of the custom datasource, such as `https://host/{{packageName}}/versions.json`.
+ */
+function isCustomUrlTemplate(hostTypes: string[], url: string): boolean {
+  return hostTypes.includes('custom') && url.includes('{{');
 }
 
 function resolveRegistryUrls(
@@ -378,12 +404,19 @@ function resolveRegistryUrls(
       isNonEmptyArray(defaultRegistryUrls) ||
       isNonEmptyArray(additionalRegistryUrls)
     ) {
+      // the URLs may carry credentials, which are not logged
       logger.warn(
         {
           datasource: datasource.id,
-          registryUrls,
-          defaultRegistryUrls,
-          additionalRegistryUrls,
+          registryUrls: registryUrls
+            ?.filter(isTruthy)
+            .map(withoutUrlCredentials),
+          defaultRegistryUrls: defaultRegistryUrls
+            ?.filter(isTruthy)
+            .map(withoutUrlCredentials),
+          additionalRegistryUrls: additionalRegistryUrls
+            ?.filter(isTruthy)
+            .map(withoutUrlCredentials),
         },
         'Custom registries are not allowed for this datasource and will be ignored',
       );
@@ -392,7 +425,7 @@ function resolveRegistryUrls(
   }
   const customUrls = registryUrls?.filter(isTruthy);
   if (isNonEmptyArray(customUrls)) {
-    return massageRegistryUrls(customUrls);
+    return massageRegistryUrls(datasource, customUrls);
   }
   const defaultUrls = isNonEmptyArray(defaultRegistryUrls)
     ? defaultRegistryUrls
@@ -400,7 +433,7 @@ function resolveRegistryUrls(
   if (!isNonEmptyArray(defaultUrls)) {
     return [];
   }
-  return massageRegistryUrls([
+  return massageRegistryUrls(datasource, [
     ...defaultUrls,
     ...coerceArray(additionalRegistryUrls),
   ]);
@@ -494,6 +527,8 @@ async function fetchReleases(
     return null;
   }
   addMetaData(dep, datasourceName, config.packageName);
+  // also for the results of a lookup without registry URL, which do not pass `getRegistryReleases()`
+  stripMetadataUrlCredentials(dep);
   dep = { ...dep, ...applyReplacements(config) };
   return dep;
 }

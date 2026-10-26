@@ -20,6 +20,7 @@ import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import * as p from '../../../util/promises.ts';
 import { Result } from '../../../util/result.ts';
 import { LookupStats } from '../../../util/stats.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import { PackageFiles } from '../package-files.ts';
 import { lookupUpdates } from './lookup/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
@@ -163,7 +164,7 @@ async function lookup(
           warnings: [
             {
               topic: 'Lookup Error',
-              message: `${depName}: ${cause.message}`,
+              message: withoutUrlCredentials(`${depName}: ${cause.message}`),
             },
           ],
         });

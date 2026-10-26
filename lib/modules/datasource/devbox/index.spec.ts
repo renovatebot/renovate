@@ -97,7 +97,7 @@ describe('modules/datasource/devbox/index', () => {
     });
     expect(res).toEqual({
       homepage: 'https://nodejs.org',
-      registryUrl: 'https://search.devbox.sh/v2',
+      registryUrl: 'https://www.nixsearch.com/v2',
       releases: [
         {
           version: '21.7.3',

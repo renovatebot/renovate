@@ -636,7 +636,15 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        updatedArtifacts.push(file);
+        // several updateArtifacts() calls can return the same file, keep only the latest
+        const existingIndex = updatedArtifacts.findIndex(
+          (artifact) => artifact.path === file.path,
+        );
+        if (existingIndex === -1) {
+          updatedArtifacts.push(file);
+        } else {
+          updatedArtifacts[existingIndex] = file;
+        }
       }
 
       if (artifactError) {

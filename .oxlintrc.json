@@ -77,6 +77,7 @@
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
 
+    "renovate/cached-response-headers": "error",
     "renovate/enforce-ts-extension": "error",
     "renovate/no-number-constructor": "error",
     "renovate/prefer-json-pipe": "error",
@@ -397,6 +398,7 @@
         "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/consistent-hook-timeouts": "error",
         "renovate/inline-single-use-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-fake-sha-in-specs": "error",
@@ -405,6 +407,12 @@
         "renovate/prefer-stub-env": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
+      }
+    },
+    {
+      "files": ["lib/util/git/index.spec.ts"],
+      "rules": {
+        "renovate/consistent-hook-timeouts": "off"
       }
     },
     {

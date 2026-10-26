@@ -139,7 +139,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'properties',
     'requiresCheckAtTrustBoundary',
+    'suggestedValues',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];

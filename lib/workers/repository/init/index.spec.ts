@@ -1,7 +1,10 @@
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _secrets from '../../../config/secrets.ts';
+import { platform } from '../../../modules/platform/index.ts';
 import * as _onboarding from '../onboarding/branch/index.ts';
 import * as _apis from './apis.ts';
 import * as _config from './config.ts';
@@ -28,12 +31,16 @@ const onboarding = vi.mocked(_onboarding);
 const secrets = vi.mocked(_secrets);
 
 describe('workers/repository/init/index', () => {
-  beforeEach(() => {
-    GlobalConfig.set({ localDir: '', cacheDir: '' });
+  let tmpDir: DirectoryResult;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ localDir: '', cacheDir: tmpDir.path });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     GlobalConfig.reset();
+    await tmpDir.cleanup();
   });
 
   describe('initRepo', () => {
@@ -47,6 +54,29 @@ describe('workers/repository/init/index', () => {
       );
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toEqual({});
+    });
+
+    it('applies the repo config to the platform after reading it', async () => {
+      const applyRepoConfig = vi.fn();
+      platform.applyRepoConfig = applyRepoConfig;
+      apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({
+        azureWorkItemType: 'Task',
+      });
+      merge.mergeRenovateConfig.mockResolvedValueOnce({});
+      secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
+        partial<RenovateConfig>(),
+      );
+      await initRepo({});
+
+      expect(applyRepoConfig).toHaveBeenCalledExactlyOnceWith({
+        azureWorkItemType: 'Task',
+      });
+      expect(applyRepoConfig.mock.invocationCallOrder[0]).toBeGreaterThan(
+        config.getRepoConfig.mock.invocationCallOrder[0],
+      );
+      delete platform.applyRepoConfig;
     });
 
     it('warns on unsupported options', async () => {
