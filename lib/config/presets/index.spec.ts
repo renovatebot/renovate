@@ -416,6 +416,7 @@ describe('config/presets/index', () => {
           'stylelint**',
           'codelyzer',
           '/\\btslint\\b/',
+          '@biomejs/**',
           '@oxlint/**',
           'oxfmt',
           'oxlint',
@@ -1568,6 +1569,7 @@ describe('config/presets/index', () => {
           'packages:tslint',
         ],
         matchPackageNames: [
+          '@biomejs/**',
           '@oxlint/**',
           'oxfmt',
           'oxlint',
