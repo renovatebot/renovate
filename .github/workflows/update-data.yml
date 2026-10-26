@@ -1,7 +1,7 @@
 name: 'Update static data'
 on:
   schedule:
-    - cron: '0 0 * * 0' # Every Sunday at midnight
+    - cron: '0 6 * * 1' # Every Monday at 06:00 UTC
   workflow_dispatch:
 
 env:
