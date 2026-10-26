@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { Json } from '../../../lib/util/schema-utils/index.ts';
 import type { StaticDataSource } from '../types.ts';
-import { fetchText } from '../utils.ts';
+import { describeKeys, fetchText } from '../utils.ts';
 
 const Runtime = z.object({
   cycle: z.string().describe('The ID of the Runtime'),
@@ -38,4 +38,10 @@ export const lambdaNodeSchedule: StaticDataSource<
     }
     return nodeRuntimes;
   },
+  commitMessage: (before, after) =>
+    describeKeys(before ?? {}, after, (added) =>
+      added.length > 0
+        ? `add AWS Lambda Node.js ${added.join(', ')}`
+        : 'update AWS Lambda Node.js schedule',
+    ),
 };

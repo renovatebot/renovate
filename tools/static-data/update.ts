@@ -2,6 +2,7 @@ import { Argument, Command } from 'commander';
 import fs from 'fs-extra';
 import prettier from 'prettier';
 import { quickStringify } from '../../lib/util/stringify.ts';
+import { exec } from '../utils/exec.ts';
 import { distroInfo } from './sources/distro-info.ts';
 import { javaLtsVersions } from './sources/java-lts-versions.ts';
 import { lambdaNodeSchedule } from './sources/lambda-node-schedule.ts';
@@ -18,6 +19,10 @@ const sources: StaticDataSource<unknown, object>[] = [
   nodeSchedule,
 ];
 
+interface Options {
+  commit: boolean;
+}
+
 await new Command('pnpm update-static-data')
   .description('Update the static data used by Renovate')
   .addArgument(
@@ -26,18 +31,46 @@ await new Command('pnpm update-static-data')
       'the static data sources to update (default: all)',
     ).choices(sources.map((s) => s.name)),
   )
-  .action(async (names: string[]) => {
+  .option(
+    '--commit',
+    'commit the changes to each source separately, with a descriptive message',
+    false,
+  )
+  .action(async (names: string[], { commit }: Options) => {
     for (const source of sources) {
       if (names.length > 0 && !names.includes(source.name)) {
         continue;
       }
 
       console.log(`Updating ${source.name} (${source.file})`);
+      const before = (await fs.pathExists(source.file))
+        ? await fs.readJson(source.file)
+        : undefined;
       const data = source.generate(await source.fetch());
       const contents = await prettier.format(quickStringify(data, null, 2), {
         parser: 'json',
       });
       await fs.writeFile(source.file, contents);
+
+      if (!commit) {
+        continue;
+      }
+
+      await exec('git', ['add', source.file]);
+      const { exitCode } = await exec('git', ['diff', '--cached', '--quiet'], {
+        reject: false,
+      });
+      if (exitCode === 0) {
+        console.log(`No changes to ${source.name}`);
+        continue;
+      }
+
+      const { subject, body } = source.commitMessage(before, data);
+      const message = `feat(static-data): ${subject}`;
+      await exec('git', ['commit', '--file', '-'], {
+        input: body ? `${message}\n\n${body}` : message,
+      });
+      console.log(`Committed changes to ${source.name}: ${subject}`);
     }
   })
   .parseAsync();
