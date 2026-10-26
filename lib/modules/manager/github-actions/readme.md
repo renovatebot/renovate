@@ -121,7 +121,7 @@ To use a different version, set the `ghActionsLock` constraint:
 }
 ```
 
-The version must be a full release tag, like `v0.4.0`.
+The version must be a full release tag, as in the example above.
 
 Because [`constraints`](../../../configuration-options.md#constraints) is mergeable, setting `"constraints": {}` does _not_ remove the pin: set the value to an empty string to always install the latest extension.
 
