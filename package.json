@@ -263,7 +263,7 @@
     "tar": "catalog:",
     "toml-eslint-parser": "1.0.3",
     "upath": "3.0.8",
-    "url-join": "5.0.0",
+    "url-join": "5.1.1",
     "validate-npm-package-name": "7.0.2",
     "xmldoc": "3.0.0",
     "yaml": "2.9.1",
