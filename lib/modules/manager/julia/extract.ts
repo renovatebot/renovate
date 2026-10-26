@@ -7,6 +7,37 @@ import { JuliaProject } from './schema.ts';
 
 const uuidRegex = regEx(/^[0-9a-f]{8}-/i);
 
+// Standard libraries that ship only with Julia, so General has no versions for
+// them. Taken from `stdlib/` in JuliaLang/julia.
+const unregisteredStdlibs = new Set([
+  'Base64',
+  'CRC32c',
+  'Dates',
+  'Distributed',
+  'FileWatching',
+  'Future',
+  'InteractiveUtils',
+  'Libdl',
+  'LibGit2',
+  'LinearAlgebra',
+  'Logging',
+  'Markdown',
+  'Mmap',
+  'Pkg',
+  'Printf',
+  'Profile',
+  'Random',
+  'REPL',
+  'Serialization',
+  'SharedArrays',
+  'Sockets',
+  'SparseArrays',
+  'SuiteSparse',
+  'Test',
+  'Unicode',
+  'UUIDs',
+]);
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -44,6 +75,9 @@ export function extractPackageFile(
     const uuid = uuids[depName];
     if (uuid && uuidRegex.test(uuid)) {
       dep.commitMessageTopic = `${depName} [${uuid.slice(0, 8)}]`;
+    }
+    if (unregisteredStdlibs.has(depName)) {
+      dep.skipReason = 'unsupported';
     }
     deps.push(dep);
   }

@@ -71,16 +71,42 @@ describe('modules/manager/julia/extract', () => {
         JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
         [extras]
-        Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+        Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 
         [compat]
         JSON = "1"
-        Test = "1"
+        Aqua = "0.8"
       `;
 
       expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
         { depName: 'JSON', commitMessageTopic: 'JSON [682c06a0]' },
-        { depName: 'Test', commitMessageTopic: 'Test [8dfed614]' },
+        { depName: 'Aqua', commitMessageTopic: 'Aqua [4c88cf16]' },
+      ]);
+    });
+
+    it('skips standard libraries that General does not register', () => {
+      const content = codeBlock`
+        [compat]
+        LinearAlgebra = "1"
+        Statistics = "1"
+      `;
+
+      expect(extractPackageFile(content, 'Project.toml')?.deps).toEqual([
+        {
+          depName: 'LinearAlgebra',
+          depType: 'compat',
+          currentValue: '1',
+          datasource: 'julia-general-metadata',
+          versioning: 'julia',
+          skipReason: 'unsupported',
+        },
+        {
+          depName: 'Statistics',
+          depType: 'compat',
+          currentValue: '1',
+          datasource: 'julia-general-metadata',
+          versioning: 'julia',
+        },
       ]);
     });
 
