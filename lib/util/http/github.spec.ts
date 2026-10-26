@@ -368,19 +368,19 @@ describe('util/http/github', () => {
       setBaseUrl(baseUrl);
       // The hostname from GHES settings, which users use through their browsers to reach GHES:
       // https://docs.github.com/en/enterprise-server@3.5/admin/configuration/configuring-network-settings/configuring-a-hostname
-      const gheHostname = 'ghe.mycompany.com';
+      const ghesHostname = 'ghe.mycompany.com';
       // GHES replies to paginated requests with a Link response header whose URLs have this base
-      const gheBaseUrl = `https://${gheHostname}/api/v3`;
+      const ghesBaseUrl = `https://${ghesHostname}/api/v3`;
       const apiUrl = '/some-url?per_page=2';
       httpMock
         .scope(baseUrl)
         .get(apiUrl)
         .reply(200, ['a', 'b'], {
-          link: `<${gheBaseUrl}${apiUrl}&page=2>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+          link: `<${ghesBaseUrl}${apiUrl}&page=2>; rel="next", <${ghesBaseUrl}${apiUrl}&page=3>; rel="last"`,
         })
         .get(`${apiUrl}&page=2`)
         .reply(200, ['c', 'd'], {
-          link: `<${gheBaseUrl}${apiUrl}&page=3>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+          link: `<${ghesBaseUrl}${apiUrl}&page=3>; rel="next", <${ghesBaseUrl}${apiUrl}&page=3>; rel="last"`,
         })
         .get(`${apiUrl}&page=3`)
         .reply(200, ['e']);

@@ -172,14 +172,14 @@ async function detectGithubHost(
     return { type: 'ghec', apiUrl };
   }
 
-  const gheHeaderKey = 'x-github-enterprise-version';
-  const gheQueryRes = await githubApi.headJson('/', { token });
-  const gheHeaders = coerceObject(gheQueryRes?.headers);
-  const gheVersionHeader = Object.entries(gheHeaders).find(
-    ([k]) => k.toLowerCase() === gheHeaderKey,
+  const ghesHeaderKey = 'x-github-enterprise-version';
+  const ghesQueryRes = await githubApi.headJson('/', { token });
+  const ghesHeaders = coerceObject(ghesQueryRes?.headers);
+  const ghesVersionHeader = Object.entries(ghesHeaders).find(
+    ([k]) => k.toLowerCase() === ghesHeaderKey,
   );
 
-  const version = semver.valid(gheVersionHeader?.[1] as string) ?? null;
+  const version = semver.valid(ghesVersionHeader?.[1] as string) ?? null;
   logger.debug(`Detected GitHub Enterprise Server, version: ${version}`);
   return { type: 'ghes', apiUrl, version };
 }
