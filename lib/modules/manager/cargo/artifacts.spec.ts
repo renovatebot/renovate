@@ -656,16 +656,17 @@ describe('modules/manager/cargo/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             GIT_CONFIG_COUNT: '6',
             GIT_CONFIG_KEY_0:
-              'url.https://ssh:some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_1:
-              'url.https://git:some-token@github.com/.insteadOf',
-            GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
+            GIT_CONFIG_KEY_2:
+              'url.https://x-access-token:some-token@github.com/.insteadOf',
             GIT_CONFIG_KEY_3:
-              'url.https://ssh:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_4:
-              'url.https://git:some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_KEY_5:
-              'url.https://some-other-token@gitea.com/.insteadOf',
+              'url.https://some-other-token:x-oauth-basic@gitea.com/.insteadOf',
             GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
             GIT_CONFIG_VALUE_1: 'git@github.com:',
             GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -729,16 +730,17 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '9',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_6:
                 'url.https://gitlab-ci-token:some-gitlab-token@gitlab.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_7:
@@ -807,10 +809,11 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '3',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
@@ -867,22 +870,79 @@ describe('modules/manager/cargo/artifacts', () => {
             env: expect.objectContaining({
               GIT_CONFIG_COUNT: '6',
               GIT_CONFIG_KEY_0:
-                'url.https://ssh:some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_1:
-                'url.https://git:some-token@github.com/.insteadOf',
-              GIT_CONFIG_KEY_2: 'url.https://some-token@github.com/.insteadOf',
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://x-access-token:some-token@github.com/.insteadOf',
               GIT_CONFIG_KEY_3:
-                'url.https://ssh:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_4:
-                'url.https://git:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_KEY_5:
-                'url.https://some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
+                'url.https://x-access-token:some-enterprise-token-cargo@github.enterprise.com/.insteadOf',
               GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
               GIT_CONFIG_VALUE_1: 'git@github.com:',
               GIT_CONFIG_VALUE_2: 'https://github.com/',
               GIT_CONFIG_VALUE_3: 'ssh://git@github.enterprise.com/',
               GIT_CONFIG_VALUE_4: 'git@github.enterprise.com:',
               GIT_CONFIG_VALUE_5: 'https://github.enterprise.com/',
+            }),
+          }),
+        }),
+      ]),
+    );
+  });
+
+  it('supports docker mode with crate git index credential', async () => {
+    fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.add({
+      token: 'some-crate-token',
+      matchHost: 'git.example.com',
+      hostType: CrateDatasource.id,
+    });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        datasource: CrateDatasource.id,
+      },
+    ];
+    await expect(
+      cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { rust: '1.65.0' } },
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            env: expect.objectContaining({
+              GIT_CONFIG_COUNT: '3',
+              GIT_CONFIG_KEY_0:
+                'url.https://ssh:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_1:
+                'url.https://git:some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_KEY_2:
+                'url.https://some-crate-token@git.example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+              GIT_CONFIG_VALUE_1: 'git@git.example.com:',
+              GIT_CONFIG_VALUE_2: 'https://git.example.com/',
             }),
           }),
         }),

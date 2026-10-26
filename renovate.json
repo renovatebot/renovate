@@ -35,25 +35,45 @@
       "enabled": false
     },
     {
+      "description": "group base image docker and npm updates, they must stay on the same version",
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
+      "groupName": "renovate-base-image"
+    },
+    {
       "description": "set fix scope for base image",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "semanticCommitType": "fix"
     },
     {
       "description": "set feat scope for base image major and minor",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
     },
     {
       "description": "use `feat` semantic commit scope with breaking change for for base image major",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchUpdateTypes": ["major"],
       "commitMessagePrefix": "feat(deps)!:"
     },
     {
       "description": "allow prereleases for base image on next branch",
-      "matchPackageNames": ["ghcr.io/renovatebot/base-image"],
+      "matchPackageNames": [
+        "ghcr.io/renovatebot/base-image",
+        "@renovatebot/base-image"
+      ],
       "matchBaseBranches": ["next"],
       "ignoreUnstable": false
     },
@@ -120,6 +140,12 @@
       "semanticCommitType": "fix"
     },
     {
+      "description": "Do not automerge breaking `gh-actions-lock` updates, which includes every v0.x release, as they can change how the lockfile is generated or verified",
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchJsonata": ["isBreaking = true"],
+      "automerge": false
+    },
+    {
       "description": "Group commander major updates, they depend on each other.",
       "matchDatasources": ["npm"],
       "matchPackageNames": ["@commander-js/extra-typings", "commander"],
@@ -148,6 +174,15 @@
       "customType": "regex",
       "managerFilePatterns": ["lib/config/options/index.ts"],
       "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "lib/modules/manager/github-actions/artifacts.spec.ts"
+      ],
+      "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
     }

@@ -31,6 +31,7 @@ import {
 import type { logger as _logger } from '../../../logger/index.ts';
 import type * as _git from '../../../util/git/index.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
+import { hashBody } from '../pr-body.ts';
 import type { Platform, RepoParams } from '../types.ts';
 import { AzurePrVote } from './types.ts';
 
@@ -68,7 +69,6 @@ describe('modules/platform/azure/index', () => {
     git = await vi.importMock('../../../util/git/index.ts');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
     azureApi.getAuthenticatedUserId.mockResolvedValue('renovate-user-id');
@@ -739,6 +739,7 @@ describe('modules/platform/azure/index', () => {
               },
             ])
             .mockResolvedValueOnce([]),
+          getPullRequestById: vi.fn().mockResolvedValue({}),
           getPullRequestLabels: vi.fn().mockResolvedValue([]),
         }),
       );
@@ -1065,6 +1066,8 @@ describe('modules/platform/azure/index', () => {
               },
             ]),
 
+          getPullRequestById: vi.fn().mockResolvedValue({}),
+
           getPullRequestLabels: vi
             .fn()
             .mockReturnValue([{ active: true, name: 'renovate' }]),
@@ -1088,6 +1091,29 @@ describe('modules/platform/azure/index', () => {
         pullRequestId: 1234,
         state: 'open',
       });
+    });
+
+    it('hashes the full description instead of the truncated list one', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const description = 'a'.repeat(1000);
+      const getPullRequestById = vi.fn().mockResolvedValue({ description });
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              { pullRequestId: 1234, description: description.slice(0, 400) },
+            ]),
+          getPullRequestById,
+          getPullRequestLabels: vi.fn().mockReturnValue([]),
+        }),
+      );
+
+      const pr = await azure.getPr(1234);
+
+      expect(getPullRequestById).toHaveBeenCalledWith(1234, 'some');
+      expect(pr?.bodyStruct?.hash).toBe(hashBody(description));
     });
   });
 
@@ -1453,6 +1479,112 @@ describe('modules/platform/azure/index', () => {
         pullRequestId: 456,
         state: 'open',
       });
+    });
+  });
+
+  describe('reattemptPlatformAutomerge()', () => {
+    const existingPr = {
+      pullRequestId: 456,
+      title: 'The Title',
+      targetRefName: 'refs/heads/dev',
+      createdBy: {
+        id: '123',
+      },
+    };
+
+    it.each`
+      platformPrOptions                                              | mergeStrategy
+      ${{ automergeStrategy: 'squash', usePlatformAutomerge: true }} | ${GitPullRequestMergeStrategy.Squash}
+      ${{ automergeStrategy: 'rebase', usePlatformAutomerge: true }} | ${GitPullRequestMergeStrategy.Rebase}
+      ${undefined}                                                   | ${GitPullRequestMergeStrategy.NoFastForward}
+    `(
+      'should update auto-complete settings with mergeStrategy $mergeStrategy',
+      async ({ platformPrOptions, mergeStrategy }) => {
+        await initRepo({ repository: 'some/repo' });
+        const getFn = vi.fn().mockResolvedValue(existingPr);
+        const updateFn = vi.fn().mockResolvedValue(existingPr);
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getPullRequestById: getFn,
+            updatePullRequest: updateFn,
+          }),
+        );
+
+        await azure.reattemptPlatformAutomerge!({
+          number: 456,
+          platformPrOptions,
+        });
+
+        expect(getFn).toHaveBeenCalledWith(456, 'some');
+        expect(updateFn.mock.calls[0][0]).toEqual({
+          autoCompleteSetBy: { id: '123' },
+          completionOptions: {
+            mergeStrategy,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The Title',
+          },
+        });
+        expect(updateFn.mock.calls[0][2]).toBe(456);
+        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+      },
+    );
+
+    it('should use the policy merge method when automergeStrategy is auto', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureHelper.getMergeMethod.mockResolvedValueOnce(
+        GitPullRequestMergeStrategy.RebaseMerge,
+      );
+      const updateFn = vi.fn().mockResolvedValue(existingPr);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue(existingPr),
+          updatePullRequest: updateFn,
+        }),
+      );
+
+      await azure.reattemptPlatformAutomerge!({
+        number: 456,
+        platformPrOptions: {
+          automergeStrategy: 'auto',
+          usePlatformAutomerge: true,
+        },
+      });
+
+      expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
+      expect(updateFn.mock.calls[0][0]).toEqual({
+        autoCompleteSetBy: { id: '123' },
+        completionOptions: {
+          mergeStrategy: GitPullRequestMergeStrategy.RebaseMerge,
+          deleteSourceBranch: true,
+          mergeCommitMessage: 'The Title',
+        },
+      });
+    });
+
+    it('should log a warning when updating the PR fails', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const err = new Error('unknown');
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue(existingPr),
+          updatePullRequest: vi.fn().mockRejectedValue(err),
+        }),
+      );
+
+      await expect(
+        azure.reattemptPlatformAutomerge!({
+          number: 456,
+          platformPrOptions: {
+            automergeStrategy: 'squash',
+            usePlatformAutomerge: true,
+          },
+        }),
+      ).toResolve();
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        { err },
+        'Error re-attempting PR platform automerge',
+      );
     });
   });
 
@@ -2646,6 +2778,43 @@ describe('modules/platform/azure/index', () => {
       'Issue',
     );
   });
+
+  it.each`
+    repoWorkItemType | expected
+    ${'Task'}        | ${'Task'}
+    ${'Issue'}       | ${'Issue'}
+    ${undefined}     | ${'Issue'}
+  `(
+    'ensureIssue uses work item type $expected for repo config $repoWorkItemType',
+    async ({ repoWorkItemType, expected }) => {
+      await initRepo({ repository: 'some/repo' });
+      azure.applyRepoConfig?.({ azureWorkItemType: repoWorkItemType });
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValueOnce(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi
+            .fn()
+            .mockResolvedValue([{ name: 'Issue' }, { name: 'Task' }]),
+        }),
+      );
+      const result = await azure.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body',
+      });
+
+      expect(result).toBe('created');
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Array),
+        'some',
+        expected,
+      );
+    },
+  );
+
   it('ensureIssue updates an existing issue', async () => {
     await initRepo({ repository: 'some/repo' });
 

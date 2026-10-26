@@ -19,10 +19,6 @@ import {
 vi.mock('../../util/fs/index.ts');
 
 describe('modules/manager/util', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   it('applies GitHub source for tag', () => {
     const dependency: PackageDependency = {};
     const git = 'https://github.com/foo/bar';

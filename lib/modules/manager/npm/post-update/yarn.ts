@@ -99,14 +99,18 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
+  return (
+    (upgrade.depType === 'packageManager' ||
+      upgrade.depType === 'devEngines.packageManager') &&
+    upgrade.depName === 'yarn'
+  );
 }
 
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   config: Partial<PostUpdateConfig<NpmManagerData>> = {},
-  upgrades: Upgrade[] = [],
+  upgrades: Upgrade<NpmManagerData>[] = [],
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
@@ -192,7 +196,11 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
-      if (!config.managerData?.yarnZeroInstall) {
+      // check upgrades too, see #17786
+      const yarnZeroInstall =
+        !!config.managerData?.yarnZeroInstall ||
+        upgrades.some((upgrade) => !!upgrade.managerData?.yarnZeroInstall);
+      if (!yarnZeroInstall) {
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
