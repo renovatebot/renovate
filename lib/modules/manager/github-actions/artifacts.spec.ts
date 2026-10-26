@@ -616,6 +616,43 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
     });
 
+    it.each`
+      constraint   | flags
+      ${'v0.2.0'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions --json=findings'}
+      ${'v0.1.6'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions --json=findings'}
+      ${'v0.3.0'}  | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
+      ${''}        | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
+      ${'invalid'} | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
+    `(
+      'passes $flags for the constraint "$constraint"',
+      async ({ constraint, flags }: { constraint: string; flags: string }) => {
+        const execSnapshots = mockExecAll();
+        mockLockfileRegenerated();
+
+        await updateActionsLockfile(
+          makeConfig({ constraints: { ghActionsLock: constraint } }),
+          packageFiles,
+        );
+
+        expect(execSnapshots.at(-1)?.cmd).toBe(`gh actions-lock ${flags}`);
+      },
+    );
+
+    it('assumes v0.3.0 or later with `binarySource=global`, whatever the constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(
+        makeConfig({ constraints: { ghActionsLock: 'v0.2.0' } }),
+        packageFiles,
+      );
+
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings',
+      ]);
+    });
+
     it('does not touch the extension with `binarySource=global`', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
       const execSnapshots = mockExecAll();

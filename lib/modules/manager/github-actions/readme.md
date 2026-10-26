@@ -82,7 +82,8 @@ gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions
 
 Renovate invokes `gh actions-lock` in a way that keeps the diff to the dependency being updated, by re-resolving only the refs which have changed, along with anything new they pull in transitively.
 Every other pin stays as locked, including floating refs (like `@v4`) which have since moved upstream.
-This needs `gh-actions-lock` v0.3.0 or later, so keep the `ghActionsLock` constraint at or above that version.
+For a `ghActionsLock` constraint below v0.3.0, Renovate passes `--relock` (which also advances moved floating refs) and `--no-migrate-local-actions` instead of `--ignore-local-actions`.
+With `binarySource=global`, Renovate assumes the installed extension is v0.3.0 or later.
 
 - `--no-interactive`: don't hang, expecting an interactive terminal to answer prompts
 - `--no-onboard`: only update workflows and actions which the lockfile already tracks, so an update pull request does not add unrelated workflows. Onboard them yourself by running `gh actions-lock`. Renovate omits this flag when an update replaces an action with a different one, as the lockfile has to learn about the new action

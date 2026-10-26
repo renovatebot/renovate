@@ -12,6 +12,7 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { api as semver } from '../../versioning/semver/index.ts';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../types.ts';
 import {
   artifactErrorMessageFromExecError,
@@ -26,6 +27,18 @@ const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
 const lockedDepTypes = ['action', 'workflow', 'docker'];
+
+/** The first `gh-actions-lock` release with `--ignore-local-actions`, and a plain run which keeps moved floating refs locked. */
+const minPlainRunVersion = '0.3.0';
+
+/** Whether a `gh-actions-lock` release tag predates `--ignore-local-actions` and needs `--relock` to write after a floating ref moved. */
+function needsRelock(version: string | undefined): boolean {
+  return (
+    !!version &&
+    semver.isVersion(version) &&
+    semver.isGreaterThan(minPlainRunVersion, version)
+  );
+}
 
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));
@@ -197,7 +210,13 @@ export async function updateActionsLockfile(
     (upgrade) => upgrade.updateType === 'replacement',
   );
 
-  // No `--relock`: a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance
+  // `binarySource=global` leaves the extension version to the administrator and it is unknown here, so assume v0.3.0 or later and only treat a version we install as old
+  const relock =
+    GlobalConfig.get('binarySource') !== 'global' &&
+    needsRelock(ghActionsLockConstraint);
+
+  // From v0.3.0 a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance.
+  // Before that, a plain run refuses to write when a path or composite action's floating ref has moved, so `--relock` is needed there
   const flags = [
     // we have no terminal to answer prompts with
     '--no-interactive',
@@ -205,9 +224,18 @@ export async function updateActionsLockfile(
     ...(hasReplacement ? [] : ['--no-onboard']),
     // keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
     '--no-narrow',
-    // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
-    '--ignore-local-actions',
-    // print the findings as JSON on stdout, so a failure can be reported readably
+    ...(relock
+      ? [
+          // a plain run before v0.3.0 refuses to write when a floating ref has moved upstream. This also advances such refs
+          '--relock',
+          // do not migrate `uses: ./…` to `uses: $/…`. `--ignore-local-actions` does not exist before v0.3.0
+          '--no-migrate-local-actions',
+        ]
+      : [
+          // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
+          '--ignore-local-actions',
+        ]),
+    // print the findings as JSON on stdout, so a failure can be reported readably. Available since v0.1.6
     '--json=findings',
   ];
   const commands = [`gh actions-lock ${flags.join(' ')}`];
