@@ -26,6 +26,25 @@ export function getDatasourceFor(datasource: string): DatasourceApi | null {
   return datasources.get(datasource) ?? null;
 }
 
+/**
+ * The host types of the datasources whose requests use another host type than their id.
+ */
+const datasourceHostTypes: Record<string, string> = {
+  'sbt-package': 'sbt',
+  'sbt-plugin': 'sbt',
+};
+
+/**
+ * Returns the host type the requests of `datasource` use, such as `custom` for `custom.<name>`, or `null` when there is no such datasource.
+ */
+export function getDatasourceHostType(datasource: string): string | null {
+  const id = getDatasourceFor(datasource)?.id;
+  if (!id) {
+    return null;
+  }
+  return datasourceHostTypes[id] ?? id;
+}
+
 export function getDefaultVersioning(
   datasourceName: string | undefined,
 ): string {

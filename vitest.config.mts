@@ -6,10 +6,7 @@ import {
   mergeConfig,
 } from 'vitest/config';
 import { testShards } from './tools/test/shards.ts';
-import {
-  getCoverageIgnorePatterns,
-  normalizePattern,
-} from './tools/test/utils.ts';
+import { normalizePattern } from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
 const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
@@ -82,7 +79,7 @@ export default defineConfig(() =>
   mergeConfig(
     {
       resolve: { tsconfigPaths: true },
-      oxc: { include: /\.([cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
+      oxc: { include: /\.(?:[cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
@@ -94,6 +91,11 @@ export default defineConfig(() =>
         ],
         reporters,
         mockReset: true,
+        unstubEnvs: true,
+        // Inlined so specs can mock `node:fs/promises` for these packages
+        server: {
+          deps: { inline: ['@renovatebot/base-image', '@containerbase/base'] },
+        },
         coverage: {
           provider: 'v8',
           skipFull: !ci,
@@ -103,7 +105,6 @@ export default defineConfig(() =>
           enabled: true,
           exclude: [
             ...coverageConfigDefaults.exclude,
-            ...getCoverageIgnorePatterns(),
             '**/*.spec.ts', // should work from defaults
             'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
             'lib/**/types.ts',
@@ -133,6 +134,7 @@ export default defineConfig(() =>
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
           '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
         ],
       },
     }),

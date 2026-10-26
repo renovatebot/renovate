@@ -13,7 +13,10 @@ import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { PackageFile, PostUpdateConfig } from '../types.ts';
-import { artifactErrorMessageFromExecError } from '../util.ts';
+import {
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
 import { ActionsLockfile } from './schema.ts';
 import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
@@ -22,7 +25,7 @@ import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
-const lockedDepTypes = ['action', 'docker'];
+const lockedDepTypes = ['action', 'workflow', 'docker'];
 
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));
@@ -157,6 +160,12 @@ export async function updateActionsLockfile(
 
   const tokenEnv = getTokenEnv();
 
+  const ghConstraint = await resolveToolConstraint(config, 'gh');
+  const ghActionsLockConstraint = await resolveToolConstraint(
+    config,
+    'ghActionsLock',
+  );
+
   const execOptions: ExecOptions = {
     // The tool rescans every workflow, so it runs from the repository root
     cwd: GlobalConfig.get('localDir'),
@@ -164,15 +173,16 @@ export async function updateActionsLockfile(
     // The token we resolved from the host rules must not be shadowed by an ambient `GH_TOKEN`, so force it as well.
     extraEnv: tokenEnv,
     env: tokenEnv,
-    toolConstraints: [{ toolName: 'gh', constraint: config.constraints?.gh }],
+    toolConstraints: [{ toolName: 'gh', constraint: ghConstraint }],
     docker: {},
   };
 
   // `--no-interactive`: we have no terminal to answer prompts with
+  // `--relock`: locked pins are sticky, so without it a changed ref fails with `Ref changed`
   // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
   // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
   const commands = [
-    'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
+    'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
   ];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
@@ -181,14 +191,14 @@ export async function updateActionsLockfile(
   if (GlobalConfig.get('binarySource') === 'global') {
     // Debug rather than warn: `constraints.ghActionsLock` ships with a default, so we cannot tell an explicit override from the default here, and warning would fire for every repository on this `binarySource`.
     logger.once.debug(
-      { constraint: config.constraints?.ghActionsLock },
+      { constraint: ghActionsLockConstraint },
       'Not installing the `gh-actions-lock` extension, and ignoring `constraints.ghActionsLock`, because `binarySource=global` leaves tooling to the administrator',
     );
   } else {
     // `--force` makes an install a no-op when the specified version is already installed
-    if (config.constraints?.ghActionsLock) {
+    if (ghActionsLockConstraint) {
       commands.unshift(
-        `gh extension install ${extensionName} --force --pin ${quote(config.constraints?.ghActionsLock)}`,
+        `gh extension install ${extensionName} --force --pin ${quote(ghActionsLockConstraint)}`,
       );
     } else {
       commands.unshift(`gh extension install ${extensionName} --force`);

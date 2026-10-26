@@ -1,11 +1,15 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { HOST_BLOCKED } from '../../../constants/error-messages.ts';
 import { defaultRegistryUrl } from '../../../modules/datasource/npm/common.ts';
+import { setNpmrc } from '../../../modules/datasource/npm/npmrc.ts';
 import { GlobalConfig } from '../../global.ts';
 import * as npm from './index.ts';
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
+    setNpmrc();
   });
 
   it('should throw if no package', async () => {
@@ -116,5 +120,46 @@ describe('config/presets/npm/index', () => {
       .reply(200, presetPackage);
     const res = await npm.getPreset({ repo: 'workingpreset' });
     expect(res).toEqual({ rangeStrategy: 'auto' });
+  });
+
+  describe('internal registry hosts', () => {
+    const presetPackage = {
+      name: 'internalpreset',
+      versions: {
+        '0.0.1': {
+          'renovate-config': { default: { rangeStrategy: 'auto' } },
+        },
+      },
+      'dist-tags': { latest: '0.0.1' },
+    };
+
+    beforeEach(() => {
+      GlobalConfig.set({ internalHostAccess: 'block' });
+      // the repository's own `npmrc` picks the registry, so this is a repo-controlled URL
+      setNpmrc('registry=http://10.1.2.3/');
+    });
+
+    it('is blocked when the admin only named the registry host', async () => {
+      hostRules.add({ matchHost: '10.1.2.3' }, { trusted: true });
+
+      await expect(npm.getPreset({ repo: 'internalpreset' })).rejects.toThrow(
+        HOST_BLOCKED,
+      );
+    });
+
+    it('is fetched under a scoped grant', async () => {
+      hostRules.add(
+        { hostType: 'npm', matchHost: '10.1.2.3', allowInternal: true },
+        { trusted: true },
+      );
+      httpMock
+        .scope('http://10.1.2.3')
+        .get('/internalpreset')
+        .reply(200, presetPackage);
+
+      const res = await npm.getPreset({ repo: 'internalpreset' });
+
+      expect(res).toEqual({ rangeStrategy: 'auto' });
+    });
   });
 });

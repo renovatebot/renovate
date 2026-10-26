@@ -1,17 +1,21 @@
+import { isBoolean } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { acquireLock } from '../../../util/mutex.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { isHttpUrl, joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as cargoVersioning from '../../versioning/cargo/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
@@ -46,7 +50,9 @@ export class CrateDatasource extends Datasource {
     super(CrateDatasource.id);
   }
 
-  override defaultRegistryUrls = ['sparse+https://index.crates.io/'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['sparse+https://index.crates.io/'];
+  }
 
   override defaultVersioning = cargoVersioning.id;
 
@@ -112,7 +118,7 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((line) => {
         const versionOrig = line.vers;
-        const version = versionOrig.replace(/\+.*$/, '');
+        const version = versionOrig.replace(regEx(/\+.*$/), '');
         const release: Release = { version };
 
         if (versionOrig !== version) {
@@ -145,13 +151,22 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}/${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         cacheable: CrateDatasource.isCratesIo(config.registryUrl),
         fallback: true,
       },
       () => this._getReleases(config),
     );
+  }
+
+  /** Returns the memory cache key of the registry's config.json. */
+  private static registryConfigCacheKey(rawUrl: string): string {
+    return buildCacheKey('crate-datasource', 'registry-config', rawUrl);
+  }
+
+  /** Returns the memory cache key of the unsupported read API marker. */
+  private static apiUnsupportedCacheKey(api: string): string {
+    return buildCacheKey('crate-datasource', 'registry-api-unsupported', api);
   }
 
   /**
@@ -162,7 +177,7 @@ export class CrateDatasource extends Datasource {
   private async fetchRegistryConfig(
     info: RegistryInfo,
   ): Promise<RegistryConfig | null> {
-    const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
+    const cacheKey = CrateDatasource.registryConfigCacheKey(info.rawUrl);
     const cached = memCache.get<RegistryConfig>(cacheKey);
     if (cached) {
       return cached;
@@ -198,6 +213,61 @@ export class CrateDatasource extends Datasource {
     return null;
   }
 
+  /**
+   * The registry web API specification only defines publish, yank, unyank,
+   * owners, search and login endpoints, see
+   * https://doc.rust-lang.org/cargo/reference/registry-web-api.html.
+   * `GET api/v1/crates/<name>` and `GET api/v1/crates/<name>/<version>` are
+   * crates.io extensions. Registries which mirror the crates.io index keep
+   * `api` pointing at crates.io and are used without probing. Any other
+   * registry is probed once and remembered as unsupported when it answers
+   * 404, since private registries (Artifactory, CodeArtifact, ...) advertise
+   * an `api` URL for publishing only.
+   */
+  private static isCratesIoApi(api: string): boolean {
+    return parseUrl(api)?.hostname === 'crates.io';
+  }
+
+  private static isNotFound(err: unknown): boolean {
+    return err instanceof HttpError && err.response?.statusCode === 404;
+  }
+
+  /**
+   * The marker is keyed by the `api` URL, since the missing endpoints are a
+   * property of the API server, not of the index that points to it.
+   */
+  private async isReadApiUnsupported(api: string): Promise<boolean> {
+    if (CrateDatasource.isCratesIoApi(api)) {
+      return false;
+    }
+
+    const memKey = CrateDatasource.apiUnsupportedCacheKey(api);
+    const cached = memCache.get<boolean>(memKey);
+    if (isBoolean(cached)) {
+      return cached;
+    }
+
+    const persisted = await packageCache.get<boolean>(
+      'datasource-crate-registry-api',
+      api,
+    );
+    const unsupported = persisted === true;
+    memCache.set(memKey, unsupported);
+    return unsupported;
+  }
+
+  private async markReadApiUnsupported(
+    registryUrl: string,
+    api: string,
+  ): Promise<void> {
+    logger.debug(
+      { registryUrl, api },
+      'Registry does not implement the crates.io read API, skipping crate metadata and release timestamp lookups',
+    );
+    memCache.set(CrateDatasource.apiUnsupportedCacheKey(api), true);
+    await packageCache.set('datasource-crate-registry-api', api, true, 24 * 60);
+  }
+
   private async _getCrateMetadata(
     info: RegistryInfo,
     packageName: string,
@@ -207,7 +277,12 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const apiBaseUrl = joinUrlParts(registryConfig.api, 'api/v1/');
+    const { api } = registryConfig;
+    if (await this.isReadApiUnsupported(api)) {
+      return null;
+    }
+
+    const apiBaseUrl = joinUrlParts(api, 'api/v1/');
 
     // The `?include=` suffix is required to avoid unnecessary database queries
     // on the crates.io server. This lets us work around the regular request
@@ -223,6 +298,15 @@ export class CrateDatasource extends Datasource {
       const { body } = await this.http.getJson(crateUrl, CrateMetadataResponse);
       return body.crate;
     } catch (err) {
+      // The index lookup preceding this call found the crate, so a 404 means
+      // the registry does not implement the endpoint at all
+      if (
+        !CrateDatasource.isCratesIoApi(api) &&
+        CrateDatasource.isNotFound(err)
+      ) {
+        await this.markReadApiUnsupported(info.rawUrl, api);
+        return null;
+      }
       logger.debug(
         { err, packageName, registryUrl: info.rawUrl },
         'failed to download crate metadata',
@@ -239,7 +323,7 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${CrateDatasource.id}-metadata`,
-        key: `${info.rawUrl}/${packageName}`,
+        key: buildCacheKey(info.rawUrl, packageName),
         cacheable: info.flavor === 'crates.io',
         ttlMinutes: 24 * 60, // 24 hours
       },
@@ -328,14 +412,14 @@ export class CrateDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
 
     const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
     const registryFetchUrl = isSparseRegistry
-      ? registryUrl.replace(/^sparse\+/, '')
+      ? registryUrl.replace(regEx(/^sparse\+/), '')
       : registryUrl;
 
     const url = parseUrl(registryFetchUrl);
@@ -359,17 +443,21 @@ export class CrateDatasource extends Datasource {
       url,
     };
 
-    if (
-      registry.flavor !== 'crates.io' &&
-      !GlobalConfig.get('allowCustomCrateRegistries')
-    ) {
-      logger.warn(
-        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out',
-      );
-      return null;
-    }
     if (!isSparseRegistry) {
-      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
+      if (
+        registry.flavor !== 'crates.io' &&
+        !GlobalConfig.get('allowCustomCrateGitRegistries')
+      ) {
+        logger.warn(
+          'crate datasource: allowCustomCrateGitRegistries=true is required for git-cloning registries other than crates.io, bailing out',
+        );
+        return null;
+      }
+      const cacheKey = buildCacheKey(
+        'crate-datasource',
+        'registry-clone-path',
+        registryFetchUrl,
+      );
       const lockKey = registryFetchUrl;
 
       const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
@@ -437,6 +525,13 @@ export class CrateDatasource extends Datasource {
 
     const git = createSimpleGit({
       config: { maxConcurrentProcesses: 1 },
+      ...(isHttpUrl(registryFetchUrl) && {
+        // the URL as well, for the credentials registered from it, which only apply to this registry
+        authentication: {
+          hostTypes: [CrateDatasource.id],
+          url: registryFetchUrl,
+        },
+      }),
     });
 
     try {
@@ -508,17 +603,23 @@ export class CrateDatasource extends Datasource {
     }
 
     // Look up the registry config from cache (populated during getReleases)
-    const rawUrl = registryUrl?.replace(/^sparse\+/, '');
+    const rawUrl = registryUrl?.replace(regEx(/^sparse\+/), '');
     if (!rawUrl) {
       return release;
     }
-    const cacheKey = `crate-datasource/registry-config/${rawUrl}`;
-    const config = memCache.get<{ dl: string; api?: string }>(cacheKey);
+    const config = memCache.get<RegistryConfig>(
+      CrateDatasource.registryConfigCacheKey(rawUrl),
+    );
     if (!config?.api) {
       return release;
     }
 
-    const apiBaseUrl = joinUrlParts(config.api, 'api/v1/');
+    const { api } = config;
+    if (await this.isReadApiUnsupported(api)) {
+      return release;
+    }
+
+    const apiBaseUrl = joinUrlParts(api, 'api/v1/');
     const url = `${apiBaseUrl}crates/${packageName}/${release.versionOrig ?? release.version}`;
     logger.trace(
       { url, packageName, version: release.version, registryUrl },
@@ -526,12 +627,22 @@ export class CrateDatasource extends Datasource {
     );
     // Getting release timestamp could become unnecessary if the manual backfill of `pubtime` mentioned in
     // https://github.com/rust-lang/cargo/issues/15491 is done for all packages.
-    const { body: releaseTimestamp } = await this.http.getJson(
-      url,
-      { cacheProvider: memCacheProvider },
-      ReleaseTimestamp,
-    );
-    release.releaseTimestamp = releaseTimestamp;
+    try {
+      const { body: releaseTimestamp } = await this.http.getJson(
+        url,
+        { cacheProvider: memCacheProvider },
+        ReleaseTimestamp,
+      );
+      release.releaseTimestamp = releaseTimestamp;
+    } catch (err) {
+      if (
+        CrateDatasource.isCratesIoApi(api) ||
+        !CrateDatasource.isNotFound(err)
+      ) {
+        throw err;
+      }
+      await this.markReadApiUnsupported(rawUrl, api);
+    }
     return release;
   }
 
@@ -542,7 +653,12 @@ export class CrateDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-crate`,
-        key: `postprocessRelease:${config.registryUrl}:${config.packageName}:${release.version}`,
+        key: buildCacheKey(
+          'postprocessRelease',
+          config.registryUrl,
+          config.packageName,
+          release.version,
+        ),
         ttlMinutes: 7 * 24 * 60,
         cacheable: CrateDatasource.isCratesIo(config.registryUrl ?? undefined),
       },

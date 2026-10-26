@@ -1,5 +1,6 @@
 import is, {
   isArray,
+  isBoolean,
   isEmptyString,
   isNonEmptyArray,
   isNonEmptyString,
@@ -12,14 +13,13 @@ import is, {
 import type { PlatformId } from '../constants/index.ts';
 import { instrument } from '../instrumentation/index.ts';
 import { logger } from '../logger/index.ts';
-import {
-  AllManagersListLiteral,
-  CustomManagersListLiteral,
-} from '../manager-list.generated.ts';
+import { AllManagersListLiteral } from '../manager-list.generated.ts';
 import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
+import { coerceArray } from '../util/array.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
+import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
@@ -27,6 +27,7 @@ import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
   anyMatchRegexOrGlobList,
+  getRegexOrGlobPredicate,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -45,20 +46,29 @@ import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
 import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
+import {
+  describeAllowedLocations,
+  getAllowedParents,
+} from './options/scopes.ts';
 import { resolveConfigPresets } from './presets/index.ts';
-import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
-import { parsePreset } from './presets/parse.ts';
+import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
+  RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
+  StatusCheckWhen,
   ValidationMessage,
   ValidationResult,
 } from './types.ts';
-import { allowedStatusCheckStrings } from './types.ts';
+import {
+  allowedStatusCheckStrings,
+  allowedStatusCheckWhenValues,
+} from './types.ts';
 import * as matchBaseBranchesValidator from './validation-helpers/match-base-branches.ts';
 import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers.ts';
+import { ConfigValidationTopic } from './validation-helpers/types.ts';
 import {
   getParentName,
   isFalseGlobal,
@@ -73,18 +83,15 @@ const options = getOptions();
 let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
+let optionLocations: Record<string, string>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
 let optionAllowsNegativeIntegers: Set<string>;
 let optionSupportsTemplating: Set<string>;
+let optionsByName: Map<string, RenovateOptions>;
 
 const managerList: readonly string[] = AllManagersListLiteral;
-
-const allManagersList: readonly string[] = [
-  ...AllManagersListLiteral,
-  ...CustomManagersListLiteral,
-];
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -104,18 +111,12 @@ const ignoredNodes = [
   'prBody', // deprecated
   'minimumConfidence', // undocumented feature flag
 ];
-const tzRe = regEx(/^:timezone\((.+)\)$/);
+const tzRe = regEx(/^:timezone\((?<timezone>.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
-}
-
-function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
-  return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
-  );
 }
 
 function getDeprecationMessage(option: string): string | undefined {
@@ -158,18 +159,26 @@ function initOptions(): void {
   }
 
   optionParents = {};
+  optionLocations = {};
   optionInherits = new Set();
   optionTypes = {};
   optionRegexOrGlob = new Set();
   optionGlobals = new Set();
   optionAllowsNegativeIntegers = new Set();
   optionSupportsTemplating = new Set();
+  optionsByName = new Map();
 
   for (const option of options) {
     optionTypes[option.name] = option.type;
 
-    if (option.parents) {
-      optionParents[option.name] = option.parents;
+    optionsByName.set(option.name, option);
+
+    const parents = getAllowedParents(option);
+    /* an option which can be used anywhere is valid in any object, even one which `any` doesn't (yet) expand to */
+    if (parents && !option.scopes?.includes('any')) {
+      optionParents[option.name] = parents;
+      // TODO: types (#22198)
+      optionLocations[option.name] = describeAllowedLocations(option)!;
     }
 
     if (option.inheritConfigSupport) {
@@ -196,11 +205,85 @@ function initOptions(): void {
   optionsInitialized = true;
 }
 
+/**
+ * Removes every relative preset reference from a deep copy of the given
+ * `packageRules` entry, at any nesting depth.
+ *
+ * Relative references are only resolvable while the preset which contains them
+ * is fetched, so they must not be passed to `resolveConfigPresets()` during
+ * validation. They are still syntax checked by the `extends` validation.
+ */
+function stripRelativePresets(packageRule: RenovateConfig): {
+  rule: RenovateConfig;
+  hasRelativePresets: boolean;
+} {
+  const rule = clone(packageRule);
+  const hasRelativePresets = stripRelativePresetsFromValue(rule);
+  return { rule, hasRelativePresets };
+}
+
+function stripRelativePresetsFromValue(value: unknown): boolean {
+  if (isArray(value)) {
+    let stripped = false;
+    for (const element of value) {
+      stripped = stripRelativePresetsFromValue(element) || stripped;
+    }
+    return stripped;
+  }
+
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  let stripped = false;
+  for (const [key, val] of Object.entries(value)) {
+    if (key === 'extends' && isArray(val)) {
+      const remaining = val.filter(
+        (preset) => !(isString(preset) && isRelativePresetReference(preset)),
+      );
+      if (remaining.length !== val.length) {
+        value[key] = remaining;
+        stripped = true;
+      }
+      continue;
+    }
+
+    stripped = stripRelativePresetsFromValue(val) || stripped;
+  }
+  return stripped;
+}
+
+type ConfigType = 'global' | 'inherit' | 'repo';
+
+/**
+ * Whether a `hostRules` `allowInternal` is honored from this kind of config.
+ *
+ * Only the self-hosted administrator's own configuration may grant access to internal hosts. The inherited config repository belongs to the organization rather than to them, so its rules only count where the administrator has opted into trusting them with `inheritConfigTrusted`.
+ */
+function mayGrantInternalHostAccess(configType: ConfigType): boolean {
+  if (configType === 'global') {
+    return true;
+  }
+  if (configType === 'inherit') {
+    return GlobalConfig.get('inheritConfigTrusted');
+  }
+  return false;
+}
+
+function allowInternalNotAllowedMessage(configType: ConfigType): string {
+  if (configType === 'inherit') {
+    return 'hostRules `allowInternal` is not allowed in inherited config, as this Renovate instance has not set `inheritConfigTrusted=true`. The administrator can either set it, or move the rule to their global config or a `repositories[]` entry.';
+  }
+  return `hostRules \`allowInternal\` is only allowed in the self-hosted administrator's own configuration.`;
+}
+
 export async function validateConfig(
-  configType: 'global' | 'inherit' | 'repo',
+  configType: ConfigType,
   config: AllConfig,
   isPreset?: boolean,
   parentPath?: string,
+  // the name of the option that `config` is a value of, for when it can't be derived from `parentPath` (i.e. the name of a `customDatasources` entry is the user's choice)
+  parentOptionName?: string,
 ): Promise<ValidationResult> {
   return instrument(
     `validateConfig(${configType}, ${JSON.stringify(parentPath)})`,
@@ -212,10 +295,10 @@ export async function validateConfig(
 
       for (const [key, val] of Object.entries(config)) {
         const currentPath = parentPath ? `${parentPath}.${key}` : key;
-        /* v8 ignore next 7 -- TODO: add test */
+        /* v8 ignore next -- TODO: add test */
         if (key === '__proto__') {
           errors.push({
-            topic: 'Config security error',
+            topic: ConfigValidationTopic.Security,
             message: '__proto__',
           });
           continue;
@@ -227,7 +310,7 @@ export async function validateConfig(
           topLevelObjects.includes(key)
         ) {
           errors.push({
-            topic: 'Configuration Error',
+            topic: ConfigValidationTopic.Error,
             message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
           });
         }
@@ -249,28 +332,15 @@ export async function validateConfig(
             !(configType === 'inherit' && isInhertConfigOption(key))
           ) {
             warnings.push({
-              topic: 'Configuration Error',
+              topic: ConfigValidationTopic.Error,
               message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
             });
             continue;
           }
         }
-        if (key === 'enabledManagers' && val) {
-          const unsupportedManagers = getUnsupportedEnabledManagers(
-            val as string[],
-          );
-          if (isNonEmptyArray(unsupportedManagers)) {
-            errors.push({
-              topic: 'Configuration Error',
-              message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
-                ', ',
-              )}"`,
-            });
-          }
-        }
         if (key === 'registryUrls' && !parentPath && isNonEmptyArray(val)) {
           warnings.push({
-            topic: 'Configuration Warning',
+            topic: ConfigValidationTopic.Warning,
             message:
               'Setting `registryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `registryUrls` inside `packageRules` to target specific managers or packages.',
           });
@@ -281,7 +351,7 @@ export async function validateConfig(
           isNonEmptyArray(val)
         ) {
           warnings.push({
-            topic: 'Configuration Warning',
+            topic: ConfigValidationTopic.Warning,
             message:
               'Setting `defaultRegistryUrls` at the top level of your config will apply it to all managers and datasources, which can cause the wrong registry URL to be used for some packages. Use `defaultRegistryUrls` inside `packageRules` to target specific managers or packages.',
           });
@@ -292,7 +362,7 @@ export async function validateConfig(
         ) {
           if (getDeprecationMessage(key)) {
             warnings.push({
-              topic: 'Deprecation Warning',
+              topic: ConfigValidationTopic.Deprecation,
               message: getDeprecationMessage(key)!,
             });
           }
@@ -302,23 +372,36 @@ export async function validateConfig(
               template.validate((val as string).toString());
             } catch {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `Invalid template in config path: ${currentPath}`,
               });
             }
           }
           const parentName =
-            parentPath && repoEntryRe.test(parentPath)
+            parentOptionName ??
+            (parentPath &&
+            (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
               ? '.'
-              : getParentName(parentPath);
+              : getParentName(parentPath));
           if (
             !isPreset &&
+            parentName &&
             optionParents[key] &&
-            !optionParents[key].includes(parentName as AllowedParents)
+            !optionParents[key].includes(parentName as AllowedParents) &&
+            /* an object which may only be top-level is already reported above, with a message which says so more precisely */
+            !topLevelObjects.includes(key)
           ) {
-            // TODO: types (#22198)
-            const options = optionParents[key]?.toSorted().join(', ');
-            const message = `"${key}" can't be used in "${parentName}". Allowed objects: ${options}.`;
+            /* the path of the parent, like `packageRules[1]`, naming a custom manager like we do in `enabledManagers` */
+            const { customType } = config as Partial<CustomManager>;
+            const parent =
+              parentName === 'customManagers' && isString(customType)
+                ? parentPath?.replace('customManagers', `custom.${customType}`)
+                : parentPath;
+            const usedIn =
+              parentName === '.'
+                ? 'at the top level of a config'
+                : `in "${parent}"`;
+            const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
               topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
               message,
@@ -328,16 +411,14 @@ export async function validateConfig(
           // v8 ignore else -- intentionally unhandled - if we knew what was to be covered here, we'd add validation
           if (!optionTypes[key]) {
             errors.push({
-              topic: 'Configuration Error',
+              topic: ConfigValidationTopic.Error,
               message: `Invalid configuration option: ${currentPath}`,
             });
-          } else if (key === 'schedule') {
-            const [validSchedule, errorMessage] = hasValidSchedule(
-              val as string[],
-            );
+          } else if (key === 'schedule' && isArray(val, isString)) {
+            const [validSchedule, errorMessage] = hasValidSchedule(val);
             if (!validSchedule) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `Invalid ${currentPath}: \`${errorMessage}\``,
               });
             }
@@ -352,7 +433,7 @@ export async function validateConfig(
           ) {
             if (!getRegexPredicate(val)) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `Invalid regExp for ${currentPath}: \`${val}\``,
               });
             }
@@ -362,7 +443,7 @@ export async function validateConfig(
             );
             if (!validTimezone) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `${currentPath}: ${errorMessage}`,
               });
             }
@@ -371,7 +452,7 @@ export async function validateConfig(
             if (type === 'boolean') {
               if (val !== true && val !== false) {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
                     val,
                   )} (${typeof val})`,
@@ -384,6 +465,7 @@ export async function validateConfig(
               );
             } else if (type === 'array' && val) {
               if (isArray(val)) {
+                validateStringArray(key, val, currentPath, errors);
                 for (const [subIndex, subval] of val.entries()) {
                   if (isObject(subval)) {
                     const subValidation = await validateConfig(
@@ -412,7 +494,7 @@ export async function validateConfig(
                         subval.startsWith('global:')
                       ) {
                         errors.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message: `${currentPath}: you cannot extend from "global:" presets in a repository config's "extends"`,
                         });
                       }
@@ -422,7 +504,7 @@ export async function validateConfig(
                         subval.startsWith('group:')
                       ) {
                         warnings.push({
-                          topic: 'Configuration Warning',
+                          topic: ConfigValidationTopic.Warning,
                           message: `${currentPath}: you should not extend "group:" presets`,
                         });
                       }
@@ -432,7 +514,7 @@ export async function validateConfig(
                           hasValidTimezone(timezone);
                         if (!validTimezone) {
                           errors.push({
-                            topic: 'Configuration Error',
+                            topic: ConfigValidationTopic.Error,
                             message: `${currentPath}: ${errorMessage}`,
                           });
                         }
@@ -442,14 +524,14 @@ export async function validateConfig(
                           parsePreset(subval);
                         } catch {
                           errors.push({
-                            topic: 'Configuration Error',
+                            topic: ConfigValidationTopic.Error,
                             message: `${currentPath}: preset "${subval}" is not valid`,
                           });
                         }
                       }
                     } else {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `${currentPath}: preset value is not a string`,
                       });
                     }
@@ -460,7 +542,7 @@ export async function validateConfig(
                   for (const subval of val) {
                     if (!isValidCommitTrailer(subval)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid commit trailer: \`${JSON.stringify(
                           subval,
                         )}\`. Must be a single-line string in the form \`Key: value\`, where the key contains only letters, digits and \`-\`.`,
@@ -484,6 +566,7 @@ export async function validateConfig(
                   'matchSourceUrls',
                   'matchRegistryUrls',
                   'matchUpdateTypes',
+                  'matchIsBreaking',
                   'matchConfidence',
                   'matchCurrentAge',
                   'matchRepositories',
@@ -493,8 +576,10 @@ export async function validateConfig(
                 if (key === 'packageRules') {
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
+                      const { rule, hasRelativePresets } =
+                        stripRelativePresets(packageRule);
                       const { config: resolved } = await resolveConfigPresets(
-                        packageRule,
+                        rule,
                         config,
                       );
                       const resolvedRule = migrateConfig({
@@ -511,20 +596,37 @@ export async function validateConfig(
                         (ruleKey) => selectors.includes(ruleKey),
                       ).length;
                       if (!selectorLength) {
-                        const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                          packageRule,
-                        )}`;
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message,
-                        });
+                        if (hasRelativePresets) {
+                          // the stripped relative preset may still provide the
+                          // missing selectors, so this cannot be an error
+                          const message = `${currentPath}[${subIndex}]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          warnings.push({
+                            topic: ConfigValidationTopic.Error,
+                            message,
+                          });
+                        } else {
+                          const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          errors.push({
+                            topic: ConfigValidationTopic.Error,
+                            message,
+                          });
+                        }
                       }
-                      if (selectorLength === Object.keys(resolvedRule).length) {
+                      if (
+                        // the stripped relative preset legitimately provides
+                        // the non-selector field
+                        !hasRelativePresets &&
+                        selectorLength === Object.keys(resolvedRule).length
+                      ) {
                         const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
                           packageRule,
                         )}`;
                         warnings.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message,
                         });
                       }
@@ -545,14 +647,22 @@ export async function validateConfig(
                         'separateMultipleMinor',
                         'versioning',
                       ] as const;
+                      // These selectors are only known after the lookup
+                      const postLookupSelectors: string[] = [];
                       if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
+                        postLookupSelectors.push('matchUpdateTypes');
+                      }
+                      if (isBoolean(resolvedRule.matchIsBreaking)) {
+                        postLookupSelectors.push('matchIsBreaking');
+                      }
+                      for (const selector of postLookupSelectors) {
                         for (const option of preLookupOptions) {
                           if (resolvedRule[option] !== undefined) {
-                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
+                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both ${selector} and ${option}. Rule: ${JSON.stringify(
                               packageRule,
                             )}`;
                             errors.push({
-                              topic: 'Configuration Error',
+                              topic: ConfigValidationTopic.Error,
                               message,
                             });
                           }
@@ -560,7 +670,7 @@ export async function validateConfig(
                       }
                     } else {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `${currentPath} must contain JSON objects`,
                       });
                     }
@@ -594,7 +704,7 @@ export async function validateConfig(
                         (k) => !allowedKeys.includes(k),
                       );
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
                           ', ',
                         )}`,
@@ -622,25 +732,18 @@ export async function validateConfig(
                         }
                       } else {
                         errors.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message: `Each Custom Manager must contain a non-empty managerFilePatterns array`,
                         });
                       }
-                    } else {
-                      if (
-                        isEmptyString(customManager.customType) ||
-                        isUndefined(customManager.customType)
-                      ) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Each Custom Manager must contain a non-empty customType string`,
-                        });
-                      } else {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid customType: ${customManager.customType}. Key is not a custom manager`,
-                        });
-                      }
+                    } else if (
+                      isEmptyString(customManager.customType) ||
+                      isUndefined(customManager.customType)
+                    ) {
+                      errors.push({
+                        topic: ConfigValidationTopic.Error,
+                        message: `Each Custom Manager must contain a non-empty customType string`,
+                      });
                     }
                   }
                 }
@@ -657,7 +760,7 @@ export async function validateConfig(
                         regEx(pattern.replace(startPattern, '/'));
                       } catch {
                         errors.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message: `Invalid regExp for ${currentPath}: \`${pattern}\``,
                         });
                       }
@@ -671,7 +774,7 @@ export async function validateConfig(
                       !getRegexPredicate(baseBranchPattern)
                     ) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid regExp for ${currentPath}: \`${baseBranchPattern}\``,
                       });
                     }
@@ -686,20 +789,20 @@ export async function validateConfig(
                   (isString(parentPath) || !isPreset) // top level in a preset
                 ) {
                   errors.push({
-                    topic: 'Configuration Error',
+                    topic: ConfigValidationTopic.Error,
                     message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
                   });
                 }
               } else {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `Configuration option \`${currentPath}\` should be a list (Array)`,
                 });
               }
             } else if (type === 'string') {
               if (!isString(val)) {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `Configuration option \`${currentPath}\` should be a string`,
                 });
               }
@@ -709,26 +812,33 @@ export async function validateConfig(
                   const res = validatePlainObject(val);
                   if (res !== true) {
                     errors.push({
-                      topic: 'Configuration Error',
+                      topic: ConfigValidationTopic.Error,
                       message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                     });
                   }
                 } else if (key === 'env') {
                   const allowedEnvVars =
                     configType === 'global'
-                      ? (config.allowedEnv ?? [])
+                      ? coerceArray(config.allowedEnv)
                       : GlobalConfig.get('allowedEnv');
                   for (const [envVarName, envVarValue] of Object.entries(val)) {
                     if (!isString(envVarValue)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
                       });
                     }
                     if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
                       errors.push({
-                        topic: 'Configuration Error',
-                        message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                        // `Security` is always a fatal error that blocks the rest of the Renovate run.
+                        //
+                        // As `env` is only applied when it's at the top-level (where `parentPath === undefined`), we should only report a security error there.
+                        //
+                        // If it's found to be set to a disallowed value - even if it's not going to be used - we should report as an error, which may block the run, but much less worryingly than Security.
+                        topic: parentPath
+                          ? ConfigValidationTopic.Error
+                          : ConfigValidationTopic.Security,
+                        message: `Env variable name \`${envVarName}\` is not allowed by this Renovate instance's \`allowedEnv\`.`,
                       });
                     }
                   }
@@ -743,22 +853,21 @@ export async function validateConfig(
                       )
                     ) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                       });
                     }
-                    if (
-                      !(isString(statusCheckValue) || null === statusCheckValue)
-                    ) {
+                    if (!(
+                      isString(statusCheckValue) || null === statusCheckValue
+                    )) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
                       });
                       continue;
                     }
                   }
                 } else if (key === 'statusCheckWhen') {
-                  const allowedWhenValues = ['always', 'never', 'failed'];
                   for (const [
                     statusCheckKey,
                     statusCheckValue,
@@ -769,76 +878,50 @@ export async function validateConfig(
                       )
                     ) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                       });
                     }
                     if (
                       !isString(statusCheckValue) ||
-                      !allowedWhenValues.includes(statusCheckValue)
+                      !allowedStatusCheckWhenValues.includes(
+                        statusCheckValue as StatusCheckWhen,
+                      )
                     ) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: value must be one of "always", "never", or "failed".`,
                       });
                       continue;
                     }
                   }
                 } else if (key === 'customDatasources') {
-                  const allowedKeys = [
-                    'description',
-                    'defaultRegistryUrlTemplate',
-                    'format',
-                    'transformTemplates',
-                  ];
                   for (const [
                     customDatasourceName,
                     customDatasourceValue,
                   ] of Object.entries(val)) {
                     if (!isPlainObject(customDatasourceValue)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${customDatasourceName}\` configuration: customDatasource is not an object`,
                       });
                       continue;
                     }
-                    for (const [subKey, subValue] of Object.entries(
+                    const subValidation = await validateConfig(
+                      configType,
                       customDatasourceValue,
-                    )) {
-                      if (!allowedKeys.includes(subKey)) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
-                        });
-                      } else if (subKey === 'transformTemplates') {
-                        if (!isArray(subValue, isString)) {
-                          errors.push({
-                            topic: 'Configuration Error',
-                            message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
-                          });
-                        }
-                      } else if (subKey === 'description') {
-                        if (
-                          !(isString(subValue) || isArray(subValue, isString))
-                        ) {
-                          errors.push({
-                            topic: 'Configuration Error',
-                            message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
-                          });
-                        }
-                      } else if (!isString(subValue)) {
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
-                        });
-                      }
-                    }
+                      isPreset,
+                      `${currentPath}.${customDatasourceName}`,
+                      key,
+                    );
+                    warnings = warnings.concat(subValidation.warnings);
+                    errors = errors.concat(subValidation.errors);
                   }
                 } else if (key === 'installTools') {
                   for (const toolName of Object.keys(val)) {
                     if (!isToolName(toolName)) {
                       warnings.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${toolName}\` configuration: not a valid tool name.`,
                       });
                     }
@@ -849,7 +932,7 @@ export async function validateConfig(
                   for (const [k, v] of Object.entries(val)) {
                     if (!isString(v)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of constraints and their value`,
                       });
                       break;
@@ -857,16 +940,16 @@ export async function validateConfig(
 
                     if (!isConstraintName(k)) {
                       warnings.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a supported constraint name`,
                       });
                     } else if (isToolName(k)) {
                       // TODO: #31831
-                      const versioningId = getToolConfig(k).versioning;
+                      const versioningId = getToolConfig(k)?.versioning;
                       const versioning = getVersioning(versioningId);
                       if (!versioning.isValid(v)) {
                         warnings.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message: `Configuration option \`${currentPath}.${k}=${v}\` is not a valid tool version constraint, according to \`${versioningId}\` versioning`,
                         });
                       }
@@ -876,7 +959,7 @@ export async function validateConfig(
                   for (const [k, v] of Object.entries(val)) {
                     if (!isString(v)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\` should be an object of key-value pairs of additional constraint names and their versioning`,
                       });
                       break;
@@ -884,7 +967,7 @@ export async function validateConfig(
 
                     if (isToolName(k)) {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\` is not a valid additional constraint name, as \`${k}\` is a tool name, and \`constraintsVersioning\` can only override the versioning for a non-tool constraint`,
                       });
                     } else if (isConstraintName(k)) {
@@ -895,13 +978,13 @@ export async function validateConfig(
                         )
                       ) {
                         errors.push({
-                          topic: 'Configuration Error',
+                          topic: ConfigValidationTopic.Error,
                           message: `Configuration option \`${currentPath}.${k}=${v}\`: \`${v}\` is not a valid versioning scheme`,
                         });
                       }
                     } else {
                       errors.push({
-                        topic: 'Configuration Error',
+                        topic: ConfigValidationTopic.Error,
                         message: `Configuration option \`${currentPath}.${k}\`: \`${k}\` is not a known additional constraint name`,
                       });
                     }
@@ -923,7 +1006,7 @@ export async function validateConfig(
                 }
               } else {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `Configuration option \`${currentPath}\` should be a json object`,
                 });
               }
@@ -940,7 +1023,7 @@ export async function validateConfig(
         if (key === 'hostRules' && isArray(val)) {
           const allowedHeaders =
             configType === 'global'
-              ? (config.allowedHeaders ?? [])
+              ? coerceArray(config.allowedHeaders)
               : GlobalConfig.get('allowedHeaders');
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
@@ -949,32 +1032,59 @@ export async function validateConfig(
                 parseUrl(rule.matchHost) === null
               ) {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
                 });
               }
             } else if (isEmptyString(rule.matchHost)) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message:
                   'Invalid value for hostRules matchHost. It cannot be an empty string.',
+              });
+            }
+
+            if (
+              !isUndefined(rule.allowInternal) &&
+              !mayGrantInternalHostAccess(configType)
+            ) {
+              errors.push({
+                // like disallowed `headers` below, `Security` only where the rules are actually applied - see the comment there
+                topic: parentPath
+                  ? ConfigValidationTopic.Error
+                  : ConfigValidationTopic.Security,
+                message: allowInternalNotAllowedMessage(configType),
               });
             }
 
             if (!rule.headers) {
               continue;
             }
+            if (!isPlainObject(rule.headers)) {
+              errors.push({
+                topic: ConfigValidationTopic.Error,
+                message: `Invalid hostRules headers configuration: headers must be an object.`,
+              });
+              continue;
+            }
             for (const [header, value] of Object.entries(rule.headers)) {
               if (!isString(value)) {
                 errors.push({
-                  topic: 'Configuration Error',
+                  topic: ConfigValidationTopic.Error,
                   message: `Invalid hostRules headers value configuration: header must be a string.`,
                 });
               }
               if (!matchRegexOrGlobList(header, allowedHeaders)) {
                 errors.push({
-                  topic: 'Configuration Error',
-                  message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
+                  // `Security` is always a fatal error that blocks the rest of the Renovate run.
+                  //
+                  // As `hostRules[]` is only applied when it's at the top-level (where `parentPath === undefined`), we should only report a security error there.
+                  //
+                  // If it's found to be set to a disallowed value - even if it's not going to be used - we should report as an error, which may block the run, but much less worryingly than Security.
+                  topic: parentPath
+                    ? ConfigValidationTopic.Error
+                    : ConfigValidationTopic.Security,
+                  message: `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
                 });
               }
             }
@@ -986,12 +1096,14 @@ export async function validateConfig(
             const res = getExpression(expression);
             if (res instanceof Error) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `Invalid JSONata expression for ${currentPath}: ${res.message}`,
               });
             }
           }
         }
+
+        validateAllowedValues(key, val, currentPath, errors);
       }
 
       function sortAll(a: ValidationMessage, b: ValidationMessage): number {
@@ -1020,17 +1132,17 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: AllConfig,
 ): Promise<void> {
-  /* v8 ignore next 5 -- not testable yet */
+  /* v8 ignore next -- not testable yet */
   if (getDeprecationMessage(key)) {
     warnings.push({
-      topic: 'Deprecation Warning',
+      topic: ConfigValidationTopic.Deprecation,
       message: getDeprecationMessage(key)!,
     });
   }
 
   if (key === 'binarySource' && val === 'docker') {
     warnings.push({
-      topic: 'Deprecation Warning',
+      topic: ConfigValidationTopic.Deprecation,
       message:
         'Usage of `binarySource=docker` is deprecated, and will be removed in the future. Please migrate to `binarySource=install`. Feedback on the usage of `binarySource=docker` is welcome at https://github.com/renovatebot/renovate/discussions/40742',
     });
@@ -1040,6 +1152,17 @@ async function validateGlobalConfig(
     // v8 ignore else -- TODO: add test #40625
     if (type === 'string') {
       if (isString(val)) {
+        if (optionSupportsTemplating.has(key)) {
+          try {
+            template.validate(val);
+          } catch {
+            errors.push({
+              topic: ConfigValidationTopic.Error,
+              message: `Invalid template in config path: ${currentPath}`,
+            });
+          }
+        }
+
         if (
           key === 'onboardingConfigFileName' &&
           !getPossibleConfigFileNames({
@@ -1048,53 +1171,13 @@ async function validateGlobalConfig(
           }).includes(val)
         ) {
           warnings.push({
-            topic: 'Configuration Error',
+            topic: ConfigValidationTopic.Error,
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${getPossibleConfigFileNames(
               {
                 configFileNames: config.configFileNames,
                 platform: config.platform,
               },
             ).join(', ')}.`,
-          });
-        } else if (
-          key === 'repositoryCache' &&
-          !['enabled', 'disabled', 'reset'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-          });
-        } else if (
-          key === 'dryRun' &&
-          !['extract', 'lookup', 'full'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-          });
-        } else if (
-          key === 'binarySource' &&
-          !['docker', 'global', 'install', 'hermit'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-          });
-        } else if (
-          key === 'requireConfig' &&
-          !['required', 'optional', 'ignored'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-          });
-        } else if (
-          key === 'gitUrl' &&
-          !['default', 'ssh', 'endpoint'].includes(val)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
           });
         }
 
@@ -1104,13 +1187,13 @@ async function validateGlobalConfig(
           !isString(config.reportPath)
         ) {
           errors.push({
-            topic: 'Configuration Error',
+            topic: ConfigValidationTopic.Error,
             message: `reportType '${val}' requires a configured reportPath`,
           });
         }
       } else {
         warnings.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Configuration option \`${currentPath}\` should be a string.`,
         });
       }
@@ -1120,7 +1203,7 @@ async function validateGlobalConfig(
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
         warnings.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
             val,
           )} (${typeof val}).`,
@@ -1128,6 +1211,7 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val) && key !== 'repositories') {
+        validateStringArray(key, val, currentPath, errors);
         for (const [subIndex, subval] of val.entries()) {
           if (isObject(subval)) {
             const subValidation = await validateConfig(
@@ -1149,36 +1233,12 @@ async function validateGlobalConfig(
             }),
           );
         }
-        if (key === 'gitNoVerify') {
-          const allowedValues = ['commit', 'push'];
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        if (key === 'mergeConfidenceDatasources') {
-          const allowedValues = supportedDatasources;
-          for (const value of val as string[]) {
-            // v8 ignore else -- TODO: add test #40625
-            if (!allowedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
       } else if (isArray(val)) {
         for (const [subIndex, subval] of val.entries()) {
           if (isPlainObject(subval)) {
             if (!isNonEmptyString(subval.repository)) {
               errors.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
               });
             }
@@ -1202,20 +1262,20 @@ async function validateGlobalConfig(
           } else if (isString(subval)) {
             if (!isNonEmptyStringAndNotWhitespace(subval)) {
               warnings.push({
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
                 message: `${currentPath}[${subIndex}]: each repository string entry entry must be a non-empty string`,
               });
             }
           } else {
             warnings.push({
-              topic: 'Configuration Error',
+              topic: ConfigValidationTopic.Error,
               message: `${currentPath}[${subIndex}]: invalid type, should be either a string or an object`,
             });
           }
         }
       } else {
         warnings.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Configuration option \`${currentPath}\` should be a list (Array).`,
         });
       }
@@ -1229,7 +1289,15 @@ async function validateGlobalConfig(
             warnings.push(warning);
           }
         } else if (key === 'force') {
-          const subValidation = await validateConfig('global', val);
+          // `force` is validated as a global config of its own, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
+          // Inherit them (unless `force` sets its own) so that the self-hosted admin's own `force.env`/`force.hostRules[].headers` are validated against the allowlists they set, rather than an empty one.
+          const subValidation = await validateConfig('global', {
+            ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
+            ...(config.allowedHeaders
+              ? { allowedHeaders: config.allowedHeaders }
+              : {}),
+            ...val,
+          });
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
@@ -1257,7 +1325,7 @@ async function validateGlobalConfig(
             ) {
               errors.push({
                 message: `${currentPath}: namespace \`${subKey}\` does not exist`,
-                topic: 'Configuration Error',
+                topic: ConfigValidationTopic.Error,
               });
             }
           }
@@ -1265,19 +1333,21 @@ async function validateGlobalConfig(
           const res = validatePlainObject(val);
           if (res !== true) {
             warnings.push({
-              topic: 'Configuration Error',
+              topic: ConfigValidationTopic.Error,
               message: `Invalid \`${currentPath}.${res}\` configuration: value must be a string.`,
             });
           }
         }
       } else {
         warnings.push({
-          topic: 'Configuration Error',
+          topic: ConfigValidationTopic.Error,
           message: `Configuration option \`${currentPath}\` should be a JSON object.`,
         });
       }
     }
   }
+
+  validateAllowedValues(key, val, currentPath, errors);
 }
 
 function getPossibleConfigFileNames({
@@ -1293,4 +1363,102 @@ function getPossibleConfigFileNames({
   }
 
   return filenames;
+}
+
+function validateStringArray(
+  key: string,
+  val: unknown[],
+  currentPath: string | undefined,
+  errors: ValidationMessage[],
+): void {
+  const option = optionsByName.get(key);
+  if (
+    option?.type === 'array' &&
+    option.subType === 'string' &&
+    // these report the invalid entries with a more specific message
+    !['extends', 'commitTrailers'].includes(key) &&
+    !val.every(isString)
+  ) {
+    errors.push({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}\` should be a list of strings`,
+    });
+  }
+}
+
+function describeAllowedValues(option: RenovateOptions): string {
+  const allowedValues = coerceArray(option.allowedValues);
+  // for options with a lot of values (i.e. `enabledManagers`), listing them all makes for an unreadable message
+  if (allowedValues.length > 10) {
+    const page = option.globalOnly
+      ? 'self-hosted-configuration'
+      : 'configuration-options';
+    return `allowedValues, which are listed at ${GlobalConfig.get('productLinks').documentation}${page}/#${option.name.toLowerCase()}`;
+  }
+  return `allowedValues: ${JSON.stringify(allowedValues)}`;
+}
+
+function isAllowedValue(
+  option: RenovateOptions,
+  allowedValues: readonly string[],
+  val: string,
+): boolean {
+  if (allowedValues.includes(val)) {
+    return true;
+  }
+  if (!option.patternMatch) {
+    return false;
+  }
+  // pattern matching options also accept negation, globs and regexes, which are valid if they can match any of the allowed values
+  const predicate = getRegexOrGlobPredicate(
+    val.startsWith('!') ? val.slice(1) : val,
+  );
+  return allowedValues.some((allowed) => predicate(allowed));
+}
+
+function validateAllowedValues(
+  key: string,
+  val: unknown,
+  currentPath: string | undefined,
+  errors: ValidationMessage[],
+): void {
+  const option = optionsByName.get(key);
+  if (!option) {
+    return;
+  }
+
+  const allowedValues = option.allowedValues;
+  if (allowedValues?.length) {
+    if (val === null && option.default === null) {
+      // do nothing
+    } else if (isArray(val, isString)) {
+      const invalidOptions = val.filter(
+        (v) => !isAllowedValue(option, allowedValues, v),
+      );
+      if (invalidOptions.length) {
+        errors.push({
+          topic: ConfigValidationTopic.Error,
+          message: `Invalid ${currentPath}: ${option.name} had invalid values \`${JSON.stringify(invalidOptions)}\` which are not part of the ${describeAllowedValues(option)}`,
+        });
+      }
+    } else if (isString(val)) {
+      if (key === 'versioning') {
+        if (!allowedValues.includes(val) && !val.startsWith('regex:')) {
+          errors.push({
+            topic: ConfigValidationTopic.Error,
+            message: `Invalid ${currentPath}: ${option.name} had invalid value \`${JSON.stringify(val)}\`. ${option.name} can only be a known versioning scheme, or be a string starting with \`regex:\` for custom regular expression versioning`,
+          });
+        }
+      } else if (
+        !isAllowedValue(option, allowedValues, val) &&
+        // a templated value can't be checked until it's been rendered
+        !(option.supportsTemplating && val.includes('{{'))
+      ) {
+        errors.push({
+          topic: ConfigValidationTopic.Error,
+          message: `Invalid ${currentPath}: ${option.name} had a value \`${JSON.stringify(val)}\` which was not part of the ${describeAllowedValues(option)}`,
+        });
+      }
+    }
+  }
 }

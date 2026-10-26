@@ -263,6 +263,44 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(result.rebaseWhen).toBe('conflicted');
     });
 
+    it('converts rebaseWhen=auto to conflicted if the base branch has a merge queue', async () => {
+      config.rebaseWhen = 'auto';
+      config.automerge = true;
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
+
+      const result = await shouldReuseExistingBranch(config);
+
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('conflicted');
+    });
+
+    it('converts rebaseWhen=auto to behind-base-branch if keepUpdatedLabel although the base branch has a merge queue', async () => {
+      config.rebaseWhen = 'auto';
+      config.keepUpdatedLabel = 'keep-updated';
+      platform.isBranchMergeQueueEnabled.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValue(pr);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(false);
+
+      const result = await shouldReuseExistingBranch(config);
+
+      expect(config.rebaseWhen).toBe('auto');
+      expect(result.rebaseWhen).toBe('behind-base-branch');
+    });
+
+    it('converts rebaseWhen=automerging to conflicted if the base branch has a merge queue', async () => {
+      config.rebaseWhen = 'automerging';
+      config.automerge = true;
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
+
+      const result = await shouldReuseExistingBranch(config);
+
+      expect(config.rebaseWhen).toBe('automerging');
+      expect(result.rebaseWhen).toBe('conflicted');
+    });
+
     it('converts rebaseWhen=automerging to behind-base-branch', async () => {
       config.rebaseWhen = 'automerging';
       config.automerge = true;

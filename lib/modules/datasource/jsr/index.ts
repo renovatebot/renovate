@@ -1,5 +1,6 @@
 import { isNull } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
@@ -14,14 +15,17 @@ export class JsrDatasource extends Datasource {
 
   // custom registry support is not yet supported
   // https://github.com/jsr-io/jsr/issues/203
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
-  override readonly registryStrategy = 'first';
   // https://jsr.io/docs/using-packages#semver-resolution
   override readonly defaultVersioning = semverId;
 
   // use npm compatible registry api url due to returns
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return defaultRegistryUrls;
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -35,7 +39,7 @@ export class JsrDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore next -- should never happen */
     if (!registryUrl) {
       return null;
     }
@@ -55,16 +59,8 @@ export class JsrDatasource extends Datasource {
       releases: [],
     };
 
-    try {
-      const { body } = await this.http.getJson(
-        packageInfoUrl,
-        JsrPackageMetadata,
-      );
-      result.releases.push(...body);
-    } catch (err) {
-      logger.warn({ err }, 'JSR: failed to get package details');
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJson(packageInfoUrl, JsrPackageMetadata);
+    result.releases.push(...body);
 
     return result.releases.length ? result : null;
   }
@@ -73,8 +69,12 @@ export class JsrDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${JsrDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
+        cacheable: true,
         fallback: true,
       },
       () => this._getReleases(config),

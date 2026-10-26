@@ -76,13 +76,13 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('should init', async () => {
-      expect(
-        await gerrit.initPlatform({
+      await expect(
+        gerrit.initPlatform({
           endpoint: gerritEndpointUrl,
           username: 'abc',
           password: '123',
         }),
-      ).toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
+      ).resolves.toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
     });
 
     it('should throw if auth fails', async () => {
@@ -111,7 +111,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('getRepos()', () => {
     it('returns repos', async () => {
       clientMock.getRepos.mockResolvedValueOnce(['repo1', 'repo2']);
-      expect(await gerrit.getRepos()).toEqual(['repo1', 'repo2']);
+      await expect(gerrit.getRepos()).resolves.toEqual(['repo1', 'repo2']);
     });
   });
 
@@ -141,13 +141,15 @@ describe('modules/platform/gerrit/index', () => {
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
       clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
-      expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
+      await expect(
+        gerrit.initRepo({ repository: 'test/repo' }),
+      ).resolves.toEqual({
         defaultBranch: 'main',
         isFork: false,
         repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         virtualBranches: {},
       });
     });
@@ -164,7 +166,7 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
         virtualBranches: {},
@@ -270,7 +272,7 @@ describe('modules/platform/gerrit/index', () => {
         },
       ]);
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         virtualBranches: {
           'renovate/dep-1': {
             ref: 'refs/changes/45/12345/1',

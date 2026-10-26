@@ -20,7 +20,7 @@ function stripGitPrefix(url: string): string {
 /**
  * Convert SSH-style template URLs to their HTTPS equivalent for the
  * datasource lookup, like the git-submodules manager does.
- * This way the lookup can be authenticated via `hostRules` on bots
+ * This way the lookup can be authenticated via `hostRules` on accounts
  * which access the Git host over HTTPS only.
  * The answers file itself keeps the original URL.
  */

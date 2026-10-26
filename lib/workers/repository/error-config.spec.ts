@@ -68,6 +68,20 @@ Message: some-message
       );
     });
 
+    it('creates an issue for an error carrying no validation details', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      platform.ensureIssue.mockResolvedValueOnce(null);
+
+      await raiseCredentialsWarningIssue(config, error);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(platform.ensureIssue).toHaveBeenCalledOnce();
+      const { body } = platform.ensureIssue.mock.calls[0][0];
+      expect(body).not.toContain('Location:');
+      expect(body).not.toContain('Error type:');
+      expect(body).not.toContain('Message:');
+    });
+
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';

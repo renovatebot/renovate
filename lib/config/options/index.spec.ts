@@ -1,6 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { migrateConfig } from '../migration.ts';
@@ -63,6 +64,21 @@ describe('config/options/index', () => {
       });
   });
 
+  it('every option which a repository can configure says where it can be used', () => {
+    /* our types require this, so this is here to say why, and to catch a self-hosted option which stops being one */
+    const missing = getOptions()
+      .filter((option) => !option.globalOnly)
+      .filter((option) => !option.scopes && !option.parents)
+      .map((option) => option.name);
+
+    expect(missing).toBeEmptyArray();
+  });
+
+  it('customDatasources `format` allows every format that has a fetcher', () => {
+    const format = getOptions().find((o) => o.name === 'format');
+    expect(format?.allowedValues).toIncludeSameMembers(Object.keys(fetchers));
+  });
+
   it('should not contain duplicate option names', () => {
     const optsNames = getOptions().map((option) => option.name);
     const optsNameSet = new Set(optsNames);
@@ -118,14 +134,14 @@ describe('config/options/index', () => {
     ).flat();
 
     const directPattern =
-      /(?<![.\w])(?:template\.)?compile\(\s*(?:config|update|upgrade|upg|toApply)\??\.(\w+)/g;
+      /(?<![.\w])(?:template\.)?compile\(\s*(?:config|update|upgrade|upg|toApply)\??\.(?<name>\w+)/g;
     const detectedOptions = new Set<string>();
 
     for (const file of sourceFiles) {
       const content = await readFile(file, 'utf-8');
       let match;
       while ((match = directPattern.exec(content)) !== null) {
-        const name = match[1];
+        const name = match.groups!.name;
         const option = allOptions.find((o) => o.name === name);
         // Only include string or array-of-string options (not objects like userStrings)
         if (
@@ -201,5 +217,17 @@ describe('config/options/index', () => {
         // ).toBeFalse()
       });
     }
+  });
+
+  describe('every option with requiresCheckAtTrustBoundary', () => {
+    it('has remembered to implement their checks', () => {
+      // if this test fails after you've added `requiresCheckAtTrustBoundary` to a config option, make sure you've implemented the checks, and then update the list below:
+      const enforced = ['env', 'hostRules'];
+      const flagged = getOptions()
+        .filter((option) => option.requiresCheckAtTrustBoundary)
+        .map((option) => option.name)
+        .sort();
+      expect(flagged).toEqual([...enforced].sort());
+    });
   });
 });

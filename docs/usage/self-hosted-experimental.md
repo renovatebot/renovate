@@ -7,7 +7,7 @@ The following environment variables are "experimental" because they:
 - can be removed at any time
 - are variables for Renovate's internal use to validate they work as intended
 
-Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
+Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate developers.
 
 Use these experimental variables at your own risk.
 We do not follow Semantic Versioning for any experimental variables.
@@ -96,11 +96,31 @@ Default value: `250` (milliseconds).
 
 If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
 This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+If the merge request has a merged results pipeline, Renovate sets the status check on that pipeline instead of skipping it.
 
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
+
+## `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`
+
+If set to any value, Renovate skips the check that the version of the Containerbase image is compatible with Renovate.
+An image is compatible when it has the same major version as the `@containerbase/base` package bundled with Renovate and the same or a newer minor or patch version.
+
+For instance, when Renovate bundles `@containerbase/base` `14.46.0`:
+
+| Image version | Compatible | Reason              |
+| ------------- | ---------- | ------------------- |
+| `14.46.0`     | yes        | same version        |
+| `14.46.1`     | yes        | newer patch version |
+| `14.50.0`     | yes        | newer minor version |
+| `14.45.0`     | no         | older minor version |
+| `13.20.0`     | no         | other major version |
+| `15.0.0`      | no         | other major version |
+
+Development images are not checked.
+This must be set in the environment of the Renovate process, not via `customEnvVariables`.
 
 ## `RENOVATE_X_IGNORE_RE2`
 

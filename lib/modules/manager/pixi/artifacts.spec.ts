@@ -170,5 +170,88 @@ describe('modules/manager/pixi/artifacts', () => {
         { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
+
+    it('falls back to the extracted pixi constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('version: 5');
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'pixi.toml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: codeBlock`
+          [project]
+          authors = []
+          channels = ["conda-forge"]
+          name = "data"
+          platforms = ["win-64"]
+          version = "0.1.0"
+
+          [dependencies]
+          python = "3.12.*"
+        `,
+        config: {
+          ...config,
+          constraints: {},
+          extractedConstraints: { pixi: '>=0.40,<0.41' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool pixi 0.40.1' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
+      ]);
+    });
+
+    it('prefers the derived pixi constraint over the extracted one', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('version: 5');
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+
+      await updateArtifacts({
+        packageFileName: 'pixi.toml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: codeBlock`
+          [project]
+          authors = []
+          channels = ["conda-forge"]
+          name = "data"
+          platforms = ["win-64"]
+          version = "0.1.0"
+          requires-pixi = '>=0.40,<0.41'
+
+          [dependencies]
+          python = "3.12.*"
+        `,
+        config: {
+          ...config,
+          constraints: {},
+          extractedConstraints: { pixi: '>=0.38,<0.39' },
+        },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool pixi 0.40.1' },
+        { cmd: 'pixi lock --no-progress --color=never --quiet' },
+      ]);
+    });
   });
 });

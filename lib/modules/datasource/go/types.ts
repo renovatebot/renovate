@@ -1,7 +1,11 @@
-import type { GoproxyFallback } from './common.ts';
+export type GoproxyFallback =
+  | ',' // WhenNotFoundOrGone
+  | '|'; // Always
+
+import type { DatasourceName } from '../../../datasource-list.generated.ts';
 
 export interface DataSource {
-  datasource: string;
+  datasource: DatasourceName;
   registryUrl?: string;
   packageName: string;
 }

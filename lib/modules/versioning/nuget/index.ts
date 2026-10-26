@@ -196,6 +196,13 @@ class NugetVersioningApi implements VersioningApi {
           continue;
         }
 
+        // A bare version acts as a min-version range, but it should
+        // still respect stability: a stable pin must not match a
+        // pre-release version.
+        if (v.prerelease && !u.prerelease) {
+          continue;
+        }
+
         if (compare(v, u) < 0) {
           continue;
         }
@@ -364,6 +371,12 @@ class NugetVersioningApi implements VersioningApi {
 
     const u = parseVersion(range);
     if (u) {
+      // A bare version acts as a min-version range, but it should
+      // still respect stability: a stable pin must not match a
+      // pre-release version.
+      if (v.prerelease && !u.prerelease) {
+        return false;
+      }
       return compare(v, u) >= 0;
     }
 

@@ -68,6 +68,8 @@ You might be interested in the following `postUpdateOptions`:
 1. This is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths`
 1. `gomodTidy1.17` - if you'd like Renovate to run `go mod tidy -compat=1.17` after every update before raising the PR
 1. `gomodTidyE` - if you'd like Renovate to run `go mod tidy -e` after every update before raising the PR
+1. `gomodTidyAll` - if you'd like Renovate to also run `go mod tidy` on every other module which depends on the updated one through a local `replace` directive
+   - This implies `gomodTidy`, needs Go 1.20 or later, and should not be combined with `gomodMassage`
 1. `gomodUpdateImportPaths` - if you'd like Renovate to update your source import paths on major updates before raising the PR
 1. `gomodMassage` - to enable massaging of all `replace` statements prior to running `go` so that they will be ignored
 1. `goGenerate` - to run `go generate ./...` after vendoring.
