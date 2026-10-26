@@ -19,7 +19,7 @@ import {
   resolveToolConstraint,
 } from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import { ActionsLockfile } from './schema.ts';
+import { ActionsLockfile, type Finding, FindingsOutput } from './schema.ts';
 import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 
 /** The `gh` CLI extension that generates and verifies the lockfile. */
@@ -107,6 +107,17 @@ function getLockedUpgrades(
 
     return isLockfileManaged(packageFile, onboardedWorkflows);
   });
+}
+
+/** One line per finding, followed by how the tool suggests fixing it. */
+function formatFindings(findings: Finding[]): string {
+  return findings
+    .map(({ workflow, dependency, detail, remediation }) => {
+      const location = dependency ? `${workflow}: ${dependency}` : workflow;
+      const fix = remediation ? ` (${remediation})` : '';
+      return `${location}: ${detail}${fix}`;
+    })
+    .join('\n');
 }
 
 /**
@@ -224,6 +235,8 @@ export async function updateActionsLockfile(
           // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
           '--ignore-local-actions',
         ]),
+    // print the findings as JSON on stdout, so a failure can be reported readably. Available since v0.1.6
+    '--json=findings',
   ];
   const commands = [`gh actions-lock ${flags.join(' ')}`];
 
@@ -254,13 +267,17 @@ export async function updateActionsLockfile(
       throw err;
     }
     logger.debug({ err }, `Error updating ${actionsLockFile}`);
+    const findings = FindingsOutput.safeParse(err.stdout);
     return {
       updatedArtifacts: [],
       artifactErrors: [
         {
           fileName: actionsLockFile,
           // an `ExecError` always carries a `stderr`, so fall back to the message rather than rendering an artifact error with nothing in it
-          stderr: artifactErrorMessageFromExecError(err, err.message),
+          stderr:
+            findings.success && findings.data.length
+              ? formatFindings(findings.data)
+              : artifactErrorMessageFromExecError(err, err.message),
         },
       ],
     };

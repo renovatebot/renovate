@@ -361,7 +361,7 @@ describe('modules/manager/github-actions/artifacts', () => {
           options: { cwd: '/tmp/github/some/repo' },
         },
         {
-          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
+          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings',
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -618,11 +618,11 @@ describe('modules/manager/github-actions/artifacts', () => {
 
     it.each`
       constraint   | flags
-      ${'v0.2.0'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions'}
-      ${'v0.1.6'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions'}
-      ${'v0.3.0'}  | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
-      ${''}        | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
-      ${'invalid'} | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
+      ${'v0.2.0'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions --json=findings'}
+      ${'v0.1.6'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions --json=findings'}
+      ${'v0.3.0'}  | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
+      ${''}        | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
+      ${'invalid'} | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings'}
     `(
       'passes $flags for the constraint "$constraint"',
       async ({ constraint, flags }: { constraint: string; flags: string }) => {
@@ -649,7 +649,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual([
-        'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
+        'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings',
       ]);
     });
 
@@ -663,7 +663,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       // the administrator owns the extension, so we must not re-pin it
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
+          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings',
         },
       ]);
       // ... but say so, since the constraint is silently inert otherwise
@@ -883,7 +883,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
 
       expect(execSnapshots.at(-1)?.cmd).toBe(
-        'gh actions-lock --no-interactive --no-narrow --ignore-local-actions',
+        'gh actions-lock --no-interactive --no-narrow --ignore-local-actions --json=findings',
       );
     });
   });
@@ -925,6 +925,74 @@ describe('modules/manager/github-actions/artifacts', () => {
       const res = await updateActionsLockfile(makeConfig(), packageFiles);
 
       expect(res.artifactErrors[0].stderr).toBe('extension not found');
+    });
+
+    it('formats the error findings from stdout', async () => {
+      const err = new Error('exit 1');
+      Object.assign(err, {
+        stderr: 'ignored',
+        stdout: JSON.stringify({
+          findings: [
+            {
+              severity: 'error',
+              workflow: packageFileName,
+              dependency: 'actions/cache@v3',
+              detail: 'workflow uses ref "v3" but lockfile pins "v4"',
+              remediation: 're-run `gh actions-lock`',
+            },
+            {
+              severity: 'error',
+              workflow: releaseFileName,
+              dependency: 'foo/bar@v1',
+              detail: 'unreachable',
+            },
+            {
+              severity: 'error',
+              workflow: releaseFileName,
+              detail: 'could not parse workflow',
+            },
+            {
+              severity: 'info',
+              workflow: releaseFileName,
+              dependency: 'foo/baz@v1',
+              detail: 'onboarding required',
+            },
+          ],
+        }),
+      });
+      mockExecAll(err);
+      fs.readLocalFile.mockResolvedValueOnce(actionsLock);
+
+      const res = await updateActionsLockfile(makeConfig(), packageFiles);
+
+      expect(res.artifactErrors[0].stderr).toBe(
+        `${packageFileName}: actions/cache@v3: workflow uses ref "v3" but lockfile pins "v4" (re-run \`gh actions-lock\`)\n${releaseFileName}: foo/bar@v1: unreachable\n${releaseFileName}: could not parse workflow`,
+      );
+    });
+
+    it('falls back when stdout has no error findings', async () => {
+      const err = new Error('exit 1');
+      Object.assign(err, {
+        stderr: 'boom',
+        stdout: JSON.stringify({ findings: [] }),
+      });
+      mockExecAll(err);
+      fs.readLocalFile.mockResolvedValueOnce(actionsLock);
+
+      const res = await updateActionsLockfile(makeConfig(), packageFiles);
+
+      expect(res.artifactErrors[0].stderr).toBe('boom');
+    });
+
+    it('falls back when stdout is not JSON', async () => {
+      const err = new Error('exit 1');
+      Object.assign(err, { stderr: '', stdout: 'not json' });
+      mockExecAll(err);
+      fs.readLocalFile.mockResolvedValueOnce(actionsLock);
+
+      const res = await updateActionsLockfile(makeConfig(), packageFiles);
+
+      expect(res.artifactErrors[0].stderr).toBe('not json');
     });
 
     it('rethrows a temporary error', async () => {
