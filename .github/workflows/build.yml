@@ -105,7 +105,7 @@ jobs:
           show-progress: false
 
       - name: Calculate matrix for `node_modules` prefetch
-        uses: ./.github/actions/calculate-prefetch-matrix
+        uses: $/.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
         with:
           repo: ${{ github.event.repository.full_name }}
@@ -114,7 +114,7 @@ jobs:
 
       - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -150,7 +150,7 @@ jobs:
           echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -191,7 +191,7 @@ jobs:
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -211,7 +211,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -236,7 +236,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -279,7 +279,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -310,7 +310,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -402,7 +402,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -532,7 +532,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -688,7 +688,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -717,7 +717,7 @@ jobs:
           show-progress: false
 
       - name: Setup Docker
-        uses: ./.github/actions/setup-docker
+        uses: $/.github/actions/setup-docker
 
       - name: Download dist
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -726,7 +726,7 @@ jobs:
           path: dist/
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -762,7 +762,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -812,7 +812,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -889,10 +889,10 @@ jobs:
           show-progress: false
 
       - name: Setup Docker
-        uses: ./.github/actions/setup-docker
+        uses: $/.github/actions/setup-docker
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
