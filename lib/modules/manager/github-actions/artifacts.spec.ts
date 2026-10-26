@@ -361,7 +361,7 @@ describe('modules/manager/github-actions/artifacts', () => {
           options: { cwd: '/tmp/github/some/repo' },
         },
         {
-          cmd: 'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
+          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -616,6 +616,43 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
     });
 
+    it.each`
+      constraint   | flags
+      ${'v0.2.0'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions'}
+      ${'v0.1.6'}  | ${'--no-interactive --no-onboard --no-narrow --relock --no-migrate-local-actions'}
+      ${'v0.3.0'}  | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
+      ${''}        | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
+      ${'invalid'} | ${'--no-interactive --no-onboard --no-narrow --ignore-local-actions'}
+    `(
+      'passes $flags for the constraint "$constraint"',
+      async ({ constraint, flags }: { constraint: string; flags: string }) => {
+        const execSnapshots = mockExecAll();
+        mockLockfileRegenerated();
+
+        await updateActionsLockfile(
+          makeConfig({ constraints: { ghActionsLock: constraint } }),
+          packageFiles,
+        );
+
+        expect(execSnapshots.at(-1)?.cmd).toBe(`gh actions-lock ${flags}`);
+      },
+    );
+
+    it('assumes v0.3.0 or later with `binarySource=global`, whatever the constraint', async () => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(
+        makeConfig({ constraints: { ghActionsLock: 'v0.2.0' } }),
+        packageFiles,
+      );
+
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
+      ]);
+    });
+
     it('does not touch the extension with `binarySource=global`', async () => {
       GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
       const execSnapshots = mockExecAll();
@@ -626,7 +663,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       // the administrator owns the extension, so we must not re-pin it
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
+          cmd: 'gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions',
         },
       ]);
       // ... but say so, since the constraint is silently inert otherwise
@@ -829,6 +866,24 @@ describe('modules/manager/github-actions/artifacts', () => {
       expect(execSnapshots[0].options?.env).not.toHaveProperty('GH_TOKEN');
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'No GitHub token found for `gh actions-lock`',
+      );
+    });
+  });
+
+  describe('replacement', () => {
+    it('omits --no-onboard for a replacement', async () => {
+      const execSnapshots = mockExecAll();
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(
+        makeConfig({
+          upgrades: [{ ...checkoutUpgrade, updateType: 'replacement' }],
+        }),
+        packageFiles,
+      );
+
+      expect(execSnapshots.at(-1)?.cmd).toBe(
+        'gh actions-lock --no-interactive --no-narrow --ignore-local-actions',
       );
     });
   });

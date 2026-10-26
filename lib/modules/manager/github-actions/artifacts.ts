@@ -12,7 +12,8 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { PackageFile, PostUpdateConfig } from '../types.ts';
+import { api as semver } from '../../versioning/semver/index.ts';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../types.ts';
 import {
   artifactErrorMessageFromExecError,
   resolveToolConstraint,
@@ -26,6 +27,18 @@ const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
 const lockedDepTypes = ['action', 'workflow', 'docker'];
+
+/** The first `gh-actions-lock` release with `--ignore-local-actions`, and a plain run which keeps moved floating refs locked. */
+const minPlainRunVersion = '0.3.0';
+
+/** Whether a `gh-actions-lock` release tag predates `--ignore-local-actions` and needs `--relock` to write after a floating ref moved. */
+function needsRelock(version: string | undefined): boolean {
+  return (
+    !!version &&
+    semver.isVersion(version) &&
+    semver.isGreaterThan(minPlainRunVersion, version)
+  );
+}
 
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));
@@ -72,13 +85,13 @@ function getTokenEnv(): ExtraEnv {
 }
 
 /**
- * Whether any updated dependency is one the lockfile records an edge for, and sits in a file `gh actions-lock` will look at.
+ * The updated dependencies which the lockfile records an edge for, and which sit in a file `gh actions-lock` will look at.
  */
-function hasLockedUpdate(
+function getLockedUpgrades(
   config: PostUpdateConfig,
   onboardedWorkflows: OnboardedWorkflows,
-): boolean {
-  return config.upgrades.some((upgrade) => {
+): Upgrade[] {
+  return config.upgrades.filter((upgrade) => {
     if (upgrade.manager !== 'github-actions') {
       return false;
     }
@@ -136,7 +149,11 @@ export async function updateActionsLockfile(
     return empty;
   }
 
-  if (!hasLockedUpdate(config, parsedLockfile.data.workflows)) {
+  const lockedUpgrades = getLockedUpgrades(
+    config,
+    parsedLockfile.data.workflows,
+  );
+  if (!lockedUpgrades.length) {
     logger.debug(`No locked dependencies updated for ${actionsLockFile}`);
     return empty;
   }
@@ -177,13 +194,38 @@ export async function updateActionsLockfile(
     docker: {},
   };
 
-  // `--no-interactive`: we have no terminal to answer prompts with
-  // `--relock`: locked pins are sticky, so without it a changed ref fails with `Ref changed`
-  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
-  const commands = [
-    'gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions',
+  // A replacement introduces a package the workflow did not use before, which `--no-onboard` refuses to add
+  const hasReplacement = lockedUpgrades.some(
+    (upgrade) => upgrade.updateType === 'replacement',
+  );
+
+  // `binarySource=global` leaves the extension version to the administrator and it is unknown here, so assume v0.3.0 or later and only treat a version we install as old
+  const relock =
+    GlobalConfig.get('binarySource') !== 'global' &&
+    needsRelock(ghActionsLockConstraint);
+
+  // From v0.3.0 a plain run re-pins only the refs whose `uses:` changed, and keeps moved floating refs (like `@v4`) locked, so unrelated pins do not advance.
+  // Before that, a plain run refuses to write when a path or composite action's floating ref has moved, so `--relock` is needed there
+  const flags = [
+    // we have no terminal to answer prompts with
+    '--no-interactive',
+    // do not add workflows which the lockfile does not track yet, as that is unrelated to the update. Omitted for a replacement, as the new action is not in the workflow's lockfile entry yet
+    ...(hasReplacement ? [] : ['--no-onboard']),
+    // keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
+    '--no-narrow',
+    ...(relock
+      ? [
+          // a plain run before v0.3.0 refuses to write when a floating ref has moved upstream. This also advances such refs
+          '--relock',
+          // do not migrate `uses: ./…` to `uses: $/…`. `--ignore-local-actions` does not exist before v0.3.0
+          '--no-migrate-local-actions',
+        ]
+      : [
+          // warn instead of failing when a local action uses remote actions the lockfile cannot cover, and do not migrate `uses: ./…` to `uses: $/…`
+          '--ignore-local-actions',
+        ]),
   ];
+  const commands = [`gh actions-lock ${flags.join(' ')}`];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
   // They own the extension version, and `constraints.ghActionsLock` does not apply.
