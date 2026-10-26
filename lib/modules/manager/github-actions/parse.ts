@@ -56,7 +56,7 @@ export function isShortSha(str: string): boolean {
   return shaShortRe.test(str);
 }
 
-const DOCKER_PREFIX = 'docker://';
+export const DOCKER_PREFIX = 'docker://';
 
 function parseDockerReference(input: string): DockerReference | null {
   const originalRef = input.slice(DOCKER_PREFIX.length);
