@@ -37,6 +37,8 @@ await new Command('pnpm update-static-data')
     false,
   )
   .action(async (names: string[], { commit }: Options) => {
+    // the branches for each committed source, from the bottom of the stack to the top
+    const branches: string[] = [];
     for (const source of sources) {
       if (names.length > 0 && !names.includes(source.name)) {
         continue;
@@ -70,7 +72,20 @@ await new Command('pnpm update-static-data')
       await exec('git', ['commit', '--file', '-'], {
         input: body ? `${message}\n\n${body}` : message,
       });
-      console.log(`Committed changes to ${source.name}: ${subject}`);
+
+      const branch = `chore/static-data/${source.name}`;
+      await exec('git', ['branch', '--force', branch]);
+      branches.push(branch);
+      console.log(
+        `Committed changes to ${source.name} on ${branch}: ${subject}`,
+      );
+    }
+
+    if (process.env.GITHUB_OUTPUT) {
+      await fs.appendFile(
+        process.env.GITHUB_OUTPUT,
+        `branches=${branches.join(' ')}\n`,
+      );
     }
   })
   .parseAsync();
