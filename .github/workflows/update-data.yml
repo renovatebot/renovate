@@ -69,11 +69,19 @@ jobs:
 
           read -ra branches <<< "$BRANCHES"
           git push --force origin "${branches[@]}"
-          if [ "${#branches[@]}" -eq 1 ]; then
-            # a stack needs at least two PRs
-            gh pr create --head "${branches[0]}" --fill
-          else
-            gh stack link --open "${branches[@]}"
+
+          # each branch holds a single commit on top of the previous one, which provides the PR title and body
+          base=main
+          for branch in "${branches[@]}"; do
+            gh pr create --head "$branch" --base "$base" \
+              --title "$(git log -1 --format=%s "$branch")" \
+              --body "$(git log -1 --format=%b "$branch")"
+            base=$branch
+          done
+
+          # a stack needs at least two PRs
+          if [ "${#branches[@]}" -gt 1 ]; then
+            gh stack link "${branches[@]}"
           fi
 
           for branch in "${branches[@]}"; do
