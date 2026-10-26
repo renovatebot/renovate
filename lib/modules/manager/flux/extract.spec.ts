@@ -600,6 +600,285 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('extracts HelmRelease with an OCIRepository chart template using a tag', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: default
+          spec:
+            interval: 10m
+            chart:
+              kind: OCIRepository
+              spec:
+                interval: 10m
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  tag: 6.5.4
+            values:
+              image:
+                repository: ghcr.io/stefanprodan/podinfo
+                tag: 6.5.4
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n        digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.5.4',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/podinfo',
+            packageName: 'ghcr.io/stefanprodan/podinfo',
+            replaceString: '6.5.4',
+            versioning: 'docker',
+          },
+        ],
+      });
+      const chartDep = result!.deps[0];
+      expect(
+        compile(
+          chartDep.autoReplaceStringTemplate!,
+          { newValue: '6.6.0', newDigest: 'sha256:abcd' },
+          false,
+        ),
+      ).toBe('tag: 6.6.0\n        digest: sha256:abcd');
+    });
+
+    it('extracts HelmRelease with an OCIRepository chart template using a tag and digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: default
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  tag: 6.5.4
+                  digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}\n        digest: {{newDigest}}',
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString:
+              'tag: 6.5.4\n        digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          },
+        ],
+      });
+    });
+
+    it('extracts HelmRelease with an OCIRepository chart template using a digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: default
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: undefined,
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+          },
+        ],
+      });
+    });
+
+    it('skips HelmRelease with an OCIRepository chart template using a semver ref', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: default
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  semver: '>= 6.0.0'
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: undefined,
+            currentValue: undefined,
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            skipReason: 'unversioned-reference',
+          },
+        ],
+      });
+    });
+
+    it('does not match a same-named HelmRelease using a HelmChart template when locating the OCI ref', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: other
+          spec:
+            chart:
+              spec:
+                chart: podinfo
+                version: 6.5.4
+                sourceRef:
+                  kind: HelmRepository
+                  name: podinfo
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: default
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  tag: 6.5.4
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '6.5.4',
+            datasource: HelmDatasource.id,
+            depName: 'podinfo',
+            depType: 'HelmChart',
+            skipReason: 'unknown-registry',
+          },
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n        digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.5.4',
+          },
+        ],
+      });
+    });
+
+    it('locates the OCI ref of same-named HelmReleases in different namespaces', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: dev
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  tag: 6.5.4
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: podinfo
+            namespace: prod
+          spec:
+            chart:
+              kind: OCIRepository
+              spec:
+                url: oci://ghcr.io/stefanprodan/charts/podinfo
+                ref:
+                  tag: 6.6.0
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n        digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.5.4',
+          },
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n        digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.6.0',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.6.0',
+          },
+        ],
+      });
+    });
+
     it('extracts HelmChart version', () => {
       const result = extractPackageFile(
         codeBlock`
