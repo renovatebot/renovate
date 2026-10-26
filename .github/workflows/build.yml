@@ -368,7 +368,7 @@ jobs:
       - name: Check workflow files
         uses: jdx/jactionlint@a65ab044e916760429068fe5794b8306abdfcbb9 # v2.3.0
         with:
-          args: --color --ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+          args: --color --profile correctness
 
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
