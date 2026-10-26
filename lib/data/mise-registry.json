@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.10.12 linux-x64 (2026-10-16)"
+    "version": "2026.10.19 linux-x64 (2026-10-24)"
   },
   "tools": {
     "1password": {
@@ -1440,6 +1440,9 @@
     "google-java-format": {
       "aqua": "google/google-java-format"
     },
+    "goose-agent": {
+      "aqua": "aaif-goose/goose"
+    },
     "gopass": {
       "aqua": "gopasspw/gopass",
       "asdf": "trallnag/asdf-gopass"
@@ -2846,7 +2849,7 @@
     },
     "protoc-gen-connect-go": {
       "asdf": "dylanrayboss/asdf-protoc-gen-connect-go",
-      "go": "connectrpc.com/connect/cmd/protoc-gen-connect-go"
+      "go": "connectrpc.com/connect/v2/cmd/protoc-gen-connect-go"
     },
     "protoc-gen-go": {
       "aqua": "protocolbuffers/protobuf-go/protoc-gen-go",
@@ -2925,6 +2928,9 @@
     "rclone": {
       "aqua": "rclone/rclone",
       "asdf": "johnlayton/asdf-rclone"
+    },
+    "rea": {
+      "npm": "rea-agents"
     },
     "rebar": {
       "github": "erlang/rebar3"
@@ -3947,7 +3953,8 @@
       "github": "a7ex/xcresultparser"
     },
     "xcsift": {
-      "github": "ldomaradzki/xcsift"
+      "github": "ldomaradzki/xcsift",
+      "packslip": "github.com/ldomaradzki/xcsift"
     },
     "xh": {
       "aqua": "ducaale/xh",
