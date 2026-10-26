@@ -44,7 +44,10 @@ jobs:
 
       - name: Update static data
         id: update
-        run: pnpm run update-static-data --commit
+        # the pre-commit hook refuses commits on `main`, so commit onto a working branch
+        run: |
+          git checkout -b chore/static-data-update
+          pnpm run update-static-data --commit
 
       - name: Create stacked pull requests
         if: steps.update.outputs.branches != ''
