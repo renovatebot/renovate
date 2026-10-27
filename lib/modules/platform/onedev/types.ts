@@ -30,6 +30,11 @@ export interface IssueCreateParams {
   title: string;
   description: string;
   confidential?: boolean;
+  /**
+   * Values for issue form fields required by the instance's issue settings,
+   * e.g. `{ Type: 'Task', Priority: 'Normal' }` for OneDev's default form.
+   */
+  fields?: Record<string, string>;
 }
 
 export interface IssueStateTransitionParams {

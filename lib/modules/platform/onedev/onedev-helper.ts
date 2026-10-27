@@ -1,7 +1,11 @@
+import { isString } from '@sindresorhus/is';
+import type { HTTPError } from 'got';
 import type { ZodType } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { OnedevHttp } from '../../../util/http/onedev.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
+import { regEx } from '../../../util/regex.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   type Build,
@@ -9,6 +13,7 @@ import {
   CloneUrl,
   type Issue,
   IssueList,
+  IssueSettings,
   NumericId,
   Project,
   ProjectList,
@@ -318,7 +323,18 @@ export async function queryIssues(http: OnedevHttp): Promise<Issue[]> {
   return items;
 }
 
-export async function createIssue(
+/**
+ * Default values for OneDev's built-in issue form fields, which instances
+ * may require even though they have no server-side default. Both fields ship
+ * with OneDev itself and cannot be renamed, so they can be looked up by
+ * name.
+ */
+const WellKnownIssueFieldValues: Record<string, string> = {
+  Type: 'Task',
+  Priority: 'Normal',
+};
+
+async function createIssueRequest(
   http: OnedevHttp,
   params: IssueCreateParams,
 ): Promise<number> {
@@ -328,6 +344,128 @@ export async function createIssue(
     NumericId,
   );
   return body;
+}
+
+/**
+ * Reads the instance's issue form field specs and returns values for the
+ * built-in fields required by the instance (e.g. `Type: 'Task'`,
+ * `Priority: 'Normal'`). Fields without a fitting known value are skipped.
+ * An empty map is returned when the specs are not readable: reading them
+ * needs an administrator account, and non-admin REST users instead rely on
+ * the retry inside `createIssue()`.
+ */
+export async function getIssueFieldDefaults(
+  http: OnedevHttp,
+): Promise<Record<string, string>> {
+  try {
+    const { body } = await http.getJson(
+      'settings/issue',
+      { ...authOptions() },
+      IssueSettings,
+    );
+    const values: Record<string, string> = {};
+    for (const spec of coerceArray(body.fieldSpecs)) {
+      if (spec.allowEmpty !== false) {
+        continue;
+      }
+      const wellKnown = WellKnownIssueFieldValues[spec.name];
+      if (!wellKnown) {
+        continue;
+      }
+      if (
+        spec.choiceProvider?.choices?.some(
+          (choice) => choice.value === wellKnown,
+        )
+      ) {
+        values[spec.name] = wellKnown;
+      }
+    }
+    return values;
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Cannot read OneDev issue form field specs, creating issues without pre-filled field values',
+    );
+    return {};
+  }
+}
+
+/**
+ * Parses the missing required issue form fields out of OneDev's
+ * `Invalid fields` validation error, mapping each field to its allowed
+ * choice values (non-choice fields get an empty list), e.g.
+ *
+ * ```
+ * Invalid fields: Type (value must not be empty, and should take one of:
+ * Enhancement, Bug, Task), Priority (value must not be empty)
+ * ```
+ *
+ * Returns `undefined` for any other error body.
+ */
+export function parseIssueFieldValidationError(
+  body: string,
+): Record<string, string[]> | undefined {
+  const prefix = 'Invalid fields: ';
+  if (!body.startsWith(prefix)) {
+    return undefined;
+  }
+  const result: Record<string, string[]> = {};
+  // OneDev emits every missing field as `Name (reason)`, where the reason
+  // may itself contain commas (choice lists) - hence the paren-based scan
+  // instead of a simple split.
+  const entries = body.slice(prefix.length);
+  const pattern = regEx(/(?<name>[^,()]*) \((?<reason>[^()]*)\)/g);
+  let match = pattern.exec(entries);
+  while (match !== null) {
+    const { name, reason } = match.groups!;
+    const choices: string[] = [];
+    const takeIndex = reason.indexOf('should take one');
+    if (takeIndex >= 0) {
+      const colonIndex = reason.indexOf(': ', takeIndex);
+      if (colonIndex >= 0) {
+        choices.push(...reason.slice(colonIndex + 2).split(', '));
+      }
+    }
+    result[name.trim()] = choices;
+    match = pattern.exec(entries);
+  }
+  return Object.keys(result).length ? result : undefined;
+}
+
+export async function createIssue(
+  http: OnedevHttp,
+  params: IssueCreateParams,
+): Promise<number> {
+  try {
+    return await createIssueRequest(http, params);
+  } catch (err) {
+    // OneDev rejects issue creation when its issue form requires field
+    // values not supplied by the client. For the built-in Type/Priority
+    // fields OneDev's error body lists the missing fields together with
+    // their allowed choices - use them to retry once.
+    const response = (err as HTTPError).response;
+    if (response?.statusCode !== 400) {
+      throw err;
+    }
+    if (!isString(response.body)) {
+      throw err;
+    }
+    const missing = parseIssueFieldValidationError(response.body);
+    if (!missing) {
+      throw err;
+    }
+    // Any missing field without a matching built-in value keeps the request
+    // failing no matter what Renovate guesses - rethrow the original error.
+    const fields = { ...params.fields };
+    for (const [name, choices] of Object.entries(missing)) {
+      const value = WellKnownIssueFieldValues[name];
+      if (!value || !choices.includes(value)) {
+        throw err;
+      }
+      fields[name] = value;
+    }
+    return createIssueRequest(http, { ...params, fields });
+  }
 }
 
 export async function setIssueDescription(

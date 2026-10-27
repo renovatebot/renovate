@@ -113,6 +113,30 @@ export type RepositoryFile = z.infer<typeof RepositoryFile>;
 export const UserId = z.number();
 
 /**
+ * Subset of an issue form field spec (`GET /settings/issue` `fieldSpecs`
+ * entries). Only what Renovate can fill in on issue creation is kept - the
+ * field name, its choice list and whether an empty value is allowed. Further
+ * field variants (user selections, build links, ...) are tolerated but
+ * ignored.
+ */
+export const IssueFieldSpec = z.looseObject({
+  name: z.string(),
+  allowEmpty: Nullish(z.boolean()),
+  choiceProvider: Nullish(
+    z.looseObject({
+      choices: Nullish(LooseArray(z.looseObject({ value: z.string() }))),
+    }),
+  ),
+});
+export type IssueFieldSpec = z.infer<typeof IssueFieldSpec>;
+
+/** Response of `GET /settings/issue`. */
+export const IssueSettings = z.looseObject({
+  fieldSpecs: Nullish(LooseArray(IssueFieldSpec)),
+});
+export type IssueSettings = z.infer<typeof IssueSettings>;
+
+/**
  * OneDev endpoints which create or identify entities answer with a plain
  * numeric id.
  */

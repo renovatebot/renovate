@@ -10,6 +10,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import { toBase64 } from '../../../util/string.ts';
 import * as onedev from './index.ts';
+import { parseIssueFieldValidationError } from './onedev-helper.ts';
 import type { Issue, Project, PullRequest, User } from './schema.ts';
 
 const user: User = {
@@ -40,6 +41,16 @@ const projects: Project[] = [
 ];
 
 const repository = 'some/repo';
+
+const invalidTypeAndPriorityFields =
+  'Invalid fields: Type (value must not be empty, and should take one of: Enhancement, Bug, Task, Support Request, Build Failed), Priority (value must not be empty, and should take one of: Minor, Normal, Major, Critical)';
+
+const defaultIssueCreateBody = {
+  projectId: 100,
+  title: 'Dependency dashboard',
+  description: 'blurb',
+  confidential: false,
+};
 
 const repoProject: Partial<Project> = {
   id: 100,
@@ -138,6 +149,60 @@ describe('modules/platform/onedev/index', () => {
 
   function mockIssueList(scope: httpMock.Scope, dto: Issue[]): void {
     scope.get('/issues').query({ offset: 0, count: 100 }).reply(200, dto);
+  }
+
+  /**
+   * Issue form field specs mirroring OneDev's default instance: `Type` and
+   * `Priority` are required choice fields without a server-side default,
+   * `Assignees` is optional.
+   */
+  function mockIssueFieldSpecs(
+    scope: httpMock.Scope,
+    fieldSpecs: unknown[] = [
+      {
+        '@type': 'ChoiceField',
+        name: 'Type',
+        allowMultiple: false,
+        allowEmpty: false,
+        choiceProvider: {
+          '@type': 'SpecifiedChoices',
+          choices: [
+            { value: 'Enhancement', color: '#1bc5bd' },
+            { value: 'Bug', color: '#F64E60' },
+            { value: 'Task', color: '#8950FC' },
+            { value: 'Support Request', color: '#8950FC' },
+            { value: 'Build Failed', color: '#F64E60' },
+          ],
+        },
+        defaultValueProvider: null,
+        defaultMultiValueProvider: null,
+      },
+      {
+        '@type': 'ChoiceField',
+        name: 'Priority',
+        allowMultiple: false,
+        allowEmpty: false,
+        choiceProvider: {
+          '@type': 'SpecifiedChoices',
+          choices: [
+            { value: 'Minor', color: '#F64E60' },
+            { value: 'Normal', color: '#2095F2' },
+            { value: 'Major', color: '#FFA700' },
+            { value: 'Critical', color: '#1BC5BD' },
+          ],
+        },
+        defaultValueProvider: null,
+        defaultMultiValueProvider: null,
+      },
+      {
+        '@type': 'UserChoiceField',
+        name: 'Assignees',
+        allowMultiple: true,
+        allowEmpty: true,
+      },
+    ],
+  ): void {
+    scope.get('/settings/issue').reply(200, { fieldSpecs });
   }
 
   describe('initPlatform()', () => {
@@ -1255,12 +1320,14 @@ describe('modules/platform/onedev/index', () => {
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
       mockIssueList(scope, []);
+      mockIssueFieldSpecs(scope);
       scope
         .post('/issues', {
           projectId: 100,
           title: 'Dependency dashboard',
           description: 'blurb',
           confidential: false,
+          fields: { Type: 'Task', Priority: 'Normal' },
         })
         .reply(200, '88');
 
@@ -1278,12 +1345,14 @@ describe('modules/platform/onedev/index', () => {
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
       mockIssueList(scope, []);
+      mockIssueFieldSpecs(scope);
       scope
         .post('/issues', {
           projectId: 100,
           title: 'Dependency dashboard',
           description: 'blurb',
           confidential: true,
+          fields: { Type: 'Task', Priority: 'Normal' },
         })
         .reply(200, '88');
 
@@ -1294,6 +1363,93 @@ describe('modules/platform/onedev/index', () => {
           confidential: true,
         }),
       ).resolves.toBe('created');
+    });
+
+    it('creates issues without field values when the form requires none', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      mockIssueFieldSpecs(scope, [
+        {
+          '@type': 'ChoiceField',
+          name: 'Type',
+          allowMultiple: false,
+          allowEmpty: true,
+        },
+        {
+          '@type': 'ChoiceField',
+          name: 'Priority',
+          allowMultiple: false,
+          allowEmpty: true,
+        },
+        // Required through its field spec but not a choice field Renovate
+        // can fill in.
+        {
+          '@type': 'BuildChoiceField',
+          name: 'Build',
+          allowMultiple: false,
+          allowEmpty: false,
+        },
+        // Required custom field Renovate has no default value for.
+        {
+          '@type': 'ChoiceField',
+          name: 'Story Points',
+          allowMultiple: false,
+          allowEmpty: false,
+          choiceProvider: {
+            '@type': 'SpecifiedChoices',
+            choices: [
+              { value: '1', color: '#2095F2' },
+              { value: '2', color: '#2095F2' },
+            ],
+          },
+        },
+      ]);
+      scope
+        .post('/issues', {
+          projectId: 100,
+          title: 'Dependency dashboard',
+          description: 'blurb',
+          confidential: false,
+        })
+        .reply(200, '88');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBe('created');
+    });
+
+    it('creates issues without field values when the field specs are unreadable', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', {
+          projectId: 100,
+          title: 'Dependency dashboard',
+          description: 'blurb',
+          confidential: false,
+        })
+        .reply(200, '88');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBe('created');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.anything() },
+        'Cannot read OneDev issue form field specs, creating issues without pre-filled field values',
+      );
     });
 
     it('updates changed issue bodies', async () => {
@@ -1406,12 +1562,14 @@ describe('modules/platform/onedev/index', () => {
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
       mockIssueList(scope, []);
+      mockIssueFieldSpecs(scope);
       scope
         .post('/issues', {
           projectId: 100,
           title: 'Dependency dashboard',
           description: 'blurb',
           confidential: false,
+          fields: { Type: 'Task', Priority: 'Normal' },
         })
         .reply(500);
 
@@ -1422,6 +1580,244 @@ describe('modules/platform/onedev/index', () => {
         }),
       ).resolves.toBeNull();
       expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('retries issue creation with built-in field values after a field validation error', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      // The field specs are unreadable for non-admin REST users, so creation
+      // starts without `fields` - mirroring OneDev's real-life rejection:
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', defaultIssueCreateBody)
+        .reply(400, invalidTypeAndPriorityFields);
+      scope
+        .post('/issues', {
+          ...defaultIssueCreateBody,
+          fields: { Type: 'Task', Priority: 'Normal' },
+        })
+        .reply(200, '88');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBe('created');
+    });
+
+    it('keeps failing when a required field has no built-in value', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', defaultIssueCreateBody)
+        .reply(400, 'Invalid fields: Story Points (value must not be empty)');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps failing when the built-in value is not among the choices', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      mockIssueFieldSpecs(scope, [
+        {
+          '@type': 'ChoiceField',
+          name: 'Type',
+          allowMultiple: false,
+          allowEmpty: false,
+          choiceProvider: {
+            '@type': 'SpecifiedChoices',
+            choices: [
+              { value: 'Enhancement', color: '#1bc5bd' },
+              { value: 'Bug', color: '#F64E60' },
+              { value: 'Task', color: '#8950FC' },
+            ],
+          },
+        },
+        {
+          '@type': 'ChoiceField',
+          name: 'Priority',
+          allowMultiple: false,
+          allowEmpty: false,
+          // `Normal` was removed from the choice list by the admin
+          choiceProvider: {
+            '@type': 'SpecifiedChoices',
+            choices: [
+              { value: 'Minor', color: '#F64E60' },
+              { value: 'Major', color: '#FFA700' },
+            ],
+          },
+        },
+      ]);
+      scope
+        .post('/issues', {
+          ...defaultIssueCreateBody,
+          fields: { Type: 'Task' },
+        })
+        .reply(400, 'Invalid fields: Priority (value must not be empty)');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps failing on unrelated validation errors', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(200, {});
+      scope.post('/issues', defaultIssueCreateBody).reply(400, {
+        message: 'boom',
+      });
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps failing when the field error body lists no fields', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', defaultIssueCreateBody)
+        .reply(400, 'Invalid fields: ');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps failing when the retried creation fails again', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', defaultIssueCreateBody)
+        .reply(400, invalidTypeAndPriorityFields);
+      scope
+        .post('/issues', {
+          ...defaultIssueCreateBody,
+          fields: { Type: 'Task', Priority: 'Normal' },
+        })
+        .reply(400, invalidTypeAndPriorityFields);
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps failing without retrying on connection failures', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope.get('/settings/issue').reply(403);
+      scope
+        .post('/issues', defaultIssueCreateBody)
+        .replyWithError('Connection interrupted');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    describe('parseIssueFieldValidationError()', () => {
+      it('extracts missing fields and their choices', () => {
+        expect(
+          parseIssueFieldValidationError(invalidTypeAndPriorityFields),
+        ).toEqual({
+          Type: [
+            'Enhancement',
+            'Bug',
+            'Task',
+            'Support Request',
+            'Build Failed',
+          ],
+          Priority: ['Minor', 'Normal', 'Major', 'Critical'],
+        });
+      });
+
+      it('extracts fields without choice values', () => {
+        expect(
+          parseIssueFieldValidationError(
+            'Invalid fields: Story Points (value must not be empty)',
+          ),
+        ).toEqual({ 'Story Points': [] });
+      });
+
+      it('extracts multi-value choice lists', () => {
+        expect(
+          parseIssueFieldValidationError(
+            'Invalid fields: Labels (value must not be empty, and should take one or more of: A, B, C)',
+          ),
+        ).toEqual({ Labels: ['A', 'B', 'C'] });
+      });
+
+      it('yields no choices when the choice list marker is incomplete', () => {
+        expect(
+          parseIssueFieldValidationError(
+            'Invalid fields: Labels (value must not be empty, and should take one)',
+          ),
+        ).toEqual({ Labels: [] });
+      });
+
+      it('ignores unrelated bodies', () => {
+        expect(
+          parseIssueFieldValidationError('Request failed: boom'),
+        ).toBeUndefined();
+      });
+
+      it('ignores bodies without field entries', () => {
+        expect(
+          parseIssueFieldValidationError('Invalid fields: '),
+        ).toBeUndefined();
+      });
     });
 
     it('closes issues on demand', async () => {

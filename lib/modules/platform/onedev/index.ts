@@ -884,11 +884,13 @@ export async function ensureIssue({
       return 'updated';
     }
 
+    const fields = await helper.getIssueFieldDefaults(onedevHttp);
     const issueId = await helper.createIssue(onedevHttp, {
       projectId: config.projectId,
       title,
       description: body,
       confidential: !!confidential,
+      fields: Object.keys(fields).length ? fields : undefined,
     });
     logger.debug(`Created new Issue id ${issueId}`);
     config.issueList = null;

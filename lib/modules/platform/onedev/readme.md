@@ -30,19 +30,27 @@ REST suffix is added automatically if missing).
 
 ## Feature support
 
-| Feature                | Status                                                                                                  |
-| ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| Branch updating        | Fully supported                                                                                         |
-| PR creation            | Fully supported                                                                                         |
-| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                                    |
-| Find/update PR         | Fully supported                                                                                         |
-| Comments               | Fully supported (PR comments via the REST API)                                                          |
-| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)          |
-| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support)         |
-| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                                     |
-| File contents          | Current repository read from the git clone; other projects (e.g. shared presets) read from the REST API |
+| Feature                | Status                                                                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Branch updating        | Fully supported                                                                                                                                                                            |
+| PR creation            | Fully supported                                                                                                                                                                            |
+| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                                                                                                                       |
+| Find/update PR         | Fully supported                                                                                                                                                                            |
+| Comments               | Fully supported (PR comments via the REST API)                                                                                                                                             |
+| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)                                                                                             |
+| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support; OneDev's built-in required issue fields `Type` and `Priority` are completed automatically) |
+| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                                                                                                                        |
+| File contents          | Current repository read from the git clone; other projects (e.g. shared presets) read from the REST API                                                                                    |
 
 ## Known limitations
+
+- OneDev's issue form may require field values. Renovate fills in OneDev's
+  built-in `Type` and `Priority` fields with `Task` and `Normal` when the
+  instance requires them (read from the admin-only issue settings,
+  plus a fallback retry for non-admin accounts). If the form requires other
+  fields without server-side defaults, Renovate gives up with a warning;
+  configure defaults for those fields in OneDev or provide them through a
+  script.
 
 - Issue closing assumes the project uses OneDev's default issue states
   (`Open` and `Closed`). Custom issue state workflows cannot be closed
