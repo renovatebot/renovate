@@ -20,8 +20,10 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
+import { configFileLocations, getConfigFilePattern } from './config-files.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { getSharedConstraintsScope } from './constraints.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';
@@ -33,14 +35,7 @@ export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://mise.jdx.dev';
 
 export const defaultConfig = {
-  managerFilePatterns: [
-    '**/{,.}mise{,.*}.toml',
-    '**/{,.}mise/config{,.*}.toml',
-    '**/.config/mise{,.*}.toml',
-    '**/.config/mise/{mise,config}{,.*}.toml',
-    '**/.config/mise/conf.d/*.toml',
-    '**/.rtx{,.*}.toml',
-  ],
+  managerFilePatterns: configFileLocations.map(getConfigFilePattern),
   pinDigests: false,
 };
 
