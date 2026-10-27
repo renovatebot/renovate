@@ -1038,11 +1038,11 @@ describe('workers/repository/init/merge', () => {
         nugetConfig: '<configuration />',
       };
 
+      applyNugetConfig(config);
       applyNugetConfig(config, 'resolved');
 
-      expect(setNugetConfigSpy).toHaveBeenCalledExactlyOnceWith(
-        '<configuration />',
-      );
+      expect(setNugetConfigSpy).toHaveBeenCalledTimes(2);
+      expect(setNugetConfigSpy).toHaveBeenCalledWith('<configuration />');
     });
   });
 

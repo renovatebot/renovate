@@ -157,6 +157,32 @@ describe('modules/datasource/nuget/nuget-config', () => {
       expect(rules[0].username).toBeUndefined();
     });
 
+    it('extracts Username without password', () => {
+      const doc = new XmlDocument(`
+        <configuration>
+          <packageSources>
+            <add key="useronly" value="https://pkgs.example.org/useronly" />
+          </packageSources>
+          <packageSourceCredentials>
+            <useronly>
+              <add key="Username" value="onlyuser" />
+            </useronly>
+          </packageSourceCredentials>
+        </configuration>
+      `);
+
+      extractAndRegisterPackageSourceCredentials(doc);
+
+      const rules = hostRules.findAll({ hostType: 'nuget' });
+      expect(rules).toHaveLength(1);
+      expect(rules[0]).toMatchObject({
+        hostType: 'nuget',
+        matchHost: 'https://pkgs.example.org/useronly',
+        username: 'onlyuser',
+      });
+      expect(rules[0].password).toBeUndefined();
+    });
+
     it('matches escaped feed names in XML', () => {
       const doc = new XmlDocument(`
         <configuration>

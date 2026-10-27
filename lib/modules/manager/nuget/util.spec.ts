@@ -5,6 +5,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import type { Registry } from './types.ts';
 import { bumpPackageVersion } from './update.ts';
 import {
+  applyNuGetConfigFile,
   applyRegistries,
   findGlobalJson,
   findVersion,
@@ -409,6 +410,90 @@ describe('modules/manager/nuget/util', () => {
           name: 'global.nuget',
           url: 'https://global.nuget.org/v3/index.json',
         },
+      ]);
+    });
+
+    it('handles config without packageSources element in applyNuGetConfigFile', () => {
+      const config = new XmlDocument('<configuration />');
+      const registries = applyNuGetConfigFile(config, [
+        { name: 'default', url: 'https://api.nuget.org/v3/index.json' },
+      ]);
+      expect(registries).toEqual([
+        { name: 'default', url: 'https://api.nuget.org/v3/index.json' },
+      ]);
+    });
+
+    it('applies global nugetConfig when repo config has no packageSources', async () => {
+      fs.findUpLocal.mockResolvedValue('NuGet.config');
+      fs.readLocalFile.mockResolvedValueOnce(
+        '<configuration><otherElement /></configuration>',
+      );
+
+      const registries = await getConfiguredRegistries('NuGet.config', {
+        nugetConfig: codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="custom" value="https://custom.nuget.org/v3/index.json" />
+            </packageSources>
+          </configuration>`,
+        nugetConfigMerge: true,
+      });
+
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+        {
+          name: 'custom',
+          url: 'https://custom.nuget.org/v3/index.json',
+        },
+      ]);
+    });
+
+    it('applies global nugetConfig when nugetConfigMerge is true and no repo config exists', async () => {
+      const registries = await getConfiguredRegistries(undefined, {
+        nugetConfig: codeBlock`
+          <configuration>
+            <packageSources>
+              <add key="custom" value="https://custom.nuget.org/v3/index.json" />
+            </packageSources>
+          </configuration>`,
+        nugetConfigMerge: true,
+      });
+
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+        {
+          name: 'custom',
+          url: 'https://custom.nuget.org/v3/index.json',
+        },
+      ]);
+    });
+
+    it('returns undefined for empty XML document without children', async () => {
+      const registries = await getConfiguredRegistries(undefined, {
+        nugetConfig: '<empty/>',
+      });
+      expect(registries).toBeUndefined();
+    });
+
+    it('ignores unsupported packageSources child elements like remove', () => {
+      const config = new XmlDocument(`
+        <configuration>
+          <packageSources>
+            <remove key="nuget.org" />
+          </packageSources>
+        </configuration>
+      `);
+      const registries = applyNuGetConfigFile(config, [
+        { name: 'default', url: 'https://api.nuget.org/v3/index.json' },
+      ]);
+      expect(registries).toEqual([
+        { name: 'default', url: 'https://api.nuget.org/v3/index.json' },
       ]);
     });
 

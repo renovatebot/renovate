@@ -41,8 +41,8 @@ export function expandEnvVariables(value: string, isFromRepo: boolean): string {
       posixBraced?: string;
       posixBare?: string;
     } = args.at(-1);
-    const varName = groups.win ?? groups.posixBraced ?? groups.posixBare;
-    const envVal = varName ? env[varName] : undefined;
+    const varName = (groups.win ?? groups.posixBraced ?? groups.posixBare)!;
+    const envVal = env[varName];
     if (envVal === undefined) {
       logger.debug(
         { varName },
