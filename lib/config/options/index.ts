@@ -237,7 +237,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     parents: ['bumpVersions'],
-    allowedValues: ['major', 'minor', 'patch', 'sync'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease', 'sync'],
     supportsTemplating: true,
   },
   {
