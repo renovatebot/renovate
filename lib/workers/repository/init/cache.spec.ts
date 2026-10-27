@@ -1,3 +1,5 @@
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepositoryCacheConfig } from '../../../config/types.ts';
@@ -6,8 +8,16 @@ import type { WorkerPlatformConfig } from './apis.ts';
 import { initializeCaches, resetCaches } from './cache.ts';
 
 describe('workers/repository/init/cache', () => {
-  beforeEach(() => {
-    GlobalConfig.set({ cacheDir: '' });
+  let tmpDir: DirectoryResult;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ cacheDir: tmpDir.path });
+  });
+
+  afterEach(async () => {
+    GlobalConfig.reset();
+    await tmpDir.cleanup();
   });
 
   describe('resetCaches()', () => {

@@ -140,6 +140,12 @@
       "semanticCommitType": "fix"
     },
     {
+      "description": "Do not automerge breaking `gh-actions-lock` updates, which includes every v0.x release, as they can change how the lockfile is generated or verified",
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchJsonata": ["isBreaking = true"],
+      "automerge": false
+    },
+    {
       "description": "Group commander major updates, they depend on each other.",
       "matchDatasources": ["npm"],
       "matchPackageNames": ["@commander-js/extra-typings", "commander"],
@@ -166,8 +172,13 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["lib/config/options/index.ts"],
-      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "managerFilePatterns": [
+        "lib/config/options/index.ts",
+        "lib/modules/manager/github-actions/readme.md"
+      ],
+      "matchStrings": [
+        "['\"]?ghActionsLock['\"]?: ['\"](?<currentValue>v[^'\"]+)['\"]"
+      ],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
     },
@@ -179,6 +190,15 @@
       "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "description": "Update pinned `gh` CLI extensions",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": [
+        "gh extension install (?<depName>[\\w.-]+/[\\w.-]+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
     }
   ]
 }

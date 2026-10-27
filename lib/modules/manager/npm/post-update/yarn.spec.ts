@@ -391,6 +391,39 @@ describe('modules/manager/npm/post-update/yarn', () => {
     ).toBeUndefined();
   });
 
+  it('does not use global cache if any upgrade has zero install', async () => {
+    Fixtures.mock(
+      {
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = {
+      constraints: {
+        yarn: '>= 2.0.0',
+      },
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      { depName: 'some-dep', newValue: '^1.0.0' },
+      {
+        depName: 'other-dep',
+        newValue: '^2.0.0',
+        managerData: { yarnZeroInstall: true },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).not.toBeEmptyArray();
+    for (const snapshot of execSnapshots) {
+      expect(snapshot.options?.env).not.toHaveProperty(
+        'YARN_ENABLE_GLOBAL_CACHE',
+      );
+    }
+  });
+
   it.each([
     ['1.22.0', '^1.10.0'],
     ['2.1.0', '>= 2.0.0'],

@@ -268,6 +268,13 @@ describe('modules/datasource/go/index', () => {
       it('are respected based on a SemVer-style range based on the `%goMod` constraint', async () => {
         const expected: ReleaseResult = {
           releases: [
+            // Go 1.23
+            {
+              version: 'v0.31.0',
+              constraints: {
+                '%goMod': ['1.23.0'],
+              },
+            },
             // Go 1.24
             {
               version: 'v0.32.0',
@@ -297,17 +304,18 @@ describe('modules/datasource/go/index', () => {
         const res = await getPkgReleases({
           datasource: GoDatasource.id,
           packageName: 'golang.org/x/mod',
-          constraints: { '%goMod': '~1.24.x' },
+          constraints: { '%goMod': '<=1.24.x' },
           constraintsFiltering: 'strict',
           constraintsVersioning: {
             '%goMod': 'semver-coerced',
           },
         });
 
-        expect(res).toBeDefined();
-        expect(res?.releases).toHaveLength(2);
-        expect(res?.releases[0].version).toEqual('v0.32.0');
-        expect(res?.releases[1].version).toEqual('v0.33.0');
+        expect(res?.releases.map((r) => r.version)).toEqual([
+          'v0.31.0',
+          'v0.32.0',
+          'v0.33.0',
+        ]);
       });
     });
   });

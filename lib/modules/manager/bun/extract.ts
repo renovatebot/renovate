@@ -49,7 +49,7 @@ export async function processPackageFile(
   return {
     ...result,
     packageFile,
-    npmrc,
+    ...(isString(npmrc) && { npmrc }),
     managerData: {
       ...result.managerData,
       // store npmrc file name so that a repository `.npmrc` which is not cached is read from disk again

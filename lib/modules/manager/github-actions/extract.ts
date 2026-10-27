@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { PLATFORM_FAMILIES } from '../../../constants/index.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { detectPlatform } from '../../../util/common.ts';
@@ -21,7 +22,13 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
-import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
+import {
+  DOCKER_PREFIX,
+  isSha,
+  isShortSha,
+  parseUsesLine,
+  versionLikeRe,
+} from './parse.ts';
 import type { UsesStep } from './schema.ts';
 import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
 import type {
@@ -279,12 +286,19 @@ function extractWithYAMLParser(
     return [];
   }
 
-  if ('runs' in obj && obj.runs.steps) {
-    return extractSteps(obj.runs.steps);
-  }
-
-  if (!('jobs' in obj)) {
-    return [];
+  if ('runs' in obj) {
+    const deps = extractSteps(coerceArray(obj.runs.steps));
+    const { image } = obj.runs;
+    // the runner matches the prefix case-insensitively, and treats anything else as a path to a `Dockerfile`
+    if (image?.toLowerCase().startsWith(DOCKER_PREFIX)) {
+      deps.push(
+        getDep(image.slice(DOCKER_PREFIX.length), {
+          registryAliases: config.registryAliases,
+          depType: 'docker',
+        }),
+      );
+    }
+    return deps;
   }
 
   const deps: PackageDependency[] = [];

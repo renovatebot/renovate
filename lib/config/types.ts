@@ -1,6 +1,9 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
-import type { ManagerName } from '../manager-list.generated.ts';
+import type {
+  CustomManagerName,
+  ManagerName,
+} from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
@@ -505,7 +508,7 @@ export interface RenovateConfig
   toolSettings?: RepoToolSettingsOptions;
 }
 
-const CustomDatasourceFormats = [
+export const CustomDatasourceFormats = [
   'html',
   'json',
   'plain',
@@ -672,7 +675,11 @@ export const namedParents = [
 ] as const;
 
 export type AllowedParents =
-  '.' | (typeof namedParents)[number] | ManagerName | UpdateTypeOptions;
+  | '.'
+  | (typeof namedParents)[number]
+  | ManagerName
+  | CustomManagerName
+  | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.

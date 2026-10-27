@@ -16,6 +16,7 @@ import {
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
+  CustomDatasourceFormats,
   type RenovateOptions,
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
@@ -326,7 +327,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['customDatasources'],
     default: 'json',
-    allowedValues: ['json', 'plain'],
+    allowedValues: [...CustomDatasourceFormats],
     cli: false,
     env: false,
   },
@@ -824,7 +825,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.135.3',
+    default: 'ghcr.io/renovatebot/base-image:13.143.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -2017,6 +2018,7 @@ const options: Readonly<RenovateOptions>[] = [
       'pinDigest',
       'digest',
       'lockFileMaintenance',
+      'lockfileUpdate',
       'rollback',
       'bump',
       'replacement',
@@ -3172,7 +3174,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: { ghActionsLock: 'v0.2.0' },
+    default: { ghActionsLock: 'v0.4.0' },
     mergeable: true,
     cli: false,
     supportedManagers: [
