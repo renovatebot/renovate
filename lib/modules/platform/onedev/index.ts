@@ -109,9 +109,8 @@ function normalizeEndpoint(url: string): string {
  * auth. The `password` (or `token`) option carries an access token or
  * account password, and the `username` option carries the OneDev user name.
  * When no username is set, `user` is assumed, which OneDev accepts for
- * personal access tokens. A legacy token of the form
- * `username:token-or-password` is still accepted when no username is
- * configured.
+ * personal access tokens. The token is used as-is; unlike some other
+ * platforms, no combined `username:token` form is supported.
  */
 function resolveCredentials(
   token: string | undefined,
@@ -126,20 +125,6 @@ function resolveCredentials(
   }
   if (isNonEmptyString(username)) {
     return { username, password: credential };
-  }
-  const separatorIndex = credential.indexOf(':');
-  if (separatorIndex > -1) {
-    const parsedUsername = credential.slice(0, separatorIndex);
-    const parsedPassword = credential.slice(separatorIndex + 1);
-    if (parsedUsername && parsedPassword) {
-      logger.warn(
-        'OneDev token contains a `username:token` pair - set the `username` and `token` options separately instead',
-      );
-      return { username: parsedUsername, password: parsedPassword };
-    }
-    throw new Error(
-      'Init: token must be in the form `username:token-or-password`, with neither part empty',
-    );
   }
   logger.debug(
     'No OneDev username configured - defaulting to `user`, which OneDev accepts for personal access tokens',

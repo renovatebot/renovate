@@ -266,19 +266,13 @@ describe('modules/platform/onedev/index', () => {
       ).resolves.toHaveProperty('gitAuthor', undefined);
     });
 
-    it('should throw if the token does not carry both parts', async () => {
-      await expect(onedev.initPlatform({ token: 'user:' })).rejects.toThrow(
-        'Init: token must be in the form `username:token-or-password`, with neither part empty',
-      );
-    });
-
     it('should throw if auth fails', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       scope.get('/users/me').reply(500);
 
-      await expect(
-        onedev.initPlatform({ token: 'user:password' }),
-      ).rejects.toThrow('Init: Authentication failure');
+      await expect(onedev.initPlatform({ token: 'abc' })).rejects.toThrow(
+        'Init: Authentication failure',
+      );
     });
 
     it('should support the default endpoint', async () => {
@@ -290,7 +284,11 @@ describe('modules/platform/onedev/index', () => {
         .reply(200, emails);
 
       await expect(
-        onedev.initPlatform({ token: 'renovate:abc' }),
+        onedev.initPlatform({
+          token: 'abc',
+          username: 'renovate',
+          endpoint: 'https://onedev.example.com',
+        }),
       ).resolves.toEqual({
         endpoint: 'https://onedev.example.com/~api/',
         gitAuthor: 'renovate <renovate@example.com>',
@@ -307,7 +305,8 @@ describe('modules/platform/onedev/index', () => {
 
       await expect(
         onedev.initPlatform({
-          token: 'renovate:abc',
+          token: 'abc',
+          username: 'renovate',
           endpoint: 'https://onedev.example.com/~api',
         }),
       ).resolves.toEqual({
@@ -316,7 +315,7 @@ describe('modules/platform/onedev/index', () => {
       });
     });
 
-    it('should send basic auth credentials derived from the token', async () => {
+    it('should send basic auth credentials derived from token and username', async () => {
       const scope = httpMock
         .scope('https://onedev.example.com/~api')
         .matchHeader('authorization', `Basic ${toBase64('renovate:abc')}`);
@@ -328,13 +327,32 @@ describe('modules/platform/onedev/index', () => {
 
       await expect(
         onedev.initPlatform({
-          token: 'renovate:abc',
+          token: 'abc',
+          username: 'renovate',
           endpoint: 'https://onedev.example.com',
         }),
       ).resolves.toBeDefined();
     });
 
-    it('should use the username parameter when the token has no colon', async () => {
+    it('sends the token as-is when no username is set, even if it contains a colon', async () => {
+      const scope = httpMock
+        .scope('https://onedev.example.com/~api')
+        .matchHeader('authorization', `Basic ${toBase64('user:abc:def')}`);
+      scope
+        .get('/users/me')
+        .reply(200, user)
+        .get('/users/1/email-addresses')
+        .reply(200, emails);
+
+      await expect(
+        onedev.initPlatform({
+          token: 'abc:def',
+          endpoint: 'https://onedev.example.com',
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('should use the configured username for authentication', async () => {
       const scope = httpMock
         .scope('https://onedev.example.com/~api')
         .matchHeader('authorization', `Basic ${toBase64('someuser:abc')}`);
@@ -363,7 +381,8 @@ describe('modules/platform/onedev/index', () => {
 
       await expect(
         onedev.initPlatform({
-          token: 'renovate:abc',
+          token: 'abc',
+          username: 'renovate',
           endpoint: 'https://onedev.example.com',
         }),
       ).resolves.toEqual({

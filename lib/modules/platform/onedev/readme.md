@@ -19,8 +19,9 @@ API and for git operations.
      for personal access tokens. If you authenticate with the **account
      password** instead of an access token, you must configure the correct
      username.
-   - A legacy token of the form `username:token-or-password` is still accepted
-     when no username is set.
+   - The token (or password) is used as-is; Renovate does not support a
+     combined `username:token` token string, so set the `username` option
+     separately.
 
 You must set the [`platform`](../../../self-hosted-configuration.md#platform)
 config option to `onedev` in your admin config file. The
