@@ -9,6 +9,8 @@ import type {
   UpdateDependencyConfig,
   Upgrade,
 } from '../types.ts';
+import type { MavenManagerData } from './types.ts';
+import { resolveXmlPath } from './xml.ts';
 
 export function updateAtPosition(
   fileContent: string,
@@ -99,18 +101,34 @@ export function updateAtPosition(
 export function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): string | null {
-  const offset = fileContent.indexOf('<');
-  const spaces = fileContent.slice(0, offset);
-  const restContent = fileContent.slice(offset);
-  const updatedContent = updateAtPosition(restContent, upgrade, '</');
-  if (!updatedContent) {
+}: UpdateDependencyConfig<MavenManagerData>): string | null {
+  const xmlPath = upgrade.managerData?.xmlPath;
+  if (!xmlPath) {
+    logger.debug('Missing Maven XML target path');
     return null;
   }
-  if (updatedContent === restContent) {
-    return fileContent;
+  const restContent = fileContent.trimStart();
+  const offset = fileContent.length - restContent.length;
+  try {
+    const document = new XmlDocument(restContent);
+    const target = resolveXmlPath(document, xmlPath);
+    if (!target) {
+      logger.debug({ xmlPath }, 'Maven XML target no longer exists');
+      return null;
+    }
+    const updatedContent = updateAtPosition(
+      restContent,
+      { ...upgrade, fileReplacePosition: target.position! },
+      '</',
+    );
+    if (updatedContent === null) {
+      return null;
+    }
+    return fileContent.slice(0, offset) + updatedContent;
+  } catch {
+    logger.debug('Failed to parse Maven XML for update');
+    return null;
   }
-  return `${spaces}${updatedContent}`;
 }
 
 export function bumpPackageVersion(
@@ -133,10 +151,15 @@ export function bumpPackageVersion(
   }
 
   try {
-    const project = new XmlDocument(content);
+    const xmlContent = content.trimStart();
+    const offset = content.length - xmlContent.length;
+    const project = new XmlDocument(xmlContent);
     const versionNode = project.childNamed('version')!;
-    const startTagPosition = versionNode.startTagPosition!; // TODO: should not be null
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+    const currentPomVersion = versionNode.val.trim();
+    const versionPosition = content.indexOf(
+      currentPomVersion,
+      offset + versionNode.position!,
+    );
 
     let newPomVersion: string | null = null;
     const currentPrereleaseValue = semver.prerelease(currentValue);
@@ -172,7 +195,7 @@ export function bumpPackageVersion(
     bumpedContent = replaceAt(
       content,
       versionPosition,
-      currentValue,
+      currentPomVersion,
       newPomVersion,
     );
 

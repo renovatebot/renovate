@@ -2,6 +2,7 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractExtensions, extractPackage } from './extract.ts';
 import { bumpPackageVersion, updateDependency } from './update.ts';
 
 const simpleContent = Fixtures.get(`simple.pom.xml`);
@@ -9,6 +10,8 @@ const minimumContent = Fixtures.get(`minimum.pom.xml`);
 const minimumSnapshotContent = Fixtures.get(`minimum_snapshot.pom.xml`);
 const prereleaseContent = Fixtures.get(`prerelease.pom.xml`);
 const cnbContent = Fixtures.get(`full_cnb.pom.xml`);
+const simpleDep = extractPackage(simpleContent, 'pom.xml', {})!.deps[1];
+const cnbDeps = extractPackage(cnbContent, 'pom.xml', {})!.deps;
 
 describe('modules/manager/maven/update', () => {
   describe('updateDependency', () => {
@@ -20,7 +23,7 @@ describe('modules/manager/maven/update', () => {
           updateType: 'patch',
           depName: 'org.example:foo',
           currentValue: '0.0.1',
-          fileReplacePosition: 905,
+          managerData: simpleDep.managerData,
           newValue: '0.0.2',
         },
       });
@@ -41,7 +44,7 @@ describe('modules/manager/maven/update', () => {
           updateType: 'replacement',
           depName: 'org.example:foo',
           currentValue: '0.0.1',
-          fileReplacePosition: 905,
+          managerData: simpleDep.managerData,
           newName: 'org.example.new:foo',
           newValue: '0.0.1',
         },
@@ -63,7 +66,7 @@ describe('modules/manager/maven/update', () => {
           updateType: 'replacement',
           depName: 'org.example:foo',
           currentValue: '0.0.1',
-          fileReplacePosition: 905,
+          managerData: simpleDep.managerData,
           newName: 'org.example.new:bar',
           newValue: '0.0.2',
         },
@@ -107,7 +110,7 @@ describe('modules/manager/maven/update', () => {
           updateType: 'replacement',
           depName: 'org.example:foo',
           currentValue: '0.0.1',
-          fileReplacePosition: 132,
+          managerData: simpleDep.managerData,
           newName: 'org.example.new:bar',
           newValue: '0.0.1',
         },
@@ -139,7 +142,7 @@ describe('modules/manager/maven/update', () => {
           updateType: 'replacement',
           depName: 'org.example.old:bar',
           currentValue: '0.0.1',
-          fileReplacePosition: 905,
+          managerData: simpleDep.managerData,
           newName: 'org.example:foo',
           newValue: '0.0.1',
         },
@@ -157,7 +160,8 @@ describe('modules/manager/maven/update', () => {
           updateType: 'patch',
           depName: 'paketo-buildpacks/nodejs',
           currentValue: '6.1.1',
-          fileReplacePosition: 1430,
+          managerData: cnbDeps.find((dep) => dep.fileReplacePosition === 1430)!
+            .managerData,
           newValue: '6.1.2',
         },
       });
@@ -184,7 +188,8 @@ describe('modules/manager/maven/update', () => {
           newValue: '2.24.3',
           datasource: 'docker',
           depName: 'docker.io/paketobuildpacks/python',
-          fileReplacePosition: 1634,
+          managerData: cnbDeps.find((dep) => dep.fileReplacePosition === 1634)!
+            .managerData,
         },
       });
 
@@ -208,6 +213,106 @@ describe('modules/manager/maven/update', () => {
         'docker://docker.io/paketobuildpacks/python:2.24.3@sha256:ab0cf962a92158f15d9e4fed6f905d5d292ed06a8e6291aa1ce3c33a5c78bde1',
         'docker://docker.io/paketobuildpacks/ruby@sha256:080f4cfa5c8fe43837b2b83f69ae16e320ea67c051173e4934a015590b2ca67a',
       ]);
+    });
+  });
+
+  describe('XML targets', () => {
+    it('updates distinct duplicate dependencies and a parent before the project version', () => {
+      const pom = codeBlock`
+        <?xml version="1.0"?>
+        <!-- keep this comment -->
+        <project xmlns="http://maven.apache.org/POM/4.0.0">
+          <parent><groupId>org.example</groupId><artifactId>parent</artifactId><version>9.9.9</version></parent>
+          <version source="1.0.99">  1.0.99  </version>
+          <dependencies>
+            <dependency><groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version></dependency>
+            <!-- sibling ordinals ignore comments and whitespace -->
+            <dependency><groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version></dependency>
+          </dependencies>
+        </project>
+      `;
+      const content = `  \n${pom}`;
+      const { deps } = extractPackage(content, 'pom.xml', {})!;
+      const bumped = bumpPackageVersion(
+        content,
+        '1.0.99',
+        'patch',
+      ).bumpedContent!;
+      const first = updateDependency({
+        packageFile: 'pom.xml',
+        fileContent: bumped,
+        upgrade: {
+          ...deps[1],
+          newName: 'org.replaced:foo-new',
+          newValue: '1.20.30',
+        },
+      })!;
+      const second = updateDependency({
+        packageFile: 'pom.xml',
+        fileContent: first,
+        upgrade: { ...deps[2], newValue: '1.2.4' },
+      })!;
+      const result = updateDependency({
+        packageFile: 'pom.xml',
+        fileContent: second,
+        upgrade: { ...deps[0], newValue: '10.0.0' },
+      });
+      expect(result).toBe(
+        content
+          .replace('>9.9.9<', '>10.0.0<')
+          .replace('>  1.0.99  <', '>  1.0.100  <')
+          .replace(
+            '<groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version>',
+            '<groupId>org.replaced</groupId><artifactId>foo-new</artifactId><version>1.20.30</version>',
+          )
+          .replace('>1.2.3<', '>1.2.4<'),
+      );
+    });
+
+    it('updates an extension without a project version', () => {
+      const content = codeBlock`
+        <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0">
+          <extension><groupId>org.example</groupId><artifactId>foo</artifactId><version>1.2.3</version></extension>
+        </extensions>
+      `;
+      const { deps } = extractExtensions(content, '.mvn/extensions.xml')!;
+      expect(
+        updateDependency({
+          fileContent: content,
+          packageFile: '.mvn/extensions.xml',
+          upgrade: { ...deps[0], newValue: '1.20.30' },
+        }),
+      ).toBe(content.replace('1.2.3', '1.20.30'));
+    });
+
+    it.each`
+      path
+      ${undefined}
+      ${[]}
+      ${[{ name: 'project', index: 1 }]}
+      ${[{ name: 'project', index: 0 }, { name: 'missing', index: 0 }]}
+    `('rejects a missing or unresolved target: $path', ({ path }) => {
+      expect(
+        updateDependency({
+          fileContent: simpleContent,
+          packageFile: 'pom.xml',
+          upgrade: {
+            ...simpleDep,
+            newValue: '0.0.2',
+            managerData: path ? { xmlPath: path } : undefined,
+          },
+        }),
+      ).toBeNull();
+    });
+
+    it('rejects malformed XML', () => {
+      expect(
+        updateDependency({
+          fileContent: 'invalid xml content',
+          packageFile: 'pom.xml',
+          upgrade: { ...simpleDep, newValue: '0.0.2' },
+        }),
+      ).toBeNull();
     });
   });
 
@@ -270,19 +375,45 @@ describe('modules/manager/maven/update', () => {
       expect(project.valueWithPath('version')).toBe('0.0.2-qualified-SNAPSHOT');
     });
 
-    it('does not bump version twice', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        simpleContent,
-        '0.0.1',
-        'patch',
-      );
+    it('does not bump version twice across a version length change', () => {
+      const content = codeBlock`
+        <project><version source="1.0.99">  <!-- keep -->1.0.99  </version></project>
+      `;
+      const { bumpedContent } = bumpPackageVersion(content, '1.0.99', 'patch');
       const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
         bumpedContent!,
-        '0.0.1',
+        '1.0.99',
         'patch',
       );
 
-      expect(bumpedContent).toEqual(bumpedContent2);
+      expect(bumpedContent).toBe(
+        codeBlock`
+          <project><version source="1.0.99">  <!-- keep -->1.0.100  </version></project>
+        `,
+      );
+      expect(bumpedContent2).toBe(bumpedContent);
+    });
+
+    it('replaces the complete current version after a minor then patch bump', () => {
+      const content = codeBlock`
+        <project><version source="1.0.99">  <!-- keep -->1.0.99  </version></project>
+      `;
+      const first = bumpPackageVersion(content, '1.0.99', 'minor');
+      expect(first.bumpedContent).toBe(
+        content.replace('<!-- keep -->1.0.99', '<!-- keep -->1.1.0'),
+      );
+
+      const second = bumpPackageVersion(
+        first.bumpedContent!,
+        '1.0.99',
+        'patch',
+      );
+
+      expect(second.bumpedContent).toBe(
+        codeBlock`
+          <project><version source="1.0.99">  <!-- keep -->1.0.100  </version></project>
+        `,
+      );
     });
 
     it('does not bump version if version is not a semantic version', () => {
