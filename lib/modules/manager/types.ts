@@ -426,6 +426,15 @@ export interface SharedConstraintsScope {
   precedence: number;
 }
 
+/**
+ * The constraints which the package files of a manager share for a directory, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraints {
+  manager: string;
+  directory: string;
+  constraints: Partial<Record<ConstraintName, string>>;
+}
+
 export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 

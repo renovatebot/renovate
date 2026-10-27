@@ -4,7 +4,10 @@ import type {
   PackageFile,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
-import { applySharedConstraints } from './shared-constraints.ts';
+import {
+  collectSharedConstraints,
+  getSharedConstraints,
+} from './shared-constraints.ts';
 
 vi.mock('../../../modules/manager/index.ts', () => ({ get: vi.fn() }));
 
@@ -18,6 +21,8 @@ const scopes = new Map<string, SharedConstraintsScope>([
   ['tools.local.toml', { directory: '', precedence: 1 }],
   ['apps/web/tools.toml', { directory: 'apps/web', precedence: 0 }],
   ['apps/api/tools.toml', { directory: 'apps/api', precedence: 0 }],
+  ['b.toml', { directory: '', precedence: 0 }],
+  ['a.toml', { directory: '', precedence: 0 }],
 ]);
 
 function getSharedConstraintsScope(
@@ -42,82 +47,17 @@ describe('workers/repository/extract/shared-constraints', () => {
     );
   });
 
-  describe('applySharedConstraints()', () => {
+  describe('collectSharedConstraints()', () => {
     it('handles missing package files', () => {
-      expect(() => applySharedConstraints(undefined)).not.toThrow();
+      expect(collectSharedConstraints(undefined)).toEqual([]);
     });
 
-    it('leaves package files alone without managers sharing constraints', () => {
+    it('ignores managers without shared constraints', () => {
       const packageFiles = {
         npm: [packageFile('package.json', { node: '20' })],
-        pep621: [packageFile('pyproject.toml')],
       };
 
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles).toEqual({
-        npm: [packageFile('package.json', { node: '20' })],
-        pep621: [packageFile('pyproject.toml')],
-      });
-    });
-
-    it('adds the shared constraints to package files in the same directory and below', () => {
-      const packageFiles = {
-        tools: [
-          packageFile('tools.toml', { node: '20.11.0', pnpm: '10.16.1' }),
-        ],
-        npm: [
-          packageFile('package.json'),
-          packageFile('apps/web/package.json'),
-        ],
-      };
-
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm).toEqual([
-        packageFile('package.json', { node: '20.11.0', pnpm: '10.16.1' }),
-        packageFile('apps/web/package.json', {
-          node: '20.11.0',
-          pnpm: '10.16.1',
-        }),
-      ]);
-    });
-
-    it('prefers the constraints the package file extracted itself', () => {
-      const own = { pnpm: '9.15.0' };
-      const shared = { node: '20.11.0', pnpm: '10.16.1' };
-      const packageFiles = {
-        tools: [packageFile('tools.toml', shared)],
-        npm: [packageFile('package.json', own)],
-      };
-
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm[0].extractedConstraints).toEqual({
-        node: '20.11.0',
-        pnpm: '9.15.0',
-      });
-      expect(own).toEqual({ pnpm: '9.15.0' });
-      expect(shared).toEqual({ node: '20.11.0', pnpm: '10.16.1' });
-    });
-
-    it('ignores package files outside of the directory', () => {
-      const packageFiles = {
-        tools: [packageFile('apps/api/tools.toml', { node: '20.11.0' })],
-        npm: [
-          packageFile('apps/web/package.json'),
-          packageFile('apps/api-client/package.json'),
-          packageFile('package.json'),
-        ],
-      };
-
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm).toEqual([
-        packageFile('apps/web/package.json'),
-        packageFile('apps/api-client/package.json'),
-        packageFile('package.json'),
-      ]);
+      expect(collectSharedConstraints(packageFiles)).toEqual([]);
     });
 
     it('ignores package files without a scope or constraints', () => {
@@ -126,86 +66,94 @@ describe('workers/repository/extract/shared-constraints', () => {
           packageFile('tools.production.toml', { node: '22.0.0' }),
           packageFile('tools.toml'),
         ],
-        npm: [packageFile('package.json')],
       };
 
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm).toEqual([packageFile('package.json')]);
+      expect(collectSharedConstraints(packageFiles)).toEqual([]);
     });
 
-    it('prefers the nearest directory', () => {
+    it('merges the package files of a directory by precedence, shallower directories first', () => {
+      const shared = { node: '20.11.0', pnpm: '10.16.1' };
       const packageFiles = {
         tools: [
-          packageFile('apps/web/tools.toml', { pnpm: '10.16.1' }),
-          packageFile('tools.toml', { node: '20.11.0', pnpm: '9.15.0' }),
-        ],
-        npm: [
-          packageFile('apps/web/package.json'),
-          packageFile('package.json'),
-        ],
-      };
-
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm).toEqual([
-        packageFile('apps/web/package.json', {
-          node: '20.11.0',
-          pnpm: '10.16.1',
-        }),
-        packageFile('package.json', { node: '20.11.0', pnpm: '9.15.0' }),
-      ]);
-    });
-
-    it('follows the precedence within a directory', () => {
-      const packageFiles = {
-        tools: [
+          packageFile('apps/web/tools.toml', { pnpm: '9.15.0' }),
           packageFile('tools.local.toml', { node: '22.0.0' }),
-          packageFile('tools.toml', { node: '20.11.0', pnpm: '10.16.1' }),
-        ],
-        npm: [packageFile('package.json')],
-      };
-
-      applySharedConstraints(packageFiles);
-
-      expect(packageFiles.npm[0].extractedConstraints).toEqual({
-        node: '22.0.0',
-        pnpm: '10.16.1',
-      });
-    });
-
-    it('orders package files of the same directory and precedence by path', () => {
-      scopes.set('b.toml', { directory: '', precedence: 0 });
-      scopes.set('a.toml', { directory: '', precedence: 0 });
-      const packageFiles = {
-        tools: [
           packageFile('b.toml', { rust: '1.80.0' }),
           packageFile('a.toml', { rust: '1.79.0' }),
+          packageFile('tools.toml', shared),
         ],
-        npm: [packageFile('package.json')],
       };
 
-      applySharedConstraints(packageFiles);
+      const res = collectSharedConstraints(packageFiles);
 
-      expect(packageFiles.npm[0].extractedConstraints).toEqual({
-        rust: '1.80.0',
-      });
+      expect(res).toEqual([
+        {
+          manager: 'tools',
+          directory: '',
+          constraints: { node: '22.0.0', pnpm: '10.16.1', rust: '1.80.0' },
+        },
+        {
+          manager: 'tools',
+          directory: 'apps/web',
+          constraints: { pnpm: '9.15.0' },
+        },
+      ]);
+      expect(shared).toEqual({ node: '20.11.0', pnpm: '10.16.1' });
+    });
+  });
+
+  describe('getSharedConstraints()', () => {
+    const sharedConstraints = [
+      {
+        manager: 'tools',
+        directory: '',
+        constraints: { node: '20.11.0', pnpm: '9.15.0' },
+      },
+      {
+        manager: 'tools',
+        directory: 'apps/web',
+        constraints: { pnpm: '10.16.1' },
+      },
+    ];
+
+    it.each`
+      packageFile                       | expected
+      ${'package.json'}                 | ${{ node: '20.11.0', pnpm: '9.15.0' }}
+      ${'apps/web/package.json'}        | ${{ node: '20.11.0', pnpm: '10.16.1' }}
+      ${'apps/web/nested/package.json'} | ${{ node: '20.11.0', pnpm: '10.16.1' }}
+      ${'apps/web-client/package.json'} | ${{ node: '20.11.0', pnpm: '9.15.0' }}
+      ${undefined}                      | ${{ node: '20.11.0', pnpm: '9.15.0' }}
+    `('returns $expected for $packageFile', ({ packageFile, expected }) => {
+      expect(
+        getSharedConstraints(sharedConstraints, 'npm', packageFile),
+      ).toEqual(expected);
     });
 
-    it('does not share constraints between package files of the same manager', () => {
-      const packageFiles = {
-        tools: [
-          packageFile('tools.toml', { node: '20.11.0' }),
-          packageFile('apps/web/tools.toml'),
-        ],
-      };
+    it('ignores constraints outside of the directory', () => {
+      expect(
+        getSharedConstraints(
+          [
+            {
+              manager: 'tools',
+              directory: 'apps/api',
+              constraints: { node: '20' },
+            },
+          ],
+          'npm',
+          'apps/web/package.json',
+        ),
+      ).toEqual({});
+    });
 
-      applySharedConstraints(packageFiles);
+    it('does not apply the constraints of a manager to its own package files', () => {
+      expect(
+        getSharedConstraints(sharedConstraints, 'tools', 'apps/web/tools.toml'),
+      ).toEqual({});
+    });
 
-      expect(packageFiles.tools).toEqual([
-        packageFile('tools.toml', { node: '20.11.0' }),
-        packageFile('apps/web/tools.toml'),
-      ]);
+    it('handles missing shared constraints', () => {
+      expect(getSharedConstraints(undefined, 'npm', 'package.json')).toEqual(
+        {},
+      );
     });
   });
 });

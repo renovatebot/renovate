@@ -102,6 +102,28 @@ describe('workers/repository/process/extract-update', () => {
       });
     });
 
+    it('passes the shared constraints of the package files on to the branches', async () => {
+      const config = { repoIsOnboarded: true };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [{ packageFile: 'package.json', deps: [] }],
+      };
+      const shared = [
+        { manager: 'tools', directory: '', constraints: { pnpm: '10.16.1' } },
+      ];
+      sharedConstraints.collectSharedConstraints.mockReturnValueOnce(shared);
+
+      await lookup(config, packageFiles);
+
+      expect(sharedConstraints.collectSharedConstraints).toHaveBeenCalledWith(
+        packageFiles,
+      );
+      expect(branchify.branchifyUpgrades).toHaveBeenCalledWith(
+        { ...config, sharedConstraints: shared },
+        packageFiles,
+      );
+      expect(config).toEqual({ repoIsOnboarded: true });
+    });
+
     it('runs with baseBranchPatterns', async () => {
       const config = {
         baseBranchPatterns: ['master', 'dev'],
@@ -816,23 +838,6 @@ describe('workers/repository/process/extract-update', () => {
         expect(
           (await extract(config)).npm[0].deps[0].skipReason,
         ).toBeUndefined();
-      });
-
-      it('shares constraints between managers after caching what was extracted', async () => {
-        extractAll.extractAllDependencies.mockResolvedValueOnce({
-          packageFiles: createPackageFiles(),
-          extractionFingerprints: {},
-        });
-        sharedConstraints.applySharedConstraints.mockImplementationOnce(
-          (packageFiles) => {
-            packageFiles!.npm[0].extractedConstraints = { pnpm: '10.16.1' };
-          },
-        );
-
-        const res = await extract(config);
-
-        expect(res.npm[0].extractedConstraints).toEqual({ pnpm: '10.16.1' });
-        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
       });
     });
 
