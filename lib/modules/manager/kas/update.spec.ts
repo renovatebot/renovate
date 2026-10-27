@@ -152,6 +152,31 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
+    it('only replaces the tag value when the repo key contains the version', () => {
+      const fileContent = codeBlock`
+        header:
+          version: 22
+        repos:
+          meta-foo-1.0:
+            url: https://example.com/meta-foo-1.0.git
+            tag: 1.0
+      `;
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'kas.yml',
+        upgrade: {
+          depName: 'meta-foo-1.0',
+          datasource: 'git-tags',
+          currentValue: '1.0',
+          newValue: '1.1',
+          replaceString: fileContent.slice(fileContent.indexOf('meta-foo')),
+        },
+      });
+      expect(result).toContain('meta-foo-1.0:');
+      expect(result).toContain('url: https://example.com/meta-foo-1.0.git');
+      expect(result).toContain('tag: 1.1');
+    });
+
     it('returning original content if replace string is not found', () => {
       const upgrade = {
         depName: 'isar',

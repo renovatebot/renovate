@@ -8,6 +8,19 @@ import type { UpdateDependencyConfig } from '../types.ts';
 import { isLockFilePath, isYamlFilePath } from './include.ts';
 import type { KasRepo } from './schema.ts';
 
+// only touch the value of `<field>:`; the repo key and url may contain the same text
+function replaceFieldValue(
+  block: string,
+  field: 'tag' | 'commit',
+  from: string,
+  to: string,
+): string {
+  return block.replace(
+    regEx(`^(\\s*${field}:\\s*["']?)${RegExp.escape(from)}`, 'm'),
+    `$1${to}`,
+  );
+}
+
 export function updateDependency({
   fileContent,
   packageFile,
@@ -50,26 +63,13 @@ export function updateDependency({
     try {
       let newString = replaceString;
       if (currentValue && newValue && currentValue !== newValue) {
-        if (!newString.includes(currentValue)) {
-          logger.trace(
-            { stringToReplace: newString, currentValue },
-            'currentValue not found in string to replace',
-          );
-        }
-        newString = newString.replace(
-          regEx(RegExp.escape(currentValue)),
-          newValue,
-        );
+        newString = replaceFieldValue(newString, 'tag', currentValue, newValue);
       }
       if (currentDigest && newDigest && currentDigest !== newDigest) {
-        if (!newString.includes(currentDigest)) {
-          logger.trace(
-            { stringToReplace: newString, currentDigest },
-            'currentDigest not found in string to replace',
-          );
-        }
-        newString = newString.replace(
-          regEx(RegExp.escape(currentDigest)),
+        newString = replaceFieldValue(
+          newString,
+          'commit',
+          currentDigest,
           newDigest,
         );
       }
