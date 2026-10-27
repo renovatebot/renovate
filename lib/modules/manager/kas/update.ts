@@ -92,68 +92,50 @@ export function updateDependency({
       return fileContent;
     }
   } else {
-    let parsedContent = null;
-    const isLockFile = isLockFilePath(packageFile);
     if (!depName) {
       logger.warn({ packageFile }, 'Dependency name not provided for update.');
       return fileContent;
     }
-    if (isLockFile) {
+    let parsedContent;
+    try {
       parsedContent = parse(fileContent);
-      const repos = parsedContent?.overrides?.repos;
-      if (!parsedContent || !repos) {
-        logger.warn(
-          { packageFile, depName },
-          'Parsed content or repos not found for non-yaml file.',
-        );
-        return fileContent;
-      }
-      const repo = repos[depName];
-      if (!repo) {
-        logger.warn(
-          { packageFile, depName },
-          'Repo not found in lock file for given dependency name.',
-        );
-        return fileContent;
-      }
-      if (
-        newDigest &&
-        currentDigest === repo.commit &&
-        currentDigest !== newDigest
-      ) {
-        repo.commit = newDigest;
-      }
-    } else {
-      parsedContent = parse(fileContent);
-      const repos: Record<string, KasRepo | null | undefined> =
-        parsedContent?.repos;
-      if (!parsedContent || !repos) {
-        logger.warn(
-          { packageFile, depName },
-          'Parsed content or repos not found for non-yaml file.',
-        );
-        return fileContent;
-      }
-      const repo = repos[depName];
-      if (!repo) {
-        logger.warn(
-          { packageFile, depName },
-          'Repo not found in project file for given dependency name.',
-        );
-        return fileContent;
-      }
-      if (
-        newDigest &&
-        currentDigest === repo.commit &&
-        currentDigest !== newDigest
-      ) {
-        repo.commit = newDigest;
-      }
-      if (newValue && currentValue === repo.tag && currentValue !== newValue) {
-        repo.tag = newValue;
-      }
+    } catch (err) {
+      logger.warn({ packageFile, depName, err }, 'Cannot parse json file.');
+      return fileContent;
     }
-    const newContent = weave(fileContent, parsedContent);
-    return newContent;
+    const isLockFile = isLockFilePath(packageFile);
+    const repos: Record<string, KasRepo | null | undefined> | undefined =
+      isLockFile ? parsedContent?.overrides?.repos : parsedContent?.repos;
+    if (!repos) {
+      logger.warn(
+        { packageFile, depName },
+        'Parsed content or repos not found for non-yaml file.',
+      );
+      return fileContent;
+    }
+    const repo = repos[depName];
+    if (!repo) {
+      logger.warn(
+        { packageFile, depName },
+        'Repo not found for given dependency name.',
+      );
+      return fileContent;
+    }
+    if (
+      newDigest &&
+      currentDigest === repo.commit &&
+      currentDigest !== newDigest
+    ) {
+      repo.commit = newDigest;
+    }
+    if (
+      !isLockFile &&
+      newValue &&
+      currentValue === repo.tag &&
+      currentValue !== newValue
+    ) {
+      repo.tag = newValue;
+    }
+    return weave(fileContent, parsedContent);
   }
 }

@@ -313,6 +313,21 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
+    it('returns original content for invalid json', () => {
+      const fileContent = '{ "repos": ';
+      const result = updateDependency({
+        fileContent,
+        packageFile: 'kas.json',
+        upgrade: {
+          depName: 'isar',
+          datasource: 'git-refs',
+          currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+          newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+        },
+      });
+      expect(result).toBe(fileContent);
+    });
+
     it('skip updating json lock file content when no repos are found', () => {
       const upgrade = {
         depName: 'isar',
