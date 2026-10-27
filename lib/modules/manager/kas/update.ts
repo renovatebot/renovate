@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { parse, weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
-import { writeLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -9,11 +8,11 @@ import type { UpdateDependencyConfig } from '../types.ts';
 import { isLockFilePath, isYamlFilePath } from './include.ts';
 import type { KasRepo } from './schema.ts';
 
-export async function updateDependency({
+export function updateDependency({
   fileContent,
   packageFile,
   upgrade,
-}: UpdateDependencyConfig): Promise<string | null> {
+}: UpdateDependencyConfig): string | null {
   const {
     depName,
     datasource,
@@ -87,7 +86,6 @@ export async function updateDependency({
         );
         return fileContent;
       }
-      await writeLocalFile(packageFile, newContent);
       return newContent;
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ packageFile, depName, err }, 'update Dependency error');
@@ -156,7 +154,6 @@ export async function updateDependency({
       }
     }
     const newContent = weave(fileContent, parsedContent);
-    await writeLocalFile(packageFile, newContent);
     return newContent;
   }
 }

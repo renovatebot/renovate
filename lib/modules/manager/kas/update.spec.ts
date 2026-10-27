@@ -1,8 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { vi } from 'vitest';
 import { updateDependency } from './update.ts';
-
-vi.mock('../../../util/fs/index.ts');
 
 const kasFileYamlBranch = codeBlock`
   header:
@@ -117,7 +114,7 @@ const kasLockFileJson = JSON.stringify(
 
 describe('modules/manager/kas/update', () => {
   describe('updateDependency()', () => {
-    it('replacing yaml file content with new digest', async () => {
+    it('replacing yaml file content with new digest', () => {
       const upgrade = {
         depName: 'isar',
         packageFile: 'kas-branch-commit.yml',
@@ -127,7 +124,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
         replaceString: replaceStringIsarYaml,
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlBranch,
         packageFile: 'kas-branch-commit.yml',
         upgrade,
@@ -136,7 +133,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
-    it('replacing yaml file content with new digest and new value', async () => {
+    it('replacing yaml file content with new digest and new value', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-tags',
@@ -146,7 +143,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
         replaceString: replaceStringIsarYamlTag,
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlTag,
         packageFile: 'kas-tag-commit.yml',
         upgrade,
@@ -155,7 +152,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
-    it('returning original content if replace string is not found', async () => {
+    it('returning original content if replace string is not found', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -164,7 +161,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
         replaceString: 'string-not-in-file',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlBranch,
         packageFile: 'kas-branch-commit.yml',
         upgrade,
@@ -172,7 +169,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileYamlBranch);
     });
 
-    it('replacing json file content with new digest', async () => {
+    it('replacing json file content with new digest', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -180,7 +177,7 @@ describe('modules/manager/kas/update', () => {
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileJsonBranch,
         packageFile: 'kas-branch-commit.json',
         upgrade,
@@ -189,7 +186,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
-    it('replacing json file content with new digest and new value', async () => {
+    it('replacing json file content with new digest and new value', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-tags',
@@ -198,7 +195,7 @@ describe('modules/manager/kas/update', () => {
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileJsonTag,
         packageFile: 'kas-tag-commit.json',
         upgrade,
@@ -207,7 +204,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
-    it('skip updating digest if datasource is git-tags and version did not change', async () => {
+    it('skip updating digest if datasource is git-tags and version did not change', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-tags',
@@ -217,7 +214,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: '6504321e85b5fdc3bb5a83f042b77cb39cd11a6f',
         replaceString: replaceStringIsarYamlTag,
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlTag,
         packageFile: 'kas-tag-commit.yml',
         upgrade,
@@ -225,7 +222,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileYamlTag);
     });
 
-    it('skip updates when currentValue and currentDigest is not included in the file', async () => {
+    it('skip updates when currentValue and currentDigest is not included in the file', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -235,7 +232,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
         replaceString: replaceStringIsarYamlTag,
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlTag,
         packageFile: 'kas-tag-commit.yml',
         upgrade,
@@ -243,7 +240,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileYamlTag);
     });
 
-    it('skip updates when depName is not provided', async () => {
+    it('skip updates when depName is not provided', () => {
       const upgrade = {
         depName: '',
         datasource: 'git-refs',
@@ -251,7 +248,7 @@ describe('modules/manager/kas/update', () => {
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileJsonBranch,
         packageFile: 'kas-branch-commit.json',
         upgrade,
@@ -259,7 +256,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileJsonBranch);
     });
 
-    it('skip updates when currentDigest equals newDigest', async () => {
+    it('skip updates when currentDigest equals newDigest', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -268,7 +265,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         replaceString: replaceStringIsarYaml,
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileYamlBranch,
         packageFile: 'kas-branch-commit.yml',
         upgrade,
@@ -276,14 +273,14 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileYamlBranch);
     });
 
-    it('update json lock file content with new digest', async () => {
+    it('update json lock file content with new digest', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasLockFileJson,
         packageFile: 'kas-branch-commit.lock.json',
         upgrade,
@@ -291,7 +288,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('c0bacbd54d682c6c2d71cdadcc2050a0173ada0a');
     });
 
-    it('skip updating json lock file content when no repos are found', async () => {
+    it('skip updating json lock file content when no repos are found', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -299,7 +296,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
       const lockFileWithoutRepos = kasLockFileJson.replace('repos', 'noRepos');
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: lockFileWithoutRepos,
         packageFile: 'kas-branch-commit.lock.json',
         upgrade,
@@ -307,14 +304,14 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(lockFileWithoutRepos);
     });
 
-    it('skip updating json lock file content when repo is not found', async () => {
+    it('skip updating json lock file content when repo is not found', () => {
       const upgrade = {
         depName: 'noIsar',
         datasource: 'git-refs',
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasLockFileJson,
         packageFile: 'kas-branch-commit.lock.json',
         upgrade,
@@ -322,7 +319,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasLockFileJson);
     });
 
-    it('skip updating json file content when no repos are found', async () => {
+    it('skip updating json file content when no repos are found', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
@@ -331,7 +328,7 @@ describe('modules/manager/kas/update', () => {
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
       const kasFileWithoutRepos = kasFileJsonBranch.replace('repos', 'noRepos');
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileWithoutRepos,
         packageFile: 'kas-branch-commit.json',
         upgrade,
@@ -339,7 +336,7 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileWithoutRepos);
     });
 
-    it('skip updating json file content repo is not found', async () => {
+    it('skip updating json file content repo is not found', () => {
       const upgrade = {
         depName: 'noIsar',
         datasource: 'git-refs',
@@ -347,7 +344,7 @@ describe('modules/manager/kas/update', () => {
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileJsonBranch,
         packageFile: 'kas-branch-commit.json',
         upgrade,
@@ -355,14 +352,14 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasFileJsonBranch);
     });
 
-    it('skip updating json lock file when commit did not change', async () => {
+    it('skip updating json lock file when commit did not change', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasLockFileJson,
         packageFile: 'kas-branch-commit.lock.json',
         upgrade,
@@ -370,14 +367,14 @@ describe('modules/manager/kas/update', () => {
       expect(result).toBe(kasLockFileJson);
     });
 
-    it('skip updating json file when commit did not change', async () => {
+    it('skip updating json file when commit did not change', () => {
       const upgrade = {
         depName: 'isar',
         datasource: 'git-refs',
         currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
         newDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
       };
-      const result = await updateDependency({
+      const result = updateDependency({
         fileContent: kasFileJsonBranch,
         packageFile: 'kas-branch-commit.json',
         upgrade,
