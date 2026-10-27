@@ -772,6 +772,66 @@ describe('modules/manager/pep621/extract', () => {
       expect(res?.deps[2].registryUrls).toBeUndefined();
     });
 
+    it('should mark a transitive dep which uv.lock holds at several versions', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.8"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "urllib3"
+          version = "2.8.0"
+          source = { registry = "https://pypi.org/simple" }
+          resolution-markers = [
+              "python_full_version >= '3.10'",
+          ]
+
+          [[package]]
+          name = "urllib3"
+          version = "2.2.3"
+          source = { registry = "https://pypi.org/simple" }
+          resolution-markers = [
+              "python_full_version < '3.9'",
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.8"
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // the lowest version is the one to look up, so no fix is missed, but the
+      // upgrade cannot be pinned to it
+      expect(res?.deps).toMatchObject([
+        { packageName: 'python' },
+        { packageName: 'attrs' },
+        {
+          packageName: 'urllib3',
+          depType: 'uv.lock',
+          lockedVersion: '2.2.3',
+          skipReason: 'lockfile-only',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ]);
+    });
+
     it('should not surface transitive deps from uv.lock by default', async () => {
       fs.readLocalFile.mockResolvedValue(
         codeBlock`

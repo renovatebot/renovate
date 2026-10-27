@@ -18,6 +18,7 @@ import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { PyProject, UvSource } from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
 
@@ -565,7 +566,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
@@ -574,7 +575,7 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('returns if no lockfile found', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
       const result = await processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       expect(result).toBeNull();
@@ -895,6 +896,42 @@ describe('modules/manager/pep621/processors/uv', () => {
           cmd: 'uv lock --upgrade-package dep1==3.15 --upgrade-package dep2',
         },
       ]);
+    });
+
+    it('does not pin the upgrade of a transitive dep locked at several versions', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.uvTransitiveDependencies,
+          newVersion: '3.15',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { packageName: 'dep1', newVersion: '3.15' },
+        expect.stringContaining('vulnerabilityFixStrategy cannot be honoured'),
+      );
     });
 
     it('performs update on private package registry', async () => {

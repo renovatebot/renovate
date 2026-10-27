@@ -254,6 +254,14 @@ export const PdmLockfile = Toml.pipe(
 export interface UvLockedPackage {
   version: string;
   /**
+   * Whether the lock file holds more than one entry for this package, as it
+   * does when resolution markers resolve to different versions. Such a package
+   * cannot be upgraded to a pinned version, because `uv` reads the pin as a
+   * constraint on every marker, and so may downgrade the other entries, or
+   * fail to resolve at all.
+   */
+  hasMultipleEntries?: boolean;
+  /**
    * The index a package was resolved from, if any. Absent for the workspace
    * root and for virtual/editable/path/git packages, which cannot be
    * remediated by `uv lock --upgrade-package`.
@@ -275,13 +283,21 @@ export const UvLockfile = Toml.pipe(
   const pkgMap: Record<string, UvLockedPackage> = {};
 
   for (const { name, version, source } of pkgs) {
+    const locked = pkgMap[name];
     // A package can be locked at several versions, e.g. for different Python
     // versions or platforms. Use the lowest one, so updates are not missed.
-    if (
-      !(name in pkgMap) ||
-      pep440.isGreaterThan(pkgMap[name].version, version)
-    ) {
+    if (!locked) {
       pkgMap[name] = { version, registryUrl: source?.registry };
+      continue;
+    }
+
+    locked.hasMultipleEntries = true;
+    if (pep440.isGreaterThan(locked.version, version)) {
+      pkgMap[name] = {
+        version,
+        registryUrl: source?.registry,
+        hasMultipleEntries: true,
+      };
     }
   }
 

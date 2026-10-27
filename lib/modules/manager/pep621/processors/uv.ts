@@ -36,6 +36,7 @@ import {
   UvLockfile,
   type UvSource,
 } from '../schema.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
 
@@ -239,6 +240,9 @@ export class UvProcessor extends BasePyProjectProcessor {
         skipReason: 'lockfile-only',
         skipStage: 'extract',
       };
+      if (locked.hasMultipleEntries) {
+        transitiveDep.managerData = { hasMultipleLockedEntries: true };
+      }
       if (!defaultPypiRegistries.has(locked.registryUrl)) {
         transitiveDep.registryUrls = [locked.registryUrl];
       }
@@ -247,7 +251,7 @@ export class UvProcessor extends BasePyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact,
+    updateArtifact: UpdateArtifact<Pep621ManagerData>,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
@@ -321,7 +325,7 @@ export class UvProcessor extends BasePyProjectProcessor {
   }
 }
 
-function generateCMD(updatedDeps: Upgrade[]): string {
+function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
@@ -336,6 +340,19 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         break;
       }
       case depTypes.uvTransitiveDependencies: {
+        // A package the lock file holds more than once, e.g. at a version per
+        // resolution marker, can only be upgraded without a version: `uv`
+        // reads a pinned one as a constraint on every marker, so it would
+        // downgrade the other entries, or fail to resolve at all.
+        if (dep.managerData?.hasMultipleLockedEntries) {
+          logger.warn(
+            { packageName: dep.packageName, newVersion: dep.newVersion },
+            'Upgrading a dependency which the lock file holds more than once, without a version: vulnerabilityFixStrategy cannot be honoured, so the version this resolves to may differ from the one Renovate picked',
+          );
+          deps.push(dep.packageName!);
+          break;
+        }
+
         // Nothing in `pyproject.toml` constrains a transitive dependency, so an
         // unpinned upgrade would resolve to the newest release instead of the
         // version we determined, e.g. the lowest one fixing a vulnerability.
