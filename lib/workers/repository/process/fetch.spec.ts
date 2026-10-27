@@ -317,6 +317,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'transitive-dep',
+                packageName: 'transitive-dep',
                 datasource: 'pypi',
                 lockedVersion: '1.0.0',
                 skipReason: 'lockfile-only',
@@ -345,6 +346,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'transitive-dep',
+                packageName: 'transitive-dep',
                 datasource: 'pypi',
                 lockedVersion: '1.0.0',
                 skipReason: 'lockfile-only',
@@ -381,6 +383,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'transitive-dep',
+                packageName: 'transitive-dep',
                 datasource: 'pypi',
                 lockedVersion: '1.0.0',
                 skipReason: 'lockfile-only',
@@ -423,6 +426,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'transitive-dep',
+                packageName: 'transitive-dep',
                 datasource: 'pypi',
                 lockedVersion: '2024.1.1',
                 skipReason: 'lockfile-only',
@@ -457,6 +461,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'transitive-dep',
+                packageName: 'transitive-dep',
                 datasource: 'pypi',
                 lockedVersion: '1.0.0',
                 skipReason: 'lockfile-only',
