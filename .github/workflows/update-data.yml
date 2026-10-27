@@ -55,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BRANCHES: ${{ steps.update.outputs.branches }}
         run: |
-          gh extension install github/gh-stack --pin v0.2.1
+          gh extension install github/gh-stack --pin v0.3.0
           gh auth setup-git
 
           # any unmerged PRs from a previous run are superseded by this run
