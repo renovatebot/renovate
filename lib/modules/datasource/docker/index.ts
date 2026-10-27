@@ -1163,15 +1163,27 @@ export class DockerDatasource extends Datasource {
     const maxPages = GlobalConfig.get('dockerMaxPages');
     const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let page = 0,
-      needNextPage = true;
+      needNextPage = true,
+      isPartial = false;
     while (needNextPage && page < maxPages) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
         .unwrap();
 
       if (err) {
-        logger.debug({ err }, `Docker: error fetching data from DockerHub`);
-        return null;
+        if (page === 0) {
+          logger.debug({ err }, `Docker: error fetching data from DockerHub`);
+          return null;
+        }
+
+        // Docker Hub rejects anonymous requests beyond the first 1000 tags with a 403.
+        // The pages already fetched hold the newest tags, so keep them and their timestamps.
+        logger.debug(
+          { err },
+          `Docker: error fetching page ${page + 1} of Docker Hub tags for ${dockerRepository}, keeping the tags already fetched`,
+        );
+        isPartial = true;
+        break;
       }
       page++;
       const { results, next, count } = val;
@@ -1195,7 +1207,10 @@ export class DockerDatasource extends Datasource {
       url = nextUrl;
     }
 
-    await cache.save();
+    // Do not cache an incomplete result, so the next lookup fetches all pages again
+    if (!isPartial) {
+      await cache.save();
+    }
 
     const items = cache.getItems();
     return items.map(({ name: version, tag_last_pushed }) => {
