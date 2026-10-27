@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -187,18 +188,26 @@ export class UvProcessor extends BasePyProjectProcessor {
         if (err) {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
+          const { packages, declaredNames } = lockFileMapping;
           for (const dep of deps) {
             const packageName = dep.packageName;
-            if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName].version;
+            if (packageName && packageName in packages) {
+              dep.lockedVersion = packages[packageName].version;
             }
           }
 
           // Transitive dependencies are only of use to vulnerability
           // remediation, and a large `uv.lock` holds a lot of them, so don't
           // surface any unless vulnerability alerts are enabled.
-          if (config?.hasVulnerabilityAlertsRules) {
-            this.addTransitiveDeps(deps, lockFileMapping);
+          //
+          // A workspace shares one lock file between its members, so they are
+          // surfaced once, for the package file which owns it, or every member
+          // would report the others' dependencies as transitive.
+          if (
+            config?.hasVulnerabilityAlertsRules &&
+            upath.dirname(lockFileName) === upath.dirname(packageFile)
+          ) {
+            this.addTransitiveDeps(deps, packages, declaredNames);
           }
         }
       }
@@ -216,13 +225,15 @@ export class UvProcessor extends BasePyProjectProcessor {
    */
   private addTransitiveDeps(
     deps: PackageDependency[],
-    lockFileMapping: Record<string, UvLockedPackage>,
+    packages: Record<string, UvLockedPackage>,
+    declaredNames: ReadonlySet<string>,
   ): void {
-    const declaredPackageNames = new Set(
-      deps.map((dep) => dep.packageName).filter(isString),
-    );
+    const declaredPackageNames = new Set([
+      ...declaredNames,
+      ...deps.map((dep) => dep.packageName).filter(isString),
+    ]);
 
-    for (const [packageName, locked] of Object.entries(lockFileMapping)) {
+    for (const [packageName, locked] of Object.entries(packages)) {
       if (declaredPackageNames.has(packageName)) {
         continue;
       }

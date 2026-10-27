@@ -1,4 +1,6 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -269,6 +271,21 @@ export interface UvLockedPackage {
   registryUrl?: string;
 }
 
+export interface UvLockfileData {
+  packages: Record<string, UvLockedPackage>;
+  /**
+   * Every package name which a workspace member declares. A workspace shares
+   * one lock file between its members, so a package one member declares is not
+   * transitive just because another member doesn't declare it.
+   */
+  declaredNames: Set<string>;
+}
+
+const UvLockedDependencies = LooseArray(z.object({ name: z.string() }));
+const UvLockedDependencyGroups = z
+  .record(z.string(), UvLockedDependencies)
+  .optional();
+
 export const UvLockfile = Toml.pipe(
   z.object({
     package: LooseArray(
@@ -276,24 +293,44 @@ export const UvLockfile = Toml.pipe(
         name: z.string(),
         version: z.string(),
         source: z.object({ registry: z.string() }).partial().optional(),
+        dependencies: UvLockedDependencies.optional(),
+        'optional-dependencies': UvLockedDependencyGroups,
+        'dev-dependencies': UvLockedDependencyGroups,
       }),
     ),
   }),
-).transform(({ package: pkgs }) => {
-  const pkgMap: Record<string, UvLockedPackage> = {};
+).transform(({ package: pkgs }): UvLockfileData => {
+  const packages: Record<string, UvLockedPackage> = {};
+  const declaredNames = new Set<string>();
 
-  for (const { name, version, source } of pkgs) {
-    const locked = pkgMap[name];
+  for (const pkg of pkgs) {
+    const { name, version, source } = pkg;
+
+    // A package with no registry is a workspace member, or the root, so what
+    // it depends on is declared rather than transitive.
+    if (!source?.registry) {
+      for (const group of [
+        pkg.dependencies,
+        ...Object.values(coerceObject(pkg['optional-dependencies'])),
+        ...Object.values(coerceObject(pkg['dev-dependencies'])),
+      ]) {
+        for (const dependency of coerceArray(group)) {
+          declaredNames.add(dependency.name);
+        }
+      }
+    }
+
+    const locked = packages[name];
     // A package can be locked at several versions, e.g. for different Python
     // versions or platforms. Use the lowest one, so updates are not missed.
     if (!locked) {
-      pkgMap[name] = { version, registryUrl: source?.registry };
+      packages[name] = { version, registryUrl: source?.registry };
       continue;
     }
 
     locked.hasMultipleEntries = true;
     if (pep440.isGreaterThan(locked.version, version)) {
-      pkgMap[name] = {
+      packages[name] = {
         version,
         registryUrl: source?.registry,
         hasMultipleEntries: true,
@@ -301,5 +338,5 @@ export const UvLockfile = Toml.pipe(
     }
   }
 
-  return pkgMap;
+  return { packages, declaredNames };
 });

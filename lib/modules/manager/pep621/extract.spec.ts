@@ -832,6 +832,92 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
+    it('should surface transitive deps of a workspace only for the package file which owns uv.lock', async () => {
+      const workspaceLockfile = codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "attrs"
+        version = "24.2.0"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "idna"
+        version = "3.10"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "urllib3"
+        version = "2.8.0"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "pkg-a"
+        version = "0.1.0"
+        source = { virtual = "packages/a" }
+        dependencies = [
+            { name = "attrs" },
+        ]
+
+        [package.dev-dependencies]
+        dev = [
+            { name = "idna" },
+        ]
+
+        [[package]]
+        name = "workspace-root"
+        version = "0.1.0"
+        source = { virtual = "." }
+      `;
+      const memberPyProject = codeBlock`
+        [project]
+        name = "pkg-a"
+        version = "0.1.0"
+        dependencies = ["attrs>=24.1.0"]
+        requires-python = ">=3.11"
+      `;
+
+      fs.readLocalFile.mockResolvedValue(workspaceLockfile);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      // a member does not own the lock file, which sits at the workspace root
+      const member = await extractPackageFile(
+        memberPyProject,
+        'packages/a/pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      expect(
+        member?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toBeEmpty();
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const root = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "workspace-root"
+          version = "0.1.0"
+          requires-python = ">=3.11"
+
+          [tool.uv.workspace]
+          members = ["packages/*"]
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // `attrs` and `idna` belong to a member, so only `urllib3` is transitive
+      expect(
+        root?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toMatchObject([{ packageName: 'urllib3', lockedVersion: '2.8.0' }]);
+    });
+
     it('should not surface transitive deps from uv.lock by default', async () => {
       fs.readLocalFile.mockResolvedValue(
         codeBlock`
