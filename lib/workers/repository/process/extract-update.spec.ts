@@ -814,6 +814,28 @@ describe('workers/repository/process/extract-update', () => {
           (await extract(config)).npm[0].deps[0].skipReason,
         ).toBeUndefined();
       });
+      it('shares the mise constraints with other managers, but caches what was extracted', async () => {
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: {
+            ...createPackageFiles(),
+            mise: [
+              {
+                packageFile: 'mise.toml',
+                deps: [],
+                extractedConstraints: { pnpm: '10.16.1' },
+              },
+            ],
+          },
+          extractionFingerprints: {},
+        });
+
+        const res = await extract(config);
+
+        expect(res.npm[0].extractedConstraints).toEqual({ pnpm: '10.16.1' });
+        expect(
+          cache.scan.master.packageFiles.npm[0].extractedConstraints,
+        ).toBeUndefined();
+      });
     });
 
     describe('npmrc', () => {

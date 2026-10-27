@@ -22,6 +22,7 @@ import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { getSharedConstraintsScope } from './constraints.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';

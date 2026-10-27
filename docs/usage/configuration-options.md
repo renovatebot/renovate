@@ -917,6 +917,9 @@ The downside of this is that you may end up with a very old issue getting "recyc
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 
+Tool versions in [mise](modules/manager/mise/index.md#tool-versions-as-constraints) config files also apply as constraints to the package files of other managers in the same directory and below.
+A constraint which the manager detects itself, like `packageManager` in a `package.json`, takes precedence over the mise version.
+
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
 

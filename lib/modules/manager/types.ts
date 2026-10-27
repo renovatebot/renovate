@@ -416,6 +416,16 @@ export interface DepTypeMetadata {
   description: string;
 }
 
+/**
+ * The directory tree in which the `extractedConstraints` of a package file apply to the package files of other managers.
+ */
+export interface SharedConstraintsScope {
+  /** The directory, relative to the repository root, whose package files and subdirectories the constraints apply to */
+  directory: string;
+  /** Decides between package files of the same directory, the higher one wins */
+  precedence: number;
+}
+
 export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
@@ -458,6 +468,13 @@ export interface ManagerApiBase extends ModuleApi {
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
+
+  /**
+   * Opts a manager into sharing the `extractedConstraints` of its package files with the package files of other managers, see {@link SharedConstraintsScope}.
+   */
+  getSharedConstraintsScope?(
+    packageFile: string,
+  ): SharedConstraintsScope | null;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact,

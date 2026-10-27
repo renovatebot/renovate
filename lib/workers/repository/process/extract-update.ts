@@ -30,6 +30,7 @@ import {
 import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import { extractAllDependencies } from '../extract/index.ts';
+import { applySharedConstraints } from '../extract/shared-constraints.ts';
 import { branchifyUpgrades } from '../updates/branchify.ts';
 import { fetchUpdates } from './fetch.ts';
 import { calculateLibYears } from './libyear.ts';
@@ -231,6 +232,8 @@ export async function extract(
       }
     });
   }
+  // after caching, so the cache holds what the managers extracted
+  applySharedConstraints(packageFiles);
   const stats = extractStats(packageFiles);
   logger.info(
     { baseBranch: config.baseBranch, stats },
