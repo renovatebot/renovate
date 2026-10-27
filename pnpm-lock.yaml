@@ -132,8 +132,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@renovatebot/osv-offline':
-        specifier: 3.1.0
-        version: 3.1.0(supports-color@7.2.0)
+        specifier: 4.1.1
+        version: 4.1.1(supports-color@7.2.0)
       '@renovatebot/pep440':
         specifier: 5.0.1
         version: 5.0.1
@@ -2061,13 +2061,13 @@ packages:
     resolution: {integrity: sha512-FBLawccaWOPwqXgMSB3FTp1VTfGJWSTTXY2Q3kWPoLYOpKYBr3V37vtqFLjb5wUFkrXN2Sj+S840JXKfHwy8Rg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@3.1.0':
-    resolution: {integrity: sha512-yEopo6aj3Y8m3qL4dA/fnNQSXFiwnp7bC8bCfBjVOKo9lJIABiy6szeVeg03HuDYRCKTwni/i2q44iq+iq25Cg==}
-    engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
+  '@renovatebot/osv-offline-db@4.1.1':
+    resolution: {integrity: sha512-aBiR/zDFFYIoLq+CkEKygSelJU6LA1/6bcXidv0YgNvP72oxQGrevvbZSk3dwT6cjyQoPRUd8VIkMvYWJNOZSA==}
+    engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@3.1.0':
-    resolution: {integrity: sha512-khhevHBoq3b33QwtaOFtxLp8fNgA+rXd2iMupNI1dnrJ8Zg+E2ubKQ0jMgXY3i/4kwil0dOZRupmxrrVJaBnqQ==}
-    engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
+  '@renovatebot/osv-offline@4.1.1':
+    resolution: {integrity: sha512-LbPGq0S1KLLVm01pjN1kV/WDwoqeSMphHlPy97OCGFepYl13i/pQUZ2iKc0e6MytaNTs9W01t0pPiuSCCZ1Mmg==}
+    engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@5.0.1':
     resolution: {integrity: sha512-KmMz+X68YvrS6aN6TJWtDiH8aCIL2Igcvceh17STHxMUN3KxXsC24COoOXjMOl/Gb+okBwwduMm8PY/WY/0Cpg==}
@@ -7477,15 +7477,15 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@3.1.0(supports-color@7.2.0)':
+  '@renovatebot/osv-offline-db@4.1.1(supports-color@7.2.0)':
     dependencies:
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@renovatebot/osv-offline@3.1.0(supports-color@7.2.0)':
+  '@renovatebot/osv-offline@4.1.1(supports-color@7.2.0)':
     dependencies:
-      '@renovatebot/osv-offline-db': 3.1.0(supports-color@7.2.0)
+      '@renovatebot/osv-offline-db': 4.1.1(supports-color@7.2.0)
       debug: 4.4.3(supports-color@7.2.0)
       fs-extra: 11.4.1
       got: 15.1.0
