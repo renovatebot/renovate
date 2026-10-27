@@ -7,20 +7,30 @@ const re = regEx(
   's',
 );
 
-const configurationStart = '\n\n---\n\n### Configuration';
-const debugCommentRegex = regEx(/\n<!--renovate-debug:[^>]*-->\n?$/);
+// where the end of a PR body which truncation keeps can start, most specific first
+const tailStarts = [
+  // the Configuration section of update PRs, followed by the controls
+  '\n\n---\n\n### Configuration\n',
+  // the controls of onboarding PRs
+  '\n\n---\n\n - [ ] <!-- rebase-check -->',
+];
+const hiddenCommentRegex = regEx(
+  /\n<!--renovate-(?:debug|config-hash):[^>]*-->\n?$/,
+);
 const detailsOpenRegex = regEx(/<details[\s>]/g);
 const detailsCloseRegex = regEx(/<\/details>/g);
 
 /**
- * Returns the end of a PR body which truncation keeps: the Configuration section with everything after it, or else the trailing `renovate-debug` comment.
+ * Returns the end of a PR body which truncation keeps: the Configuration section or the controls with everything after them, or else the trailing `renovate-debug` or `renovate-config-hash` comment.
  */
 function getTail(body: string): string {
-  const start = body.lastIndexOf(configurationStart);
-  if (start !== -1) {
-    return body.slice(start);
+  for (const tailStart of tailStarts) {
+    const start = body.lastIndexOf(tailStart);
+    if (start !== -1) {
+      return body.slice(start);
+    }
   }
-  return debugCommentRegex.exec(body)?.[0] ?? '';
+  return hiddenCommentRegex.exec(body)?.[0] ?? '';
 }
 
 /**
