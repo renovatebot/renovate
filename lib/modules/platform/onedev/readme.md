@@ -10,13 +10,17 @@ API and for git operations.
 
 1. In OneDev, open your user profile and create an **access token** (or use the
    account password).
-2. Set the `RENOVATE_TOKEN` environment variable to `username:token`, for
-   example `renovate-bot:<access-token>`.
-   - The username is the OneDev user name.
-   - When only a token (without `username:`) is given, the username defaults
-     to `user`, which OneDev accepts for personal access tokens.
-3. The token's user needs the permission to read the project, clone the
-   repository, push commits, and open pull requests.
+2. Set the `RENOVATE_TOKEN` (or `RENOVATE_PASSWORD`) environment variable to
+   the access token, and set `RENOVATE_USERNAME` to the OneDev user name, e.g.
+   `renovate-bot`.
+   - The token's user needs the permission to read the project, clone the
+     repository, push commits, and open pull requests.
+   - When no username is configured, `user` is assumed, which OneDev accepts
+     for personal access tokens. If you authenticate with the **account
+     password** instead of an access token, you must configure the correct
+     username.
+   - A legacy token of the form `username:token-or-password` is still accepted
+     when no username is set.
 
 You must set the [`platform`](../../../self-hosted-configuration.md#platform)
 config option to `onedev` in your admin config file. The
@@ -26,26 +30,20 @@ REST suffix is added automatically if missing).
 
 ## Feature support
 
-Because OneDev has not enabled this integration officially, some features work
-differently or not at all:
-
-| Feature                | Status                                                                                                                           |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Branch updating        | Fully supported                                                                                                                  |
-| PR creation            | Fully supported                                                                                                                  |
-| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                                                             |
-| Find/update PR         | Fully supported                                                                                                                  |
-| Comments               | Not implemented (OneDev's REST API does not expose PR comment creation)                                                          |
-| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)                                   |
-| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support)                                  |
-| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                                                              |
-| File contents via REST | Not implemented; files of the _current_ repository are read from the git clone (`getRawFile` supports only the initialized repo) |
+| Feature                | Status                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| Branch updating        | Fully supported                                                                                         |
+| PR creation            | Fully supported                                                                                         |
+| PR automerge           | Fully supported (via OneDev's "auto merge when checks pass" feature)                                    |
+| Find/update PR         | Fully supported                                                                                         |
+| Comments               | Fully supported (PR comments via the REST API)                                                          |
+| PR labels              | Not implemented (labels exist in OneDev, but are project-scoped specs not manageable via REST)          |
+| Issues automation      | Supported (Renovate's dashboard issues are created in the project, with `confidential` support)         |
+| PR reviews/assignments | Supported (user names are resolved through OneDev's user directory)                                     |
+| File contents          | Current repository read from the git clone; other projects (e.g. shared presets) read from the REST API |
 
 ## Known limitations
 
-- OneDev does not expose the default branch through its REST API, so Renovate
-  detects it from the cloned repository (`main` is preferred, then `master`,
-  then the first branch in the list).
 - Issue closing assumes the project uses OneDev's default issue states
   (`Open` and `Closed`). Custom issue state workflows cannot be closed
   automatically; a warning is logged in that case.
@@ -56,9 +54,10 @@ differently or not at all:
   `rebase` → `REBASE_SOURCE_BRANCH_COMMITS`,
   `rebase-merge` → `CREATE_MERGE_COMMIT`,
   `fast-forward` → `CREATE_MERGE_COMMIT_IF_NECESSARY`.
-- Renovate's `getRawFile`/`getJsonFile` APIs fall back to the local git clone;
-  manager features which require raw file lookups through the API (e.g. gitlab
-  `include` support) are not affected.
+- OneDev's PR description editor re-saves the description without HTML
+  comments and with normalized list indentation when a PR is edited in the web
+  UI. Renovate restores its checkbox marker afterwards automatically, but
+  avoid hand-editing Renovate PR descriptions in the OneDev UI.
 
 ## Automerge
 

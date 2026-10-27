@@ -13,7 +13,10 @@ import {
   Project,
   ProjectList,
   type PullRequest,
+  type PullRequestComment,
+  PullRequestCommentList,
   PullRequestList,
+  RepositoryFile,
   User,
   type UserEmail,
   UserEmailList,
@@ -24,6 +27,7 @@ import type {
   IssueCreateParams,
   IssueStateTransitionParams,
   OneDevCredentials,
+  PullRequestCommentCreateParams,
   PullRequestCreateParams,
   PullRequestMergeStrategy,
 } from './types.ts';
@@ -40,19 +44,12 @@ export function resetCredentials(): void {
   credentials = undefined;
 }
 
-function authOptions(): OneDevCredentials & Pick<HttpOptions, 'memCache'> {
+function authOptions(): OneDevCredentials {
   /* v8 ignore next -- credentials are always set by initPlatform first */
   if (!credentials) {
     throw new Error('OneDev helper called before credentials were set');
   }
-  return {
-    ...credentials,
-    // Renovate's HTTP layer memoizes every GET request unless this is
-    // disabled. The platform relies on re-fetching list endpoints (e.g. the
-    // pull request list right after creating one), so responses must never
-    // come from the memory cache.
-    memCache: false,
-  };
+  return credentials;
 }
 
 /**
@@ -74,6 +71,7 @@ async function queryPaginated<T>(
   http: OnedevHttp,
   path: string,
   schema: ZodType<T[]>,
+  extraOptions: HttpOptions = authOptions(),
 ): Promise<T[]> {
   const items: T[] = [];
   for (
@@ -82,13 +80,22 @@ async function queryPaginated<T>(
     page++, offset += PAGE_SIZE
   ) {
     const url = `${path}?${getQueryString({ offset, count: PAGE_SIZE })}`;
-    const { body } = await http.getJson(url, { ...authOptions() }, schema);
+    const { body } = await http.getJson(url, extraOptions, schema);
     items.push(...body);
     if (body.length < PAGE_SIZE) {
       break;
     }
   }
   return items;
+}
+
+/**
+ * Query parameter and auth options which disable the HTTP memory cache, for
+ * endpoints whose response is expected to change within a run (list endpoints
+ * re-read after mutations, and build statuses polled until they turn green).
+ */
+export function freshOptions(): HttpOptions {
+  return { ...authOptions(), memCache: false };
 }
 
 /**
@@ -176,7 +183,14 @@ export async function getCloneUrl(
 export async function queryPullRequests(
   http: OnedevHttp,
 ): Promise<PullRequest[]> {
-  const items = await queryPaginated(http, 'pulls', PullRequestList);
+  // The list is re-read right after mutations (e.g. PR creation); serving it
+  // from the memory cache would return the pre-mutation result.
+  const items = await queryPaginated(
+    http,
+    'pulls',
+    PullRequestList,
+    freshOptions(),
+  );
   logger.trace(`Retrieved ${items.length} pull requests`);
   return items;
 }
@@ -198,9 +212,9 @@ export async function setPullRequestTitle(
   requestId: number,
   title: string,
 ): Promise<void> {
-  await http.postJson(`pulls/${requestId}/title`, {
+  await http.postPlain(`pulls/${requestId}/title`, title, {
     ...authOptions(),
-    body: title,
+    headers: { 'content-type': 'application/json' },
   });
 }
 
@@ -209,20 +223,9 @@ export async function setPullRequestDescription(
   requestId: number,
   description: string,
 ): Promise<void> {
-  await http.postJson(`pulls/${requestId}/description`, {
+  await http.postPlain(`pulls/${requestId}/description`, description, {
     ...authOptions(),
-    body: description,
-  });
-}
-
-export async function setPullRequestWorkInProgress(
-  http: OnedevHttp,
-  requestId: number,
-  workInProgress: boolean,
-): Promise<void> {
-  await http.postJson(`pulls/${requestId}/work-in-progress`, {
-    ...authOptions(),
-    body: workInProgress,
+    headers: { 'content-type': 'application/json' },
   });
 }
 
@@ -301,14 +304,16 @@ export async function getPullRequestBuilds(
 ): Promise<Build[]> {
   const { body } = await http.getJson(
     `pulls/${requestId}/current-builds`,
-    { ...authOptions() },
+    freshOptions(),
     BuildList,
   );
   return body;
 }
 
 export async function queryIssues(http: OnedevHttp): Promise<Issue[]> {
-  const items = await queryPaginated(http, 'issues', IssueList);
+  // The list is re-read right after issue mutations; serving it from the
+  // memory cache would return the pre-mutation result.
+  const items = await queryPaginated(http, 'issues', IssueList, freshOptions());
   logger.trace(`Retrieved ${items.length} issues`);
   return items;
 }
@@ -330,9 +335,9 @@ export async function setIssueDescription(
   issueId: number,
   description: string,
 ): Promise<void> {
-  await http.postJson(`issues/${issueId}/description`, {
+  await http.postPlain(`issues/${issueId}/description`, description, {
     ...authOptions(),
-    body: description,
+    headers: { 'content-type': 'application/json' },
   });
 }
 
@@ -348,4 +353,76 @@ export async function transitIssueState(
       comment: params.comment ?? '',
     },
   });
+}
+
+export async function getPullRequestComments(
+  http: OnedevHttp,
+  requestId: number,
+): Promise<PullRequestComment[]> {
+  // Comments may change both through Renovate itself and through the web
+  // UI - always read them fresh.
+  const { body } = await http.getJson(
+    `pulls/${requestId}/comments`,
+    freshOptions(),
+    PullRequestCommentList,
+  );
+  return body;
+}
+
+export async function createPullRequestComment(
+  http: OnedevHttp,
+  params: PullRequestCommentCreateParams,
+): Promise<number> {
+  const { body } = await http.postJson(
+    'pull-request-comments',
+    { ...authOptions(), body: params },
+    NumericId,
+  );
+  return body;
+}
+
+export async function updatePullRequestComment(
+  http: OnedevHttp,
+  commentId: number,
+  content: string,
+): Promise<void> {
+  await http.postPlain(`pull-request-comments/${commentId}`, content, {
+    ...authOptions(),
+    headers: { 'content-type': 'application/json' },
+  });
+}
+
+export async function deletePullRequestComment(
+  http: OnedevHttp,
+  commentId: number,
+): Promise<void> {
+  await http.deleteJson(`pull-request-comments/${commentId}`, {
+    ...authOptions(),
+  });
+}
+
+export async function getDefaultBranch(
+  http: OnedevHttp,
+  projectId: number,
+): Promise<string | undefined> {
+  const { body } = await http.getPlain(
+    `repositories/${projectId}/default-branch`,
+    { ...authOptions() },
+  );
+  const branch = body.trim();
+  return branch === '' ? undefined : branch;
+}
+
+export async function getRepositoryFile(
+  http: OnedevHttp,
+  projectId: number,
+  file: string,
+  revision: string,
+): Promise<RepositoryFile> {
+  const { body } = await http.getJson(
+    `repositories/${projectId}/files?${getQueryString({ revision, file })}`,
+    authOptions(),
+    RepositoryFile,
+  );
+  return body;
 }

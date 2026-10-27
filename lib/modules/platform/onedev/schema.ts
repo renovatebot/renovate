@@ -92,6 +92,24 @@ export const Issue = z.object({
 export type Issue = z.infer<typeof Issue>;
 export const IssueList = LooseArray(Issue);
 
+export const PullRequestComment = z.object({
+  id: z.number(),
+  requestId: Nullish(z.number()),
+  content: Nullish(z.string()),
+  messageId: Nullish(z.string()),
+  date: Nullish(z.string()),
+  userId: Nullish(z.number()),
+});
+export type PullRequestComment = z.infer<typeof PullRequestComment>;
+export const PullRequestCommentList = LooseArray(PullRequestComment);
+
+/** REST response of `GET /repositories/{projectId}/files`. */
+export const RepositoryFile = z.object({
+  base64Content: Nullish(z.string()),
+  isPartial: Nullish(z.boolean()),
+});
+export type RepositoryFile = z.infer<typeof RepositoryFile>;
+
 export const UserId = z.number();
 
 /**

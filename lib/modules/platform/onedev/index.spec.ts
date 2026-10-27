@@ -2,6 +2,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_BLOCKED,
   REPOSITORY_EMPTY,
@@ -97,7 +98,8 @@ describe('modules/platform/onedev/index', () => {
       .get('/users/1/email-addresses')
       .reply(200, emails);
     await onedev.initPlatform({
-      token: 'renovate:abc-def',
+      token: 'abc-def',
+      username: 'renovate',
       endpoint: 'https://onedev.example.com',
     });
   }
@@ -105,6 +107,7 @@ describe('modules/platform/onedev/index', () => {
   function mockInitRepo(
     scope: httpMock.Scope,
     project: Partial<Project> = {},
+    options: { defaultBranch?: string | null } = {},
   ): void {
     scope
       .get('/projects/ids/some/repo')
@@ -113,6 +116,20 @@ describe('modules/platform/onedev/index', () => {
       .reply(200, { ...repoProject, ...project })
       .get('/projects/100/clone-url')
       .reply(200, cloneUrl);
+    switch (options.defaultBranch) {
+      case null:
+        // No default branch reported (repository not initialized)
+        scope.get('/repositories/100/default-branch').reply(204);
+        break;
+      case undefined:
+        scope.get('/repositories/100/default-branch').reply(200, 'main');
+        break;
+      default:
+        scope
+          .get('/repositories/100/default-branch')
+          .reply(200, options.defaultBranch);
+        break;
+    }
   }
 
   function mockPrList(scope: httpMock.Scope, dto: PullRequest[]): void {
@@ -124,15 +141,69 @@ describe('modules/platform/onedev/index', () => {
   }
 
   describe('initPlatform()', () => {
-    it('should throw if no token', async () => {
+    it('should throw if no token or password', async () => {
       await expect(onedev.initPlatform({})).rejects.toThrow(
-        'Init: You must configure a OneDev token in the form `username:token-or-password`',
+        'Init: You must configure a OneDev access token via the `token` or `password` option',
       );
+    });
+
+    it('should send basic auth credentials from username and password options', async () => {
+      const scope = httpMock
+        .scope('https://onedev.example.com/~api')
+        .matchHeader('authorization', `Basic ${toBase64('someuser:abc')}`);
+      scope
+        .get('/users/me')
+        .reply(200, user)
+        .get('/users/1/email-addresses')
+        .reply(200, emails);
+
+      await expect(
+        onedev.initPlatform({
+          username: 'someuser',
+          password: 'abc',
+          endpoint: 'https://onedev.example.com',
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('defaults the username to `user` when only a token is set', async () => {
+      const scope = httpMock
+        .scope('https://onedev.example.com/~api')
+        .matchHeader('authorization', `Basic ${toBase64('user:abc')}`);
+      scope
+        .get('/users/me')
+        .reply(200, user)
+        .get('/users/1/email-addresses')
+        .reply(200, emails);
+
+      await expect(
+        onedev.initPlatform({
+          token: 'abc',
+          endpoint: 'https://onedev.example.com',
+        }),
+      ).resolves.toBeDefined();
+    });
+
+    it('does not require user emails to determine a gitAuthor', async () => {
+      httpMock
+        .scope('https://onedev.example.com/~api')
+        .get('/users/me')
+        .reply(200, user)
+        .get('/users/1/email-addresses')
+        .reply(500);
+
+      await expect(
+        onedev.initPlatform({
+          token: 'abc',
+          username: 'renovate',
+          endpoint: 'https://onedev.example.com',
+        }),
+      ).resolves.toHaveProperty('gitAuthor', undefined);
     });
 
     it('should throw if the token does not carry both parts', async () => {
       await expect(onedev.initPlatform({ token: 'user:' })).rejects.toThrow(
-        'Init: token must be in the form `username:token-or-password`',
+        'Init: token must be in the form `username:token-or-password`, with neither part empty',
       );
     });
 
@@ -267,6 +338,30 @@ describe('modules/platform/onedev/index', () => {
       );
     });
 
+    it('ignores topic filters', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects')
+        .query({ offset: 0, count: 100 })
+        .reply(200, projects);
+
+      await expect(onedev.getRepos({ topics: ['demo'] })).resolves.toEqual([
+        'some/repo',
+        'other/empty',
+      ]);
+    });
+
+    it('rethrows autodiscovery errors', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope.get('/projects').query({ offset: 0, count: 100 }).reply(500);
+
+      await expect(onedev.getRepos()).rejects.toMatchObject({
+        statusCode: 500,
+      });
+    });
+
     it('paginates the project list', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
@@ -333,11 +428,21 @@ describe('modules/platform/onedev/index', () => {
     it('falls back to the master branch', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
-      mockInitRepo(scope);
+      mockInitRepo(scope, {}, { defaultBranch: null });
       git.getBranchList.mockReturnValue(['master', 'dev']);
 
       await expect(onedev.initRepo({ repository })).resolves.toMatchObject({
         defaultBranch: 'master',
+      });
+    });
+
+    it('prefers the default branch reported by OneDev REST', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope, {}, { defaultBranch: 'trunk' });
+
+      await expect(onedev.initRepo({ repository })).resolves.toMatchObject({
+        defaultBranch: 'trunk',
       });
     });
 
@@ -382,12 +487,101 @@ describe('modules/platform/onedev/index', () => {
     it('throws when the repository has no branches', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
-      mockInitRepo(scope);
+      mockInitRepo(scope, {}, { defaultBranch: null });
       git.getBranchList.mockReturnValue([]);
 
       await expect(onedev.initRepo({ repository })).rejects.toThrow(
         REPOSITORY_EMPTY,
       );
+    });
+
+    it('rethrows unknown errors when resolving the project fails', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope.get('/projects/ids/some/repo').reply(503);
+
+      await expect(onedev.initRepo({ repository })).rejects.toMatchObject({
+        statusCode: 503,
+      });
+    });
+
+    it('throws when the project details are not accessible', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects/ids/some/repo')
+        .reply(200, '100')
+        .get('/projects/100')
+        .reply(403);
+
+      await expect(onedev.initRepo({ repository })).rejects.toThrow(
+        REPOSITORY_ACCESS_FORBIDDEN,
+      );
+    });
+
+    it('rethrows unknown errors when loading the project details', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects/ids/some/repo')
+        .reply(200, '100')
+        .get('/projects/100')
+        .reply(503);
+
+      await expect(onedev.initRepo({ repository })).rejects.toMatchObject({
+        statusCode: 503,
+      });
+    });
+
+    it('throws when the ssh url is unavailable', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects/ids/some/repo')
+        .reply(200, '100')
+        .get('/projects/100')
+        .reply(200, repoProject)
+        .get('/projects/100/clone-url')
+        .reply(200, { http: cloneUrl.http, ssh: '' });
+
+      await expect(
+        onedev.initRepo({ repository, gitUrl: 'ssh' }),
+      ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
+    });
+
+    it('throws when the http clone url cannot be parsed', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects/ids/some/repo')
+        .reply(200, '100')
+        .get('/projects/100')
+        .reply(200, repoProject)
+        .get('/projects/100/clone-url')
+        .reply(200, { http: ':::not-a-url', ssh: cloneUrl.ssh });
+
+      await expect(onedev.initRepo({ repository })).rejects.toThrow(
+        CONFIG_GIT_URL_UNAVAILABLE,
+      );
+    });
+
+    it('falls back to the branch list when the default-branch endpoint errors', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      scope
+        .get('/projects/ids/some/repo')
+        .reply(200, '100')
+        .get('/projects/100')
+        .reply(200, repoProject)
+        .get('/projects/100/clone-url')
+        .reply(200, cloneUrl)
+        .get('/repositories/100/default-branch')
+        .reply(500);
+      git.getBranchList.mockReturnValue(['dev', 'main']);
+
+      await expect(onedev.initRepo({ repository })).resolves.toMatchObject({
+        defaultBranch: 'main',
+      });
     });
   });
 
@@ -464,6 +658,87 @@ describe('modules/platform/onedev/index', () => {
 
       const prList = await onedev.getPrList();
       expect(prList[0].isDraft).toBeTrue();
+    });
+
+    it('restores the rebase-check marker stripped by the OneDev editor', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [
+        mockPullRequest({
+          description:
+            '\n\n---\n\n - [x] If you want to rebase/retry this PR, click this checkbox.\n\n<!--renovate-config-hash:abc-->',
+        }),
+        mockPullRequest({
+          id: 5556,
+          number: 2,
+          description:
+            '- [ ] <! note --> If you want to rebase/retry something else',
+        }),
+      ]);
+
+      const prList = await onedev.getPrList();
+      expect(prList[0].bodyStruct?.rebaseRequested).toBeTrue();
+      expect(prList[1].bodyStruct?.rebaseRequested).toBeUndefined();
+    });
+
+    it('keeps the marker intact when OneDev did not strip it', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      const description =
+        '\n\n---\n\n - [x] <!-- rebase-check -->If you want to rebase/retry this PR, check this box\n';
+      mockPrList(scope, [mockPullRequest({ description })]);
+
+      const prList = await onedev.getPrList();
+      expect(prList[0].bodyStruct?.rebaseRequested).toBeTrue();
+    });
+
+    it('skips pull requests without a source branch', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest({ sourceBranch: '' })]);
+
+      await expect(onedev.getPrList()).resolves.toEqual([]);
+    });
+
+    it('handles pull requests without a description', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest({ description: null })]);
+
+      const prList = await onedev.getPrList();
+      expect(prList[0].bodyStruct?.hash).toBeDefined();
+      expect(prList[0].bodyStruct?.rebaseRequested).toBeUndefined();
+    });
+
+    it('supports conflicting state filters and cache refreshes', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      mockPrList(scope, [mockPullRequest()]);
+
+      await expect(
+        onedev.findPr({
+          branchName: 'renovate/something-1.x',
+          state: '!closed',
+        }),
+      ).resolves.toMatchObject({ number: 1 });
+
+      await expect(
+        onedev.findPr({
+          branchName: 'renovate/something-1.x',
+          refreshCache: true,
+        }),
+      ).resolves.toMatchObject({ number: 1 });
     });
   });
 
@@ -644,6 +919,87 @@ describe('modules/platform/onedev/index', () => {
         }),
       ).rejects.toMatchObject({ statusCode: 500 });
     });
+
+    it('updates the reused PR when creation fails and it is outdated', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .post('/pulls')
+        .reply(500)
+        .get('/pulls')
+        .query({ offset: 0, count: 100 })
+        .reply(200, [
+          mockPullRequest({
+            sourceBranch: 'renovate/new-branch',
+            title: 'other title',
+            description: 'other body',
+          }),
+        ])
+        .post('/pulls/5555/title', 'PR title')
+        .reply(200)
+        .post('/pulls/5555/description', 'PR body')
+        .reply(200);
+
+      await expect(
+        onedev.createPr({
+          sourceBranch: 'renovate/new-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR body',
+        }),
+      ).resolves.toMatchObject({ number: 1, title: 'PR title' });
+    });
+
+    it('returns null when the created PR cannot be located', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope.post('/pulls').reply(200, '5555');
+      mockPrList(scope, [
+        mockPullRequest({ id: 8888, sourceBranch: 'renovate/other-branch' }),
+      ]);
+
+      await expect(
+        onedev.createPr({
+          sourceBranch: 'renovate/new-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR body',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('continues without automerge when the platform rejects it', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .post('/pulls')
+        .reply(200, '5555')
+        .post('/pulls/5555/merge-strategy')
+        .reply(500)
+        .get('/pulls')
+        .query({ offset: 0, count: 100 })
+        .reply(200, [mockPullRequest({ sourceBranch: 'renovate/new-branch' })]);
+
+      await expect(
+        onedev.createPr({
+          sourceBranch: 'renovate/new-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR body',
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeStrategy: 'squash',
+          },
+        }),
+      ).resolves.toMatchObject({ number: 1 });
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
   });
 
   describe('updatePr()', () => {
@@ -654,9 +1010,9 @@ describe('modules/platform/onedev/index', () => {
       await onedev.initRepo({ repository });
       mockPrList(scope, [mockPullRequest()]);
       scope
-        .post('/pulls/5555/title', '"new title"')
+        .post('/pulls/5555/title', 'new title')
         .reply(200)
-        .post('/pulls/5555/description', '"new description"')
+        .post('/pulls/5555/description', 'new description')
         .reply(200);
 
       await expect(
@@ -675,7 +1031,7 @@ describe('modules/platform/onedev/index', () => {
       await onedev.initRepo({ repository });
       mockPrList(scope, [mockPullRequest()]);
       scope
-        .post('/pulls/5555/title', '"PR title"')
+        .post('/pulls/5555/title', 'PR title')
         .reply(200)
         .post('/pulls/5555/discard')
         .reply(200);
@@ -690,7 +1046,7 @@ describe('modules/platform/onedev/index', () => {
 
       mockPrList(scope, [mockPullRequest()]);
       scope
-        .post('/pulls/5555/title', '"PR title"')
+        .post('/pulls/5555/title', 'PR title')
         .reply(200)
         .post('/pulls/5555/reopen')
         .reply(200);
@@ -930,7 +1286,7 @@ describe('modules/platform/onedev/index', () => {
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
       mockIssueList(scope, [mockIssue({ title: 'Dependency dashboard' })]);
-      scope.post('/issues/77/description', '"new blurb"').reply(200);
+      scope.post('/issues/77/description', 'new blurb').reply(200);
 
       await expect(
         onedev.ensureIssue({
@@ -984,7 +1340,7 @@ describe('modules/platform/onedev/index', () => {
         mockIssue({ title: 'Dependency dashboard', state: 'Closed' }),
       ]);
       scope
-        .post('/issues/77/description', '"blurb"')
+        .post('/issues/77/description', 'blurb')
         .reply(200)
         .post('/issues/77/state-transitions', { state: 'Open', comment: '' })
         .reply(200);
@@ -996,6 +1352,60 @@ describe('modules/platform/onedev/index', () => {
           shouldReOpen: true,
         }),
       ).resolves.toBe('updated');
+    });
+
+    it('reuses a matching closed issue via reuseTitle', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, [
+        mockIssue({
+          id: 78,
+          number: 2,
+          state: 'Closed',
+          title: 'old dashboard',
+          description: 'old blurb',
+        }),
+      ]);
+      scope
+        .post('/issues/78/description', 'blurb')
+        .reply(200)
+        .post('/issues/78/state-transitions', { state: 'Open', comment: '' })
+        .reply(200);
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+          reuseTitle: 'old dashboard',
+          shouldReOpen: true,
+        }),
+      ).resolves.toBe('updated');
+    });
+
+    it('returns null when issue creation fails', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, []);
+      scope
+        .post('/issues', {
+          projectId: 100,
+          title: 'Dependency dashboard',
+          description: 'blurb',
+          confidential: false,
+        })
+        .reply(500);
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalled();
     });
 
     it('closes issues on demand', async () => {
@@ -1031,11 +1441,250 @@ describe('modules/platform/onedev/index', () => {
   });
 
   describe('comments', () => {
-    it('returns false for PR comments', async () => {
+    it('creates a new topic comment', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [])
+        .post('/pull-request-comments', {
+          requestId: 5555,
+          userId: 1,
+          content: '### topic\n\ncontent',
+        })
+        .reply(200, '99');
+
+      await expect(
+        onedev.ensureComment({
+          number: 1,
+          topic: 'topic',
+          content: 'content',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('updates an outdated topic comment', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [
+          { id: 66, requestId: 5555, userId: 1, content: '### topic\n\nold' },
+        ])
+        .post('/pull-request-comments/66', '### topic\n\ncontent')
+        .reply(200);
+
+      await expect(
+        onedev.ensureComment({
+          number: 1,
+          topic: 'topic',
+          content: 'content',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('keeps an up-to-date comment untouched', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope.get('/pulls/5555/comments').reply(200, [
+        {
+          id: 66,
+          requestId: 5555,
+          userId: 1,
+          content: '### topic\n\ncontent',
+        },
+      ]);
+
+      await expect(
+        onedev.ensureComment({
+          number: 1,
+          topic: 'topic',
+          content: 'content',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('creates a content-only comment when no exact match exists', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [
+          { id: 66, requestId: 5555, userId: 1, content: 'old body' },
+        ])
+        .post('/pull-request-comments', {
+          requestId: 5555,
+          userId: 1,
+          content: 'new body',
+        })
+        .reply(200, '99');
+
+      await expect(
+        onedev.ensureComment({
+          number: 1,
+          topic: null,
+          content: 'new body',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('updates content-only comments which only differ in whitespace', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [
+          { id: 66, requestId: 5555, userId: 1, content: '  new body  ' },
+        ])
+        .post('/pull-request-comments/66', 'new body')
+        .reply(200);
+
+      await expect(
+        onedev.ensureComment({
+          number: 1,
+          topic: null,
+          content: 'new body',
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('returns false for unknown PR numbers', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+
+      await expect(
+        onedev.ensureComment({
+          number: 99,
+          topic: 'topic',
+          content: 'content',
+        }),
+      ).resolves.toBeFalse();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('removes topic comments', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [
+          {
+            id: 66,
+            requestId: 5555,
+            userId: 1,
+            content: '### topic\n\ncontent',
+          },
+        ])
+        .delete('/pull-request-comments/66')
+        .reply(200);
+
+      await onedev.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 1,
+        topic: 'topic',
+      });
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('removes content comments', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/pulls/5555/comments')
+        .reply(200, [{ id: 66, requestId: 5555, userId: 1, content: 'blurb' }])
+        .delete('/pull-request-comments/66')
+        .reply(200);
+
+      await onedev.ensureCommentRemoval({
+        type: 'by-content',
+        number: 1,
+        content: 'blurb',
+      });
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when no comment matches', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope.get('/pulls/5555/comments').reply(200, []);
+
+      await onedev.ensureCommentRemoval({
+        type: 'by-topic',
+        number: 1,
+        topic: 'topic',
+      });
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns without deleting when the PR number is unknown', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+
+      await expect(
+        onedev.ensureCommentRemoval({
+          type: 'by-topic',
+          number: 99,
+          topic: 'topic',
+        }),
+      ).toResolve();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('does not throw when the comment list cannot be read', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope.get('/pulls/5555/comments').reply(500);
+
+      await expect(
+        onedev.ensureCommentRemoval({
+          type: 'by-content',
+          number: 1,
+          content: 'blurb',
+        }),
+      ).toResolve();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('returns false when the comment list cannot be read', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope.get('/pulls/5555/comments').reply(500);
 
       await expect(
         onedev.ensureComment({
@@ -1044,12 +1693,6 @@ describe('modules/platform/onedev/index', () => {
           content: 'content',
         }),
       ).resolves.toBeFalse();
-
-      await onedev.ensureCommentRemoval({
-        type: 'by-topic',
-        number: 1,
-        topic: 'topic',
-      });
     });
   });
 
@@ -1101,10 +1744,45 @@ describe('modules/platform/onedev/index', () => {
       await onedev.addReviewers(1, ['unknown', 'known']);
       expect(logger.logger.warn).toHaveBeenCalled();
     });
+
+    it('skips unknown pull request numbers', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+
+      await expect(onedev.addAssignees(99, ['someuser'])).toResolve();
+      await expect(onedev.addReviewers(99, ['someuser'])).toResolve();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('keeps going when the user lookup fails', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope
+        .get('/users/ids/broken')
+        .reply(500)
+        .get('/users/ids/broken')
+        .reply(500);
+
+      await expect(onedev.addAssignees(1, ['broken'])).toResolve();
+      await expect(onedev.addReviewers(1, ['broken'])).toResolve();
+      expect(logger.logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('labels', () => {
+    it('handles unsupported label operations', async () => {
+      await expect(onedev.deleteLabel(1, 'label')).toResolve();
+    });
   });
 
   describe('files', () => {
-    it('serves the initialized repository from git and returns null for other repos', async () => {
+    it('serves the initialized repository from git', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
       mockInitRepo(scope);
@@ -1117,12 +1795,116 @@ describe('modules/platform/onedev/index', () => {
       await expect(onedev.getJsonFile('renovate.json')).resolves.toEqual({
         foo: 'bar',
       });
+    });
+
+    it('reads other repositories over REST', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .get('/projects/ids/other/repo')
+        .reply(200, '200')
+        .get('/repositories/200/default-branch')
+        .reply(200, 'main')
+        .get('/repositories/200/files')
+        .query({ revision: 'main', file: 'renovate.json' })
+        .reply(200, { base64Content: toBase64('{"foo": "bar"}') })
+        // Both reads use the same URL; unit tests run without the HTTP
+        // memory cache initialized, so the second call re-fetches.
+        .get('/repositories/200/files')
+        .query({ revision: 'main', file: 'renovate.json' })
+        .reply(200, { base64Content: toBase64('{"foo": "bar"}') });
+
+      await expect(
+        onedev.getRawFile('renovate.json', 'other/repo'),
+      ).resolves.toBe('{"foo": "bar"}');
+      await expect(
+        onedev.getJsonFile('renovate.json', 'other/repo'),
+      ).resolves.toEqual({ foo: 'bar' });
+    });
+
+    it('reads other repositories with a given revision without resolving the default branch', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .get('/projects/ids/other/repo')
+        .reply(200, '200')
+        .get('/repositories/200/files')
+        .query({ revision: '1.0.0', file: 'renovate.json' })
+        .reply(200, { base64Content: toBase64('{"foo": "bar"}') });
+
+      await expect(
+        onedev.getRawFile('renovate.json', 'other/repo', '1.0.0'),
+      ).resolves.toBe('{"foo": "bar"}');
+    });
+
+    it('returns null for other repositories when the REST read fails', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope.get('/projects/ids/unknown/repo').reply(404);
+
+      await expect(
+        onedev.getRawFile('renovate.json', 'unknown/repo'),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when no revision can be determined', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .get('/projects/ids/other/repo')
+        .reply(200, '200')
+        .get('/repositories/200/default-branch')
+        .reply(204);
+      git.getBranchList.mockReturnValue([]);
 
       await expect(
         onedev.getRawFile('renovate.json', 'other/repo'),
       ).resolves.toBeNull();
+    });
+
+    it('returns null when the file has no base64 content', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .get('/projects/ids/other/repo')
+        .reply(200, '200')
+        .get('/repositories/200/default-branch')
+        .reply(200, 'main')
+        .get('/repositories/200/files')
+        .query({ revision: 'main', file: 'renovate.json' })
+        .reply(200, { base64Content: null });
+
       await expect(
-        onedev.getJsonFile('renovate.json', 'other/repo'),
+        onedev.getRawFile('renovate.json', 'other/repo'),
+      ).resolves.toBeNull();
+    });
+
+    it('returns null when the REST read errors', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .get('/projects/ids/other/repo')
+        .reply(200, '200')
+        .get('/repositories/200/default-branch')
+        .reply(200, 'main')
+        .get('/repositories/200/files')
+        .query({ revision: 'main', file: 'renovate.json' })
+        .reply(500);
+
+      await expect(
+        onedev.getRawFile('renovate.json', 'other/repo'),
       ).resolves.toBeNull();
     });
   });

@@ -37,6 +37,12 @@ export interface IssueStateTransitionParams {
   comment?: string;
 }
 
+export interface PullRequestCommentCreateParams {
+  requestId: number;
+  userId: number;
+  content: string;
+}
+
 /**
  * HTTP Basic auth credentials used for every OneDev API and git request.
  */

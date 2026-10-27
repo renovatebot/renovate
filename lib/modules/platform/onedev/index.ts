@@ -15,6 +15,7 @@ import * as git from '../../../util/git/index.ts';
 import { OnedevHttp, setBaseUrl } from '../../../util/http/onedev.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import { fromBase64 } from '../../../util/string.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type {
@@ -38,7 +39,13 @@ import type {
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './onedev-helper.ts';
-import type { Build, Project, PullRequest, User } from './schema.ts';
+import type {
+  Build,
+  Project,
+  PullRequest,
+  PullRequestComment,
+  User,
+} from './schema.ts';
 import type { OneDevCredentials, PullRequestMergeStrategy } from './types.ts';
 
 interface OneDevRepoConfig {
@@ -53,6 +60,10 @@ interface OneDevRepoConfig {
   /** Issue number -> OneDev issue id. */
   issueIds: Map<number, number>;
   issueList: Promise<Issue[]> | null;
+  /** Repository path -> project id, cached for cross-repository file access. */
+  rawFileProjectIds: Map<string, number>;
+  /** Project id -> default branch, cached across reads within a run. */
+  defaultBranches: Map<number, string>;
 }
 
 export const id = 'onedev';
@@ -94,29 +105,46 @@ function normalizeEndpoint(url: string): string {
 }
 
 /**
- * Splits a token of the form `username:token-or-password` into its parts.
- *
  * OneDev authenticates REST and git-over-HTTPS requests with HTTP Basic
- * auth, so credentials carry both the username and the access token
- * (password). When no username is configured, `user` is assumed, which
- * OneDev accepts for personal access tokens.
+ * auth. The `password` (or `token`) option carries an access token or
+ * account password, and the `username` option carries the OneDev user name.
+ * When no username is set, `user` is assumed, which OneDev accepts for
+ * personal access tokens. A legacy token of the form
+ * `username:token-or-password` is still accepted when no username is
+ * configured.
  */
-function parseToken(token: string, username?: string): OneDevCredentials {
-  const separatorIndex = token.indexOf(':');
+function resolveCredentials(
+  token: string | undefined,
+  username: string | undefined,
+  password: string | undefined,
+): OneDevCredentials {
+  const credential = password ?? token;
+  if (!credential) {
+    throw new Error(
+      'Init: You must configure a OneDev access token via the `token` or `password` option',
+    );
+  }
+  if (isNonEmptyString(username)) {
+    return { username, password: credential };
+  }
+  const separatorIndex = credential.indexOf(':');
   if (separatorIndex > -1) {
-    const parsedUsername = token.slice(0, separatorIndex);
-    const password = token.slice(separatorIndex + 1);
-    if (parsedUsername && password) {
-      return { username: parsedUsername, password };
+    const parsedUsername = credential.slice(0, separatorIndex);
+    const parsedPassword = credential.slice(separatorIndex + 1);
+    if (parsedUsername && parsedPassword) {
+      logger.warn(
+        'OneDev token contains a `username:token` pair - set the `username` and `token` options separately instead',
+      );
+      return { username: parsedUsername, password: parsedPassword };
     }
     throw new Error(
       'Init: token must be in the form `username:token-or-password`, with neither part empty',
     );
   }
-  return {
-    username: username ?? 'user',
-    password: token,
-  };
+  logger.debug(
+    'No OneDev username configured - defaulting to `user`, which OneDev accepts for personal access tokens',
+  );
+  return { username: 'user', password: credential };
 }
 
 const mergeStrategyMapping: Record<
@@ -157,6 +185,29 @@ function matchesState(actual: string, expected: string): boolean {
   return actual === expected;
 }
 
+const rebaseCheckboxLineRe = regEx(
+  /^(?<prefix>\s*-\s\[[ x]\])\s+(?<text>If you want to rebase\/retry this PR, (?:check this box|click this checkbox))(?<dot>\.)?$/m,
+);
+
+/**
+ * OneDev's PR description editor re-saves the description without HTML
+ * comments (and with normalized list indentation). That could strip Renovate's
+ * `- [ ] <!-- rebase-check -->` marker, which the repository worker relies on
+ * to detect a ticked rebase checkbox. Restore the marker when the checkbox
+ * line is still recognizable so the state survives the round trip.
+ */
+export function restoreRebaseCheckMarker(
+  description: string | null | undefined,
+): string | null | undefined {
+  if (!description) {
+    return description;
+  }
+  return description.replace(
+    rebaseCheckboxLineRe,
+    '$<prefix> <!-- rebase-check -->$<text>$<dot>',
+  );
+}
+
 function mapPr(dto: PullRequest): Pr | null {
   if (dto.number === undefined || !isNonEmptyString(dto.sourceBranch)) {
     logger.trace(
@@ -184,7 +235,7 @@ function mapPr(dto: PullRequest): Pr | null {
     number: dto.number,
     state: prStateMapping[dto.status],
     title: dto.title,
-    bodyStruct: getPrBodyStruct(dto.description),
+    bodyStruct: getPrBodyStruct(restoreRebaseCheckMarker(dto.description)),
     sourceBranch: dto.sourceBranch,
     targetBranch: dto.targetBranch ?? '',
     createdAt: dto.submitDate ?? undefined,
@@ -291,14 +342,9 @@ export async function initPlatform({
   endpoint: platformEndpoint,
   token,
   username,
+  password,
 }: PlatformParams): Promise<PlatformResult> {
-  if (!token) {
-    throw new Error(
-      'Init: You must configure a OneDev token in the form `username:token-or-password`',
-    );
-  }
-
-  helper.setCredentials(parseToken(token, username));
+  helper.setCredentials(resolveCredentials(token, username, password));
 
   endpoint = normalizeEndpoint(platformEndpoint ?? defaultEndpoint);
   setBaseUrl(endpoint);
@@ -324,6 +370,41 @@ export async function initPlatform({
     endpoint,
     gitAuthor,
   };
+}
+
+/**
+ * OneDev exposes the default branch over REST (`GET /repositories/{id}/default-branch`,
+ * which answers 204 when the repository is not initialized). Fall back to the
+ * branch list of the freshly initialized git clone when the REST endpoint is
+ * unavailable (older OneDev versions, or an uninitialized repository).
+ */
+async function determineDefaultBranch(
+  projectId: number,
+): Promise<string | undefined> {
+  config.defaultBranches ??= new Map();
+  const cached = config.defaultBranches.get(projectId);
+  if (cached) {
+    return cached;
+  }
+  try {
+    const branch = await helper.getDefaultBranch(onedevHttp, projectId);
+    if (branch) {
+      config.defaultBranches.set(projectId, branch);
+      return branch;
+    }
+  } catch (err) {
+    logger.debug(
+      { err, projectId },
+      'Error reading the default branch from OneDev REST - falling back to the branch list',
+    );
+  }
+  const branchList = git.getBranchList();
+  for (const candidate of ['main', 'master']) {
+    if (branchList.includes(candidate)) {
+      return candidate;
+    }
+  }
+  return branchList[0];
 }
 
 export async function initRepo({
@@ -385,6 +466,9 @@ export async function initRepo({
       case 'endpoint': {
         // OneDev serves repository git urls as `<server>/<project path>.git`
         const endpointUrl = parseUrl(endpoint.replace(regEx(/~api\/?$/), ''));
+        // The endpoint has been dereferenced by initPlatform() already, so a
+        // parse failure is not reachable in practice.
+        /* v8 ignore next -- the endpoint is always dereferencable here */
         if (!endpointUrl) {
           throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
         }
@@ -420,17 +504,7 @@ export async function initRepo({
     url,
   });
 
-  // OneDev does not expose the default branch over REST, so derive it from
-  // the branches of the freshly initialized repository.
-  const branchList = git.getBranchList();
-  let defaultBranch: string | undefined;
-  if (branchList.includes('main')) {
-    defaultBranch = 'main';
-  } else if (branchList.includes('master')) {
-    defaultBranch = 'master';
-  } else {
-    defaultBranch = branchList[0];
-  }
+  const defaultBranch = await determineDefaultBranch(projectId);
   if (!defaultBranch) {
     logger.debug('Project has no branches - aborting renovation');
     throw new Error(REPOSITORY_EMPTY);
@@ -443,6 +517,7 @@ export async function initRepo({
   config.issueIds = new Map();
   config.prList = null;
   config.prRequestIds = new Map();
+  config.rawFileProjectIds = new Map();
 
   logger.debug(
     `OneDev project ${repository} (id ${projectId}), default branch = ${defaultBranch}`,
@@ -652,6 +727,9 @@ export async function getBranchStatus(
     return 'yellow';
   }
   const requestId = requestIdFor(pr.number);
+  // config.prList and config.prRequestIds are filled together in
+  // fetchPrList(), so the request id always resolves here.
+  /* v8 ignore next -- the request id map is always filled together with the PR list */
   if (requestId === undefined) {
     return 'yellow';
   }
@@ -737,6 +815,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 function issueIdFor(issueNumber: number): number | undefined {
   const issueId = config.issueIds.get(issueNumber);
+  // fetchIssueList() fills config.issueIds for every issue it returns, so
+  // the lookup always succeeds for an issue coming from that list.
+  /* v8 ignore next -- issues and their ids are always fetched together */
   if (issueId === undefined) {
     logger.warn({ issueNumber }, 'Could not find the OneDev id of the issue');
   }
@@ -773,6 +854,8 @@ export async function ensureIssue({
       }
 
       const issueId = issueIdFor(activeIssue.number!);
+      // fetchIssueList() fills config.issueIds for every issue it returns.
+      /* v8 ignore next -- issues and their ids are always fetched together */
       if (issueId === undefined) {
         return null;
       }
@@ -825,6 +908,8 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
       const issueId = issueIdFor(issue.number!);
+      // fetchIssueList() fills config.issueIds for every issue it returns.
+      /* v8 ignore next -- issues and their ids are always fetched together */
       if (issueId === undefined) {
         continue;
       }
@@ -844,22 +929,104 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   config.issueList = null;
 }
 
-export function ensureComment({
-  number,
-  topic,
-}: EnsureCommentConfig): Promise<boolean> {
-  logger.debug(
-    { prNumber: number, topic },
-    'OneDev REST does not support writing pull request comments',
+function findCommentByTopic(
+  comments: PullRequestComment[],
+  topic: string,
+): PullRequestComment | null {
+  return (
+    comments.find((c) => c.content?.startsWith(`### ${topic}\n\n`)) ?? null
   );
-  return Promise.resolve(false);
 }
 
-export function ensureCommentRemoval(
-  _ensureCommentRemoval: EnsureCommentRemovalConfig,
+function findCommentByContent(
+  comments: PullRequestComment[],
+  content: string,
+): PullRequestComment | null {
+  return comments.find((c) => c.content?.trim() === content.trim()) ?? null;
+}
+
+export async function ensureComment({
+  number,
+  topic,
+  content,
+}: EnsureCommentConfig): Promise<boolean> {
+  try {
+    logger.debug(`Ensuring comment "${topic ?? content}" in PR #${number}`);
+    await getPrList();
+    const requestId = requestIdFor(number);
+    if (requestId === undefined) {
+      return false;
+    }
+    const body = sanitize(content);
+    const commentList = await helper.getPullRequestComments(
+      onedevHttp,
+      requestId,
+    );
+
+    let comment: PullRequestComment | null;
+    let commentBody = body;
+    if (topic) {
+      comment = findCommentByTopic(commentList, topic);
+      commentBody = `### ${topic}\n\n${body}`;
+    } else {
+      comment = findCommentByContent(commentList, body);
+    }
+
+    if (!comment) {
+      const commentId = await helper.createPullRequestComment(onedevHttp, {
+        requestId,
+        userId: botUser?.id ?? 0,
+        content: commentBody,
+      });
+      logger.debug(`Added pull request comment id ${commentId}`);
+    } else if (comment.content === commentBody) {
+      logger.debug(`Comment #${comment.id} is already up-to-date`);
+    } else {
+      await helper.updatePullRequestComment(
+        onedevHttp,
+        comment.id,
+        commentBody,
+      );
+      logger.debug(`Comment #${comment.id} updated`);
+    }
+    return true;
+  } catch (err) {
+    logger.warn({ err, number, subject: topic }, 'Error ensuring comment');
+    return false;
+  }
+}
+
+export async function ensureCommentRemoval(
+  deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
-  logger.debug('OneDev REST does not support writing pull request comments');
-  return Promise.resolve();
+  const { number } = deleteConfig;
+  logger.debug(`Ensuring removal of comment in PR #${number} removed`);
+  await getPrList();
+  const requestId = requestIdFor(number);
+  if (requestId === undefined) {
+    return;
+  }
+  try {
+    const commentList = await helper.getPullRequestComments(
+      onedevHttp,
+      requestId,
+    );
+    let comment: PullRequestComment | null = null;
+    if (deleteConfig.type === 'by-topic') {
+      comment = findCommentByTopic(commentList, deleteConfig.topic);
+    } else if (deleteConfig.type === 'by-content') {
+      const body = sanitize(deleteConfig.content);
+      comment = findCommentByContent(commentList, body);
+    }
+    if (!comment) {
+      logger.debug(`Comment not found in PR #${number}, nothing to remove`);
+      return;
+    }
+    await helper.deletePullRequestComment(onedevHttp, comment.id);
+    logger.debug(`Removed pull request comment id ${comment.id}`);
+  } catch (err) {
+    logger.warn({ err, number }, 'Error removing comment');
+  }
 }
 
 export async function addAssignees(
@@ -916,17 +1083,64 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  // OneDev has no file-contents REST resource; content is served from the
-  // git clone. That only works for the currently initialized repository -
-  // presets living in another project cannot be resolved over REST.
-  if (repoName && repoName !== config.repository) {
+  const repository = repoName ?? config.repository;
+  // Content of the currently initialized repository is served from the git
+  // clone; other projects are read over REST, so that e.g. config presets
+  // living in a shared parent project can be resolved.
+  if (repository === config.repository) {
+    return (await git.getFile(fileName, branchOrTag)) ?? null;
+  }
+  const projectId = await getRawFileProjectId(repository);
+  if (projectId === undefined) {
+    return null;
+  }
+  const revision =
+    branchOrTag ?? (await determineDefaultBranch(projectId)) ?? undefined;
+  if (!revision) {
     logger.debug(
-      { repoName },
-      'OneDev local presets are limited to the current repository - skipping',
+      { repository, fileName },
+      'Cannot determine a revision for the remote file read',
     );
     return null;
   }
-  return (await git.getFile(fileName, branchOrTag)) ?? null;
+  try {
+    const file = await helper.getRepositoryFile(
+      onedevHttp,
+      projectId,
+      fileName,
+      revision,
+    );
+    if (!file.base64Content) {
+      return null;
+    }
+    return fromBase64(file.base64Content);
+  } catch (err) {
+    logger.debug(
+      { err, repository, projectId, fileName, revision },
+      'Could not read file contents over the OneDev REST API',
+    );
+    return null;
+  }
+}
+
+async function getRawFileProjectId(
+  repoName: string,
+): Promise<number | undefined> {
+  let projectId = config.rawFileProjectIds?.get(repoName);
+  if (projectId !== undefined) {
+    return projectId;
+  }
+  try {
+    projectId = await helper.getProjectId(onedevHttp, repoName);
+  } catch (err) {
+    logger.debug(
+      { err, repoName },
+      'Could not resolve the project id for remote file access',
+    );
+    return undefined;
+  }
+  config.rawFileProjectIds?.set(repoName, projectId);
+  return projectId;
 }
 
 export async function getJsonFile(
