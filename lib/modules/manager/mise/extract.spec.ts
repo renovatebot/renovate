@@ -1320,6 +1320,42 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts tool versions as constraints, preferring the locked version', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        python = "3.10"
+        "npm:pnpm" = "10.16.1"
+        "aqua:astral-sh/uv[bin=uv]" = "latest"
+        rust = "stable"
+        terraform = "1.9.0"
+
+        [tasks.build]
+        tools = { java = "21" }
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.extractedConstraints).toEqual({
+        node: '20.11.0',
+        python: '3.10.17',
+        pnpm: '10.16.1',
+      });
+    });
+
+    it('omits extractedConstraints without usable tool versions', async () => {
+      const content = codeBlock`
+        [tools]
+        python = "3.10"
+        terraform = "1.9.0"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result).not.toHaveProperty('extractedConstraints');
+    });
+
     it('sets lockFiles array when lock file present', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
