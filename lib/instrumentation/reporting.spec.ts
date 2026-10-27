@@ -3,7 +3,10 @@ import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '~test/s3.ts';
 import { fs, logger } from '~test/util.ts';
 import type { RenovateConfig } from '../config/types.ts';
-import type { PackageFile } from '../modules/manager/types.ts';
+import type {
+  NpmrcPackageFile,
+  PackageFile,
+} from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
 import {
   addBranchStats,
@@ -134,6 +137,84 @@ describe('instrumentation/reporting', () => {
       config.reportPath,
       JSON.stringify(expectedReport),
     );
+  });
+
+  describe('sanitized report body', () => {
+    const packageName = 'git::https://user:secret-token-1234@host/x';
+    const npmrc = '//registry.example.com/:_authToken=secret-npm-token';
+    const packageFilesWithCredentials: Record<string, NpmrcPackageFile[]> = {
+      npm: [
+        {
+          packageFile: 'package.json',
+          npmrc,
+          deps: [{ depName: 'x', packageName }],
+        },
+      ],
+    };
+    const sanitizedPackageFiles = {
+      npm: [
+        {
+          packageFile: 'package.json',
+          npmrc: '***********',
+          deps: [
+            { depName: 'x', packageName: 'git::https://**redacted**@host/x' },
+          ],
+        },
+      ],
+    };
+
+    it('writes the report file with URL credentials and npmrc masked', async () => {
+      const config: RenovateConfig = {
+        repository: 'myOrg/myRepo',
+        reportType: 'file',
+        reportPath: './report.json',
+      };
+      addExtractionStats(config, {
+        branchList: [],
+        branches: [],
+        packageFiles: packageFilesWithCredentials,
+      });
+
+      await exportStats(config);
+
+      const [[, writtenContent]] = fs.writeSystemFile.mock.calls;
+      expect(
+        JSON.parse(writtenContent as string).repositories['myOrg/myRepo']
+          .packageFiles,
+      ).toEqual(sanitizedPackageFiles);
+      // the report itself keeps the original values
+      expect(getReport().repositories['myOrg/myRepo'].packageFiles).toEqual(
+        packageFilesWithCredentials,
+      );
+    });
+
+    it('sends the report to S3 with URL credentials and npmrc masked', async () => {
+      const mockClient = mock<S3Client>();
+      s3.parseS3Url.mockReturnValue({
+        Bucket: 'bucket-name',
+        Key: 'key-name',
+      });
+      s3.getS3Client.mockReturnValue(mockClient);
+      const config: RenovateConfig = {
+        repository: 'myOrg/myRepo',
+        reportType: 's3',
+        reportPath: 's3://bucket-name/key-name',
+      };
+      addExtractionStats(config, {
+        branchList: [],
+        branches: [],
+        packageFiles: packageFilesWithCredentials,
+      });
+
+      await exportStats(config);
+
+      const { Body } = (
+        mockClient.send.mock.calls[0][0] as { input: { Body: string } }
+      ).input;
+      expect(
+        JSON.parse(Body).repositories['myOrg/myRepo'].packageFiles,
+      ).toEqual(sanitizedPackageFiles);
+    });
   });
 
   it('write formatted report if reportFormatting is enabled', async () => {

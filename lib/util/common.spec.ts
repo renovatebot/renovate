@@ -41,8 +41,6 @@ const validJsoncString = `
 `;
 
 describe('util/common', () => {
-  beforeEach(() => hostRules.clear());
-
   describe('detectPlatform', () => {
     it.each`
       url                                                                    | hostType

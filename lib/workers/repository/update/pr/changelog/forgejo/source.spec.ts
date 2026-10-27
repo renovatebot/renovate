@@ -44,7 +44,6 @@ describe('workers/repository/update/pr/changelog/forgejo/source', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'forgejo',
         matchHost,

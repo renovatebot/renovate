@@ -1,6 +1,7 @@
 import { isString, isTruthy } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { getEnv } from '../../../util/env.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { GoproxyItem } from './types.ts';
@@ -25,7 +26,7 @@ export function parseGoproxy(
     return [];
   }
 
-  const cacheKey = `goproxy::${input}`;
+  const cacheKey = buildCacheKey('goproxy', input);
   const cachedResult = memCache.get<GoproxyItem[]>(cacheKey);
   if (cachedResult) {
     return cachedResult;
@@ -105,7 +106,7 @@ export function parseNoproxy(
     return null;
   }
 
-  const cacheKey = `noproxy::${input}`;
+  const cacheKey = buildCacheKey('noproxy', input);
   const cachedResult = memCache.get<RegExp | null>(cacheKey);
   if (cachedResult !== undefined) {
     return cachedResult;

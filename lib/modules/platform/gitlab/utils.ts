@@ -37,6 +37,10 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
       headPipelineStatus: mr.head_pipeline?.status,
     }),
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
+    ...(mr.head_pipeline?.id && { headPipelineId: mr.head_pipeline?.id }),
+    ...(mr.head_pipeline?.source && {
+      headPipelineSource: mr.head_pipeline?.source,
+    }),
 
     ...(isNonEmptyArray(mr.reviewers) && {
       reviewers: mr.reviewers?.map(({ username }) => username),

@@ -12,8 +12,6 @@ describe('util/http/bitbucket', () => {
   beforeEach(() => {
     api = new BitbucketHttp();
 
-    // clean up hostRules
-    hostRules.clear();
     hostRules.add({
       hostType: 'bitbucket',
       matchHost: baseUrl,

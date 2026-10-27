@@ -1,4 +1,4 @@
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
@@ -21,7 +21,9 @@ export class RpmDatasource extends Datasource {
    * But according to this post, it's not something we can really look into or reference.
    * @see{https://lists.rpm.org/pipermail/rpm-ecosystem/2015-October/000283.html}
    */
-  override readonly customRegistrySupport = true;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   /**
    * Users can specify multiple repositories and the datasource will aggregate the releases
@@ -38,7 +40,7 @@ export class RpmDatasource extends Datasource {
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -55,21 +57,19 @@ export class RpmDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${RpmDatasource.id}`,
-        key: `${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         ttlMinutes: 1440,
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 
   getPrimaryUrl(registryUrl: string): Promise<string> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${RpmDatasource.id}`,
         key: registryUrl,
         ttlMinutes: 1440,
       },

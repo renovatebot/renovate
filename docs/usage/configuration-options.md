@@ -2344,8 +2344,8 @@ Do not combine with `hostType` in the same rule or it won't work.
 
 ### `hostRules.dnsCache`
 
-Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
+This option is deprecated and has no effect.
+Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
@@ -2358,8 +2358,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
@@ -2437,6 +2439,8 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
 
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
@@ -3051,6 +3055,7 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ read checkboxes from an existing Dependency Dashboard: use `checkedBranches` to request branches instead
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
@@ -3628,6 +3633,32 @@ The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### `packageRules.matchIsBreaking`
+
+Use `matchIsBreaking` to match updates based on whether Renovate considers them breaking.
+Set it to `true` to match only breaking updates, or `false` to match only non-breaking updates.
+
+What counts as breaking depends on the versioning of the dependency:
+
+- Versionings with their own notion of breaking changes decide themselves, for example Cargo treats a minor bump of a `0.x` crate (`0.1.0` to `0.2.0`) as breaking
+- For all other versionings, an update is breaking if its `updateType` is `major`
+
+Rules with `matchIsBreaking` never match when there is no update to evaluate, for example for `lockFileMaintenance`.
+
+The following example automerges all non-breaking updates of packages in the `@myorg` scope:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@myorg{/,}**"],
+      "matchIsBreaking": false,
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### `packageRules.matchJsonata`
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
@@ -3643,6 +3674,7 @@ $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
 $detectPlatform(sourceUrl) = 'github'
+$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://registry.example.com/**"])
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
@@ -3650,6 +3682,7 @@ $detectPlatform(sourceUrl) = 'github'
 Renovate provides the following custom JSONata functions:
 
 - `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
+- `$matchRegexOrGlob(input, patterns)` - Returns `true` if `input` matches `patterns`, using Renovate's [string pattern matching](./string-pattern-matching.md) syntax. `input` can be a string or an array of strings, in which case any matching element returns `true`. `patterns` is an array of strings, or a single string. Returns `false` if `input` is missing. Use this to combine conditions on different fields with `or`, which separate `match*` options can't do because they are combined with `and`.
 
 ### `packageRules.matchManagers`
 
@@ -4593,6 +4626,7 @@ It usually doesn't _know_ why they're there, instead it simply knows that it has
 
 If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+Read the [Abandoned PRs](./key-concepts/pull-requests.md#abandoned-prs) docs to learn more.
 
 If a branch appears stale and hasn't been modified, then:
 
@@ -5308,6 +5342,10 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
 
+!!! note
+  Some managers disable certain dependencies by default, such as `indirect` Go modules or Gradle `strictly` constraints.
+  Renovate still raises vulnerability-fix PRs for those dependencies, unless you disable them yourself with a `packageRules` entry that sets `enabled=false`.
+
 If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
 Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
 
@@ -5323,6 +5361,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.

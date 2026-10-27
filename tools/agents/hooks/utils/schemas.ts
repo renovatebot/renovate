@@ -28,14 +28,10 @@ export type SessionStartHookInput = z.infer<typeof SessionStartHookInput>;
 // https://code.claude.com/docs/en/hooks#stop
 export const StopHookInput = BaseHookInput.extend({
   hook_event_name: z.literal('Stop'),
-  permission_mode: z.enum([
-    'default',
-    'plan',
-    'acceptEdits',
-    'auto',
-    'dontAsk',
-    'bypassPermissions',
-  ]),
+  // kept as a plain string rather than an enum of known modes, so an unlisted
+  // future mode does not make the whole input fail to parse
+  permission_mode: z.string(),
+  stop_hook_active: z.boolean().optional(),
 });
 export type StopHookInput = z.infer<typeof StopHookInput>;
 

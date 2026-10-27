@@ -174,7 +174,7 @@ describe('config/migration', () => {
         configMigration.migrateConfig(config);
       expect(migratedConfig).toEqual({
         additionalBranchPrefix: '{{parentDir}}-',
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         allowScripts: true,
         autodiscover: true,
         automerge: false,

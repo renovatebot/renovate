@@ -2,8 +2,8 @@ import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 
 /**
- * URL and cache-key helpers shared by the datasources which speak the Gitea
- * API (`gitea-tags`, `gitea-releases`, `forgejo-tags`, `forgejo-releases`).
+ * URL helpers shared by the datasources which speak the Gitea API
+ * (`gitea-tags`, `gitea-releases`, `forgejo-tags`, `forgejo-releases`).
  *
  * All of them take an already resolved registry URL, so each datasource
  * applies its own default registry URL before calling them.
@@ -16,12 +16,4 @@ export function getApiUrl(registryUrl: string): string {
 
 export function getSourceUrl(packageName: string, registryUrl: string): string {
   return `${ensureTrailingSlash(registryUrl)}${packageName}`;
-}
-
-export function getCacheKey(
-  registryUrl: string,
-  repo: string,
-  type: string,
-): string {
-  return `${registryUrl}:${repo}:${type}`;
 }
