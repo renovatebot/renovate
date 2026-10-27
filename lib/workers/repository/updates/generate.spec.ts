@@ -385,6 +385,47 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
+    it('merges the shared constraints for the package files below their own extractedConstraints', () => {
+      const sharedConstraints = [
+        {
+          manager: 'tools',
+          directory: '',
+          constraints: { node: '20', pnpm: '9' },
+        },
+        {
+          manager: 'tools',
+          directory: 'apps/web',
+          constraints: { pnpm: '10' },
+        },
+      ];
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'npm',
+          packageFile: 'apps/web/package.json',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          extractedConstraints: { node: '22' },
+          sharedConstraints,
+        },
+        {
+          manager: 'tools',
+          packageFile: 'tools.toml',
+          depName: 'some-tool',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          sharedConstraints,
+        },
+      ];
+
+      const res = generateBranchConfig(branch);
+
+      expect(res.extractedConstraints).toEqual({ node: '22', pnpm: '10' });
+      expect(res).not.toHaveProperty('sharedConstraints');
+    });
+
     it('uses the new value of a tool constraint which the branch updates', () => {
       const branch: BranchUpgradeConfig[] = [
         {

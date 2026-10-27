@@ -5,6 +5,7 @@ import type {
   ManagerName,
 } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
+import type { SharedConstraints } from '../modules/manager/types.ts';
 import type {
   GitUrlOption,
   RepoSortMethod,
@@ -375,6 +376,8 @@ export interface RenovateInternalConfig {
   remediations?: unknown;
   /** What is this used for? */
   vulnerabilityAlertsOnly?: boolean;
+  /** constraints which managers share with the package files of other managers, collected after extraction - for internal use only */
+  sharedConstraints?: SharedConstraints[];
 }
 
 // TODO: Proper typings
