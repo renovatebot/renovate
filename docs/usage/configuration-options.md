@@ -162,7 +162,8 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## `assignees`
 
 Must be valid usernames on the platform in use.
-This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
+Teams are not supported, and Renovate passes `team:` entries to the platform unchanged.
+To request a review from a team, use [`reviewers`](#reviewers) instead.
 
 ## `assigneesFromCodeOwners`
 
