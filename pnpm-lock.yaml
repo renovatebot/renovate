@@ -132,8 +132,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@renovatebot/osv-offline':
-        specifier: 3.0.12
-        version: 3.0.12(supports-color@7.2.0)
+        specifier: 3.1.0
+        version: 3.1.0(supports-color@7.2.0)
       '@renovatebot/pep440':
         specifier: 5.0.1
         version: 5.0.1
@@ -2061,12 +2061,12 @@ packages:
     resolution: {integrity: sha512-FBLawccaWOPwqXgMSB3FTp1VTfGJWSTTXY2Q3kWPoLYOpKYBr3V37vtqFLjb5wUFkrXN2Sj+S840JXKfHwy8Rg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@3.0.12':
-    resolution: {integrity: sha512-zucy8DMvzE4JBjmobiAqk1mXnH2X7KwbZ9Q9YRw3RzevqhlBDZ+q5qQ3KLpEM1vaCpdhDUzaeJLxA5zOkNh4ww==}
+  '@renovatebot/osv-offline-db@3.1.0':
+    resolution: {integrity: sha512-yEopo6aj3Y8m3qL4dA/fnNQSXFiwnp7bC8bCfBjVOKo9lJIABiy6szeVeg03HuDYRCKTwni/i2q44iq+iq25Cg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@3.0.12':
-    resolution: {integrity: sha512-trFb1+hz84jtvvkJpsx/hEIktwDfyVsXIe4bWj7t5dSUHcP5JZmibE8CiR8KY9BXnqQtiig5HTRM5iwzlkQw/Q==}
+  '@renovatebot/osv-offline@3.1.0':
+    resolution: {integrity: sha512-khhevHBoq3b33QwtaOFtxLp8fNgA+rXd2iMupNI1dnrJ8Zg+E2ubKQ0jMgXY3i/4kwil0dOZRupmxrrVJaBnqQ==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@5.0.1':
@@ -7477,20 +7477,21 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@3.0.12(supports-color@7.2.0)':
+  '@renovatebot/osv-offline-db@3.1.0(supports-color@7.2.0)':
     dependencies:
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@renovatebot/osv-offline@3.0.12(supports-color@7.2.0)':
+  '@renovatebot/osv-offline@3.1.0(supports-color@7.2.0)':
     dependencies:
-      '@renovatebot/osv-offline-db': 3.0.12(supports-color@7.2.0)
-      adm-zip: 0.6.1
+      '@renovatebot/osv-offline-db': 3.1.0(supports-color@7.2.0)
       debug: 4.4.3(supports-color@7.2.0)
       fs-extra: 11.4.1
       got: 15.1.0
       luxon: 3.7.2
+      ms: 2.1.3
+      yauzl: 3.4.0
     transitivePeerDependencies:
       - supports-color
 
