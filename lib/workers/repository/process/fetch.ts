@@ -70,10 +70,12 @@ async function lookup(
   const mayBeGivenARegistry =
     dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
 
-  // `lockfile-only` says the dependency is useless for routine updates, but a
-  // vulnerability fix still needs to be able to reach it. Whether an alert
-  // matches is only known once the rules it became have been applied, so such a
-  // dep reaches them and is dropped afterwards if none did.
+  // A `lockfile-only` dependency is skipped for routine updates, because it is
+  // not declared anywhere for an update to change. A vulnerability fix still
+  // has to be able to reach it.
+  // Whether an alert matches is not known until the package rules have been
+  // applied, so the dependency passes through to them, and is skipped again
+  // below if none did.
   const mayBeAVulnerabilityAlert = dep.skipReason === 'lockfile-only';
 
   if (dep.skipReason && !mayBeGivenARegistry && !mayBeAVulnerabilityAlert) {
