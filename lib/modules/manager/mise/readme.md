@@ -132,8 +132,9 @@ In particular:
 
 ### Tool versions as constraints
 
-Renovate uses the versions of tools which it can install, like `node`, `pnpm`, `python` or `rust`, as [`constraints`](../../../configuration-options.md#constraints) for the package files of other managers.
-They apply to the directory of the mise config file and its subdirectories, so a `mise.toml` with `pnpm = "10.16.1"` makes Renovate use pnpm `10.16.1` for the `package.json` next to it.
+Renovate uses the versions of tools which it can install, like `node`, `pnpm`, `python` or `rust`, as [`constraints`](../../../configuration-options.md#constraints) for artifact updates of other managers in the directory tree of the mise config file.
+They apply to the directory of the mise config file and its subdirectories, so a `mise.toml` with `pnpm = "10.16.1"` makes Renovate use pnpm `10.16.1` when it updates the `pnpm-lock.yaml` of the `package.json` next to it.
+The lookup of new versions does not use them.
 For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory which holds the `.config` or `mise` directory.
 
 - The locked version from `mise.lock` is used, otherwise the version in the config file
