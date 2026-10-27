@@ -2,6 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
@@ -31,13 +32,11 @@ export class VcpkgDatasource extends Datasource {
     super(VcpkgDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
-    'https://github.com/microsoft/vcpkg',
-  ];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://github.com/microsoft/vcpkg'];
+  }
 
   override readonly defaultVersioning = 'vcpkg';
-
-  override readonly customRegistrySupport = true;
 
   override readonly releaseTimestampSupport = false;
 
@@ -111,7 +110,11 @@ export class VcpkgDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${VcpkgDatasource.id}`,
-        key: `getReleases:${config.registryUrl}/${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         cacheable: true,
       },
       () => this._getReleases(config),
@@ -134,7 +137,11 @@ export class VcpkgDatasource extends Datasource {
     registryUrl: string,
     url: URL,
   ): Promise<string | null> {
-    const cacheKey = `vcpkg-datasource/registry-clone-path/${registryUrl}`;
+    const cacheKey = buildCacheKey(
+      'vcpkg-datasource',
+      'registry-clone-path',
+      registryUrl,
+    );
     const lockKey = registryUrl;
 
     const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
