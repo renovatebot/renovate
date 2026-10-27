@@ -711,7 +711,7 @@ describe('modules/platform/onedev/index', () => {
       await initFakePlatform(scope);
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
-      mockPrList(scope, [mockPullRequest({ description: null })]);
+      mockPrList(scope, [mockPullRequest({ description: undefined })]);
 
       const prList = await onedev.getPrList();
       expect(prList[0].bodyStruct?.hash).toBeDefined();
@@ -723,15 +723,31 @@ describe('modules/platform/onedev/index', () => {
       await initFakePlatform(scope);
       mockInitRepo(scope);
       await onedev.initRepo({ repository });
-      mockPrList(scope, [mockPullRequest()]);
-      mockPrList(scope, [mockPullRequest()]);
+      mockPrList(scope, [
+        mockPullRequest(),
+        mockPullRequest({ id: 5556, number: 2, status: 'MERGED' }),
+      ]);
+      mockPrList(scope, [
+        mockPullRequest(),
+        mockPullRequest({ id: 5556, number: 2, status: 'MERGED' }),
+      ]);
 
+      // A `!open` filter keeps non-open pull requests, so it skips the open
+      // one and matches the merged one…
       await expect(
         onedev.findPr({
           branchName: 'renovate/something-1.x',
-          state: '!closed',
+          state: '!open',
         }),
-      ).resolves.toMatchObject({ number: 1 });
+      ).resolves.toMatchObject({ number: 2 });
+      // …while an exact `closed` filter matches none of the two (merged
+      // pull requests report state `merged`, only discarded map to closed).
+      await expect(
+        onedev.findPr({
+          branchName: 'renovate/something-1.x',
+          state: 'closed',
+        }),
+      ).resolves.toBeNull();
 
       await expect(
         onedev.findPr({
