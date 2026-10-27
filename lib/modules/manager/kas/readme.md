@@ -9,7 +9,8 @@ These entry-point files can then include many more kas files, which should not b
 ```json
 {
   "kas": {
-    "managerFilePatterns": ["kas.yml"]
+    "managerFilePatterns": ["kas.yml"],
+    "enabled": true
   }
 }
 ```

@@ -163,7 +163,7 @@ function updateLockFile(
   const edits = new Map<string, string>();
   for (const [name, sha] of toLock) {
     if (name in existing) {
-      // ponytail: kas also accepts the annotated tag object sha as up to date; we only know the peeled sha
+      // kas also accepts the annotated tag object sha as up to date; we only know the peeled sha
       if (existing[name].commit !== sha) {
         edits.set(name, sha);
       }

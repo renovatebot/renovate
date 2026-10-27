@@ -199,7 +199,7 @@ export async function extractAllPackageFiles(
     if (seen.has(rootFile)) {
       logger.warn(
         { rootFile },
-        'only specify the root entry kas file in matchFiles renovate config. Skipping.',
+        'only specify the root entry kas file in matchFilePatterns renovate config. Skipping.',
       );
       continue;
     }
