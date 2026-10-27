@@ -11,6 +11,7 @@ import {
   getLockFilePath,
   isYamlFilePath,
   loadKasConfigTree,
+  repoRefs,
 } from './include.ts';
 import type { KasConfig, KasRepo } from './schema.ts';
 import type { KasConfigFile } from './types.ts';
@@ -145,9 +146,7 @@ function floatingRef(
   if (repo.commit ?? config.overrides?.repos?.[name]?.commit) {
     return null;
   }
-  const defaults = config.defaults?.repos;
-  const tag = 'tag' in repo ? repo.tag : defaults?.tag;
-  const branch = 'branch' in repo ? repo.branch : defaults?.branch;
+  const { tag, branch } = repoRefs(repo, config);
   const ref = tag ?? branch;
   return ref ? { ref, url: repo.url } : null;
 }

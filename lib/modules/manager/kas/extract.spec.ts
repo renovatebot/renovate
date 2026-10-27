@@ -234,6 +234,31 @@ describe('modules/manager/kas/extract', () => {
       ]);
     });
 
+    it.each`
+      field       | value     | datasource    | versioning
+      ${'branch'} | ${'main'} | ${'git-refs'} | ${'loose'}
+      ${'tag'}    | ${'v1.0'} | ${'git-tags'} | ${undefined}
+    `(
+      'uses defaults.repos.$field when the repo omits it',
+      async ({ field, value, datasource, versioning }) => {
+        files['kas.yml'] = codeBlock`
+          header:
+            version: 22
+          defaults:
+            repos:
+              ${field}: ${value}
+          repos:
+            isar:
+              url: https://github.com/ilbers/isar.git
+              commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
+        `;
+        const result = await extractAllPackageFiles({}, ['kas.yml']);
+        expect(result?.[0].deps).toMatchObject([
+          { depName: 'isar', currentValue: value, datasource, versioning },
+        ]);
+      },
+    );
+
     it('lockfile commit wins over project file commit', async () => {
       files['kas.yml'] = kasRoot(codeBlock`
         isar:

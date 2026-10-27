@@ -8,6 +8,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import type { KasRepo } from './schema.ts';
 import { KasConfig, KasConfigJson, KasConfigYaml } from './schema.ts';
 import type { KasConfigFile, KasConfigTree } from './types.ts';
 
@@ -32,6 +33,18 @@ export function getLockFilePath(filePath: string): string | null {
 
 export function parseKasConfig(path: string, content: string): KasConfig {
   return (isYamlFilePath(path) ? KasConfigYaml : KasConfigJson).parse(content);
+}
+
+/** Like kas, a repo without its own `tag`/`branch` inherits `defaults.repos`. */
+export function repoRefs(
+  repo: KasRepo,
+  config: KasConfig,
+): { tag?: string; branch?: string } {
+  const defaults = config.defaults?.repos;
+  return {
+    tag: ('tag' in repo ? repo.tag : defaults?.tag) ?? undefined,
+    branch: ('branch' in repo ? repo.branch : defaults?.branch) ?? undefined,
+  };
 }
 
 function deepMerge(

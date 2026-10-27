@@ -15,6 +15,7 @@ import {
   getLockFilePath,
   isYamlFilePath,
   loadKasConfigTree,
+  repoRefs,
 } from './include.ts';
 import type { KasConfig, KasRepo } from './schema.ts';
 import type { KasConfigFile } from './types.ts';
@@ -138,8 +139,7 @@ export function extractPackageFile(
     }
 
     const commit = isCommitInMerged ? effectiveCommit : undefined;
-    const branch = mergedRepo.branch ?? undefined;
-    const tag = mergedRepo.tag ?? undefined;
+    const { tag, branch } = repoRefs(mergedRepo, merged);
 
     if (branch && tag) {
       logger.warn(
@@ -166,7 +166,7 @@ export function extractPackageFile(
     const packageDependency: PackageDependency = {
       depName: repoName,
       packageName: git,
-      versioning: mergedRepo.branch ? looseVersioning : undefined,
+      versioning: branch ? looseVersioning : undefined,
       replaceString: replaceString,
       currentDigest: commit,
     };
