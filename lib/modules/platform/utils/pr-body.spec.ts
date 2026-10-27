@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
 import { smartTruncate } from './pr-body.ts';
@@ -87,6 +88,70 @@ describe('modules/platform/utils/pr-body', () => {
 
     it('does not truncate', () => {
       expect(smartTruncate(prBody, 60000)).toEqual(prBody);
+    });
+
+    describe('when the part before the release notes is too long', () => {
+      const advisory = codeBlock`
+        <details>
+        <summary>More information</summary>
+
+        #### Details
+        ${'Vuln: java.nio.file.Path deserialization\n'.repeat(100)}
+        </details>
+      `;
+      // `codeBlock` strips leading line breaks
+      const tail = `\n\n${codeBlock`
+        ---
+
+        ### Configuration
+
+        🚦 **Automerge**: Enabled.
+
+        ---
+
+         - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box
+
+        <!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiI0NC4wLjAifQ==-->
+      `}`;
+
+      it('keeps the Configuration section, the controls and the debug comment', () => {
+        const input = `This PR contains the following updates:\n\n### GitHub Vulnerability Alerts\n\n${advisory}\n\n### Release Notes\n\n<details>\nnotes\n</details>${tail}\n`;
+
+        const body = smartTruncate(input, 2000);
+
+        expect(body.length).toBeLessThanOrEqual(2000);
+        expect(body).toContain('PR body was truncated to here');
+        expect(body).not.toContain('### Release Notes');
+        expect(body).toEndWith(`${tail}\n`);
+        // the cut advisory's `<details>` is closed before the notice
+        expect(body.match(/<details>/g)).toHaveLength(1);
+        expect(body.match(/<\/details>/g)).toHaveLength(1);
+        expect(body.indexOf('</details>')).toBeLessThan(
+          body.indexOf('PR body was truncated to here'),
+        );
+      });
+
+      it('keeps the tail without release notes', () => {
+        const input = `${advisory}${tail}\n`;
+
+        const body = smartTruncate(input, 1500);
+
+        expect(body.length).toBeLessThanOrEqual(1500);
+        expect(body).toContain('🚦 **Automerge**: Enabled.');
+        expect(body).toEndWith(`${tail}\n`);
+      });
+
+      it('keeps the debug comment without a Configuration section', () => {
+        const debugComment =
+          '\n<!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiI0NC4wLjAifQ==-->\n';
+        const input = `${'x'.repeat(2000)}${debugComment}`;
+
+        const body = smartTruncate(input, 500);
+
+        expect(body).toHaveLength(500);
+        expect(body).toContain('PR body was truncated to here');
+        expect(body).toEndWith(debugComment);
+      });
     });
   });
 });

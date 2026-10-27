@@ -7,6 +7,39 @@ const re = regEx(
   's',
 );
 
+const configurationStart = '\n\n---\n\n### Configuration';
+const debugCommentRegex = regEx(/\n<!--renovate-debug:[^>]*-->\n?$/);
+const detailsOpenRegex = regEx(/<details[\s>]/g);
+const detailsCloseRegex = regEx(/<\/details>/g);
+
+/**
+ * Returns the end of a PR body which truncation keeps: the Configuration section with everything after it, or else the trailing `renovate-debug` comment.
+ */
+function getTail(body: string): string {
+  const start = body.lastIndexOf(configurationStart);
+  if (start !== -1) {
+    return body.slice(start);
+  }
+  return debugCommentRegex.exec(body)?.[0] ?? '';
+}
+
+/**
+ * Returns the first `length` characters of `body`, closing the `<details>` blocks the cut leaves open (e.g. of vulnerability advisories).
+ */
+function cutHead(body: string, length: number): string {
+  let head = body.substring(0, length);
+  for (;;) {
+    const unclosed =
+      (head.match(detailsOpenRegex)?.length ?? 0) -
+      (head.match(detailsCloseRegex)?.length ?? 0);
+    const closing = '\n\n</details>'.repeat(Math.max(unclosed, 0));
+    if (head.length + closing.length <= length) {
+      return head + closing;
+    }
+    head = head.substring(0, length - closing.length);
+  }
+}
+
 export function smartTruncate(input: string, len: number): string {
   if (input.length < len) {
     return input;
@@ -23,43 +56,44 @@ export function smartTruncate(input: string, len: number): string {
   );
   const truncatedInput = note + input;
 
+  // cut the release notes first, if everything else fits
   const reMatch = re.exec(truncatedInput);
-  if (!reMatch?.groups) {
-    if (truncationNotice.length >= len) {
-      return truncatedInput.substring(0, len);
+  if (reMatch?.groups) {
+    const divider = `\n\n</details>\n\n---\n\n### Configuration`;
+    const preNotes = reMatch.groups.preNotes;
+    const releaseNotes = reMatch.groups.releaseNotes;
+    const postNotes = reMatch.groups.postNotes;
+
+    const availableLength =
+      len -
+      (preNotes.length +
+        postNotes.length +
+        divider.length +
+        truncationNotice.length);
+
+    if (availableLength > 0) {
+      return (
+        preNotes +
+        releaseNotes.slice(0, availableLength) +
+        truncationNotice +
+        divider +
+        postNotes
+      );
     }
-    return (
-      truncatedInput.substring(0, len - truncationNotice.length) +
-      truncationNotice
-    );
   }
 
-  const divider = `\n\n</details>\n\n---\n\n### Configuration`;
-  const preNotes = reMatch.groups.preNotes;
-  const releaseNotes = reMatch.groups.releaseNotes;
-  const postNotes = reMatch.groups.postNotes;
+  // otherwise cut what comes before the tail, e.g. long vulnerability advisories, so the Configuration section, the controls and the `renovate-debug` comment survive
+  const tail = getTail(truncatedInput);
+  const headLength = len - truncationNotice.length - tail.length;
+  if (headLength > 0) {
+    return cutHead(truncatedInput, headLength) + truncationNotice + tail;
+  }
 
-  const availableLength =
-    len -
-    (preNotes.length +
-      postNotes.length +
-      divider.length +
-      truncationNotice.length);
-
-  if (availableLength <= 0) {
-    if (truncationNotice.length >= len) {
-      return truncatedInput.substring(0, len);
-    }
-    return (
-      truncatedInput.substring(0, len - truncationNotice.length) +
-      truncationNotice
-    );
+  if (truncationNotice.length >= len) {
+    return truncatedInput.substring(0, len);
   }
   return (
-    preNotes +
-    releaseNotes.slice(0, availableLength) +
-    truncationNotice +
-    divider +
-    postNotes
+    truncatedInput.substring(0, len - truncationNotice.length) +
+    truncationNotice
   );
 }
