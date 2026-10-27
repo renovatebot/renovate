@@ -1,6 +1,9 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
-import type { ManagerName } from '../manager-list.generated.ts';
+import type {
+  CustomManagerName,
+  ManagerName,
+} from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
@@ -503,7 +506,7 @@ export interface RenovateConfig
   toolSettings?: RepoToolSettingsOptions;
 }
 
-const CustomDatasourceFormats = [
+export const CustomDatasourceFormats = [
   'html',
   'json',
   'plain',
@@ -647,31 +650,35 @@ export const configScopes = [
   'vulnerabilityAlert',
   /** the `group` configuration object, which is merged into an update when it's grouped */
   'group',
+  /** every object a config can be nested in, for the options which are read wherever they're found */
+  'any',
 ] as const;
 
 export type ConfigScope = (typeof configScopes)[number];
 
+/**
+ * The objects which a config can be nested in, other than the top level and the ones which are covered by a {@link ConfigScope}.
+ */
+export const namedParents = [
+  'bumpVersions',
+  'customDatasources',
+  'customManagers',
+  'group',
+  'hostRules',
+  'logLevelRemap',
+  'packageRules',
+  'postUpgradeTasks',
+  'toolSettings',
+  'vulnerabilityAlerts',
+] as const;
+
 export type AllowedParents =
   | '.'
-  | 'bumpVersions'
-  | 'group'
-  | 'customDatasources'
-  | 'customManagers'
-  | 'hostRules'
-  | 'logLevelRemap'
-  | 'packageRules'
-  | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts'
-  | 'toolSettings'
+  | (typeof namedParents)[number]
   | ManagerName
+  | CustomManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {
-  /**
-   * If true, the option can only be configured by people with access to the Renovate instance.
-   * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
-   */
-  globalOnly?: boolean;
-
   /**
    * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
    *
@@ -686,6 +693,13 @@ export interface RenovateOptionBase {
   inheritConfigSupport?: boolean;
 
   allowedValues?: string[];
+
+  /**
+   * A subset of suggested values for the user, which are some (but not all) of the possible `allowedValues`.
+   *
+   * This provides editor autocomplete (i.e. via our JSON Schema) but makes it possible to not be an exhaustive list, which is required by `allowedValues`, and may be further complicated by `patternMatch`.
+   */
+  suggestedValues?: string[];
 
   allowString?: boolean;
 
@@ -822,7 +836,7 @@ export interface RenovateObjectOption extends RenovateOptionBase {
   type: 'object';
 }
 
-export type RenovateOptions =
+type RenovateOptionType =
   | RenovateStringOption
   | RenovateNumberArrayOption
   | RenovateStringArrayOption
@@ -830,6 +844,28 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+/**
+ * An option which can only be configured by people with access to the Renovate instance.
+ *
+ * It should be documented in docs/usage/self-hosted-configuration.md, and doesn't have to say where it can be used yet - see #43020.
+ */
+interface SelfHostedOption {
+  globalOnly: true;
+  scopes?: ConfigScope[];
+  parents?: AllowedParents[];
+}
+
+/**
+ * An option which a repository can configure, which has to say where it can be used, through either its `scopes` or its `parents`.
+ */
+type ConfigurableOption = { globalOnly?: false } & (
+  | { scopes: ConfigScope[]; parents?: AllowedParents[] }
+  | { parents: AllowedParents[]; scopes?: ConfigScope[] }
+);
+
+export type RenovateOptions = RenovateOptionType &
+  (SelfHostedOption | ConfigurableOption);
 
 export interface PackageRuleInputConfig extends RenovateConfig {
   versioning?: string;

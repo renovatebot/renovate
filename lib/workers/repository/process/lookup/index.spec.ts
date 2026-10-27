@@ -140,6 +140,44 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('removes URL credentials of the package name from the unknown datasource warning', async () => {
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = 'does not exist';
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(warnings).toEqual([
+        {
+          topic: 'https://git.example.com/org/repo',
+          message:
+            'Unknown datasource "does not exist" for package https://git.example.com/org/repo',
+        },
+      ]);
+    });
+
+    it('removes URL credentials of the package name from the lookup failure warning', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = GithubTagsDatasource.id;
+      // a datasource without a result for the package
+      getGithubTags.mockResolvedValueOnce(null);
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(warnings).toEqual([
+        {
+          topic: 'https://git.example.com/org/repo',
+          message:
+            'Failed to look up github-tags package https://git.example.com/org/repo: no-result',
+        },
+      ]);
+      expect(JSON.stringify(warnings)).not.toContain('secret');
+    });
+
     it('handles error result from getPkgReleasesWithResult', async () => {
       config.currentValue = '1.0.0';
       config.packageName = 'some-dep';
@@ -3418,6 +3456,39 @@ describe('workers/repository/process/lookup/index', () => {
           message:
             'Could not determine new digest for update (github-tags package angular/angular)',
           topic: 'angular/angular',
+        },
+      ]);
+    });
+
+    it('removes URL credentials of the package name from the digest warning', async () => {
+      config.currentValue = 'v1.0.0';
+      config.currentDigest = 'bla';
+      config.digestOneAndOnly = true;
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = GithubTagsDatasource.id;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01' as Timestamp,
+          },
+        ],
+      });
+      const getDigest = vi
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce(null);
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(getDigest).toHaveBeenCalled();
+      expect(warnings).toEqual([
+        {
+          message:
+            'Could not determine new digest for update (github-tags package https://git.example.com/org/repo)',
+          topic: 'https://git.example.com/org/repo',
         },
       ]);
     });
@@ -7170,6 +7241,39 @@ describe('workers/repository/process/lookup/index', () => {
         warnings: [],
       });
     });
+
+    it.each`
+      changelogUrl                                     | expected
+      ${'https://user:token@example.com/CHANGELOG.md'} | ${'https://example.com/CHANGELOG.md'}
+      ${undefined}                                     | ${undefined}
+    `(
+      'sets changelogUrl $expected over the dependency one for release changelogUrl $changelogUrl',
+      async ({ changelogUrl, expected }) => {
+        config.currentValue = '8.0.0';
+        config.packageName = 'node';
+        config.datasource = DockerDatasource.id;
+        getDockerReleases.mockResolvedValueOnce({
+          changelogUrl: 'https://example.com/dependency/CHANGELOG.md',
+          releases: [
+            {
+              version: '8.0.0',
+            },
+            {
+              changelogContent: 'testContent',
+              changelogUrl,
+              version: '8.1.0',
+            },
+          ],
+        });
+
+        const res = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(res.changelogContent).toBe('testContent');
+        expect(res.changelogUrl).toBe(expected);
+      },
+    );
 
     it('handles changelog with content for ranges', async () => {
       config.currentValue = '[8.0,8.1)';

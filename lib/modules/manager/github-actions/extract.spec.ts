@@ -957,6 +957,53 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(4);
     });
 
+    it('extracts multiple xcode action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowXcode = codeBlock`
+      jobs:
+        test1:
+          runs-on: xcode-27
+        test2:
+          runs-on: xcode-27-xlarge
+        test3:
+          runs-on: xcode-latest
+      `;
+      const res = await extractPackageFile(
+        runnerTestWorkflowXcode,
+        'workflow.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'xcode',
+          currentValue: '27',
+          replaceString: 'xcode-27',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: '27-xlarge',
+          replaceString: 'xcode-27-xlarge',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: 'latest',
+          replaceString: 'xcode-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
       const runnerTestWorkflowUbuntu = codeBlock`
       jobs:
@@ -1403,6 +1450,87 @@ describe('modules/manager/github-actions/extract', () => {
         runs:
           using: 'node20'
           main: 'index.js'
+        `;
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts the image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString: 'ghcr.io/ossf/scorecard-action:v2.5.0',
+        },
+      ]);
+    });
+
+    it('extracts the digest-pinned image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('extracts the digest-only image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "DOCKER://ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('ignores a docker container action which builds a Dockerfile', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: docker
+          image: Dockerfile
         `;
       await expect(
         extractPackageFile(yamlContent, 'action.yml'),

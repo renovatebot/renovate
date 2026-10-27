@@ -92,6 +92,10 @@ export default defineConfig(() =>
         reporters,
         mockReset: true,
         unstubEnvs: true,
+        // Inlined so specs can mock `node:fs/promises` for these packages
+        server: {
+          deps: { inline: ['@renovatebot/base-image', '@containerbase/base'] },
+        },
         coverage: {
           provider: 'v8',
           skipFull: !ci,

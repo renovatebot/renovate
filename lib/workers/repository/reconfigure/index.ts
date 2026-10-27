@@ -109,6 +109,7 @@ export async function checkReconfigureBranch(
       config: repoConfig,
     }),
   );
+  newConfig.defaultBranch = config.defaultBranch;
   newConfig.baseBranch = config.defaultBranch;
   newConfig.repoIsOnboarded = true;
   newConfig.errors = [];

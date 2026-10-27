@@ -2778,6 +2778,43 @@ describe('modules/platform/azure/index', () => {
       'Issue',
     );
   });
+
+  it.each`
+    repoWorkItemType | expected
+    ${'Task'}        | ${'Task'}
+    ${'Issue'}       | ${'Issue'}
+    ${undefined}     | ${'Issue'}
+  `(
+    'ensureIssue uses work item type $expected for repo config $repoWorkItemType',
+    async ({ repoWorkItemType, expected }) => {
+      await initRepo({ repository: 'some/repo' });
+      azure.applyRepoConfig?.({ azureWorkItemType: repoWorkItemType });
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValueOnce(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi
+            .fn()
+            .mockResolvedValue([{ name: 'Issue' }, { name: 'Task' }]),
+        }),
+      );
+      const result = await azure.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body',
+      });
+
+      expect(result).toBe('created');
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Array),
+        'some',
+        expected,
+      );
+    },
+  );
+
   it('ensureIssue updates an existing issue', async () => {
     await initRepo({ repository: 'some/repo' });
 

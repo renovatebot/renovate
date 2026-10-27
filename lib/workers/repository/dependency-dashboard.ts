@@ -187,7 +187,10 @@ export async function readDashboardBody(
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
-  if (
+  // mode=silent never updates the dashboard, so checkboxes left on an existing one would never be cleared
+  if (config.mode === 'silent') {
+    logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
+  } else if (
     config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
