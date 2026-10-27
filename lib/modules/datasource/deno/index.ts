@@ -2,6 +2,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -21,8 +22,6 @@ export class DenoDatasource extends Datasource {
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
-
-  override readonly registryStrategy = 'first';
 
   override readonly defaultVersioning = semanticVersioning.id;
 
@@ -75,8 +74,11 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -86,7 +88,7 @@ export class DenoDatasource extends Datasource {
   private async _getReleaseResult(
     moduleAPIURL: string,
   ): Promise<ReleaseResult> {
-    const detailsCacheKey = `details:${moduleAPIURL}`;
+    const detailsCacheKey = buildCacheKey('details', moduleAPIURL);
     const releasesCache: Record<string, Release> = coerceObject(
       await packageCache.get(
         `datasource-${DenoDatasource.id}`,
@@ -148,7 +150,7 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        key: `getReleaseResult:${moduleAPIURL}`,
+        key: buildCacheKey('getReleaseResult', moduleAPIURL),
       },
       () => this._getReleaseResult(moduleAPIURL),
     );

@@ -1,4 +1,8 @@
 import os from 'node:os';
+import {
+  isContainerbase,
+  validateContainerbaseVersion,
+} from '@renovatebot/base-image';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
@@ -50,14 +54,44 @@ function limitCommitsPerRun(config: RenovateConfig): void {
   setMaxLimit('Commits', typeof limit === 'number' && limit > 0 ? limit : null);
 }
 
+/**
+ * Checks that the Containerbase image version is compatible with Renovate.
+ *
+ * Can be skipped using `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`, which is
+ * read from the process environment only.
+ */
+async function checkContainerbaseVersion(): Promise<void> {
+  if (!isContainerbase()) {
+    return;
+  }
+  if (process.env.RENOVATE_X_IGNORE_CONTAINERBASE_VERSION) {
+    logger.info(
+      'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
+    );
+    return;
+  }
+  try {
+    const version = await validateContainerbaseVersion();
+    logger.debug({ version }, 'Containerbase image version is compatible');
+  } catch (err) {
+    throw new Error(
+      `Init: containerbase image version check failed: ${err.message}. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
+    );
+  }
+}
+
+/**
+ * Checks the versions of the tools and the image Renovate depends on.
+ */
 async function checkVersions(): Promise<void> {
   const validGitVersion = await validateGitVersion();
   if (!validGitVersion) {
     throw new Error('Init: git version needs upgrading');
   }
+  await checkContainerbaseVersion();
 }
 
-function setGlobalHostRules(config: AllConfig, warnOnDenied = true): void {
+function setGlobalHostRules(config: AllConfig): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
     applySecretsAndVariablesToConfig({
@@ -65,20 +99,9 @@ function setGlobalHostRules(config: AllConfig, warnOnDenied = true): void {
       deleteVariables: false,
       deleteSecrets: false,
     });
-    // filtered here, rather than left to `add()`, so that the WARN about any dropped header can be suppressed when the same rules are registered again
-    // `config.hostRules` is deliberately left as it is: a `repositories[]` entry can widen `allowedHeaders` for its own repository, and `start()` re-filters these rules with the entry's allowlist to honour that
-    const rules = hostRules.filterAllowedHeaders(
-      config.hostRules,
-      config.allowedHeaders,
-      warnOnDenied,
-    );
-    for (const rule of rules) {
-      // already filtered above, so `add()`'s own enforcement has nothing left to drop
-      // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
-      hostRules.add(rule, {
-        allowedHeaders: config.allowedHeaders,
-        trusted: true,
-      });
+    for (const rule of config.hostRules) {
+      // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host, and exempt from `allowedHeaders` altogether - `allowedHeaders` constrains what a repository or preset may set, not the administrator, mirroring how `allowedEnv` does not constrain the administrator's own `env`
+      hostRules.add(rule, { trusted: true });
     }
   }
 }
@@ -105,8 +128,8 @@ export async function globalInitialize(
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
-  // registered a second time in case initialization changed them; anything `allowedHeaders` drops was already warned about by the call above
-  setGlobalHostRules(config, false);
+  // registered a second time in case initialization changed them
+  setGlobalHostRules(config);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
   return config;
