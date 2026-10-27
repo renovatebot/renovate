@@ -3,7 +3,6 @@ import type {
   ValidationMessage,
 } from '../../../../config/types.ts';
 import type { DatasourceName } from '../../../../datasource-list.generated.ts';
-import type { ChangelogRelease } from '../../../../modules/datasource/types.ts';
 import type {
   LookupUpdate,
   RangeConfig,
@@ -67,7 +66,6 @@ export interface LookupUpdateConfig
 export interface UpdateResult {
   sourceDirectory?: string;
   changelogContent?: string;
-  changelogReleases?: ChangelogRelease[];
   changelogUrl?: string;
   dependencyUrl?: string;
   homepage?: string;
