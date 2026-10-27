@@ -29,15 +29,3 @@ export const VcpkgPortVersions = z.object({
 });
 
 export type VcpkgPortVersions = z.infer<typeof VcpkgPortVersions>;
-
-export const VcpkgBaseline = z.object({
-  default: z.record(
-    z.string(),
-    z.object({
-      baseline: z.string(),
-      'port-version': z.number().int().nonnegative(),
-    }),
-  ),
-});
-
-export type VcpkgBaseline = z.infer<typeof VcpkgBaseline>;
