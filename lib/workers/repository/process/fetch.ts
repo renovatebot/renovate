@@ -42,7 +42,14 @@ async function lookup(
   // here - unless its manager already gave it a registry it could not use.
   const mayBeGivenARegistry =
     dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
-  if (dep.skipReason && !mayBeGivenARegistry) {
+
+  // `lockfile-only` says the dependency is useless for routine updates, but a
+  // vulnerability fix still needs to be able to reach it. Whether an alert
+  // matches is only known once the rules it became have been applied, so such a
+  // dep reaches them and is dropped afterwards if none did.
+  const mayBeAVulnerabilityAlert = dep.skipReason === 'lockfile-only';
+
+  if (dep.skipReason && !mayBeGivenARegistry && !mayBeAVulnerabilityAlert) {
     return Result.ok(dep);
   }
 
@@ -79,6 +86,18 @@ async function lookup(
       return Result.ok(dep);
     }
 
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
+
+  if (mayBeAVulnerabilityAlert) {
+    if (!depConfig.isVulnerabilityAlert) {
+      return Result.ok(dep);
+    }
+
+    logger.debug(
+      `Dependency: ${depName!}, is only in a lock file, but a vulnerability alert matches it - looking it up`,
+    );
     delete dep.skipReason;
     delete dep.skipStage;
   }
