@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _extractAll from '../extract/index.ts';
+import * as _sharedConstraints from '../extract/shared-constraints.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
@@ -46,11 +47,13 @@ vi.mock('./vulnerabilities.ts', () => {
 });
 vi.mock('../updates/branchify.ts');
 vi.mock('../extract/index.ts');
+vi.mock('../extract/shared-constraints.ts');
 vi.mock('../../../util/cache/repository/index.ts');
 vi.mock('../../../util/fs/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const extractAll = vi.mocked(_extractAll);
+const sharedConstraints = vi.mocked(_sharedConstraints);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
 const write = vi.mocked(_write);
@@ -813,6 +816,23 @@ describe('workers/repository/process/extract-update', () => {
         expect(
           (await extract(config)).npm[0].deps[0].skipReason,
         ).toBeUndefined();
+      });
+
+      it('shares constraints between managers after caching what was extracted', async () => {
+        extractAll.extractAllDependencies.mockResolvedValueOnce({
+          packageFiles: createPackageFiles(),
+          extractionFingerprints: {},
+        });
+        sharedConstraints.applySharedConstraints.mockImplementationOnce(
+          (packageFiles) => {
+            packageFiles!.npm[0].extractedConstraints = { pnpm: '10.16.1' };
+          },
+        );
+
+        const res = await extract(config);
+
+        expect(res.npm[0].extractedConstraints).toEqual({ pnpm: '10.16.1' });
+        expect(cache.scan.master.packageFiles).toEqual(createPackageFiles());
       });
     });
 
