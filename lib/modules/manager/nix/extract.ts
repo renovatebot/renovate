@@ -6,8 +6,16 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  LookupUpdate,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
 import { NixFlakeLock } from './schema.ts';
+
+interface NixDependency extends PackageDependency {
+  digest?: Pick<LookupUpdate, 'isLockfileUpdate'>;
+}
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
@@ -114,7 +122,7 @@ export async function extractPackageFile(
       continue;
     }
 
-    const dep: PackageDependency = {
+    const dep: NixDependency = {
       depName: rootInputs.get(node),
       datasource: GitRefsDatasource.id,
     };
@@ -124,6 +132,11 @@ export async function extractPackageFile(
       '',
     );
     dep.currentDigest = flakeLocked.rev;
+    if (flakeOriginal.rev === undefined) {
+      // Only digest updates use this override. Version updates must still
+      // rewrite flake.nix, as must digests explicitly pinned there.
+      dep.digest = { isLockfileUpdate: true };
+    }
 
     switch (flakeLocked.type) {
       case 'git': {

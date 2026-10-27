@@ -20,6 +20,29 @@ inputs.nixpkgs = {
 Complex Nix expressions and attribute sets where another member appears before `url` are not updated.
 FlakeHub inputs are not supported because FlakeHub version constraints require registry-specific version lookup.
 
+Renovate also proposes digest updates for root inputs that track a branch, such as `nixos-unstable`, or a repository's default branch, such as `github:owner/repo`.
+These updates refresh the revision in `flake.lock` without changing the URL in `flake.nix`, so a moving branch can produce a new update whenever its upstream revision changes.
+Previously, these revisions were refreshed only by lock file maintenance.
+
+If you prefer to refresh those revisions through lock file maintenance, disable individual Nix digest updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["nix"],
+      "matchUpdateTypes": ["digest"],
+      "enabled": false
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  }
+}
+```
+
+This rule leaves version updates enabled and does not disable lock file maintenance.
+
 For specifying `packageRules` it is important to know how `depName` and `packageName` are defined for nix updates:
 
 - The `depName` field is equal to the Nix flake input name, for example `nix.inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";` has the `depName` of `nixpkgs`

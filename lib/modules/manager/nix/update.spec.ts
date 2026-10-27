@@ -616,6 +616,63 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
+    it('updates a root inputs declaration instead of a depth-2 override', () => {
+      const fileContent = codeBlock`
+        {
+          inputs.foo = {
+            url = "github:owner/foo";
+            inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+          };
+          inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+        }
+      `;
+
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs',
+          currentValue: '24.05',
+          newValue: '25.05',
+        },
+      });
+
+      expect(result).toBe(codeBlock`
+        {
+          inputs.foo = {
+            url = "github:owner/foo";
+            inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+          };
+          inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+        }
+      `);
+    });
+
+    it('does not update a depth-2 override when the root input is complex', () => {
+      const fileContent = codeBlock`
+        {
+          inputs.foo = {
+            url = "github:owner/foo";
+            inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+          };
+          inputs.nixpkgs = {
+            flake = true;
+            url = "github:NixOS/nixpkgs/nixos-24.05";
+          };
+        }
+      `;
+
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs',
+          currentValue: '24.05',
+          newValue: '25.05',
+        },
+      });
+
+      expect(result).toBe(fileContent);
+    });
+
     it('does not update a nested override when the root input is complex', () => {
       const fileContent = codeBlock`
         {

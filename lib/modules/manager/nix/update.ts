@@ -139,22 +139,29 @@ function updateUrl(
   return newUrl;
 }
 
-function getBraceDepth(content: string, end: number): number {
+function isRootInput(content: string, end: number): boolean {
   const nixSyntax = content
     .slice(0, end)
     .replace(
       regEx(/"(?:\\.|[^"\\])*"|''[\s\S]*?''|#[^\n]*|\/\*[\s\S]*?\*\//g),
       '',
     );
-  let depth = 0;
-  for (const char of nixSyntax) {
-    if (char === '{') {
-      depth += 1;
-    } else if (char === '}') {
-      depth -= 1;
+  const openingBraces: number[] = [];
+  for (const match of nixSyntax.matchAll(regEx(/[{}]/g))) {
+    if (match[0] === '{') {
+      openingBraces.push(match.index);
+    } else {
+      openingBraces.pop();
     }
   }
-  return depth;
+
+  return (
+    openingBraces.length === 1 ||
+    (openingBraces.length === 2 &&
+      regEx(/(?:^|[;{])\s*inputs\s*=\s*$/).test(
+        nixSyntax.slice(0, openingBraces[1]),
+      ))
+  );
 }
 
 function findInputUrl(
@@ -164,9 +171,7 @@ function findInputUrl(
   return (
     patterns
       .flatMap((pattern) => [...fileContent.matchAll(pattern)])
-      // Root declarations are inside the flake attrset (depth 1) or its inputs
-      // attrset (depth 2). Deeper matches are overrides nested in another input.
-      .find((match) => getBraceDepth(fileContent, match.index) <= 2) ?? null
+      .find((match) => isRootInput(fileContent, match.index)) ?? null
   );
 }
 
@@ -219,10 +224,7 @@ export function updateDependency({
   }
 
   const urlStart = match.index + match[0].lastIndexOf(oldUrl);
-  const updatedContent =
-    fileContent.slice(0, urlStart) +
-    newUrl +
-    fileContent.slice(urlStart + oldUrl.length);
+  const updatedContent = `${fileContent.slice(0, urlStart)}${newUrl}${fileContent.slice(urlStart + oldUrl.length)}`;
 
   logger.debug({ depName, oldUrl, newUrl }, 'Successfully updated Nix flake');
   return updatedContent;

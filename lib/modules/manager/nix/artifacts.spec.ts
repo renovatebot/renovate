@@ -298,6 +298,52 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
   });
 
+  it.each`
+    binarySource
+    ${'global'}
+    ${'docker'}
+  `(
+    'forwards runtime Git configuration in $binarySource mode',
+    async ({ binarySource }) => {
+      GlobalConfig.set(
+        binarySource === 'docker' ? dockerAdminConfig : adminConfig,
+      );
+      const gitConfig = {
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'url.https://git.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+      };
+      env.getChildProcessEnv.mockReturnValue({
+        ...envMock.basic,
+        ...gitConfig,
+      });
+      fs.readLocalFile.mockResolvedValueOnce('old flake.lock');
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({ modified: [] }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [{ depName: 'nixpkgs' }],
+        newPackageFileContent: '{}',
+        config: { constraints: { nix: '2.10.0' } },
+      });
+
+      const flakeExec = execSnapshots.at(-1)!;
+      expect(flakeExec.options?.env).toMatchObject(gitConfig);
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_COUNT')).toBe(
+        binarySource === 'docker',
+      );
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_KEY_0')).toBe(
+        binarySource === 'docker',
+      );
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_VALUE_0')).toBe(
+        binarySource === 'docker',
+      );
+    },
+  );
+
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');

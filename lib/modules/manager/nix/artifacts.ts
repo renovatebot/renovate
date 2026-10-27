@@ -2,7 +2,6 @@ import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
@@ -10,11 +9,13 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
+
+const gitExec = withGitEnvironment();
 
 export async function updateArtifacts({
   packageFileName,
@@ -67,7 +68,6 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      ...getGitEnvironmentVariables({}),
       NIX_CACHE_HOME: await ensureCacheDir('nix'),
     },
     toolConstraints: [
@@ -80,7 +80,7 @@ export async function updateArtifacts({
   };
 
   try {
-    await exec(cmd, execOptions);
+    await gitExec(cmd, execOptions);
 
     const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {

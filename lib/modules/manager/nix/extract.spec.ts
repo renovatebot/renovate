@@ -72,6 +72,7 @@ describe('modules/manager/nix/extract', () => {
       deps: [
         {
           currentDigest: 'fb7944c166a3b630f177938e478f0378e64ce108',
+          digest: { isLockfileUpdate: true },
           currentValue: 'nixos-unstable',
           datasource: GitRefsDatasource.id,
           depName: 'nixpkgs',
@@ -463,6 +464,7 @@ describe('modules/manager/nix/extract', () => {
       deps: [
         {
           currentDigest: 'ff81ac966bb2cae68946d5ed5fc4994f96d0ffec',
+          digest: { isLockfileUpdate: true },
           datasource: GitRefsDatasource.id,
           depName: 'flake-compat',
           packageName: 'https://github.com/edolstra/flake-compat',
@@ -538,6 +540,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
+            digest: { isLockfileUpdate: true },
             currentValue: 'v1.7.2',
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
@@ -678,6 +681,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: 'be97b37989f11b724197b5f4c7ffd78f12c8c4bf',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'cachix',
             packageName: 'https://github.com/cachix/cachix.git',
@@ -844,6 +848,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '4524271976b625a4a605beefd893f270620fd751',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'flake-parts',
             packageName: 'https://github.com/hercules-ci/flake-parts',
@@ -891,6 +896,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '9f4128e00b0ae8ec65918efeba59db998750ead6',
+            digest: { isLockfileUpdate: true },
             currentValue: 'nixos-unstable',
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
@@ -939,6 +945,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '612ee628421ba2c1abca4c99684862f76cb3b089',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs',
             packageName: 'https://github.com/NixOS/nixpkgs',
@@ -990,6 +997,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '6bf2706348447df6f8b86b1c3e54f87b0afda84f',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'nixpkgs-extra-pkgs',
             packageName:
@@ -1040,6 +1048,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '26993d87fd0d3b14f7667b74ad82235f120d986e',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'home-manager',
             packageName: 'https://gitlab.com/rycee/home-manager',
@@ -1090,6 +1099,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: '2dcb371b407ba4009e27a8e8adf88e6f93d40bfb',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'firefox-addons',
             packageName: 'https://git.sr.ht/~rycee/nur-expressions',
@@ -1140,6 +1150,7 @@ describe('modules/manager/nix/extract', () => {
         deps: [
           {
             currentDigest: 'f4bdddf0fdaabc68546cf561c5343b83d95d2466',
+            digest: { isLockfileUpdate: true },
             datasource: GitRefsDatasource.id,
             depName: 'lix',
             packageName: 'https://git.lix.systems/lix-project/lix',
@@ -1191,6 +1202,7 @@ describe('modules/manager/nix/extract', () => {
           deps: [
             {
               currentDigest: '0e6684e6c5755325f801bda1751a8a4038145d7d',
+              digest: { isLockfileUpdate: true },
               currentValue: 'nixpkgs-unstable',
               datasource: GitRefsDatasource.id,
               depName: 'nixpkgs',
