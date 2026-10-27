@@ -109,8 +109,8 @@ function normalizeEndpoint(url: string): string {
  * auth. The `password` (or `token`) option carries an access token or
  * account password, and the `username` option carries the OneDev user name.
  * When no username is set, `user` is assumed, which OneDev accepts for
- * personal access tokens. The token is used as-is; unlike some other
- * platforms, no combined `username:token` form is supported.
+ * personal access tokens. The token is used as-is; no combined
+ * `username:token` form is parsed, mirroring the other platform modules.
  */
 function resolveCredentials(
   token: string | undefined,
