@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isPlainObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
@@ -8,8 +8,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import type { KasConfig } from './schema.ts';
-import { KasConfigJson, KasConfigYaml } from './schema.ts';
+import { KasConfig, KasConfigJson, KasConfigYaml } from './schema.ts';
 import type { KasConfigFile, KasConfigTree } from './types.ts';
 
 export function isLockFilePath(filePath: string): boolean {
@@ -43,16 +42,18 @@ function deepMerge(
   for (const [key, val] of Object.entries(upd)) {
     const cur = out[key];
     out[key] =
-      is.plainObject(cur) && is.plainObject(val) ? deepMerge(cur, val) : val;
+      isPlainObject(cur) && isPlainObject(val) ? deepMerge(cur, val) : val;
   }
   return out;
 }
 
 /** Port of kas `IncludeHandler._internal_dict_merge`: later files win. */
 export function mergeConfigs(files: KasConfigFile[]): KasConfig {
-  return files
-    .map((f) => f.config as Record<string, unknown>)
-    .reduce(deepMerge) as KasConfig;
+  let merged = files[0].config;
+  for (const f of files.slice(1)) {
+    merged = KasConfig.parse(deepMerge(merged, f.config));
+  }
+  return merged;
 }
 
 class IncludeError extends Error {}
@@ -89,7 +90,7 @@ export async function loadKasConfigTree(
       await visit(lock, true);
     }
     for (const include of coerceArray(config.header.includes)) {
-      if (!is.string(include)) {
+      if (!isString(include)) {
         logger.debug(
           { path, include },
           'kas cross-repo include not supported, skipping',

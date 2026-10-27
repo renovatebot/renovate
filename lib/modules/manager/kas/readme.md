@@ -23,5 +23,6 @@ Mercurial repos and the legacy `refspec` field are ignored.
 Renovate updates:
 
 - `commit` and `tag` fields in project files, and `overrides.repos.<name>.commit` in lock files
-- With `lockFileMaintenance` enabled, Renovate behaves like `kas lock --update` for each entry file: floating repos (no `commit`) get their `branch` or `tag` resolved and pinned in the first lock file that already locks them.
-  Repos not locked anywhere are added to `<entry>.lock.<ext>`, which is created if missing.
+- With `lockFileMaintenance` enabled, Renovate behaves like `kas lock --update` for each entry file.
+  Floating repos (no `commit`) get their `branch` or `tag` resolved and pinned in the first lock file that already locks them.
+  Repos not locked anywhere are added to `<entry>.lock.<ext>`, which is created if missing

@@ -116,7 +116,7 @@ export function extractPackageFile(
       continue;
     }
     if (repo.url && mergedRepo.url && repo.url !== mergedRepo.url) {
-      logger.warn(
+      logger.debug(
         { repo, mergedRepo },
         'Repo URL in file does not match merged config. Skipping.',
       );

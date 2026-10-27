@@ -117,7 +117,11 @@ describe('modules/manager/kas/include', () => {
       ]);
       expect(merged).toEqual({
         header: { version: 2 },
-        repos: { x: { url: 'u', branch: 'c' }, y: undefined, z: { url: 'z' } },
+        repos: {
+          x: { url: 'u', branch: 'c', type: 'git' },
+          y: undefined,
+          z: { url: 'z', type: 'git' },
+        },
         overrides: { repos: { x: { commit: '1' } } },
       });
     });

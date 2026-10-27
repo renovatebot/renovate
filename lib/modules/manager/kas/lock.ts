@@ -54,14 +54,15 @@ export async function updateArtifacts({
   for (const [name, repo] of Object.entries(
     coerceObject(tree.mergedNoLock.repos),
   )) {
-    const ref = floatingRef(name, repo, tree.mergedNoLock);
-    if (!ref) {
+    const floating = floatingRef(name, repo, tree.mergedNoLock);
+    if (!floating) {
       continue;
     }
+    const { ref, url } = floating;
     let sha: string | null = null;
     try {
       sha = await getDigest(
-        { datasource: GitRefsDatasource.id, packageName: repo!.url! },
+        { datasource: GitRefsDatasource.id, packageName: url },
         ref,
       );
     } catch (err) {
@@ -137,7 +138,7 @@ function floatingRef(
   name: string,
   repo: KasRepo | null | undefined,
   config: KasConfig,
-): string | null {
+): { ref: string; url: string } | null {
   if (!repo?.url || repo.type === 'hg') {
     return null;
   }
@@ -147,7 +148,8 @@ function floatingRef(
   const defaults = config.defaults?.repos;
   const tag = 'tag' in repo ? repo.tag : defaults?.tag;
   const branch = 'branch' in repo ? repo.branch : defaults?.branch;
-  return tag ?? branch ?? null;
+  const ref = tag ?? branch;
+  return ref ? { ref, url: repo.url } : null;
 }
 
 /**

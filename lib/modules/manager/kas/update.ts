@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import { isString } from '@sindresorhus/is';
 import { parse, weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -32,7 +32,7 @@ export function updateDependency({
   if (isYamlFilePath(packageFile)) {
     const replaceString = upgrade.replaceString;
     /* istanbul ignore if */
-    if (!is.string(replaceString)) {
+    if (!isString(replaceString)) {
       logger.warn(
         { packageFile, depName, replaceString },
         'replaceString is not a string. This should not happen, skipping update.',
