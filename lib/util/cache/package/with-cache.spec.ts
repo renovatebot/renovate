@@ -56,6 +56,107 @@ describe('util/cache/package/with-cache', () => {
     );
   });
 
+  it('shares a concurrent same-key lookup', async () => {
+    const lookup = Promise.withResolvers<string>();
+    getValue.mockImplementation(() => lookup.promise);
+
+    const calls = Array.from({ length: 5 }, () =>
+      withCache({ namespace: '_test-namespace', key: 'slow-key' }, getValue),
+    );
+    await vi.waitFor(() => expect(getValue).toHaveBeenCalledTimes(1));
+
+    lookup.resolve('done');
+    await expect(Promise.all(calls)).resolves.toEqual(Array(5).fill('done'));
+    expect(setCache).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a concurrent caller after a failed lookup', async () => {
+    const lookup = Promise.withResolvers<string>();
+    const firstFn = vi.fn(() => lookup.promise);
+    const secondFn = vi.fn(() => Promise.resolve('recovered'));
+    const options = {
+      namespace: '_test-namespace' as const,
+      key: 'failed-key',
+    };
+    const first = withCache(options, firstFn);
+    const second = withCache(options, secondFn);
+    const resultsPromise = Promise.allSettled([first, second]);
+    await vi.waitFor(() => expect(firstFn).toHaveBeenCalledTimes(1));
+    const failure = new Error('lookup failed');
+    lookup.reject(failure);
+    await expect(resultsPromise).resolves.toEqual([
+      { status: 'rejected', reason: failure },
+      { status: 'fulfilled', value: 'recovered' },
+    ]);
+    expect(secondFn).toHaveBeenCalledTimes(1);
+
+    await expect(withCache(options, getValue)).resolves.toBe('recovered');
+    expect(getValue).not.toHaveBeenCalled();
+  });
+
+  it('retries a concurrent caller after an undefined result', async () => {
+    const lookup = Promise.withResolvers<string | undefined>();
+    const firstFn = vi.fn(() => lookup.promise);
+    const secondFn = vi.fn(() => Promise.resolve('defined'));
+    const options = {
+      namespace: '_test-namespace' as const,
+      key: 'undefined-key',
+    };
+    const first = withCache(options, firstFn);
+    const second = withCache(options, secondFn);
+    await vi.waitFor(() => expect(firstFn).toHaveBeenCalledTimes(1));
+    lookup.resolve(undefined);
+    await expect(first).resolves.toBeUndefined();
+    await expect(second).resolves.toBe('defined');
+    expect(secondFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a concurrent caller after a predicate-rejected result', async () => {
+    const lookup = Promise.withResolvers<string>();
+    const firstFn = vi.fn(() => lookup.promise);
+    const secondFn = vi.fn(() => Promise.resolve('second'));
+    const options = {
+      namespace: '_test-namespace' as const,
+      key: 'uncached-key',
+      shouldCacheResult: () => false,
+    };
+    const first = withCache(options, firstFn);
+    const second = withCache(options, secondFn);
+    await vi.waitFor(() => expect(firstFn).toHaveBeenCalledTimes(1));
+    lookup.resolve('first');
+    await expect(first).resolves.toBe('first');
+    await expect(second).resolves.toBe('second');
+    expect(secondFn).toHaveBeenCalledTimes(1);
+    expect(setCache).not.toHaveBeenCalled();
+  });
+
+  it('evaluates different result predicates separately', async () => {
+    const lookup = Promise.withResolvers<string>();
+    const firstFn = vi.fn(() => lookup.promise);
+    const secondFn = vi.fn(() => Promise.resolve('second'));
+    const first = withCache(
+      {
+        namespace: '_test-namespace',
+        key: 'predicate-key',
+        shouldCacheResult: () => false,
+      },
+      firstFn,
+    );
+    const second = withCache(
+      {
+        namespace: '_test-namespace',
+        key: 'predicate-key',
+        shouldCacheResult: () => true,
+      },
+      secondFn,
+    );
+    lookup.resolve('first');
+    await expect(first).resolves.toBe('first');
+    await expect(second).resolves.toBe('second');
+    expect(firstFn).toHaveBeenCalledTimes(1);
+    expect(secondFn).toHaveBeenCalledTimes(1);
+  });
+
   it('disables cache if cacheable is false', async () => {
     function fn() {
       return getValue();
