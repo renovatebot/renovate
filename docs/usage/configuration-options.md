@@ -3076,6 +3076,25 @@ A use case for the latter is if you are a Renovate admin and wish to provide a d
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
 
+## `nugetConfig`
+
+String copy of `nuget.config` file.
+
+You can provide this as a raw XML string containing your NuGet configuration (package sources, credentials, package source mappings, etc.).
+Renovate uses this configuration when extracting dependencies, determining registry URLs, and injecting feed credentials.
+
+## `nugetConfigMerge`
+
+Whether to merge `config.nugetConfig` with repo `nuget.config` content if both are found.
+
+This option exists to provide flexibility about whether `nugetConfig` strings in config should override `nuget.config` files in the repo, or be merged with them.
+
+In some situations you need the ability to force override `nuget.config` contents in a repo (`nugetConfigMerge=false`) while in others you might want to simply supplement the settings already in the repository's `nuget.config` (`nugetConfigMerge=true`).
+A use case for the latter is if you are a Renovate admin and wish to provide a private registry or credentials without removing the package sources which individual repositories have configured.
+
+If `false`, defining `config.nugetConfig` will result in any `nuget.config` file in the repo being overridden and its values ignored.
+If configured to `true` (default), any `nuget.config` file in the repo will have package sources and credentials merged with `config.nugetConfig`.
+
 ## `osvVulnerabilityAlerts`
 
 Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability database, to check if extracted dependencies have known vulnerabilities.
