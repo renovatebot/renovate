@@ -1,5 +1,6 @@
 import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import { partial } from '~test/util.ts';
 import { loadModules } from '../../util/modules.ts';
 import { getDatasourceList } from '../datasource/index.ts';
 import * as customManager from './custom/index.ts';
@@ -76,6 +77,48 @@ describe('modules/manager/index', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
       expect(manager.get('regex', 'extractPackageFile')).not.toBeNull(); // gets custom manager
     });
+  });
+
+  describe('enforcesMinimumReleaseAge()', () => {
+    afterEach(() => {
+      manager.getManagers().delete('stub-manager');
+    });
+
+    it('returns false for a manager which does not implement it', async () => {
+      await expect(
+        manager.enforcesMinimumReleaseAge('dockerfile', {}),
+      ).resolves.toBe(false);
+    });
+
+    it('returns false for an unknown manager', async () => {
+      await expect(
+        manager.enforcesMinimumReleaseAge('unknown-manager', {}),
+      ).resolves.toBe(false);
+    });
+
+    it.each([true, false])(
+      'returns %s as reported by the manager',
+      async (enforces) => {
+        const enforcesMinimumReleaseAge = vi.fn().mockResolvedValue(enforces);
+        manager.getManagers().set(
+          'stub-manager',
+          partial<ManagerApi>({
+            defaultConfig: {},
+            supportedDatasources: [],
+            enforcesMinimumReleaseAge,
+          }),
+        );
+        const config = { minimumReleaseAgeExtracted: '3 days' };
+
+        const res = await manager.enforcesMinimumReleaseAge(
+          'stub-manager',
+          config,
+        );
+
+        expect(res).toBe(enforces);
+        expect(enforcesMinimumReleaseAge).toHaveBeenCalledWith(config);
+      },
+    );
   });
 
   describe('getManagerList()', () => {

@@ -86,6 +86,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeExtracted?: Nullish<string>;
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -113,6 +114,12 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   *
+   * Renovate uses the larger of this and `minimumReleaseAge`.
+   */
+  minimumReleaseAgeExtracted?: string;
 }
 
 export interface PackageFile<T = unknown> extends PackageFileContent<T> {
@@ -458,6 +465,15 @@ export interface ManagerApiBase extends ModuleApi {
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
+
+  /**
+   * Whether the package manager enforces the minimum release age itself when regenerating the lock file for lock file maintenance.
+   *
+   * Called before `updateArtifacts()`, so lock file maintenance does not wait for release timestamps that it cannot have.
+   */
+  enforcesMinimumReleaseAge?(
+    config: UpdateArtifactsConfig,
+  ): MaybePromise<boolean>;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact,

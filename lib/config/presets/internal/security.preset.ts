@@ -79,7 +79,7 @@ const minimumReleaseAgeDatasources: Partial<
  *
  * These rules are datasource-agnostic (`matchDatasources` is added per preset), so they are shared across every generated `security:minimumReleaseAge*` preset to keep the warnings consistent.
  */
-const unsupportedUpdateTypeRules: PackageRule[] = [
+export const unsupportedUpdateTypeRules: PackageRule[] = [
   {
     description:
       'Do not require Minimum Release Age for update types that are controlled by the package manager',

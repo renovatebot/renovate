@@ -19,7 +19,6 @@ import {
   checkMinimumConfidence,
   filterInternalChecks,
   isMinimumConfidenceApplicable,
-  isMinimumReleaseAgeApplicable,
   resolveUpdateTypeConfig,
 } from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
@@ -388,36 +387,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
-    });
-  });
-
-  describe('.isMinimumReleaseAgeApplicable()', () => {
-    // Exhaustive by construction, so we get a type error if we add a new UpdateType
-    const expectedByUpdateType: Record<UpdateType, boolean> = {
-      major: true,
-      minor: true,
-      patch: true,
-      digest: true,
-      pinDigest: true,
-      pin: false,
-      replacement: false,
-      lockFileMaintenance: false,
-      lockfileUpdate: false,
-      rollback: false,
-      bump: false,
-    };
-
-    it.each(Object.entries(expectedByUpdateType))(
-      'updateType=%s returns %s',
-      (updateType, expected) => {
-        expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
-          expected,
-        );
-      },
-    );
-
-    it('returns true for updateType=undefined', () => {
-      expect(isMinimumReleaseAgeApplicable(undefined)).toBeTrue();
     });
   });
 

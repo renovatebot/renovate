@@ -68,7 +68,9 @@ As long as the registry/datasource provides the release timestamp, Renovate will
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
 
 Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
-Renovate does not currently have the ability to determine the `minimumReleaseAge` from your package manager's configuration.
+A manager may read the minimum release age from the configuration of your package manager.
+If it does, Renovate uses the larger of that value and `minimumReleaseAge`.
+Setting `minimumReleaseAge` to `null` does not turn off the value from the configuration of your package manager.
 
 When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
 In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
@@ -175,7 +177,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
 | `pinDigest`           | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#pindigest-updates).        |
-| `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
+| `lockFileMaintenance` | ❌                            | It can only be enforced by your package manager. [See below for more info](#lockfilemaintenance-updates). |
 | `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
@@ -263,6 +265,17 @@ This decouples "how fresh must a release be before I trust it enough to upgrade 
 ```
 
 These are functionally identical options.
+
+#### `lockFileMaintenance` updates
+
+Lock file maintenance delegates to the package manager to update package(s), so the updated packages have no release timestamp for Renovate to check.
+
+A manager can tell Renovate that its package manager enforces the minimum release age itself while it regenerates the lock file.
+In that case, Renovate does not wait for a release timestamp, and creates the lock file maintenance branch straight away.
+
+For all other managers, lock file maintenance is treated like any other update without a release timestamp.
+With the default `minimumReleaseAgeBehaviour=timestamp-required`, the branch is never created while `minimumReleaseAge` is set.
+The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
 
 ### What happens to security updates?
 

@@ -12,6 +12,7 @@ import {
   artifactErrorResult,
   fileAddition,
   fileChangesToArtifactResults,
+  isMinimumVersionGuaranteed,
   resolveToolConstraint,
   updateLockFile,
 } from './util.ts';
@@ -341,6 +342,30 @@ describe('modules/manager/util', () => {
     ).toEqual([
       { artifactError: { fileName: 'foo.lock', stderr: 'from stderr' } },
     ]);
+  });
+
+  describe('isMinimumVersionGuaranteed()', () => {
+    it.each`
+      constraint          | expected
+      ${'10.16.0'}        | ${true}
+      ${'10.20.0'}        | ${true}
+      ${'^10.16.0'}       | ${true}
+      ${'>=11'}           | ${true}
+      ${'10.15.1'}        | ${false}
+      ${'^10.0.0'}        | ${false}
+      ${'>=10.16.0-rc.1'} | ${false}
+      ${'*'}              | ${false}
+      ${'>2.0.0 <1.0.0'}  | ${false}
+      ${'not-a-version'}  | ${false}
+      ${undefined}        | ${false}
+    `(
+      'returns $expected for constraint=$constraint',
+      ({ constraint, expected }) => {
+        expect(isMinimumVersionGuaranteed(constraint, '10.16.0')).toBe(
+          expected,
+        );
+      },
+    );
   });
 
   describe('updateLockFile', () => {

@@ -1,4 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import semver from 'semver';
 import { logger } from '../../logger/index.ts';
 import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
@@ -125,6 +126,22 @@ export async function resolveToolConstraint(
   }
   const extracted = config.extractedConstraints?.[toolName];
   return isNonEmptyString(extracted) ? extracted : undefined;
+}
+
+/**
+ * Whether every version allowed by the semver `constraint` is at least
+ * `minimumVersion`, for instance to check that a tool supports a feature.
+ */
+export function isMinimumVersionGuaranteed(
+  constraint: string | undefined,
+  minimumVersion: string,
+): boolean {
+  const range = semver.validRange(constraint);
+  if (!range) {
+    return false;
+  }
+  const lowestVersion = semver.minVersion(range);
+  return lowestVersion !== null && semver.gte(lowestVersion, minimumVersion);
 }
 
 /**
