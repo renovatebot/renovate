@@ -1,10 +1,11 @@
-import { getToolConfig } from '../../../util/exec/containerbase.ts';
+import { getSupportedToolNames } from '../../../util/exec/containerbase.ts';
 import type { ToolName } from '../../../util/exec/types.ts';
 import {
   getConstraintName,
   getConstraintValue,
   getSharedConstraintsScope,
 } from './constraints.ts';
+import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 
 describe('modules/manager/mise/constraints', () => {
   describe('getConstraintName()', () => {
@@ -32,51 +33,23 @@ describe('modules/manager/mise/constraints', () => {
       expect(getConstraintName(depName)).toBe(expected);
     });
 
-    it('only maps to tools Renovate can install', () => {
-      const names = [
-        'bazelisk',
-        'bun',
-        'bundler',
-        'cocoapods',
-        'conan',
-        'copier',
-        'dart',
-        'deno',
-        'dotnet',
-        'elixir',
-        'erlang',
-        'flutter',
-        'flux2',
-        'gh',
-        'gleam',
-        'go',
-        'gradle',
-        'helm',
-        'helmfile',
-        'java',
-        'jb',
-        'kustomize',
-        'maven',
-        'node',
-        'npm',
-        'pdm',
-        'php',
-        'pipenv',
-        'pixi',
-        'pnpm',
-        'poetry',
-        'python',
-        'ruby',
-        'rust',
-        'uv',
-        'vendir',
-        'yarn',
-      ];
-
-      const toolNames = names.map((name) => getConstraintName(name)!);
-
-      expect(toolNames.filter((name) => !getToolConfig(name))).toEqual([]);
+    it.each(getSupportedToolNames())('maps the short name %s', (toolName) => {
+      expect(getConstraintName(toolName)).toBe(toolName);
+      expect(getConstraintName(`core:${toolName}`)).toBe(toolName);
     });
+
+    it.each(getSupportedToolNames())(
+      'maps the mise registry backends of %s',
+      (toolName) => {
+        const backends = Object.entries(
+          getOrderedMiseRegistryBackends(toolName),
+        ).map(([backend, name]) => `${backend}:${name}`);
+
+        expect(backends.map(getConstraintName)).toEqual(
+          backends.map(() => toolName),
+        );
+      },
+    );
   });
 
   describe('getConstraintValue()', () => {

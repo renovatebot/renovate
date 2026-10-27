@@ -1,4 +1,7 @@
-import { getToolConfig } from '../../../util/exec/containerbase.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../../util/exec/containerbase.ts';
 import type { ToolName } from '../../../util/exec/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { get as getVersioning } from '../../versioning/index.ts';
@@ -7,48 +10,20 @@ import { getConfigType } from './lockfile.ts';
 import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 
 /**
- * Tools of the mise registry which are Containerbase tools, by their short name.
+ * mise short names which differ from the Containerbase tool name.
  */
-const toolConstraintNames = new Map<string, ToolName>([
-  ['bazelisk', 'bazelisk'],
-  ['bun', 'bun'],
-  ['bundler', 'bundler'],
-  ['cocoapods', 'cocoapods'],
-  ['conan', 'conan'],
-  ['copier', 'copier'],
-  ['dart', 'dart'],
-  ['deno', 'deno'],
-  ['dotnet', 'dotnet'],
-  ['elixir', 'elixir'],
-  ['erlang', 'erlang'],
-  ['flutter', 'flutter'],
+const toolNameAliases = new Map<string, ToolName>([
   ['flux2', 'flux'],
-  ['gh', 'gh'],
-  ['gleam', 'gleam'],
   ['go', 'golang'],
-  ['golang', 'golang'],
-  ['gradle', 'gradle'],
-  ['helm', 'helm'],
-  ['helmfile', 'helmfile'],
-  ['java', 'java'],
-  ['jb', 'jb'],
-  ['kustomize', 'kustomize'],
-  ['maven', 'maven'],
-  ['node', 'node'],
   ['nodejs', 'node'],
-  ['npm', 'npm'],
-  ['pdm', 'pdm'],
-  ['php', 'php'],
-  ['pipenv', 'pipenv'],
-  ['pixi', 'pixi'],
-  ['pnpm', 'pnpm'],
-  ['poetry', 'poetry'],
-  ['python', 'python'],
-  ['ruby', 'ruby'],
-  ['rust', 'rust'],
-  ['uv', 'uv'],
-  ['vendir', 'vendir'],
-  ['yarn', 'yarn'],
+]);
+
+/**
+ * The Containerbase tools Renovate can install, by their mise short name.
+ */
+const toolNames = new Map<string, ToolName>([
+  ...getSupportedToolNames().map((name): [string, ToolName] => [name, name]),
+  ...toolNameAliases,
 ]);
 
 /**
@@ -57,15 +32,15 @@ const toolConstraintNames = new Map<string, ToolName>([
 const shortNameBackends = new Set(['', 'core', 'asdf', 'vfox']);
 
 /**
- * The tools of {@link toolConstraintNames} by the backend names the mise registry lists for them, e.g. `npm:pnpm` or `aqua:astral-sh/uv`.
+ * The Containerbase tools by the backend names the mise registry lists for them, e.g. `npm:pnpm` or `aqua:astral-sh/uv`.
  */
 const backendConstraintNames = new Map<string, ToolName>();
-for (const [shortName, constraintName] of toolConstraintNames) {
+for (const [shortName, toolName] of toolNames) {
   const backends = Object.entries(
     getOrderedMiseRegistryBackends(shortName),
   ).map(([backend, name]) => `${backend}:${name}`);
   for (const backend of backends) {
-    backendConstraintNames.set(backend, constraintName);
+    backendConstraintNames.set(backend, toolName);
   }
 }
 
@@ -82,7 +57,7 @@ export function getConstraintName(depName: string): ToolName | undefined {
   const backend = depName.substring(0, delimiterIndex);
   const toolName = depName.substring(delimiterIndex + 1);
   const shortName = shortNameBackends.has(backend)
-    ? toolConstraintNames.get(toolName)
+    ? toolNames.get(toolName)
     : undefined;
   return shortName ?? backendConstraintNames.get(depName);
 }
