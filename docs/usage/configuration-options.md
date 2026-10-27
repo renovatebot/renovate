@@ -1613,6 +1613,7 @@ You can choose from:
 - `all` list all CVEs
 
 You will only get OSV-based vulnerability alerts for direct dependencies.
+The only exception today is the `pep621` manager.
 
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
