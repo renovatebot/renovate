@@ -525,6 +525,25 @@ export abstract class HttpBase<
   }
 
   /**
+   * Post the body as plain text, without JSON-encoding it. For API endpoints
+   * which take the request body verbatim (e.g. OneDev resource methods
+   * declared to accept a string payload).
+   */
+  async postPlain(
+    url: string,
+    body: string,
+    options?: Opts,
+  ): Promise<HttpResponse> {
+    const opt = coerceObject(options);
+    return await this.request(url, {
+      ...opt,
+      method: 'post',
+      responseType: 'text',
+      body,
+    });
+  }
+
+  /**
    * @deprecated use `getYaml` instead
    */
   async getYamlUnchecked<ResT>(
