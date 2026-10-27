@@ -898,6 +898,45 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('updates a build requirement which the lock file holds', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        // something depends on it at runtime, so the lock holds a version
+        {
+          packageName: 'setuptools',
+          depType: depTypes.buildSystemRequires,
+          lockedVersion: '69.5.1',
+          newVersion: '78.1.1',
+        },
+        // a build requirement proper, which the lock file knows nothing about
+        {
+          packageName: 'hatchling',
+          depType: depTypes.buildSystemRequires,
+          newVersion: '1.27.0',
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package setuptools==78.1.1',
+        },
+      ]);
+    });
+
     it('does not pin the upgrade of a transitive dep locked at several versions', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);

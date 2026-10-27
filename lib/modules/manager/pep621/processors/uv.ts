@@ -189,10 +189,17 @@ export class UvProcessor extends BasePyProjectProcessor {
           logger.debug({ packageFile, err }, `Error parsing uv lock file`);
         } else {
           const { packages, declaredNames } = lockFileMapping;
-          for (const dep of deps) {
+          for (const dep of deps as PackageDependency<Pep621ManagerData>[]) {
             const packageName = dep.packageName;
             if (packageName && packageName in packages) {
-              dep.lockedVersion = packages[packageName].version;
+              const locked = packages[packageName];
+              dep.lockedVersion = locked.version;
+              if (locked.hasMultipleEntries) {
+                dep.managerData = {
+                  ...dep.managerData,
+                  hasMultipleLockedEntries: true,
+                };
+              }
             }
           }
 
@@ -336,6 +343,28 @@ export class UvProcessor extends BasePyProjectProcessor {
   }
 }
 
+/**
+ * The `--upgrade-package` argument to move `dep` to the version which was
+ * looked up, or to whichever version `uv` resolves when it cannot be pinned.
+ */
+function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
+  // A package the lock file holds more than once, e.g. at a version per
+  // resolution marker, can only be upgraded without a version: `uv` reads a
+  // pinned one as a constraint on every marker, so it would downgrade the
+  // other entries, or fail to resolve at all.
+  if (dep.managerData?.hasMultipleLockedEntries) {
+    logger.warn(
+      { packageName: dep.packageName, newVersion: dep.newVersion },
+      'Upgrading a dependency which the lock file holds more than once, without a version: vulnerabilityFixStrategy cannot be honoured, so the version this resolves to may differ from the one Renovate picked',
+    );
+    return dep.packageName!;
+  }
+
+  return dep.newVersion
+    ? `${dep.packageName!}==${dep.newVersion}`
+    : dep.packageName!;
+}
+
 function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
   const deps: string[] = [];
 
@@ -351,31 +380,18 @@ function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
         break;
       }
       case depTypes.uvTransitiveDependencies: {
-        // A package the lock file holds more than once, e.g. at a version per
-        // resolution marker, can only be upgraded without a version: `uv`
-        // reads a pinned one as a constraint on every marker, so it would
-        // downgrade the other entries, or fail to resolve at all.
-        if (dep.managerData?.hasMultipleLockedEntries) {
-          logger.warn(
-            { packageName: dep.packageName, newVersion: dep.newVersion },
-            'Upgrading a dependency which the lock file holds more than once, without a version: vulnerabilityFixStrategy cannot be honoured, so the version this resolves to may differ from the one Renovate picked',
-          );
-          deps.push(dep.packageName!);
-          break;
-        }
-
         // Nothing in `pyproject.toml` constrains a transitive dependency, so an
         // unpinned upgrade would resolve to the newest release instead of the
         // version we determined, e.g. the lowest one fixing a vulnerability.
-        deps.push(
-          dep.newVersion
-            ? `${dep.packageName!}==${dep.newVersion}`
-            : dep.packageName!,
-        );
+        deps.push(pinnedUpgrade(dep));
         break;
       }
       case depTypes.buildSystemRequires:
-        // build requirements are not locked in the lock files, no need to update.
+        // A build requirement is not locked, unless something depends on it at
+        // runtime as well, in which case the lock holds a version to update.
+        if (dep.lockedVersion) {
+          deps.push(pinnedUpgrade(dep));
+        }
         break;
       default: {
         deps.push(dep.packageName!);
