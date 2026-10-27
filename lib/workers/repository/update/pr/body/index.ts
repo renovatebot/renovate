@@ -17,6 +17,21 @@ import { getPrHeader } from './header.ts';
 import { getPrExtraNotes, getPrNotes } from './notes.ts';
 import { getPrUpdatesTable } from './updates-table.ts';
 
+function getLinkedName(
+  name: string,
+  primaryLink: string | undefined,
+  otherLinks: string[],
+): string {
+  let linkedName = name;
+  if (primaryLink) {
+    linkedName = `[${linkedName}](${primaryLink})`;
+  }
+  if (otherLinks.length) {
+    linkedName += ` (${otherLinks.join(', ')})`;
+  }
+  return linkedName;
+}
+
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {
     const {
@@ -27,11 +42,9 @@ function massageUpdateMetadata(config: BranchConfig): void {
       dependencyUrl,
     } = upgrade;
     // TODO: types (#22198)
-    let depNameLinked = upgrade.depName!;
     let newNameLinked = upgrade.newName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
-      depNameLinked = `[${depNameLinked}](${primaryLink})`;
       newNameLinked = `[${newNameLinked}](${primaryLink})`;
     }
 
@@ -52,10 +65,25 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (templatedChangelogUrl) {
       otherLinks.push(`[changelog](${templatedChangelogUrl})`);
     }
-    if (otherLinks.length) {
-      depNameLinked += ` (${otherLinks.join(', ')})`;
+    upgrade.depNameLinked = getLinkedName(
+      upgrade.depName!,
+      primaryLink,
+      otherLinks,
+    );
+    delete upgrade.packageNameLinked;
+    if (
+      upgrade.manager === 'cargo' &&
+      upgrade.datasource === 'crate' &&
+      upgrade.packageName &&
+      upgrade.depName &&
+      upgrade.packageName !== upgrade.depName
+    ) {
+      upgrade.packageNameLinked = getLinkedName(
+        upgrade.packageName,
+        primaryLink,
+        otherLinks,
+      );
     }
-    upgrade.depNameLinked = depNameLinked;
     upgrade.newNameLinked = newNameLinked;
     const references: string[] = [];
     if (homepage) {

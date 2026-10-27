@@ -7,6 +7,11 @@ When using the default rangeStrategy=auto:
 
 The `update-lockfile` default means that most upgrades will update `Cargo.lock` files without the need to change the value in `Cargo.toml`.
 
+For registry dependencies renamed with `package`, the default PR table shows the registry crate name and its local alias.
+The `depNameLinked` template field retains the linked local alias.
+The optional `packageNameLinked` field provides the linked registry name, including source and changelog links when available, for these renamed registry dependencies.
+An explicit custom `prBodyDefinitions.Package` template takes precedence over the default display.
+
 ### Private Modules Authentication
 
 Before running the `cargo` commands to update the `cargo.lock`, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.

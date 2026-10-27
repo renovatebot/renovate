@@ -84,6 +84,7 @@ export interface BranchUpgradeConfig
 
   packageFile?: string;
   packageFileDir?: string;
+  packageNameLinked?: string;
   parentDir?: string;
 
   lockFile?: string;
