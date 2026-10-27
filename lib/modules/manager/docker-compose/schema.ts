@@ -1,5 +1,5 @@
 import { isObject, isString } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const DockerComposeService = z.object({
   image: z.string().optional(),
@@ -14,7 +14,7 @@ const DockerComposeService = z.object({
     .optional(),
 });
 
-const DockerComposeFileV1 = z.record(DockerComposeService);
+const DockerComposeFileV1 = z.record(z.string(), DockerComposeService);
 const DockerComposeFileModern = z
   .object({
     /**
@@ -22,7 +22,7 @@ const DockerComposeFileModern = z
      *  https://docs.docker.com/compose/compose-file/04-version-and-name/#version-top-level-element
      */
     version: z.string().optional(),
-    services: z.record(DockerComposeService),
+    services: z.record(z.string(), DockerComposeService),
   })
   // using catchall to capture fields starting with `x-` and collecting them in `extensions` field
   // might need to replace this with something better once zod v4 is stable

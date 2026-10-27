@@ -182,13 +182,24 @@ If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
 `{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
+### uppercase
+
+The `uppercase` helper converts a given string to upper case.
+
+`{{{ uppercase depName }}}`
+
 ## Environment variables
 
-By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.
+By default, templates can only access [a subset of environment variables](./environment-variable-handling.md#with-child-processes) like `HOME` or `PATH`.
 This is for security reasons.
+
+You can reference environment variables like so:
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option.
+If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option, which will also be available to all child processes.
 
-You can also use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.
+See also: [environment variable handling](./environment-variable-handling.md).
+
+!!! warning
+  It is possible to use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.

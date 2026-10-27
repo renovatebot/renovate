@@ -1,0 +1,32 @@
+name: PR Size Labeler
+
+# Unprivileged half: runs for every pull request (including forks) with no
+# permissions and only records the pull request number. The label is applied by
+# `pr-size-labeler-apply.yml`, which runs on `workflow_run` in the base context.
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions: {}
+
+jobs:
+  save-pr-number:
+    if: github.event.pull_request.draft != true
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save pull request number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > pr-number.txt
+
+      - name: Upload pull request number
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pr-number
+          path: pr-number.txt
+          retention-days: 1

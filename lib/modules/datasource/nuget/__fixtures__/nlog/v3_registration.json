@@ -14,7 +14,7 @@
       "@type": "catalog:CatalogPage",
       "commitId": "008a216c-5f6c-48c7-94c8-d48217e028bb",
       "commitTimeStamp": "2020-02-07T22:40:40.4993259+00:00",
-      "count": 64,
+      "count": 4,
       "lower": "1.0.0.505",
       "upper": "4.4.0-beta5"
     },
@@ -23,7 +23,7 @@
       "@type": "catalog:CatalogPage",
       "commitId": "008a216c-5f6c-48c7-94c8-d48217e028bb",
       "commitTimeStamp": "2020-02-07T22:40:40.4993259+00:00",
-      "count": 64,
+      "count": 3,
       "lower": "4.4.0-beta6",
       "upper": "4.6.0-rc2"
     },
@@ -32,7 +32,7 @@
       "@type": "catalog:CatalogPage",
       "commitId": "1ecce4df-d77c-414d-8c2d-0f39eeeab278",
       "commitTimeStamp": "2020-07-31T22:23:20.8406554+00:00",
-      "count": 28,
+      "count": 3,
       "lower": "4.6.0-rc3",
       "upper": "5.0.0-beta11"
     }

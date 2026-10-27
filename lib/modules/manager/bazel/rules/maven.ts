@@ -1,5 +1,5 @@
 import { isString } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { MavenDatasource } from '../../../datasource/maven/index.ts';
 import { id as versioning } from '../../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../../types.ts';

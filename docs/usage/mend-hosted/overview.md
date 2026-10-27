@@ -44,11 +44,10 @@ This offering provides increased resources and concurrency, as well as access to
 
 Projects licensed under an Open Source Initiative (OSI) approved license can request increased resources on Mend Renovate Cloud under the Community (OSS) plan.
 
-<!-- prettier-ignore -->
 !!! tip
-    To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
-    <br>
-    Acceptance is at the discretion of Mend.
+  To request increased resources, create a [Mend Hosted Request](https://github.com/renovatebot/renovate/discussions/new?category=mend-hosted-request) on the Renovate GitHub Discussions board.
+  <br>
+  Acceptance is at the discretion of Mend.
 
 ### Mend Renovate Enterprise Cloud
 
@@ -64,7 +63,7 @@ The resources, scheduling and concurrency of Renovate jobs is determined by the 
 | ----------------------------- | ----------------------------- | ----------------------------------- | ------------------------------ |
 | Concurrent jobs per Org       | 1                             | 2                                   | 16                             |
 | Job scheduling (active repos) | Every 4 hours                 | Every 4 hours                       | Hourly<sup>1</sup>             |
-| Job runner CPUs               | 1 vCPU                        | 2 vCPU                              | 2 vCPU                         |
+| Job runner CPUs               | 1 vCPU                        | 1 vCPU                              | 2 vCPU                         |
 | Job runner Memory             | 3GB                           | 6GB                                 | 8GB                            |
 | Job runner Disk space         | 15GB                          | 25GB                                | 40GB                           |
 | Job timeout                   | 30 minutes                    | 60 minutes                          | 60 minutes                     |

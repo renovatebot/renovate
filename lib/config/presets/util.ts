@@ -10,6 +10,8 @@ export const PRESET_INVALID = 'invalid preset';
 export const PRESET_INVALID_JSON = 'invalid preset JSON';
 export const PRESET_NOT_FOUND = 'preset not found';
 export const PRESET_PROHIBITED_SUBPRESET = 'prohibited sub-preset';
+export const PRESET_RELATIVE_NO_PARENT = 'relative preset has no parent';
+export const PRESET_RELATIVE_OUTSIDE_REPO = 'relative preset outside repo';
 export const PRESET_RENOVATE_CONFIG_NOT_FOUND =
   'preset renovate-config not found';
 
@@ -26,7 +28,9 @@ export async function fetchPreset({
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
-  const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
+  function buildFilePath(name: string): string {
+    return `${pathPrefix}${name}`;
+  }
   let jsonContent: any;
   if (fileName === 'default') {
     try {
@@ -61,7 +65,7 @@ export async function fetchPreset({
     jsonContent = await fetch(
       repo,
       buildFilePath(
-        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`,
+        regEx(/\.json[5c]?$/).test(fileName) ? fileName : `${fileName}.json`,
       ),
       endpoint,
       tag,

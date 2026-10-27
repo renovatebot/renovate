@@ -1,13 +1,23 @@
-import { getDefault } from './defaults.ts';
+import { partial } from '../../test/util.ts';
+import { getConfig, getDefault } from './defaults.ts';
 import type { RenovateOptions } from './types.ts';
 
 describe('config/defaults', () => {
+  describe('getConfig()', () => {
+    it('leaves the vulnerabilityAlerts concurrent limit unlimited', () => {
+      expect(getConfig().vulnerabilityAlerts).toMatchObject({
+        prConcurrentLimit: 0,
+      });
+    });
+  });
+
   describe('getDefault()', () => {
     it('returns new instances of arrays when called repeatedly', () => {
       const option: RenovateOptions = {
         type: 'array',
         description: 'thing',
         name: 'thing',
+        scopes: ['repo'],
       };
       const array1 = getDefault(option);
       const array2 = getDefault(option);
@@ -22,6 +32,7 @@ describe('config/defaults', () => {
         type: 'boolean',
         description: 'thing',
         name: 'thing',
+        scopes: ['repo'],
       };
       const val = getDefault(option);
 
@@ -31,11 +42,12 @@ describe('config/defaults', () => {
     it.each(['string', 'object', 'integer'])(
       'returns null for %s values',
       (type: string) => {
-        const option: RenovateOptions = {
+        const option = partial<RenovateOptions>({
           type: type as 'string' | 'object' | 'integer',
           description: 'thing',
           name: 'thing',
-        };
+          scopes: ['repo'],
+        });
         const val = getDefault(option);
 
         expect(val).toBeNull();

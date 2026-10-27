@@ -14,7 +14,7 @@ Here is a list of the most common cases where Renovate must update/rebase the br
 - When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
 - When you have set `keepUpdatedLabel` and included the label on a PR
 - When a newer version of the dependency is released
-- When you request a manual rebase from the Renovate bot
+- When you request a manual rebase from Renovate
 - When you use `"automerge": true` and `"rebaseWhen": "auto"` on a branch / pr
 
 Renovate uses its own version of "rebasing", which is _not the same_ as doing a `git rebase` with Git.
@@ -26,10 +26,9 @@ First of all, here is the one time when Renovate _won't_ update branches.
 If you push a new commit to a Renovate branch, for example to fix your code so the tests pass, then Renovate stops all updates of that branch.
 It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take over again.
 
-<!-- prettier-ignore -->
 !!! warning
-    Do _not_ amend Renovate's commits, because Renovate will rebase over your amended commit.
-    Keep your work safe and always push your own _new_ commit to any Renovate branch.
+  Do _not_ amend Renovate's commits, because Renovate will rebase over your amended commit.
+  Keep your work safe and always push your own _new_ commit to any Renovate branch.
 
 ## Rebasing conflicted PRs
 

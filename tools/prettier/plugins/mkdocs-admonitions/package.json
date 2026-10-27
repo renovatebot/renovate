@@ -1,0 +1,12 @@
+{
+  "name": "renovate-prettier-mkdocs-admonitions",
+  "private": true,
+  "type": "module",
+  "main": "./index.mjs",
+  "peerDependencies": {
+    "@types/common-tags": "*",
+    "common-tags": "*",
+    "prettier": "*",
+    "vitest": "*"
+  }
+}

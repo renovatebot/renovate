@@ -14,7 +14,7 @@ The above are listed in **_reverse order_** of preference. e.g. CLI values will 
 ### Default Configuration
 
 The default configuration values can be found in [lib/config/options/index.ts](../../lib/config/options/index.ts).
-Options which have `"globalOnly": true` are reserved only for bot global configuration and cannot be configured within repository config files.
+Options which have `"globalOnly": true` are reserved only for global self-hosted configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
@@ -63,7 +63,7 @@ If you add a `renovate.json` file to the root of your repository, you can use th
 
 If you add configuration options to your `package.json` then these will override any other settings above.
 
-```json
+```json {configType=none}
 {
   "renovate": {
     "labels": ["upgrade", "bot"]

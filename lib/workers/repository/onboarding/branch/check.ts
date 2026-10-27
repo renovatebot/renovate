@@ -107,7 +107,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
 
-  // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
+  // when Renovate is running in fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
   // prevents https://github.com/renovatebot/renovate/discussions/37328
   if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
@@ -115,18 +115,16 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       const configFileContent = await platform.getJsonFile(
         cache.configFileName,
       );
-      if (configFileContent) {
-        if (
-          cache.configFileName !== 'package.json' ||
-          configFileContent.renovate
-        ) {
-          logger.debug('Existing config file confirmed');
-          logger.debug(
-            { fileName: cache.configFileName, config: configFileContent },
-            'Repository config',
-          );
-          return true;
-        }
+      if (
+        configFileContent &&
+        (cache.configFileName !== 'package.json' || configFileContent.renovate)
+      ) {
+        logger.debug('Existing config file confirmed');
+        logger.debug(
+          { fileName: cache.configFileName, config: configFileContent },
+          'Repository config',
+        );
+        return true;
       }
     } catch {
       // probably file doesn't exist

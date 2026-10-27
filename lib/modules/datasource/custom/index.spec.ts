@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../logger/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { CustomDatasource } from './index.ts';
 
@@ -250,8 +251,11 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
 
       expect(logger.once.warn).toHaveBeenCalledWith(
-        { errorMessage: 'The symbol "." cannot be used as a unary operator' },
-        'Invalid JSONata expression: $[.name = "Alice" and',
+        {
+          errorMessage: 'The symbol "." cannot be used as a unary operator',
+          transformTemplate: '$[.name = "Alice" and',
+        },
+        'Invalid JSONata expression',
       );
     });
 
@@ -276,8 +280,8 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
 
       expect(logger.once.warn).toHaveBeenCalledWith(
-        { err: expect.any(Object) },
-        'Error while evaluating JSONata expression: $notafunction()',
+        { err: expect.any(Object), transformTemplate: '$notafunction()' },
+        'Error while evaluating JSONata expression',
       );
     });
 
@@ -573,6 +577,93 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toEqual(expected);
+    });
+
+    describe('registry URL with credentials', () => {
+      const authorization = `Basic ${Buffer.from('user:token1234567890abcd').toString('base64')}`;
+
+      afterEach(() => {
+        hostRules.clear();
+      });
+
+      it('requests the compiled registry URL template with its credentials', async () => {
+        httpMock
+          .scope('https://nexus.example.com', { reqheaders: { authorization } })
+          .get('/repository/raw/myPackage/versions.json')
+          .reply(200, { releases: [{ version: 'v1.0.0' }] });
+
+        const result = await getPkgReleases({
+          datasource: `${CustomDatasource.id}.foo`,
+          packageName: 'myPackage',
+          registryUrls: [
+            'https://user:token1234567890abcd@nexus.example.com/repository/raw/{{packageName}}/versions.json',
+          ],
+          customDatasources: { foo: {} },
+        });
+
+        expect(result).toEqual({
+          registryUrl:
+            'https://nexus.example.com/repository/raw/{{packageName}}/versions.json',
+          releases: [{ version: 'v1.0.0' }],
+        });
+        expect(
+          hostRules.find({
+            hostType: 'custom',
+            url: 'https://nexus.example.com/repository/raw/myPackage/versions.json',
+          }),
+        ).toMatchObject({ username: 'user', password: 'token1234567890abcd' });
+        expect(
+          hostRules.find({
+            hostType: 'custom',
+            url: 'https://nexus.example.com/repository/raw/other/versions.json',
+          }).password,
+        ).toBeUndefined();
+      });
+
+      it('returns null for a registry URL whose response has no releases', async () => {
+        httpMock
+          .scope('https://nexus.example.com', { reqheaders: { authorization } })
+          .get('/repository/raw/myPackage/versions.json')
+          .reply(200, { releases: [] });
+
+        const result = await getPkgReleases({
+          datasource: `${CustomDatasource.id}.foo`,
+          packageName: 'myPackage',
+          registryUrls: [
+            'https://user:token1234567890abcd@nexus.example.com/repository/raw/{{packageName}}/versions.json',
+          ],
+          customDatasources: { foo: {} },
+        });
+
+        expect(result).toBeNull();
+      });
+
+      it('requests a registry URL without template with its credentials', async () => {
+        httpMock
+          .scope('https://nexus.example.com', { reqheaders: { authorization } })
+          .get('/repository/raw/versions.json')
+          .reply(200, { releases: [{ version: 'v1.0.0' }] });
+
+        const result = await getPkgReleases({
+          datasource: `${CustomDatasource.id}.foo`,
+          packageName: 'myPackage',
+          registryUrls: [
+            'https://user:token1234567890abcd@nexus.example.com/repository/raw/versions.json',
+          ],
+          customDatasources: { foo: {} },
+        });
+
+        expect(result).toEqual({
+          registryUrl: 'https://nexus.example.com/repository/raw/versions.json',
+          releases: [{ version: 'v1.0.0' }],
+        });
+        expect(
+          hostRules.find({
+            hostType: 'custom',
+            url: 'https://nexus.example.com/repository/raw/versions.json',
+          }),
+        ).toMatchObject({ username: 'user', password: 'token1234567890abcd' });
+      });
     });
 
     it('return release with templated path', async () => {

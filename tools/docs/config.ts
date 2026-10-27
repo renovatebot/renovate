@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getConfigFileNames } from '../../lib/config/app-strings.ts';
+import { MigrationsService } from '../../lib/config/migrations/index.ts';
 import { getEnvName } from '../../lib/config/options/env.ts';
 import { getOptions } from '../../lib/config/options/index.ts';
 import {
@@ -8,19 +9,46 @@ import {
   getManagers,
 } from '../../lib/modules/manager/index.ts';
 import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
-import { getToolConfig } from '../../lib/util/exec/containerbase.ts';
+import {
+  getSupportedToolNames,
+  getToolConfig,
+} from '../../lib/util/exec/containerbase.ts';
 import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
 import {
   additionalConstraintDefinitions,
-  toolDefinitions,
-  toolNames,
+  toolDefinitionDocumentation,
 } from '../../lib/util/exec/types.ts';
+import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
+import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
-import { formatCell, replaceContent } from './utils.ts';
+import { formatCell, indexMarkdown, replaceContent } from './utils.ts';
 
 const options = getOptions();
 const managers = new Set(allManagersList);
+
+const previousNames: ReadonlyMap<string, string[]> = (() => {
+  const map = new Map<string, string[]>();
+
+  function add(optionName: string, previousName: string): void {
+    const existing = map.get(optionName);
+    if (existing) {
+      existing.push(previousName);
+    } else {
+      map.set(optionName, [previousName]);
+    }
+  }
+
+  for (const [oldName, newName] of MigrationsService.renamedProperties) {
+    add(newName, oldName);
+  }
+
+  for (const [oldEnvVar, { optionName }] of convertedExperimentalEnvVars) {
+    add(optionName, oldEnvVar);
+  }
+
+  return map;
+})();
 
 /**
  * Merge string arrays one by one
@@ -111,6 +139,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'advancedUse',
     'deprecationMsg',
     'patternMatch',
+    'properties',
+    'requiresCheckAtTrustBoundary',
+    'suggestedValues',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -141,7 +172,9 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         ((type === 'object' || type === 'array') &&
           (el[0] === 'default' || el[0] === 'additionalProperties')) ||
         // enum values for `allowedValues` should be printed in JSON notation
-        el[0] === 'allowedValues'
+        el[0] === 'allowedValues' ||
+        // previous names should be printed in JSON notation
+        el[0] === 'previouslyKnownAs'
       ) {
         // only show array and object defaults if they are not null and are not empty
         if (Object.keys(el[1] ?? []).length === 0) {
@@ -172,7 +205,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
 }
 
 function stringifyArrays(el: Record<string, any>): void {
-  const ignoredKeys = ['allowedValues', 'default', 'experimentalIssues'];
+  const ignoredKeys = [
+    'allowedValues',
+    'default',
+    'experimentalIssues',
+    'previouslyKnownAs',
+  ];
 
   for (const [key, value] of Object.entries(el)) {
     if (!ignoredKeys.includes(key) && Array.isArray(value)) {
@@ -183,13 +221,12 @@ function stringifyArrays(el: Record<string, any>): void {
 
 function genExperimentalMsg(el: Record<string, any>): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature is flagged as experimental"\n';
+  let warning = '\n!!! warning "This feature is flagged as experimental"\n';
 
   if (el.experimentalDescription) {
-    warning += indent`${2}${el.experimentalDescription}`;
+    warning += indent`${1}${el.experimentalDescription}`;
   } else {
-    warning += indent`${2}Experimental features might be changed or even removed at any time.`;
+    warning += indent`${1}Experimental features might be changed or even removed at any time.`;
   }
 
   const issues = el.experimentalIssues ?? [];
@@ -206,37 +243,17 @@ function genExperimentalMsg(el: Record<string, any>): string {
 }
 
 function genTemplatingMsg(): string {
-  return `\n<!-- prettier-ignore -->\n!!! tip "This option supports Renovate's template syntax"\n${indent`${2}See [templates](templates.md) for available variables and helpers.`}\n`;
+  return `\n!!! tip "This option supports Renovate's template syntax"\n${indent`${1}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
 function genDeprecationMsg(el: Record<string, any>): string {
-  let warning =
-    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+  let warning = '\n!!! warning "This feature has been deprecated"\n';
 
   if (el.deprecationMsg) {
-    warning += indent`${2}${el.deprecationMsg}`;
+    warning += indent`${1}${el.deprecationMsg}`;
   }
 
   return `${warning}\n`;
-}
-
-function indexMarkdown(lines: string[]): Record<string, [number, number]> {
-  const indexed: Record<string, [number, number]> = {};
-
-  let optionName = '';
-  let start = 0;
-  for (const [i, line] of lines.entries()) {
-    if (line.startsWith('## ') || line.startsWith('### ')) {
-      if (optionName) {
-        indexed[optionName] = [start, i - 1];
-      }
-      start = i;
-      optionName = line.split(' ')[1].replace(/^`|`$/g, '');
-    }
-  }
-  indexed[optionName] = [start, lines.length - 1];
-
-  return indexed;
 }
 
 function generateLockFileTable(): string {
@@ -279,6 +296,46 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateInheritConfigSupportList(): string {
+  const inheritable = options
+    .filter((option) => option.inheritConfigSupport)
+    .map((option) => {
+      const parent = option.parents?.find((p) => p !== '.');
+      return parent ? `${parent}.${option.name}` : option.name;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  let list = '\n';
+  for (const fullName of inheritable) {
+    list += `- \`${fullName}\`\n`;
+  }
+  list += '\n';
+
+  return list;
+}
+
+function generateStatusCheckWhenTable(): string {
+  const option = options.find((o) => o.name === 'statusCheckWhen');
+  const defaults = coerceObject<Record<string, string>>(option?.default);
+
+  const reasoning: Record<string, string> = {
+    artifactError: 'Legacy behavior — only reports artifact failures',
+    configValidation: 'Always reports validation pass/fail',
+    mergeConfidence: 'Always reports confidence level',
+    minimumReleaseAge: 'Always reports stability status',
+  };
+
+  const keys = Object.keys(defaults).sort();
+
+  let table = '\n| Key | Default | Reasoning |\n';
+  table += '| :-- | :-- | :-- |\n';
+  for (const key of keys) {
+    table += `| \`${key}\` | \`${defaults[key]}\` | ${reasoning[key] ?? ''} |\n`;
+  }
+
+  return table;
+}
+
 function generateConfigFileNames(): string {
   // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
@@ -294,21 +351,21 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {
   let output = '| Tool | Additional Information | Versioning | Datasource |\n';
   output += '| --- | --- | --- | --- |\n';
-  for (const toolDef of toolDefinitions) {
-    const toolConfig = getToolConfig(toolDef.name);
+  for (const toolName of getSupportedToolNames()) {
+    const toolConfig = getToolConfig(toolName);
     if (!toolConfig) {
       continue;
     }
-    const def: ConstraintDefinition = toolDef;
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def.description?.replaceAll('\n', '<br>') ?? '';
-    output += `| \`${toolDef.name}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
+    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
   return output;
@@ -331,16 +388,19 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of getSupportedToolNames()) {
     output += `- \`${tool}\`\n`;
   }
 
   return output;
 }
 
-export async function generateConfig(dist: string, bot = false): Promise<void> {
+export async function generateConfig(
+  dist: string,
+  globalOnly = false,
+): Promise<void> {
   let configFile = `configuration-options.md`;
-  if (bot) {
+  if (globalOnly) {
     configFile = `self-hosted-configuration.md`;
   }
 
@@ -352,7 +412,8 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
   options
     .filter(
-      (option) => !!option.globalOnly === bot && !managers.has(option.name),
+      (option) =>
+        !!option.globalOnly === globalOnly && !managers.has(option.name),
     )
     .forEach((option) => {
       // TODO: fix types (#22198,#9610)
@@ -380,10 +441,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       el.cli = getCliName(option);
       el.env = getEnvName(option);
+      const prevNames = previousNames.get(option.name);
+      if (prevNames) {
+        el.previouslyKnownAs = prevNames;
+      }
       stringifyArrays(el);
 
       for (const key of lookupKeys) {
-        const [headerIndex, footerIndex] = indexed[key];
+        const [headerIndex] = indexed[key];
         let sectionContent = `\n${option.description}\n\n${genTable(Object.entries(el), option.type, option.default)}`;
 
         if (el.supportsTemplating) {
@@ -393,21 +458,21 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         configOptionsRaw[headerIndex] += sectionContent;
 
         if (el.experimental) {
-          configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+          configOptionsRaw[headerIndex] += genExperimentalMsg(el);
         }
         if (el.advancedUse) {
           configOptionsRaw[headerIndex] += generateAdvancedUse();
         }
 
         if (is.nonEmptyString(el.deprecationMsg)) {
-          configOptionsRaw[footerIndex] += genDeprecationMsg(el);
+          configOptionsRaw[headerIndex] += genDeprecationMsg(el);
         }
       }
     });
 
   let content = configOptionsRaw.join('\n');
 
-  if (bot) {
+  if (globalOnly) {
     content = replaceContent(
       content,
       generateCacheNamespacesList(),
@@ -415,7 +480,15 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (globalOnly) {
+    content = replaceContent(
+      content,
+      generateInheritConfigSupportList(),
+      '<!-- Autogenerate inheritConfigSupport-list -->',
+    );
+  }
+
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateLockFileTable(),
@@ -423,7 +496,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateConfigFileNames(),
@@ -431,7 +504,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForConstraints(),
@@ -439,7 +512,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateAdditionalConstraints(),
@@ -447,7 +520,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
-  if (!bot) {
+  if (!globalOnly) {
     content = replaceContent(
       content,
       generateToolsForInstallTools(),
@@ -455,12 +528,17 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
     );
   }
 
+  if (!globalOnly) {
+    content = replaceContent(
+      content,
+      generateStatusCheckWhenTable(),
+      '<!-- status-check-when-defaults-begin -->',
+    );
+  }
+
   await updateFile(`${dist}/${configFile}`, content);
 }
 
 function generateAdvancedUse(): string {
-  return (
-    '\n<!-- prettier-ignore -->\n!!! warning\n' +
-    '    For advanced use only! Use at your own risk!\n'
-  );
+  return '!!! warning\n' + '  For advanced use only! Use at your own risk!\n';
 }

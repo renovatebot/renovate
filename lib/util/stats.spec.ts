@@ -50,6 +50,20 @@ describe('util/stats', () => {
         totalMs: 700,
       });
     });
+
+    it('does not overflow the call stack for large datasets', () => {
+      const res = makeTimingReport(
+        Array.from<number>({ length: 200_000 }).fill(1),
+      );
+
+      expect(res).toEqual({
+        avgMs: 1,
+        count: 200_000,
+        maxMs: 1,
+        medianMs: 1,
+        totalMs: 200_000,
+      });
+    });
   });
 
   describe('LookupStats', () => {

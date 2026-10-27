@@ -17,22 +17,28 @@ const lockFileContent = codeBlock`
 describe('modules/manager/gleam/locked-version', () => {
   describe('extractLockFileVersions()', () => {
     it('returns null for missing lock file', async () => {
-      expect(await extractLockFileVersions('manifest.toml')).toBeNull();
+      await expect(
+        extractLockFileVersions('manifest.toml'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce('foo');
-      expect(await extractLockFileVersions('manifest.toml')).toBeNull();
+      await expect(
+        extractLockFileVersions('manifest.toml'),
+      ).resolves.toBeNull();
     });
 
     it('returns empty map for lock file without packages', async () => {
       fs.readLocalFile.mockResolvedValueOnce('[requirements]');
-      expect(await extractLockFileVersions('manifest.toml')).toEqual(new Map());
+      await expect(extractLockFileVersions('manifest.toml')).resolves.toEqual(
+        new Map(),
+      );
     });
 
     it('returns a map of package versions', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
-      expect(await extractLockFileVersions('manifest.toml')).toEqual(
+      await expect(extractLockFileVersions('manifest.toml')).resolves.toEqual(
         new Map([
           ['foo', ['1.0.4']],
           ['bar', ['2.1.0']],

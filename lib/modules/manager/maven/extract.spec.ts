@@ -594,7 +594,7 @@ describe('modules/manager/maven/extract', () => {
       ]);
       for (const packageFile of res) {
         for (const dep of packageFile.deps) {
-          const depUrls = new Set([...dep.registryUrls!]);
+          const depUrls = new Set(dep.registryUrls);
           expect(depUrls).toStrictEqual(unorderedUrls);
         }
       }
@@ -999,12 +999,12 @@ describe('modules/manager/maven/extract', () => {
       fs.readLocalFile
         .mockResolvedValueOnce('')
         .mockResolvedValueOnce('invalid xml content');
-      expect(
-        await extractAllPackageFiles({}, [
+      await expect(
+        extractAllPackageFiles({}, [
           '.mvn/extensions.xml',
           'grp/.mvn/extensions.xml',
         ]),
-      ).toBeEmptyArray();
+      ).resolves.toBeEmptyArray();
     });
 
     describe('root pom handling', () => {
