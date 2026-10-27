@@ -1,4 +1,5 @@
-import { z } from 'zod/v3';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 
 const VcpkgPortVersionEntry = z
   .object({
@@ -11,14 +12,14 @@ const VcpkgPortVersionEntry = z
   })
   .refine(
     (entry) =>
-      typeof (
+      isString(
         entry.version ??
-        entry['version-semver'] ??
-        entry['version-date'] ??
-        entry['version-string']
-      ) === 'string',
+          entry['version-semver'] ??
+          entry['version-date'] ??
+          entry['version-string'],
+      ),
     {
-      message:
+      error:
         'one of version, version-semver, version-date, version-string is required',
     },
   );
@@ -31,6 +32,7 @@ export type VcpkgPortVersions = z.infer<typeof VcpkgPortVersions>;
 
 export const VcpkgBaseline = z.object({
   default: z.record(
+    z.string(),
     z.object({
       baseline: z.string(),
       'port-version': z.number().int().nonnegative(),
