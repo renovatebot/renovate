@@ -99,7 +99,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Only supported on Docker Hub: The release timestamp is determined from the `tag_last_pushed` field in the results. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Supported on Docker Hub and Quay.io: The release timestamp is determined from the `tag_last_pushed` field (Docker Hub) or the `start_ts` field with `last_modified` fallback (Quay.io) in the results. **NOTE**: Currently, digests will receive the same release timestamp as the tag, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -715,8 +715,8 @@ export class DockerDatasource extends Datasource {
   private async getTagsQuayRegistry(
     registry: string,
     repository: string,
-  ): Promise<string[]> {
-    let tags: string[] = [];
+  ): Promise<Release[]> {
+    let releases: Release[] = [];
     const limit = 100;
 
     function pageUrl(page: number): string {
@@ -730,12 +730,24 @@ export class DockerDatasource extends Datasource {
         url,
         QuayTagsResponse,
       );
-      const pageTags = res.body.tags.map((tag) => tag.name);
-      tags = tags.concat(pageTags);
+      const pageReleases = res.body.tags.map((tag) => {
+        const release: Release = { version: tag.name };
+
+        // Prefer `start_ts` (unix seconds, TZ-independent) over
+        // `last_modified` (HTTP date with `-0000` offset, parsed via
+        // `Date.parse` fallback in `asTimestamp` which is offset-sensitive).
+        const releaseTimestamp =
+          asTimestamp(tag.start_ts) ?? asTimestamp(tag.last_modified);
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+        return release;
+      });
+      releases = releases.concat(pageReleases);
       page += 1;
       url = res.body.has_additional ? pageUrl(page) : null;
     }
-    return tags;
+    return releases;
   }
 
   private async getDockerApiTags(
@@ -843,14 +855,17 @@ export class DockerDatasource extends Datasource {
   private async _getTags(
     registryHost: string,
     dockerRepository: string,
-  ): Promise<string[] | undefined> {
+  ): Promise<Release[] | undefined> {
     try {
       const isQuay = registryHost === 'https://quay.io';
-      let tags: string[] | undefined;
+      let releases: Release[] | undefined;
       if (isQuay) {
         try {
           // Due to pagination and sorting limits on Quay Docker v2 API implementation we try the Quay v1 API first
-          tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
+          releases = await this.getTagsQuayRegistry(
+            registryHost,
+            dockerRepository,
+          );
         } catch (err) {
           // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
           if (err.statusCode === 401) {
@@ -858,15 +873,23 @@ export class DockerDatasource extends Datasource {
               { registryHost, dockerRepository },
               'Quay v1 API unauthorized, falling back to Docker v2 API',
             );
-            tags = await this.getDockerApiTags(registryHost, dockerRepository);
+            const tags = await this.getDockerApiTags(
+              registryHost,
+              dockerRepository,
+            );
+            releases = tags?.map((version) => ({ version }));
           } else {
             throw err;
           }
         }
       } else {
-        tags = await this.getDockerApiTags(registryHost, dockerRepository);
+        const tags = await this.getDockerApiTags(
+          registryHost,
+          dockerRepository,
+        );
+        releases = tags?.map((version) => ({ version }));
       }
-      return tags;
+      return releases;
     } catch (_err) /* istanbul ignore next */ {
       const err = _err instanceof ExternalHostError ? _err.err : _err;
 
@@ -877,7 +900,7 @@ export class DockerDatasource extends Datasource {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
-        return this.getTags(registryHost, `library/${dockerRepository}`);
+        return this._getTags(registryHost, `library/${dockerRepository}`);
       }
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
@@ -894,7 +917,7 @@ export class DockerDatasource extends Datasource {
         const jfrogRepository = dockerRepositoryParts[0];
         const dockerImage = dockerRepositoryParts[1];
 
-        return this.getTags(
+        return this._getTags(
           registryHost,
           `${jfrogRepository}/library/${dockerImage}`,
         );
@@ -938,7 +961,10 @@ export class DockerDatasource extends Datasource {
         key: buildCacheKey(registryHost, dockerRepository),
         cacheable: registryHost === DOCKER_HUB,
       },
-      () => this._getTags(registryHost, dockerRepository),
+      () =>
+        this._getTags(registryHost, dockerRepository).then((releases) =>
+          releases?.map((release) => release.version),
+        ),
     );
   }
 
@@ -1261,11 +1287,24 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const tagsResult =
+    const getQuayTags = (): TagsResultType =>
+      Result.wrapNullable(
+        this._getTags(registryHost, dockerRepository),
+        'tags-error' as const,
+      );
+
+    const isQuay = registryHost === 'https://quay.io';
+    const isDockerHub =
       registryHost === DOCKER_HUB &&
-      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
-        ? getDockerHubTags()
-        : getTags();
+      !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
+    let tagsResult: TagsResultType;
+    if (isDockerHub) {
+      tagsResult = getDockerHubTags();
+    } else if (isQuay) {
+      tagsResult = getQuayTags();
+    } else {
+      tagsResult = getTags();
+    }
 
     const { val: releases, err } = await tagsResult.unwrap();
     if (err instanceof Error) {

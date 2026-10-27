@@ -2136,6 +2136,100 @@ describe('modules/datasource/docker/index', () => {
       );
     });
 
+    it('sets releaseTimestamp from quay api start_ts', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/feastdev/feature-server/tag/?limit=100&page=1&onlyActiveTags=true',
+        )
+        .reply(200, {
+          tags: [
+            {
+              name: '0.67.0',
+              start_ts: 1791900498,
+              last_modified: 'Tue, 13 Oct 2026 14:08:18 -0000',
+            },
+          ],
+          has_additional: true,
+        })
+        .get(
+          '/api/v1/repository/feastdev/feature-server/tag/?limit=100&page=2&onlyActiveTags=true',
+        )
+        .reply(200, {
+          tags: [
+            {
+              name: '0.66.0',
+              start_ts: 1787284322,
+              last_modified: 'Fri, 21 Aug 2026 03:52:02 -0000',
+            },
+          ],
+          has_additional: false,
+        })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/feastdev/feature-server/manifests/0.67.0')
+        .reply(200, '', {});
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'feastdev/feature-server',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toMatchObject([
+        { version: '0.66.0', releaseTimestamp: '2026-08-21T03:52:02.000Z' },
+        { version: '0.67.0', releaseTimestamp: '2026-10-13T14:08:18.000Z' },
+      ]);
+    });
+
+    it('sets no releaseTimestamp from quay api when timestamps are missing', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/feastdev/feature-server/tag/?limit=100&page=1&onlyActiveTags=true',
+        )
+        .reply(200, {
+          tags: [{ name: '0.67.0' }],
+          has_additional: false,
+        })
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/feastdev/feature-server/manifests/0.67.0')
+        .reply(200, '', {});
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'feastdev/feature-server',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0]).not.toHaveProperty('releaseTimestamp');
+    });
+
+    it('sets no releaseTimestamp from quay api v2 fallback', async () => {
+      httpMock
+        .scope('https://quay.io')
+        .get(
+          '/api/v1/repository/feastdev/feature-server/tag/?limit=100&page=1&onlyActiveTags=true',
+        )
+        .reply(401, 'Unauthorized')
+        .get('/v2/')
+        .reply(200, '', {})
+        .get('/v2/feastdev/feature-server/tags/list?n=10000')
+        .reply(200, {})
+        .get('/v2/feastdev/feature-server/tags/list?n=10000')
+        .reply(200, { tags: ['0.67.0'] })
+        .get('/v2/feastdev/feature-server/manifests/0.67.0')
+        .reply(200, '', {});
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'feastdev/feature-server',
+        registryUrls: ['https://quay.io'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases[0]).not.toHaveProperty('releaseTimestamp');
+    });
+
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
       const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
       const tags2 = [...range(10000, 20000)].map((i) => `${i}.0.0`);
