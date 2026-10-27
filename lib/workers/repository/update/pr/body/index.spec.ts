@@ -226,6 +226,7 @@ describe('workers/repository/update/pr/body/index', () => {
 
       const result = getPrBody(
         {
+          manager: 'npm',
           branchName: 'renovate/group',
           baseBranch: 'main',
           upgrades,
