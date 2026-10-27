@@ -1,6 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
+import { isUndefined } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
-import { setTimeout } from 'timers/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -39,8 +40,8 @@ function setupGitMocks(
           `${firstLetter}-`,
           `${portName}.json`,
         );
-        fs.mkdirSync(upath.dirname(filePath), { recursive: true });
-        fs.writeFileSync(filePath, Fixtures.get(fixtureName), {
+        await fs.mkdir(upath.dirname(filePath), { recursive: true });
+        await fs.writeFile(filePath, Fixtures.get(fixtureName), {
           encoding: 'utf8',
         });
       },
@@ -57,8 +58,8 @@ function setupEmptyGitMock(): {
   const mockClone = vi
     .fn()
     .mockName('clone')
-    .mockImplementation((_registryUrl: string, clonePath: string) => {
-      fs.mkdirSync(clonePath, { recursive: true });
+    .mockImplementation(async (_registryUrl: string, clonePath: string) => {
+      await fs.mkdir(clonePath, { recursive: true });
     });
   const gitMock = partial<SimpleGit>({ clone: mockClone });
   createSimpleGit.mockReturnValue(gitMock);
@@ -86,12 +87,10 @@ describe('modules/datasource/vcpkg/index', () => {
     tmpDir = await dir({ unsafeCleanup: true });
 
     adminConfig = {
-      localDir: upath.join(tmpDir.path, 'local'),
       cacheDir: upath.join(tmpDir.path, 'cache'),
     };
     GlobalConfig.set(adminConfig);
 
-    createSimpleGit.mockReset();
     memCache.init();
   });
 
@@ -102,13 +101,13 @@ describe('modules/datasource/vcpkg/index', () => {
   });
 
   it('returns null for invalid registry url', async () => {
-    expect(
-      await getPkgReleases({
+    await expect(
+      getPkgReleases({
         datasource,
         packageName: 'zlib',
         registryUrls: ['not a url'],
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
   it('returns releases for the zlib fixture using the default registry url', async () => {
@@ -165,20 +164,22 @@ describe('modules/datasource/vcpkg/index', () => {
     const mockClone = vi
       .fn()
       .mockName('clone')
-      .mockImplementation((_registryUrl: string, clonePath: string, _opts) => {
-        for (const name of ['zlib', 'zstd']) {
-          const filePath = upath.join(
-            clonePath,
-            'versions',
-            'z-',
-            `${name}.json`,
-          );
-          fs.mkdirSync(upath.dirname(filePath), { recursive: true });
-          fs.writeFileSync(filePath, Fixtures.get('zlib.json'), {
-            encoding: 'utf8',
-          });
-        }
-      });
+      .mockImplementation(
+        async (_registryUrl: string, clonePath: string, _opts) => {
+          for (const name of ['zlib', 'zstd']) {
+            const filePath = upath.join(
+              clonePath,
+              'versions',
+              'z-',
+              `${name}.json`,
+            );
+            await fs.mkdir(upath.dirname(filePath), { recursive: true });
+            await fs.writeFile(filePath, Fixtures.get('zlib.json'), {
+              encoding: 'utf8',
+            });
+          }
+        },
+      );
     const gitMock = partial<SimpleGit>({ clone: mockClone });
     createSimpleGit.mockReturnValue(gitMock);
 
@@ -216,20 +217,22 @@ describe('modules/datasource/vcpkg/index', () => {
     const mockClone = vi
       .fn()
       .mockName('clone')
-      .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-        if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-          return Promise.reject(
-            new Error(
-              'fatal: dumb http transport does not support shallow capabilities',
-            ),
-          );
-        }
-        const filePath = upath.join(clonePath, 'versions', 'z-', 'zlib.json');
-        fs.mkdirSync(upath.dirname(filePath), { recursive: true });
-        fs.writeFileSync(filePath, Fixtures.get('zlib.json'), {
-          encoding: 'utf8',
-        });
-      });
+      .mockImplementation(
+        async (_registryUrl: string, clonePath: string, opts) => {
+          if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
+            return Promise.reject(
+              new Error(
+                'fatal: dumb http transport does not support shallow capabilities',
+              ),
+            );
+          }
+          const filePath = upath.join(clonePath, 'versions', 'z-', 'zlib.json');
+          await fs.mkdir(upath.dirname(filePath), { recursive: true });
+          await fs.writeFile(filePath, Fixtures.get('zlib.json'), {
+            encoding: 'utf8',
+          });
+        },
+      );
     const gitMock = partial<SimpleGit>({ clone: mockClone });
     createSimpleGit.mockReturnValue(gitMock);
 
@@ -246,7 +249,7 @@ describe('modules/datasource/vcpkg/index', () => {
       .fn()
       .mockName('clone')
       .mockImplementation((_registryUrl: string, _clonePath: string, opts) => {
-        if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+        if (!isUndefined(opts) && Object.hasOwn(opts, '--depth')) {
           return Promise.reject(
             new Error(
               'fatal: dumb http transport does not support shallow capabilities',
