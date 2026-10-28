@@ -61,6 +61,6 @@ ${
     prBody,
     config,
     existingPr,
-    logName: 'migration',
+    type: 'migration',
   });
 }

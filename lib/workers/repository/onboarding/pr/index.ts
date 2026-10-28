@@ -321,7 +321,7 @@ export async function ensureOnboardingPr(
     prBody,
     config,
     existingPr,
-    logName: 'onboarding',
+    type: 'onboarding',
   });
 
   return 'onboarding';

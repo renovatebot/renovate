@@ -22,7 +22,7 @@ export interface EnsureConfigPrConfig {
   config: RenovateConfig;
   /** Open PR for `branchName`, if the caller already looked it up. */
   existingPr: Pr | null;
-  logName: ConfigPrKind;
+  type: ConfigPrKind;
 }
 
 /**
@@ -40,13 +40,13 @@ export async function ensureConfigPr({
   prBody: renderedPrBody,
   config,
   existingPr,
-  logName,
+  type,
 }: EnsureConfigPrConfig): Promise<Pr | null> {
   logger.trace({ prBody: renderedPrBody }, 'prBody');
   const prBody = platform.massageMarkdown(renderedPrBody, config.rebaseLabel);
 
   if (existingPr) {
-    logger.debug(`Found open ${logName} PR`);
+    logger.debug(`Found open ${type} PR`);
     // Check if existing PR needs updating
     if (
       existingPr.bodyStruct?.hash === hashBody(prBody) &&
@@ -57,7 +57,7 @@ export async function ensureConfigPr({
     }
     // PR must need updating
     if (GlobalConfig.get('dryRun')) {
-      logger.info(`DRY-RUN: Would update ${logName} PR`);
+      logger.info(`DRY-RUN: Would update ${type} PR`);
       return existingPr;
     }
     await platform.updatePr({
@@ -65,13 +65,13 @@ export async function ensureConfigPr({
       prTitle,
       prBody,
     });
-    logger.info({ pr: existingPr.number }, `Updated ${logName} PR`);
+    logger.info({ pr: existingPr.number }, `Updated ${type} PR`);
     return existingPr;
   }
 
-  logger.debug(`Creating ${logName} PR`);
+  logger.debug(`Creating ${type} PR`);
   if (GlobalConfig.get('dryRun')) {
-    logger.info(`DRY-RUN: Would create ${logName} PR`);
+    logger.info(`DRY-RUN: Would create ${type} PR`);
     return null;
   }
 
@@ -87,7 +87,7 @@ export async function ensureConfigPr({
         automerge: false,
       }),
     });
-    logger.info({ pr: pr?.number }, `Created ${logName} PR`);
+    logger.info({ pr: pr?.number }, `Created ${type} PR`);
     if (pr) {
       await addParticipants(config, pr);
     }
