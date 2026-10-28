@@ -24,6 +24,26 @@ export interface InternalChecksResult {
   pendingReleases: Release[];
 }
 
+/** Given an UpdateType, should `minimumReleaseAge` apply to it? **/
+export function isMinimumReleaseAgeApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    // Possible, but not wanted, as this is intentionally rolling back to a previous (generally older) release to unblock the build
+    updateType !== 'rollback' &&
+    // Not yet supported: TODO #40288
+    updateType !== 'pin' &&
+    // Not yet supported: TODO #39400
+    updateType !== 'replacement' &&
+    // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
+    updateType !== 'lockFileMaintenance' &&
+    // Not supported
+    updateType !== 'bump' &&
+    // Not supported
+    updateType !== 'lockfileUpdate'
+  );
+}
+
 /** Given an UpdateType, should `minimumConfidence` apply to it? **/
 export function isMinimumConfidenceApplicable(
   updateType: UpdateType | undefined,

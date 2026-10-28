@@ -468,8 +468,6 @@ export interface ManagerApiBase extends ModuleApi {
 
   /**
    * Whether the package manager enforces the minimum release age itself when regenerating the lock file for lock file maintenance.
-   *
-   * Called before `updateArtifacts()`, so lock file maintenance does not wait for release timestamps that it cannot have.
    */
   enforcesMinimumReleaseAge?(
     config: UpdateArtifactsConfig,
