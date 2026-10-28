@@ -91,11 +91,21 @@ When `minimumReleaseAge` is configured, Renovate passes `--before=<date>` to npm
 This ensures that npm only resolves package versions that were available before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
 
 The `--before` date is calculated as `now - minimumReleaseAge`.
-If a `before=<date>` or `min-release-age=<days>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
+
+Renovate also reads the `before` and `min-release-age` settings from the project's `.npmrc`, and uses the larger of that age and `minimumReleaseAge` for package files which are not managed by Yarn or pnpm.
+A `before=<date>` counts as the time elapsed since that date.
 
 If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
 In this case, Renovate automatically retries without `--before` and logs a warning.
 This ensures existing lock files are never broken by the `--before` flag.
+Lock file maintenance does not retry, and reports the `ETARGET` error as an artifact error instead.
+
+npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
+
+- Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
+- the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the npm constraint only allows npm v11.10.0 or later, which added `min-release-age`
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 

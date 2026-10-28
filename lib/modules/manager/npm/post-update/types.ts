@@ -1,4 +1,3 @@
-import type { DateTime } from 'luxon';
 import type { FileChange } from '../../../../util/git/types.ts';
 import type {
   ArtifactError,
@@ -59,11 +58,6 @@ export interface YarnRcYmlFile {
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
   additionalYarnRcYml?: any;
-}
-
-export interface NpmrcCooldownResult {
-  date: DateTime<true>;
-  source: 'before' | 'min-release-age';
 }
 
 export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;

@@ -1,6 +1,5 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
-import ini from 'ini';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -30,51 +29,17 @@ import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
+import { parseNpmrcCooldown } from '../extract/npmrc.ts';
 import { PackageLock } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
-import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
+import type { GenerateLockFileResult } from './types.ts';
 import {
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
-
-export function parseNpmrcCooldownDate(
-  npmrcContent: string | null,
-): NpmrcCooldownResult | null {
-  if (!npmrcContent) {
-    return null;
-  }
-
-  const parsed = ini.parse(npmrcContent);
-
-  const before = parsed.before;
-  if (isNonEmptyString(before)) {
-    const dt = DateTime.fromISO(before, { zone: 'utc' });
-    if (dt.isValid) {
-      return { date: dt, source: 'before' };
-    }
-    logger.debug(`Invalid before date in .npmrc: ${before}, ignoring`);
-  }
-
-  const minReleaseAge = parsed['min-release-age'];
-  if (isNonEmptyString(minReleaseAge)) {
-    const days = parseInt(minReleaseAge, 10);
-    if (isNumber(days) && days >= 0) {
-      return {
-        date: DateTime.now().minus({ days }).toUTC(),
-        source: 'min-release-age',
-      };
-    }
-    logger.debug(
-      `Invalid min-release-age in .npmrc: ${minReleaseAge}, ignoring`,
-    );
-  }
-
-  return null;
-}
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -168,14 +133,14 @@ export async function generateLockFile(
           'Invalid minimumReleaseAge, skipping --before for npm install',
         );
       } else {
-        const npmrcCooldown = parseNpmrcCooldownDate(npmrcContent);
+        const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
 
         // npm rejects --before when min-release-age is set in .npmrc,
         // so let the .npmrc handle cooldown natively in that case
         if (npmrcCooldown?.source === 'min-release-age') {
           logger.debug(
             {
-              npmrcMinReleaseAge: npmrcCooldown.date.toISO(),
+              npmrcMinReleaseAge: npmrcCooldown.days,
               minimumReleaseAge: config.minimumReleaseAge,
             },
             'Skipping --before flag because .npmrc already contains min-release-age',
@@ -330,9 +295,18 @@ export async function generateLockFile(
       }
     }
 
-    // Run the commands, retrying without --before on ETARGET if needed
+    // Run the commands, retrying without --before on ETARGET if needed.
+    // Lock file maintenance does not retry, as it relies on --before to
+    // enforce the minimum release age.
+    const isLockFileMaintenance = upgrades.some(
+      (upgrade) => upgrade.isLockFileMaintenance,
+    );
     await exec(commands, execOptions).catch(async (err) => {
-      if (beforeFlag && err.stderr?.includes('with a date before')) {
+      if (
+        beforeFlag &&
+        !isLockFileMaintenance &&
+        err.stderr?.includes('with a date before')
+      ) {
         logger.debug('npm --before caused ETARGET, retrying without --before');
         const commandsWithoutBefore = commands.map((cmd) =>
           cmd.replace(beforeFlag, ''),
