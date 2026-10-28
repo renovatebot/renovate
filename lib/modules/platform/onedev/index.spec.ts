@@ -802,6 +802,20 @@ describe('modules/platform/onedev/index', () => {
       expect(prList[0].bodyStruct?.rebaseRequested).toBeUndefined();
     });
 
+    it('maps pull requests without target and submit dates', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [
+        mockPullRequest({ targetBranch: undefined, submitDate: undefined }),
+      ]);
+
+      const prList = await onedev.getPrList();
+      expect(prList[0].targetBranch).toBe('');
+      expect(prList[0].createdAt).toBeUndefined();
+    });
+
     it('supports conflicting state filters and cache refreshes', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
@@ -882,6 +896,18 @@ describe('modules/platform/onedev/index', () => {
       await expect(
         onedev.getBranchPr('renovate/something-1.x'),
       ).resolves.toMatchObject({ number: 1 });
+    });
+
+    it('returns null when no open PR of the branch exists', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, []);
+
+      await expect(
+        onedev.getBranchPr('renovate/something-1.x'),
+      ).resolves.toBeNull();
     });
   });
 
@@ -971,6 +997,62 @@ describe('modules/platform/onedev/index', () => {
             usePlatformAutomerge: true,
             automergeStrategy: 'squash',
             automergeCommitMessage: 'automerge!',
+          },
+        }),
+      ).resolves.toMatchObject({ number: 1 });
+    });
+
+    it('returns null when the created pull request cannot be located', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .post('/pulls')
+        .reply(200, '5555')
+        .get('/pulls')
+        .query({ offset: 0, count: 100 })
+        .reply(200, []);
+
+      await expect(
+        onedev.createPr({
+          sourceBranch: 'renovate/new-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR body',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'OneDev accepted the PR creation, but the new PR could not be located',
+      );
+    });
+
+    it('enables platform native automerge with the default strategy and message', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      scope
+        .post('/pulls')
+        .reply(200, '5555')
+        .post('/pulls/5555/auto-merge', {
+          commitMessage: '',
+          enabled: true,
+        })
+        .reply(200)
+        .get('/pulls')
+        .query({ offset: 0, count: 100 })
+        .reply(200, [mockPullRequest({ sourceBranch: 'renovate/new-branch' })]);
+
+      await expect(
+        onedev.createPr({
+          sourceBranch: 'renovate/new-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR body',
+          platformPrOptions: {
+            usePlatformAutomerge: true,
           },
         }),
       ).resolves.toMatchObject({ number: 1 });
@@ -1153,6 +1235,19 @@ describe('modules/platform/onedev/index', () => {
 
       await expect(
         onedev.updatePr({ number: 1, prTitle: 'PR title', state: 'open' }),
+      ).toResolve();
+    });
+
+    it('updates only the description when no title is provided', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockPrList(scope, [mockPullRequest()]);
+      scope.post('/pulls/5555/description', 'new description').reply(200);
+
+      await expect(
+        onedev.updatePr({ number: 1, prTitle: '', prBody: 'new description' }),
       ).toResolve();
     });
 
@@ -1545,6 +1640,32 @@ describe('modules/platform/onedev/index', () => {
       ).resolves.toBe('updated');
     });
 
+    it('reopens closed issues without rewriting an up-to-date body', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, [
+        mockIssue({
+          title: 'Dependency dashboard',
+          description: 'blurb',
+          state: 'Closed',
+        }),
+      ]);
+      scope
+        .post('/issues/77/state-transitions', { state: 'Open', comment: '' })
+        .reply(200);
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+          shouldReOpen: true,
+        }),
+      ).resolves.toBe('updated');
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
     it('reuses a matching closed issue via reuseTitle', async () => {
       const scope = httpMock.scope('https://onedev.example.com/~api');
       await initFakePlatform(scope);
@@ -1868,6 +1989,64 @@ describe('modules/platform/onedev/index', () => {
 
       await onedev.ensureIssueClosing('Dependency dashboard');
       expect(logger.logger.warn).toHaveBeenCalled();
+    });
+
+    it('creates the dashboard issue when the list holds unrelated stale entries', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, [
+        mockIssue({
+          title: 'Unrelated topic',
+          state: 'Closed',
+          description: undefined,
+          submitDate: undefined,
+        }),
+      ]);
+      mockIssueFieldSpecs(scope);
+      scope
+        .post('/issues', {
+          projectId: 100,
+          title: 'Dependency dashboard',
+          description: 'blurb',
+          confidential: false,
+          fields: { Type: 'Task', Priority: 'Normal' },
+        })
+        .reply(200, '88');
+
+      await expect(
+        onedev.ensureIssue({
+          title: 'Dependency dashboard',
+          body: 'blurb',
+        }),
+      ).resolves.toBe('created');
+    });
+
+    it('does not close unrelated or closed issues', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+      mockIssueList(scope, [
+        mockIssue({
+          id: 99,
+          number: 2,
+          state: 'Closed',
+          title: 'Dependency dashboard',
+          description: 'blurb',
+        }),
+        mockIssue({
+          id: 100,
+          number: 3,
+          title: 'Unrelated topic',
+          description: 'blurb',
+        }),
+      ]);
+
+      await expect(
+        onedev.ensureIssueClosing('Dependency dashboard'),
+      ).toResolve();
     });
   });
 
@@ -2226,6 +2405,16 @@ describe('modules/platform/onedev/index', () => {
       await expect(onedev.getJsonFile('renovate.json')).resolves.toEqual({
         foo: 'bar',
       });
+    });
+
+    it('returns null when the git file is missing', async () => {
+      const scope = httpMock.scope('https://onedev.example.com/~api');
+      await initFakePlatform(scope);
+      mockInitRepo(scope);
+      await onedev.initRepo({ repository });
+
+      git.getFile.mockResolvedValueOnce(null);
+      await expect(onedev.getRawFile('renovate.json')).resolves.toBeNull();
     });
 
     it('reads other repositories over REST', async () => {

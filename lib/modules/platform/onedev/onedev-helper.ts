@@ -203,7 +203,7 @@ export async function queryPullRequests(
 export async function createPullRequest(
   http: OnedevHttp,
   params: PullRequestCreateParams,
-): Promise<number | undefined> {
+): Promise<number> {
   const { body } = await http.postJson(
     'pulls',
     { ...authOptions(), body: params },

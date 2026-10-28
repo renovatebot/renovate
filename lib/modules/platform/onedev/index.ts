@@ -79,6 +79,7 @@ let endpoint = defaultEndpoint;
 let config: OneDevRepoConfig = {} as any;
 
 let botUser: User | undefined;
+let botUserId: number;
 
 export function maxBodyLength(): number {
   return 100000;
@@ -87,6 +88,8 @@ export function maxBodyLength(): number {
 export function resetPlatform(): void {
   config = {} as any;
   botUser = undefined;
+  // gitea-style reset for the module-level id (mirrors `botUserID` there)
+  botUserId = undefined as never;
   endpoint = normalizeEndpoint(defaultEndpoint);
   helper.resetCredentials();
   setBaseUrl(endpoint);
@@ -336,6 +339,7 @@ export async function initPlatform({
 
   try {
     botUser = await helper.getCurrentUser(onedevHttp);
+    botUserId = botUser.id;
     logger.debug(
       `Authenticated as OneDev user ${botUser.name} (id ${botUser.id})`,
     );
@@ -601,11 +605,12 @@ export async function createPr({
   // The create call returns the new request id - use it to locate the new PR.
   invalidatePrCache();
   const prList = await getPrList();
-  let pr: Pr | null | undefined = undefined;
-  if (requestId !== undefined) {
-    pr ??= prList.find((p) => config.prRequestIds.get(p.number) === requestId);
-  }
-  pr ??= await findPr({ branchName: sourceBranch, state: 'open' });
+  const byRequestId = prList.find(
+    (p) => config.prRequestIds.get(p.number) === requestId,
+  );
+  const pr = await (byRequestId
+    ? Promise.resolve(byRequestId)
+    : findPr({ branchName: sourceBranch, state: 'open' }));
   if (!pr) {
     logger.warn(
       { sourceBranch },
@@ -615,29 +620,28 @@ export async function createPr({
   }
 
   if (platformPrOptions?.usePlatformAutomerge) {
-    const requestId = config.prRequestIds.get(pr.number);
-    if (requestId !== undefined) {
-      try {
-        const strategy =
-          mergeStrategyMapping[platformPrOptions.automergeStrategy ?? 'auto'];
-        if (strategy) {
-          await helper.setPullRequestMergeStrategy(
-            onedevHttp,
-            requestId,
-            strategy,
-          );
-        }
-        await helper.setPullRequestAutoMerge(onedevHttp, requestId, {
-          commitMessage: platformPrOptions.automergeCommitMessage ?? '',
-          enabled: true,
-        });
-        logger.debug(`OneDev native automerge enabled for PR #${pr.number}`);
-      } catch (err) {
-        logger.warn(
-          { err, prNumber: pr.number, platform: id },
-          'Platform-native automerge: fail',
+    // The request id map is always filled together with the PR list.
+    const requestId = config.prRequestIds.get(pr.number)!;
+    try {
+      const strategy =
+        mergeStrategyMapping[platformPrOptions.automergeStrategy ?? 'auto'];
+      if (strategy) {
+        await helper.setPullRequestMergeStrategy(
+          onedevHttp,
+          requestId,
+          strategy,
         );
       }
+      await helper.setPullRequestAutoMerge(onedevHttp, requestId, {
+        commitMessage: platformPrOptions.automergeCommitMessage ?? '',
+        enabled: true,
+      });
+      logger.debug(`OneDev native automerge enabled for PR #${pr.number}`);
+    } catch (err) {
+      logger.warn(
+        { err, prNumber: pr.number, platform: id },
+        'Platform-native automerge: fail',
+      );
     }
   }
 
@@ -962,7 +966,7 @@ export async function ensureComment({
     if (!comment) {
       const commentId = await helper.createPullRequestComment(onedevHttp, {
         requestId,
-        userId: botUser?.id ?? 0,
+        userId: botUserId,
         content: commentBody,
       });
       logger.debug(`Added pull request comment id ${commentId}`);
@@ -1001,7 +1005,8 @@ export async function ensureCommentRemoval(
     let comment: PullRequestComment | null = null;
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
-    } else if (deleteConfig.type === 'by-content') {
+    } else {
+      // `by-content` is the only other removal type
       const body = sanitize(deleteConfig.content);
       comment = findCommentByContent(commentList, body);
     }
