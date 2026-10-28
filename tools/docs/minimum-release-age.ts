@@ -1,5 +1,7 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { getDatasources } from '../../lib/modules/datasource/index.ts';
 import { getManagers } from '../../lib/modules/manager/index.ts';
+import type { MinimumReleaseAgeToolCapability } from '../../lib/modules/manager/types.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import { getDisplayName, replaceContent } from './utils.ts';
 
@@ -24,7 +26,10 @@ function generateDatasourceTable(): string {
   return tableContent;
 }
 
-function mark(value: boolean | undefined): string {
+function mark(value: MinimumReleaseAgeToolCapability | undefined): string {
+  if (isNonEmptyString(value)) {
+    return `✅<br>\`${value}\``;
+  }
   return value ? '✅' : '❌';
 }
 

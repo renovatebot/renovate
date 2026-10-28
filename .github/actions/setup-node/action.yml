@@ -33,11 +33,13 @@ runs:
       run: |
         error=0
         if [[ -z "${{ inputs.node-version }}" ]]; then
+          # shellcheck disable=SC2016 # the backticks are code formatting, not command substitution
           >&2 echo 'Error: `node-version` is a required argument, but it was empty'
           error=1
         fi
 
         if [[ -z "${{ inputs.os }}" ]]; then
+          # shellcheck disable=SC2016 # the backticks are code formatting, not command substitution
           >&2 echo 'Error: `os` is a required argument, but it was empty'
           error=1
         fi
