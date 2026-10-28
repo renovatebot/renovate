@@ -129,8 +129,8 @@ importers:
         specifier: 4.0.23
         version: 4.0.23
       '@renovatebot/good-enough-parser':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 3.0.0
+        version: 3.0.0
       '@renovatebot/osv-offline':
         specifier: 4.2.0
         version: 4.2.0(supports-color@7.2.0)
@@ -2054,9 +2054,9 @@ packages:
     resolution: {integrity: sha512-+mZxeioZUc1UAs2NO02x5RcPQdvX4B4eJsrFYSIVT8yRdtsc9OV8L/KeYnKatWFd8BxbOyr5mS8I8JbolOPVqg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/good-enough-parser@2.0.1':
-    resolution: {integrity: sha512-FBLawccaWOPwqXgMSB3FTp1VTfGJWSTTXY2Q3kWPoLYOpKYBr3V37vtqFLjb5wUFkrXN2Sj+S840JXKfHwy8Rg==}
-    engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
+  '@renovatebot/good-enough-parser@3.0.0':
+    resolution: {integrity: sha512-dvFb9ST8WVo+YsrhK6vbWBib49Biu4/fPmZf1QRNIR1Ov5T04god/AA3rRJcyRrofzt/K96vPO9RPhEE3u+hfg==}
+    engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/osv-offline-db@4.2.0':
     resolution: {integrity: sha512-1qUj7k3abBDWp8HAa19lcON9+x8y3jpFBcxX0ILVLsb22H9zBqb7wArgdcNGsinRyjfZwjFyqND8X1fnT4rS3A==}
@@ -7453,7 +7453,7 @@ snapshots:
       upath: 3.0.8
       zod: 4.6.7
 
-  '@renovatebot/good-enough-parser@2.0.1':
+  '@renovatebot/good-enough-parser@3.0.0':
     dependencies:
       '@thi.ng/zipper': 1.0.3
       '@types/moo': 0.5.10
