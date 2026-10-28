@@ -371,6 +371,14 @@ export interface UpdateDependencyConfig<T = unknown> {
   upgrade: Upgrade<T>;
 }
 
+export interface UpdateDependencyResult {
+  content: string;
+  /**
+   * The update was also applied outside the package file, e.g. to the checkout on disk, so the package file counts as updated and `updateArtifacts()` runs for it even if `content` is unchanged.
+   */
+  updatedOutOfBand?: boolean;
+}
+
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
 }
@@ -432,13 +440,6 @@ export interface ManagerApiBase extends ModuleApi {
    * or conditional, instead of a plain `true`/`false`.
    */
   lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
-  /**
-   * Whether `updateDependency()` applies its change outside the package file,
-   * e.g. by modifying the checkout on disk, and therefore may return the
-   * package file unchanged. Such an unchanged package file must still be
-   * treated as updated, so that `updateArtifacts()` runs for it.
-   */
-  updatesFilesOutOfBand?: boolean;
 
   lockFileNames?: string[];
   supersedesManagers?: string[];
@@ -472,7 +473,7 @@ export interface ManagerApiBase extends ModuleApi {
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-  ): MaybePromise<string | null>;
+  ): MaybePromise<string | UpdateDependencyResult | null>;
 
   updateLockedDependency?(
     config: UpdateLockedConfig,

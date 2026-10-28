@@ -3,12 +3,15 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
-import type { UpdateDependencyConfig } from '../types.ts';
+import type {
+  UpdateDependencyConfig,
+  UpdateDependencyResult,
+} from '../types.ts';
 
 export default async function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): Promise<string | null> {
+}: UpdateDependencyConfig): Promise<UpdateDependencyResult | null> {
   // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
   const authentication = {
@@ -32,6 +35,7 @@ export default async function updateDependency({
       '--recursive',
       upgrade.depName!,
     ]);
+    // The new revision is checked out in the submodule, outside `.gitmodules`, so `updateArtifacts()` has to run even if `.gitmodules` is unchanged.
     await submoduleGit.checkout([upgrade.newDigest!]);
     if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
       await git.subModule([
@@ -44,9 +48,9 @@ export default async function updateDependency({
         upgrade.packageFile!,
         'utf8',
       );
-      return updatedPackageContent!;
+      return { content: updatedPackageContent!, updatedOutOfBand: true };
     }
-    return fileContent;
+    return { content: fileContent, updatedOutOfBand: true };
   } catch (err) {
     logger.debug({ err }, 'submodule checkout error');
     return null;
