@@ -208,12 +208,10 @@ export async function updateArtifacts({
     } else {
       const deps = updatedDeps
         .map((dep) =>
-          dep.newVersion
-            ? quote(`${dep.depName}:${dep.newVersion}`)
-            : quote(dep.depName!),
+          dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
         )
         .filter(isString)
-        .map((dep) => quote(dep))
+        .map(quote)
         .join(' ');
       args = `update ${deps}`.trim();
       args += config.postUpdateOptions?.includes('composerWithAll')
