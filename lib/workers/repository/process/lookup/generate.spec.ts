@@ -1,5 +1,7 @@
+import { logger } from '~test/util.ts';
 import type { Release } from '../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
+import type { NewValueConfig } from '../../../../modules/versioning/types.ts';
 import { generateUpdate } from './generate.ts';
 import type { LookupUpdateConfig } from './types.ts';
 
@@ -83,6 +85,61 @@ describe('workers/repository/process/lookup/generate', () => {
       );
 
       expect(res.newValue).toBe('^1.0.0');
+    });
+
+    it('keeps the update-lockfile value for a vulnerability alert when bump has none', async () => {
+      const npmVersioning = allVersioning.get('npm');
+      const noBumpVersioning = {
+        ...npmVersioning,
+        getNewValue: (newValueConfig: NewValueConfig): string | null =>
+          newValueConfig.rangeStrategy === 'bump'
+            ? null
+            : npmVersioning.getNewValue(newValueConfig),
+      };
+
+      const res = await generateUpdate(
+        { ...config, isVulnerabilityAlert: true },
+        '^1.0.0',
+        noBumpVersioning,
+        'update-lockfile',
+        '1.0.0',
+        'major',
+        release({ version: '2.0.1' }),
+        allVersions,
+      );
+
+      expect(res.newValue).toBe('^2.0.0');
+    });
+
+    it('keeps the update-lockfile value for a vulnerability alert when bump throws', async () => {
+      const npmVersioning = allVersioning.get('npm');
+      const throwingBumpVersioning = {
+        ...npmVersioning,
+        getNewValue: (newValueConfig: NewValueConfig): string | null => {
+          if (newValueConfig.rangeStrategy === 'bump') {
+            throw new Error('getNewValue error');
+          }
+          return npmVersioning.getNewValue(newValueConfig);
+        },
+      };
+
+      const res = await generateUpdate(
+        { ...config, isVulnerabilityAlert: true },
+        '^1.0.0',
+        throwingBumpVersioning,
+        'update-lockfile',
+        '1.0.0',
+        'major',
+        release({ version: '2.0.1' }),
+        allVersions,
+      );
+
+      expect(res.newValue).toBe('^2.0.0');
+      expect(res.isLockfileUpdate).toBeUndefined();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ newVersion: '2.0.1' }),
+        'Could not bump the range for a vulnerability fix',
+      );
     });
 
     it('returns early when there is no current version', async () => {
