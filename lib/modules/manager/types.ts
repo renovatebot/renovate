@@ -428,7 +428,7 @@ export interface MinimumReleaseAgeToolSupport {
   /** Renovate reads the package manager's own minimum release age setting */
   readsConfiguredAge?: MinimumReleaseAgeToolCapability;
   /** The package manager enforces the minimum release age during lock file maintenance */
-  enforcesInLockFileMaintenance?: MinimumReleaseAgeToolCapability;
+  enforcedInLockFile?: MinimumReleaseAgeToolCapability;
   /** Markdown note */
   note?: string;
 }
