@@ -34,7 +34,7 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   npm: {
     passesMinimumReleaseAge: true,
     readsConfiguredAge: minReleaseAgeNpmRange,
-    enforcesInLockFileMaintenance: true,
+    enforcedInLockFile: true,
     note: 'Passes `--before`, unless the `.npmrc` has `min-release-age`. Reads `before` and `min-release-age` from the repository `.npmrc`; `before` works with every npm version. If only the `.npmrc` sets `min-release-age`, npm enforces it from v11.10.0.',
   },
   pnpm: {},
