@@ -222,7 +222,7 @@ describe('modules/manager/deno/post', () => {
   });
 
   describe('collectPackageJsonAsWorkspaceMember()', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       GlobalConfig.set({ localDir: '' });
     });
 
