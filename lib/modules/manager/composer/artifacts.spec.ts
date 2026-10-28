@@ -1284,7 +1284,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
-  it('quotes dependencies in the update command', async () => {
+  it('quotes each dependency once in the update command', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -1300,7 +1300,7 @@ describe('modules/manager/composer/artifacts', () => {
     ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `composer update "'"'foo:^1.1 || ^2.0'"'" --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins`,
+        cmd: "composer update 'foo:^1.1 || ^2.0' --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins",
       },
     ]);
   });
