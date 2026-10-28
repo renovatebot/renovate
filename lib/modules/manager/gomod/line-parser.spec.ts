@@ -1,8 +1,13 @@
-import { parseLine } from './line-parser.ts';
+import { endBlockRegex, parseLine } from './line-parser.ts';
 
 describe('modules/manager/gomod/line-parser', () => {
   it('should return null for invalid input', () => {
     expect(parseLine('invalid')).toBeNull();
+  });
+
+  it('endBlockRegex matches a gofmt-style unindented closing paren', () => {
+    expect(endBlockRegex.test(')')).toBeTrue();
+    expect(endBlockRegex.test('  )')).toBeTrue();
   });
 
   it('should parse go version', () => {
@@ -14,6 +19,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'golang',
       versioning: 'go-mod-directive',
+      commitMessageTopic: 'go module directive',
     });
   });
 
@@ -27,6 +33,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depType: 'golang',
       skipReason: 'invalid-version',
       versioning: 'go-mod-directive',
+      commitMessageTopic: 'go module directive',
     });
   });
 
@@ -39,6 +46,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'toolchain',
       skipReason: 'invalid-version',
+      commitMessageTopic: 'go toolchain directive',
     });
   });
 
@@ -51,6 +59,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'toolchain',
       skipReason: 'invalid-version',
+      commitMessageTopic: 'go toolchain directive',
     });
   });
 
@@ -262,6 +271,19 @@ describe('modules/manager/gomod/line-parser', () => {
       depType: 'replace',
       digestOneAndOnly: true,
       versioning: 'loose',
+    });
+  });
+
+  it.each`
+    version
+    ${'v2.0.0-00010101000000-000000000000'}
+    ${'v1.2.3-00010101000000-000000000000'}
+  `('should skip the placeholder pseudo-version $version', ({ version }) => {
+    const res = parseLine(`require foo/foo/v2 ${version}`);
+    expect(res).toMatchObject({
+      currentDigest: '000000000000',
+      currentValue: version,
+      skipReason: 'invalid-version',
     });
   });
 

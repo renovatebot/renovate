@@ -19,7 +19,7 @@
     "noImplicitOverride": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for tsdown */,
-    "lib": ["ES2024"],
+    "lib": ["ES2025"] /* node v24.11.0+ supports ES2025 */,
     "types": ["node", "vitest/globals"],
     "checkJs": true,
     "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971

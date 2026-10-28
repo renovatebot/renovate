@@ -1,3 +1,72 @@
 packages: []
 
+savePrefix: ''
+# updates are handled by Renovate itself
+updateNotifier: false
+# https://pnpm.io/cli/run
+shellEmulator: true
+
+allowBuilds:
+  core-js-pure: false
+  esbuild: false
+  protobufjs: false
+  unrs-resolver: false
+  re2: true
+
+dedupePeers: true
+
+catalog:
+  esbuild: 0.28.2
+  tar: 7.5.22
+  vite: 8.3.4
+
+overrides:
+  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
+  '@simple-git/argv-parser@2.0.0': 2.0.1
+  '@yarnpkg/core@4.5.0>tar': 'catalog:'
+  esbuild: 'catalog:'
+  http-cache-semantics@<=4.2.0: 4.3.0
+  katex@>=0.11.0 <0.18.2: 0.19.0
+  markdown-it@>=15.0.0 <15.0.3: 15.0.3
+  protobufjs@8.0.1: 8.8.1
+  shell-quote@>=1.8.4 <1.11.0: 1.12.0
+  smol-toml@<=1.8.0: 1.9.1
+  source-map-js@>=1.0.0 <1.2.2: 1.2.2
+  vite: 'catalog:'
+
+ignoredOptionalDependencies:
+  - dtrace-provider
+  - moment
+  - mv
+  - safe-json-stringify
+
 strictPeerDependencies: true
+
+# in line with https://github.com/renovatebot/.github/blob/main/default.json,
+# all non-Renovate or non-Containerbase packages should only be installed after
+# 7 days
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@containerbase/base'
+  - '@renovatebot/base-image'
+  - '@renovatebot/detect-tools'
+  - '@renovatebot/good-enough-parser'
+  - '@renovatebot/osv-offline'
+  - '@renovatebot/osv-offline-db'
+  - '@renovatebot/pep440'
+  - '@renovatebot/pgp'
+  - '@renovatebot/ruby-semver'
+  - '@containerbase/eslint-plugin'
+  - '@containerbase/istanbul-reports-html'
+  - '@containerbase/semantic-release-pnpm'
+  # Renovate security update: tar@7.5.21
+  - tar@7.5.21
+  # Renovate security update: simple-git@4.0.1
+  - simple-git@4.0.1
+  # Renovate security update: handlebars@4.7.10
+  - handlebars@4.7.10
+  # security update: markdown-it@15.0.3 and its dependency argparse@3.0.3
+  - markdown-it@15.0.3
+  - argparse@3.0.3
+
+provenance: true

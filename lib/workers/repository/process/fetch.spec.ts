@@ -1,10 +1,13 @@
 import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { Result } from '../../../util/result.ts';
 import { fetchUpdates } from './fetch.ts';
 import * as lookup from './lookup/index.ts';
+import type { UpdateResult } from './lookup/types.ts';
 
 const lookupUpdates = vi.mocked(lookup).lookupUpdates;
 
@@ -41,9 +44,13 @@ describe('workers/repository/process/fetch', () => {
           {
             packageFile: 'package.json',
             deps: [
-              { depName: 'abcd' },
-              { depName: 'foo' },
-              { depName: 'skipped', skipReason: 'some-reason' as never },
+              { depName: 'abcd', packageName: 'abcd' },
+              { depName: 'foo', packageName: 'foo' },
+              {
+                depName: 'skipped',
+                packageName: 'skipped',
+                skipReason: 'some-reason' as never,
+              },
             ],
           },
         ],
@@ -82,19 +89,417 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
+    describe('dependency disabled by its manager', () => {
+      const vulnerabilityAlertRule = {
+        matchPackageNames: ['foo:bar'],
+        isVulnerabilityAlert: true,
+      };
+
+      function packageFiles(): Record<string, PackageFile[]> {
+        return {
+          gradle: [
+            {
+              packageFile: 'build.gradle',
+              deps: [
+                {
+                  depName: 'foo:bar',
+                  packageName: 'foo:bar',
+                  datasource: MavenDatasource.id,
+                  currentValue: '1.0.0',
+                  enabled: false,
+                },
+              ],
+            },
+          ],
+        };
+      }
+
+      it('skips it without a vulnerability alert', async () => {
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0].skipReason).toBe('disabled');
+        expect(lookupUpdates).not.toHaveBeenCalled();
+      });
+
+      it('looks it up for a vulnerability alert', async () => {
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+        config.packageRules = [vulnerabilityAlertRule];
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0]).toMatchObject({ enabled: true });
+        expect(files.gradle[0].deps[0]).not.toHaveProperty('skipReason');
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            enabled: true,
+            isVulnerabilityAlert: true,
+          }),
+        );
+      });
+
+      it('skips it for a vulnerability alert if a package rule disabled it too', async () => {
+        config.packageRules = [
+          { matchPackageNames: ['foo:bar'], enabled: false },
+          vulnerabilityAlertRule,
+        ];
+        const files = packageFiles();
+        await fetchUpdates(config, files);
+        expect(files.gradle[0].deps[0].skipReason).toBe('disabled');
+        expect(lookupUpdates).not.toHaveBeenCalled();
+      });
+    });
+
+    it('keeps skipping an unknown-registry dep which config gives no registry', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping an unknown-registry dep which only a rule enables', async () => {
+      // the rule says the dependency is wanted, but names no registry to look
+      // it up in, so there is still nothing Renovate can do with it
+      config.packageRules = [{ matchDatasources: ['apk'], enabled: true }];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up an unknown-registry dep which config gives a registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipStage',
+      );
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          registryUrls: ['https://dl-cdn.alpinelinux.org/alpine?arch=x86_64'],
+        }),
+      );
+    });
+
+    it('looks up an unknown-registry dep which config gives a default registry', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.defaultRegistryUrls = [
+        'https://dl-cdn.alpinelinux.org/alpine?arch=x86_64',
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'bash',
+                packageName: 'bash',
+                datasource: 'apk',
+                skipReason: 'unknown-registry',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.dockerfile[0].deps[0]).not.toHaveProperty(
+        'skipReason',
+      );
+      expect(lookupUpdates).toHaveBeenCalledOnce();
+    });
+
+    it('keeps skipping an unknown-registry dep which brought its own registry', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['git-refs'],
+          registryUrls: ['https://example.com'],
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        'pre-commit': [
+          {
+            packageFile: '.pre-commit-config.yaml',
+            deps: [
+              {
+                depName: 'some/repo',
+                datasource: 'git-refs',
+                skipReason: 'unknown-registry',
+                registryUrls: ['https://unknown-host.com'],
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles['pre-commit'][0].deps[0]).toMatchObject({
+        skipReason: 'unknown-registry',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping a lockfile-only dep which no vulnerability alert matches', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['other-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping a lockfile-only dep which only a rule enables', async () => {
+      // the rule says the dependency is wanted, but only a vulnerability fix
+      // has any use for a dependency which is not declared anywhere
+      config.packageRules = [{ matchDatasources: ['pypi'], enabled: true }];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('looks up a lockfile-only dep which a vulnerability alert matches', async () => {
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).not.toHaveProperty('skipReason');
+      expect(packageFiles.pep621[0].deps[0]).not.toHaveProperty('skipStage');
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          depName: 'transitive-dep',
+          isVulnerabilityAlert: true,
+        }),
+      );
+    });
+
+    it('matches a vulnerability alert against a lockfile-only dep using the datasource versioning', async () => {
+      // `2024.1.1` is a version under pypi's own versioning, but not under the
+      // default one, so the alert only matches once the datasource default has
+      // been applied
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '2024.1.1',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
+    it('keeps skipping a lockfile-only dep which the user disabled', async () => {
+      config.packageRules = [
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['transitive-dep'],
+          matchCurrentVersion: '< 2.0.0',
+          isVulnerabilityAlert: true,
+        },
+        { matchPackageNames: ['transitive-dep'], enabled: false },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'transitive-dep',
+                packageName: 'transitive-dep',
+                datasource: 'pypi',
+                lockedVersion: '1.0.0',
+                skipReason: 'lockfile-only',
+                skipStage: 'extract',
+              },
+            ],
+          },
+        ],
+      };
+      await fetchUpdates(config, packageFiles);
+      expect(packageFiles.pep621[0].deps[0]).toMatchObject({
+        skipReason: 'disabled',
+      });
+      expect(lookupUpdates).not.toHaveBeenCalled();
+    });
+
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
+      // @ts-expect-error -- intentionally using invalid constraint names
       config.constraints = { some: 'different' };
       const packageFiles: any = {
         maven: [
           {
             packageFile: 'pom.xml',
             extractedConstraints: { some: 'constraint', other: 'constraint' },
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toEqual({
         maven: [
@@ -114,18 +519,261 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
+    describe('constraintsVersioning', () => {
+      it('is merged from packageFile with config', async () => {
+        config.constraintsVersioning = { gomodMod: 'config-version' };
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: {
+                gomodMod: 'pfile-version',
+                go: 'go-version',
+              },
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {
+              gomodMod: 'config-version',
+              go: 'go-version',
+            },
+          }),
+        );
+      });
+
+      it('is set from packageFile if only set on packageFile', async () => {
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: { go: 'go-version' },
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { go: 'go-version' },
+          }),
+        );
+      });
+
+      it('is not set if neither config nor packageFile are set', async () => {
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              // no constraintsVersioning on pFile
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {},
+          }),
+        );
+      });
+
+      it('is set if config is set', async () => {
+        config.rangeStrategy = 'auto';
+        config.constraintsVersioning = { gomodMod: 'config-version' };
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              // no constraintsVersioning on pFile
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+        await fetchUpdates(config, packageFiles);
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { gomodMod: 'config-version' },
+          }),
+        );
+      });
+
+      it('is merged from dep with packageFile and config', async () => {
+        config.constraintsVersioning = { '%goMod': 'config-version' };
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: {
+                '%goMod': 'pfile-version',
+                perl: 'pfile-perl-version',
+              },
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                  constraintsVersioning: {
+                    '%goMod': 'dep-version',
+                    perl: 'dep-perl-version',
+                    vscode: 'dep-vscode-version',
+                  },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {
+              '%goMod': 'config-version',
+              perl: 'pfile-perl-version',
+              vscode: 'dep-vscode-version',
+            },
+          }),
+        );
+      });
+
+      it('is set from dep if only set on dep', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              deps: [
+                {
+                  datasource: MavenDatasource.id,
+                  depName: 'bbb',
+                  packageName: 'bbb',
+                  constraintsVersioning: { perl: 'dep-perl-version' },
+                },
+              ],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue(
+          Result.ok(partial<UpdateResult>({ updates: [] })),
+        );
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { perl: 'dep-perl-version' },
+          }),
+        );
+      });
+    });
+
+    it('prefers configured constraints over extracted constraints', async () => {
+      config.rangeStrategy = 'auto';
+      config.constraints = { python: '>=3.9' };
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            extractedConstraints: { python: '>=3.8' },
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+                extractedConstraints: { python: '<3.12' },
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          constraints: { python: '>=3.9' },
+          datasource: 'maven',
+          depName: 'bbb',
+        }),
+      );
+      expect(packageFiles.maven[0].deps[0]).toEqual(
+        expect.objectContaining({
+          extractedConstraints: { python: '<3.12' },
+          updates: ['a', 'b'],
+        }),
+      );
+    });
+
     it('skips deps with empty names', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         docker: [
           {
             packageFile: 'values.yaml',
             deps: [
-              { depName: '', currentValue: '2.8.11', datasource: 'docker' },
-              { depName: 'abcd' },
+              {
+                depName: '',
+                packageName: '',
+                currentValue: '2.8.11',
+                datasource: 'docker',
+              },
+              { depName: 'abcd', packageName: 'abcd' },
               { currentValue: '2.8.11', datasource: 'docker' },
-              { depName: ' ' },
+              // a whitespace-only name is trimmed away during extraction
+              { depName: '', packageName: '' },
               {},
               { depName: undefined },
+              // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid depName type to test invalid-name skip handling
               { depName: { oh: 'no' } as unknown as string },
             ],
           },
@@ -149,6 +797,7 @@ describe('workers/repository/process/fetch', () => {
             deps: [
               {
                 depName: 'dep-name',
+                packageName: 'dep-name',
                 currentValue: '2.8.11',
                 datasource: 'docker',
                 isInternal: true,
@@ -175,13 +824,16 @@ describe('workers/repository/process/fetch', () => {
               {
                 datasource: MavenDatasource.id,
                 depName: 'bbb',
+                packageName: 'bbb',
                 isInternal: true,
               },
             ],
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: ['a', 'b'] as never })),
+      );
       await fetchUpdates(config, packageFiles);
       expect(packageFiles.maven[0].deps[0].updates).toHaveLength(2);
     });
@@ -192,7 +844,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -200,7 +858,7 @@ describe('workers/repository/process/fetch', () => {
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
-      ).rejects.toThrow();
+      ).rejects.toThrow('some error');
     });
 
     it('throws lookup errors for not onboarded repos', async () => {
@@ -209,7 +867,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -217,7 +881,7 @@ describe('workers/repository/process/fetch', () => {
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
-      ).rejects.toThrow();
+      ).rejects.toThrow('some error');
     });
 
     it('produces external host warnings for not onboarded repos', async () => {
@@ -226,7 +890,13 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
-            deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                packageName: 'bbb',
+              },
+            ],
           },
         ],
       };
@@ -249,6 +919,39 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       });
+    });
+
+    it('removes URL credentials from external host warnings', async () => {
+      config.rangeStrategy = 'auto';
+      const depName = 'https://user:secret@git.example.com/org/repo';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName,
+                packageName: depName,
+              },
+            ],
+          },
+        ],
+      };
+      const err = new ExternalHostError(
+        new Error(`failed to fetch ${depName}/maven-metadata.xml`),
+      );
+      lookupUpdates.mockRejectedValueOnce(err);
+
+      await fetchUpdates({ ...config, repoIsOnboarded: false }, packageFiles);
+
+      expect(packageFiles.maven[0].deps[0].warnings).toEqual([
+        {
+          topic: 'Lookup Error',
+          message:
+            'https://git.example.com/org/repo: failed to fetch https://git.example.com/org/repo/maven-metadata.xml',
+        },
+      ]);
     });
   });
 });

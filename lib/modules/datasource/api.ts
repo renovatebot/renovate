@@ -1,3 +1,4 @@
+import { ApkDatasource } from './apk/index.ts';
 import { ArtifactoryDatasource } from './artifactory/index.ts';
 import { AwsEKSAddonDataSource } from './aws-eks-addon/index.ts';
 import { AwsMachineImageDatasource } from './aws-machine-image/index.ts';
@@ -71,6 +72,7 @@ import { RepologyDatasource } from './repology/index.ts';
 import { RpmDatasource } from './rpm/index.ts';
 import { RubyVersionDatasource } from './ruby-version/index.ts';
 import { RubygemsDatasource } from './rubygems/index.ts';
+import { RustVersionDatasource } from './rust-version/index.ts';
 import { SbtPackageDatasource } from './sbt-package/index.ts';
 import { SbtPluginDatasource } from './sbt-plugin/index.ts';
 import { TerraformModuleDatasource } from './terraform-module/index.ts';
@@ -83,6 +85,7 @@ import { Unity3dPackagesDatasource } from './unity3d-packages/index.ts';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
+api.set(ApkDatasource.id, new ApkDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsEKSAddonDataSource.id, new AwsEKSAddonDataSource());
 api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
@@ -159,6 +162,7 @@ api.set(RepologyDatasource.id, new RepologyDatasource());
 api.set(RpmDatasource.id, new RpmDatasource());
 api.set(RubyVersionDatasource.id, new RubyVersionDatasource());
 api.set(RubygemsDatasource.id, new RubygemsDatasource());
+api.set(RustVersionDatasource.id, new RustVersionDatasource());
 api.set(SbtPackageDatasource.id, new SbtPackageDatasource());
 api.set(SbtPluginDatasource.id, new SbtPluginDatasource());
 api.set(TerraformModuleDatasource.id, new TerraformModuleDatasource());

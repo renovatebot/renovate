@@ -20,13 +20,14 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types.ts';
+import type { SbtManagerData } from './types.ts';
 import { normalizeScalaVersion, sortPackageFiles } from './util.ts';
 
 type Vars = Record<string, string>;
 
 interface Ctx {
   vars: Vars;
-  deps: PackageDependency[];
+  deps: PackageDependency<SbtManagerData>[];
   registryUrls: string[];
 
   scalaVersion?: string;
@@ -40,6 +41,11 @@ interface Ctx {
   depType?: string;
   useScalaVersion?: boolean;
   variableName?: string;
+
+  // Use to contain temporary object name
+  // when parsing anonymous object structs.
+  // See objectAssignmentMatch.
+  currentObjectName?: string;
 }
 
 const scala = lang.createLang('scala');
@@ -56,7 +62,26 @@ const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
   .op(':=')
   .alt(
-    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
+    // Dotted symbol. Important to have this first in the `alt` as otherwise
+    // the tree walker will eager parse a simple symbol and stop there.
+    q
+      // keep the first part of the path in context
+      .sym<Ctx>((ctx, { value: currentVarName }) => ({
+        ...ctx,
+        currentVarName,
+      }))
+      .op('.')
+      .sym((ctx, { value: varName }) => {
+        // build the full variable name from what we saved earlier
+        const dottedVariableName = `${ctx.currentVarName}.${varName}`;
+        const currentValue = ctx.vars[dottedVariableName];
+        if (currentValue) {
+          ctx.scalaVersion = currentValue;
+        }
+        delete ctx.currentVarName;
+        return ctx;
+      }),
+    // Simple symbol defined previously
     q.sym<Ctx>((ctx, { value: varName }) => {
       const scalaVersion = ctx.vars[varName];
       if (scalaVersion) {
@@ -64,6 +89,8 @@ const scalaVersionMatch = q
       }
       return ctx;
     }),
+    // Direct string
+    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
@@ -74,7 +101,7 @@ const scalaVersionMatch = q
         packageName = 'org.scala-lang:scala3-library_3';
       }
 
-      const dep: PackageDependency = {
+      const dep: PackageDependency<SbtManagerData> = {
         datasource: MavenDatasource.id,
         depName: 'scala',
         packageName,
@@ -127,6 +154,41 @@ const variableDefinitionMatch = q
   )
   .join(variableValueMatch);
 
+// Parses objects fields of the form `{name} = "{version}"`.
+const objectFieldMatch = q
+  .sym<Ctx>((ctx, { value: fieldName }) => ({
+    ...ctx,
+    currentVarName: `${ctx.currentObjectName}.${fieldName}`,
+  }))
+  .op('=')
+  .str((ctx, { value }) => {
+    ctx.vars[ctx.currentVarName!] = value;
+    delete ctx.currentVarName;
+    return ctx;
+  });
+
+// Parses anonymous objects of the form
+// val {objName} = new {
+//   {name} = "{version}"
+// }
+// and introduces a `objName.name` variable with value "{version}"
+// in the context.
+const objectAssignmentMatch = q
+  .sym<Ctx>('val')
+  .sym((ctx, { value: currentObjectName }) => ({
+    ...ctx,
+    currentObjectName,
+  }))
+  .op('=')
+  .sym('new')
+  .tree({
+    search: q.many(objectFieldMatch),
+  })
+  .handler((ctx) => {
+    delete ctx.currentObjectName;
+    return ctx;
+  });
+
 const groupIdMatch = q.alt<Ctx>(
   q.sym<Ctx>((ctx, { value: varName }) => {
     const currentGroupId = ctx.vars[varName];
@@ -139,8 +201,8 @@ const groupIdMatch = q.alt<Ctx>(
 );
 
 const artifactIdMatch = q.alt<Ctx>(
-  q.sym<Ctx>((ctx, { value: varName }) => {
-    const artifactId = ctx.vars[varName];
+  q.sym<Ctx>((ctx, { value }) => {
+    const artifactId = ctx.vars[value];
     if (artifactId) {
       ctx.artifactId = artifactId;
     }
@@ -150,6 +212,23 @@ const artifactIdMatch = q.alt<Ctx>(
 );
 
 const versionMatch = q.alt<Ctx>(
+  // Dotted symbol. Important to have this first in the `alt` as otherwise
+  // the tree walker will eager parse a simple symbol and stop there.
+  q
+    .sym<Ctx>((ctx, { value: currentVarName }) => ({ ...ctx, currentVarName }))
+    .op('.')
+    .sym((ctx, { value: varName }) => {
+      // build the full variable name from what we saved earlier
+      const dottedVariableName = `${ctx.currentVarName}.${varName}`;
+      const currentValue = ctx.vars[dottedVariableName];
+      if (currentValue) {
+        ctx.currentValue = currentValue;
+        ctx.variableName = dottedVariableName;
+      }
+      delete ctx.currentVarName;
+      return ctx;
+    }),
+  // Simple symbol defined earlier
   q.sym<Ctx>((ctx, { value: varName }) => {
     const currentValue = ctx.vars[varName];
     if (currentValue) {
@@ -158,6 +237,7 @@ const versionMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
+  // Direct string
   q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
 );
 
@@ -201,7 +281,7 @@ function depHandler(ctx: Ctx): Ctx {
 
   const depName = `${groupId!}:${artifactId!}`;
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<SbtManagerData> = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
@@ -292,6 +372,7 @@ const query = q.tree<Ctx>({
     sbtPluginMatch,
     addResolverMatch,
     variableDefinitionMatch,
+    objectAssignmentMatch,
   ),
   postHandler: registryUrlHandler,
 });
@@ -316,7 +397,7 @@ export function extractProxyUrls(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): PackageFileContent<SbtManagerData> | null {
   return extractPackageFileInternal(content, packageFile);
 }
 
@@ -324,7 +405,7 @@ function extractPackageFileInternal(
   content: string,
   packageFile: string,
   ctxScalaVersion?: string,
-): PackageFileContent | null {
+): PackageFileContent<SbtManagerData> | null {
   if (
     packageFile === 'project/build.properties' ||
     packageFile.endsWith('/project/build.properties')
@@ -333,7 +414,7 @@ function extractPackageFileInternal(
     const sbtVersion = regexResult?.groups?.version;
     const matchString = regexResult?.[0];
     if (sbtVersion) {
-      const sbtDependency: PackageDependency = {
+      const sbtDependency: PackageDependency<SbtManagerData> = {
         datasource: GithubReleasesDatasource.id,
         depName: 'sbt/sbt',
         packageName: 'sbt/sbt',
@@ -347,9 +428,8 @@ function extractPackageFileInternal(
       return {
         deps: [sbtDependency],
       };
-    } else {
-      return null;
     }
+    return null;
   }
 
   let parsedResult: Ctx | null = null;

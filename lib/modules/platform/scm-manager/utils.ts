@@ -25,22 +25,11 @@ export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
     return true;
   }
 
-  if (state === 'open' && (pr.state === 'OPEN' || pr.state === 'DRAFT')) {
+  if (state === '!open' && (pr.state === 'closed' || pr.state === 'merged')) {
     return true;
   }
 
-  if (state === '!open' && (pr.state === 'MERGED' || pr.state === 'REJECTED')) {
-    return true;
-  }
-
-  if (
-    state === 'closed' &&
-    (pr.state === 'MERGED' || pr.state === 'REJECTED')
-  ) {
-    return true;
-  }
-
-  return false;
+  return state === pr.state;
 }
 
 export function smartLinks(body: string): string {
@@ -89,7 +78,8 @@ export function getRepoUrl(
     url: endpoint,
   });
 
-  repoUrl.username = hostOptions.username ?? '';
+  // SCM-Manager ignores the username for API keys, `x-access-token` is our own choice and not documented by SCM-Manager
+  repoUrl.username = hostOptions.username ?? 'x-access-token';
   repoUrl.password = hostOptions.token ?? '';
 
   return repoUrl.toString();

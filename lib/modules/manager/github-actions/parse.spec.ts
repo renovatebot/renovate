@@ -219,6 +219,15 @@ describe('modules/manager/github-actions/parse', () => {
       });
     });
 
+    it('parses ratchet pinned version for action in subdirectory', () => {
+      const result = parseComment('ratchet:actions/cache/restore@v4');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'ratchet:actions/cache/restore@v4',
+        pinnedVersion: 'v4',
+      });
+    });
+
     it('parses version without v prefix', () => {
       const result = parseComment('1.2.3');
       expect(result).toEqual({
@@ -243,6 +252,24 @@ describe('modules/manager/github-actions/parse', () => {
         index: 0,
         matchedString: 'node/v20',
         pinnedVersion: 'node/v20',
+      });
+    });
+
+    it('parses prerelease version like v2.2-rc.1', () => {
+      const result = parseComment('v2.2-rc.1');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'v2.2-rc.1',
+        pinnedVersion: 'v2.2-rc.1',
+      });
+    });
+
+    it('parses full semver prerelease version like v2.2.0-rc.1', () => {
+      const result = parseComment('v2.2.0-rc.1');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'v2.2.0-rc.1',
+        pinnedVersion: 'v2.2.0-rc.1',
       });
     });
 

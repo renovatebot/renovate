@@ -16,11 +16,16 @@ describe('modules/versioning/npm/index', () => {
     ${'1.2.x'}                                       | ${true}
     ${'1.2.X'}                                       | ${true}
     ${'1.2.*'}                                       | ${true}
+    ${'1.x.5'}                                       | ${true}
+    ${'1.x.5-alpha+build'}                           | ${true}
+    ${'1.x.5+bad+bad'}                               | ${true}
+    ${'1.x.05'}                                      | ${false}
     ${'~1.2.3'}                                      | ${true}
     ${'^1.2.3'}                                      | ${true}
     ${'>1.2.3'}                                      | ${true}
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#main'}                   | ${false}
+    ${'1.x.5.6'}                                     | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
   `('isValid("$version") === $isValid', ({ version, isValid }) => {
     const res = semver.isValid(version);
@@ -28,18 +33,55 @@ describe('modules/versioning/npm/index', () => {
   });
 
   it.each`
-    versions                                          | range      | maxSatisfying
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'*'}     | ${'3.0.0'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'x'}     | ${'3.0.0'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'X'}     | ${'3.0.0'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2'}     | ${'2.5.1'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*'}   | ${'2.5.1'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3'}   | ${'2.3.4'}
-    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3.*'} | ${'2.3.4'}
+    versions                                          | range             | maxSatisfying
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'*'}            | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'x'}            | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'X'}            | ${'3.0.0'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2'}            | ${'2.5.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*'}          | ${'2.5.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*.3'}        | ${'2.5.1'}
+    ${['4.2.1', '4.2.5', '4.3.0']}                    | ${'4.*.0 <4.2.5'} | ${'4.2.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3'}          | ${'2.3.4'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3.*'}        | ${'2.3.4'}
   `(
     'getSatisfyingVersion("$versions","$range") === $maxSatisfying',
     ({ versions, range, maxSatisfying }) => {
       expect(semver.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
+    },
+  );
+
+  it.each`
+    version    | range                  | expected
+    ${'1.2.0'} | ${'1.x.5'}             | ${true}
+    ${'1.2.0'} | ${'1.x.5-alpha+build'} | ${true}
+    ${'1.2.0'} | ${'1.x.5+bad+bad'}     | ${true}
+    ${'1.2.0'} | ${'1.x.05'}            | ${false}
+    ${'2.0.0'} | ${'1.x.5'}             | ${false}
+  `(
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(semver.matches(version, range)).toBe(expected);
+    },
+  );
+
+  it.each`
+    versions                       | range      | minSatisfying
+    ${['1.0.0', '1.2.0', '2.0.0']} | ${'1.x.5'} | ${'1.0.0'}
+  `(
+    'minSatisfyingVersion("$versions", "$range") === $minSatisfying',
+    ({ versions, range, minSatisfying }) => {
+      expect(semver.minSatisfyingVersion(versions, range)).toBe(minSatisfying);
+    },
+  );
+
+  it.each`
+    version    | range      | expected
+    ${'0.9.0'} | ${'1.x.5'} | ${true}
+    ${'1.2.0'} | ${'1.x.5'} | ${false}
+  `(
+    'isLessThanRange("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(semver.isLessThanRange?.(version, range)).toBe(expected);
     },
   );
 
@@ -71,6 +113,7 @@ describe('modules/versioning/npm/index', () => {
     ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
     ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
     ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${false}
+    ${'1.x.5'}            | ${'1.x'}              | ${true}
   `('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.subset!(a, b)).toBe(expected);
   });
@@ -91,6 +134,7 @@ describe('modules/versioning/npm/index', () => {
     ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
     ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
     ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${true}
+    ${'1.x.5'}            | ${'1.2.x'}            | ${true}
   `('intersects("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.intersects!(a, b)).toBe(expected);
   });
@@ -174,10 +218,13 @@ describe('modules/versioning/npm/index', () => {
     ${'^1.2.3'}             | ${'replace'}         | ${'1.2.3'}       | ${'1.2.2'}              | ${'^1.2.2'}
     ${'^0.9.21'}            | ${'replace'}         | ${'0.9.21'}      | ${'0.9.22'}             | ${'^0.9.21'}
     ${'1.x'}                | ${'update-lockfile'} | ${'1.0.0'}       | ${'1.0.1'}              | ${'1.x'}
+    ${'1.x.5'}              | ${'update-lockfile'} | ${'1.0.0'}       | ${'1.0.1'}              | ${'1.x.5'}
     ${'1.x'}                | ${'update-lockfile'} | ${'1.0.0'}       | ${'2.0.1'}              | ${'2.x'}
     ${'<2.0.0'}             | ${'widen'}           | ${'1.0.0'}       | ${'2.0.1'}              | ${'<3.0.0'}
+    ${'1.x.5'}              | ${'widen'}           | ${'1.0.0'}       | ${'1.0.1'}              | ${'1.x.5'}
     ${'1.0.0 - 2.0.0'}      | ${'widen'}           | ${'1.0.0'}       | ${'2.1.0'}              | ${'1.0.0 - 2.1'}
     ${'1.x >2.0.0'}         | ${'widen'}           | ${'1.0.0'}       | ${'2.1.0'}              | ${null}
+    ${'<1.x.5 >=0.1.0'}     | ${'bump'}            | ${'0.8.0'}       | ${'0.9.0'}              | ${'<1.x.5 >=0.9.0'}
     ${'^1.0.0'}             | ${'bump'}            | ${'1.0.0'}       | ${'2.0.0'}              | ${'^2.0.0'}
     ${'~1.0.0'}             | ${'bump'}            | ${'1.0.0'}       | ${'2.0.0'}              | ${'~2.0.0'}
     ${'~1.0.0'}             | ${'bump'}            | ${'v1.0.0'}      | ${'v2.0.0'}             | ${'~2.0.0'}
@@ -185,9 +232,11 @@ describe('modules/versioning/npm/index', () => {
     ${'^1.0.0-alpha'}       | ${'replace'}         | ${'1.0.0-alpha'} | ${'1.0.0-beta'}         | ${'^1.0.0-beta'}
     ${'~1.0.0'}             | ${'replace'}         | ${'1.0.0'}       | ${'1.1.0'}              | ${'~1.1.0'}
     ${'1.0.x'}              | ${'replace'}         | ${'1.0.0'}       | ${'1.1.0'}              | ${'1.1.x'}
+    ${'<2.0'}               | ${'replace'}         | ${'1.0.0'}       | ${'2.1.0'}              | ${'<2.2'}
     ${'<=1.0'}              | ${'replace'}         | ${'1.0.0'}       | ${'1.2.0'}              | ${'<=1.2'}
     ${'<=1'}                | ${'replace'}         | ${'1.0.0'}       | ${'2.0.0'}              | ${'<=2'}
     ${'<= 1'}               | ${'replace'}         | ${'1.0.0'}       | ${'2.0.0'}              | ${'<= 2'}
+    ${'5'}                  | ${'replace'}         | ${'5.0.0'}       | ${'6.1.7'}              | ${'6'}
     ${'>=18.17.0'}          | ${'bump'}            | ${'v18.17.0'}    | ${'v18.17.1'}           | ${'>=18.17.1'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',

@@ -1,9 +1,11 @@
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _sanitize from '../../../util/sanitize.ts';
+import { defaultRegistryUrl } from './common.ts';
 import {
   convertNpmrcToRules,
   getMatchHostFromNpmrcHost,
+  resolveRegistryUrl,
   setNpmrc,
 } from './npmrc.ts';
 
@@ -31,8 +33,8 @@ describe('modules/datasource/npm/npmrc', () => {
     });
 
     it('parses https://host', () => {
-      expect(getMatchHostFromNpmrcHost('https://registry.npmjs.org')).toBe(
-        'https://registry.npmjs.org',
+      expect(getMatchHostFromNpmrcHost(defaultRegistryUrl)).toBe(
+        defaultRegistryUrl,
       );
     });
   });
@@ -170,6 +172,11 @@ describe('modules/datasource/npm/npmrc', () => {
     });
   });
 
+  it('keeps the default registry for a package no rule matches', () => {
+    setNpmrc('@myco:registry=https://test.org');
+    expect(resolveRegistryUrl('@other/pkg')).toBe(defaultRegistryUrl);
+  });
+
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
     expect(sanitize.addSecretForSanitizing).toHaveBeenCalledExactlyOnceWith(
@@ -201,7 +208,7 @@ describe('modules/datasource/npm/npmrc', () => {
 
   it('sanitize _authtoken with high trust', () => {
     GlobalConfig.set({ exposeAllEnv: true });
-    process.env.TEST_TOKEN = 'test';
+    vi.stubEnv('TEST_TOKEN', 'test');
     setNpmrc(
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost',
     );

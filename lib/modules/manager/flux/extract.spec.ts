@@ -1,7 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import { compile } from '../../../util/template/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -13,7 +17,9 @@ import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 const config: ExtractConfig = {};
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 const fixtureHelmSource = Fixtures.get('helmSource.yaml');
 const fixtureHelmChart = Fixtures.get('helmChart.yaml');
 const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');
@@ -35,6 +41,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '1.7.0',
             datasource: HelmDatasource.id,
             depName: 'external-dns',
+            depType: 'HelmChart',
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
           },
           {
@@ -57,16 +64,79 @@ describe('modules/manager/flux/extract', () => {
           },
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
-            replaceString: 'v1.8.2',
+            replaceString: 'tag: v1.8.2',
           },
         ],
       });
+      const ociDep = result?.deps.find(
+        (dep) => dep.depName === 'ghcr.io/kyverno/manifests/kyverno',
+      );
+      expect(
+        compile(
+          ociDep!.autoReplaceStringTemplate!,
+          { newValue: 'v2.0.0' },
+          false,
+        ),
+      ).toBe('tag: v2.0.0');
+      expect(
+        compile(
+          ociDep!.autoReplaceStringTemplate!,
+          { newValue: 'v2.0.0', newDigest: 'sha256:abcd' },
+          false,
+        ),
+      ).toBe('tag: v2.0.0\n    digest: sha256:abcd');
+    });
+
+    it('keeps HelmRelease values image replacement in inline tag@digest format', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          ${fixtureHelmSource}
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: sealed-secrets
+                sourceRef:
+                  kind: HelmRepository
+                  name: sealed-secrets
+                version: "2.0.2"
+            values:
+              image:
+                repository: ghcr.io/example/app
+                tag: v1.2.3
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps).toContainEqual(
+        expect.objectContaining({
+          depName: 'ghcr.io/example/app',
+          currentValue: 'v1.2.3',
+          autoReplaceStringTemplate:
+            '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          replaceString: 'v1.2.3',
+        }),
+      );
+      const imageDep = result?.deps.find(
+        (dep) => dep.depName === 'ghcr.io/example/app',
+      );
+      expect(
+        compile(
+          imageDep!.autoReplaceStringTemplate!,
+          { newValue: 'v1.2.4', newDigest: 'sha256:abcd' },
+          false,
+        ),
+      ).toBe('v1.2.4@sha256:abcd');
     });
 
     it.each`
@@ -127,6 +197,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: 'helm',
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -149,6 +220,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -171,6 +243,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://example.com/charts'],
           },
         ],
@@ -193,7 +266,9 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: DockerDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             packageName: 'ghcr.io/charts/sealed-secrets',
+            pinDigests: false,
           },
         ],
       });
@@ -225,6 +300,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -290,6 +366,37 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             depName: './charts/cert-manager-config',
+            depType: 'HelmChart',
+            skipReason: 'local-chart',
+          },
+        ],
+      });
+    });
+
+    it('skip HelmRelease with parent directory chart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: cert-manager-config
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                chart: ../charts/cert-manager-config
+                sourceRef:
+                  kind: GitRepository
+                  name: chart-repo
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: '../charts/cert-manager-config',
+            depType: 'HelmChart',
             skipReason: 'local-chart',
           },
         ],
@@ -346,6 +453,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -391,6 +499,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -416,6 +525,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -448,6 +558,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
           },
         ],
@@ -477,13 +588,13 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
-            replaceString: 'v1.8.2',
+            replaceString: 'tag: v1.8.2',
           },
         ],
       });
@@ -504,6 +615,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
           },
         ],
@@ -535,6 +647,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -557,6 +670,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unknown-registry',
           },
         ],
@@ -579,6 +693,7 @@ describe('modules/manager/flux/extract', () => {
             currentValue: '2.0.2',
             datasource: HelmDatasource.id,
             depName: 'sealed-secrets',
+            depType: 'HelmChart',
             registryUrls: ['https://example.com/charts'],
           },
         ],
@@ -636,6 +751,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             depName: './helm/sealed-secrets',
+            depType: 'HelmChart',
             skipReason: 'unsupported-datasource',
           },
         ],
@@ -662,6 +778,45 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('derives no source url from an ssh GitRepository url', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              tag: v1.0.0
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps).toMatchObject([
+        { depName: 'renovate-repo', currentValue: 'v1.0.0' },
+      ]);
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
+    });
+
+    it('derives no source url from an ssh GitRepository url with a commit', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: ssh://git@example.com/renovatebot/renovate.git
+            ref:
+              commit: c93b2ec7a1d2bc4e0b4b8a5e9dd9d0f3f5a0c111
+        `,
+        'test.yaml',
+      );
+      expect(result?.deps[0].sourceUrl).toBeUndefined();
+    });
+
     it('extracts GitRepository with a commit', () => {
       const result = extractPackageFile(
         codeBlock`
@@ -685,6 +840,37 @@ describe('modules/manager/flux/extract', () => {
             depName: 'renovate-repo',
             packageName: 'https://github.com/renovatebot/renovate',
             replaceString: 'c93154b',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with both commit and branch', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              commit: adf1fce
+              branch: hotfix/39.264.1
+            url: https://github.com/renovatebot/renovate
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: 'adf1fce',
+            currentValue: 'hotfix/39.264.1',
+            datasource: GitRefsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://github.com/renovatebot/renovate',
+            replaceString: 'adf1fce',
             sourceUrl: 'https://github.com/renovatebot/renovate',
           },
         ],
@@ -882,13 +1068,137 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.proxy.test/some/path/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
-            replaceString: 'v1.8.2',
+            replaceString: 'tag: v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a quoted tag', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            tag: "v1.8.2"
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: "{{newValue}}"{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'tag: "v1.8.2"',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag and preserves 4-space ref indentation', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+            name: kyverno-controller
+            namespace: flux-system
+        spec:
+            ref:
+                tag: v1.8.2
+            url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n        digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'tag: v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag when ref is after url', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'tag: v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag and preserves CRLF newlines in replacement template', () => {
+      const result = extractPackageFile(
+        [
+          'apiVersion: source.toolkit.fluxcd.io/v1beta2',
+          'kind: OCIRepository',
+          'metadata:',
+          '  name: kyverno-controller',
+          'spec:',
+          '  url: oci://ghcr.io/kyverno/manifests/kyverno',
+          '  ref:',
+          '    tag: v1.8.2',
+          '',
+        ].join('\r\n'),
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\r\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'tag: v1.8.2',
           },
         ],
       });
@@ -922,7 +1232,7 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('extracts OCIRepository with a tag that contains a digest', () => {
+    it('repairs OCIRepository with a tag that contains an inline digest by emitting a separate digest line', () => {
       const result = extractPackageFile(
         codeBlock`
         apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -941,7 +1251,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -949,13 +1259,13 @@ describe('modules/manager/flux/extract', () => {
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
             replaceString:
-              'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+              'tag: v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
           },
         ],
       });
     });
 
-    it('extracts OCIRepository with a digest and tag but prefers digest', () => {
+    it('extracts OCIRepository with a digest and tag', () => {
       const result = extractPackageFile(
         codeBlock`
         apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -974,11 +1284,540 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /digest: \{\{newDigest}}\n\s*tag: \{\{newValue}}/,
+            ),
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc\n\s*tag: v1\.8\.2/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with quoted digest and tag', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            tag: "v1.8.2"
+            digest: "sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc"
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: "{{newValue}}"\n\s*digest: "{{newDigest}}"/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: "v1\.8\.2"\n\s*digest: "sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc"/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with quoted keys', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+        spec:
+          ref:
+            "tag": v1.8.2
+            "digest": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '"tag": {{newValue}}\n    "digest": {{newDigest}}',
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString:
+              '"tag": v1.8.2\n    "digest": sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository when ref key is quoted', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          "ref":
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('skips OCIRepository when tag value is a YAML alias', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        x-tag: &mytag v1.8.2
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: *mytag
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+      `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            skipReason: 'invalid-value',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with tag and digest preceded by other document types', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        ---
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: HelmRepository
+        metadata:
+          name: bitnami
+          namespace: flux-system
+        spec:
+          url: https://charts.bitnami.com/bitnami
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: other-oci
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/other/repo
+          ref:
+            tag: v1.0.0
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/other/repo',
+            packageName: 'ghcr.io/other/repo',
+            replaceString: 'tag: v1.0.0',
+          },
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref: "not-a-map"
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec: "not-a-map"
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with tag-only ref when tag value is a YAML alias without digest pinning', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        x-tag: &mytag v1.8.2
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: *mytag
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: '{{newValue}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: 'v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with tag and digest when ref contains a non-scalar key', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            ? [seq-key]
+            : ignored
+            tag: v1.8.2
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: expect.stringMatching(
+              /tag: \{\{newValue\}\}\n\s*digest: \{\{newDigest\}\}/,
+            ),
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: expect.stringMatching(
+              /tag: v1\.8\.2\n\s*digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc/,
+            ),
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository selecting the Helm chart layer as a HelmChart', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+            operation: copy
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            tag: 6.5.4
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '6.5.4',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/stefanprodan/charts/podinfo',
+            depType: 'HelmChart',
+            packageName: 'ghcr.io/stefanprodan/charts/podinfo',
+            replaceString: 'tag: 6.5.4',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository selecting the Helm chart layer as a HelmChart with a digest or without a ref', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-digest
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-tag-digest
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+          ref:
+            tag: 6.5.4
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+        ---
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: podinfo-unversioned
+          namespace: default
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+          url: oci://ghcr.io/stefanprodan/charts/podinfo
+        `,
+        'test.yaml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          currentDigest:
+            'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          depType: 'HelmChart',
+        },
+        {
+          currentDigest:
+            'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          currentValue: '6.5.4',
+          depType: 'HelmChart',
+          replaceString:
+            'tag: 6.5.4\n    digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+        },
+        { depType: 'HelmChart', skipReason: 'unversioned-reference' },
+      ]);
+    });
+
+    it('does not set a depType for OCIRepository selecting another layer', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: manifests
+          namespace: flux-system
+        spec:
+          layerSelector:
+            mediaType: application/vnd.cncf.flux.content.v1.tar+gzip
+            operation: extract
+          url: oci://ghcr.io/example/manifests
+          ref:
+            tag: v1.0.0
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.0.0',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/example/manifests',
+            packageName: 'ghcr.io/example/manifests',
+            replaceString: 'tag: v1.0.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with an empty layerSelector without a depType', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          layerSelector:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+          ref:
+            tag: v1.8.2
+        `,
+        'test.yaml',
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            packageName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: 'tag: v1.8.2',
           },
         ],
       });
@@ -1097,6 +1936,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.0.2',
               datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
+              depType: 'HelmChart',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
@@ -1118,13 +1958,13 @@ describe('modules/manager/flux/extract', () => {
           deps: [
             {
               autoReplaceStringTemplate:
-                '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+                'tag: {{newValue}}{{#if newDigest}}\n    digest: {{newDigest}}{{/if}}',
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
               packageName: 'ghcr.io/kyverno/manifests/kyverno',
               datasource: DockerDatasource.id,
-              replaceString: 'v1.8.2',
+              replaceString: 'tag: v1.8.2',
             },
           ],
           packageFile: 'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
@@ -1165,8 +2005,10 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '0.4.0',
               datasource: DockerDatasource.id,
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              depType: 'HelmChart',
               packageName:
                 'ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              pinDigests: false,
             },
           ],
           packageFile:
@@ -1187,7 +2029,9 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.6.0',
               datasource: DockerDatasource.id,
               depName: 'kyverno',
+              depType: 'HelmChart',
               packageName: 'ghcr.io/kyverno/charts/kyverno',
+              pinDigests: false,
             },
           ],
           packageFile:
@@ -1199,6 +2043,13 @@ describe('modules/manager/flux/extract', () => {
     it('ignores files that do not exist', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/bogus.yaml',
+      ]);
+      expect(result).toBeNull();
+    });
+
+    it('ignores system manifest files without valid Flux version header', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/flux-system-invalid/gotk-components.yaml',
       ]);
       expect(result).toBeNull();
     });
@@ -1216,6 +2067,7 @@ describe('modules/manager/flux/extract', () => {
               currentValue: '2.0.2',
               datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
+              depType: 'HelmChart',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],

@@ -293,11 +293,13 @@ describe('config/presets/internal/custom-managers', () => {
       it.each`
         path                                  | expected
         ${'bitbucket-pipelines.yml'}          | ${true}
-        ${'bitbucket-pipelines.yaml'}         | ${true}
+        ${'bitbucket-pipelines.yaml'}         | ${false}
         ${'foo/bitbucket-pipelines.yml'}      | ${true}
-        ${'foo/bitbucket-pipelines.yaml'}     | ${true}
+        ${'foo/bitbucket-pipelines.yaml'}     | ${false}
         ${'foo/bar/bitbucket-pipelines.yml'}  | ${true}
-        ${'foo/bar/bitbucket-pipelines.yaml'} | ${true}
+        ${'foo/bar/bitbucket-pipelines.yaml'} | ${false}
+        ${'.bitbucket/shared-pipelines.yml'}  | ${true}
+        ${'.bitbucket/shared-pipeline.yaml'}  | ${false}
         ${'bitbucket-pipelines'}              | ${false}
       `('$path', ({ path, expected }) => {
         expect(
@@ -758,6 +760,71 @@ describe('config/presets/internal/custom-managers', () => {
         ${'versions.mk'}          | ${true}
         ${'Dockerfile'}           | ${false}
         ${'MakefileGenerator.ts'} | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(
+          matchRegexOrGlobList(path, customManager!.managerFilePatterns),
+        ).toBe(expected);
+      });
+    });
+  });
+
+  describe('Update Vale package versions in .vale.ini', () => {
+    const customManager = presets.valeVersions.customManagers?.[0];
+
+    it('finds dependencies in file', async () => {
+      const fileContent = codeBlock`
+        StylesPath = styles
+
+        MinAlertLevel = suggestion
+
+        [*.{md,txt}]
+        BasedOnStyles = Vale
+
+        Packages = https://github.com/vale-cli/Google/releases/download/v1.0.0/Google.zip
+        Packages = https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/Microsoft.zip, https://github.com/vale-cli/write-good/releases/download/v0.4.0/write-good.zip
+        Packages = proselint
+      `;
+
+      const res = await extractPackageFile(
+        'regex',
+        fileContent,
+        '.vale.ini',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/Google',
+          replaceString:
+            'https://github.com/vale-cli/Google/releases/download/v1.0.0/',
+        },
+        {
+          currentValue: 'v0.1.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/Microsoft',
+          replaceString:
+            'https://github.com/vale-cli/Microsoft/releases/download/v0.1.0/',
+        },
+        {
+          currentValue: 'v0.4.0',
+          datasource: 'github-releases',
+          packageName: 'vale-cli/write-good',
+          replaceString:
+            'https://github.com/vale-cli/write-good/releases/download/v0.4.0/',
+        },
+      ]);
+    });
+
+    describe('matches regex patterns', () => {
+      it.each`
+        path                   | expected
+        ${'.vale.ini'}         | ${true}
+        ${'foo/.vale.ini'}     | ${true}
+        ${'foo/bar/.vale.ini'} | ${true}
+        ${'vale.ini'}          | ${false}
+        ${'.vale.ini.bak'}     | ${false}
       `('$path', ({ path, expected }) => {
         expect(
           matchRegexOrGlobList(path, customManager!.managerFilePatterns),

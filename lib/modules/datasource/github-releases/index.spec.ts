@@ -1,19 +1,12 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GithubReleasesDatasource } from './index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
-
 describe('modules/datasource/github-releases/index', () => {
   beforeEach(() => {
-    hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({
-      token: 'some-token',
-    });
+    hostRules.add({ token: 'some-token' });
   });
 
   describe('getReleases', () => {
@@ -157,6 +150,23 @@ describe('modules/datasource/github-releases/index', () => {
         'unknown-tag',
       );
       expect(digest).toBeNull();
+    });
+
+    it('returns null when newValue is not provided', async () => {
+      const queryTagsSpy = vi.spyOn(githubGraphql, 'queryTags');
+
+      const digest = await getDigest(
+        {
+          datasource: GithubReleasesDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
+      );
+
+      expect(digest).toBeNull();
+      expect(queryTagsSpy).not.toHaveBeenCalled();
     });
   });
 });

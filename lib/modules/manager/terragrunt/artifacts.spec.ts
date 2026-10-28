@@ -1,6 +1,10 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { UpdateType } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+  UpdateType,
+} from '../../../config/types.ts';
 import * as terraformLockfile from '../terraform/lockfile/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
@@ -11,11 +15,12 @@ const config = {
   constraints: {},
 };
 
-const adminConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 
 describe('modules/manager/terragrunt/artifacts', () => {

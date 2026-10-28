@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { regEx } from '../../../../util/regex.ts';
 import { GoDatasource } from '../../../datasource/go/index.ts';
 import type { PackageDependency } from '../../types.ts';
@@ -37,7 +37,7 @@ export const GoTarget = z
 
       if (remote) {
         const remoteMatch = regEx(
-          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/,
+          /https:\/\/github\.com(?:.*\/)(?:(?:[a-zA-Z]+)(?:-)?(?:[a-zA-Z]+))/,
         ).exec(remote);
         if (remoteMatch?.[0].length === remote.length) {
           dep.packageName = remote.replace('https://', '');

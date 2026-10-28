@@ -1,4 +1,3 @@
-// @ts-ignore
 module.exports = {
   endpoint: CI_API_V4_URL
 };

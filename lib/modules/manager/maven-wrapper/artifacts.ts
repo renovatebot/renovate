@@ -1,6 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { isTruthy } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -28,6 +29,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 const http = new Http('maven-wrapper');
 const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
@@ -47,12 +49,14 @@ function getDistributionUrl(content: string): string | null {
   const match = regEx(/^distributionUrl\s*=\s*(?<distributionUrl>.+)$/m).exec(
     content,
   );
-  return match?.groups?.distributionUrl?.replace(/\\:/g, ':').trim() ?? null;
+  return (
+    match?.groups?.distributionUrl?.replace(regEx(/\\:/g), ':').trim() ?? null
+  );
 }
 
 function getWrapperUrl(content: string): string | null {
   const match = regEx(/^wrapperUrl\s*=\s*(?<wrapperUrl>.+)$/m).exec(content);
-  return match?.groups?.wrapperUrl?.replace(/\\:/g, ':').trim() ?? null;
+  return match?.groups?.wrapperUrl?.replace(regEx(/\\:/g), ':').trim() ?? null;
 }
 
 function constructWrapperUrl(
@@ -125,7 +129,7 @@ async function updateChecksums(
           // Add checksum after distributionUrl
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             checksum,
           );
@@ -138,7 +142,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            regEx(/^(?:distributionUrl\s*=\s*.+)$/m),
             'distributionSha256Sum',
             fallbackChecksum,
           );
@@ -183,7 +187,7 @@ async function updateChecksums(
           // Add checksum after wrapperUrl or wrapperVersion
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             checksum,
           );
@@ -196,7 +200,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            regEx(/^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m),
             'wrapperSha256Sum',
             fallbackChecksum,
           );
@@ -408,8 +412,9 @@ async function executeWrapperCommand(
     toolConstraints: [
       {
         toolName: 'java',
-        constraint:
-          config.constraints?.java ?? getJavaConstraint(config.currentValue),
+        constraint: await resolveToolConstraint(config, 'java', () =>
+          getJavaConstraint(config.currentValue),
+        ),
       },
     ],
   };
@@ -458,7 +463,7 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+  const match = regEx(/^(?<repoUrl>.*?)\/org\/apache\/maven\/wrapper\//).exec(
     replaceString,
   );
 
@@ -466,7 +471,9 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+  return match.groups!.repoUrl === DEFAULT_MAVEN_REPO_URL
+    ? null
+    : match.groups!.repoUrl;
 }
 
 async function createWrapperCommand(
@@ -482,7 +489,7 @@ async function createWrapperCommand(
   // Use existing distributionType or default to 'script' to preserve JAR-based mode
   // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
   const type = distributionType ?? 'script';
-  const args = `wrapper:wrapper -Dtype=${type}`;
+  const args = `wrapper:wrapper -Dtype=${quote(type)}`;
 
   return await prepareCommand(
     wrapperExecutableFileName,
@@ -532,7 +539,8 @@ async function prepareCommand(
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
       await chmodLocalFile(
-        upath.join(cwd, fileName),
+        // TODO: types (#22198)
+        upath.join(cwd!, fileName),
         pathFileStats.mode | 0o111,
       );
     }

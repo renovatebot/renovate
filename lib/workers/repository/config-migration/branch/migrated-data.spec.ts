@@ -131,7 +131,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
       );
       expect(res?.content).toBe(
-        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+        `${JSON.stringify(migratedConfigObj, undefined, 2)}\n`,
       );
     });
 
@@ -143,7 +143,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
       expect(weave).not.toHaveBeenCalled();
       expect(res?.content).toBe(
-        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+        `${JSON.stringify(migratedConfigObj, undefined, 2)}\n`,
       );
     });
 
@@ -248,6 +248,21 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       vi.mocked(EditorConfig.getCodeFormat).mockResolvedValueOnce({
         maxLineLength: 80,
       });
+      await expect(
+        applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
+          amount: 0,
+          indent: '  ',
+        }),
+      ).resolves.toEqual(formattedMigratedData.content);
+    });
+
+    it('formats with an editorconfig that sets no line length', async () => {
+      vi.mocked(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      vi.mocked(EditorConfig.getCodeFormat).mockResolvedValueOnce({});
+
       await expect(
         applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
           amount: 0,

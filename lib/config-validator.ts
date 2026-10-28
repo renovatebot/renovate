@@ -2,8 +2,11 @@
 import 'source-map-support/register.js';
 import './punycode.cjs';
 
+import { styleText } from 'node:util';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { Command, CommanderError } from 'commander';
 import { dequal } from 'dequal';
+import { diffLines } from 'diff';
 import fs from 'fs-extra';
 import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
@@ -14,6 +17,8 @@ import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
+import { add as addHostRule } from './util/host-rules.ts';
+import { regEx, regexEngineStatus } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -35,6 +40,13 @@ async function partiallyGlobalInitialize(): Promise<void> {
   // NOTE that this doesn't allow command-line arguments
   const globalConfig = await parseConfigs(getEnv(), []);
   GlobalConfig.set(globalConfig);
+
+  if (globalConfig.hostRules) {
+    // this is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`
+    for (const hostRule of globalConfig.hostRules) {
+      addHostRule(hostRule, { trusted: true });
+    }
+  }
 }
 
 async function validate(
@@ -44,6 +56,12 @@ async function validate(
   strict: boolean,
   isPreset = false,
 ): Promise<void> {
+  if (config.hostRules) {
+    // a `global` config is the self-hosted administrator's own, so its `headers` are exempt from `allowedHeaders` altogether - see `hostRules.add()`; a `repo` config's `hostRules` are still constrained by this instance's `allowedHeaders`
+    for (const hostRule of config.hostRules) {
+      addHostRule(hostRule, { trusted: configType === 'global' });
+    }
+  }
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -53,6 +71,33 @@ async function validate(
       },
       'Config migration necessary',
     );
+    const changedObjects = diffLines(
+      JSON.stringify(config, null, 2),
+      JSON.stringify(migratedConfig, null, 2),
+      { ignoreWhitespace: false, newlineIsToken: false },
+    );
+    const added = styleText('green', '+ ');
+    const removed = styleText('red', '- ');
+    const msg = changedObjects
+      .flatMap((part) => {
+        let linePrefix: string;
+        if (part.added) {
+          linePrefix = added;
+        } else if (part.removed) {
+          linePrefix = removed;
+        } else {
+          linePrefix = '  ';
+        }
+        return part.value
+          .split('\n')
+          .filter(isNonEmptyStringAndNotWhitespace)
+          .map((line) =>
+            line.replace(regEx(/^(?<ws> *)/), `${linePrefix}$<ws>`),
+          );
+      })
+      .join('\n');
+    // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
+    logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;
     }
@@ -87,10 +132,12 @@ interface PackageJson {
     .summary('Validate Renovate configuration files')
     .description(
       `Validate your Renovate configuration (repo config, shared presets or global configuration) files\n` +
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
         'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
     )
     .addHelpText(
       'after',
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
       `
 When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
 
@@ -127,6 +174,19 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
+    let filesValidated = 0;
+
+    // without RE2, patterns are checked by RegExp, which accepts syntax RE2 rejects (e.g. lookahead)
+    if (regexEngineStatus.type === 'unavailable') {
+      logger.warn(
+        { err: regexEngineStatus.err },
+        'RE2 not usable, falling back to RegExp: regex validation may be inaccurate',
+      );
+    } else if (regexEngineStatus.type === 'ignored') {
+      logger.debug(
+        'RE2 ignored via RENOVATE_X_IGNORE_RE2: regex validation may be inaccurate',
+      );
+    }
 
     if (files.length) {
       let isGlobalConfig = true;
@@ -153,6 +213,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
+
+        filesValidated++;
       }
     } else {
       for (const file of getConfigFileNames().filter(
@@ -174,6 +236,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
           logger.warn({ file, err }, 'File could not be parsed');
           returnVal = 1;
         }
+
+        filesValidated++;
       }
       try {
         const pkgJson = JSON.parse(
@@ -187,6 +251,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
             pkgJson.renovate,
             strict,
           );
+
+          filesValidated++;
         }
         if (pkgJson['renovate-config']) {
           logger.info(`Validating package.json > renovate-config`);
@@ -200,6 +266,8 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
               strict,
               true,
             );
+
+            filesValidated++;
           }
         }
       } catch {
@@ -217,27 +285,31 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
             logger.error({ file, err }, 'File is not valid Renovate config');
             returnVal = 1;
           }
+          filesValidated++;
         }
       } catch {
         // ignore
       }
     }
-    if (returnVal !== 0) {
-      process.exit(returnVal);
+    if (returnVal === 0 && filesValidated) {
+      logger.info(
+        `Config validated successfully against ${filesValidated} file(s)`,
+      );
+    } else if (!filesValidated) {
+      logger.warn(`No files to perform configuration validation against`);
     }
-    logger.info('Config validated successfully');
+    // Use exitCode (not process.exit) so async log streams can flush
+    process.exitCode = returnVal;
   });
 
   await program.parseAsync();
 })().catch((e) => {
-  if (e instanceof CommanderError) {
-    // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
-    if (
-      e.code === 'commander.helpDisplayed' ||
-      e.code === 'commander.version'
-    ) {
-      return;
-    }
+  // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+  if (
+    e instanceof CommanderError &&
+    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+  ) {
+    return;
   }
 
   // oxlint-disable-next-line no-console -- intentional: display critical error on CLI

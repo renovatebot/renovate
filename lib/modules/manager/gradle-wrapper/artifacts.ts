@@ -18,7 +18,7 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { Http } from '../../../util/http/index.ts';
-import { newlineRegex } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
 import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
@@ -27,6 +27,7 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import {
   extraEnv,
   getJavaConstraint,
@@ -168,14 +169,14 @@ export async function updateArtifacts({
     let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
-      cmd += ` --gradle-distribution-url ${distributionUrl}`;
+      cmd += ` --gradle-distribution-url ${quote(distributionUrl)}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
         //update checksum in case of distributionSha256Sum in properties then run wrapper
         checksum = await getDistributionChecksum(distributionUrl);
         await writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(
-            /distributionSha256Sum=.*/,
+            regEx(/distributionSha256Sum=.*/),
             `distributionSha256Sum=${checksum}`,
           ),
         );
@@ -192,9 +193,9 @@ export async function updateArtifacts({
       toolConstraints: [
         {
           toolName: 'java',
-          constraint:
-            config.constraints?.java ??
-            (await getJavaConstraint(config.currentValue, gradlewFile)),
+          constraint: await resolveToolConstraint(config, 'java', () =>
+            getJavaConstraint(config.currentValue, gradlewFile),
+          ),
         },
       ],
     };

@@ -2,6 +2,35 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { matchRegexOrGlob } from '../string-match.ts';
+
+/**
+ * Take a relative path reference from a repo-relative file and resolve it
+ * to a repo-relative path. Uses a virtual root to avoid upath.resolve
+ * prepending the real cwd for relative paths.
+ */
+export function resolveRelativePathToRoot(
+  baseFilePath: string,
+  relativePath: string,
+): string {
+  const virtualRoot = '/';
+  const absoluteBase = upath.resolve(virtualRoot, baseFilePath);
+  const absoluteResolved = upath.resolve(
+    upath.dirname(absoluteBase),
+    relativePath,
+  );
+  return upath.relative(virtualRoot, absoluteResolved);
+}
+
+/**
+ * Filter a list of repo-relative file paths by a glob or regex pattern.
+ */
+export function getMatchingFiles(
+  pattern: string,
+  allFiles: string[],
+): string[] {
+  return allFiles.filter((file) => matchRegexOrGlob(file, pattern));
+}
 
 function assertBaseDir(path: string, allowedDir: string): void {
   if (!path.startsWith(allowedDir)) {
@@ -14,7 +43,7 @@ function assertBaseDir(path: string, allowedDir: string): void {
 }
 
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
-  const baseDir = upath.resolve(GlobalConfig.get(key)!);
+  const baseDir = upath.resolve(GlobalConfig.get(key));
   const fullPath = upath.resolve(
     upath.isAbsolute(path) ? path : upath.join(baseDir, path),
   );
@@ -34,7 +63,7 @@ export function isValidPath(
   path: string,
   key: 'localDir' | 'cacheDir',
 ): boolean {
-  const baseDir = upath.resolve(GlobalConfig.get(key)!);
+  const baseDir = upath.resolve(GlobalConfig.get(key));
   const fullPath = upath.resolve(
     upath.isAbsolute(path) ? path : upath.join(baseDir, path),
   );

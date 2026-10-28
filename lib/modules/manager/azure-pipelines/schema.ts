@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseArray, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const Step = z.object({

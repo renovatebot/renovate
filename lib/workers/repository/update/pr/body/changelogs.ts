@@ -13,14 +13,14 @@ export function getChangelogs(config: BranchConfig): string {
 
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
-      upgrade.releaseNotesSummaryTitle = `${
-        upgrade.repoName
-      } (${upgrade.depName!})`;
+      upgrade.releaseNotesSummaryTitle =
+        upgrade.repoName === upgrade.depName
+          ? upgrade.repoName
+          : `${upgrade.repoName} (${upgrade.depName!})`;
     }
   }
 
-  releaseNotes +=
-    '\n\n---\n\n' + template.compile(releaseNotesHbs, config, false) + '\n\n';
+  releaseNotes += `\n\n---\n\n${template.compile(releaseNotesHbs, config, false)}\n\n`;
   releaseNotes = releaseNotes.replace(regEx(/### \[`vv/g), '### [`v');
   releaseNotes = sanitizeMarkdown(releaseNotes);
   releaseNotes = unemojify(releaseNotes);

@@ -1,10 +1,10 @@
 import type { WrappedException as _WrappedException } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json } from '../../../util/schema-utils/index.ts';
 
 const _WrappedException: z.ZodSchema<_WrappedException> = z.lazy(() =>
   z.object({
-    customProperties: z.record(z.any()).optional(),
+    customProperties: z.record(z.string(), z.any()).optional(),
     errorCode: z.number().optional(),
     eventId: z.number().optional(),
     helpLink: z.string().optional(),

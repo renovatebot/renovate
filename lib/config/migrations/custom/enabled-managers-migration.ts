@@ -15,6 +15,8 @@ export class EnabledManagersMigration extends AbstractMigration {
           return 'npm';
         case 'regex':
           return 'custom.regex';
+        case 'renovate-config-presets':
+          return 'renovate-config';
         default:
           return manager;
       }
