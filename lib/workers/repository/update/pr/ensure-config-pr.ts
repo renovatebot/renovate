@@ -5,12 +5,15 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import { isPrAlreadyExistsError } from './errors.ts';
+import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
 import { getPlatformPrOptions } from './index.ts';
 import { prepareLabels } from './labels.ts';
 import { addParticipants } from './participants.ts';
 
-export interface EnsureSimplePrConfig {
+/** Lowercase name of the PR flavor, used in log messages. */
+export type ConfigPrKind = 'onboarding' | 'migration';
+
+export interface EnsureConfigPrConfig {
   branchName: string;
   targetBranch: string;
   prTitle: string;
@@ -19,8 +22,7 @@ export interface EnsureSimplePrConfig {
   config: RenovateConfig;
   /** Open PR for `branchName`, if the caller already looked it up. */
   existingPr: Pr | null;
-  /** Lowercase name of the PR flavor, used in log messages. */
-  logName: string;
+  logName: ConfigPrKind;
 }
 
 /**
@@ -31,7 +33,7 @@ export interface EnsureSimplePrConfig {
  * reconciliation - they are only created, or updated whenever their body or
  * title changed.
  */
-export async function ensureSimplePr({
+export async function ensureConfigPr({
   branchName,
   targetBranch,
   prTitle,
@@ -39,7 +41,7 @@ export async function ensureSimplePr({
   config,
   existingPr,
   logName,
-}: EnsureSimplePrConfig): Promise<Pr | null> {
+}: EnsureConfigPrConfig): Promise<Pr | null> {
   logger.trace({ prBody: renderedPrBody }, 'prBody');
   const prBody = platform.massageMarkdown(renderedPrBody, config.rebaseLabel);
 

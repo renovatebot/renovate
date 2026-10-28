@@ -7,7 +7,7 @@ import { emojify } from '../../../../util/emoji.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
 import { getPrFooter } from '../../update/pr/body/footer.ts';
 import { getPrHeader } from '../../update/pr/body/header.ts';
-import { ensureSimplePr } from '../../update/pr/ensure-simple-pr.ts';
+import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
 import type { MigratedData } from '../branch/migrated-data.ts';
 import { getMigrationBranchName } from '../common.ts';
@@ -53,7 +53,7 @@ ${
 
   prBody = `${getPrHeader(config)}${prBody}${getPrFooter(config)}`;
 
-  return await ensureSimplePr({
+  return await ensureConfigPr({
     branchName,
     // TODO #22198
     targetBranch: config.defaultBranch!,

@@ -32,6 +32,7 @@ import { getElapsedHours } from '../../../../util/date.ts';
 import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
+import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
 import { memoize } from '../../../../util/memoize.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -42,7 +43,6 @@ import type {
 import { embedChangelogs } from '../../changelog/index.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
 import { getPrBody } from './body/index.ts';
-import { isPrAlreadyExistsError } from './errors.ts';
 import {
   getChangedLabels,
   prepareLabels,
