@@ -32,7 +32,9 @@ export const categories: Category[] = ['js'];
 export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   npm: {
     passesMinimumReleaseAge: true,
-    note: 'Passes `--before`. Uses the older date if the repository `.npmrc` has a `before` setting. Skipped if the `.npmrc` has `min-release-age`.',
+    readsConfiguredAge: true,
+    enforcesInLockFileMaintenance: true,
+    note: 'Passes `--before`, unless the `.npmrc` has `min-release-age`. Reads `before` and `min-release-age` from the repository `.npmrc`. `min-release-age` needs npm v11.10.0 or later.',
   },
   pnpm: {},
   yarn: {},
