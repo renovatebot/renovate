@@ -204,13 +204,27 @@ const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
 ): BranchConfig {
+  for (const upg of upgrades) {
+    if (upg.currentDigest) {
+      upg.currentDigestShort =
+        upg.currentDigestShort ??
+        upg.currentDigest.replace('sha256:', '').substring(0, 7);
+    }
+    if (upg.newDigest) {
+      upg.newDigestShort =
+        upg.newDigestShort ??
+        upg.newDigest.replace('sha256:', '').substring(0, 7);
+    }
+  }
   let branchUpgrades = upgrades;
+  let pendingUpgrades: BranchUpgradeConfig[] = [];
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
     // If the branch isn't pending, then remove any upgrades within which *are*
     logger.debug(
       { branch: branchUpgrades[0].branchName },
       'Branch is not pending, removing pending upgrades',
     );
+    pendingUpgrades = branchUpgrades.filter((upgrade) => upgrade.pendingChecks);
     branchUpgrades = branchUpgrades.filter((upgrade) => !upgrade.pendingChecks);
   }
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
@@ -228,16 +242,6 @@ export function generateBranchConfig(
   for (const upg of branchUpgrades) {
     upg.recreateClosed = upg.recreateWhen === 'always';
 
-    if (upg.currentDigest) {
-      upg.currentDigestShort =
-        upg.currentDigestShort ??
-        upg.currentDigest.replace('sha256:', '').substring(0, 7);
-    }
-    if (upg.newDigest) {
-      upg.newDigestShort =
-        upg.newDigestShort ??
-        upg.newDigest.replace('sha256:', '').substring(0, 7);
-    }
     if (upg.isDigest || upg.isPinDigest) {
       upg.displayFrom = upg.currentDigestShort;
       upg.displayTo = upg.newDigestShort;
@@ -591,6 +595,9 @@ export function generateBranchConfig(
   );
   if (additionalReviewers.length > 0) {
     config.additionalReviewers = additionalReviewers;
+  }
+  if (pendingUpgrades.length > 0) {
+    config.pendingUpgrades = pendingUpgrades;
   }
   return config;
 }
