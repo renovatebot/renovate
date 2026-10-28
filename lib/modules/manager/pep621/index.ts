@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
@@ -13,6 +14,11 @@ export const lockFileMaintenanceIsDelegatedToPackageManager =
 export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';
 export const categories: Category[] = ['python'];
+
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  uv: {},
+  pdm: {},
+};
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
