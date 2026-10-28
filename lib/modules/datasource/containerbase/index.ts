@@ -1,5 +1,7 @@
 import {
+  filterByMinCb,
   isContainerbase,
+  packageVersion,
   toolVersionsFormat,
   toolVersionsFormatPath,
   toolVersionsPath,
@@ -149,16 +151,25 @@ export class ContainerbaseDatasource extends Datasource {
 
   /**
    * Converts a tool file to the release result, or `null` without versions.
+   * Versions which need a newer containerbase than the one Renovate runs with
+   * are skipped.
    */
   private toReleaseResult(
     body: ContainerbaseToolVersions,
     registryUrl: string | undefined,
   ): ReleaseResult | null {
+    const { versions, needed } = filterByMinCb(body, packageVersion);
+    if (needed.length) {
+      logger.trace(
+        { datasource: this.id, tool: body.tool, needed, packageVersion },
+        'Skipped the versions which need a newer containerbase',
+      );
+    }
     const result: ReleaseResult = {
       registryUrl,
       sourceUrl: body.sourceUrl,
       homepage: body.homepage,
-      releases: body.versions.map(
+      releases: versions.map(
         ({ version, prerelease, releaseTimestamp, constraints }) => {
           const release: Release = {
             version,

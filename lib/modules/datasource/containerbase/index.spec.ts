@@ -7,7 +7,21 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { ContainerbaseDatasource, defaultRegistryUrl } from './index.ts';
 
+const containerbase = vi.hoisted(() => ({
+  version: undefined as string | undefined,
+}));
+
 vi.mock('../../../util/fs/index.ts');
+vi.mock('@renovatebot/base-image', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@renovatebot/base-image')>();
+  return {
+    ...actual,
+    get packageVersion() {
+      return containerbase.version ?? actual.packageVersion;
+    },
+  };
+});
 
 const datasource = ContainerbaseDatasource.id;
 const baseUrl = 'https://containerbase.github.io';
@@ -25,6 +39,10 @@ const pnpm = {
 };
 
 describe('modules/datasource/containerbase/index', () => {
+  afterEach(() => {
+    containerbase.version = undefined;
+  });
+
   describe('getReleases', () => {
     it('processes real data', async () => {
       httpMock
@@ -115,6 +133,79 @@ describe('modules/datasource/containerbase/index', () => {
         expect(res?.releases.map(({ version }) => version)).toEqual(versions);
       },
     );
+
+    describe('minCb', () => {
+      const versions = [
+        { version: '12.0.0' },
+        { version: '11.0.0' },
+        { version: '10.0.0' },
+      ];
+
+      it('skips the versions which need a newer containerbase', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            minCb: [{ version: '11.0.0', cb: '99.0.0' }],
+            versions,
+          });
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases.map(({ version }) => version)).toEqual(['10.0.0']);
+        expect(logger.trace).toHaveBeenCalledWith(
+          {
+            datasource,
+            tool: 'pnpm',
+            needed: ['99.0.0'],
+            packageVersion: expect.any(String),
+          },
+          'Skipped the versions which need a newer containerbase',
+        );
+      });
+
+      it('keeps the versions of a met range', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            minCb: [{ version: '11.0.0', cb: '1.0.0' }],
+            versions,
+          });
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases.map(({ version }) => version)).toEqual([
+          '10.0.0',
+          '11.0.0',
+          '12.0.0',
+        ]);
+      });
+
+      it('skips the filter for a development build', async () => {
+        containerbase.version = '0.0.0-PLACEHOLDER';
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            minCb: [{ version: '11.0.0', cb: '99.0.0' }],
+            versions,
+          });
+
+        const res = await getPkgReleases({ datasource, packageName: 'pnpm' });
+
+        expect(res?.releases).toHaveLength(3);
+      });
+    });
 
     it('uses a custom registry', async () => {
       httpMock
