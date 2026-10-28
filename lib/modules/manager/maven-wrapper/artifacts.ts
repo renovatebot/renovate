@@ -442,7 +442,7 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
     if (username && password) {
       extraEnv.MVNW_USERNAME = username;
       extraEnv.MVNW_PASSWORD = password;
-      logger.debug(
+      logger.trace(
         { customMavenWrapperUrl },
         'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
       );
