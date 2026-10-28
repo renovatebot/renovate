@@ -29,7 +29,6 @@ The manager's `index.ts` file supports the following values or functions:
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
-| `updatesFilesOutOfBand`       | yes      |       |
 
 ### `bumpPackageVersion` (optional)
 
@@ -148,15 +147,14 @@ Use `updateDependency` if _both_ conditions apply:
 - the manager can't be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
 
+It returns the new package file content, or `null` on failure.
+If the update is also applied outside the package file, for example by modifying the checkout on disk, return `{ content, updatedOutOfBand: true }` instead.
+Renovate then treats the package file as updated even if `content` is unchanged, so that `updateArtifacts` still runs for it.
+The `git-submodules` manager uses this.
+
 ### `updateLockedDependency` (optional)
 
 Use `updateLockedDependency` to directly update dependencies in lock files.
-
-### `updatesFilesOutOfBand` (optional)
-
-Set to `true` if your `updateDependency` applies its change outside the package file, for example by modifying the checkout on disk, and so may return the package file unchanged.
-Renovate then treats the unchanged package file as updated, so that `updateArtifacts` still runs for it.
-The `git-submodules` manager uses this.
 
 ## Package files and Lock files
 

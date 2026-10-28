@@ -8,7 +8,6 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
-import { getManagers } from '../../../../modules/manager/index.ts';
 import * as _mise from '../../../../modules/manager/mise/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
@@ -818,7 +817,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         datasource: GitRefsDatasource.id,
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
@@ -831,49 +833,18 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    describe('updatesFilesOutOfBand', () => {
-      afterEach(() => {
-        getManagers().delete('dummy');
+    it('drops unchanged package file if not updated out of band', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
       });
-
-      it('keeps unchanged package file for manager which updates files out of band', async () => {
-        getManagers().set('dummy', {
-          defaultConfig: {},
-          supportedDatasources: [],
-          updateDependency: () => 'existing content',
-          updatesFilesOutOfBand: true,
-        });
-        config.upgrades.push({
-          packageFile: 'dummy-file',
-          manager: 'dummy',
-          branchName: 'some-branch',
-        } satisfies BranchUpgradeConfig);
-        const res = await getUpdatedPackageFiles(config);
-        expect(res).toMatchObject({
-          updatedPackageFiles: [
-            {
-              type: 'addition',
-              path: 'dummy-file',
-              contents: 'existing content',
-            },
-          ],
-        });
-      });
-
-      it('drops unchanged package file for manager without the flag', async () => {
-        getManagers().set('dummy', {
-          defaultConfig: {},
-          supportedDatasources: [],
-          updateDependency: () => 'existing content',
-        });
-        config.upgrades.push({
-          packageFile: 'dummy-file',
-          manager: 'dummy',
-          branchName: 'some-branch',
-        } satisfies BranchUpgradeConfig);
-        const res = await getUpdatedPackageFiles(config);
-        expect(res).toMatchObject({ updatedPackageFiles: [] });
-      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({ updatedPackageFiles: [] });
     });
 
     /*
