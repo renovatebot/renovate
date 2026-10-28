@@ -12,6 +12,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
+import * as looseVersioning from '../../versioning/loose/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { ToolingDefinition } from './types.ts';
@@ -438,6 +439,19 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
           currentValue: temurinJreMatches.version,
+        };
+      }
+      // Liberica tags (`27.0.1+11`, hotfix `27.0.1.0.3+5`) match the version ids;
+      // every flavour ships in the same release. Exact versions only.
+      const libericaMatches = regEx(
+        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl)-)?(?<version>\d+\.\d+\.\d+\S*)$/,
+      ).exec(version)?.groups;
+      if (libericaMatches) {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          packageName: 'bell-sw/Liberica',
+          currentValue: libericaMatches.version,
+          versioning: looseVersioning.id,
         };
       }
 

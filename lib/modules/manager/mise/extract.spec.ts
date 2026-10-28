@@ -1178,6 +1178,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts liberica java via the asdf fallback', async () => {
+      const content = codeBlock`
+        [tools]
+        java = "liberica-javafx-27.0.1+11"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '27.0.1+11',
+            datasource: 'github-releases',
+            packageName: 'bell-sw/Liberica',
+          },
+        ],
+      });
+    });
+
     it.each`
       version            | currentValue
       ${'21'}            | ${'21'}

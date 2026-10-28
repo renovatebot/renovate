@@ -1001,6 +1001,49 @@ awscli    2.8.6
       });
     });
 
+    it.each`
+      id
+      ${'liberica-27.0.1+11'}
+      ${'liberica-jre-27.0.1+11'}
+      ${'liberica-javafx-27.0.1+11'}
+      ${'liberica-jre-javafx-27.0.1+11'}
+      ${'liberica-musl-27.0.1+11'}
+      ${'liberica-jre-musl-27.0.1+11'}
+      ${'liberica-lite-27.0.1+11'}
+      ${'liberica-lite-musl-27.0.1+11'}
+      ${'liberica-crac-27.0.1+11'}
+      ${'liberica-crac-musl-27.0.1+11'}
+      ${'liberica-27.0.1.0.3+5'}
+    `('supports liberica java $id', ({ id }) => {
+      expect(extractPackageFile(`java ${id}`)).toEqual({
+        deps: [
+          {
+            currentValue: id.replace(/^liberica-(?:[a-z-]+-)?/, ''),
+            datasource: 'github-releases',
+            depName: 'java',
+            packageName: 'bell-sw/Liberica',
+            versioning: 'loose',
+          },
+        ],
+      });
+    });
+
+    it.each`
+      id
+      ${'liberica-27'}
+      ${'liberica-27.0'}
+      ${'liberica-foo-27.0.1+11'}
+    `('does not support liberica java $id', ({ id }) => {
+      expect(extractPackageFile(`java ${id}`)).toEqual({
+        deps: [
+          {
+            depName: 'java',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     it('can handle scala v 2 & 3', () => {
       const v2Res = extractPackageFile('scala 2.0.0');
       expect(v2Res).toEqual({
