@@ -3,6 +3,11 @@ import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { isPseudoVersion } from '../../versioning/gomod/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
+import {
+  endBlockRegex,
+  excludeBlockStartRegex,
+  parseLine,
+} from './line-parser.ts';
 import type { GoModManagerData } from './types.ts';
 
 function getNameWithNoVersion(name: string): string {
@@ -13,6 +18,66 @@ function getNameWithNoVersion(name: string): string {
     nameNoVersion = nameNoVersion.replace(regEx(/\.v\d+$/), '');
   }
   return nameNoVersion;
+}
+
+function isRequireDirective(depType: string | undefined): boolean {
+  return depType === 'require' || depType === 'indirect';
+}
+
+function hasSameDirectiveKind(
+  depType: string | undefined,
+  foundDepType: string | undefined,
+): boolean {
+  if (depType === foundDepType) {
+    return true;
+  }
+  // A require line can be marked as indirect after `go mod tidy` changed the file
+  return isRequireDirective(depType) && isRequireDirective(foundDepType);
+}
+
+function isDependencyLine(
+  line: string,
+  depName: string,
+  depType: string | undefined,
+  multiLine: boolean | undefined,
+): boolean {
+  const dep = parseLine(line);
+  if (!dep) {
+    return false;
+  }
+  if (!hasSameDirectiveKind(depType, dep.depType)) {
+    return false;
+  }
+  const depMultiLine = dep.managerData?.multiLine ?? false;
+  const expectedMultiLine = multiLine ?? false;
+  if (depMultiLine !== expectedMultiLine) {
+    return false;
+  }
+  return getNameWithNoVersion(dep.depName!) === getNameWithNoVersion(depName);
+}
+
+function findDependencyLine(
+  lines: string[],
+  depName: string,
+  depType: string | undefined,
+  multiLine: boolean | undefined,
+): number | undefined {
+  let inExcludeBlock = false;
+  for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
+    const line = lines[lineNumber];
+    if (inExcludeBlock) {
+      inExcludeBlock = !endBlockRegex.test(line);
+      continue;
+    }
+    if (excludeBlockStartRegex.test(line)) {
+      inExcludeBlock = true;
+      continue;
+    }
+    if (isDependencyLine(line, depName, depType, multiLine)) {
+      return lineNumber;
+    }
+  }
+  return undefined;
 }
 
 export function updateDependency({
@@ -27,31 +92,41 @@ export function updateDependency({
       logger.warn('gomod manager does not support replacement updates yet');
       return null;
     }
-    const lineNumber = upgrade.managerData?.lineNumber;
+    const recordedLineNumber = upgrade.managerData?.lineNumber;
     const multiLine = upgrade.managerData?.multiLine;
     /* v8 ignore next -- should never happen */
-    if (!currentName || lineNumber === undefined) {
+    if (!currentName || recordedLineNumber === undefined) {
       return null;
     }
     const currentNameNoVersion = getNameWithNoVersion(currentName);
     const lines = fileContent.split(newlineRegex);
-    /* v8 ignore next -- hard to test */
-    if (lines.length <= lineNumber) {
-      logger.warn('go.mod current line no longer exists after update');
-      return null;
-    }
-    const lineToChange = lines[lineNumber];
-    logger.trace({ upgrade, lineToChange }, 'go.mod current line');
-    if (
-      !lineToChange.includes(currentNameNoVersion) &&
-      !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
-    ) {
+    const recordedLine: string | undefined = lines[recordedLineNumber];
+    // `go mod tidy` can shift lines, so fall back to searching the whole file
+    const lineNumber =
+      recordedLine !== undefined &&
+      (recordedLine.includes(currentNameNoVersion) ||
+        recordedLine.includes('rethinkdb/rethinkdb-go.v5'))
+        ? recordedLineNumber
+        : findDependencyLine(lines, currentName, depType, multiLine);
+    if (lineNumber === undefined) {
       logger.debug(
-        { lineToChange, depName: currentName },
-        "go.mod current line doesn't contain dependency",
+        { depName: currentName, recordedLineNumber },
+        'go.mod dependency line not found',
       );
       return null;
     }
+    if (lineNumber !== recordedLineNumber) {
+      logger.debug(
+        {
+          depName: currentName,
+          lineNumber,
+          recordedLineNumber,
+        },
+        'go.mod dependency line number changed',
+      );
+    }
+    const lineToChange = lines[lineNumber];
+    logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     let updateLineExp: RegExp | undefined;
 
     if (depType === 'golang' || depType === 'toolchain') {
