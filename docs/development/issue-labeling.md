@@ -62,6 +62,117 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 
 Add the `breaking` label for Issues or PRs which have changes that are not backwards compatible and require a major version bump.
 
+### Bucket
+
+<details>
+    <summary>Bucket labels</summary>
+
+    bucket:ecosystem-depth
+    bucket:new-ecosystem
+    bucket:ecosystem-data
+    bucket:platform
+    bucket:security-supply-chain
+    bucket:workflow-fit
+    bucket:predictability
+    bucket:observability
+    bucket:performance-scale
+    bucket:bug-fix
+    bucket:engineering-health
+    bucket:docs
+    bucket:dependency-updates
+
+</details>
+
+Use these to label what _kind_ of work an issue, discussion or PR represents, independent of area (`manager:`/`platform:`/`core:`) and priority.
+Unlike `type:*`, an item can carry more than one `bucket:` label: apply every one that fits, though most items take exactly one.
+
+- `bucket:ecosystem-depth`: extends a manager, datasource or versioning Renovate _already_ supports, to cover something new in that ecosystem.
+- `bucket:new-ecosystem`: a net-new manager, datasource or versioning scheme, where nothing exists for it yet.
+- `bucket:ecosystem-data`: adds or corrects an entry in Renovate's curated knowledge of the package world, e.g. monorepo groupings, replacement/workaround presets, package-list presets. The deliverable is data, not behavior.
+- `bucket:platform`: needs a platform's API (GitHub, GitLab, Azure DevOps, Bitbucket, Gerrit, Forgejo, Gitea, etc) — parity, platform-specific behavior, a new platform, or a migration forced by a platform deprecation.
+- `bucket:security-supply-chain`: prevents a supply-chain attack, a bad release, or credential/execution exposure. Covers both protecting users and hardening Renovate itself.
+- `bucket:workflow-fit`: "raise updates the way my org works" — grouping, scheduling, limits, automerge conditions, PR/commit presentation, reviewers, dashboard shape.
+- `bucket:predictability`: makes Renovate do the expected thing, or fail loudly instead of silently — validation, config discovery, config migration, clearer warnings or log levels.
+- `bucket:observability`: helps someone see what Renovate did or why — logs, OpenTelemetry, the Renovate Report, dry-run output, notifications.
+- `bucket:performance-scale`: same behavior for less time/memory/API traffic, or working at a scale that currently degrades.
+- `bucket:bug-fix`: supported behavior producing visibly wrong output — crashes, corruption, wrong versions, failed commands.
+- `bucket:engineering-health`: maintainer-facing investment with no direct user-visible feature — deprecation removals, refactors, lint rules, CI, test coverage.
+- `bucket:docs`: the deliverable is something users read — key-concept pages, deep dives, clarifications, restructuring, and generated reference material such as the JSON schema and option tables.
+- `bucket:dependency-updates`: Renovate renovating Renovate, i.e. the bot's own update PRs and the Dependency Dashboard issue. Fully automated, so exclude it from any "incoming work" view.
+
+Not every item needs a bucket: support questions, discussions still waiting on details, and announcements stay unbucketed.
+Duplicates take the bucket of their canonical item, and anything authored by `renovate[bot]` is always `bucket:dependency-updates`.
+When `workflow-fit`, `predictability` and `observability` all seem to fit, ask whether the user wants different _behavior_, to be _told_ something Renovate hides or gets wrong, or a new _lens_ on what happened.
+
+Read the [bucket definitions](./bucket-definitions.md) for the full test, worked examples, near-miss redirects, and the rules for PRs, duplicates and unbucketed items.
+
+### Motivation
+
+<details>
+    <summary>Motivation labels</summary>
+
+    mend:customer-request
+    competitive
+
+</details>
+
+Use these to record _why_ work matters, separately from _what_ it is.
+Motivation is orthogonal to bucket: a Dependabot-parity item is still, concretely, a `bucket:ecosystem-depth` or `bucket:security-supply-chain` item that also happens to be `competitive`.
+Keeping them separate lets us ask questions like "how much of our security bucket is competitive-driven?" instead of forcing one label to do both jobs.
+
+### Lifecycle
+
+<details>
+    <summary>Lifecycle label</summary>
+
+    lifecycle
+
+</details>
+
+Use `lifecycle` as a cross-cutting flag for a judgement about a dependency's life and health _beyond_ updating its version: abandonment/staleness detection, replacements for renamed or relocated packages, deprecations, end-of-life data, age/adoption/health metadata surfaced to the user.
+The mechanism is metadata _about_ the dependency, not a version bump of it.
+Apply it alongside a `bucket:*` label, not instead of one.
+
+Don't use `lifecycle` for `minimumReleaseAge`/release-age gating (that's `bucket:security-supply-chain`, age as an attack window rather than dependency health), or for changelog fetching (that's about the update, not the dependency's life).
+
+This is kept as a single cross-cutting label rather than its own bucket because it's a small share of volume (around 3% of ideas) scattered across several buckets: promote it to a full `bucket:*` label if that share grows.
+
+### Rough edge
+
+<details>
+    <summary>Rough edge label</summary>
+
+    rough-edge
+
+</details>
+
+Use `rough-edge` as a cross-cutting flag when all three hold: the irritation comes from one of Renovate's own surfaces (config discovery, PR/commit presentation, the dashboard, logs, the CLI, defaults, docs) behaving below reasonable expectation, rather than a gap in ecosystem or platform coverage, users hit it repeatedly in ordinary use, and it's irritating rather than blocking (a workaround exists or you live with it, with no failed runs, data loss or security exposure).
+If any one fails, don't apply it.
+Apply it alongside a `bucket:*` label, not instead of one.
+The size of the fix is not a test: record effort separately (e.g. `good first issue`).
+
+This is kept as a single cross-cutting label rather than its own bucket because it concentrates unevenly across buckets (measured at around half of `bucket:predictability`, `bucket:docs` and `bucket:bug-fix` items, versus around 5% of `bucket:ecosystem-depth` and `bucket:security-supply-chain`) rather than forming a bucket of its own.
+
+### Audience
+
+<details>
+    <summary>Audience labels</summary>
+
+    audience:user
+    audience:operator
+    audience:mend-hosted
+    audience:maintainer
+
+</details>
+
+Use these to record _who_ feels the work, as a single label per item (unlike bucket, these are mutually exclusive).
+Audience follows who feels the result, not who does the work, and where a reporter runs Renovate does not decide it on its own.
+
+- `audience:user` (the default): configured in, or experienced through, repository config — the PRs Renovate raises, `renovate.json`, shared presets and org-inherited config, grouping, scheduling, presentation.
+- `audience:operator`: lives in global config, environment, credentials infrastructure, or affects how the bot instance (not one repo) behaves — autodiscovery, scaling, CI resource use, fleet admin. When torn between user and operator, ask where the config key lives: repo config is user, global-only is operator. For keys allowed in both (`hostRules`, `binarySource`), ask who sets it in practice: credentials, tool installation and bot-wide limits are operator.
+- `audience:mend-hosted`: specific to the Mend-hosted app's behavior or constraints, not reproducible on plain self-hosted.
+- `audience:maintainer`: Renovate's own maintainers — repo CI, refactors, test tooling, release process.
+
 ### Priority
 
 <details>

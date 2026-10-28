@@ -5,6 +5,7 @@ import { decryptConfig } from '../../../config/decrypt.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
+import { massageConfig } from '../../../config/massage.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
@@ -122,7 +123,8 @@ export async function mergeInheritedConfig(
   const inheritedConfigSource = `Inherited config (\`${config.inheritConfigFileName}\` in \`${inheritConfigRepoName}\`)`;
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
-  const res = await validateConfig('inherit', inheritedConfig);
+  // `validateConfig` expects massaged input
+  const res = await validateConfig('inherit', massageConfig(inheritedConfig));
   if (res.errors.length) {
     logger.warn(
       { errors: res.errors },
@@ -176,7 +178,10 @@ export async function mergeInheritedConfig(
   );
   logger.trace({ config: resolvedConfig }, 'Resolved inherited config');
 
-  const validationRes = await validateConfig('inherit', resolvedConfig);
+  const validationRes = await validateConfig(
+    'inherit',
+    massageConfig(resolvedConfig),
+  );
   if (validationRes.errors.length) {
     logger.warn(
       { errors: validationRes.errors },

@@ -1,5 +1,7 @@
 import { DateTime, Settings } from 'luxon';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as hostRules from '../../host-rules.ts';
+import { hashUserinfoAndQuery } from '../sanitize-key.ts';
 import { cleanupHttpCache } from './http-cache.ts';
 
 describe('util/cache/repository/http-cache', () => {
@@ -9,10 +11,73 @@ describe('util/cache/repository/http-cache', () => {
     GlobalConfig.reset();
   });
 
+  afterEach(() => {
+    hostRules.clear();
+  });
+
   const httpResponse = { statusCode: 200, headers: {}, body: 'body' };
 
   it('should not throw if cache is not a valid HttpCache', () => {
     expect(() => cleanupHttpCache({})).not.toThrow();
+  });
+
+  it('should remove items with an unsanitized key', () => {
+    const now = DateTime.now();
+    const item = { timestamp: now.toISO(), etag: 'abc', httpResponse };
+    const cache = {
+      httpCache: {
+        'https://user:pass@example.com/foo': item,
+        'https://example.com/foo?token=abc': item,
+        'https://example.com/foo': item,
+      },
+      httpCacheHead: {
+        'https://user:pass@example.com/foo': item,
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: { 'https://example.com/foo': item },
+      httpCacheHead: {},
+    });
+  });
+
+  it('should keep items with a sanitized key', () => {
+    const now = DateTime.now();
+    const item = { timestamp: now.toISO(), etag: 'abc', httpResponse };
+    const userinfoKey = hashUserinfoAndQuery(
+      'https://user:pass@example.com/foo',
+    );
+    const queryKey = hashUserinfoAndQuery('https://example.com/foo?token=abc');
+    const cache = {
+      httpCache: { [userinfoKey]: item, [queryKey]: item },
+      httpCacheHead: { [userinfoKey]: item },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: { [userinfoKey]: item, [queryKey]: item },
+      httpCacheHead: { [userinfoKey]: item },
+    });
+  });
+
+  it('should keep items under a URL with detached credentials', () => {
+    const now = DateTime.now();
+    const item = { timestamp: now.toISO(), etag: 'abc', httpResponse };
+    const cache = {
+      httpCache: { 'https://example.com/maven/pkg': item },
+    };
+    hostRules.detachUrlCredentials('https://user:pass@example.com/maven', [
+      'maven',
+    ]);
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: { 'https://example.com/maven/pkg': item },
+    });
   });
 
   it('should remove expired items from the cache', () => {
@@ -143,6 +208,61 @@ describe('util/cache/repository/http-cache', () => {
           timestamp: now.toISO(),
           etag: 'abc',
           httpResponse,
+        },
+      },
+    });
+  });
+
+  it('should keep only the persisted headers of GET and HEAD items', () => {
+    const now = DateTime.now();
+    const cache = {
+      httpCache: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: {
+              etag: 'abc',
+              'set-cookie': ['session=secret'],
+              'x-session-token': 'also-secret',
+            },
+            body: 'body',
+          },
+        },
+      },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: { etag: 'abc', 'x-session-token': 'also-secret' },
+            body: '',
+          },
+        },
+      },
+    };
+
+    cleanupHttpCache(cache);
+
+    expect(cache).toEqual({
+      httpCache: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: {
+            statusCode: 200,
+            headers: { etag: 'abc' },
+            body: 'body',
+          },
+        },
+      },
+      httpCacheHead: {
+        'http://example.com/foo': {
+          timestamp: now.toISO(),
+          etag: 'abc',
+          httpResponse: { statusCode: 200, headers: { etag: 'abc' }, body: '' },
         },
       },
     });

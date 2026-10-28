@@ -190,6 +190,29 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
+    it('ignores the dashboard issue but applies checkedBranches when mode=silent', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1'] });
+      const conf: RenovateConfig = {
+        dependencyDashboard: true,
+        mode: 'silent',
+      };
+
+      await dependencyDashboard.readDashboardBody(conf);
+
+      expect(platform.findIssue).not.toHaveBeenCalled();
+      expect(conf).toEqual({
+        dependencyDashboard: true,
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+        },
+        dependencyDashboardRebaseAllOpen: false,
+        mode: 'silent',
+      });
+    });
+
     it('reads dashboard body all pending approval', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
