@@ -12,7 +12,7 @@ import { loadPackageJson } from './utils.ts';
 
 // npm supports `min-release-age` since v11.10.0
 // https://github.com/npm/cli/releases/tag/v11.10.0
-const minReleaseAgeNpmRange = '>=11.10.0';
+export const minReleaseAgeNpmRange = '>=11.10.0';
 
 const dayMs = 24 * 60 * 60 * 1000;
 
