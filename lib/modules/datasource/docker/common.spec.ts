@@ -2,6 +2,7 @@ import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
@@ -333,6 +334,112 @@ describe('modules/datasource/docker/common', () => {
           "authorization": "Bearer abc",
         }
       `);
+    });
+
+    describe('registry token cache', () => {
+      const registryHost = 'https://my.local.registry';
+      const challenge = {
+        'www-authenticate':
+          'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry"',
+      };
+      const tokenPath =
+        '/oauth2/token?service=my.local.registry&scope=repository:repo:pull';
+
+      beforeEach(() => {
+        memCache.init();
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+        memCache.reset();
+      });
+
+      it('reuses a token until it is due for refresh', async () => {
+        httpMock
+          .scope(registryHost)
+          .get('/v2/')
+          .times(2)
+          .reply(401, '', challenge)
+          .get(tokenPath)
+          .reply(200, { token: 'first', expires_in: 300 });
+
+        const first = await getAuthHeaders(http, registryHost, 'repo');
+        vi.setSystemTime(new Date('2026-01-01T00:04:29Z'));
+        const second = await getAuthHeaders(http, registryHost, 'repo');
+
+        expect(first).toEqual({ authorization: 'Bearer first' });
+        expect(second).toEqual({ authorization: 'Bearer first' });
+      });
+
+      it.each`
+        expiresIn    | elapsed
+        ${300}       | ${'00:04:30'}
+        ${undefined} | ${'00:00:30'}
+      `(
+        'fetches a new token $elapsed after one with expires_in $expiresIn',
+        async ({
+          expiresIn,
+          elapsed,
+        }: {
+          expiresIn: number | undefined;
+          elapsed: string;
+        }) => {
+          httpMock
+            .scope(registryHost)
+            .get('/v2/')
+            .times(2)
+            .reply(401, '', challenge)
+            .get(tokenPath)
+            .reply(200, { token: 'first', expires_in: expiresIn })
+            .get(tokenPath)
+            .reply(200, { token: 'second', expires_in: 300 });
+
+          await getAuthHeaders(http, registryHost, 'repo');
+          vi.setSystemTime(new Date(`2026-01-01T${elapsed}Z`));
+          const headers = await getAuthHeaders(http, registryHost, 'repo');
+
+          expect(headers).toEqual({ authorization: 'Bearer second' });
+        },
+      );
+
+      it('shares one token request between concurrent lookups', async () => {
+        httpMock
+          .scope(registryHost)
+          .get('/v2/')
+          .reply(401, '', challenge)
+          .get(tokenPath)
+          .reply(200, { token: 'first', expires_in: 300 });
+
+        const headers = await Promise.all([
+          getAuthHeaders(http, registryHost, 'repo'),
+          getAuthHeaders(http, registryHost, 'repo'),
+        ]);
+
+        expect(headers).toEqual([
+          { authorization: 'Bearer first' },
+          { authorization: 'Bearer first' },
+        ]);
+      });
+
+      it('fetches a new token after a failed token request', async () => {
+        httpMock
+          .scope(registryHost)
+          .get('/v2/')
+          .times(2)
+          .reply(401, '', challenge)
+          .get(tokenPath)
+          .reply(401)
+          .get(tokenPath)
+          .reply(200, { token: 'second', expires_in: 300 });
+
+        const first = await getAuthHeaders(http, registryHost, 'repo');
+        const second = await getAuthHeaders(http, registryHost, 'repo');
+
+        expect(first).toBeUndefined();
+        expect(second).toEqual({ authorization: 'Bearer second' });
+      });
     });
   });
 
