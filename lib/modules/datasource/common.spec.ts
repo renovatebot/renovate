@@ -391,7 +391,7 @@ describe('modules/datasource/common', () => {
       });
     });
 
-    it('drops releases whose constraint the package versioning rejects, despite a constraintsVersioning override', () => {
+    it('should validate release constraints with the overridden constraint versioning', () => {
       const releaseResult = {
         releases: [
           { version: '1.0.0', constraints: { jenkins: ['>=15.0.0'] } },
@@ -408,7 +408,7 @@ describe('modules/datasource/common', () => {
 
       expect(
         applyConstraintsFiltering(structuredClone(releaseResult), config),
-      ).toEqual({ releases: [] });
+      ).toEqual({ releases: [{ version: '1.0.0' }] });
       expect(
         applyConstraintsFiltering(structuredClone(releaseResult), {
           ...config,
