@@ -4279,7 +4279,10 @@ Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
 ### `uvExportRequirements`
 
-Re-run `uv export` after `uv.lock` updates when a `requirements.txt` with a `uv export` header is found alongside `pyproject.toml`.
+Re-run `uv export` after `uv.lock` updates when a file named exactly `requirements.txt` with a `uv export` header is found in the same directory as `pyproject.toml`.
+
+The `uv export` header in `requirements.txt` must include `--output-file requirements.txt` (or `-o requirements.txt`).
+Other files such as `requirements-dev.txt`, and output produced with shell redirection (for example `uv export > requirements.txt`), are ignored.
 
 ### `yarnDedupeFewer`
 

@@ -10,7 +10,7 @@ import type {
 } from '../../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
-  getParentDir,
+  getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
@@ -259,7 +259,7 @@ export class UvProcessor extends BasePyProjectProcessor {
       ) {
         const exportResult = await runUvExport(packageFileName, execOptions);
         if (exportResult) {
-          fileChanges.push(exportResult);
+          fileChanges.push(...exportResult);
         }
       }
 
@@ -308,9 +308,7 @@ function withoutAnyUserinfo(url: string): string {
 }
 
 // PEP 508 normalised package / extra / group names.
-const PEP508_NAME_RE = regEx(
-  /^[a-zA-Z0-9](?<suffix>[-a-zA-Z0-9._]*[a-zA-Z0-9])?$/,
-);
+const PEP508_NAME_RE = regEx(/^[a-zA-Z0-9](?:[-a-zA-Z0-9._]*[a-zA-Z0-9])?$/);
 
 // Flags that take no value.
 const UV_EXPORT_BOOLEAN_FLAGS = new Set([
@@ -330,24 +328,35 @@ const UV_EXPORT_BOOLEAN_FLAGS = new Set([
   '--prune',
   '--no-strip-extras',
   '--no-strip-markers',
+  '--quiet',
+  '-q',
 ]);
 
+// Filenames only; no path separators or traversal.
+const OUTPUT_FILE_RE = regEx(/^[-a-zA-Z0-9._]+$/);
+
 // Flags that take a value, mapped to a validation pattern for that value.
-const UV_EXPORT_VALUE_FLAGS: Record<string, RegExp> = {
-  '--python': regEx(/^\d+(?<versionSegment>\.\d+){1,2}$/),
-  // Filenames only; no path separators or traversal.
-  '--output-file': regEx(/^[-a-zA-Z0-9._]+$/),
-  '--no-emit-package': PEP508_NAME_RE,
-  '--extra': PEP508_NAME_RE,
-  '--group': PEP508_NAME_RE,
-  '--only-group': PEP508_NAME_RE,
-  '--no-group': PEP508_NAME_RE,
-  '--package': PEP508_NAME_RE,
-  '--index-strategy': regEx(
-    /^(?<strategy>first-index|unsafe-first-match|unsafe-best-match)$/,
-  ),
-  '--format': regEx(/^requirements-txt$/),
-};
+const UV_EXPORT_VALUE_FLAGS = new Map<string, RegExp>([
+  ['--python', regEx(/^\d+(?:\.\d+){1,2}$/)],
+  ['--output-file', OUTPUT_FILE_RE],
+  // Short alias of --output-file.
+  ['-o', OUTPUT_FILE_RE],
+  ['--no-emit-package', PEP508_NAME_RE],
+  ['--extra', PEP508_NAME_RE],
+  ['--group', PEP508_NAME_RE],
+  ['--only-group', PEP508_NAME_RE],
+  ['--no-group', PEP508_NAME_RE],
+  ['--package', PEP508_NAME_RE],
+  [
+    '--index-strategy',
+    regEx(/^(?:first-index|unsafe-first-match|unsafe-best-match)$/),
+  ],
+  ['--format', regEx(/^requirements-txt$/)],
+]);
+
+function isOutputFileFlag(flag: string): boolean {
+  return flag === '--output-file' || flag === '-o';
+}
 
 type UvExportParseResult =
   | { status: 'not-found' }
@@ -376,11 +385,11 @@ function parseUvExportCmd(content: string): UvExportParseResult {
       if (eqIdx > 0) {
         const flag = token.slice(0, eqIdx);
         const value = token.slice(eqIdx + 1);
-        const pattern = UV_EXPORT_VALUE_FLAGS[flag];
+        const pattern = UV_EXPORT_VALUE_FLAGS.get(flag);
         if (!pattern?.test(value)) {
           return { status: 'rejected' };
         }
-        if (flag === '--output-file') {
+        if (isOutputFileFlag(flag)) {
           outputFile = value;
         }
         safeArgs.push(`${flag}=${value}`);
@@ -396,12 +405,12 @@ function parseUvExportCmd(content: string): UvExportParseResult {
       }
 
       // --flag value form
-      if (token in UV_EXPORT_VALUE_FLAGS) {
+      if (UV_EXPORT_VALUE_FLAGS.has(token)) {
         const value = tokens[i + 1];
-        if (!value || !UV_EXPORT_VALUE_FLAGS[token].test(value)) {
+        if (!value || !UV_EXPORT_VALUE_FLAGS.get(token)!.test(value)) {
           return { status: 'rejected' };
         }
-        if (token === '--output-file') {
+        if (isOutputFileFlag(token)) {
           outputFile = value;
         }
         safeArgs.push(token, value);
@@ -425,22 +434,11 @@ function parseUvExportCmd(content: string): UvExportParseResult {
 async function runUvExport(
   packageFileName: string,
   execOptions: ExecOptions,
-): Promise<UpdateArtifactsResult | null> {
-  const requirementsFileName = await findLocalSiblingOrParent(
+): Promise<UpdateArtifactsResult[] | null> {
+  const requirementsFileName = getSiblingFileName(
     packageFileName,
     'requirements.txt',
   );
-  if (!requirementsFileName) {
-    return null;
-  }
-
-  if (getParentDir(requirementsFileName) !== getParentDir(packageFileName)) {
-    logger.debug(
-      { requirementsFileName, packageFileName },
-      'uv export: requirements.txt is not in the same directory as pyproject.toml',
-    );
-    return null;
-  }
 
   const existingRequirements = await readLocalFile(
     requirementsFileName,
@@ -482,8 +480,11 @@ async function runUvExport(
   try {
     await gitExec(cmd, execOptions);
   } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, 'uv export: failed to run uv export');
-    return null;
+    return artifactErrorResult(requirementsFileName, err);
   }
   const newRequirements = await readLocalFile(requirementsFileName, 'utf8');
   if (newRequirements === existingRequirements) {
@@ -491,13 +492,15 @@ async function runUvExport(
     return null;
   }
 
-  return {
-    file: {
-      type: 'addition',
-      path: requirementsFileName,
-      contents: newRequirements,
+  return [
+    {
+      file: {
+        type: 'addition',
+        path: requirementsFileName,
+        contents: newRequirements,
+      },
     },
-  };
+  ];
 }
 
 async function getUvExtraIndexUrl(
