@@ -1015,6 +1015,10 @@ awscli    2.8.6
       ${'liberica-crac-musl-27.0.1+11'}
       ${'liberica-musl-crac-27.0.1+11'}
       ${'liberica-27.0.1.0.3+5'}
+      ${'liberica-27+36'}
+      ${'liberica-8u513+5'}
+      ${'liberica-jre-8u482+10'}
+      ${'liberica-8u202'}
     `('supports liberica java $id', ({ id }) => {
       expect(extractPackageFile(`java ${id}`)).toEqual({
         deps: [
@@ -1022,6 +1026,7 @@ awscli    2.8.6
             currentValue: id.replace(/^liberica-(?:[a-z-]+-)?/, ''),
             datasource: 'github-releases',
             depName: 'java',
+            extractVersion: '^(?<version>\\d[^-]*)$',
             packageName: 'bell-sw/Liberica',
             versioning: 'loose',
           },

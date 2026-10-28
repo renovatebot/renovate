@@ -455,16 +455,18 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           versioning: looseVersioning.id,
         };
       }
-      // Liberica tags (`27.0.1+11`, hotfix `27.0.1.0.3+5`) match the version ids;
-      // every flavour ships in the same release. Exact versions only.
+      // Liberica tags (`27.0.1+11`, `27.0.1.0.3+5`, `27+36`, `8u513+5`) match the
+      // version ids. Exact versions only; flavours are not filtered per release.
       const libericaMatches = regEx(
-        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl|musl-crac)-)?(?<version>\d+\.\d+\.\d+\S*)$/,
+        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl|musl-crac)-)?(?<version>\d+\.\d+\.\d+\S*|\d+u\d+\S*|\d+\+\d+\S*)$/,
       ).exec(version)?.groups;
       if (libericaMatches) {
         return {
           datasource: GithubReleasesDatasource.id,
           packageName: 'bell-sw/Liberica',
           currentValue: libericaMatches.version,
+          // drops early-access tags (`26+29-ea`), published as normal releases
+          extractVersion: '^(?<version>\\d[^-]*)$',
           versioning: looseVersioning.id,
         };
       }
