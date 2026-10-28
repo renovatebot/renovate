@@ -51,7 +51,7 @@ function generateManagerTable(): string {
       ([a], [b]) => a.localeCompare(b),
     );
     for (const [packageManager, support] of packageManagers) {
-      tableContent += `| [${displayName}](../modules/manager/${manager}/index.md) | ${packageManager} | ${mark(support.passesMinimumReleaseAge)} | ${mark(support.readsConfiguredAge)} | ${mark(support.enforcesInLockFileMaintenance)} | ${support.note ?? ''} |\n`;
+      tableContent += `| [${displayName}](../modules/manager/${manager}/index.md) | ${packageManager} | ${mark(support.passesMinimumReleaseAge)} | ${mark(support.readsConfiguredAge)} | ${mark(support.enforcedInLockFile)} | ${support.note ?? ''} |\n`;
     }
   }
 

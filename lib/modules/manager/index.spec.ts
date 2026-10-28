@@ -68,7 +68,7 @@ describe('modules/manager/index', () => {
           const ranges = [
             support.passesMinimumReleaseAge,
             support.readsConfiguredAge,
-            support.enforcesInLockFileMaintenance,
+            support.enforcedInLockFile,
           ].filter(isString);
           expect(ranges.filter((range) => !versioning.isValid(range))).toEqual(
             [],
