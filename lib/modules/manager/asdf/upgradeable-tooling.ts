@@ -458,7 +458,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       // Liberica tags (`27.0.1+11`, hotfix `27.0.1.0.3+5`) match the version ids;
       // every flavour ships in the same release. Exact versions only.
       const libericaMatches = regEx(
-        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl)-)?(?<version>\d+\.\d+\.\d+\S*)$/,
+        /^liberica-(?:(?:jre|javafx|jre-javafx|musl|jre-musl|lite|lite-musl|crac|crac-musl|musl-crac)-)?(?<version>\d+\.\d+\.\d+\S*)$/,
       ).exec(version)?.groups;
       if (libericaMatches) {
         return {

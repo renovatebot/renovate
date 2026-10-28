@@ -1013,6 +1013,7 @@ awscli    2.8.6
       ${'liberica-lite-musl-27.0.1+11'}
       ${'liberica-crac-27.0.1+11'}
       ${'liberica-crac-musl-27.0.1+11'}
+      ${'liberica-musl-crac-27.0.1+11'}
       ${'liberica-27.0.1.0.3+5'}
     `('supports liberica java $id', ({ id }) => {
       expect(extractPackageFile(`java ${id}`)).toEqual({
