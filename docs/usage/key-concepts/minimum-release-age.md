@@ -101,6 +101,7 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
+Poetry added this setting in v2.4.0, and older versions ignore it.
 
 The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
 

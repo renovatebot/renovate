@@ -22,8 +22,8 @@ export const categories: Category[] = ['python'];
 
 export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   poetry: {
-    passesMinimumReleaseAge: true,
-    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`.',
+    passesMinimumReleaseAge: '>=2.4.0',
+    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days. Older Poetry versions ignore it.',
   },
 };
 
