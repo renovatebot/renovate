@@ -1056,6 +1056,52 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(3);
     });
 
+    it('extracts Blacksmith ubuntu action runners', async () => {
+      const runnerTestWorkflowUbuntu = codeBlock`
+      jobs:
+        test1:
+          runs-on: blacksmith-2vcpu-ubuntu-2204
+        test2:
+          runs-on: blacksmith-4vcpu-ubuntu-2404-arm
+        test3:
+          runs-on: blacksmith-8vcpu-ubuntu-2604
+      `;
+      const res = await extractPackageFile(
+        runnerTestWorkflowUbuntu,
+        'workflow.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04',
+          replaceString: 'blacksmith-2vcpu-ubuntu-2204',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-2vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '24.04-arm',
+          replaceString: 'blacksmith-4vcpu-ubuntu-2404-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-4vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '26.04',
+          replaceString: 'blacksmith-8vcpu-ubuntu-2604',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate:
+            'blacksmith-8vcpu-ubuntu-{{replace "[.]" "" newValue}}',
+        },
+      ]);
+    });
+
     it('extracts multiple windows action runners from yaml configuration file', async () => {
       const runnerTestWorkflowWindows = codeBlock`
       jobs:
