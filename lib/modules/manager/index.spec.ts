@@ -1,8 +1,12 @@
 import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { partial } from '~test/util.ts';
+import { getToolConfig } from '../../util/exec/containerbase.ts';
+import type { ToolName } from '../../util/exec/types.ts';
 import { loadModules } from '../../util/modules.ts';
+import { coerceObject } from '../../util/object.ts';
 import { getDatasourceList } from '../datasource/index.ts';
+import { get as getVersioning } from '../versioning/index.ts';
 import * as customManager from './custom/index.ts';
 import * as manager from './index.ts';
 import type {
@@ -49,6 +53,28 @@ describe('modules/manager/index', () => {
           (value) => isBoolean(value) || isString(value),
         );
       });
+    }
+  });
+
+  describe('minimumReleaseAgeSupport', () => {
+    for (const [name, mgr] of manager.getManagers()) {
+      for (const [tool, support] of Object.entries(
+        coerceObject(mgr.minimumReleaseAgeSupport),
+      )) {
+        it(`has valid version ranges for ${tool} of ${name}`, () => {
+          const versioning = getVersioning(
+            getToolConfig(tool as ToolName)!.versioning,
+          );
+          const ranges = [
+            support.passesMinimumReleaseAge,
+            support.readsConfiguredAge,
+            support.enforcesInLockFileMaintenance,
+          ].filter(isString);
+          expect(ranges.filter((range) => !versioning.isValid(range))).toEqual(
+            [],
+          );
+        });
+      }
     }
   });
 

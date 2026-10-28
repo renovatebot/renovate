@@ -424,13 +424,18 @@ export interface DepTypeMetadata {
   description: string;
 }
 
+/**
+ * `true` when supported, or the version range of the package manager that supports it, e.g. `>=11.10.0`.
+ */
+export type MinimumReleaseAgeToolCapability = boolean | string;
+
 export interface MinimumReleaseAgeToolSupport {
   /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
-  passesMinimumReleaseAge?: boolean;
+  passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
   /** Renovate reads the package manager's own minimum release age setting */
-  readsConfiguredAge?: boolean;
+  readsConfiguredAge?: MinimumReleaseAgeToolCapability;
   /** The package manager enforces the minimum release age during lock file maintenance */
-  enforcesInLockFileMaintenance?: boolean;
+  enforcesInLockFileMaintenance?: MinimumReleaseAgeToolCapability;
   /** Markdown note */
   note?: string;
 }
