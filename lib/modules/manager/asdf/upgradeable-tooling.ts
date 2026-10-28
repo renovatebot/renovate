@@ -441,6 +441,20 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJreMatches.version,
         };
       }
+      // Liberica NIK tags pair the NIK and JDK versions (`25.0.4+1-25.0.4+10`);
+      // anchor on the JDK major so a pin stays on its own JDK line.
+      const libericaNikMatches = regEx(
+        /^liberica-nik-(?:(?:javafx|musl)-)?openjdk(?<jdk>\d+)-(?<version>\d+\.\d+\.\d+\S*)$/,
+      ).exec(version)?.groups;
+      if (libericaNikMatches) {
+        return {
+          datasource: GithubReleasesDatasource.id,
+          packageName: 'bell-sw/LibericaNIK',
+          currentValue: libericaNikMatches.version,
+          extractVersion: `^(?<version>[^-]+)-${libericaNikMatches.jdk}\\.`,
+          versioning: looseVersioning.id,
+        };
+      }
       // Liberica tags (`27.0.1+11`, hotfix `27.0.1.0.3+5`) match the version ids;
       // every flavour ships in the same release. Exact versions only.
       const libericaMatches = regEx(

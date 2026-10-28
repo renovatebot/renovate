@@ -1029,10 +1029,34 @@ awscli    2.8.6
     });
 
     it.each`
+      id                                           | currentValue    | extractVersion
+      ${'liberica-nik-openjdk25-25.0.4+1'}         | ${'25.0.4+1'}   | ${'^(?<version>[^-]+)-25\\.'}
+      ${'liberica-nik-javafx-openjdk21-23.1.12+1'} | ${'23.1.12+1'}  | ${'^(?<version>[^-]+)-21\\.'}
+      ${'liberica-nik-musl-openjdk25-25.0.4.1+1'}  | ${'25.0.4.1+1'} | ${'^(?<version>[^-]+)-25\\.'}
+    `(
+      'supports liberica native image kit $id',
+      ({ id, currentValue, extractVersion }) => {
+        expect(extractPackageFile(`java ${id}`)).toEqual({
+          deps: [
+            {
+              currentValue,
+              datasource: 'github-releases',
+              depName: 'java',
+              extractVersion,
+              packageName: 'bell-sw/LibericaNIK',
+              versioning: 'loose',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
       id
       ${'liberica-27'}
       ${'liberica-27.0'}
       ${'liberica-foo-27.0.1+11'}
+      ${'liberica-nik-openjdk25'}
     `('does not support liberica java $id', ({ id }) => {
       expect(extractPackageFile(`java ${id}`)).toEqual({
         deps: [

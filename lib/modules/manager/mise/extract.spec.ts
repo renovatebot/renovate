@@ -1178,6 +1178,25 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts liberica native image kit via the asdf fallback', async () => {
+      const content = codeBlock`
+        [tools]
+        java = "liberica-nik-openjdk25-25.0.4+1"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '25.0.4+1',
+            datasource: 'github-releases',
+            packageName: 'bell-sw/LibericaNIK',
+            extractVersion: '^(?<version>[^-]+)-25\\.',
+          },
+        ],
+      });
+    });
+
     it('extracts liberica java via the asdf fallback', async () => {
       const content = codeBlock`
         [tools]
