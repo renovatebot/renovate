@@ -237,7 +237,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     parents: ['bumpVersions'],
-    allowedValues: ['major', 'minor', 'patch', 'sync'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease', 'sync'],
     supportsTemplating: true,
   },
   {
@@ -825,7 +825,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.138.1',
+    default: 'ghcr.io/renovatebot/base-image:13.145.4',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -3158,7 +3158,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: { ghActionsLock: 'v0.2.0' },
+    default: { ghActionsLock: 'v0.4.0' },
     mergeable: true,
     cli: false,
     supportedManagers: [

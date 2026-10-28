@@ -1,8 +1,9 @@
 import { partial } from '~test/util.ts';
+import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { AllConfig, RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -878,12 +879,12 @@ describe('config/validation', () => {
         {
           topic: 'ansible.minor.matchDepNames',
           message:
-            '"matchDepNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
+            '"matchDepNames" can\'t be used in "ansible.minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'ansible.minor.matchPackageNames',
           message:
-            '"matchPackageNames" can\'t be used in "minor", as it can only be used in `packageRules`.',
+            '"matchPackageNames" can\'t be used in "ansible.minor", as it can only be used in `packageRules`.',
         },
         {
           topic: 'matchDepNames',
@@ -1808,7 +1809,103 @@ describe('config/validation', () => {
         {
           topic: 'npm.minor.managerFilePatterns',
           message: expect.toStartWith(
-            `"managerFilePatterns" can't be used in "minor", as it can only be used `,
+            `"managerFilePatterns" can't be used in "npm.minor", as it can only be used `,
+          ),
+        },
+      ]);
+    });
+
+    it('allows manager options in a custom manager config', async () => {
+      const config: RenovateConfig &
+        Partial<Record<CustomManagerName, RenovateConfig>> = {
+        regex: {
+          description: ['Clear ignorePaths for regex custom managers.'],
+          ignorePaths: [],
+        },
+        jsonata: {
+          ignorePaths: [],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows options which can be used anywhere, even in an object the `any` scope misses', async () => {
+      vi.resetModules();
+      vi.doMock('./options/scopes.ts', async (importOriginal) => {
+        const scopes =
+          await importOriginal<typeof import('./options/scopes.ts')>();
+        return {
+          ...scopes,
+          // simulate the `any` scope not (yet) expanding to `packageRules`
+          getAllowedParents: (option: RenovateOptions) =>
+            option.scopes?.includes('any')
+              ? ['.']
+              : scopes.getAllowedParents(option),
+        };
+      });
+      const { validateConfig } = await import('./validation.ts');
+
+      const { warnings, errors } = await validateConfig('repo', {
+        packageRules: [
+          { description: ['Disable foo'], matchPackageNames: ['foo'] },
+        ],
+      });
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('names the object an option was wrongly used in', async () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          { matchPackageNames: ['foo'], enabled: false },
+          { matchPackageNames: ['bar'], managerFilePatterns: ['bar'] },
+        ],
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['Dockerfile'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'docker',
+          },
+          {
+            customType: 'regex',
+            managerFilePatterns: ['build.gradle'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            // @ts-expect-error -- intentionally invalid
+            enabledManagers: ['npm'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Custom Manager contains disallowed fields: enabledManagers',
+        },
+      ]);
+      expect(warnings).toEqual([
+        {
+          topic: 'customManagers[1].enabledManagers',
+          message: expect.toStartWith(
+            `"enabledManagers" can't be used in "custom.regex[1]", as it can only be used `,
+          ),
+        },
+        {
+          topic: 'packageRules[1].managerFilePatterns',
+          message: expect.toStartWith(
+            `"managerFilePatterns" can't be used in "packageRules[1]", as it can only be used `,
           ),
         },
       ]);
@@ -2780,7 +2877,7 @@ describe('config/validation', () => {
         {
           topic: 'packageRules[0].hostRules',
           message:
-            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+            '"hostRules" can\'t be used in "packageRules[0]", as it can only be used at the top level of a config.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -2817,7 +2914,7 @@ describe('config/validation', () => {
         {
           topic: 'packageRules[0].hostRules',
           message:
-            '"hostRules" can\'t be used in "packageRules", as it can only be used at the top level of a config.',
+            '"hostRules" can\'t be used in "packageRules[0]", as it can only be used at the top level of a config.',
         },
       ]);
       expect(errors).toMatchObject([
@@ -3306,6 +3403,25 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('does not warn about repo config options inside onboardingConfig in inherited config', async () => {
+        const config = {
+          onboardingConfig: {
+            extends: ['config:recommended'],
+            packageRules: [
+              { matchPackageNames: ['foo'], minimumReleaseAge: '3 days' },
+            ],
+          },
+        };
+
+        const { warnings, errors } = await configValidation.validateConfig(
+          'inherit',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
       it('force', async () => {
         const config = {
           force: {
@@ -3422,6 +3538,28 @@ describe('config/validation', () => {
           message:
             'Invalid gitNoVerify: gitNoVerify had invalid values `["invalid"]` which are not part of the allowedValues: ["commit","push"]',
           topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('allows negation, globs and regexes for pattern matching options with allowedValues', async () => {
+      const config: Record<string, unknown> = {
+        packageRules: [
+          { matchUpdateTypes: ['!major'], enabled: false },
+          { matchUpdateTypes: ['/^m/', 'pin*'], enabled: false },
+          { matchUpdateTypes: ['!majr', 'unknown'], enabled: false },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid packageRules[2].matchUpdateTypes: matchUpdateTypes had invalid values `["!majr","unknown"]`',
+          ),
         },
       ]);
     });
@@ -4088,6 +4226,11 @@ describe('config/validation', () => {
               matchStrings: [],
               bumpType: 'not-a-bump-type',
             },
+            {
+              filePatterns: [],
+              matchStrings: [],
+              bumpType: 'prerelease',
+            },
           ],
         };
         const { warnings, errors } = await configValidation.validateConfig(
@@ -4099,7 +4242,7 @@ describe('config/validation', () => {
         expect(errors).toMatchObject([
           {
             message:
-              'Invalid bumpVersions[1].bumpType: bumpType had a value `"not-a-bump-type"` which was not part of the allowedValues: ["major","minor","patch","sync"]',
+              'Invalid bumpVersions[1].bumpType: bumpType had a value `"not-a-bump-type"` which was not part of the allowedValues: ["major","minor","patch","prerelease","sync"]',
             topic: 'Configuration Error',
           },
           {

@@ -145,8 +145,8 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   },
   jb: {
     datasource: 'github-releases',
-    packageName: 'jsonnet-bundler/jsonnet-bundler',
-    versioning: 'semver',
+    packageName: 'containerbase/jb-prebuild',
+    versioning: 'loose',
   },
   kustomize: {
     datasource: 'github-releases',

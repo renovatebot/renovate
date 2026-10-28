@@ -1,3 +1,5 @@
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -29,12 +31,16 @@ const onboarding = vi.mocked(_onboarding);
 const secrets = vi.mocked(_secrets);
 
 describe('workers/repository/init/index', () => {
-  beforeEach(() => {
-    GlobalConfig.set({ localDir: '', cacheDir: '' });
+  let tmpDir: DirectoryResult;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ localDir: '', cacheDir: tmpDir.path });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     GlobalConfig.reset();
+    await tmpDir.cleanup();
   });
 
   describe('initRepo', () => {

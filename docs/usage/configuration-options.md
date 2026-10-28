@@ -162,7 +162,8 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## `assignees`
 
 Must be valid usernames on the platform in use.
-This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
+Teams are not supported, and Renovate passes `team:` entries to the platform unchanged.
+To request a review from a team, use [`reviewers`](#reviewers) instead.
 
 ## `assigneesFromCodeOwners`
 
@@ -3055,6 +3056,7 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ read checkboxes from an existing Dependency Dashboard: use `checkedBranches` to request branches instead
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
