@@ -22,7 +22,7 @@ import type { RepositoryResult } from '../../result.ts';
 import { getRebaseCheckbox } from '../../update/pr/body/controls.ts';
 import { getPrFooter } from '../../update/pr/body/footer.ts';
 import { getPrHeader } from '../../update/pr/body/header.ts';
-import { ensureSimplePr } from '../../update/pr/ensure-simple-pr.ts';
+import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
   OnboardingState,
@@ -311,7 +311,7 @@ export async function ensureOnboardingPr(
     }
   }
 
-  await ensureSimplePr({
+  await ensureConfigPr({
     branchName: onboardingBranch,
     // TODO #22198
     targetBranch: config.defaultBranch!,
