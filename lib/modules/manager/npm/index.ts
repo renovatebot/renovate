@@ -6,6 +6,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,

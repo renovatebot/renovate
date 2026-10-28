@@ -1,3 +1,4 @@
+import type { DateTime } from 'luxon';
 import type { PackageJson } from 'type-fest';
 
 export type NpmPackageDependency = PackageJson.Dependency;
@@ -61,3 +62,8 @@ export interface Catalog {
 export type OverrideDependency = Record<string, RecursiveOverride>;
 
 export type RecursiveOverride = string | { [_: string]: RecursiveOverride };
+
+/** the cooldown which npm applies for the `before` or `min-release-age` setting of an `.npmrc` */
+export type NpmrcCooldown =
+  | { source: 'before'; date: DateTime<true> }
+  | { source: 'min-release-age'; days: number };
