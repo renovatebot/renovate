@@ -4,10 +4,13 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractManagerPackageFile } from '../../../../modules/manager/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
-import { doAutoReplace } from './auto-replace.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
+import { flattenUpdates } from '../../updates/flatten.ts';
+import { confirmIfDepUpdated, doAutoReplace } from './auto-replace.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
@@ -33,6 +36,229 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';
       reuseExistingBranch = false;
+    });
+
+    describe('overrideDepName', () => {
+      beforeEach(() => {
+        upgrade.manager = 'docker-compose';
+        upgrade.packageFile = 'compose.yaml';
+        upgrade.registryAliases = {
+          '${HARBOR_URL}/dockerhub': 'docker.io',
+        };
+        upgrade.depIndex = 0;
+        upgrade.newValue = '24';
+      });
+
+      async function applyOverride(content: string): Promise<void> {
+        const config = getConfig();
+        config.semanticCommits = 'disabled';
+        config.registryAliases = upgrade.registryAliases;
+        config.packageRules = [
+          {
+            matchDatasources: ['docker'],
+            overrideDepName: 'node',
+            replacementName: upgrade.newName,
+          },
+        ];
+        const extracted = (await extractManagerPackageFile(
+          upgrade.manager,
+          content,
+          upgrade.packageFile!,
+          config,
+        ))!;
+        for (const dep of extracted.deps) {
+          normalizeDepNames(dep);
+          dep.updates = [];
+        }
+        extracted.deps[upgrade.depIndex!].updates = [
+          {
+            newValue: upgrade.newValue,
+            newName: upgrade.newName,
+            updateType: upgrade.newName ? 'replacement' : 'major',
+          },
+        ];
+        [upgrade] = await flattenUpdates(config, {
+          [upgrade.manager]: [
+            { ...extracted, packageFile: upgrade.packageFile! },
+          ],
+        });
+      }
+
+      it.each([
+        {
+          description: 'Docker Compose',
+          manager: 'docker-compose',
+          packageFile: 'compose.yaml',
+          content: codeBlock`
+            services:
+              node:
+                image: \${HARBOR_URL}/dockerhub/library/node:22
+          `,
+        },
+        {
+          description: 'GitLab CI',
+          manager: 'gitlabci',
+          packageFile: '.gitlab-ci.yml',
+          content: 'image: ${HARBOR_URL}/dockerhub/library/node:22',
+        },
+        {
+          description: 'structured Helm values',
+          manager: 'helm-values',
+          packageFile: 'values.yaml',
+          content: codeBlock`
+            image:
+              registry: \${HARBOR_URL}/dockerhub
+              repository: library/node
+              tag: "22"
+          `,
+        },
+        {
+          description: 'Helm values with a combined repository',
+          manager: 'helm-values',
+          packageFile: 'values.yaml',
+          content: codeBlock`
+            image:
+              repository: \${HARBOR_URL}/dockerhub/library/node
+              tag: "22"
+          `,
+        },
+        {
+          description: 'Dockerfile',
+          manager: 'dockerfile',
+          packageFile: 'Dockerfile',
+          content: 'FROM ${HARBOR_URL}/dockerhub/library/node:22',
+        },
+        {
+          description: 'Dockerfile ARG',
+          manager: 'dockerfile',
+          packageFile: 'Dockerfile',
+          content: codeBlock`
+            ARG NODE_VERSION=22
+            FROM \${HARBOR_URL}/dockerhub/library/node:\${NODE_VERSION}
+          `,
+        },
+      ])(
+        'updates $description without changing an aliased mirror reference',
+        async ({ manager, packageFile, content }) => {
+          upgrade.manager = manager;
+          upgrade.packageFile = packageFile;
+          await applyOverride(content);
+
+          const result = await doAutoReplace(upgrade, content, false);
+
+          expect(upgrade.depName).toBe('node');
+          expect(upgrade.packageName).toBe('docker.io/library/node');
+          expect(upgrade.depNameSanitized).toBe('node');
+          expect(upgrade.packageRules).toBeUndefined();
+          expect(result).toBe(content.replace('22', '24'));
+        },
+      );
+
+      it('preserves the source name in a Dockerfile replacement template', async () => {
+        const content = 'FROM registry.example.com/library/node:22';
+        upgrade.manager = 'dockerfile';
+        upgrade.packageFile = 'Dockerfile';
+        await applyOverride(content);
+
+        const result = await doAutoReplace(upgrade, content, false);
+
+        expect(upgrade.depName).toBe('node');
+        expect(upgrade.packageName).toBe('registry.example.com/library/node');
+        expect(result).toBe('FROM registry.example.com/library/node:24');
+      });
+
+      it('reuses an existing branch with the overridden display name', async () => {
+        const content = codeBlock`
+          services:
+            node:
+              image: \${HARBOR_URL}/dockerhub/library/node:22
+        `;
+        await applyOverride(content);
+        const updatedContent = content.replace(':22', ':24');
+
+        const result = await doAutoReplace(upgrade, updatedContent, true);
+
+        expect(result).toBe(updatedContent);
+      });
+
+      it('updates the dependency at depIndex when display names collide', async () => {
+        const content = codeBlock`
+          services:
+            first:
+              image: node:22
+            node:
+              image: \${HARBOR_URL}/dockerhub/library/node:22
+        `;
+        upgrade.depIndex = 1;
+        await applyOverride(content);
+
+        const result = await doAutoReplace(upgrade, content, false);
+
+        expect(upgrade.depIndex).toBe(1);
+        expect(upgrade.baseDeps![0].depName).toBe(upgrade.depName);
+        expect(result).toBe(
+          content.replace('library/node:22', 'library/node:24'),
+        );
+      });
+
+      it.each`
+        replacementName
+        ${'ghcr.io/nodejs/node'}
+        ${'node'}
+      `(
+        'honors replacementName=$replacementName',
+        async ({ replacementName }) => {
+          const content = codeBlock`
+            services:
+              node:
+                image: \${HARBOR_URL}/dockerhub/library/node:22
+          `;
+          upgrade.newName = replacementName;
+          await applyOverride(content);
+
+          const result = await doAutoReplace(upgrade, content, false);
+
+          expect(result).toBe(
+            content.replace(
+              '${HARBOR_URL}/dockerhub/library/node:22',
+              `${replacementName}:24`,
+            ),
+          );
+        },
+      );
+
+      it('rejects a tag update that did not write the replacement name', async () => {
+        const content = codeBlock`
+          services:
+            node:
+              image: \${HARBOR_URL}/dockerhub/library/node:22
+        `;
+        upgrade.newName = 'ghcr.io/nodejs/node';
+        await applyOverride(content);
+
+        const result = await confirmIfDepUpdated(
+          upgrade,
+          content.replace(':22', ':24'),
+        );
+
+        expect(result).toBeFalse();
+      });
+
+      it('rejects another source image with the overridden display name', async () => {
+        const content = codeBlock`
+          services:
+            node:
+              image: \${HARBOR_URL}/dockerhub/library/node:22
+        `;
+        await applyOverride(content);
+
+        const result = await confirmIfDepUpdated(
+          upgrade,
+          content.replace('${HARBOR_URL}/dockerhub/library/node:22', 'node:24'),
+        );
+
+        expect(result).toBeFalse();
+      });
     });
 
     it('rebases if the deps list has changed', async () => {

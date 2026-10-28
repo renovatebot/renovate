@@ -3904,6 +3904,9 @@ For example, the `packageName` is `docker.io/library/node` while the `depName` m
 
 `depName` is used in PR titles as well as branch names, so changes to `depName` will have effects on those.
 
+`overrideDepName` does not change Docker image names in Dockerfiles, Docker Compose files, GitLab CI files, or Helm values files.
+Use [`replacementName`](#packagerulesreplacementname) to change the image name.
+
 `overrideDepName` supports template compilation.
 Example:
 
