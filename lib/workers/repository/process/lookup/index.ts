@@ -553,7 +553,13 @@ export async function lookupUpdates(
       );
 
       if (!config.pinDigests && !config.currentDigest) {
-        logger.debug(
+        logger.once.debug(
+          {
+            datasource: config.datasource,
+            versioning: config.versioning,
+            currentValue: config.currentValue,
+            compareValue,
+          },
           `Skipping ${config.packageName} because no currentDigest or pinDigests`,
         );
         res.skipReason = 'invalid-value';
