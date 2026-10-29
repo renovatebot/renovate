@@ -144,18 +144,18 @@ describe('workers/repository/process/lookup/index', () => {
 
     it.each`
       rangeStrategy        | currentValue | lockedVersion | newVersion   | expectedUpdates
-      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '17.1*', newVersion: '17.14.1' }]}
-      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '18.1*', newVersion: '18.11.0' }]}
-      ${'in-range-only'}   | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[]}
+      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '17.*', newVersion: '17.14.1', isLockfileUpdate: true }]}
+      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '18.*', newVersion: '18.11.0' }]}
+      ${'in-range-only'}   | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '17.*', newVersion: '17.14.1', isLockfileUpdate: true }]}
       ${'in-range-only'}   | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
-      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[{ newValue: '17.1.9*', newVersion: '17.1.99' }]}
-      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.2.15'} | ${[{ newValue: '17.2.1*', newVersion: '17.2.15' }]}
-      ${'in-range-only'}   | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[]}
+      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[{ newValue: '17.1.*', newVersion: '17.1.99', isLockfileUpdate: true }]}
+      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.2.15'} | ${[{ newValue: '17.2.*', newVersion: '17.2.15' }]}
+      ${'in-range-only'}   | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[{ newValue: '17.1.*', newVersion: '17.1.99', isLockfileUpdate: true }]}
       ${'in-range-only'}   | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.2.15'} | ${[]}
       ${'replace'}         | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
       ${'widen'}           | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
-      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }, { newValue: '17.1*', newVersion: '17.14.1' }]}
-      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }, { newValue: '18.1*', newVersion: '18.11.0' }]}
+      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }]}
+      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }, { newValue: '18.*', newVersion: '18.11.0' }]}
     `(
       'updates native NuGet $currentValue locked at $lockedVersion to $newVersion with rangeStrategy=$rangeStrategy',
       async ({
