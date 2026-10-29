@@ -33,6 +33,15 @@ export default async function updateDependency({
       upgrade.depName!,
     ]);
     await submoduleGit.checkout([upgrade.newDigest!]);
+    // Checking out the updated submodule can change its nested gitlinks.
+    // Synchronize again so post-upgrade tasks see the nested revisions from
+    // the newly checked out parent, rather than those from the old revision.
+    await git.submoduleUpdate([
+      '--checkout',
+      '--init',
+      '--recursive',
+      upgrade.depName!,
+    ]);
     if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
       await git.subModule([
         'set-branch',
