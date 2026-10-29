@@ -320,6 +320,7 @@ In that case, Renovate does not wait for a release timestamp, and the `renovate/
 For all other managers, lock file maintenance is treated like any other update without a release timestamp.
 With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
 The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
+The minimum release age from the configuration of your package manager does not hold back lock file maintenance on its own, as your package manager applies it itself.
 
 ### What happens to security updates?
 
