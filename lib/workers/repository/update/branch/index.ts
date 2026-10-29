@@ -279,7 +279,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      config.isModified = await scm.isBranchModified(
+      const branchIsModified = await scm.isBranchModified(
         config.branchName,
         config.baseBranch,
       );
@@ -291,7 +291,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (config.isModified || userChangedTargetBranch(branchPr)) {
+        if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
@@ -303,7 +303,7 @@ export async function processBranch(
           }
         }
       } else if (
-        config.isModified &&
+        branchIsModified &&
         !dependencyDashboardCheck &&
         !(await findClosedPrForModifiedBranch(config))
       ) {
