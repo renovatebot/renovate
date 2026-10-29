@@ -1746,6 +1746,30 @@ None detected
           await dryRun(branches, platform, 0, 1);
         });
 
+        it('omits package files and managers without listed dependencies', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.clear();
+          PackageFiles.add('main', {
+            dockerfile: [{ packageFile: 'Dockerfile', deps: [] }],
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [{ depName: 'foo', skipReason: 'unspecified-version' }],
+              },
+            ],
+          });
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            {},
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain('## Detected Dependencies\n\nNone detected');
+          expect(body).not.toContain('<details>');
+        });
+
         it('shows different combinations of version+digest for a given dependency', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', packageFilesWithDigest);
@@ -1757,20 +1781,15 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           const body = platform.ensureIssue.mock.calls[0][0].body;
-          expect(body).toContain('<details><summary>dockerfile (4)</summary>');
+          expect(body).toContain('<details><summary>dockerfile (3)</summary>');
           expect(body).toContain(
             '<details><summary>digest-only/Dockerfile (1)</summary>',
           );
           expect(body).toContain(
             ' - `ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f`',
           );
-          // a dep with neither version nor digest gets no count and no entry
-          expect(body).toContain(codeBlock`
-            <details><summary>no-ver-no-digest/Dockerfile</summary>
-
-
-            </details>
-          `);
+          // a package file whose only dep is skipped is not listed
+          expect(body).not.toContain('no-ver-no-digest/Dockerfile');
           expect(body).toContain(
             '<details><summary>ver-and-digest/Dockerfile (1)</summary>',
           );
