@@ -410,6 +410,37 @@ describe('workers/repository/updates/flatten', () => {
       ]);
     });
 
+    it('passes the minimumReleaseAge before packageRules as minimumReleaseAgeRepository', async () => {
+      config.minimumReleaseAge = '3 days';
+      config.packageRules = [
+        { matchUpdateTypes: ['major'], minimumReleaseAge: '14 days' },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        {
+          depName: 'foo',
+          minimumReleaseAge: '14 days',
+          minimumReleaseAgeRepository: '3 days',
+        },
+      ]);
+    });
+
     describe('hasAttestation is taken from the current value', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',
