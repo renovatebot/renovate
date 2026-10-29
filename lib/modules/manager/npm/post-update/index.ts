@@ -691,6 +691,14 @@ async function getAdditionalFilesInner(
           upgrades,
           npmrcContent,
         );
+        // Renovate shows artifact notices only if there are no artifact
+        // errors, so a failed pnpm run reports the notice with its error
+        if (res.minimumReleaseAgeNotice && !res.error) {
+          artifactNotices.push({
+            file: pnpmLockFile,
+            message: res.minimumReleaseAgeNotice,
+          });
+        }
         if (res.error) {
           /* v8 ignore next -- needs test */
           if (res.stdout?.includes(`No compatible version found:`)) {
@@ -714,9 +722,12 @@ async function getAdditionalFilesInner(
             }
           }
 
+          const stderr = artifactErrorMessageFromExecError(res, '');
           artifactErrors.push({
             fileName: pnpmLockFile,
-            stderr: artifactErrorMessageFromExecError(res, ''),
+            stderr: res.minimumReleaseAgeNotice
+              ? `${res.minimumReleaseAgeNotice}\n\n${stderr}`
+              : stderr,
           });
         } else {
           const existingContent = await getFile(

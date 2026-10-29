@@ -1024,6 +1024,64 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
 
+    it('adds artifact notice on pnpm minimumReleaseAgeNotice', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: 'some-contents:',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          upgrades: [
+            {
+              isRemediation: true,
+              packageFile: 'packages/pnpm/package.json',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'packages/pnpm/pnpm-lock.yaml', message: 'some notice' },
+      ]);
+    });
+
+    it('adds pnpm minimumReleaseAgeNotice to the artifact error', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: true,
+        stdout: 'some-error',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          upgrades: [
+            {
+              isRemediation: true,
+              packageFile: 'packages/pnpm/package.json',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(res).toStrictEqual({
+        artifactErrors: [
+          {
+            fileName: 'packages/pnpm/pnpm-lock.yaml',
+            stderr: 'some notice\n\nsome-error',
+          },
+        ],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
+    });
+
     it('no npm files', async () => {
       await expect(getAdditionalFiles(baseConfig, {})).resolves.toStrictEqual({
         artifactErrors: [],

@@ -89,6 +89,12 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeExtracted?: Nullish<string>;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: Nullish<string>;
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -310,6 +316,12 @@ export interface Upgrade<
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeBuffer?: string | null;
+  minimumReleaseAgeExtracted?: string | null;
+  /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
+  minimumReleaseAgeRepository?: string | null;
+  releaseTimestamp?: Timestamp;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;
