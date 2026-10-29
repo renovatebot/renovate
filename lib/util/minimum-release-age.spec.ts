@@ -24,6 +24,16 @@ describe('util/minimum-release-age', () => {
       ).toBe(toMs('3 days'));
     });
 
+    it('ignores minimumReleaseAgeExtracted for security updates', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({
+          isVulnerabilityAlert: true,
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: '3 days',
+        }),
+      ).toBe(toMs('1 day'));
+    });
+
     it('ignores an invalid minimumReleaseAgeBuffer', () => {
       expect(
         calculateMinimumReleaseAgeMs({
