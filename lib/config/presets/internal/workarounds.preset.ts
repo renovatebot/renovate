@@ -151,6 +151,14 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
+          'Group jsep major updates with its plugins, which declare it as a peer dependency.',
+        groupName: 'jsep',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['jsep', '@jsep-plugin/**'],
+        matchUpdateTypes: ['major'],
+      },
+      {
+        description:
           'Group SimpleWebAuthn major updates to keep browser and server compatible.',
         groupName: 'SimpleWebAuthn',
         matchDatasources: ['npm'],
