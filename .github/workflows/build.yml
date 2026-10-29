@@ -798,14 +798,23 @@ jobs:
 
       # The privacy plugin downloads external assets (fonts, mermaid, emojis) with a fixed 5s timeout.
       # No restore keys: a new month starts empty, so floating versions like `mermaid@11` are refreshed.
-      - name: Cache mkdocs external assets
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      # Saved on `main` pushes only, like the other caches.
+      - name: Restore mkdocs assets cache
+        id: mkdocs-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: tools/mkdocs/.cache/plugin/privacy
           key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
 
       - name: Build mkdocs
         run: pnpm mkdocs build --no-build
+
+      - name: Save mkdocs assets cache
+        if: github.event_name == 'push' && steps.mkdocs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
 
   test-e2e:
     needs:
@@ -975,9 +984,9 @@ jobs:
         id: month
         run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
 
-      - name: Cache mkdocs external assets
+      - name: Restore mkdocs assets cache
         if: github.ref_name == 'main'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: tools/mkdocs/.cache/plugin/privacy
           key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
