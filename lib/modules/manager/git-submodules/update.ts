@@ -35,7 +35,6 @@ export default async function updateDependency({
       '--recursive',
       upgrade.depName!,
     ]);
-    // The new revision is checked out in the submodule, outside `.gitmodules`, so `updateArtifacts()` has to run even if `.gitmodules` is unchanged.
     await submoduleGit.checkout([upgrade.newDigest!]);
     if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
       await git.subModule([

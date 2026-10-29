@@ -433,11 +433,8 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(branchPr);
       scm.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
-      // the branch PR and the modified state are fetched once and handed to the stages which need them
-      expect(platform.getBranchPr).toHaveBeenCalledOnce();
-      expect(scm.isBranchModified).toHaveBeenCalledOnce();
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ isModified: false }),
+        expect.anything(),
         branchPr,
       );
     });

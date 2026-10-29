@@ -395,9 +395,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      }
-      if (newContent === packageFileContent && updatedOutOfBand) {
-        // The manager applied the update outside the package file, so treat the unchanged package file as updated to make `updateArtifacts()` run for it.
+      } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
