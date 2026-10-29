@@ -6,6 +6,7 @@ import type {
   UpdateType,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import { enforcesMinimumReleaseAge } from '../../../../modules/manager/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
@@ -16,9 +17,10 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
+import type { MinimumReleaseAgeCheckResult } from '../../../../util/minimum-release-age.ts';
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -183,6 +185,33 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   });
 }
 
+/**
+ * Checks the minimum release age of `upgrade`, which is skipped for lock file
+ * maintenance if the package manager enforces it itself.
+ */
+async function checkUpgradeMinimumReleaseAge(
+  upgrade: BranchUpgradeConfig,
+): Promise<MinimumReleaseAgeCheckResult> {
+  const result = checkMinimumReleaseAge(
+    {
+      ...upgrade,
+      minimumReleaseAgeBehaviour:
+        upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required',
+    },
+    upgrade.releaseTimestamp,
+  );
+  if (!result.minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
+    return result;
+  }
+  if (!(await enforcesMinimumReleaseAge(upgrade.manager, upgrade))) {
+    return result;
+  }
+  logger.debug(
+    `Lock file maintenance of ${upgrade.packageFile}: the package manager enforces the minimum release age`,
+  );
+  return { ...result, isPending: false, minimumReleaseAgeMs: 0 };
+}
+
 export interface InternalChecksStatus {
   stabilityStatus?: BranchStatus;
   confidenceStatus?: BranchStatus;
@@ -199,6 +228,7 @@ export async function computeInternalChecksStatus(
   const internalChecksConfigured = config.upgrades.some(
     (upgrade) =>
       isNonEmptyString(upgrade.minimumReleaseAge) ||
+      isNonEmptyString(upgrade.minimumReleaseAgeExtracted) ||
       isActiveConfidenceLevel(upgrade.minimumConfidence!),
   );
   if (!internalChecksConfigured) {
@@ -223,14 +253,7 @@ export async function computeInternalChecksStatus(
   // Default to 'success' but set 'pending' if any update is pending
   for (const upgrade of config.upgrades) {
     const { isPending, minimumReleaseAgeMs, hasTimestamp } =
-      checkMinimumReleaseAge(
-        {
-          ...upgrade,
-          minimumReleaseAgeBehaviour:
-            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required',
-        },
-        upgrade.releaseTimestamp,
-      );
+      await checkUpgradeMinimumReleaseAge(upgrade);
 
     if (isPending) {
       if (hasTimestamp) {
