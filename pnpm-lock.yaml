@@ -129,8 +129,8 @@ importers:
         specifier: 4.0.23
         version: 4.0.23
       '@renovatebot/good-enough-parser':
-        specifier: 3.0.0
-        version: 3.0.0
+        specifier: 4.0.2
+        version: 4.0.2
       '@renovatebot/osv-offline':
         specifier: 4.4.0
         version: 4.4.0(supports-color@7.2.0)
@@ -2063,8 +2063,8 @@ packages:
     resolution: {integrity: sha512-+mZxeioZUc1UAs2NO02x5RcPQdvX4B4eJsrFYSIVT8yRdtsc9OV8L/KeYnKatWFd8BxbOyr5mS8I8JbolOPVqg==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/good-enough-parser@3.0.0':
-    resolution: {integrity: sha512-dvFb9ST8WVo+YsrhK6vbWBib49Biu4/fPmZf1QRNIR1Ov5T04god/AA3rRJcyRrofzt/K96vPO9RPhEE3u+hfg==}
+  '@renovatebot/good-enough-parser@4.0.2':
+    resolution: {integrity: sha512-efCoKYR7bnKQSWF9ymwjyQyw9zI+9Q6ogTEx78NNQrPY/OxUwFCOW5lo9EwZ7JOMSYsvkR8AChA6Meaht3a1pw==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/osv-offline-db@4.4.0':
@@ -2292,32 +2292,37 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
-  '@thi.ng/api@7.2.0':
-    resolution: {integrity: sha512-4NcwHXxwPF/JgJG/jSFd9rjfQNguF0QrHvd6e+CEf4T0sFChqetW6ZmJ6/a2X+noDVntgulegA+Bx0HHzw+Tyw==}
+  '@thi.ng/api@8.12.28':
+    resolution: {integrity: sha512-SbC2c2fULIXtAsgtT9Vz7Dviv1KaZD3oYrvqy3zV405xHuipaFMZN1VbVr6LzN8JCdIFp0oH4b6OdNHdojdzcA==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/arrays@1.0.3':
-    resolution: {integrity: sha512-ZUB27bdpTwcvxYJTlt/eWKrj98nWXo0lAUPwRwubk4GlH8rTKKkc7qZr9/4LCKPsNjnZdQqbBtNvNf3HjYxCzw==}
+  '@thi.ng/arrays@2.14.26':
+    resolution: {integrity: sha512-sIzVJyXZRQC8KQQpRn7KZZlanRej2Q+bvmFsq9GhAh5kuzfCjaCGuXibTtJS2X5uEMfXvH2D6mi0auIBbZ+V9Q==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/checks@2.9.11':
-    resolution: {integrity: sha512-fBvWod32w24JlJsrrOdl+tlx+UNehCORi4rHaJ7l7HH+SEhD/lYTCXOBjwu9D/ztIUjMP5Q+n8cAqI5iPhbvAQ==}
+  '@thi.ng/checks@3.11.1':
+    resolution: {integrity: sha512-S64V2nAPA0Y66VwpJdi3fdwv4xP9G7M13nvQWzp6YTERsnusI6FtihbxhENt/DQ/k+iP+aVSsy+LgtqwkFvvag==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/compare@1.3.34':
-    resolution: {integrity: sha512-E+UWhmo8l5yeHDuriPUsfrnk/Mj5kSDNRX7lPfv2zNdAQ7N8UDzc0IXu46U6EpqtCReo+2n5N8qzfD3TjerFRw==}
+  '@thi.ng/compare@2.5.16':
+    resolution: {integrity: sha512-NSqurH5cqjHjcyKANPoKofDEbfQRNkL2Ct+3W5o1QdY6y/iSDysccOVdwA4oc5A49+bMwmOIUhnTyiiRIlYkWQ==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/equiv@1.0.45':
-    resolution: {integrity: sha512-tdXaJfF0pFvT80Q7BOlhc7H7ja/RbVGzlGpE4LqjDWfXPPbLYwmq6EbQuHWeXuvT0qe+BsGnuO5UXAR5B8oGGQ==}
+  '@thi.ng/equiv@2.1.117':
+    resolution: {integrity: sha512-HNZvfMsTMPMEh9TisOgasMVStG5kgEfLfKww+Am2RrOb2B1fQ6ZKJYRJCf+bMF8SOboaz74V9KewIDcMKTR8Qw==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/errors@1.3.4':
-    resolution: {integrity: sha512-hTk71OPKnioN349sdj2DAoY+69eSerB3MN4Zwz6mosr1QFzIMkfkNOtBeC+Gm0yi0V0EY5LeBYFgqb3oXbtTbw==}
+  '@thi.ng/errors@2.6.17':
+    resolution: {integrity: sha512-momw7wo3EXes1wa6Smckr+l4BaJi/h+E67R3furYOBjQpciie1OgoTa43PXPb1POsuWxynkEF8OCnQgreE8twg==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/hex@1.0.4':
-    resolution: {integrity: sha512-9ofIG4nXhEskGeOJthpi/9LXFIPrlZ/MmHpgLWa3wNqTVhODP/o++mu9jDKojHEpKvswkkFCE+mSVmMu8xo4mQ==}
+  '@thi.ng/random@4.1.54':
+    resolution: {integrity: sha512-h4sUHPlDd1abr78o3jmvFeAKMH97YHAbrcjCcb9YaQiAADLu64NvkR0hCA69kuAJSXCYJZ9k8e0EjmbuEhFuuQ==}
+    engines: {node: '>=18'}
 
-  '@thi.ng/random@2.4.8':
-    resolution: {integrity: sha512-4JJB8zbaPxjlAp1kCqsBbs6eN4Ivd/5fs1e4GlvmNkyGSucHIDTWvw6NnQWqUx2oPaAEDB9CFCH7SOcGC/cwkw==}
-
-  '@thi.ng/zipper@1.0.3':
-    resolution: {integrity: sha512-dWfuk5nzf5wGEmcF90AXNEuWr3NVwRF+cf/9ZSE6xImA7Vy5XpHNMwLHFszZaC+kqiDXr+EZ0lXWDF46a8lSPA==}
+  '@thi.ng/zipper@2.1.181':
+    resolution: {integrity: sha512-hNnVHHGjZziANFqIVokVIIHvSfr7ICZhLEWr5Azo/DCEFb+k6/u2Pi9esHFoC+8HNu5kIHRDW5J8eKNwab1fIA==}
+    engines: {node: '>=18'}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -7464,9 +7469,9 @@ snapshots:
       upath: 3.0.8
       zod: 4.6.7
 
-  '@renovatebot/good-enough-parser@3.0.0':
+  '@renovatebot/good-enough-parser@4.0.2':
     dependencies:
-      '@thi.ng/zipper': 1.0.3
+      '@thi.ng/zipper': 2.1.181
       '@types/moo': 0.5.10
       klona: 2.0.6
       moo: 0.5.3
@@ -7696,42 +7701,38 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@thi.ng/api@7.2.0': {}
+  '@thi.ng/api@8.12.28': {}
 
-  '@thi.ng/arrays@1.0.3':
+  '@thi.ng/arrays@2.14.26':
     dependencies:
-      '@thi.ng/api': 7.2.0
-      '@thi.ng/checks': 2.9.11
-      '@thi.ng/compare': 1.3.34
-      '@thi.ng/equiv': 1.0.45
-      '@thi.ng/errors': 1.3.4
-      '@thi.ng/random': 2.4.8
+      '@thi.ng/api': 8.12.28
+      '@thi.ng/checks': 3.11.1
+      '@thi.ng/compare': 2.5.16
+      '@thi.ng/equiv': 2.1.117
+      '@thi.ng/errors': 2.6.17
+      '@thi.ng/random': 4.1.54
 
-  '@thi.ng/checks@2.9.11':
+  '@thi.ng/checks@3.11.1': {}
+
+  '@thi.ng/compare@2.5.16':
     dependencies:
-      tslib: 2.8.1
+      '@thi.ng/api': 8.12.28
 
-  '@thi.ng/compare@1.3.34':
+  '@thi.ng/equiv@2.1.117': {}
+
+  '@thi.ng/errors@2.6.17': {}
+
+  '@thi.ng/random@4.1.54':
     dependencies:
-      '@thi.ng/api': 7.2.0
+      '@thi.ng/api': 8.12.28
+      '@thi.ng/errors': 2.6.17
 
-  '@thi.ng/equiv@1.0.45': {}
-
-  '@thi.ng/errors@1.3.4': {}
-
-  '@thi.ng/hex@1.0.4': {}
-
-  '@thi.ng/random@2.4.8':
+  '@thi.ng/zipper@2.1.181':
     dependencies:
-      '@thi.ng/api': 7.2.0
-      '@thi.ng/checks': 2.9.11
-      '@thi.ng/hex': 1.0.4
-
-  '@thi.ng/zipper@1.0.3':
-    dependencies:
-      '@thi.ng/api': 7.2.0
-      '@thi.ng/arrays': 1.0.3
-      '@thi.ng/checks': 2.9.11
+      '@thi.ng/api': 8.12.28
+      '@thi.ng/arrays': 2.14.26
+      '@thi.ng/checks': 3.11.1
+      '@thi.ng/errors': 2.6.17
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
