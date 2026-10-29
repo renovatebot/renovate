@@ -2,6 +2,7 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { toMs } from '../../../util/pretty-time.ts';
+import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
@@ -37,11 +38,7 @@ async function isNpmMinReleaseAgeSupported(
       await loadPackageJson(upath.dirname(npmLock)),
     ),
   );
-  return (
-    isNonEmptyString(constraint) &&
-    npmVersioning.isValid(constraint) &&
-    npmVersioning.subset?.(constraint, minReleaseAgeNpmRange) === true
-  );
+  return isSubsetOf(npmVersioning, constraint, minReleaseAgeNpmRange);
 }
 
 /**
