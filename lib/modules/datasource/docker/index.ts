@@ -15,6 +15,7 @@ import { isDockerDigest } from '../../../util/string-match.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import {
   ensurePathPrefix,
+  isHttpUrl,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
@@ -752,6 +753,10 @@ export class DockerDatasource extends Datasource {
         : 10000;
     let url: string | null =
       `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    if (!isHttpUrl(url)) {
+      logger.warn({ url, registryHost, dockerRepository }, 'Invalid URL');
+      return undefined;
+    }
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
