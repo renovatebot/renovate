@@ -343,9 +343,32 @@ describe('workers/repository/update/branch/index', () => {
 
         await branchWorker.processBranch(config);
 
-        expect(config.stabilityStatus).toBeUndefined();
+        expect(
+          reuse.shouldReuseExistingBranch.mock.calls[0][0].stabilityStatus,
+        ).toBeUndefined();
         expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
-        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
+
+      it('does not skip lock file maintenance with minimumReleaseAge=0 days', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            isLockFileMaintenance: true,
+            updateType: 'lockFileMaintenance',
+            minimumReleaseAge: '0 days',
+            minimumReleaseAgeExtracted: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          reuse.shouldReuseExistingBranch.mock.calls[0][0].stabilityStatus,
+        ).toBe('green');
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
       });
     });
 

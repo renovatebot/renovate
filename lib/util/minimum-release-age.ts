@@ -46,6 +46,23 @@ export function calculateMinimumReleaseAgeMs(
 }
 
 /**
+ * Calculates the minimum release age in milliseconds which Renovate passes to
+ * a package manager for a dependency update: the larger of
+ * `minimumReleaseAgeRepository` and `minimumReleaseAgeExtracted`, without
+ * `minimumReleaseAgeBuffer`.
+ */
+export function calculatePackageManagerMinimumReleaseAgeMs(
+  config: Pick<MinimumReleaseAgeConfig, 'minimumReleaseAgeExtracted'> & {
+    minimumReleaseAgeRepository?: string | null;
+  },
+): number {
+  return calculateMinimumReleaseAgeMs({
+    minimumReleaseAge: config.minimumReleaseAgeRepository,
+    minimumReleaseAgeExtracted: config.minimumReleaseAgeExtracted,
+  });
+}
+
+/**
  * Checks whether a release satisfies the effective minimum release age.
  *
  * Separate from `internalChecksFilter` to allow reuse, and lives here so that
