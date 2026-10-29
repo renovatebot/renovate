@@ -36,6 +36,9 @@ import { BasePyProjectProcessor } from './abstract.ts';
 const uvUpdateCMD = 'uv lock';
 const gitExec = withGitEnvironment(['pep621']);
 
+// uv sources may use the pip-style `git+` prefix; strip it before handing the URL to git.
+const gitPlusPrefixRegex = regEx(/^git\+/);
+
 function isUvIndexSource(
   source: UvSource,
 ): source is Extract<UvSource, { index: string }> {
@@ -106,7 +109,7 @@ export class UvProcessor extends BasePyProjectProcessor {
             if ('git' in depSource) {
               applyGitSource(
                 dep,
-                depSource.git,
+                depSource.git.replace(gitPlusPrefixRegex, ''),
                 depSource.rev,
                 depSource.tag,
                 depSource.branch,
