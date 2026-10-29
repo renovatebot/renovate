@@ -2,6 +2,7 @@ import type { Category } from '../../../constants/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
@@ -26,6 +27,15 @@ export const lockFileMaintenanceIsDelegatedToPackageManager =
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';
 export const categories: Category[] = ['js'];
+
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  npm: {
+    passesMinimumReleaseAge: true,
+    note: 'Passes `--before`. Uses the older date if the repository `.npmrc` has a `before` setting. Skipped if the `.npmrc` has `min-release-age`.',
+  },
+  pnpm: {},
+  yarn: {},
+};
 
 export const defaultConfig = {
   managerFilePatterns: [

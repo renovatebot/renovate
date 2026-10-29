@@ -4,6 +4,7 @@ import type {
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
+  VulnerabilityAlertSource,
 } from '../../config/types.ts';
 import type { Category } from '../../constants/index.ts';
 import type {
@@ -17,6 +18,7 @@ import type {
 import type {
   AdditionalConstraintName,
   ConstraintName,
+  ToolName,
 } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
@@ -86,6 +88,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeExtracted?: Nullish<string>;
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -113,6 +116,12 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   *
+   * Renovate uses the larger of this and `minimumReleaseAge`.
+   */
+  minimumReleaseAgeExtracted?: string;
 }
 
 export interface PackageFile<T = unknown> extends PackageFileContent<T> {
@@ -424,6 +433,27 @@ export interface DepTypeMetadata {
   description: string;
 }
 
+/**
+ * `true` when supported, or the version range of the package manager that supports it, e.g. `>=11.10.0`.
+ */
+export type MinimumReleaseAgeToolCapability = boolean | string;
+
+export interface MinimumReleaseAgeToolSupport {
+  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
+  /** Renovate reads the package manager's own minimum release age setting */
+  readsConfiguredAge?: MinimumReleaseAgeToolCapability;
+  /** The package manager enforces the minimum release age during lock file maintenance */
+  enforcedInLockFile?: MinimumReleaseAgeToolCapability;
+  /** Markdown note */
+  note?: string;
+}
+
+/** How the package managers of a manager handle `minimumReleaseAge`, used for docs. A missing field means "not supported". */
+export type MinimumReleaseAgeSupport = Partial<
+  Record<ToolName, MinimumReleaseAgeToolSupport>
+>;
+
 export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
@@ -432,6 +462,8 @@ export interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /** How the package managers used by this manager handle `minimumReleaseAge`, used for docs */
+  minimumReleaseAgeSupport?: MinimumReleaseAgeSupport;
   /** Whether the package files carry an `npmrc` resolved from the repository `.npmrc` and the config, see `NpmrcPackageFile` */
   supportsNpmrc?: boolean;
   /**
@@ -444,6 +476,15 @@ export interface ManagerApiBase extends ModuleApi {
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
+
+  /**
+   * Whether Renovate can perform a Vulnerability Alerts' remediation for a transitive dependency.
+   *
+   * This most likely happens using `lockfile-only` updates.
+   */
+  supportsTransitiveRemediation?: Partial<
+    Record<VulnerabilityAlertSource, true>
+  >;
 
   bumpPackageVersion?(
     content: string,
@@ -466,6 +507,13 @@ export interface ManagerApiBase extends ModuleApi {
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
+
+  /**
+   * Whether the package manager enforces the minimum release age itself when regenerating the lock file for lock file maintenance.
+   */
+  enforcesMinimumReleaseAge?(
+    config: UpdateArtifactsConfig,
+  ): MaybePromise<boolean>;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact,
