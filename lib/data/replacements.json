@@ -1311,7 +1311,7 @@
         "matchDatasources": ["maven"],
         "matchPackageNames": ["net.sf.ucanaccess:ucanaccess"],
         "replacementName": "io.github.spannm:ucanaccess",
-        "replacementVersion": "5.1.8"
+        "replacementVersion": "5.1.0"
       }
     ]
   },
