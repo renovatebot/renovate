@@ -76,7 +76,8 @@ This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment v
 
 You can then ingest this data into other tools, for instance:
 
-```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+```bash title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+# bash-specific syntax
 while IFS= read -r line || [ -n "$line" ]; do
   curl -s -X POST http://localhost:4318/v1/traces \
     -H 'Content-Type: application/json' \
