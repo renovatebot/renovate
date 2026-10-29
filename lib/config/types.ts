@@ -966,3 +966,31 @@ export interface RepoToolSettingsOptions {
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }
+
+/** All known `VulnerabilityAlertSource`s */
+export const VulnerabilityAlertSources = [
+  /**
+   * The Platform being used provides vulnerability alerts.
+   *
+   * i.e. GitHub Advanced Security's Dependabot Alerts
+   **/
+  '$platform',
+  /**
+   * The Open Source Vulnerability database (OSV) provides vulnerability alerts.
+   *
+   * @link https://github.com/renovatebot/osv-offline
+   **/
+  'OSV',
+  /**
+   * A self-hosted administrator is providing any `packageRules` that will apply Vulnerability Alerts.
+   *
+   * @see PackageRule
+   **/
+  'packageRules',
+] as const;
+
+/**
+ * Where the Vulnerability Alerts are sourced from.
+ */
+export type VulnerabilityAlertSource =
+  (typeof VulnerabilityAlertSources)[number];
