@@ -46,11 +46,12 @@ export function calculateMinimumReleaseAgeMs(
 }
 
 /**
- * Checks whether a release satisfies the effective minimum release age, see
- * `calculateMinimumReleaseAgeMs()`.
+ * Checks whether a release satisfies the effective minimum release age.
  *
  * Separate from `internalChecksFilter` to allow reuse, and lives here so that
  * managers can import it without an import cycle.
+ *
+ * @see calculateMinimumReleaseAgeMs
  */
 export function checkMinimumReleaseAge(
   config: MinimumReleaseAgeConfig & {
