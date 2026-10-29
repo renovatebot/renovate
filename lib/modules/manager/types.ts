@@ -101,6 +101,10 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
+   * Set by the manager to share the `extractedConstraints` of this package file with the package files of other managers, see {@link SharedConstraintsScope}.
+   */
+  sharedConstraintsScope?: SharedConstraintsScope;
+  /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
@@ -415,6 +419,25 @@ export interface DepTypeMetadata {
   prettyDepType?: string;
   /** Human-readable description of what this depType represents */
   description: string;
+}
+
+/**
+ * The directory tree in which the `extractedConstraints` of a package file apply to the package files of other managers.
+ */
+export interface SharedConstraintsScope {
+  /** The directory, relative to the repository root, whose package files and subdirectories the constraints apply to */
+  directory: string;
+  /** Decides between package files of the same directory, the higher one wins */
+  precedence: number;
+}
+
+/**
+ * The constraints which the package files of a manager share for a directory, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraints {
+  manager: string;
+  directory: string;
+  constraints: Partial<Record<ConstraintName, string>>;
 }
 
 export interface ManagerApiBase extends ModuleApi {

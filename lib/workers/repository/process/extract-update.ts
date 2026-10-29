@@ -30,6 +30,7 @@ import {
 import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import { extractAllDependencies } from '../extract/index.ts';
+import { collectSharedConstraints } from '../extract/shared-constraints.ts';
 import { branchifyUpgrades } from '../updates/branchify.ts';
 import { fetchUpdates } from './fetch.ts';
 import { calculateLibYears } from './libyear.ts';
@@ -352,7 +353,7 @@ export async function lookup(
   memCache.cleanDatasourceKeys();
   calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
-    config,
+    { ...config, sharedConstraints: collectSharedConstraints(packageFiles) },
     packageFiles,
   );
   reportMaliciousSkippedDependencies(packageFiles);

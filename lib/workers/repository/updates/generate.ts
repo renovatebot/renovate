@@ -15,6 +15,7 @@ import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
 import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { getSharedConstraints } from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
 function prettifyVersion(version: string): string {
@@ -530,13 +531,18 @@ export function generateBranchConfig(
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
-    if (upgrade.extractedConstraints) {
-      config.extractedConstraints = {
-        ...config.extractedConstraints,
-        ...upgrade.extractedConstraints,
-      };
-    }
+    // the constraints which other managers share for the directory of the package file come below its own
+    config.extractedConstraints = {
+      ...config.extractedConstraints,
+      ...getSharedConstraints(
+        upgrade.sharedConstraints,
+        upgrade.manager,
+        upgrade.packageFile,
+      ),
+      ...upgrade.extractedConstraints,
+    };
   }
+  delete config.sharedConstraints;
 
   config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
   // Set skipInstalls to false if any upgrade in the branch has it false

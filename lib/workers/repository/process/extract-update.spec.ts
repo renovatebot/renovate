@@ -18,6 +18,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _extractAll from '../extract/index.ts';
+import * as _sharedConstraints from '../extract/shared-constraints.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
   EXTRACT_CACHE_REVISION,
@@ -46,11 +47,13 @@ vi.mock('./vulnerabilities.ts', () => {
 });
 vi.mock('../updates/branchify.ts');
 vi.mock('../extract/index.ts');
+vi.mock('../extract/shared-constraints.ts');
 vi.mock('../../../util/cache/repository/index.ts');
 vi.mock('../../../util/fs/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const extractAll = vi.mocked(_extractAll);
+const sharedConstraints = vi.mocked(_sharedConstraints);
 const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
 const write = vi.mocked(_write);
@@ -97,6 +100,28 @@ describe('workers/repository/process/extract-update', () => {
         ],
         packageFiles: undefined,
       });
+    });
+
+    it('passes the shared constraints of the package files on to the branches', async () => {
+      const config = { repoIsOnboarded: true };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [{ packageFile: 'package.json', deps: [] }],
+      };
+      const shared = [
+        { manager: 'tools', directory: '', constraints: { pnpm: '10.16.1' } },
+      ];
+      sharedConstraints.collectSharedConstraints.mockReturnValueOnce(shared);
+
+      await lookup(config, packageFiles);
+
+      expect(sharedConstraints.collectSharedConstraints).toHaveBeenCalledWith(
+        packageFiles,
+      );
+      expect(branchify.branchifyUpgrades).toHaveBeenCalledWith(
+        { ...config, sharedConstraints: shared },
+        packageFiles,
+      );
+      expect(config).toEqual({ repoIsOnboarded: true });
     });
 
     it('runs with baseBranchPatterns', async () => {
