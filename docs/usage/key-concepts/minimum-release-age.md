@@ -287,6 +287,12 @@ The minimum release age from the configuration of your package manager does not 
 ### What happens to security updates?
 
 Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
+This includes the minimum release age from the configuration of your package manager.
+
+Your package manager still applies its own minimum release age when Renovate updates the lock file.
+If the fixed version is younger than that, the lock file update fails, and the PR shows an artifact error.
+This keeps a fix which your package manager would reject visible, instead of holding it back without a PR.
+Set the minimum release age of your package manager to the smallest age which you want security updates to wait for.
 
 ### What happens if a package has multiple updates available?
 
