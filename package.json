@@ -179,7 +179,7 @@
     "@renovatebot/base-image": "13.147.0",
     "@renovatebot/detect-tools": "4.0.23",
     "@renovatebot/good-enough-parser": "3.0.0",
-    "@renovatebot/osv-offline": "4.2.0",
+    "@renovatebot/osv-offline": "4.4.0",
     "@renovatebot/pep440": "5.0.1",
     "@renovatebot/pgp": "2.0.4",
     "@renovatebot/ruby-semver": "5.0.0",
