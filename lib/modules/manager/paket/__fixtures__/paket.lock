@@ -1,0 +1,78 @@
+RESTRICTION: == net8.0
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    dotnet-fable (2.0.11) - clitool: true
+      Dotnet.ProjInfo (>= 0.20)
+      FSharp.Compiler.Service (>= 25.0.1)
+      FSharp.Core (>= 4.5.2)
+      Microsoft.NETCore.App (>= 2.0)
+      Newtonsoft.Json (>= 11.0.2)
+    Dotnet.ProjInfo (0.44)
+      FSharp.Core (>= 4.6.2)
+      Microsoft.NETFramework.ReferenceAssemblies (>= 1.0)
+      System.ValueTuple (>= 4.4)
+    FSharp.Compiler.Service (43.9.300)
+      FSharp.Core (9.0.300)
+      System.Buffers (>= 4.6)
+      System.Collections.Immutable (>= 8.0)
+      System.Diagnostics.DiagnosticSource (>= 8.0)
+      System.Memory (>= 4.5.5)
+      System.Reflection.Emit (>= 4.7)
+      System.Reflection.Metadata (>= 8.0)
+      System.Runtime.CompilerServices.Unsafe (>= 6.1)
+    FSharp.Core (9.0.300)
+    Microsoft.NETCore.App (2.2.8)
+      Microsoft.NETCore.DotNetHostPolicy (>= 2.2.8)
+      Microsoft.NETCore.Platforms (>= 2.2.4)
+      Microsoft.NETCore.Targets (>= 2.0)
+      NETStandard.Library (>= 2.0.3)
+    Microsoft.NETCore.DotNetAppHost (9.0.7)
+    Microsoft.NETCore.DotNetHostPolicy (8.0.18)
+      Microsoft.NETCore.DotNetHostResolver (>= 8.0.18)
+    Microsoft.NETCore.DotNetHostResolver (8.0.18)
+      Microsoft.NETCore.DotNetAppHost (>= 8.0.18)
+    Microsoft.NETCore.Platforms (7.0.4)
+    Microsoft.NETCore.Targets (5.0)
+    Microsoft.NETFramework.ReferenceAssemblies (1.0.3)
+    NETStandard.Library (2.0.3)
+      Microsoft.NETCore.Platforms (>= 1.1)
+    Newtonsoft.Json (13.0.3)
+    System.Buffers (4.6.1)
+    System.Collections.Immutable (9.0.7)
+    System.Diagnostics.DiagnosticSource (9.0.7)
+    System.Memory (4.6.3)
+    System.Reflection.Emit (4.7)
+    System.Reflection.Metadata (9.0.7)
+      System.Collections.Immutable (>= 9.0.7)
+    System.Runtime.CompilerServices.Unsafe (6.1.2)
+    System.ValueTuple (4.6.1)
+    xunit (2.9.3)
+      xunit.analyzers (>= 1.18)
+      xunit.assert (>= 2.9.3)
+      xunit.core (2.9.3)
+    xunit.abstractions (2.0.3)
+    xunit.analyzers (1.23)
+    xunit.assert (2.9.3)
+    xunit.core (2.9.3)
+      xunit.extensibility.core (2.9.3)
+      xunit.extensibility.execution (2.9.3)
+    xunit.extensibility.core (2.9.3)
+      xunit.abstractions (>= 2.0.3)
+    xunit.extensibility.execution (2.9.3)
+      xunit.extensibility.core (2.9.3)
+GITHUB
+  remote: forki/FsUnit
+    FsUnit.fs (fa4eb37288d355eb855261be6c0b3945fba68432)
+GIST
+  remote: fpellet/b28953bc4d1ad9ffa4c5a1c471d0db82
+    assert.fs (dc75e661b465543a33d8e1b3d3402fa3d4caae31)
+HTTP
+  remote: http://www.fssnip.net
+    decrypt.fs (/1n)
+GIT
+  remote: http://github.com/forki/AskMe.git
+     (23c2cf83495c9096f9bdd9d629a0849e3e853f42)
+GROUP GroupA
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FAKE (5.16)
