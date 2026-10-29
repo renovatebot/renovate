@@ -42,6 +42,8 @@ const php2shellRule = {
 
 interface MinimumReleaseAgeDatasource {
   description: string;
+  /** The managers whose package manager Renovate passes the minimum release age to, for packages of this datasource */
+  managers: string[];
   minimumReleaseAge: string;
 }
 
@@ -56,16 +58,19 @@ const minimumReleaseAgeDatasources: Partial<
   crate: {
     description:
       "Wait until the Crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
+    managers: ['cargo'],
     minimumReleaseAge: '3 days',
   },
   npm: {
     description:
       'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
+    managers: ['npm'],
     minimumReleaseAge: '3 days',
   },
   pypi: {
     description:
       'Wait until the Python package is three days old before raising the update. This introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages.',
+    managers: ['poetry'],
     minimumReleaseAge: '3 days',
   },
 };
@@ -120,21 +125,35 @@ const unsupportedUpdateTypeRules: PackageRule[] = [
 
 function buildMinimumReleaseAgePreset(
   datasource: string,
-  { description, minimumReleaseAge }: MinimumReleaseAgeDatasource,
+  { description, managers, minimumReleaseAge }: MinimumReleaseAgeDatasource,
 ): Preset {
   const packageRules: PackageRule[] = [
+    {
+      description: `Only require Minimum Release Age for ${datasource} packages of the managers which pass it to their package manager`,
+      matchDatasources: [`!${datasource}`],
+      matchManagers: managers,
+      minimumReleaseAge: null,
+    },
     {
       internalChecksFilter: 'strict',
       matchDatasources: [datasource],
       minimumReleaseAge,
     },
-    ...unsupportedUpdateTypeRules.map((rule): PackageRule => ({
-      ...rule,
-      matchDatasources: [datasource],
-    })),
+    ...unsupportedUpdateTypeRules.map((rule): PackageRule =>
+      // lock file maintenance has no datasource
+      rule.matchUpdateTypes?.includes('lockFileMaintenance')
+        ? { ...rule, matchManagers: managers }
+        : { ...rule, matchDatasources: [datasource] },
+    ),
   ];
 
-  return { description, packageRules };
+  // A `minimumReleaseAge` from `packageRules` does not reach the package
+  // managers, so it is set per manager too
+  const managerConfig = Object.fromEntries(
+    managers.map((manager) => [manager, { minimumReleaseAge }]),
+  );
+
+  return { description, ...managerConfig, packageRules };
 }
 
 function loadMinimumReleaseAgePresets(): Record<string, Preset> {
