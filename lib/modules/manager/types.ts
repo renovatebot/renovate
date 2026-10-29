@@ -75,13 +75,10 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
-  currentValue?: string;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
   ignoreScripts?: boolean;
   updateType?: UpdateType;
-  newValue?: string;
-  newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
