@@ -296,4 +296,56 @@ describe('modules/versioning/rust-release-channel/index', () => {
       ).toBe(expected);
     },
   );
+
+  it.each`
+    input          | expected
+    ${'>=1.100.0'} | ${true}
+    ${'>= 1.100'}  | ${true}
+    ${'>=stable'}  | ${false}
+    ${'>=invalid'} | ${false}
+    ${'>='}        | ${false}
+  `(
+    'isValid("$input") === $expected for lower bounds',
+    ({ input, expected }) => {
+      expect(rustReleaseChannel.isValid(input)).toBe(expected);
+    },
+  );
+
+  it.each`
+    version                 | range          | expected
+    ${'1.100.0'}            | ${'>=1.100.0'} | ${true}
+    ${'1.101.2'}            | ${'>=1.100.0'} | ${true}
+    ${'1.99.0'}             | ${'>=1.100.0'} | ${false}
+    ${'1.100.0-beta.1'}     | ${'>=1.100.0'} | ${false}
+    ${'nightly-2026-11-01'} | ${'>=1.100.0'} | ${false}
+    ${'stable'}             | ${'>=1.100.0'} | ${false}
+    ${'invalid'}            | ${'>=1.100.0'} | ${false}
+  `(
+    'matches("$version", "$range") === $expected for lower bounds',
+    ({ version, range, expected }) => {
+      expect(rustReleaseChannel.matches(version, range)).toBe(expected);
+    },
+  );
+
+  it.each`
+    subRange                              | superRange     | expected
+    ${'1.100.0'}                          | ${'>=1.100.0'} | ${true}
+    ${'1.100'}                            | ${'>=1.100.0'} | ${true}
+    ${'1.102.1'}                          | ${'>=1.100.0'} | ${true}
+    ${'>=1.101'}                          | ${'>=1.100.0'} | ${true}
+    ${'1.100.0-x86_64-unknown-linux-gnu'} | ${'>=1.100.0'} | ${true}
+    ${'1.99.0'}                           | ${'>=1.100.0'} | ${false}
+    ${'1.99'}                             | ${'>=1.100.0'} | ${false}
+    ${'>=1.99'}                           | ${'>=1.100.0'} | ${false}
+    ${'1.100.0-beta'}                     | ${'>=1.100.0'} | ${false}
+    ${'stable'}                           | ${'>=1.100.0'} | ${false}
+    ${'nightly-2026-11-01'}               | ${'>=1.100.0'} | ${false}
+    ${'invalid'}                          | ${'>=1.100.0'} | ${false}
+    ${'1.100.0'}                          | ${'1.100'}     | ${undefined}
+  `(
+    'subset("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(rustReleaseChannel.subset(subRange, superRange)).toBe(expected);
+    },
+  );
 });

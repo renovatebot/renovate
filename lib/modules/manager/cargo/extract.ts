@@ -16,6 +16,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractLockFileVersions } from './locked-version.ts';
+import { getGlobalMinPublishAge } from './minimum-release-age.ts';
 import { CargoConfig, CargoManifest } from './schema.ts';
 import type {
   CargoManagerData,
@@ -295,6 +296,14 @@ export async function extractPackageFile(
     deps,
     packageFileVersion: version,
   };
+
+  const minPublishAge = getGlobalMinPublishAge(cargoConfig);
+  if (minPublishAge) {
+    logger.debug(
+      `Found global-min-publish-age ${minPublishAge} in the cargo config for ${packageFile}`,
+    );
+    res.minimumReleaseAgeExtracted = minPublishAge;
+  }
 
   const rustConstraint = await extractRustConstraint(packageFile);
   if (rustConstraint) {

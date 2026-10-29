@@ -971,6 +971,61 @@ replace-with = "mcorbin"
       ]);
     });
 
+    describe('minimum release age', () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        syn = "2.0"
+      `;
+
+      it('extracts global-min-publish-age from .cargo/config.toml', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = "3 days"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.minimumReleaseAgeExtracted).toBe('3 days');
+      });
+
+      it('ignores a global-min-publish-age of 0', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = "0"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res).not.toHaveProperty('minimumReleaseAgeExtracted');
+      });
+
+      it('keeps the registries of a config with an invalid global-min-publish-age', async () => {
+        mockReadLocalFile({
+          '.cargo/config.toml': codeBlock`
+            [registry]
+            global-min-publish-age = 3
+
+            [source.crates-io]
+            replace-with = "mirror"
+
+            [source.mirror]
+            registry = "https://mirror.example.com/index"
+          `,
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res).not.toHaveProperty('minimumReleaseAgeExtracted');
+        expect(res?.deps).toMatchObject([
+          { registryUrls: ['https://mirror.example.com/index'] },
+        ]);
+      });
+    });
+
     describe('rust constraint', () => {
       const cargotoml = codeBlock`
         [dependencies]

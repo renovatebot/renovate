@@ -1,7 +1,9 @@
 import { isNonEmptyString, isObject } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { parse } from './parse.ts';
+import type { ToolchainObject } from './types.ts';
 import { sortParsed } from './util.ts';
 
 export const id = 'rust-release-channel';
@@ -15,9 +17,23 @@ export const supportedRangeStrategies = ['pin', 'replace'];
 /** Rust 1.0.0 release date for major version calculation */
 const rust1Date = DateTime.utc(2015, 5, 15);
 
+const lowerBoundRegex = regEx(/^>=\s*(?<version>.+)$/);
+
+/**
+ * Parses a lower bound range like `>=1.100.0` into its versioned channel.
+ */
+function parseLowerBound(input: string): ToolchainObject | null {
+  const version = lowerBoundRegex.exec(input)?.groups?.version;
+  if (!version) {
+    return null;
+  }
+  const parsed = parse(version);
+  return parsed && isObject(parsed.channel) ? parsed : null;
+}
+
 class RustReleaseChannelVersioning implements VersioningApi {
   isValid(input: string): boolean {
-    return parse(input) !== null;
+    return parse(input) !== null || parseLowerBound(input) !== null;
   }
 
   isVersion(input: string | undefined | null): boolean {
@@ -258,6 +274,15 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
   matches(version: string, range: string): boolean {
     const parsedVersion = parse(version);
+    const lowerBound = parseLowerBound(range);
+    if (lowerBound) {
+      return (
+        !!parsedVersion &&
+        isObject(parsedVersion.channel) &&
+        sortParsed(parsedVersion, lowerBound) >= 0
+      );
+    }
+
     const parsedRange = parse(range);
 
     if (!parsedVersion || !parsedRange) {
@@ -326,6 +351,26 @@ class RustReleaseChannelVersioning implements VersioningApi {
     }
 
     return false;
+  }
+
+  /**
+   * Whether every version of `subRange` matches `superRange`, which has to be a lower bound like `>=1.100.0`.
+   */
+  subset(subRange: string, superRange: string): boolean | undefined {
+    const superBound = parseLowerBound(superRange);
+    if (!superBound) {
+      return undefined;
+    }
+
+    const subBound = parseLowerBound(subRange) ?? parse(subRange);
+    // channel names like `stable` and nightlies have no lowest version
+    if (!subBound || !isObject(subBound.channel)) {
+      return false;
+    }
+
+    // The lowest version of a range like `1.100` is `1.100.0`, and of
+    // `1.100.0-beta` it is the first beta
+    return sortParsed(subBound, superBound) >= 0;
   }
 }
 

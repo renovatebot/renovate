@@ -142,6 +142,12 @@ const CargoConfigSource = z.object({
 
 export const CargoConfig = Toml.pipe(
   z.object({
+    registry: z
+      .object({
+        'global-min-publish-age': z.string().optional().catch(undefined),
+      })
+      .optional()
+      .catch(undefined),
     registries: z.record(z.string(), CargoConfigRegistry).optional(),
     source: z.record(z.string(), CargoConfigSource).optional(),
   }),
