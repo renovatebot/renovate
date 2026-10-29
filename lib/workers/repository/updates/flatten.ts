@@ -120,6 +120,8 @@ export async function flattenUpdates(
         managerConfig,
         packageFile,
       ) as never;
+      packageFileConfig.minimumReleaseAgeRepository =
+        managerConfig.minimumReleaseAge;
       const packagePath = packageFile.packageFile?.split('/');
       // `split` always yields at least one element, so there is always a file
       // name to drop here

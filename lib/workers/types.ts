@@ -105,6 +105,12 @@ export interface BranchUpgradeConfig
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
   minimumReleaseAgeExtracted?: string;
+  /**
+   * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
+   *
+   * Package managers apply a minimum release age to every package they resolve, so Renovate passes them this value instead of a `minimumReleaseAge` from `packageRules`.
+   */
+  minimumReleaseAgeRepository?: string | null;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
