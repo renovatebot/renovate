@@ -100,6 +100,10 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
+   * Set by the manager to share the `extractedConstraints` of this package file with the package files of other managers, see {@link SharedConstraintsScope}.
+   */
+  sharedConstraintsScope?: SharedConstraintsScope;
+  /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
@@ -477,13 +481,6 @@ export interface ManagerApiBase extends ModuleApi {
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
-
-  /**
-   * Opts a manager into sharing the `extractedConstraints` of its package files with the package files of other managers, see {@link SharedConstraintsScope}.
-   */
-  getSharedConstraintsScope?(
-    packageFile: string,
-  ): SharedConstraintsScope | null;
 
   updateArtifacts?(
     updateArtifact: UpdateArtifact,
