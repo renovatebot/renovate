@@ -29,6 +29,8 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
+  /** Warns that pnpm got a larger minimum release age than some updates of the branch */
+  minimumReleaseAgeNotice?: string;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions

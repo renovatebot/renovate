@@ -316,6 +316,7 @@ export interface Upgrade<
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  minimumReleaseAge?: string | null;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;

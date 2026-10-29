@@ -51,8 +51,31 @@ function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
 
 const minuteMs = 60 * 1000;
 
+interface MinimumReleaseAgeFlag {
+  flag: string;
+  notice?: string;
+}
+
+function durationToMs(
+  key: string,
+  duration: string | null | undefined,
+): number | null {
+  if (!isNonEmptyString(duration)) {
+    return null;
+  }
+  const ms = toMs(duration);
+  if (ms === null) {
+    logger.debug({ [key]: duration }, `Invalid ${key}, not passing it to pnpm`);
+  }
+  return ms;
+}
+
 /**
- * The `--config.minimum-release-age` flag which passes the larger of `minimumReleaseAge` and the pnpm value to pnpm, in minutes.
+ * The `--config.minimum-release-age` flag, in minutes, which passes the larger of Renovate's minimum release age and the pnpm value to pnpm.
+ *
+ * Lock file maintenance uses its own `minimumReleaseAge`.
+ * Other updates use `minimumReleaseAgeRepository`, as pnpm applies the value to every package in the lock file, and a larger `minimumReleaseAge` from `packageRules` would fail on packages which other updates locked.
+ * The notice warns about updates whose own `minimumReleaseAge` is smaller than the value which pnpm gets.
  *
  * The pnpm value comes from the `pnpm-workspace.yaml`, the `.npmrc` before pnpm v11, or the pnpm v11 default.
  *
@@ -64,23 +87,21 @@ async function getMinimumReleaseAgeFlag(
   upgrades: Upgrade[],
   npmrcContent: string | null,
   pnpmConstraint: string | null | undefined,
-): Promise<string | null> {
-  if (!isNonEmptyString(config.minimumReleaseAge)) {
-    return null;
-  }
-  const minimumReleaseAgeMs = toMs(config.minimumReleaseAge);
-  if (minimumReleaseAgeMs === null) {
-    logger.debug(
-      { minimumReleaseAge: config.minimumReleaseAge },
-      'Invalid minimumReleaseAge, not passing it to pnpm',
-    );
-    return null;
-  }
-  if (!minimumReleaseAgeMs) {
-    return null;
-  }
+): Promise<MinimumReleaseAgeFlag | null> {
   // security updates bypass minimumReleaseAge
   if (upgrades.some((upgrade) => upgrade.isVulnerabilityAlert)) {
+    return null;
+  }
+  const isLockFileMaintenance = upgrades.some(
+    (upgrade) => upgrade.isLockFileMaintenance,
+  );
+  const minimumReleaseAgeMs = isLockFileMaintenance
+    ? durationToMs('minimumReleaseAge', config.minimumReleaseAge)
+    : durationToMs(
+        'minimumReleaseAgeRepository',
+        config.minimumReleaseAgeRepository,
+      );
+  if (!minimumReleaseAgeMs) {
     return null;
   }
   const workspace = await readPnpmWorkspaceMinimumReleaseAge(lockFileName);
@@ -96,12 +117,38 @@ async function getMinimumReleaseAgeFlag(
   );
   logger.debug(
     {
-      minimumReleaseAge: config.minimumReleaseAge,
+      minimumReleaseAge: isLockFileMaintenance
+        ? config.minimumReleaseAge
+        : config.minimumReleaseAgeRepository,
       pnpmMinimumReleaseAge: pnpmMinutes,
     },
     `Passing a minimum release age of ${minutes} minutes to pnpm`,
   );
-  return `--config.minimum-release-age=${minutes}`;
+  const result: MinimumReleaseAgeFlag = {
+    flag: `--config.minimum-release-age=${minutes}`,
+  };
+
+  // Renovate looks updates up with the larger of their own `minimumReleaseAge`
+  // and the pnpm value, which can be smaller than the value pnpm gets
+  const lowerUpgrades = isLockFileMaintenance
+    ? []
+    : upgrades.filter(
+        (upgrade) =>
+          Math.max(
+            toMs(upgrade.minimumReleaseAge ?? '') ?? 0,
+            (pnpmMinutes ?? 0) * minuteMs,
+          ) <
+          minutes * minuteMs,
+      );
+  if (lowerUpgrades.length) {
+    const depNames = lowerUpgrades
+      .map((upgrade) => `\`${upgrade.depName!}\``)
+      .filter(uniqueStrings)
+      .join(', ');
+    result.notice = `The \`minimumReleaseAge\` of ${depNames} is smaller than the ${minutes} minutes which Renovate passes to pnpm, so pnpm may reject versions younger than that. A \`minimumReleaseAge\` from \`packageRules\` only applies to Renovate's own checks; set it in the repository config or the \`pnpm-workspace.yaml\` to apply it to pnpm.`;
+    logger.warn({ lockFileName, depNames }, result.notice);
+  }
+  return result;
 }
 
 const immatureVersionRegex = regEx(
@@ -148,6 +195,7 @@ export async function generateLockFile(
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
   const commands: string[] = [];
+  let minimumReleaseAgeNotice: string | undefined;
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const pnpmToolConstraint: ToolConstraint = {
@@ -236,7 +284,8 @@ export async function generateLockFile(
       pnpmToolConstraint.constraint,
     );
     if (minimumReleaseAgeFlag) {
-      args += ` ${minimumReleaseAgeFlag}`;
+      args += ` ${minimumReleaseAgeFlag.flag}`;
+      minimumReleaseAgeNotice = minimumReleaseAgeFlag.notice;
     }
 
     logger.trace({ args }, 'pnpm command options');
@@ -306,15 +355,30 @@ export async function generateLockFile(
     );
     if (immaturePackages.length) {
       const packages = immaturePackages.map((pkg) => `\`${pkg}\``).join(', ');
-      return {
-        error: true,
-        stderr: `pnpm found no version old enough for the minimum release age: ${packages}\n\n${artifactErrorMessageFromExecError(err, '')}`,
-        stdout: err.stdout,
-      };
+      return withNotice(
+        {
+          error: true,
+          stderr: `pnpm found no version old enough for the minimum release age: ${packages}\n\n${artifactErrorMessageFromExecError(err, '')}`,
+          stdout: err.stdout,
+        },
+        minimumReleaseAgeNotice,
+      );
     }
-    return { error: true, stderr: err.stderr, stdout: err.stdout };
+    return withNotice(
+      { error: true, stderr: err.stderr, stdout: err.stdout },
+      minimumReleaseAgeNotice,
+    );
   }
-  return { lockFile };
+  return withNotice({ lockFile }, minimumReleaseAgeNotice);
+}
+
+function withNotice(
+  result: GenerateLockFileResult,
+  minimumReleaseAgeNotice: string | undefined,
+): GenerateLockFileResult {
+  return minimumReleaseAgeNotice
+    ? { ...result, minimumReleaseAgeNotice }
+    : result;
 }
 
 export async function getConstraintFromLockFile(

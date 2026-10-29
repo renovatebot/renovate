@@ -691,6 +691,12 @@ async function getAdditionalFilesInner(
           upgrades,
           npmrcContent,
         );
+        if (res.minimumReleaseAgeNotice) {
+          artifactNotices.push({
+            file: pnpmLockFile,
+            message: res.minimumReleaseAgeNotice,
+          });
+        }
         if (res.error) {
           /* v8 ignore next -- needs test */
           if (res.stdout?.includes(`No compatible version found:`)) {

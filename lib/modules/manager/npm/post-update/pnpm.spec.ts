@@ -779,8 +779,8 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         const res = await pnpmHelper.generateLockFile(
           'some-folder',
           {},
-          { ...config, minimumReleaseAge },
-          upgrades,
+          { ...config, minimumReleaseAgeRepository: minimumReleaseAge },
+          [{ minimumReleaseAge }],
         );
 
         expect(res.lockFile).toBe('package-lock-contents');
@@ -811,8 +811,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         await pnpmHelper.generateLockFile(
           'some-folder',
           {},
-          { ...config, constraints: { pnpm }, minimumReleaseAge },
-          upgrades,
+          {
+            ...config,
+            constraints: { pnpm },
+            minimumReleaseAgeRepository: minimumReleaseAge,
+          },
+          [{ minimumReleaseAge }],
           npmrc,
         );
 
@@ -839,7 +843,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         await pnpmHelper.generateLockFile(
           'some-folder',
           {},
-          { ...config, minimumReleaseAge },
+          { ...config, minimumReleaseAgeRepository: minimumReleaseAge },
           [upgrade],
         );
 
@@ -848,6 +852,102 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         ]);
       },
     );
+
+    it('passes minimumReleaseAge for lock file maintenance', async () => {
+      const execSnapshots = mockExecAll();
+      mockPnpmFiles();
+
+      await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        {
+          ...config,
+          minimumReleaseAge: '7 days',
+          minimumReleaseAgeRepository: '1 day',
+        },
+        [{ isLockFileMaintenance: true }],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `${pnpmInstall} --config.minimum-release-age=10080 --no-frozen-lockfile`,
+        },
+      ]);
+    });
+
+    it('passes minimumReleaseAgeRepository instead of a larger minimumReleaseAge for updates', async () => {
+      const execSnapshots = mockExecAll();
+      mockPnpmFiles();
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        {
+          ...config,
+          minimumReleaseAge: '14 days',
+          minimumReleaseAgeRepository: '3 days',
+        },
+        [{ depName: 'foo', minimumReleaseAge: '14 days' }],
+      );
+
+      expect(res).toEqual({ lockFile: 'package-lock-contents' });
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `${pnpmInstall} --config.minimum-release-age=4320 --no-frozen-lockfile`,
+        },
+      ]);
+    });
+
+    it.each`
+      workspace                      | notice
+      ${undefined}                   | ${true}
+      ${'minimumReleaseAge: 4320\n'} | ${false}
+    `(
+      'warns about updates with a smaller minimumReleaseAge: workspace=$workspace',
+      async ({ workspace, notice }) => {
+        mockExecAll();
+        mockPnpmFiles(workspace);
+
+        const res = await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          {
+            ...config,
+            constraints: { pnpm: '^10.20.0' },
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '3 days',
+          },
+          [
+            { depName: 'foo', minimumReleaseAge: '1 day' },
+            { depName: 'foo', minimumReleaseAge: '1 day' },
+            { depName: 'bar', minimumReleaseAge: '3 days' },
+          ],
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBe(
+          notice
+            ? "The `minimumReleaseAge` of `foo` is smaller than the 4320 minutes which Renovate passes to pnpm, so pnpm may reject versions younger than that. A `minimumReleaseAge` from `packageRules` only applies to Renovate's own checks; set it in the repository config or the `pnpm-workspace.yaml` to apply it to pnpm."
+            : undefined,
+        );
+      },
+    );
+
+    it('keeps the notice if pnpm fails', async () => {
+      mockExecSequence([immatureError('ERR_PNPM_FETCH_404  Not Found')]);
+      mockPnpmFiles();
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        { ...config, minimumReleaseAgeRepository: '3 days' },
+        [{ depName: 'foo' }],
+      );
+
+      expect(res).toMatchObject({
+        error: true,
+        minimumReleaseAgeNotice: expect.stringContaining('`foo`'),
+      });
+    });
 
     it('does not retry if pnpm rejects locked packages', async () => {
       const stdout =
@@ -858,8 +958,8 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       const res = await pnpmHelper.generateLockFile(
         'some-folder',
         {},
-        { ...config, minimumReleaseAge: '1 day' },
-        upgrades,
+        { ...config, minimumReleaseAgeRepository: '1 day' },
+        [{ minimumReleaseAge: '1 day' }],
       );
 
       expect(res).toEqual({ error: true, stderr: '', stdout });
@@ -875,8 +975,8 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       const res = await pnpmHelper.generateLockFile(
         'some-folder',
         {},
-        { ...config, minimumReleaseAge: '1 day' },
-        upgrades,
+        { ...config, minimumReleaseAgeRepository: '1 day' },
+        [{ minimumReleaseAge: '1 day' }],
       );
 
       expect(res).toEqual({
@@ -902,8 +1002,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         const res = await pnpmHelper.generateLockFile(
           'some-folder',
           {},
-          { ...config, minimumReleaseAge: '1 day' },
-          [upgrade],
+          {
+            ...config,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '1 day',
+          },
+          [{ minimumReleaseAge: '1 day', ...upgrade }],
         );
 
         expect(res).toEqual({
