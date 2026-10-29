@@ -420,9 +420,6 @@ importers:
       '@oxlint/plugins':
         specifier: 1.88.0
         version: 1.88.0
-      '@semantic-release/exec':
-        specifier: 7.1.0
-        version: 7.1.0(semantic-release@25.0.9)(supports-color@7.2.0)
       '@smithy/util-stream':
         specifier: 4.8.2
         version: 4.8.2
@@ -2189,12 +2186,6 @@ packages:
   '@semantic-release/error@4.0.0':
     resolution: {integrity: sha512-mgdxrHTLOjOddRVYIYDo0fR3/v61GNN1YGkfbrjuIKg/uMgCd+Qzo3UAXJ+woLQQpos4pl5Esuw5A7AoNlzjUQ==}
     engines: {node: '>=18'}
-
-  '@semantic-release/exec@7.1.0':
-    resolution: {integrity: sha512-4ycZ2atgEUutspPZ2hxO6z8JoQt4+y/kkHvfZ1cZxgl9WKJId1xPj+UadwInj+gMn2Gsv+fLnbrZ4s+6tK2TFQ==}
-    engines: {node: '>=20.8.1'}
-    peerDependencies:
-      semantic-release: '>=24.1.0'
 
   '@semantic-release/github@12.0.10':
     resolution: {integrity: sha512-QskygvpX8hFx9UEbqJ+C46OIhaJjsysNQ8PYJPuRDc/ek5+dh8WYGD1ofUahCcGLAOmnnwZTcmCJCEXM8XxhRw==}
@@ -7548,18 +7539,6 @@ snapshots:
       - supports-color
 
   '@semantic-release/error@4.0.0': {}
-
-  '@semantic-release/exec@7.1.0(semantic-release@25.0.9)(supports-color@7.2.0)':
-    dependencies:
-      '@semantic-release/error': 4.0.0
-      aggregate-error: 3.1.0
-      debug: 4.4.3(supports-color@7.2.0)
-      execa: 9.6.1
-      lodash-es: 4.18.1
-      parse-json: 8.3.0
-      semantic-release: 25.0.9(supports-color@7.2.0)(typescript@7.0.2)
-    transitivePeerDependencies:
-      - supports-color
 
   '@semantic-release/github@12.0.10(semantic-release@25.0.9)(supports-color@7.2.0)':
     dependencies:
