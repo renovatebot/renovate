@@ -23,7 +23,6 @@ import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.
 import { configFileLocations, getConfigFilePattern } from './config-files.ts';
 
 export { updateArtifacts } from './artifacts.ts';
-export { getSharedConstraintsScope } from './constraints.ts';
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';

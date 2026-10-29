@@ -1342,6 +1342,22 @@ describe('modules/manager/mise/extract', () => {
         python: '3.10.17',
         pnpm: '10.16.1',
       });
+      expect(result?.sharedConstraintsScope).toEqual({
+        directory: '',
+        precedence: expect.any(Number),
+      });
+    });
+
+    it('does not share the constraints of an environment config file', async () => {
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.production.toml');
+
+      expect(result?.extractedConstraints).toEqual({ node: '20' });
+      expect(result).not.toHaveProperty('sharedConstraintsScope');
     });
 
     it('omits extractedConstraints without usable tool versions', async () => {
