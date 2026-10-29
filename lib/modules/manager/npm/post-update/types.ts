@@ -29,8 +29,6 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
-  /** pnpm succeeded only without the minimum release age which Renovate passed */
-  minimumReleaseAgeFallback?: boolean;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions

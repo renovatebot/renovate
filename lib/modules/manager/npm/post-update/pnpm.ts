@@ -104,21 +104,6 @@ async function getMinimumReleaseAgeFlag(
   return `--config.minimum-release-age=${minutes}`;
 }
 
-const minimumReleaseAgeErrorCodes = [
-  'ERR_PNPM_NO_MATURE_MATCHING_VERSION',
-  // since v11.1.3, pnpm checks the existing lock file entries too
-  'ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION',
-];
-
-function isMinimumReleaseAgeError(err: {
-  stdout?: string;
-  stderr?: string;
-}): boolean {
-  return [err.stdout, err.stderr].some((output) =>
-    minimumReleaseAgeErrorCodes.some((code) => output?.includes(code)),
-  );
-}
-
 const immatureVersionRegex = regEx(
   /Version (?<version>\S+) \(released [^)]*\) of (?<name>\S+) does not meet the minimumReleaseAge constraint/g,
 );
@@ -162,7 +147,6 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
-  let minimumReleaseAgeFallback = false;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -300,29 +284,7 @@ export async function generateLockFile(
       }
     }
 
-    // Retry without the minimum release age if it rejects locked or new
-    // transitive packages. Lock file maintenance does not retry, as it relies
-    // on the flag to enforce the minimum release age.
-    minimumReleaseAgeFallback = await exec(commands, execOptions).then(
-      () => false,
-      async (err) => {
-        if (
-          !minimumReleaseAgeFlag ||
-          isLockFileMaintenance ||
-          !isMinimumReleaseAgeError(err)
-        ) {
-          throw err;
-        }
-        logger.debug(
-          'pnpm failed with the minimum release age, retrying without it',
-        );
-        await exec(
-          commands.map((cmd) => cmd.replace(` ${minimumReleaseAgeFlag}`, '')),
-          execOptions,
-        );
-        return true;
-      },
-    );
+    await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) {
     // v8 ignore if -- TODO: add test #40625
@@ -352,9 +314,7 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
-  return minimumReleaseAgeFallback
-    ? { lockFile, minimumReleaseAgeFallback }
-    : { lockFile };
+  return { lockFile };
 }
 
 export async function getConstraintFromLockFile(
