@@ -30,7 +30,11 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
-import { getConstraintName, getConstraintValue } from './constraints.ts';
+import {
+  getConstraintName,
+  getConstraintValue,
+  getSharedConstraintsScope,
+} from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
@@ -147,6 +151,10 @@ export async function extractPackageFile(
   );
   if (Object.keys(extractedConstraints).length) {
     result.extractedConstraints = extractedConstraints;
+    const scope = getSharedConstraintsScope(packageFile);
+    if (scope) {
+      result.sharedConstraintsScope = scope;
+    }
   }
 
   return result;
