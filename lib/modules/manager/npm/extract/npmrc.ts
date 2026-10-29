@@ -46,13 +46,13 @@ export function parseNpmrcCooldown(
  */
 export function parseNpmrcPnpmMinimumReleaseAge(
   npmrcContent: string | null | undefined,
-): number | undefined {
+): number | null {
   if (!npmrcContent) {
-    return undefined;
+    return null;
   }
   const minimumReleaseAge = ini.parse(npmrcContent)['minimum-release-age'];
   if (!isNonEmptyString(minimumReleaseAge)) {
-    return undefined;
+    return null;
   }
   const minutes = parseInt(minimumReleaseAge, 10);
   if (isNumber(minutes) && minutes >= 0) {
@@ -61,7 +61,7 @@ export function parseNpmrcPnpmMinimumReleaseAge(
   logger.debug(
     `Invalid minimum-release-age in .npmrc: ${minimumReleaseAge}, ignoring`,
   );
-  return undefined;
+  return null;
 }
 
 /**

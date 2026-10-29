@@ -2,6 +2,7 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
+import { intersectsWith, isSubsetOf } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
 import type { PackageFile } from '../../types.ts';
 import { PnpmWorkspaceMinimumReleaseAge } from '../schema.ts';
@@ -60,25 +61,26 @@ export function getPnpmMinimumReleaseAgeMinutes(
   if (workspace.minimumReleaseAge !== undefined) {
     return workspace.minimumReleaseAge;
   }
-  const constraint =
-    isNonEmptyString(pnpmConstraint) && npmVersioning.isValid(pnpmConstraint)
-      ? pnpmConstraint
-      : null;
-  const npmrcMinutes =
-    constraint &&
-    npmVersioning.subset?.(constraint, pnpmNpmrcMinimumReleaseAgeRange) === true
-      ? parseNpmrcPnpmMinimumReleaseAge(npmrcContent)
-      : undefined;
-  if (npmrcMinutes !== undefined) {
+  const npmrcMinutes = isSubsetOf(
+    npmVersioning,
+    pnpmConstraint,
+    pnpmNpmrcMinimumReleaseAgeRange,
+  )
+    ? parseNpmrcPnpmMinimumReleaseAge(npmrcContent)
+    : null;
+  if (npmrcMinutes !== null) {
     return npmrcMinutes;
   }
+  const isKnownVersion =
+    isNonEmptyString(pnpmConstraint) && npmVersioning.isValid(pnpmConstraint);
   if (
     includeDefault &&
-    (!constraint ||
-      npmVersioning.intersects?.(
-        constraint,
+    (!isKnownVersion ||
+      intersectsWith(
+        npmVersioning,
+        pnpmConstraint,
         pnpmDefaultMinimumReleaseAgeRange,
-      ) === true)
+      ))
   ) {
     return pnpmDefaultMinimumReleaseAgeMinutes;
   }
