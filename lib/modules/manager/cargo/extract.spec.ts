@@ -971,6 +971,66 @@ replace-with = "mcorbin"
       ]);
     });
 
+    describe('rust constraint', () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        syn = "2.0"
+      `;
+
+      function mockToolchainFile(fileName: string, content: string): void {
+        fs.findLocalSiblingOrParent.mockImplementation((_, other) =>
+          Promise.resolve(other === fileName ? fileName : null),
+        );
+        mockReadLocalFile({ [fileName]: content });
+      }
+
+      it.each`
+        channel
+        ${'1.100.0'}
+        ${'1.100'}
+      `(
+        'extracts channel $channel from rust-toolchain.toml',
+        async ({ channel }) => {
+          mockToolchainFile(
+            'rust-toolchain.toml',
+            `[toolchain]\nchannel = "${channel}"\n`,
+          );
+
+          const res = await extractPackageFile(
+            cargotoml,
+            'crates/foo/Cargo.toml',
+            config,
+          );
+
+          expect(res?.extractedConstraints).toEqual({ rust: channel });
+        },
+      );
+
+      it('extracts the channel from a legacy rust-toolchain file', async () => {
+        mockToolchainFile('rust-toolchain', '1.100.1\n');
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.extractedConstraints).toEqual({ rust: '1.100.1' });
+      });
+
+      it.each`
+        content
+        ${'[toolchain]\nchannel = "stable"\n'}
+        ${'[toolchain]\nchannel = "nightly-2026-11-01"\n'}
+        ${'[toolchain]\nchannel = "1.100.0-beta.1"\n'}
+        ${'[toolchain]\npath = "/opt/rust"\n'}
+        ${'invalid'}
+        ${''}
+      `('does not extract a constraint from $content', async ({ content }) => {
+        mockToolchainFile('rust-toolchain.toml', content);
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res).not.toHaveProperty('extractedConstraints');
+      });
+    });
+
     it('should extract project version', async () => {
       const cargotoml = codeBlock`
         [package]

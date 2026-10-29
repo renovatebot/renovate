@@ -7,7 +7,9 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
+import { regEx } from '../../../util/regex.ts';
 import { api as versioning } from '../../versioning/cargo/index.ts';
+import { extractPackageFile as extractRustToolchain } from '../rust-toolchain/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -23,6 +25,8 @@ import type {
 import { DEFAULT_REGISTRY_URL } from './utils.ts';
 
 const DEFAULT_REGISTRY_ID = 'crates-io';
+
+const rustVersionRegex = regEx(/^\d+\.\d+(?:\.\d+)?$/);
 
 function getCargoIndexEnv(registryName: string): string | null {
   const registry = registryName.toUpperCase().replaceAll('-', '_');
@@ -164,6 +168,31 @@ function resolveRegistryIndex(
   return null;
 }
 
+/**
+ * Returns the Rust version, like `1.100.0` or `1.100`, which the closest `rust-toolchain.toml`, or else the closest `rust-toolchain` file pins.
+ */
+async function extractRustConstraint(
+  packageFile: string,
+): Promise<string | null> {
+  for (const fileName of ['rust-toolchain.toml', 'rust-toolchain']) {
+    const toolchainFile = await findLocalSiblingOrParent(packageFile, fileName);
+    if (!toolchainFile) {
+      continue;
+    }
+    const content = await readLocalFile(toolchainFile, 'utf8');
+    const channel = content
+      ? extractRustToolchain(content, toolchainFile)?.deps[0]?.currentValue
+      : null;
+    // channel names like `stable` and nightlies are not a version constraint
+    if (channel && rustVersionRegex.test(channel)) {
+      return channel;
+    }
+    logger.debug(`${toolchainFile} does not pin a Rust version`);
+    return null;
+  }
+  return null;
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -266,6 +295,12 @@ export async function extractPackageFile(
     deps,
     packageFileVersion: version,
   };
+
+  const rustConstraint = await extractRustConstraint(packageFile);
+  if (rustConstraint) {
+    res.extractedConstraints = { rust: rustConstraint };
+  }
+
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
