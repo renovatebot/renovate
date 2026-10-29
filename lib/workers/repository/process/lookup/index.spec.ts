@@ -100,14 +100,24 @@ describe('workers/repository/process/lookup/index', () => {
 
   describe('.lookupUpdates()', () => {
     it.each`
-      rangeStrategy | currentValue | versions                            | newValues
-      ${'replace'}  | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
-      ${'bump'}     | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${['18.*']}
-      ${'bump'}     | ${'17.*'}    | ${['17.0.0', '17.14.1']}            | ${[]}
-      ${'bump'}     | ${'4.*'}     | ${['4.0.0', '4.15.0']}              | ${[]}
-      ${'replace'}  | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
-      ${'bump'}     | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${['17.2.*']}
-      ${'bump'}     | ${'17.1.*'}  | ${['17.1.0', '17.1.99']}            | ${[]}
+      rangeStrategy        | currentValue | versions                            | newValues
+      ${'replace'}         | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'auto'}            | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'widen'}           | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'update-lockfile'} | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'in-range-only'}   | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${[]}
+      ${'pin'}             | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${['[18.11.0]']}
+      ${'bump'}            | ${'17.*'}    | ${['17.0.0', '17.14.1', '18.11.0']} | ${['18.*']}
+      ${'bump'}            | ${'17.*'}    | ${['17.0.0', '17.14.1']}            | ${[]}
+      ${'bump'}            | ${'4.*'}     | ${['4.0.0', '4.15.0']}              | ${[]}
+      ${'replace'}         | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'auto'}            | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'widen'}           | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'update-lockfile'} | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'in-range-only'}   | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${[]}
+      ${'pin'}             | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${['[17.2.15]']}
+      ${'bump'}            | ${'17.1.*'}  | ${['17.1.0', '17.1.99', '17.2.15']} | ${['17.2.*']}
+      ${'bump'}            | ${'17.1.*'}  | ${['17.1.0', '17.1.99']}            | ${[]}
     `(
       'updates native NuGet $currentValue with rangeStrategy=$rangeStrategy',
       async ({ rangeStrategy, currentValue, versions, newValues }) => {
@@ -129,6 +139,51 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(updates.map((update) => update.newValue)).toEqual(newValues);
+      },
+    );
+
+    it.each`
+      rangeStrategy        | currentValue | lockedVersion | newVersion   | expectedUpdates
+      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '17.1*', newVersion: '17.14.1' }]}
+      ${'update-lockfile'} | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '18.1*', newVersion: '18.11.0' }]}
+      ${'in-range-only'}   | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[]}
+      ${'in-range-only'}   | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
+      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[{ newValue: '17.1.9*', newVersion: '17.1.99' }]}
+      ${'update-lockfile'} | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.2.15'} | ${[{ newValue: '17.2.1*', newVersion: '17.2.15' }]}
+      ${'in-range-only'}   | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.1.99'} | ${[]}
+      ${'in-range-only'}   | ${'17.1.*'}  | ${'17.1.0'}   | ${'17.2.15'} | ${[]}
+      ${'replace'}         | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
+      ${'widen'}           | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[]}
+      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'17.14.1'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }, { newValue: '17.1*', newVersion: '17.14.1' }]}
+      ${'pin'}             | ${'17.*'}    | ${'17.0.0'}   | ${'18.11.0'} | ${[{ newValue: '[17.0.0]', newVersion: '17.0.0', isPin: true }, { newValue: '18.1*', newVersion: '18.11.0' }]}
+    `(
+      'updates native NuGet $currentValue locked at $lockedVersion to $newVersion with rangeStrategy=$rangeStrategy',
+      async ({
+        rangeStrategy,
+        currentValue,
+        lockedVersion,
+        newVersion,
+        expectedUpdates,
+      }) => {
+        config.manager = 'nuget';
+        config.datasource = NugetDatasource.id;
+        config.versioning = 'nuget';
+        config.packageName = 'Example.Package';
+        config.currentValue = currentValue;
+        config.lockedVersion = lockedVersion;
+        config.rangeStrategy = rangeStrategy;
+        vi.spyOn(
+          NugetDatasource.prototype,
+          'getReleases',
+        ).mockResolvedValueOnce({
+          releases: [lockedVersion, newVersion].map((version) => ({ version })),
+        });
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toMatchObject(expectedUpdates);
       },
     );
 
