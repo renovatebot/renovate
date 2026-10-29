@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import { calculateMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
 import { toMs } from '../../../util/pretty-time.ts';
+import { isSubsetOf } from '../../versioning/common.ts';
 import { api as rustVersioning } from '../../versioning/rust-release-channel/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
@@ -86,9 +87,5 @@ export async function enforcesMinimumReleaseAge(
     return false;
   }
   const constraint = await resolveToolConstraint(config, 'rust');
-  return (
-    isNonEmptyString(constraint) &&
-    rustVersioning.isValid(constraint) &&
-    rustVersioning.subset(constraint, minPublishAgeRustRange) === true
-  );
+  return isSubsetOf(rustVersioning, constraint, minPublishAgeRustRange);
 }
