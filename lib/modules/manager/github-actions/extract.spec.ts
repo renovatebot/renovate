@@ -695,7 +695,39 @@ describe('modules/manager/github-actions/extract', () => {
         versioning: 'github-actions',
         replaceString:
           'actions/cache/restore@b7e8d49f17405cc70c1c120101943203c98d3a4b # ratchet:actions/cache/restore@v4',
+        autoReplaceStringTemplate:
+          '{{depName}}/restore@{{#if newDigest}}{{newDigest}}{{#if newValue}} # ratchet:actions/cache/restore@{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
       });
+    });
+
+    it('keeps ratchet comment prefix in autoReplaceStringTemplate', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            build:
+              steps:
+                - uses: "actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93" # ratchet:actions/setup-java@v4
+                - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v4.1.0
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/setup-java',
+          currentValue: 'v4',
+          currentDigest: '387ac29b308b003ca37ba93a6cab5eb57c8f5f93',
+          replaceString:
+            '"actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93" # ratchet:actions/setup-java@v4',
+          autoReplaceStringTemplate:
+            '"{{depName}}@{{#if newDigest}}{{newDigest}}"{{#if newValue}} # ratchet:actions/setup-java@{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}"{{/unless}}',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: 'v4.1.0',
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+        },
+      ]);
     });
 
     it('extracts a reusable workflow call as a workflow', async () => {
