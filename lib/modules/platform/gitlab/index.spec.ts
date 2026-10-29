@@ -34,6 +34,41 @@ const credentialStore = vi.mocked(_credentialStore);
 const gitlabApiHost = 'https://gitlab.com';
 
 const branchSha = fakeSha('branchSha');
+const mrListPath =
+  '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me';
+const mergeRefSha = fakeSha('mergeRefSha');
+
+function mockBranchMr(
+  scope: httpMock.Scope,
+  mr: Record<string, unknown>,
+): void {
+  scope
+    .get(mrListPath)
+    .reply(200, [
+      {
+        iid: 91,
+        title: 'some change',
+        source_branch: 'some-branch',
+        target_branch: 'master',
+        state: 'opened',
+        description: 'a merge request',
+        detailed_merge_status: 'mergeable',
+        created_at: '2025-05-19T12:00:00.000Z',
+        updated_at: '2025-05-19T12:00:00.000Z',
+      },
+    ])
+    .get(
+      '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
+    )
+    .reply(200, {
+      iid: 91,
+      title: 'some change',
+      source_branch: 'some-branch',
+      target_branch: 'master',
+      state: 'opened',
+      ...mr,
+    });
+}
 
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
@@ -1239,6 +1274,7 @@ describe('modules/platform/gitlab/index', () => {
   describe('getBranchStatusCheck', () => {
     it('returns null if no results', async () => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .get(
           `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
@@ -1253,6 +1289,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('returns null if no matching results', async () => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .get(
           `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
@@ -1300,6 +1337,62 @@ describe('modules/platform/gitlab/index', () => {
       );
       expect(res).toBe('yellow');
     });
+
+    it('returns status from the merged results pipeline commit', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
+        )
+        .reply(200, [])
+        .get(
+          `/api/v4/projects/some%2Frepo/repository/commits/${mergeRefSha}/statuses`,
+        )
+        .reply(200, [{ name: 'some-context', status: 'failed' }]);
+      mockBranchMr(scope, {
+        sha: branchSha,
+        head_pipeline: {
+          id: 456,
+          status: 'running',
+          sha: mergeRefSha,
+          source: 'merge_request_event',
+        },
+      });
+
+      const res = await gitlab.getBranchStatusCheck(
+        'some-branch',
+        'some-context',
+      );
+
+      expect(res).toBe('red');
+    });
+
+    it.each`
+      case                         | sha                    | headPipeline
+      ${'MR is outdated'}          | ${fakeSha('outdated')} | ${{ id: 456, status: 'running', sha: mergeRefSha, source: 'merge_request_event' }}
+      ${'pipeline is not for MR'}  | ${branchSha}           | ${{ id: 456, status: 'running', sha: mergeRefSha, source: 'push' }}
+      ${'pipeline has no id'}      | ${branchSha}           | ${{ status: 'running', sha: mergeRefSha, source: 'merge_request_event' }}
+      ${'pipeline has no sha'}     | ${branchSha}           | ${{ id: 456, status: 'running', source: 'merge_request_event' }}
+      ${'pipeline is on the head'} | ${branchSha}           | ${{ id: 456, status: 'running', sha: branchSha, source: 'merge_request_event' }}
+    `(
+      'ignores the MR head pipeline when $case',
+      async ({ sha, headPipeline }) => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
+          )
+          .reply(200, []);
+        mockBranchMr(scope, { sha, head_pipeline: headPipeline });
+
+        const res = await gitlab.getBranchStatusCheck(
+          'some-branch',
+          'some-context',
+        );
+
+        expect(res).toBeNull();
+      },
+    );
   });
 
   describe('setBranchStatus', () => {
@@ -1350,6 +1443,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
@@ -1377,6 +1471,7 @@ describe('modules/platform/gitlab/index', () => {
       async (state) => {
         vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', 'true');
         const scope = await initRepo();
+        scope.get(mrListPath).reply(200, []);
         scope
           .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
           .times(3)
@@ -1401,6 +1496,7 @@ describe('modules/platform/gitlab/index', () => {
     it('does not skip setting branch status when RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE is not true', async () => {
       vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', 'false');
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
@@ -1463,6 +1559,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('waits for 1000ms by default', async () => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
@@ -1523,6 +1620,7 @@ describe('modules/platform/gitlab/index', () => {
       vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY', String(delay));
 
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
@@ -1564,6 +1662,7 @@ describe('modules/platform/gitlab/index', () => {
       vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_CHECK_ATTEMPTS', `${retry}`);
 
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
@@ -1589,6 +1688,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('ignores status transition error', async () => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
@@ -1615,6 +1715,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('handles non-string error message', async () => {
       const scope = await initRepo();
+      scope.get(mrListPath).reply(200, []);
       scope
         .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
@@ -1634,6 +1735,49 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         'Failed to set branch status',
+      );
+    });
+
+    it('sets branch status on the merged results pipeline', async () => {
+      const scope = await initRepo();
+      scope
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
+        .times(3)
+        .reply(200, {})
+        .post(
+          `/api/v4/projects/some%2Frepo/statuses/${mergeRefSha}`,
+          (body: any): boolean => {
+            expect(body.pipeline_id).toBe(456);
+            return true;
+          },
+        )
+        .reply(200, {})
+        .get(
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
+        )
+        .reply(200, []);
+      mockBranchMr(scope, {
+        sha: branchSha,
+        head_pipeline: {
+          id: 456,
+          status: 'running',
+          sha: mergeRefSha,
+          source: 'merge_request_event',
+        },
+      });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'red',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Setting branch status on merged results pipeline 456',
       );
     });
   });

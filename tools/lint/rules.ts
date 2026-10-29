@@ -1,5 +1,7 @@
 import { definePlugin } from '@oxlint/plugins';
+import cachedResponseHeaders from './rules/cached-response-headers.ts';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
+import consistentHookTimeouts from './rules/consistent-hook-timeouts.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
 import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.ts';
 import loggerErrKey from './rules/logger-err-key.ts';
@@ -27,6 +29,7 @@ import preferNullishUtil from './rules/prefer-nullish-util.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
+import requireBuildCacheKey from './rules/require-build-cache-key.ts';
 import requireCacheable from './rules/require-cacheable.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
@@ -42,7 +45,9 @@ export default definePlugin({
     name: 'renovate',
   },
   rules: {
+    'cached-response-headers': cachedResponseHeaders,
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
+    'consistent-hook-timeouts': consistentHookTimeouts,
     'enforce-ts-extension': enforceTsExtension,
     'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-err-key': loggerErrKey,
@@ -70,6 +75,7 @@ export default definePlugin({
     'prefer-partial-in-specs': preferPartialInSpecs,
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
     'prefer-stub-env': preferStubEnv,
+    'require-build-cache-key': requireBuildCacheKey,
     'require-cacheable': requireCacheable,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,

@@ -1,6 +1,9 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
-import type { ManagerName } from '../manager-list.generated.ts';
+import type {
+  CustomManagerName,
+  ManagerName,
+} from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
@@ -46,7 +49,12 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
-export type StatusCheckWhen = 'always' | 'never' | 'failed';
+export const allowedStatusCheckWhenValues = [
+  'always',
+  'never',
+  'failed',
+] as const;
+export type StatusCheckWhen = (typeof allowedStatusCheckWhenValues)[number];
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -502,7 +510,7 @@ export interface RenovateConfig
   toolSettings?: RepoToolSettingsOptions;
 }
 
-const CustomDatasourceFormats = [
+export const CustomDatasourceFormats = [
   'html',
   'json',
   'plain',
@@ -628,26 +636,53 @@ export interface ValidationMessage {
   message: string;
 }
 
+/**
+ * The kinds of place a config option can be used, which expand to the {@link AllowedParents} they cover.
+ *
+ * These are for the places which can't reasonably be listed, like every manager or every update type, so an option which is only valid in a specific object - like `hostRules` - should use `parents` instead.
+ */
+export const configScopes = [
+  /** the top level of a repository, global, inherited or preset config */
+  'repo',
+  /** a `packageRules` entry */
+  'packageRule',
+  /** a manager's configuration object, like `npm` */
+  'manager',
+  /** an update type's configuration object, like `major` */
+  'updateType',
+  /** the `vulnerabilityAlerts` configuration object */
+  'vulnerabilityAlert',
+  /** the `group` configuration object, which is merged into an update when it's grouped */
+  'group',
+  /** every object a config can be nested in, for the options which are read wherever they're found */
+  'any',
+] as const;
+
+export type ConfigScope = (typeof configScopes)[number];
+
+/**
+ * The objects which a config can be nested in, other than the top level and the ones which are covered by a {@link ConfigScope}.
+ */
+export const namedParents = [
+  'bumpVersions',
+  'customDatasources',
+  'customManagers',
+  'group',
+  'hostRules',
+  'logLevelRemap',
+  'packageRules',
+  'postUpgradeTasks',
+  'toolSettings',
+  'vulnerabilityAlerts',
+] as const;
+
 export type AllowedParents =
   | '.'
-  | 'bumpVersions'
-  | 'customDatasources'
-  | 'customManagers'
-  | 'hostRules'
-  | 'logLevelRemap'
-  | 'packageRules'
-  | 'postUpgradeTasks'
-  | 'vulnerabilityAlerts'
-  | 'toolSettings'
+  | (typeof namedParents)[number]
   | ManagerName
+  | CustomManagerName
   | UpdateTypeOptions;
 export interface RenovateOptionBase {
-  /**
-   * If true, the option can only be configured by people with access to the Renovate instance.
-   * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
-   */
-  globalOnly?: boolean;
-
   /**
    * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
    *
@@ -662,6 +697,13 @@ export interface RenovateOptionBase {
   inheritConfigSupport?: boolean;
 
   allowedValues?: string[];
+
+  /**
+   * A subset of suggested values for the user, which are some (but not all) of the possible `allowedValues`.
+   *
+   * This provides editor autocomplete (i.e. via our JSON Schema) but makes it possible to not be an exhaustive list, which is required by `allowedValues`, and may be further complicated by `patternMatch`.
+   */
+  suggestedValues?: string[];
 
   allowString?: boolean;
 
@@ -683,6 +725,13 @@ export interface RenovateOptionBase {
   name: string;
 
   parents?: AllowedParents[];
+
+  /**
+   * The kinds of place this option can be used, which are expanded alongside any `parents`.
+   *
+   * An option which declares neither is treated as valid anywhere, which is what we're working towards removing in #43020.
+   */
+  scopes?: ConfigScope[];
 
   stage?: RenovateConfigStage;
 
@@ -708,6 +757,13 @@ export interface RenovateOptionBase {
    * For internal use only: add it to any config option of type integer that supports negative integers
    */
   allowNegative?: boolean;
+
+  /**
+   * Whether the option can be set to `null`.
+   *
+   * This is only needed if the default is not `null` (which makes this implied).
+   */
+  nullable?: boolean;
 
   /**
    * Managers which support this option, leave undefined if all managers support it.
@@ -775,11 +831,16 @@ export interface RenovateStringOption extends RenovateOptionBase {
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
   additionalProperties?: Record<string, unknown> | boolean;
+
+  /**
+   * The keys the object accepts, for an option whose keys are a known set rather than the user's choice.
+   */
+  properties?: Record<string, unknown>;
   mergeable?: boolean;
   type: 'object';
 }
 
-export type RenovateOptions =
+type RenovateOptionType =
   | RenovateStringOption
   | RenovateNumberArrayOption
   | RenovateStringArrayOption
@@ -787,6 +848,28 @@ export type RenovateOptions =
   | RenovateBooleanOption
   | RenovateArrayOption
   | RenovateObjectOption;
+
+/**
+ * An option which can only be configured by people with access to the Renovate instance.
+ *
+ * It should be documented in docs/usage/self-hosted-configuration.md, and doesn't have to say where it can be used yet - see #43020.
+ */
+interface SelfHostedOption {
+  globalOnly: true;
+  scopes?: ConfigScope[];
+  parents?: AllowedParents[];
+}
+
+/**
+ * An option which a repository can configure, which has to say where it can be used, through either its `scopes` or its `parents`.
+ */
+type ConfigurableOption = { globalOnly?: false } & (
+  | { scopes: ConfigScope[]; parents?: AllowedParents[] }
+  | { parents: AllowedParents[]; scopes?: ConfigScope[] }
+);
+
+export type RenovateOptions = RenovateOptionType &
+  (SelfHostedOption | ConfigurableOption);
 
 export interface PackageRuleInputConfig extends RenovateConfig {
   versioning?: string;
@@ -887,3 +970,31 @@ export interface RepoToolSettingsOptions {
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }
+
+/** All known `VulnerabilityAlertSource`s */
+export const VulnerabilityAlertSources = [
+  /**
+   * The Platform being used provides vulnerability alerts.
+   *
+   * i.e. GitHub Advanced Security's Dependabot Alerts
+   **/
+  '$platform',
+  /**
+   * The Open Source Vulnerability database (OSV) provides vulnerability alerts.
+   *
+   * @link https://github.com/renovatebot/osv-offline
+   **/
+  'OSV',
+  /**
+   * A self-hosted administrator is providing any `packageRules` that will apply Vulnerability Alerts.
+   *
+   * @see PackageRule
+   **/
+  'packageRules',
+] as const;
+
+/**
+ * Where the Vulnerability Alerts are sourced from.
+ */
+export type VulnerabilityAlertSource =
+  (typeof VulnerabilityAlertSources)[number];

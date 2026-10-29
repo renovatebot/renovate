@@ -52,6 +52,11 @@ export interface RepoParams {
   azureWorkItemType?: string;
 }
 
+export interface RepoConfigParams {
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
+}
+
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
@@ -240,6 +245,8 @@ export interface Platform {
    * Experimental features might be changed or even removed at any time.
    */
   experimental?: true;
+  /** Applies options read from the repository config after `initRepo`. */
+  applyRepoConfig?(config: RepoConfigParams): void;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -301,7 +308,7 @@ export interface Platform {
       EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  getPr(number: number): Promise<Pr | null>;
+  getPr(number: number, refreshCache?: boolean): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
   reattemptPlatformAutomerge?(

@@ -12,14 +12,18 @@ export interface MinimumReleaseAgeCheckResult {
   hasTimestamp: boolean;
 }
 
+export interface MinimumReleaseAgeConfig {
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeBuffer?: string | null;
+}
+
 /**
  * Calculates the effective minimum release age in milliseconds, extended by
  * the `minimumReleaseAgeBuffer` duration if configured.
  */
-export function calculateMinimumReleaseAgeMs(config: {
-  minimumReleaseAge?: string | null;
-  minimumReleaseAgeBuffer?: string | null;
-}): number {
+export function calculateMinimumReleaseAgeMs(
+  config: MinimumReleaseAgeConfig,
+): number {
   const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
     ? coerceNumber(toMs(config.minimumReleaseAge), 0)
     : 0;
@@ -43,9 +47,7 @@ export function calculateMinimumReleaseAgeMs(config: {
  * managers can import it without an import cycle.
  */
 export function checkMinimumReleaseAge(
-  config: {
-    minimumReleaseAge?: string | null;
-    minimumReleaseAgeBuffer?: string | null;
+  config: MinimumReleaseAgeConfig & {
     minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
   },
   releaseTimestamp: Timestamp | null | undefined,

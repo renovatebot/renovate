@@ -24,6 +24,8 @@ export const presets: Record<string, Preset> = {
       'workarounds:libericaJdkDockerVersioning',
       'workarounds:ubuntuDockerVersioning',
       'workarounds:groupings',
+      'workarounds:helmDocs',
+      'workarounds:guavaVariants',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -146,6 +148,25 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['@commander-js/extra-typings', 'commander'],
         matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  guavaVariants: {
+    description: 'Keep Guava on its `-jre` or `-android` variant.',
+    packageRules: [
+      {
+        matchDatasources: ['maven', 'sbt-package'],
+        matchPackageNames: ['com.google.guava:guava'],
+        versionCompatibility: '^(?<version>.+)-(?<compatibility>jre|android)$',
+      },
+    ],
+  },
+  helmDocs: {
+    description: 'Block helm-docs calver-like versions from 2019',
+    packageRules: [
+      {
+        allowedVersions: '!/^19\\.(0614|0110)$/',
+        matchPackageNames: ['norwoodj/helm-docs'],
       },
     ],
   },

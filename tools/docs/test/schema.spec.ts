@@ -2,7 +2,9 @@ import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import _addFormats from 'ajv-formats';
 import { getOptions } from '../../../lib/config/options/index.ts';
+import { groups } from '../../../lib/config/presets/internal/index.ts';
 import type {
+  ConfigScope,
   RenovateOptions,
   RenovateStringOption,
 } from '../../../lib/config/types.ts';
@@ -19,11 +21,26 @@ const addFormats = _addFormats as unknown as typeof _addFormats.default;
 
 const managers = new Set<string>(allManagersList);
 
-function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
-  return partial<RenovateStringOption>({
+function option(
+  overrides: Partial<RenovateStringOption & { scopes: ConfigScope[] }>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { scopes: ConfigScope[] }>({
     name: 'anOption',
     description: 'A description',
     type: 'string',
+    ...overrides,
+  });
+}
+
+/** a self-hosted option, which doesn't have to say where it can be used */
+function globalOption(
+  overrides: Partial<RenovateStringOption>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { globalOnly: true }>({
+    name: 'aGlobalOption',
+    description: 'A description',
+    type: 'string',
+    globalOnly: true,
     ...overrides,
   });
 }
@@ -83,7 +100,7 @@ async function getLinksToMissingHeadings(): Promise<string[]> {
   );
 }
 
-describe('tools/docs/test/schema', () => {
+describe('tools/docs/test/schema', { timeout: 30000 }, () => {
   describe('getOptionDocsUrl', () => {
     it('links an option with no parents to its own heading', () => {
       expect(
@@ -108,7 +125,7 @@ describe('tools/docs/test/schema', () => {
     it('links a global option to the self-hosted page', () => {
       expect(
         getOptionDocsUrl(
-          option({ name: 'onboarding', globalOnly: true }),
+          globalOption({ name: 'onboarding' }),
           headings(['onboarding'], ['onboarding']),
         ),
       ).toBe(
@@ -158,7 +175,7 @@ describe('tools/docs/test/schema', () => {
     beforeAll(async () => {
       repoSchema = await compileSchema();
       globalSchema = await compileSchema({ isGlobal: true });
-    });
+    }, 30000);
 
     it('allows a map of values to use any key', () => {
       /* `secrets` is self-hosted only, so is only in the global schema */
@@ -183,32 +200,76 @@ describe('tools/docs/test/schema', () => {
       ).toEqual(['must be string']);
     });
 
-    it('validates a map which does not declare its values as a nested config', () => {
-      expect(schemaErrors(repoSchema, { env: { automerge: 'true' } })).toEqual([
-        'must be boolean',
+    it('allows an environment variable named after a config option', () => {
+      expect(
+        schemaErrors(repoSchema, { env: { automerge: 'true' } }),
+      ).toBeUndefined();
+
+      expect(schemaErrors(repoSchema, { env: { GOPROXY: 123 } })).toEqual([
+        'must be string',
       ]);
     });
 
-    it('does not validate the children of an option which nests a config', () => {
+    it('validates the keys of an object whose keys are a known set', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckNames: { artifactError: 'renovate/artifacts' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, { statusCheckNames: { bogusCheck: 'x' } }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
+    it('validates the values of a map against their allowed values', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckWhen: { artifactError: 'failed' },
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          statusCheckWhen: { artifactError: 'sometimes' },
+        }),
+      ).toEqual(['must be equal to one of the allowed values']);
+    });
+
+    it('validates the children of an option which nests a config', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          postUpgradeTasks: { commands: ['echo hi'], executionMode: 'branch' },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaErrors(repoSchema, {
           postUpgradeTasks: { commands: 'echo hi' },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be array']);
 
       expect(
         schemaErrors(repoSchema, {
           vulnerabilityAlerts: { vulnerabilityFixStrategy: 'nope' },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be equal to one of the allowed values']);
     });
 
-    it('does not validate the children of a map of configs', () => {
+    it('validates the children of a map of configs', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          customDatasources: {
+            myDatasource: { format: 'json', transformTemplates: ['{}'] },
+          },
+        }),
+      ).toBeUndefined();
+
       expect(
         schemaErrors(repoSchema, {
           customDatasources: { myDatasource: { format: 'nope' } },
         }),
-      ).toBeUndefined();
+      ).toEqual(['must be equal to one of the allowed values']);
     });
 
     it('validates an option which nests a config as a config', () => {
@@ -225,8 +286,116 @@ describe('tools/docs/test/schema', () => {
       expect(schemaErrors(repoSchema, { extends: 123 })).toEqual([
         'must be array',
         'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
         'must match exactly one schema in oneOf',
       ]);
+    });
+  });
+
+  describe('suggested values', () => {
+    let repoSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+    }, 30000);
+
+    it('suggests the managers we know about, without rejecting a pattern', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: ['npm', 'custom.regex'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchManagers: ['/^npm$/', 'not-a-manager'] }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, { packageRules: [{ matchManagers: [123] }] }),
+      ).toEqual([
+        'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
+        'must be string',
+        'must be equal to one of the allowed values',
+        'must be string',
+        'must match a schema in anyOf',
+        'must match exactly one schema in oneOf',
+      ]);
+    });
+
+    it('suggests the host types we know about, without constraining them', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 'github', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 'something-we-do-not-know', matchHost: 'x' }],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          hostRules: [{ hostType: 123, matchHost: 'x' }],
+        }),
+      ).toEqual(['must be string']);
+    });
+
+    it('suggests the datasources and categories we know about', () => {
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [
+            { matchDatasources: ['npm'], matchCategories: ['js'] },
+          ],
+        }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, {
+          packageRules: [{ matchDatasources: ['/^np/'] }],
+        }),
+      ).toBeUndefined();
+    });
+  });
+
+  describe('internal presets', () => {
+    let repoSchema: ValidateFunction;
+    let globalSchema: ValidateFunction;
+
+    beforeAll(async () => {
+      repoSchema = await compileSchema();
+      globalSchema = await compileSchema({ isGlobal: true });
+    }, 30000);
+
+    function getPresetsRejectedBySchema(): string[] {
+      const rejected: string[] = [];
+
+      for (const [group, presets] of Object.entries(groups)) {
+        /* the `global:` presets configure the Renovate instance, so are only valid in a global config */
+        const validate = group === 'global' ? globalSchema : repoSchema;
+
+        for (const [name, preset] of Object.entries(presets)) {
+          if (!validate(preset)) {
+            rejected.push(
+              `${group}:${name} -> ${validate.errors?.[0]?.message}`,
+            );
+          }
+        }
+      }
+
+      return rejected;
+    }
+
+    it('accepts every preset we ship', () => {
+      expect(getPresetsRejectedBySchema()).toBeEmptyArray();
     });
   });
 

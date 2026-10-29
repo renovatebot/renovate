@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -48,8 +49,7 @@ export class EndoflifeDateDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

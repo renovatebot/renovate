@@ -504,6 +504,63 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('keeps only the latest artifact when several package files return the same path', async () => {
+      config.upgrades.push(
+        {
+          packageFile: 'app/go.mod',
+          manager: 'gomod',
+          branchName: 'foo/bar',
+        },
+        {
+          packageFile: 'lib/go.mod',
+          manager: 'gomod',
+          branchName: 'foo/bar',
+        },
+      );
+      gomod.updateDependency.mockReturnValue('some new content');
+      gomod.updateArtifacts
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'go.work.sum',
+              contents: 'first contents',
+            },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'lib/go.sum',
+              contents: 'lib contents',
+            },
+          },
+          {
+            file: {
+              type: 'addition',
+              path: 'go.work.sum',
+              contents: 'second contents',
+            },
+          },
+        ]);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'go.work.sum',
+          contents: 'second contents',
+        },
+        {
+          type: 'addition',
+          path: 'lib/go.sum',
+          contents: 'lib contents',
+        },
+      ]);
+    });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',

@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
-export type { DiffResult, StatusResult } from 'simple-git';
+export type { StatusResult } from 'simple-git';
 
 export interface GitAuthor {
   name?: string | null;
@@ -119,8 +119,6 @@ export interface PushFilesConfig {
   files: FileChange[];
   pushOptions?: string[];
 }
-
-export type BranchName = string;
 
 export interface CommitResult {
   parentCommitSha: LongCommitSha;

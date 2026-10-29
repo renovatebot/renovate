@@ -957,6 +957,53 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(4);
     });
 
+    it('extracts multiple xcode action runners from yaml configuration file', async () => {
+      const runnerTestWorkflowXcode = codeBlock`
+      jobs:
+        test1:
+          runs-on: xcode-27
+        test2:
+          runs-on: xcode-27-xlarge
+        test3:
+          runs-on: xcode-latest
+      `;
+      const res = await extractPackageFile(
+        runnerTestWorkflowXcode,
+        'workflow.yml',
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'xcode',
+          currentValue: '27',
+          replaceString: 'xcode-27',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: '27-xlarge',
+          replaceString: 'xcode-27-xlarge',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'xcode',
+          currentValue: 'latest',
+          replaceString: 'xcode-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
     it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
       const runnerTestWorkflowUbuntu = codeBlock`
       jobs:
@@ -1403,6 +1450,87 @@ describe('modules/manager/github-actions/extract', () => {
         runs:
           using: 'node20'
           main: 'index.js'
+        `;
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts the image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString: 'ghcr.io/ossf/scorecard-action:v2.5.0',
+        },
+      ]);
+    });
+
+    it('extracts the digest-pinned image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('extracts the digest-only image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "DOCKER://ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('ignores a docker container action which builds a Dockerfile', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: docker
+          image: Dockerfile
         `;
       await expect(
         extractPackageFile(yamlContent, 'action.yml'),
@@ -2430,12 +2558,12 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
     {
-      // `'latest'` is the default `pixi-version`, and is a valid version according to Conda versioning, but not one that can be used to bump the verson
+      // `'latest'` is the default `pixi-version`, which is not a version that can be bumped
       step: {
         uses: 'prefix-dev/setup-pixi@v0.8.3',
         with: {
@@ -2449,7 +2577,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'prefix-dev/pixi',
           depType: 'uses-with',
           packageName: 'prefix-dev/pixi',
-          versioning: 'conda',
+          versioning: 'semver',
         },
       ],
     },
@@ -3230,6 +3358,28 @@ describe('modules/manager/github-actions/extract', () => {
           packageName: 'ghcr.io/renovatebot/renovate',
           skipStage: 'extract',
           skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      // `renovate-image` tag- and digest-pinned, with no `renovate-version`
+      // set: https://github.com/renovatebot/renovate/discussions/46969
+      step: {
+        uses: 'renovatebot/github-action@v43.0.0',
+        with: {
+          'renovate-image':
+            'ghcr.io/renovatebot/renovate:44.104.2@sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+        },
+      },
+      expected: [
+        {
+          currentValue: '44.104.2',
+          currentDigest:
+            'sha256:0f7ba2b70c5d1a7e2d95b0f6c3d5b4a1e2f6b6a1e2f6b6a1e2f6b6a1e2f6b6a1',
+          datasource: 'docker',
+          depName: 'ghcr.io/renovatebot/renovate',
+          depType: 'uses-with',
+          packageName: 'ghcr.io/renovatebot/renovate',
         },
       ],
     },

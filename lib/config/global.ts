@@ -116,3 +116,18 @@ export class GlobalConfig {
     GlobalConfig.config = {};
   }
 }
+
+/**
+ * Sets the global options which HTTP requests consult, for the requests made before the full global config is set.
+ */
+export function setHttpGlobalConfig(
+  config: RenovateConfig & RepoGlobalConfig,
+): void {
+  GlobalConfig.set({
+    allowedHeaders: config.allowedHeaders,
+    endpoint: config.endpoint,
+    internalHostAccess: config.internalHostAccess,
+    platform: config.platform,
+    userAgent: config.userAgent,
+  });
+}

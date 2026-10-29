@@ -218,7 +218,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
 
         git.createSimpleGit({
-          authentication: { hostTypes: ['git-refs'] },
+          authentication: {
+            hostTypes: ['git-refs'],
+            url: 'https://git.example.com/repo.git',
+          },
         });
 
         expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
@@ -228,6 +231,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             GIT_CONFIG_VALUE_0: 'existing-value',
           }),
           ['git-refs'],
+          'https://git.example.com/repo.git',
         );
         expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
       });

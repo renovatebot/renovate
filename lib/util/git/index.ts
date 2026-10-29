@@ -109,6 +109,8 @@ interface CreateSimpleGitOptions {
   env?: ExtraEnv;
   authentication?: {
     hostTypes?: readonly string[];
+    /** the URL of the cloned repository: adds the credentials which `detachUrlCredentials()` registered for it with one of `hostTypes` */
+    url?: string;
   };
 }
 
@@ -138,7 +140,11 @@ export function createSimpleGit({
     },
   });
   const authenticatedEnv = authentication
-    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+    ? getGitEnvironmentVariables(
+        childEnv,
+        authentication.hostTypes,
+        authentication.url,
+      )
     : childEnv;
   // Passed as environment variables, these entries take precedence over credential helpers from any config file
   const credentialStoreConfig = getCredentialStoreConfig();
