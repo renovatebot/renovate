@@ -4,45 +4,40 @@ import { filterValidCommitTrailers } from '../../../util/git/commit-trailers.ts'
 import { compile } from '../../../util/template/index.ts';
 import { withoutUrlCredentials } from '../../../util/url.ts';
 
-export type CommitBodyConfig = Pick<
-  RenovateConfig,
-  'commitBody' | 'commitTrailers'
->;
+/**
+ * Appends the compiled `commitBody` to `message`, without URL credentials, or returns `message` unchanged when no `commitBody` is configured.
+ */
+export function compileCommitBody(
+  config: Pick<RenovateConfig, 'commitBody'>,
+  message: string,
+  context: object,
+): string {
+  if (!config.commitBody) {
+    return message;
+  }
 
-export interface CompiledCommitMessage {
-  /** The subject, plus the compiled `commitBody` when one is configured */
-  message: string;
-  /** The compiled `commitTrailers`, or `undefined` when none are configured */
-  trailers: string[] | undefined;
+  const compiledMessage = `${message}\n\n${withoutUrlCredentials(compile(config.commitBody, context))}`;
+  logger.trace(`commitMessage: ${JSON.stringify(compiledMessage)}`);
+  return compiledMessage;
 }
 
 /**
- * Appends the compiled `commitBody` to `message` and compiles `commitTrailers`, removing URL credentials from both.
- *
- * `bodyContext` is the template context for `commitBody`, `trailersContext` the one for `commitTrailers`. They are separate because the branch worker exposes the changelog of the first upgrade to the body only.
+ * Compiles `commitTrailers` without URL credentials and drops the ones that are invalid after compilation, or returns `undefined` when none are configured.
  */
-export function compileCommitBodyAndTrailers(
-  config: CommitBodyConfig,
-  message: string,
-  bodyContext: object,
-  trailersContext: object = bodyContext,
-): CompiledCommitMessage {
-  let compiledMessage = message;
-  if (config.commitBody) {
-    compiledMessage = `${message}\n\n${withoutUrlCredentials(compile(config.commitBody, bodyContext))}`;
-    logger.trace(`commitMessage: ${JSON.stringify(compiledMessage)}`);
+export function compileCommitTrailers(
+  config: Pick<RenovateConfig, 'commitTrailers'>,
+  context: object,
+): string[] | undefined {
+  if (!config.commitTrailers) {
+    return undefined;
   }
 
-  let trailers: string[] | undefined;
-  if (config.commitTrailers) {
-    // Template expansions can produce broken trailers
-    trailers = filterValidCommitTrailers(
-      config.commitTrailers.map((trailer) =>
-        withoutUrlCredentials(compile(trailer, trailersContext)),
-      ),
-    );
-    logger.trace(`commitTrailers: ${JSON.stringify(trailers)}`);
-  }
-
-  return { message: compiledMessage, trailers };
+  // Template expansions can produce broken trailers
+  const trailers = filterValidCommitTrailers(
+    config.commitTrailers.map((trailer) =>
+      withoutUrlCredentials(compile(trailer, context)),
+    ),
+  );
+  logger.trace(`commitTrailers: ${JSON.stringify(trailers)}`);
+  return trailers;
 }

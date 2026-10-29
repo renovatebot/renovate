@@ -21,7 +21,10 @@ import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
-import { compileCommitBodyAndTrailers } from '../../model/commit-body.ts';
+import {
+  compileCommitBody,
+  compileCommitTrailers,
+} from '../../model/commit-body.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
@@ -527,19 +530,14 @@ export async function processBranch(
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs
-      const compiledCommitMessage = compileCommitBodyAndTrailers(
-        config,
-        config.commitMessage!,
-        {
-          ...config,
-          // changelog is on first upgrade
-          logJSON: config.upgrades[0].logJSON,
-          releases: config.upgrades[0].releases,
-        },
-        config,
-      );
-      config.commitMessage = compiledCommitMessage.message;
-      config.commitTrailers = compiledCommitMessage.trailers;
+      config.commitMessage = compileCommitBody(config, config.commitMessage!, {
+        ...config,
+        // changelog is on first upgrade
+        logJSON: config.upgrades[0].logJSON,
+        releases: config.upgrades[0].releases,
+      });
+      // compiled after the body, so that `{{{commitMessage}}}` in a trailer includes it
+      config.commitTrailers = compileCommitTrailers(config, config);
 
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch

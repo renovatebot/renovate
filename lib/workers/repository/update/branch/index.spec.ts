@@ -1786,6 +1786,41 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it('compiles commit trailers against the commit message including the body', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitMessage: 'Update dependency',
+        commitBody: 'Some body',
+        commitTrailers: ['X-Commit: {{{commitMessage}}}', 'Static: kept'],
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      // the body makes the trailer multi-line, so it is dropped
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitMessage: 'Update dependency\n\nSome body',
+          commitTrailers: ['Static: kept'],
+        }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { invalid: ['X-Commit: Update dependency\n\nSome body'] },
+        'Ignoring invalid commit trailers (must be a single-line Key: value)',
+      );
+    });
+
     it('updates branch when no fingerprint match', async () => {
       expect.assertions(4);
       const setArtifactErrorStatus = vi.spyOn(

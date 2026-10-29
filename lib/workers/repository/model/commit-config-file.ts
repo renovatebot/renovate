@@ -3,7 +3,7 @@ import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import type { FileChange } from '../../../util/git/types.ts';
-import { compileCommitBodyAndTrailers } from './commit-body.ts';
+import { compileCommitBody, compileCommitTrailers } from './commit-body.ts';
 import type { CommitMessageConfig } from './commit-message-factory.ts';
 import { CommitMessageFactory } from './commit-message-factory.ts';
 
@@ -51,17 +51,17 @@ export async function commitConfigFile({
     return null;
   }
 
-  const compiled = compileCommitBodyAndTrailers(config, message, {
-    // only allow the gitAuthor template value in the commitBody and commitTrailers
-    gitAuthor: config.gitAuthor,
-  });
+  // only allow the gitAuthor template value in the commitBody and commitTrailers
+  const templateContext = { gitAuthor: config.gitAuthor };
+  const commitMessage = compileCommitBody(config, message, templateContext);
+  const trailers = compileCommitTrailers(config, templateContext);
 
   return await scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName,
     files: await getFiles(),
-    message: compiled.message,
-    trailers: compiled.trailers,
+    message: commitMessage,
+    trailers,
     platformCommit: config.platformCommit,
     force,
     // Only needed by Gerrit platform
