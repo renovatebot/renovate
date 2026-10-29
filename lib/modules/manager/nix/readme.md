@@ -24,7 +24,7 @@ Renovate also proposes digest updates for root inputs that track a branch, such 
 These updates refresh the revision in `flake.lock` without changing the URL in `flake.nix`, so a moving branch can produce a new update whenever its upstream revision changes.
 Previously, these revisions were refreshed only by lock file maintenance.
 
-If you prefer to refresh those revisions through lock file maintenance, disable individual Nix digest updates:
+For nix inputs, the `pin` range strategy is treated as `update-lockfile`, matching the default `auto` strategy. If you prefer to refresh those revisions through lock file maintenance, disable individual Nix digest updates:
 
 ```json
 {

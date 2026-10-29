@@ -4,7 +4,8 @@ import type { RangeConfig } from '../types.ts';
 export function getRangeStrategy({
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
-  if (rangeStrategy && rangeStrategy !== 'auto') {
+  // Treat pin like auto because supported inputs do not use version ranges.
+  if (rangeStrategy && rangeStrategy !== 'auto' && rangeStrategy !== 'pin') {
     return rangeStrategy;
   }
 

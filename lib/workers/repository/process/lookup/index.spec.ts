@@ -6033,6 +6033,85 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it.each`
+      depName           | currentValue       | versioning          | versions
+      ${'nixos-wsl'}    | ${'release-26.05'} | ${'semver-coerced'} | ${['2605.7.2']}
+      ${'home-manager'} | ${'release-26.05'} | ${'semver-coerced'} | ${['release-26.05']}
+      ${'nixpkgs'}      | ${'nixos-26.05'}   | ${'nixpkgs'}        | ${['nixos-26.05']}
+      ${'disko'}        | ${'v1.13.0'}       | ${'semver-coerced'} | ${['v1.13.0']}
+    `(
+      'refreshes the $depName flake digest with rangeStrategy=pin',
+      async ({ depName, currentValue, versioning, versions }) => {
+        config.manager = 'nix';
+        config.packageFile = 'flake.nix';
+        config.depName = depName;
+        config.packageName = `https://github.com/nix-community/${depName}`;
+        config.datasource = GitRefsDatasource.id;
+        config.versioning = versioning;
+        config.rangeStrategy = 'pin';
+        config.currentValue = currentValue;
+        config.currentDigest = fakeSha('old');
+        vi.spyOn(GitRefsDatasource.prototype, 'getReleases')
+          .mockReset()
+          .mockResolvedValue({
+            releases: [currentValue, ...versions].map((version) => ({
+              version,
+            })),
+          });
+
+        const res = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(res.skipReason).toBeUndefined();
+        expect(res.updates).toEqual([
+          {
+            newDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
+            newValue: currentValue,
+            updateType: 'digest',
+          },
+        ]);
+      },
+    );
+
+    it('updates flake version refs with rangeStrategy=pin', async () => {
+      config.manager = 'nix';
+      config.packageFile = 'flake.nix';
+      config.depName = 'disko';
+      config.packageName = 'https://github.com/nix-community/disko';
+      config.datasource = GitRefsDatasource.id;
+      config.versioning = 'semver-coerced';
+      config.rangeStrategy = 'pin';
+      config.currentValue = 'v1.13.0';
+      config.currentDigest = fakeSha('old');
+      vi.spyOn(GitRefsDatasource.prototype, 'getReleases')
+        .mockReset()
+        .mockResolvedValue({
+          releases: [{ version: 'v1.13.0' }, { version: 'v1.14.0' }],
+        });
+      vi.spyOn(GitRefsDatasource.prototype, 'getDigest')
+        .mockReset()
+        .mockResolvedValue(fakeSha('new'));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.skipReason).toBeUndefined();
+      expect(res.updates).toMatchObject([
+        {
+          newDigest: fakeSha('new'),
+          newValue: 'v1.14.0',
+          updateType: 'minor',
+        },
+        {
+          newDigest: fakeSha('new'),
+          newValue: 'v1.13.0',
+          updateType: 'digest',
+        },
+      ]);
+    });
+
     it('handles git submodule update', async () => {
       config.packageName = 'some-path';
       config.versioning = gitVersioningId;
