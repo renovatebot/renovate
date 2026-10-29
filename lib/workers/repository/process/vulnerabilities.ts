@@ -590,8 +590,6 @@ export class Vulnerabilities {
     }
 
     // Prefer the `versioning` already assigned to the dependency by its manager
-    // (e.g. `poetry`), so this rule does not override it with the datasource
-    // default and turn a valid `currentValue` into an `invalid-value` skip.
     const versioning = depVersioning ?? getDefaultVersioning(datasource);
 
     logger.debug(
