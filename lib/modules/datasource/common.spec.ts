@@ -390,6 +390,32 @@ describe('modules/datasource/common', () => {
         releases: [{ version: '4.1.2' }, { version: '8.1.3' }],
       });
     });
+
+    it('should validate release constraints with the overridden constraint versioning', () => {
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { jenkins: ['>=15.0.0'] } },
+        ],
+      };
+      const config: GetPkgReleasesConfig = {
+        datasource: 'maven',
+        packageName: 'bar',
+        versioning: 'maven',
+        constraintsFiltering: 'strict',
+        constraints: { jenkins: '16.0.0' },
+        constraintsVersioning: { jenkins: 'npm' },
+      };
+
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), config),
+      ).toEqual({ releases: [{ version: '1.0.0' }] });
+      expect(
+        applyConstraintsFiltering(structuredClone(releaseResult), {
+          ...config,
+          constraints: { jenkins: '14.0.0' },
+        }),
+      ).toEqual({ releases: [] });
+    });
   });
 
   describe('applyVersionCompatibility', () => {

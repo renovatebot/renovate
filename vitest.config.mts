@@ -92,6 +92,10 @@ export default defineConfig(() =>
         reporters,
         mockReset: true,
         unstubEnvs: true,
+        deps: {
+          // Import CommonJS packages like Node does, without copying default exports onto namespaces
+          interopDefault: false,
+        },
         // Inlined so specs can mock `node:fs/promises` for these packages
         server: {
           deps: { inline: ['@renovatebot/base-image', '@containerbase/base'] },
