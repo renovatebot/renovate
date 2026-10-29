@@ -165,7 +165,17 @@ export function extractHelmChart(
   }
 
   const { repo } = helmChart;
-  if (isNonEmptyString(repo) && isOCIRegistry(repo)) {
+  // without `repo`, kustomize reads the chart from `helmGlobals.chartHome`
+  if (!isNonEmptyString(repo)) {
+    return {
+      depName: helmChart.name,
+      currentValue: helmChart.version,
+      datasource: HelmDatasource.id,
+      skipReason: 'local-chart',
+    };
+  }
+
+  if (isOCIRegistry(repo)) {
     return {
       ...getOciChartDep(repo, helmChart.name, aliases),
       depName: helmChart.name,
@@ -176,7 +186,7 @@ export function extractHelmChart(
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    ...(isNonEmptyString(repo) && { registryUrls: [repo] }),
+    registryUrls: [repo],
     datasource: HelmDatasource.id,
   };
 }

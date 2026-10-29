@@ -1,7 +1,7 @@
 name: 'Update static data'
 on:
   schedule:
-    - cron: '0 0 * * 0' # Every Sunday at midnight
+    - cron: '0 6 * * 1' # Every Monday at 06:00 UTC
   workflow_dispatch:
 
 env:
@@ -32,23 +32,58 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install mise
-        uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
+        uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           # don't run `mise install`, but do install a version of `mise` itself
           install: false
 
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
       - name: Update static data
-        run: pnpm run update-static-data
+        id: update
+        # the pre-commit hook refuses commits on `main`, so commit onto a working branch
+        run: |
+          git checkout -b chore/static-data-update
+          pnpm run update-static-data --commit
 
-      - name: Run Prettier
-        run: pnpm prettier-fix
+      - name: Create stacked pull requests
+        if: steps.update.outputs.branches != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCHES: ${{ steps.update.outputs.branches }}
+        run: |
+          gh extension install github/gh-stack --pin v0.3.0
+          gh auth setup-git
 
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
-        with:
-          author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-          branch: 'chore/update-static-data'
-          commit-message: 'feat(data): automatic update of static data'
-          committer: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
-          title: 'feat(data): automatic update of static data'
-          assignees: viceice,secustor,jamietanna
+          # any unmerged PRs from a previous run are superseded by this run
+          gh pr list --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("chore/static-data/")) | "\(.number) \(.headRefName)"' |
+            while read -r pr branch; do
+              gh pr close "$pr" --comment 'Superseded by a newer static data update.'
+              # not via `--delete-branch`, as that would also delete the new local branch
+              git push origin --delete "$branch"
+            done
+
+          read -ra branches <<< "$BRANCHES"
+          git push --force origin "${branches[@]}"
+
+          # each branch holds a single commit on top of the previous one, which provides the PR title and body
+          base=main
+          for branch in "${branches[@]}"; do
+            gh pr create --head "$branch" --base "$base" \
+              --title "$(git log -1 --format=%s "$branch")" \
+              --body "$(git log -1 --format=%b "$branch")"
+            base=$branch
+          done
+
+          # a stack needs at least two PRs
+          if [ "${#branches[@]}" -gt 1 ]; then
+            gh stack link "${branches[@]}"
+          fi
+
+          for branch in "${branches[@]}"; do
+            gh pr edit "$branch" --add-assignee viceice,secustor,jamietanna
+          done
