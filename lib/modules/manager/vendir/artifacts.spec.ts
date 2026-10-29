@@ -1,3 +1,4 @@
+import type { Stats } from 'node:fs';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
@@ -342,6 +343,72 @@ describe('modules/manager/vendir/artifacts', () => {
             PATH: '/tmp/path',
           },
         },
+      },
+    ]);
+  });
+
+  it('marks added files executable when the owner execute bit is set', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    git.isFileModeEnabled.mockResolvedValueOnce(true);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['vendor/bin/run.sh', 'vendor/Chart.yaml', 'vendor/sub'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('script');
+    fs.readLocalFile.mockResolvedValueOnce('chart');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.statLocalFile.mockImplementation((path) =>
+      Promise.resolve(
+        path === 'vendor/sub'
+          ? null
+          : partial<Stats>({
+              isFile: () => true,
+              mode: path === 'vendor/bin/run.sh' ? 0o755 : 0o644,
+            }),
+      ),
+    );
+
+    await expect(
+      vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps: [{ depName: 'dep1' }],
+        newPackageFileContent: vendirFile,
+        config,
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'vendir.lock.yml',
+          contents: vendirLockFile2,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'vendor/bin/run.sh',
+          contents: 'script',
+          isExecutable: true,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'vendor/Chart.yaml',
+          contents: 'chart',
+        },
+      },
+      {
+        file: { type: 'addition', path: 'vendor/sub', contents: null },
       },
     ]);
   });
