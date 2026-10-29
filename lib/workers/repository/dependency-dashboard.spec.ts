@@ -1746,6 +1746,44 @@ None detected
           await dryRun(branches, platform, 0, 1);
         });
 
+        it('shows the new locked version for lockfile-only updates', async () => {
+          const branches: BranchConfig[] = [];
+          PackageFiles.clear();
+          PackageFiles.add('main', {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'js-yaml',
+                    currentValue: '^4.1.0',
+                    lockedVersion: '4.1.0',
+                    updates: [
+                      {
+                        newValue: '^4.1.0',
+                        newVersion: '4.1.1',
+                        isLockfileUpdate: true,
+                      },
+                      { newValue: '^5.0.0', newVersion: '5.0.0' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          });
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            {},
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toContain(
+            ' - `js-yaml ^4.1.0` → [Updates: `lock file @ 4.1.1`, `^5.0.0`]',
+          );
+        });
+
         it('shows different combinations of version+digest for a given dependency', async () => {
           const branches: BranchConfig[] = [];
           PackageFiles.add('main', packageFilesWithDigest);
