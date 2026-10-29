@@ -3,6 +3,7 @@ import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { toMs } from '../../../util/pretty-time.ts';
+import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
@@ -59,14 +60,6 @@ async function resolveConstraint(
   );
 }
 
-function isInRange(constraint: string | undefined, range: string): boolean {
-  return (
-    isNonEmptyString(constraint) &&
-    npmVersioning.isValid(constraint) &&
-    npmVersioning.subset?.(constraint, range) === true
-  );
-}
-
 async function npmEnforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   npmLock: string,
@@ -89,7 +82,8 @@ async function npmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  return isInRange(
+  return isSubsetOf(
+    npmVersioning,
     await resolveConstraint(config, 'npm', npmLock),
     minReleaseAgeNpmRange,
   );
@@ -100,7 +94,9 @@ async function pnpmEnforcesMinimumReleaseAge(
   pnpmLockFile: string,
 ): Promise<boolean> {
   const constraint = await resolveConstraint(config, 'pnpm', pnpmLockFile);
-  if (!isInRange(constraint, minimumReleaseAgeEnforcedPnpmRange)) {
+  if (
+    !isSubsetOf(npmVersioning, constraint, minimumReleaseAgeEnforcedPnpmRange)
+  ) {
     return false;
   }
 
