@@ -206,7 +206,7 @@
     "description": "`@cloudflare/vitest-pool-workers` was renamed to `@cloudflare/vitest-plugin` for the v1 generally available release.",
     "packageRules": [
       {
-        "matchCurrentVersion": ">=0.22.0",
+        "matchCurrentVersion": ">=0.23.0",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@cloudflare/vitest-pool-workers"],
         "replacementName": "@cloudflare/vitest-plugin",
