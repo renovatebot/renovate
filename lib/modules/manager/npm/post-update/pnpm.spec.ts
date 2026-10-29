@@ -875,6 +875,22 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       ]);
     });
 
+    it('does not pass an invalid minimumReleaseAge for lock file maintenance', async () => {
+      const execSnapshots = mockExecAll();
+      mockPnpmFiles();
+
+      await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        { ...config, minimumReleaseAge: 'bananas' },
+        [{ isLockFileMaintenance: true }],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: `${pnpmInstall} --no-frozen-lockfile` },
+      ]);
+    });
+
     it('passes minimumReleaseAgeRepository instead of a larger minimumReleaseAge for updates', async () => {
       const execSnapshots = mockExecAll();
       mockPnpmFiles();

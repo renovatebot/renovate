@@ -17,6 +17,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
+import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
@@ -95,12 +96,12 @@ async function getMinimumReleaseAgeFlag(
   const isLockFileMaintenance = upgrades.some(
     (upgrade) => upgrade.isLockFileMaintenance,
   );
+  // the pnpm value is added below, as it depends on the pnpm version
   const minimumReleaseAgeMs = isLockFileMaintenance
     ? durationToMs('minimumReleaseAge', config.minimumReleaseAge)
-    : durationToMs(
-        'minimumReleaseAgeRepository',
-        config.minimumReleaseAgeRepository,
-      );
+    : calculatePackageManagerMinimumReleaseAgeMs({
+        minimumReleaseAgeRepository: config.minimumReleaseAgeRepository,
+      });
   if (!minimumReleaseAgeMs) {
     return null;
   }
