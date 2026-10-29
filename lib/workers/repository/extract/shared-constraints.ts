@@ -1,5 +1,4 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
-import { get } from '../../../modules/manager/index.ts';
 import type {
   PackageFile,
   SharedConstraints,
@@ -28,12 +27,11 @@ function getSources(
 ): SharedConstraintsSource[] {
   const sources: SharedConstraintsSource[] = [];
   for (const [manager, files] of Object.entries(packageFiles)) {
-    const getScope = get(manager, 'getSharedConstraintsScope');
-    if (!getScope) {
-      continue;
-    }
-    for (const { packageFile, extractedConstraints } of files) {
-      const scope = getScope(packageFile);
+    for (const {
+      packageFile,
+      extractedConstraints,
+      sharedConstraintsScope: scope,
+    } of files) {
       if (scope && isNonEmptyObject(extractedConstraints)) {
         sources.push({
           ...scope,

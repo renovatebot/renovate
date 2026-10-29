@@ -1,6 +1,4 @@
-import * as _manager from '../../../modules/manager/index.ts';
 import type {
-  ManagerApi,
   PackageFile,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
@@ -9,44 +7,22 @@ import {
   getSharedConstraints,
 } from './shared-constraints.ts';
 
-vi.mock('../../../modules/manager/index.ts', () => ({ get: vi.fn() }));
-
-const manager = vi.mocked(_manager);
-
-/**
- * The scopes of a stub `tools` manager, which shares the constraints of its package files.
- */
-const scopes = new Map<string, SharedConstraintsScope>([
-  ['tools.toml', { directory: '', precedence: 0 }],
-  ['tools.local.toml', { directory: '', precedence: 1 }],
-  ['apps/web/tools.toml', { directory: 'apps/web', precedence: 0 }],
-  ['apps/api/tools.toml', { directory: 'apps/api', precedence: 0 }],
-  ['b.toml', { directory: '', precedence: 0 }],
-  ['a.toml', { directory: '', precedence: 0 }],
-]);
-
-function getSharedConstraintsScope(
-  packageFile: string,
-): SharedConstraintsScope | null {
-  return scopes.get(packageFile) ?? null;
-}
-
 function packageFile(
   path: string,
   extractedConstraints?: PackageFile['extractedConstraints'],
+  sharedConstraintsScope?: SharedConstraintsScope,
 ): PackageFile {
-  return { packageFile: path, deps: [], extractedConstraints };
+  return {
+    packageFile: path,
+    deps: [],
+    extractedConstraints,
+    sharedConstraintsScope,
+  };
 }
 
-describe('workers/repository/extract/shared-constraints', () => {
-  beforeEach(() => {
-    manager.get.mockImplementation((name: string, key: keyof ManagerApi) =>
-      name === 'tools' && key === 'getSharedConstraintsScope'
-        ? getSharedConstraintsScope
-        : undefined,
-    );
-  });
+const root = { directory: '', precedence: 0 };
 
+describe('workers/repository/extract/shared-constraints', () => {
   describe('collectSharedConstraints()', () => {
     it('handles missing package files', () => {
       expect(collectSharedConstraints(undefined)).toEqual([]);
@@ -64,7 +40,7 @@ describe('workers/repository/extract/shared-constraints', () => {
       const packageFiles = {
         tools: [
           packageFile('tools.production.toml', { node: '22.0.0' }),
-          packageFile('tools.toml'),
+          packageFile('tools.toml', undefined, root),
         ],
       };
 
@@ -73,13 +49,15 @@ describe('workers/repository/extract/shared-constraints', () => {
 
     it('merges the package files of a directory by precedence, shallower directories first', () => {
       const shared = { node: '20.11.0', pnpm: '10.16.1' };
+      const web = { directory: 'apps/web', precedence: 0 };
+      const local = { directory: '', precedence: 1 };
       const packageFiles = {
         tools: [
-          packageFile('apps/web/tools.toml', { pnpm: '9.15.0' }),
-          packageFile('tools.local.toml', { node: '22.0.0' }),
-          packageFile('b.toml', { rust: '1.80.0' }),
-          packageFile('a.toml', { rust: '1.79.0' }),
-          packageFile('tools.toml', shared),
+          packageFile('apps/web/tools.toml', { pnpm: '9.15.0' }, web),
+          packageFile('tools.local.toml', { node: '22.0.0' }, local),
+          packageFile('b.toml', { rust: '1.80.0' }, root),
+          packageFile('a.toml', { rust: '1.79.0' }, root),
+          packageFile('tools.toml', shared, root),
         ],
       };
 
