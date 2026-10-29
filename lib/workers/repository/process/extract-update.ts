@@ -1,8 +1,17 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString, isTruthy } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
+import {
+  getDatasourceFor,
+  getDatasourceHostType,
+} from '../../../modules/datasource/common.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
+import {
+  needsNpmrcFromDisk,
+  withNpmrc,
+  withoutNpmrc,
+} from '../../../modules/manager/npmrc.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { isNotNullOrUndefined } from '../../../util/array.ts';
@@ -12,6 +21,12 @@ import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token.ts';
 import { clone } from '../../../util/clone.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
+import { detachUrlCredentials } from '../../../util/host-rules.ts';
+import { coerceObject } from '../../../util/object.ts';
+import {
+  containsUrlCredentials,
+  hasUrlCredentials,
+} from '../../../util/url.ts';
 import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import { extractAllDependencies } from '../extract/index.ts';
@@ -127,6 +142,10 @@ export function isCacheExtractValid(
     );
     return false;
   }
+  if (containsUrlCredentials(cachedExtract.packageFiles)) {
+    logger.debug('Cached extract has URLs with credentials, so cannot be used');
+    return false;
+  }
   logger.debug(
     `Cached extract for sha=${baseBranchSha} is valid and can be used`,
   );
@@ -151,7 +170,15 @@ export async function extract(
     overwriteCache &&
     isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)
   ) {
-    packageFiles = clone(cachedExtract.packageFiles);
+    if (needsNpmrcFromDisk(cachedExtract.packageFiles)) {
+      // a repository `.npmrc` with credentials is not cached, so it is read from the base branch again
+      await instrument(
+        'checkoutBranch',
+        async () => await scm.checkoutBranch(baseBranch!),
+      );
+    }
+    // the merged `npmrc` is not cached, so it is rebuilt from the cached repository `.npmrc` and the config
+    packageFiles = await withNpmrc(clone(cachedExtract.packageFiles), config);
   } else {
     await instrument(
       'checkoutBranch',
@@ -163,15 +190,34 @@ export async function extract(
     );
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
+    // before caching, as the host rules for the credentials are registered for this run only, and the cache keeps copies of the package files
+    const registryUrlsHadCredentials =
+      detachRegistryUrlCredentials(packageFiles);
+    // the merged `npmrc` carries the configured one, which may hold credentials
+    const cachedPackageFiles = overwriteCache
+      ? withoutNpmrc(packageFiles)
+      : undefined;
+    // the registry URLs held their credentials before they were detached, the other strings are checked on what would be cached
+    const hasUrlCredentials =
+      overwriteCache &&
+      (registryUrlsHadCredentials ||
+        containsUrlCredentials(cachedPackageFiles));
 
-    if (overwriteCache) {
+    if (hasUrlCredentials) {
+      logger.once.warn(
+        { baseBranch },
+        'The package files contain URLs with credentials, so the extract result is not cached: configure the credentials through hostRules instead',
+      );
+      delete cache.scan[baseBranch!];
+    } else if (cachedPackageFiles) {
       // TODO: fix types (#22198)
       cache.scan[baseBranch!] = {
         revision: EXTRACT_CACHE_REVISION,
         sha: baseBranchSha!,
         configHash,
         extractionFingerprints,
-        packageFiles: clone(packageFiles),
+        // a deep copy, as `withoutNpmrc()` copies the package files shallowly and the lookup adds its results to the deps
+        packageFiles: clone(cachedPackageFiles),
       };
     }
 
@@ -193,6 +239,87 @@ export async function extract(
   logger.trace({ config: packageFiles }, 'packageFiles');
   ensureGithubToken(packageFiles);
   return packageFiles;
+}
+
+/**
+ * Returns the host types the known datasources among `datasources` request with, such as `custom` for `custom.<name>`.
+ */
+function datasourceHostTypes(datasources: (string | undefined)[]): string[] {
+  const hostTypes = datasources
+    .filter(isTruthy)
+    .map((datasource) => getDatasourceHostType(datasource))
+    .filter(isTruthy);
+  return [...new Set(hostTypes)];
+}
+
+/**
+ * Returns the datasources of `deps` which support custom registry URLs for their package.
+ */
+function customRegistryDatasources(
+  deps: Pick<
+    PackageFile['deps'][number],
+    'datasource' | 'packageName' | 'depName'
+  >[],
+): string[] {
+  return deps
+    .filter(({ datasource, packageName, depName }) =>
+      getDatasourceFor(datasource ?? '')?.supportsCustomRegistry(
+        packageName ?? depName ?? '',
+      ),
+    )
+    .map(({ datasource }) => datasource!);
+}
+
+/**
+ * Moves the credentials of every extracted registry URL into host rules for the current run, for the datasources which support custom registry URLs; the URLs of other datasources lose their credentials.
+ *
+ * @returns whether a registry URL of a datasource which supports custom registry URLs held credentials according to `hasUrlCredentials()`
+ */
+function detachRegistryUrlCredentials(
+  packageFiles: Record<string, PackageFile[]>,
+): boolean {
+  let hadCredentials = false;
+
+  function detach(url: string, hostTypes: string[]): string {
+    // managers may yield non-string entries despite the type
+    if (!isString(url)) {
+      return url;
+    }
+    hadCredentials ||= hostTypes.length > 0 && hasUrlCredentials(url);
+    return detachUrlCredentials(url, hostTypes);
+  }
+
+  // `extractAllDependencies` may have yielded nothing
+  for (const files of Object.values(coerceObject(packageFiles))) {
+    for (const file of files) {
+      // the URLs of a package file are requested with the datasources of its dependencies
+      const hostTypes = datasourceHostTypes(
+        customRegistryDatasources([
+          { datasource: file.datasource },
+          ...file.deps,
+        ]),
+      );
+      // absent fields stay absent, so they don't override configured ones
+      if (isArray(file.registryUrls)) {
+        file.registryUrls = file.registryUrls.map((url) =>
+          detach(url, hostTypes),
+        );
+      }
+      if (isArray(file.additionalRegistryUrls)) {
+        file.additionalRegistryUrls = file.additionalRegistryUrls.map((url) =>
+          detach(url, hostTypes),
+        );
+      }
+      for (const dep of file.deps) {
+        if (isArray(dep.registryUrls)) {
+          dep.registryUrls = dep.registryUrls.map((url) =>
+            detach(url, datasourceHostTypes(customRegistryDatasources([dep]))),
+          );
+        }
+      }
+    }
+  }
+  return hadCredentials;
 }
 
 async function fetchVulnerabilities(

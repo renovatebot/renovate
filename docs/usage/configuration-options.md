@@ -162,7 +162,8 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## `assignees`
 
 Must be valid usernames on the platform in use.
-This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
+Teams are not supported, and Renovate passes `team:` entries to the platform unchanged.
+To request a review from a team, use [`reviewers`](#reviewers) instead.
 
 ## `assigneesFromCodeOwners`
 
@@ -2344,8 +2345,8 @@ Do not combine with `hostType` in the same rule or it won't work.
 
 ### `hostRules.dnsCache`
 
-Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
+This option is deprecated and has no effect.
+Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
@@ -2439,6 +2440,8 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
 
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
@@ -3053,6 +3056,7 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ read checkboxes from an existing Dependency Dashboard: use `checkedBranches` to request branches instead
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
@@ -3094,6 +3098,16 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
 The entire database is downloaded locally by [osv-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+
+If you self-host Renovate, you can change how the database is downloaded with these osv-offline environment variables:
+
+- `OSV_OFFLINE_ROOT_DIR`: where the database is stored
+- `OSV_OFFLINE_MAX_AGE`: how old the database may be before it's downloaded again, as an [`ms`](https://github.com/vercel/ms) duration such as `30m`, `4h` or `7d` (default: `1d`)
+- `OSV_OFFLINE_DATABASE_FORMAT=split`: download the database of each ecosystem on its first use, instead of all of them at once
+- `OSV_OFFLINE_DATABASE_URL` and `OSV_OFFLINE_DATABASE_INDEX_URL`: download from an internal mirror
+- `OSV_OFFLINE_DISABLE_DOWNLOAD=true`: use a database you've put into `OSV_OFFLINE_ROOT_DIR` yourself, without internet access
+
+Read the [osv-offline readme](https://github.com/renovatebot/osv-offline/tree/main/packages/osv-offline#readme) for all options, mirrors, and which hosts to allow.
 
 <!-- markdownlint-disable MD001 -->
 
@@ -4623,6 +4637,7 @@ It usually doesn't _know_ why they're there, instead it simply knows that it has
 
 If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+Read the [Abandoned PRs](./key-concepts/pull-requests.md#abandoned-prs) docs to learn more.
 
 If a branch appears stale and hasn't been modified, then:
 
@@ -5357,6 +5372,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.

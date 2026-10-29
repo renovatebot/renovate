@@ -28,6 +28,7 @@ import {
   trimTrailingSlash,
 } from '../../../util/url.ts';
 import goVersioning from '../../versioning/go-mod-directive/index.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -52,26 +53,16 @@ const versionTagRegex = regEx(/^v\d/);
  */
 const incompatibleSuffixRegex = regEx(/\+incompatible$/);
 
-/**
- * @see https://go.dev/ref/mod#pseudo-versions
- */
-const pseudoVersionRegex = regEx(
-  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
-);
-
 export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
-  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
-  if (!match) {
+  const commit = parseVersionCommit(pseudoVersion);
+  if (!commit) {
     return null;
   }
 
-  const { digest: newDigest, timestamp } = match;
-  const releaseTimestamp = asTimestamp(timestamp);
-
   return {
     version: pseudoVersion,
-    newDigest,
-    releaseTimestamp,
+    newDigest: commit.revision,
+    releaseTimestamp: asTimestamp(commit.timestamp),
   };
 }
 
@@ -125,7 +116,7 @@ export class GoProxyDatasource extends Datasource {
     logger.trace(`goproxy.getReleases(${packageName})`);
     const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
-      return this.direct.getReleases(config);
+      return this.getDirectReleases(config);
     }
     const proxyList = parseGoproxy(goproxy);
     const noproxy = parseNoproxy();
@@ -135,7 +126,7 @@ export class GoProxyDatasource extends Datasource {
 
     if (noproxy?.test(packageName)) {
       logger.debug(`Fetching ${packageName} via GONOPROXY match`);
-      result = await this.direct.getReleases(config);
+      result = await this.getDirectReleases(config);
       return result;
     }
 
@@ -144,7 +135,7 @@ export class GoProxyDatasource extends Datasource {
         if (url === 'off') {
           break;
         } else if (url === 'direct') {
-          result = await this.direct.getReleases(config);
+          result = await this.getDirectReleases(config);
           break;
         }
 
@@ -199,6 +190,33 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  /**
+   * Looks up a module directly from its source, or from the module proxy its `go-import` meta tag advertises with the `mod` VCS, as with private Buf Schema Registries.
+   */
+  private async getDirectReleases(
+    config: GetReleasesConfig,
+  ): Promise<ReleaseResult | null> {
+    const { packageName } = config;
+
+    const source = await BaseGoDatasource.getDatasource(packageName);
+    if (!source) {
+      const modProxyUrl = await BaseGoDatasource.getModProxyUrl(packageName);
+      if (modProxyUrl) {
+        logger.debug(
+          `Fetching ${packageName} via go-import mod proxy ${modProxyUrl}`,
+        );
+        const res = await this.getVersionsWithInfo(
+          modProxyUrl,
+          packageName,
+          config.constraintsFiltering,
+        );
+        return res.releases.length ? res : null;
+      }
+    }
+
+    return this.direct.getReleases(config);
   }
 
   /**

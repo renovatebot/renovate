@@ -24,18 +24,6 @@ type JsonSchemaBasicType =
   'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
-/* These are sorted in priority order, but editors may not suggest in that order */
-const presetsToSuggest = [
-  'config:best-practices',
-  'config:recommended',
-  'mergeConfidence:all-badges',
-  'abandonments:recommended',
-  'group:all',
-  'replacements:all',
-  'security:minimumReleaseAgeNpm',
-  'security:only-security-updates',
-];
-
 const docsPages = {
   repo: 'configuration-options',
   global: 'self-hosted-configuration',
@@ -86,23 +74,13 @@ export function getOptionDocsUrl(
 }
 
 /**
- * When suggesting presets in `extends`, suggest a number of values that users may want to use
+ * Suggests values in an editor, while still accepting anything else matching `items`.
  */
-function createExtendsSchema(items: Record<string, any>): any[] {
-  return [
-    {
-      type: 'array',
-      items: {
-        anyOf: [
-          {
-            enum: presetsToSuggest,
-          },
-          items,
-        ],
-      },
-    },
-    { ...items },
-  ];
+function suggestValues(
+  values: string[],
+  items: Record<string, unknown>,
+): Record<string, any> {
+  return { anyOf: [{ enum: values }, items] };
 }
 
 function createSingleConfig(
@@ -135,17 +113,19 @@ function createSingleConfig(
         } else {
           temp.items.enum = option.allowedValues;
         }
+      } else if (option.suggestedValues) {
+        /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+        Object.assign(
+          temp.items,
+          suggestValues(option.suggestedValues, { type: option.subType }),
+        );
       }
     }
     if (option.subType === 'string' && option.allowString === true) {
       const items = temp.items;
       delete temp.items;
       delete temp.type;
-      if (option.name === 'extends') {
-        temp.oneOf = createExtendsSchema(items);
-      } else {
-        temp.oneOf = [{ type: 'array', items }, { ...items }];
-      }
+      temp.oneOf = [{ type: 'array', items }, { ...items }];
     }
   } else {
     if (hasKey('format', option) && option.format) {
@@ -162,6 +142,12 @@ function createSingleConfig(
       } else {
         temp.enum = option.allowedValues;
       }
+    } else if (option.suggestedValues) {
+      /* the values are a suggestion rather than the only ones allowed, so anything of the right type is still valid */
+      Object.assign(
+        temp,
+        suggestValues(option.suggestedValues, { type: option.type }),
+      );
     }
   }
   if (option.default !== undefined) {
@@ -334,42 +320,7 @@ function addChildrenToParents(
       getChildrenSchema(definitions[parent]).allOf = [
         {
           type: 'object',
-          properties: {
-            description: {
-              oneOf: [
-                {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    description:
-                      'A custom description for this configuration object',
-                  },
-                },
-                {
-                  type: 'string',
-                  description:
-                    'A custom description for this configuration object',
-                },
-              ],
-            },
-            overrideDescription: {
-              oneOf: [
-                {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    description:
-                      'Description which replaces the descriptions of any presets which this config extends',
-                  },
-                },
-                {
-                  type: 'string',
-                  description:
-                    'Description which replaces the descriptions of any presets which this config extends',
-                },
-              ],
-            },
-          },
+          properties: {},
         },
       ];
     }
@@ -490,21 +441,16 @@ export async function buildSchema({
       return isInherit || isGlobal;
     }
 
-    if (o.globalOnly) {
-      if (!isGlobal) {
-        schema.not ??= {
-          anyOf: [],
-        };
-        // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
-        schema.not.anyOf.push({
-          required: [o.name],
-        });
-      }
-      return isGlobal;
+    if (!isGlobal) {
+      schema.not ??= {
+        anyOf: [],
+      };
+      // we have to use `anyOf` here with each rule, so any of the properties can be found in isolation, and will be excluded
+      schema.not.anyOf.push({
+        required: [o.name],
+      });
     }
-
-    // we don't currently have any config options that are hitting this, but to be safe, let's throw an error if we ever hit this
-    throw new Error(`Unhandled case for \`${o.name}\``);
+    return isGlobal;
   });
 
   configurationOptions.sort((a, b) => {

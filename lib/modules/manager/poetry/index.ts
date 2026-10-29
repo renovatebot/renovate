@@ -5,6 +5,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import type { MinimumReleaseAgeSupport } from '../types.ts';
 
 export { bumpPackageVersion } from '../pep621/update.ts';
 export { updateArtifacts } from './artifacts.ts';
@@ -18,6 +19,13 @@ export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
+
+export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
+  poetry: {
+    passesMinimumReleaseAge: '>=2.4.0',
+    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days. Older Poetry versions ignore it.',
+  },
+};
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
