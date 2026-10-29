@@ -849,38 +849,22 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     );
 
-    it.each`
-      stdout
-      ${'ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version 1.2.3 (released 2 hours ago) of foo does not meet the minimumReleaseAge constraint'}
-      ${'ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION  foo@1.2.3 was published within the minimumReleaseAge cutoff'}
-    `(
-      'retries without the minimum release age: $stdout',
-      async ({ stdout }) => {
-        const execSnapshots = mockExecSequence([
-          immatureError(stdout),
-          { stdout: '', stderr: '' },
-        ]);
-        mockPnpmFiles();
+    it('does not retry if pnpm rejects locked packages', async () => {
+      const stdout =
+        'ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION  foo@1.2.3 was published within the minimumReleaseAge cutoff';
+      const execSnapshots = mockExecSequence([immatureError(stdout)]);
+      mockPnpmFiles();
 
-        const res = await pnpmHelper.generateLockFile(
-          'some-folder',
-          {},
-          { ...config, minimumReleaseAge: '1 day' },
-          upgrades,
-        );
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        { ...config, minimumReleaseAge: '1 day' },
+        upgrades,
+      );
 
-        expect(res).toEqual({
-          lockFile: 'package-lock-contents',
-          minimumReleaseAgeFallback: true,
-        });
-        expect(execSnapshots).toMatchObject([
-          {
-            cmd: `${pnpmInstall} --config.minimum-release-age=1440 --no-frozen-lockfile`,
-          },
-          { cmd: `${pnpmInstall} --no-frozen-lockfile` },
-        ]);
-      },
-    );
+      expect(res).toEqual({ error: true, stderr: '', stdout });
+      expect(execSnapshots).toHaveLength(1);
+    });
 
     it('does not retry on other errors', async () => {
       const execSnapshots = mockExecSequence([
@@ -903,26 +887,33 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(execSnapshots).toHaveLength(1);
     });
 
-    it('does not retry for lock file maintenance and names the packages', async () => {
-      const stdout =
-        'ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version 1.2.3 (released 2 hours ago) of foo does not meet the minimumReleaseAge constraint';
-      const execSnapshots = mockExecSequence([immatureError(stdout)]);
-      mockPnpmFiles();
+    it.each`
+      name                       | upgrade
+      ${'an update'}             | ${{}}
+      ${'lock file maintenance'} | ${{ isLockFileMaintenance: true }}
+    `(
+      'does not retry for $name and names the packages',
+      async ({ upgrade }) => {
+        const stdout =
+          'ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version 1.2.3 (released 2 hours ago) of foo does not meet the minimumReleaseAge constraint';
+        const execSnapshots = mockExecSequence([immatureError(stdout)]);
+        mockPnpmFiles();
 
-      const res = await pnpmHelper.generateLockFile(
-        'some-folder',
-        {},
-        { ...config, minimumReleaseAge: '1 day' },
-        [{ isLockFileMaintenance: true }],
-      );
+        const res = await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, minimumReleaseAge: '1 day' },
+          [upgrade],
+        );
 
-      expect(res).toEqual({
-        error: true,
-        stderr: `pnpm found no version old enough for the minimum release age: \`foo@1.2.3\`\n\n${stdout}`,
-        stdout,
-      });
-      expect(execSnapshots).toHaveLength(1);
-    });
+        expect(res).toEqual({
+          error: true,
+          stderr: `pnpm found no version old enough for the minimum release age: \`foo@1.2.3\`\n\n${stdout}`,
+          stdout,
+        });
+        expect(execSnapshots).toHaveLength(1);
+      },
+    );
   });
 
   describe('getImmaturePackages()', () => {
