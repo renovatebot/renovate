@@ -45,7 +45,7 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
     passesMinimumReleaseAge: minimumReleaseAgePnpmRange,
     readsConfiguredAge: minimumReleaseAgePnpmRange,
     enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
-    note: 'Passes `--config.minimum-release-age` with the larger of `minimumReleaseAge` and the `pnpm-workspace.yaml` `minimumReleaseAge`. pnpm v11.0.0 to v11.0.3 install a version which is too new if no other version matches.',
+    note: 'Passes `--config.minimum-release-age` with the larger of `minimumReleaseAge` and the pnpm value. Reads `minimumReleaseAge` from the `pnpm-workspace.yaml`, and before pnpm v11 `minimum-release-age` from the `.npmrc`. From pnpm v11, the pnpm default of 1 day counts. pnpm v10.16.0 and v11.0.0 to v11.0.3 do not enforce it in every case.',
   },
   yarn: {},
 };

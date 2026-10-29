@@ -7,7 +7,10 @@ import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { parseNpmrcCooldown } from './extract/npmrc.ts';
-import { readPnpmWorkspaceMinimumReleaseAge } from './extract/pnpm-minimum-release-age.ts';
+import {
+  getPnpmMinimumReleaseAgeMinutes,
+  readPnpmWorkspaceMinimumReleaseAge,
+} from './extract/pnpm-minimum-release-age.ts';
 import { getPackageManagerVersion } from './post-update/utils.ts';
 import type { NpmManagerData } from './types.ts';
 import { loadPackageJson } from './utils.ts';
@@ -20,12 +23,14 @@ export const minReleaseAgeNpmRange = '>=11.10.0';
 // https://github.com/pnpm/pnpm/releases/tag/v10.16.0
 export const minimumReleaseAgePnpmRange = '>=10.16.0';
 
+// pnpm v10.16.0 skips the check for an exact version from the metadata cache,
+// fixed in v10.17.0: https://github.com/pnpm/pnpm/releases/tag/v10.17.0
 // pnpm v11.0.0 to v11.0.3 fall back to a version which is too new, unless
 // `minimumReleaseAgeStrict` is set. Since v11.0.4, an explicit
 // `minimumReleaseAge` turns on `minimumReleaseAgeStrict`.
 // https://github.com/pnpm/pnpm/releases/tag/v11.0.4
 export const minimumReleaseAgeEnforcedPnpmRange =
-  '>=10.16.0 <11.0.0 || >=11.0.4';
+  '>=10.17.0 <11.0.0 || >=11.0.4';
 
 const dayMs = 24 * 60 * 60 * 1000;
 const minuteMs = 60 * 1000;
@@ -41,18 +46,20 @@ function getMinimumReleaseAgeMs(
   return isNonEmptyString(minimumReleaseAge) ? toMs(minimumReleaseAge) : null;
 }
 
-async function isToolVersionInRange(
+async function resolveConstraint(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   toolName: 'npm' | 'pnpm',
   lockFile: string,
-  range: string,
-): Promise<boolean> {
-  const constraint = await resolveToolConstraint(config, toolName, async () =>
+): Promise<string | undefined> {
+  return await resolveToolConstraint(config, toolName, async () =>
     getPackageManagerVersion(
       toolName,
       await loadPackageJson(upath.dirname(lockFile)),
     ),
   );
+}
+
+function isInRange(constraint: string | undefined, range: string): boolean {
   return (
     isNonEmptyString(constraint) &&
     npmVersioning.isValid(constraint) &&
@@ -82,10 +89,8 @@ async function npmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  return await isToolVersionInRange(
-    config,
-    'npm',
-    npmLock,
+  return isInRange(
+    await resolveConstraint(config, 'npm', npmLock),
     minReleaseAgeNpmRange,
   );
 }
@@ -94,6 +99,11 @@ async function pnpmEnforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   pnpmLockFile: string,
 ): Promise<boolean> {
+  const constraint = await resolveConstraint(config, 'pnpm', pnpmLockFile);
+  if (!isInRange(constraint, minimumReleaseAgeEnforcedPnpmRange)) {
+    return false;
+  }
+
   const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
   if (workspace.minimumReleaseAgeStrict === false) {
     logger.debug(
@@ -102,21 +112,16 @@ async function pnpmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  // Renovate passes the larger of `minimumReleaseAge` and the
-  // `pnpm-workspace.yaml` value, otherwise pnpm applies its own value
-  const minimumReleaseAgeMs = Math.max(
-    getMinimumReleaseAgeMs(config.minimumReleaseAge) ?? 0,
-    (workspace.minimumReleaseAge ?? 0) * minuteMs,
-  );
-  if (!minimumReleaseAgeMs) {
-    return false;
-  }
-
-  return await isToolVersionInRange(
-    config,
-    'pnpm',
-    pnpmLockFile,
-    minimumReleaseAgeEnforcedPnpmRange,
+  // Renovate passes the larger of `minimumReleaseAge` and the pnpm value,
+  // otherwise pnpm applies its own value. The pnpm v11 default does not
+  // count, as pnpm does not apply it strictly.
+  const pnpmMinutes =
+    getPnpmMinimumReleaseAgeMinutes(workspace, config.npmrc, constraint) ?? 0;
+  return (
+    Math.max(
+      getMinimumReleaseAgeMs(config.minimumReleaseAge) ?? 0,
+      pnpmMinutes * minuteMs,
+    ) > 0
   );
 }
 

@@ -4,6 +4,7 @@ import { toMs } from '../../../../util/pretty-time.ts';
 import type { PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
+  getPnpmMinimumReleaseAgeMinutes,
   readPnpmWorkspaceMinimumReleaseAge,
   setPnpmMinimumReleaseAge,
 } from './pnpm-minimum-release-age.ts';
@@ -122,5 +123,71 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
         expect(packageFiles[0].minimumReleaseAgeExtracted).toBeUndefined();
       },
     );
+
+    it.each`
+      pnpm          | workspace                    | expected
+      ${'^10.20.0'} | ${null}                      | ${'2880 minutes'}
+      ${'^10.20.0'} | ${'minimumReleaseAge: 60\n'} | ${'60 minutes'}
+      ${'^11.0.0'}  | ${null}                      | ${undefined}
+      ${undefined}  | ${null}                      | ${undefined}
+    `(
+      'reads the repository .npmrc for pnpm $pnpm and workspace=$workspace',
+      async ({ pnpm, workspace, expected }) => {
+        mockWorkspace(workspace);
+        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+          {
+            packageFile: 'some-dir/package.json',
+            extractedConstraints: { pnpm },
+            managerData: {
+              pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+              repoNpmrc: {
+                fileName: '.npmrc',
+                content: 'minimum-release-age=2880\n',
+                detectedLineEnding: '\n',
+              },
+            },
+          },
+        ];
+
+        await setPnpmMinimumReleaseAge(packageFiles);
+
+        expect(packageFiles[0].minimumReleaseAgeExtracted).toBe(expected);
+      },
+    );
+  });
+
+  describe('getPnpmMinimumReleaseAgeMinutes()', () => {
+    const npmrc = 'minimum-release-age=2880\n';
+
+    it.each`
+      workspace                   | pnpm          | includeDefault | expected
+      ${{}}                       | ${'^10.20.0'} | ${true}        | ${2880}
+      ${{}}                       | ${'^10.20.0'} | ${false}       | ${2880}
+      ${{ minimumReleaseAge: 0 }} | ${'^10.20.0'} | ${true}        | ${0}
+      ${{ minimumReleaseAge: 0 }} | ${'^11.0.0'}  | ${true}        | ${0}
+      ${{}}                       | ${'^11.0.0'}  | ${true}        | ${1440}
+      ${{}}                       | ${'^11.0.0'}  | ${false}       | ${undefined}
+      ${{}}                       | ${'>=10'}     | ${true}        | ${1440}
+      ${{}}                       | ${'bananas'}  | ${true}        | ${1440}
+      ${{}}                       | ${null}       | ${true}        | ${1440}
+    `(
+      'returns $expected for workspace=$workspace, pnpm $pnpm and includeDefault=$includeDefault',
+      ({ workspace, pnpm, includeDefault, expected }) => {
+        expect(
+          getPnpmMinimumReleaseAgeMinutes(
+            workspace,
+            npmrc,
+            pnpm,
+            includeDefault,
+          ),
+        ).toBe(expected);
+      },
+    );
+
+    it('returns undefined for pnpm v10 without a setting', () => {
+      expect(
+        getPnpmMinimumReleaseAgeMinutes({}, null, '^10.20.0', true),
+      ).toBeUndefined();
+    });
   });
 });

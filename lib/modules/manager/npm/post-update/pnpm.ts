@@ -27,7 +27,10 @@ import {
   resolveToolConstraint,
 } from '../../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
-import { readPnpmWorkspaceMinimumReleaseAge } from '../extract/pnpm-minimum-release-age.ts';
+import {
+  getPnpmMinimumReleaseAgeMinutes,
+  readPnpmWorkspaceMinimumReleaseAge,
+} from '../extract/pnpm-minimum-release-age.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
@@ -49,7 +52,9 @@ function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
 const minuteMs = 60 * 1000;
 
 /**
- * The `--config.minimum-release-age` flag which passes the larger of `minimumReleaseAge` and the `pnpm-workspace.yaml` `minimumReleaseAge` to pnpm, in minutes.
+ * The `--config.minimum-release-age` flag which passes the larger of `minimumReleaseAge` and the pnpm value to pnpm, in minutes.
+ *
+ * The pnpm value comes from the `pnpm-workspace.yaml`, the `.npmrc` before pnpm v11, or the pnpm v11 default.
  *
  * pnpm reads `--config.minimum-release-age` since v10.16.0, and the flag takes precedence over the `pnpm-workspace.yaml`.
  */
@@ -57,6 +62,8 @@ async function getMinimumReleaseAgeFlag(
   lockFileName: string,
   config: PostUpdateConfig,
   upgrades: Upgrade[],
+  npmrcContent: string | null,
+  pnpmConstraint: string | null | undefined,
 ): Promise<string | null> {
   if (!isNonEmptyString(config.minimumReleaseAge)) {
     return null;
@@ -77,14 +84,20 @@ async function getMinimumReleaseAgeFlag(
     return null;
   }
   const workspace = await readPnpmWorkspaceMinimumReleaseAge(lockFileName);
+  const pnpmMinutes = getPnpmMinimumReleaseAgeMinutes(
+    workspace,
+    npmrcContent,
+    pnpmConstraint,
+    true,
+  );
   const minutes = Math.max(
     Math.ceil(minimumReleaseAgeMs / minuteMs),
-    workspace.minimumReleaseAge ?? 0,
+    pnpmMinutes ?? 0,
   );
   logger.debug(
     {
       minimumReleaseAge: config.minimumReleaseAge,
-      pnpmMinimumReleaseAge: workspace.minimumReleaseAge,
+      pnpmMinimumReleaseAge: pnpmMinutes,
     },
     `Passing a minimum release age of ${minutes} minutes to pnpm`,
   );
@@ -144,6 +157,7 @@ export async function generateLockFile(
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
   upgrades: Upgrade[] = [],
+  npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
@@ -234,6 +248,8 @@ export async function generateLockFile(
       lockFileName,
       config,
       upgrades,
+      npmrcContent,
+      pnpmToolConstraint.constraint,
     );
     if (minimumReleaseAgeFlag) {
       args += ` ${minimumReleaseAgeFlag}`;

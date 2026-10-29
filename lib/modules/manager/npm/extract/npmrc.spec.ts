@@ -5,6 +5,7 @@ import type { NpmManagerData } from '../types.ts';
 import {
   getNpmrcMinimumReleaseAge,
   parseNpmrcCooldown,
+  parseNpmrcPnpmMinimumReleaseAge,
   setNpmrcMinimumReleaseAge,
 } from './npmrc.ts';
 
@@ -16,6 +17,23 @@ describe('modules/manager/npm/extract/npmrc', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  describe('parseNpmrcPnpmMinimumReleaseAge()', () => {
+    it.each`
+      content                                    | expected
+      ${null}                                    | ${undefined}
+      ${''}                                      | ${undefined}
+      ${'registry=https://registry.npmjs.org\n'} | ${undefined}
+      ${'minimum-release-age=1440\n'}            | ${1440}
+      ${'minimum-release-age="60"\n'}            | ${60}
+      ${'minimum-release-age=60 # 1 hour\n'}     | ${60}
+      ${'minimum-release-age=0\n'}               | ${0}
+      ${'minimum-release-age=-1\n'}              | ${undefined}
+      ${'minimum-release-age=bananas\n'}         | ${undefined}
+    `('returns $expected for $content', ({ content, expected }) => {
+      expect(parseNpmrcPnpmMinimumReleaseAge(content)).toBe(expected);
+    });
   });
 
   describe('parseNpmrcCooldown()', () => {

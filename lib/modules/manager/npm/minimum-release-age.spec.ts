@@ -150,8 +150,9 @@ describe('modules/manager/npm/minimum-release-age', () => {
 
     it.each`
       constraint     | expected
-      ${'10.16.0'}   | ${true}
-      ${'^10.16.0'}  | ${true}
+      ${'10.17.0'}   | ${true}
+      ${'^10.17.0'}  | ${true}
+      ${'10.16.0'}   | ${false}
       ${'11.0.4'}    | ${true}
       ${'>=11.0.4'}  | ${true}
       ${'^11.28.0'}  | ${true}
@@ -159,7 +160,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       ${'>=10'}      | ${false}
       ${'11.0.3'}    | ${false}
       ${'^11.0.0'}   | ${false}
-      ${'>=10.16.0'} | ${false}
+      ${'>=10.17.0'} | ${false}
       ${'bananas'}   | ${false}
     `(
       'returns $expected for the pnpm constraint $constraint',
@@ -194,7 +195,28 @@ describe('modules/manager/npm/minimum-release-age', () => {
           enforcesMinimumReleaseAge({
             managerData: pnpmLockManagerData,
             minimumReleaseAge,
-            constraints: { pnpm: '10.16.0' },
+            constraints: { pnpm: '10.17.0' },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it.each`
+      pnpm         | npmrc                           | expected
+      ${'10.17.0'} | ${'minimum-release-age=1440\n'} | ${true}
+      ${'10.17.0'} | ${'minimum-release-age=0\n'}    | ${false}
+      ${'10.17.0'} | ${undefined}                    | ${false}
+      ${'11.0.4'}  | ${'minimum-release-age=1440\n'} | ${false}
+    `(
+      'returns $expected for pnpm $pnpm with npmrc=$npmrc and no minimumReleaseAge',
+      async ({ pnpm, npmrc, expected }) => {
+        mockPnpmFiles();
+
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: pnpmLockManagerData,
+            npmrc,
+            constraints: { pnpm },
           }),
         ).resolves.toBe(expected);
       },

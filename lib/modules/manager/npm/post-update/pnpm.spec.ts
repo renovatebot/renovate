@@ -791,6 +791,40 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
 
     it.each`
+      pnpm          | minimumReleaseAge | workspace                    | npmrc                              | minutes
+      ${'^11.0.0'}  | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${1440}
+      ${'^11.0.0'}  | ${'7 days'}       | ${undefined}                 | ${null}                            | ${10080}
+      ${'^11.0.0'}  | ${'1 hour'}       | ${'minimumReleaseAge: 0\n'}  | ${null}                            | ${60}
+      ${'^11.0.0'}  | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${1440}
+      ${'>=9'}      | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${1440}
+      ${undefined}  | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${1440}
+      ${'^10.20.0'} | ${'1 hour'}       | ${undefined}                 | ${null}                            | ${60}
+      ${'^10.20.0'} | ${'1 day'}        | ${undefined}                 | ${'minimum-release-age=2880\n'}    | ${2880}
+      ${'^10.20.0'} | ${'1 day'}        | ${'minimumReleaseAge: 60\n'} | ${'minimum-release-age=2880\n'}    | ${1440}
+      ${'^10.20.0'} | ${'1 hour'}       | ${undefined}                 | ${'minimum-release-age=bananas\n'} | ${60}
+    `(
+      'passes $minutes minutes for pnpm $pnpm, minimumReleaseAge=$minimumReleaseAge, workspace=$workspace and npmrc=$npmrc',
+      async ({ pnpm, minimumReleaseAge, workspace, npmrc, minutes }) => {
+        const execSnapshots = mockExecAll();
+        mockPnpmFiles(workspace);
+
+        await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, constraints: { pnpm }, minimumReleaseAge },
+          upgrades,
+          npmrc,
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: `${pnpmInstall} --config.minimum-release-age=${minutes} --no-frozen-lockfile`,
+          },
+        ]);
+      },
+    );
+
+    it.each`
       minimumReleaseAge | upgrade
       ${null}           | ${{}}
       ${'0 days'}       | ${{}}
