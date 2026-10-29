@@ -149,6 +149,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@commander-js/extra-typings', 'commander'],
         matchUpdateTypes: ['major'],
       },
+      {
+        description:
+          'Group SimpleWebAuthn major updates to keep browser and server compatible.',
+        groupName: 'SimpleWebAuthn',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          '@simplewebauthn/browser',
+          '@simplewebauthn/server',
+        ],
+        matchUpdateTypes: ['major'],
+      },
     ],
   },
   guavaVariants: {
