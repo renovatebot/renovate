@@ -517,6 +517,7 @@ const staticGroups = {
       'group:hibernateOgm',
       'group:hibernateCommons',
       'group:illuminate',
+      'group:java',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
