@@ -119,12 +119,30 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 /**
+ * Whether Renovate checks the minimum release age of `upgrade`.
+ *
+ * Lock file maintenance has no release timestamps, so only Renovate's own
+ * `minimumReleaseAge` holds it back, not `minimumReleaseAgeExtracted`.
+ */
+function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
+  return (
+    isNonEmptyString(upgrade.minimumReleaseAge) ||
+    (!upgrade.isLockFileMaintenance &&
+      isNonEmptyString(upgrade.minimumReleaseAgeExtracted))
+  );
+}
+
+/**
  * The minimum release age which Renovate has to check for `upgrade`, which is
- * `0` for lock file maintenance if the package manager enforces it itself.
+ * `0` for lock file maintenance if `minimumReleaseAge` is unset or the package
+ * manager enforces it itself.
  */
 async function getMinimumReleaseAgeMsToCheck(
   upgrade: BranchUpgradeConfig,
 ): Promise<number> {
+  if (!hasMinimumReleaseAge(upgrade)) {
+    return 0;
+  }
   const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
   if (!minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
     return minimumReleaseAgeMs;
@@ -460,8 +478,7 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          isNonEmptyString(upgrade.minimumReleaseAge) ||
-          isNonEmptyString(upgrade.minimumReleaseAgeExtracted) ||
+          hasMinimumReleaseAge(upgrade) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {
