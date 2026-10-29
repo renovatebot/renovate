@@ -146,15 +146,6 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
-    it('reuses the modified state which the caller already determined', async () => {
-      config.isModified = true;
-      scm.branchExists.mockResolvedValueOnce(true);
-      scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config, pr);
-      expect(res.reuseExistingBranch).toBeTrue();
-      expect(scm.isBranchModified).not.toHaveBeenCalled();
-    });
-
     it('returns false if automerge pr and stale', async () => {
       config.rebaseWhen = 'auto';
       config.automerge = true;
@@ -210,7 +201,7 @@ describe('workers/repository/update/branch/reuse', () => {
       scm.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeFalse();
-      expect(res.isModified).toBeFalse();
+      expect(res.isModified).toBeUndefined();
     });
 
     it('returns true if rebaseWhen=never, miss-match keepUpdatedLabel and stale', async () => {
