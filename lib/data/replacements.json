@@ -34,6 +34,7 @@
       "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
+      "replacements:monochromata-cucumber-reporting-plugin-to-jvt",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
@@ -934,6 +935,17 @@
         "matchPackageNames": ["middie"],
         "replacementName": "@fastify/middie",
         "replacementVersion": "8.0.0"
+      }
+    ]
+  },
+  "monochromata-cucumber-reporting-plugin-to-jvt": {
+    "description": "`de.monochromata.cucumber:reporting-plugin` was moved to `me.jvt.cucumber:reporting-plugin`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["de.monochromata.cucumber:reporting-plugin"],
+        "replacementName": "me.jvt.cucumber:reporting-plugin",
+        "replacementVersion": "5.0.0"
       }
     ]
   },

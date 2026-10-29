@@ -6,7 +6,6 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -20,6 +19,7 @@ import {
   artifactErrorResult,
   fileAddition,
   resolveToolConstraint,
+  updateLockFile,
 } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
 
@@ -109,7 +109,7 @@ async function updateArtifactsImpl(
     'Cargo.lock',
   );
   const existingLockFileContent = lockFileName
-    ? await readLocalFile(lockFileName)
+    ? await readLocalFile(lockFileName, 'utf8')
     : null;
   if (!existingLockFileContent || !lockFileName) {
     logger.debug('No Cargo.lock found');
@@ -125,44 +125,47 @@ async function updateArtifactsImpl(
   const rustConstraint = await resolveToolConstraint(config, 'rust');
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug(`Updating ${lockFileName}`);
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent,
+      packageFile: { path: packageFileName, contents: newPackageFileContent },
+      run: async () => {
+        logger.debug(`Updating ${lockFileName}`);
 
-    if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName, true, rustConstraint);
-    } else {
-      const hasNonCrateDep = updatedDeps.some(
-        (dep) => dep.datasource !== CrateDatasource.id,
-      );
-      const crateDepWithoutLockedVersion = updatedDeps.find(
-        (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
-      );
-      // Non-crate dependencies (like git ones) do not have locked versions.
-      // For crate dependencies, a locked version is expected.
-      // In both situations, perform a regular workspace lockfile update.
-      if (hasNonCrateDep || crateDepWithoutLockedVersion) {
-        // v8 ignore else -- needs a workspace update driven only by a non-crate dep
-        if (crateDepWithoutLockedVersion) {
-          // Only warn when a crate dependency has no locked version
-          logger.warn(
-            { dependency: crateDepWithoutLockedVersion.depName },
-            'Missing locked version for dependency',
+        if (isLockFileMaintenance) {
+          await cargoUpdate(packageFileName, true, rustConstraint);
+          return;
+        }
+
+        const hasNonCrateDep = updatedDeps.some(
+          (dep) => dep.datasource !== CrateDatasource.id,
+        );
+        const crateDepWithoutLockedVersion = updatedDeps.find(
+          (dep) => !dep.lockedVersion && dep.datasource === CrateDatasource.id,
+        );
+        // Non-crate dependencies (like git ones) do not have locked versions.
+        // For crate dependencies, a locked version is expected.
+        // In both situations, perform a regular workspace lockfile update.
+        if (hasNonCrateDep || crateDepWithoutLockedVersion) {
+          // v8 ignore else -- needs a workspace update driven only by a non-crate dep
+          if (crateDepWithoutLockedVersion) {
+            // Only warn when a crate dependency has no locked version
+            logger.warn(
+              { dependency: crateDepWithoutLockedVersion.depName },
+              'Missing locked version for dependency',
+            );
+          }
+          await cargoUpdate(packageFileName, false, rustConstraint);
+        } else {
+          // If all dependencies have locked versions then update them precisely.
+          await cargoUpdatePrecise(
+            packageFileName,
+            updatedDeps,
+            rustConstraint,
           );
         }
-        await cargoUpdate(packageFileName, false, rustConstraint);
-      } else {
-        // If all dependencies have locked versions then update them precisely.
-        await cargoUpdatePrecise(packageFileName, updatedDeps, rustConstraint);
-      }
-    }
-
-    logger.debug('Returning updated Cargo.lock');
-    const newCargoLockContent = await readLocalFile(lockFileName);
-    if (existingLockFileContent === newCargoLockContent) {
-      logger.debug('Cargo.lock is unchanged');
-      return null;
-    }
-    return [fileAddition(lockFileName, newCargoLockContent)];
+      },
+    });
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {

@@ -380,6 +380,36 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
     });
 
+    it('passes minimumReleaseAgeExtracted from the package file to all updates', async () => {
+      config.lockFileMaintenance!.enabled = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            minimumReleaseAgeExtracted: '3 days',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgeExtracted: '3 days' },
+        {
+          updateType: 'lockFileMaintenance',
+          minimumReleaseAgeExtracted: '3 days',
+        },
+      ]);
+    });
+
     describe('hasAttestation is taken from the current value', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',

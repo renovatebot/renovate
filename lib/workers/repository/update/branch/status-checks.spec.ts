@@ -2,6 +2,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import * as _managers from '../../../../modules/manager/index.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
@@ -13,6 +14,10 @@ import {
   setStability,
 } from './status-checks.ts';
 
+vi.mock('../../../../modules/manager/index.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _managers>()),
+  enforcesMinimumReleaseAge: vi.fn(),
+}));
 vi.mock(
   '../../../../util/merge-confidence/index.ts',
   async (importOriginal) => ({
@@ -21,6 +26,7 @@ vi.mock(
   }),
 );
 
+const managers = vi.mocked(_managers);
 const mergeConfidence = vi.mocked(_mergeConfidence);
 
 describe('workers/repository/update/branch/status-checks', () => {
@@ -398,6 +404,53 @@ describe('workers/repository/update/branch/status-checks', () => {
       ]);
       await expect(computeInternalChecksStatus(config)).resolves.toEqual({
         stabilityStatus: 'yellow',
+      });
+    });
+
+    it('returns yellow if the extracted minimum release age is not met', async () => {
+      const config = branchConfig([
+        {
+          depName: 'some-dep',
+          minimumReleaseAgeExtracted: '100 days',
+          releaseTimestamp: new Date().toISOString() as Timestamp,
+        },
+      ]);
+      await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+        stabilityStatus: 'yellow',
+      });
+    });
+
+    describe('lock file maintenance', () => {
+      const upgrade: Partial<BranchUpgradeConfig> = {
+        manager: 'some-manager',
+        packageFile: 'package.json',
+        isLockFileMaintenance: true,
+        updateType: 'lockFileMaintenance',
+        minimumReleaseAge: '1 day',
+        releaseTimestamp: undefined,
+      };
+
+      it('returns green if the package manager enforces the minimum release age', async () => {
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(true);
+        const config = branchConfig([upgrade]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'green',
+        });
+        expect(managers.enforcesMinimumReleaseAge).toHaveBeenCalledWith(
+          'some-manager',
+          config.upgrades[0],
+        );
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Lock file maintenance of package.json: the package manager enforces the minimum release age',
+        );
+      });
+
+      it('returns yellow if the package manager does not enforce the minimum release age', async () => {
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(false);
+        const config = branchConfig([upgrade]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'yellow',
+        });
       });
     });
 

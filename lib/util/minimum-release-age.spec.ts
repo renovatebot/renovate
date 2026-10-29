@@ -49,6 +49,33 @@ describe('util/minimum-release-age', () => {
         }),
       ).toBe((toMs('3 days') ?? 0) + (toMs('10 minutes') ?? 0));
     });
+    it.each`
+      minimumReleaseAge | minimumReleaseAgeExtracted | expected
+      ${'3 days'}       | ${'1 day'}                 | ${'3 days'}
+      ${'1 day'}        | ${'3 days'}                | ${'3 days'}
+      ${null}           | ${'3 days'}                | ${'3 days'}
+      ${undefined}      | ${'3 days'}                | ${'3 days'}
+      ${'3 days'}       | ${'bananas'}               | ${'3 days'}
+    `(
+      'uses the larger of minimumReleaseAge=$minimumReleaseAge and minimumReleaseAgeExtracted=$minimumReleaseAgeExtracted',
+      ({ minimumReleaseAge, minimumReleaseAgeExtracted, expected }) => {
+        expect(
+          calculateMinimumReleaseAgeMs({
+            minimumReleaseAge,
+            minimumReleaseAgeExtracted,
+          }),
+        ).toBe(toMs(expected));
+      },
+    );
+
+    it('extends minimumReleaseAgeExtracted by the minimumReleaseAgeBuffer duration', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({
+          minimumReleaseAgeExtracted: '3 days',
+          minimumReleaseAgeBuffer: '10 minutes',
+        }),
+      ).toBe((toMs('3 days') ?? 0) + (toMs('10 minutes') ?? 0));
+    });
   });
 
   describe('.checkMinimumReleaseAge()', () => {
@@ -68,6 +95,19 @@ describe('util/minimum-release-age', () => {
       dateUtil.getElapsedMs.mockReturnValueOnce(toMs('1 day') ?? 0);
       const res = checkMinimumReleaseAge(
         { minimumReleaseAge: '3 days' },
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: true,
+        minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: true,
+      });
+    });
+
+    it('is pending if the release is younger than minimumReleaseAgeExtracted', () => {
+      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('2 days') ?? 0);
+      const res = checkMinimumReleaseAge(
+        { minimumReleaseAge: '1 day', minimumReleaseAgeExtracted: '3 days' },
         '2021-01-01T00:00:00.000Z' as Timestamp,
       );
       expect(res).toEqual({
