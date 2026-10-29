@@ -1349,6 +1349,17 @@ describe('workers/repository/dependency-dashboard', () => {
           msg: 'i am an artifact error',
           artifactErrors: {},
         },
+        {
+          level: WARN,
+          msg: 'Dependency is currently using a malicious version',
+          depName: 'fs',
+          packageFile: 'package.json',
+        },
+        {
+          level: WARN,
+          msg: 'i only name a file',
+          packageFile: 'Dockerfile',
+        },
       ]);
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureDependencyDashboard(
@@ -1370,6 +1381,8 @@ describe('workers/repository/dependency-dashboard', () => {
          - ❌ ERROR: i am a duplicated problem
          - ❌ ERROR: i am a non-duplicated problem
          - ⚠️ WARN: i am a non-duplicated problem
+         - ⚠️ WARN: Dependency is currently using a malicious version (fs in package.json)
+         - ⚠️ WARN: i only name a file (Dockerfile)
       `);
       expect(body).not.toContain('i am an artifact error');
       expect(body).toContain('## Pending Status Checks');
