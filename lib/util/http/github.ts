@@ -41,6 +41,8 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const apiVersion = '2022-11-28';
+
 const MAX_PAGINATION_PAGES = 100;
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
@@ -422,6 +424,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts.headers = {
       ...opts.headers,
       accept,
+      'X-GitHub-Api-Version': apiVersion,
     };
   }
 
