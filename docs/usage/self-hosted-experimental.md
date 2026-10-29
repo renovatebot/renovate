@@ -23,6 +23,14 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
+## `RENOVATE_X_CARGO_MIN_PUBLISH_AGE`
+
+If set to any value, Renovate relies on cargo to enforce the minimum release age during lock file maintenance.
+Renovate then creates the lock file maintenance branch without waiting for release timestamps.
+This only applies if the `rust` constraint only allows Rust 1.100.0 or later.
+
+Read the [Cargo section of the minimum release age docs](./key-concepts/minimum-release-age.md#cargo) to learn more.
+
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.

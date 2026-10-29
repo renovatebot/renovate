@@ -153,6 +153,29 @@ Poetry added this setting in v2.4.0, and older versions ignore it.
 
 The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
 
+#### Cargo
+
+When `minimumReleaseAge` is configured, Renovate sets the `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` environment variable when it runs `cargo update`.
+Renovate also sets `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny`, so that an `allow` in the cargo config does not turn off the check.
+Cargo respects these settings from Rust 1.100.0 on, and older versions ignore them.
+
+Renovate reads `registry.global-min-publish-age` from the repository `.cargo/config.toml`, or `.cargo/config`.
+Renovate uses the larger of this age and `minimumReleaseAge` when it looks up updates, and passes this larger age to cargo.
+A `global-min-publish-age` of `"0"` turns the setting off.
+Renovate does not read the `min-publish-age` of a single registry, and does not change it.
+
+Renovate passes the age in the largest unit which keeps it a whole number, for example `36 hours`.
+Renovate does not pass `minimumReleaseAgeBuffer` to cargo.
+
+Renovate reads the Rust version from the closest `rust-toolchain.toml`, or else the closest `rust-toolchain` file, and uses it as the `rust` constraint.
+This only applies if the file pins a version like `1.100.0` or `1.100`, not a channel like `stable`.
+Renovate does not use `package.rust-version` from `Cargo.toml`, as it only sets the oldest Rust version which the crate supports.
+
+Cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
+
+- the self-hosted Renovate sets the experimental [`RENOVATE_X_CARGO_MIN_PUBLISH_AGE`](../self-hosted-experimental.md#renovate_x_cargo_min_publish_age) environment variable, and
+- the `rust` constraint only allows Rust 1.100.0 or later, for example `1.100.0` or `1.100`
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 !!! warning
