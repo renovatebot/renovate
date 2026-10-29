@@ -48,8 +48,6 @@ import {
 } from './status-checks.ts';
 import type { ProcessBranchResult } from './types.ts';
 
-export type { ProcessBranchResult };
-
 async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
   await setStability(config);
   await setConfidence(config);
