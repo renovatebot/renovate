@@ -6,6 +6,7 @@ import {
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -29,6 +30,11 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import {
+  getConstraintName,
+  getConstraintValue,
+  getSharedConstraintsScope,
+} from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
@@ -139,7 +145,47 @@ export async function extractPackageFile(
     result.lockFiles = [lockFileName];
   }
 
+  const extractedConstraints = extractToolConstraints(
+    misefile.tools,
+    lockFileData,
+  );
+  if (Object.keys(extractedConstraints).length) {
+    result.extractedConstraints = extractedConstraints;
+    const scope = getSharedConstraintsScope(packageFile);
+    if (scope) {
+      result.sharedConstraintsScope = scope;
+    }
+  }
+
   return result;
+}
+
+/**
+ * Returns the versions of the tools which are Containerbase tools, preferring the locked version, which is the one mise installs.
+ */
+function extractToolConstraints(
+  tools: Record<string, MiseTool>,
+  lockFileData: MiseLockFile | undefined,
+): Partial<Record<ConstraintName, string>> {
+  const constraints: Partial<Record<ConstraintName, string>> = {};
+  for (const [name, toolData] of Object.entries(tools)) {
+    const depName = optionInToolNameRegex.exec(name.trim())!.groups!.name;
+    const constraintName = getConstraintName(depName);
+    if (!constraintName) {
+      continue;
+    }
+    const lockedVersion = lockFileData
+      ? getLockedVersion(lockFileData, depName)
+      : undefined;
+    const constraint = getConstraintValue(
+      constraintName,
+      lockedVersion ?? parseVersion(getPrimaryToolValue(toolData)),
+    );
+    if (constraint) {
+      constraints[constraintName] = constraint;
+    }
+  }
+  return constraints;
 }
 
 /**
