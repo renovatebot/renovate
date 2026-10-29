@@ -210,7 +210,7 @@
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@cloudflare/vitest-pool-workers"],
         "replacementName": "@cloudflare/vitest-plugin",
-        "replacementVersion": "1.4.3"
+        "replacementVersion": "1.0.0"
       }
     ]
   },
