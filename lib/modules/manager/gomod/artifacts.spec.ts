@@ -106,6 +106,51 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toBeEmptyArray();
   });
 
+  it('passes Go env derived from host rules', async () => {
+    GlobalConfig.set({ ...adminConfig, goEnvFromHostRules: true });
+    env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    vi.stubEnv('GOPROXY', undefined);
+    vi.stubEnv('GONOPROXY', undefined);
+    vi.stubEnv('GOPRIVATE', undefined);
+    vi.stubEnv('GONOSUMDB', undefined);
+    hostRules.add({
+      hostType: 'go-proxy',
+      matchHost: 'bsr.example.com',
+      username: 'user',
+      password: 'pass',
+    });
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      }),
+    );
+
+    await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            GOPROXY:
+              'https://user:pass@bsr.example.com,https://proxy.golang.org,direct',
+            GONOSUMDB: 'bsr.example.com',
+          },
+        },
+      },
+    ]);
+    hostRules.clear();
+    vi.unstubAllEnvs();
+  });
+
   it('returns null if unchanged', async () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');

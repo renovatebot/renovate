@@ -890,6 +890,11 @@ Use the `extends` field instead of this if, for example, you need the ability fo
   Renovate resolves `globalExtends` before it initializes the platform, so it does not have the platform `token` yet.
   To fetch a private `globalExtends` preset, including a `local>` preset, add a `hostRules` entry with the credentials for its host.
 
+## `goEnvFromHostRules`
+
+Set to `true` to derive the `GOPROXY`, `GONOPROXY` and `GONOSUMDB` environment variables from your host rules, if you have not set them yourself.
+Read the [Go Modules docs](./golang.md#deriving-go-environment-variables-from-host-rules) to learn more.
+
 ## `hostRules`
 
 These `hostRules` fields are only allowed in self-hosted config, and are ignored (or rejected with a config error) if set in repository config or a preset.
