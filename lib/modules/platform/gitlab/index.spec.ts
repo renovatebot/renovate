@@ -4178,12 +4178,17 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          sha: 'abc123',
           merge_status: 'can_be_merged',
           pipeline: {
             status: 'running',
           },
         })
-        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge', {
+          should_remove_source_branch: true,
+          merge_when_pipeline_succeeds: true,
+          sha: 'abc123',
+        })
         .reply(200);
 
       await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
@@ -4289,13 +4294,52 @@ describe('modules/platform/gitlab/index', () => {
     it('merges the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .put('/api/v4/projects/undefined/merge_requests/1/merge')
+        .get('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, { sha: 'abc123' })
+        .put('/api/v4/projects/undefined/merge_requests/1/merge', {
+          should_remove_source_branch: true,
+          sha: 'abc123',
+        })
         .reply(200);
       await expect(
         gitlab.mergePr({
           id: 1,
         }),
       ).resolves.toBeTrue();
+    });
+
+    it('merges the PR without sha if none is returned', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, {})
+        .put('/api/v4/projects/undefined/merge_requests/1/merge', {
+          should_remove_source_branch: true,
+        })
+        .reply(200);
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+        }),
+      ).resolves.toBeTrue();
+    });
+
+    it('returns false if the source branch changed', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, { sha: 'abc123' })
+        .put('/api/v4/projects/undefined/merge_requests/1/merge')
+        .reply(409, { message: 'SHA does not match HEAD of source branch' });
+      await expect(
+        gitlab.mergePr({
+          id: 1,
+        }),
+      ).resolves.toBeFalse();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'PR source branch changed, not merging',
+      );
     });
 
     it('adds the MR to the merge train when merge trains are enabled', async () => {

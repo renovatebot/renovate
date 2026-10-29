@@ -654,9 +654,15 @@ async function tryPrAutomerge(
         250,
       );
 
+      // HEAD sha of the source branch, sent with the merge request so GitLab
+      // instances with `require_sha_for_merge` enabled accept it.
+      // https://docs.gitlab.com/api/merge_requests/#merge-a-merge-request
+      let sha: string | undefined;
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
+          sha?: string;
           merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
@@ -666,6 +672,7 @@ async function tryPrAutomerge(
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+        sha = body.sha;
 
         // Exit early if merge_when_pipeline_succeeds is already set
         if (body.merge_when_pipeline_succeeds === true) {
@@ -728,6 +735,7 @@ async function tryPrAutomerge(
                 body: {
                   should_remove_source_branch: true,
                   merge_when_pipeline_succeeds: true,
+                  ...(sha && { sha }),
                 },
               },
             );
@@ -909,11 +917,21 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
   }
 
   try {
+    // Pass the HEAD sha so GitLab instances with `require_sha_for_merge`
+    // enabled accept the merge, and only the evaluated commit gets merged.
+    // https://docs.gitlab.com/api/merge_requests/#merge-a-merge-request
+    const { sha } = (
+      await gitlabApi.getJsonUnchecked<{ sha?: string }>(
+        `projects/${config.repository}/merge_requests/${id}`,
+        { memCache: false },
+      )
+    ).body;
     await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${id}/merge`,
       {
         body: {
           should_remove_source_branch: true,
+          ...(sha && { sha }),
         },
       },
     );
@@ -925,6 +943,10 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     }
     if (err.statusCode === 406) {
       logger.debug({ err }, 'PR not acceptable for merging');
+      return false;
+    }
+    if (err.statusCode === 409) {
+      logger.debug({ err }, 'PR source branch changed, not merging');
       return false;
     }
     logger.debug({ err }, 'merge PR error');
