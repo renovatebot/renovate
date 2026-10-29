@@ -2,7 +2,7 @@ import upath from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -175,6 +175,88 @@ describe('modules/manager/apm/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
+    });
+
+    it('passes the github.com token to apm install', async () => {
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://api.github.com/',
+        token: 'x-access-token:github-token',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+
+      await updateArtifacts({
+        packageFileName: 'apm.yml',
+        updatedDeps: [{ depName: 'owner/repo' }],
+        newPackageFileContent: 'new',
+        config,
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'apm install',
+          options: {
+            env: expect.objectContaining({ GITHUB_APM_PAT: 'github-token' }),
+          },
+        },
+      ]);
+    });
+
+    it('passes the token of a github-tags host rule over the platform one', async () => {
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'https://api.github.com/',
+        token: 'platform-token',
+      });
+      hostRules.add({
+        hostType: 'github-tags',
+        matchHost: 'api.github.com',
+        token: 'lookup-token',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+
+      await updateArtifacts({
+        packageFileName: 'apm.yml',
+        updatedDeps: [{ depName: 'owner/repo' }],
+        newPackageFileContent: 'new',
+        config,
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'apm install',
+          options: {
+            env: expect.objectContaining({ GITHUB_APM_PAT: 'lookup-token' }),
+          },
+        },
+      ]);
+    });
+
+    it('does not pass tokens for other hosts to apm install', async () => {
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'gitlab',
+        matchHost: 'https://gitlab.com/',
+        token: 'gitlab-token',
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+
+      await updateArtifacts({
+        packageFileName: 'apm.yml',
+        updatedDeps: [{ depName: 'owner/repo' }],
+        newPackageFileContent: 'new',
+        config,
+      });
+
+      expect(execSnapshots).toHaveLength(1);
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'GITHUB_APM_PAT',
+      );
     });
 
     it('deletes lock file on lockFileMaintenance', async () => {
