@@ -715,6 +715,12 @@ async function getAdditionalFilesInner(
           stderr: artifactErrorMessageFromExecError(res, ''),
         });
       } else {
+        if (res.minimumReleaseAgeFallback) {
+          const message =
+            'pnpm could not enforce `minimumReleaseAge` because locked or new packages were published within the `minimumReleaseAge`. This will resolve after the next lock file maintenance run.';
+          logger.warn({ pnpmLockFile }, message);
+          artifactNotices.push({ file: pnpmLockFile, message });
+        }
         const existingContent = await getFile(
           pnpmLockFile,
           config.reuseExistingBranch ? config.branchName : config.baseBranch,

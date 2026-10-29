@@ -109,6 +109,34 @@ npm enforces the minimum release age during lock file maintenance of a `package-
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
+#### pnpm
+
+Renovate reads the `minimumReleaseAge` setting of the `pnpm-workspace.yaml` next to the `pnpm-lock.yaml`.
+pnpm sets this value in minutes.
+Renovate uses the larger of this value and `minimumReleaseAge` when it looks up updates for package files that pnpm manages.
+
+When `minimumReleaseAge` is configured, Renovate passes `--config.minimum-release-age=<minutes>` to pnpm commands during lock file generation.
+The value is the larger of `minimumReleaseAge` and the `pnpm-workspace.yaml` value, rounded up to whole minutes.
+The flag takes precedence over the `pnpm-workspace.yaml`.
+pnpm added `minimumReleaseAge` in v10.16.0, and older versions ignore the flag.
+Renovate does not pass the flag for security updates, as they bypass `minimumReleaseAge`.
+
+pnpm v11 applies a `minimumReleaseAge` of 1 day by default.
+When the value is not set explicitly, pnpm still installs a version which is too new, and adds it to `minimumReleaseAgeExclude`.
+As Renovate passes the value explicitly, pnpm applies it strictly.
+
+If pnpm rejects a package with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` or `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, Renovate retries without the flag and adds a notice to the PR.
+Lock file maintenance does not retry, and reports an artifact error which names the rejected packages instead.
+
+pnpm enforces the minimum release age during lock file maintenance of a `pnpm-lock.yaml`, so Renovate creates the branch without waiting for release timestamps, if:
+
+- `minimumReleaseAge` or the `pnpm-workspace.yaml` `minimumReleaseAge` is set, and
+- the `pnpm-workspace.yaml` does not set `minimumReleaseAgeStrict: false`, and
+- the pnpm version used is v10.16.0 to v10.x, or v11.0.4 or later
+
+pnpm v11.0.0 to v11.0.3 install a version which is too new if no other version matches, unless `minimumReleaseAgeStrict` is set.
+Renovate reads the pnpm version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), or the extracted constraints.
+
 #### Poetry
 
 When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.

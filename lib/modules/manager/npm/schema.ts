@@ -130,6 +130,17 @@ export const PnpmWorkspaceFile = Yaml.pipe(
 );
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
+/** The minimum release age settings of a `pnpm-workspace.yaml`, `minimumReleaseAge` is in minutes. */
+export const PnpmWorkspaceMinimumReleaseAge = Yaml.pipe(
+  z.object({
+    minimumReleaseAge: z.number().nonnegative().optional().catch(undefined),
+    minimumReleaseAgeStrict: z.boolean().optional().catch(undefined),
+  }),
+);
+export type PnpmWorkspaceMinimumReleaseAge = z.infer<
+  typeof PnpmWorkspaceMinimumReleaseAge
+>;
+
 export const PackageManager = z
   .string()
   .transform((val) => val.split('@'))

@@ -1024,6 +1024,38 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.deleteLocalFile).toHaveBeenCalled();
     });
 
+    it('adds artifact notice on pnpm minimumReleaseAgeFallback', async () => {
+      const message =
+        'pnpm could not enforce `minimumReleaseAge` because locked or new packages were published within the `minimumReleaseAge`. This will resolve after the next lock file maintenance run.';
+      spyPnpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: 'some-contents:',
+        minimumReleaseAgeFallback: true,
+      });
+
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          upgrades: [
+            {
+              isRemediation: true,
+              packageFile: 'packages/pnpm/package.json',
+            },
+          ],
+        },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'packages/pnpm/pnpm-lock.yaml', message },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { pnpmLockFile: 'packages/pnpm/pnpm-lock.yaml' },
+        message,
+      );
+    });
+
     it('no npm files', async () => {
       await expect(getAdditionalFiles(baseConfig, {})).resolves.toStrictEqual({
         artifactErrors: [],

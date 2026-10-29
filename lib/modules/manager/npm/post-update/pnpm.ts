@@ -1,4 +1,4 @@
-import { isNumber, isNumericString } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isNumericString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -17,11 +17,17 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
-import { resolveToolConstraint } from '../../util.ts';
+import {
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from '../../util.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
+import { readPnpmWorkspaceMinimumReleaseAge } from '../extract/pnpm-minimum-release-age.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
@@ -40,6 +46,99 @@ function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   return null;
 }
 
+const minuteMs = 60 * 1000;
+
+/**
+ * The `--config.minimum-release-age` flag which passes the larger of `minimumReleaseAge` and the `pnpm-workspace.yaml` `minimumReleaseAge` to pnpm, in minutes.
+ *
+ * pnpm reads `--config.minimum-release-age` since v10.16.0, and the flag takes precedence over the `pnpm-workspace.yaml`.
+ */
+async function getMinimumReleaseAgeFlag(
+  lockFileName: string,
+  config: PostUpdateConfig,
+  upgrades: Upgrade[],
+): Promise<string | null> {
+  if (!isNonEmptyString(config.minimumReleaseAge)) {
+    return null;
+  }
+  const minimumReleaseAgeMs = toMs(config.minimumReleaseAge);
+  if (minimumReleaseAgeMs === null) {
+    logger.debug(
+      { minimumReleaseAge: config.minimumReleaseAge },
+      'Invalid minimumReleaseAge, not passing it to pnpm',
+    );
+    return null;
+  }
+  if (!minimumReleaseAgeMs) {
+    return null;
+  }
+  // security updates bypass minimumReleaseAge
+  if (upgrades.some((upgrade) => upgrade.isVulnerabilityAlert)) {
+    return null;
+  }
+  const workspace = await readPnpmWorkspaceMinimumReleaseAge(lockFileName);
+  const minutes = Math.max(
+    Math.ceil(minimumReleaseAgeMs / minuteMs),
+    workspace.minimumReleaseAge ?? 0,
+  );
+  logger.debug(
+    {
+      minimumReleaseAge: config.minimumReleaseAge,
+      pnpmMinimumReleaseAge: workspace.minimumReleaseAge,
+    },
+    `Passing a minimum release age of ${minutes} minutes to pnpm`,
+  );
+  return `--config.minimum-release-age=${minutes}`;
+}
+
+const minimumReleaseAgeErrorCodes = [
+  'ERR_PNPM_NO_MATURE_MATCHING_VERSION',
+  // since v11.1.3, pnpm checks the existing lock file entries too
+  'ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION',
+];
+
+function isMinimumReleaseAgeError(err: {
+  stdout?: string;
+  stderr?: string;
+}): boolean {
+  return [err.stdout, err.stderr].some((output) =>
+    minimumReleaseAgeErrorCodes.some((code) => output?.includes(code)),
+  );
+}
+
+const immatureVersionRegex = regEx(
+  /Version (?<version>\S+) \(released [^)]*\) of (?<name>\S+) does not meet the minimumReleaseAge constraint/g,
+);
+const immatureListRegex = regEx(
+  /not meet the minimumReleaseAge constraint:\r?\n(?<list>(?:[ \t]+\S+@\S+.*(?:\r?\n|$))+)/g,
+);
+const immatureListEntryRegex = regEx(/^[ \t]+(?<pkg>\S+@\S+)/gm);
+const noMatureVersionRegex = regEx(
+  /No matching version found for (?<pkg>\S+) published by /g,
+);
+
+/**
+ * The packages which pnpm reports with `ERR_PNPM_NO_MATURE_MATCHING_VERSION`, as `name@version` or `name@range`.
+ */
+export function getImmaturePackages(output: string): string[] {
+  if (!output.includes('ERR_PNPM_NO_MATURE_MATCHING_VERSION')) {
+    return [];
+  }
+  const packages: string[] = [];
+  for (const match of output.matchAll(immatureVersionRegex)) {
+    packages.push(`${match.groups!.name}@${match.groups!.version}`);
+  }
+  for (const match of output.matchAll(immatureListRegex)) {
+    for (const entry of match.groups!.list.matchAll(immatureListEntryRegex)) {
+      packages.push(entry.groups!.pkg);
+    }
+  }
+  for (const match of output.matchAll(noMatureVersionRegex)) {
+    packages.push(match.groups!.pkg);
+  }
+  return packages.filter(uniqueStrings);
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -49,6 +148,7 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
+  let minimumReleaseAgeFallback = false;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -130,6 +230,15 @@ export async function generateLockFile(
       args += ' --ignore-scripts';
     }
 
+    const minimumReleaseAgeFlag = await getMinimumReleaseAgeFlag(
+      lockFileName,
+      config,
+      upgrades,
+    );
+    if (minimumReleaseAgeFlag) {
+      args += ` ${minimumReleaseAgeFlag}`;
+    }
+
     logger.trace({ args }, 'pnpm command options');
 
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -158,7 +267,10 @@ export async function generateLockFile(
       commands.push(`pnpm dedupe ${args.replace(' --recursive', '')}`);
     }
 
-    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+    const isLockFileMaintenance = upgrades.some(
+      (upgrade) => upgrade.isLockFileMaintenance,
+    );
+    if (isLockFileMaintenance) {
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
@@ -172,7 +284,29 @@ export async function generateLockFile(
       }
     }
 
-    await exec(commands, execOptions);
+    // Retry without the minimum release age if it rejects locked or new
+    // transitive packages. Lock file maintenance does not retry, as it relies
+    // on the flag to enforce the minimum release age.
+    minimumReleaseAgeFallback = await exec(commands, execOptions).then(
+      () => false,
+      async (err) => {
+        if (
+          !minimumReleaseAgeFlag ||
+          isLockFileMaintenance ||
+          !isMinimumReleaseAgeError(err)
+        ) {
+          throw err;
+        }
+        logger.debug(
+          'pnpm failed with the minimum release age, retrying without it',
+        );
+        await exec(
+          commands.map((cmd) => cmd.replace(` ${minimumReleaseAgeFlag}`, '')),
+          execOptions,
+        );
+        return true;
+      },
+    );
     lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) {
     // v8 ignore if -- TODO: add test #40625
@@ -189,9 +323,22 @@ export async function generateLockFile(
       },
       'lock file error',
     );
+    const immaturePackages = getImmaturePackages(
+      `${err.stdout ?? ''}\n${err.stderr ?? ''}`,
+    );
+    if (immaturePackages.length) {
+      const packages = immaturePackages.map((pkg) => `\`${pkg}\``).join(', ');
+      return {
+        error: true,
+        stderr: `pnpm found no version old enough for the minimum release age: ${packages}\n\n${artifactErrorMessageFromExecError(err, '')}`,
+        stdout: err.stdout,
+      };
+    }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
-  return { lockFile };
+  return minimumReleaseAgeFallback
+    ? { lockFile, minimumReleaseAgeFallback }
+    : { lockFile };
 }
 
 export async function getConstraintFromLockFile(
