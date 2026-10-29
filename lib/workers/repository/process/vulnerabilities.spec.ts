@@ -71,6 +71,59 @@ describe('workers/repository/process/vulnerabilities', () => {
       config.packageRules = [];
     });
 
+    it('marks a vulnerability with only a last_affected version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash.pick',
+                packageName: 'lodash.pick',
+                currentValue: '4.4.0',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-p6mc-m468-83gw',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'lodash.pick',
+                ecosystem: 'npm',
+                purl: 'pkg:npm/lodash.pick',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '4.0.0' }, { last_affected: '4.4.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'lodash.pick',
+          depVersion: '4.4.0',
+          fixedVersion: '> 4.4.0',
+          lastAffectedVersion: '4.4.0',
+          datasource: 'npm',
+        },
+      ]);
+    });
+
     it('return list of Vulnerabilities', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
