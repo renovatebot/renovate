@@ -24,10 +24,10 @@ describe('workers/repository/update/branch/pr-blocked-by', () => {
       },
     );
 
-    it('warns for a rate-limited vulnerability alert', () => {
-      expect(prBlockedByToResult('RateLimited', true)).toBe('error');
+    it('warns for an unknown reason', () => {
+      expect(prBlockedByToResult('Unknown' as never, false)).toBe('error');
       expect(logger.warn).toHaveBeenCalledWith(
-        { prBlockedBy: 'RateLimited' },
+        { prBlockedBy: 'Unknown' },
         'Unknown PrBlockedBy result',
       );
     });

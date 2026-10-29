@@ -377,7 +377,11 @@ describe('workers/repository/update/branch/reuse', () => {
       ${'via the PR title, label or box'} | ${'rebaseRequested'}
     `(
       'does not reuse the branch if the user requested a rebase $scenario',
-      ({ key }: { key: 'dependencyDashboardRebaseAllOpen' }) => {
+      ({
+        key,
+      }: {
+        key: 'dependencyDashboardRebaseAllOpen' | 'rebaseRequested';
+      }) => {
         input.config[key] = true;
         expect(decideBranchReuse(input)).toEqual({
           action: 'no-reuse',
@@ -409,7 +413,14 @@ describe('workers/repository/update/branch/reuse', () => {
       ${'dependencyDashboardAllAwaitingSchedule'}
     `(
       'leaves the branch untouched for $key',
-      ({ key }: { key: 'dependencyDashboardAllPending' }) => {
+      ({
+        key,
+      }: {
+        key:
+          | 'dependencyDashboardAllPending'
+          | 'dependencyDashboardAllRateLimited'
+          | 'dependencyDashboardAllAwaitingSchedule';
+      }) => {
         input.config[key] = true;
         expect(decideBranchReuse(input)).toEqual({
           action: 'unchanged',
