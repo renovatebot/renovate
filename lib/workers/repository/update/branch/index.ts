@@ -120,12 +120,13 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 
 /**
  * Whether Renovate checks the minimum release age of `upgrade`, ignoring
- * `minimumReleaseAgeExtracted` for lock file maintenance.
+ * `minimumReleaseAgeExtracted` for lock file maintenance and security updates.
  */
 function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
   return (
     isNonEmptyString(upgrade.minimumReleaseAge) ||
     (!upgrade.isLockFileMaintenance &&
+      !upgrade.isVulnerabilityAlert &&
       isNonEmptyString(upgrade.minimumReleaseAgeExtracted))
   );
 }

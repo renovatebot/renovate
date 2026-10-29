@@ -13,6 +13,7 @@ export interface MinimumReleaseAgeCheckResult {
 }
 
 export interface MinimumReleaseAgeConfig {
+  isVulnerabilityAlert?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
   /** The minimum release age which a manager extracted from the package manager's own configuration. */
@@ -27,13 +28,18 @@ function durationToMs(duration: string | null | undefined): number {
  * Calculates the effective minimum release age in milliseconds: the larger of
  * `minimumReleaseAge` and `minimumReleaseAgeExtracted`, extended by the
  * `minimumReleaseAgeBuffer` duration if configured.
+ *
+ * Security updates ignore `minimumReleaseAgeExtracted`, so that Renovate
+ * raises them and the package manager reports a fix which is too new.
  */
 export function calculateMinimumReleaseAgeMs(
   config: MinimumReleaseAgeConfig,
 ): number {
   const minimumReleaseAgeMs = Math.max(
     durationToMs(config.minimumReleaseAge),
-    durationToMs(config.minimumReleaseAgeExtracted),
+    config.isVulnerabilityAlert
+      ? 0
+      : durationToMs(config.minimumReleaseAgeExtracted),
   );
 
   if (!minimumReleaseAgeMs) {
