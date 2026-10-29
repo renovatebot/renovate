@@ -4,6 +4,7 @@ import type {
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
+  VulnerabilityAlertSource,
 } from '../../config/types.ts';
 import type { Category } from '../../constants/index.ts';
 import type {
@@ -467,6 +468,15 @@ export interface ManagerApiBase extends ModuleApi {
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
+
+  /**
+   * Whether Renovate can perform a Vulnerability Alerts' remediation for a transitive dependency.
+   *
+   * This most likely happens using `lockfile-only` updates.
+   */
+  supportsTransitiveRemediation?: Partial<
+    Record<VulnerabilityAlertSource, true>
+  >;
 
   bumpPackageVersion?(
     content: string,

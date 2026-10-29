@@ -114,9 +114,7 @@ describe('modules/manager/conan/artifacts', () => {
     ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
 
-    expect(logger.debug).toHaveBeenCalledWith(
-      'New conan.lock read operation failed',
-    );
+    expect(logger.debug).toHaveBeenCalledWith('No conan.lock found');
   });
 
   it('returns null if original and updated conan.lock files are the same', async () => {
@@ -145,8 +143,12 @@ describe('modules/manager/conan/artifacts', () => {
       }),
     ).resolves.toBeNull();
     expect(execSnapshots).toMatchObject(expectedInSnapshot);
-
-    expect(logger.trace).toHaveBeenCalledWith('conan.lock is unchanged');
+    // both are read as text, so equal content compares equal
+    expect(fs.readLocalFile.mock.calls).toEqual([
+      ['conan.lock', 'utf8'],
+      ['conan.lock', 'utf8'],
+    ]);
+    expect(logger.debug).toHaveBeenCalledWith('conan.lock is unchanged');
   });
 
   it('returns updated conan.lock for conanfile.txt', async () => {
