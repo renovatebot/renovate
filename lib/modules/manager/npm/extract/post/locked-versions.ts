@@ -135,8 +135,10 @@ export async function getLockedVersions(
           lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
         }
 
+        // npm hoists a workspace dependency to the root unless its version conflicts
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions?.[lockedDepName],
+          lockFileCache[npmLock].lockedVersions?.[lockedDepName] ??
+            lockFileCache[npmLock].lockedVersions?.[dep.depName!],
         )!;
       }
     } else if (pnpmLockFile) {
