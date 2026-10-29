@@ -18,6 +18,7 @@ import type {
 import type {
   AdditionalConstraintName,
   ConstraintName,
+  ToolName,
 } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
@@ -417,6 +418,27 @@ export interface DepTypeMetadata {
   description: string;
 }
 
+/**
+ * `true` when supported, or the version range of the package manager that supports it, e.g. `>=11.10.0`.
+ */
+export type MinimumReleaseAgeToolCapability = boolean | string;
+
+export interface MinimumReleaseAgeToolSupport {
+  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
+  /** Renovate reads the package manager's own minimum release age setting */
+  readsConfiguredAge?: MinimumReleaseAgeToolCapability;
+  /** The package manager enforces the minimum release age during lock file maintenance */
+  enforcedInLockFile?: MinimumReleaseAgeToolCapability;
+  /** Markdown note */
+  note?: string;
+}
+
+/** How the package managers of a manager handle `minimumReleaseAge`, used for docs. A missing field means "not supported". */
+export type MinimumReleaseAgeSupport = Partial<
+  Record<ToolName, MinimumReleaseAgeToolSupport>
+>;
+
 export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
@@ -425,6 +447,8 @@ export interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /** How the package managers used by this manager handle `minimumReleaseAge`, used for docs */
+  minimumReleaseAgeSupport?: MinimumReleaseAgeSupport;
   /** Whether the package files carry an `npmrc` resolved from the repository `.npmrc` and the config, see `NpmrcPackageFile` */
   supportsNpmrc?: boolean;
   /**
