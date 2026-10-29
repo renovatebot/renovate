@@ -1,41 +1,70 @@
 import { codeBlock } from 'common-tags';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { fs } from '~test/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
 
+vi.mock('../../../util/fs/index.ts');
+
 const packageFile = 'apm.yml';
+
+const manifest = codeBlock`
+  name: some-skill
+  version: 1.0.0
+  dependencies:
+    apm:
+      - owner/repo#v1.0.0
+`;
+
+const lockFile = codeBlock`
+  lockfile_version: '1'
+  dependencies:
+  - repo_url: owner/skills
+    deployed_files:
+    - .claude/skills/some-skill
+    - .claude/skills/some-skill/SKILL.md
+    - .claude/skills/some-skill/apm.yml
+`;
 
 describe('modules/manager/apm/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid YAML', () => {
-      expect(extractPackageFile('foo: *bar', packageFile)).toBeNull();
+    it('returns null for invalid YAML', async () => {
+      await expect(
+        extractPackageFile('foo: *bar', packageFile),
+      ).resolves.toBeNull();
     });
 
-    it('returns null when parsed content is not an object', () => {
-      expect(extractPackageFile('just a string', packageFile)).toBeNull();
+    it('returns null when parsed content is not an object', async () => {
+      await expect(
+        extractPackageFile('just a string', packageFile),
+      ).resolves.toBeNull();
     });
 
-    it('returns null when there are no dependencies', () => {
+    it('returns null when there are no dependencies', async () => {
       const content = codeBlock`
         name: your-project
         version: 1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)).toBeNull();
+      await expect(
+        extractPackageFile(content, packageFile),
+      ).resolves.toBeNull();
     });
 
-    it('returns null when apm section is not an array', () => {
+    it('returns null when apm section is not an array', async () => {
       const content = codeBlock`
         name: your-project
         dependencies:
           apm: not-an-array
       `;
-      expect(extractPackageFile(content, packageFile)).toBeNull();
+      await expect(
+        extractPackageFile(content, packageFile),
+      ).resolves.toBeNull();
     });
 
-    it('extracts github dependencies (default host)', () => {
+    it('extracts github dependencies (default host)', async () => {
       const content = codeBlock`
         name: your-project
         version: 1.0.0
@@ -43,7 +72,7 @@ describe('modules/manager/apm/extract', () => {
           apm:
             - microsoft/apm-sample-package#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)).toEqual({
+      await expect(extractPackageFile(content, packageFile)).resolves.toEqual({
         deps: [
           {
             depName: 'microsoft/apm-sample-package',
@@ -59,14 +88,16 @@ describe('modules/manager/apm/extract', () => {
       });
     });
 
-    it('parses the SHA-pinned digest form (tag recovered from comment)', () => {
+    it('parses the SHA-pinned digest form (tag recovered from comment)', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - owner/tool#v1.0.0
             - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         { depName: 'owner/tool', currentValue: 'v1.0.0' },
         {
           depName: 'acme/playbooks',
@@ -80,7 +111,7 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('maps a SHA pinned in both sections to its own line', () => {
+    it('maps a SHA pinned in both sections to its own line', async () => {
       const content = codeBlock`
         dependencies:
           apm:
@@ -89,7 +120,9 @@ describe('modules/manager/apm/extract', () => {
           apm:
             - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.1.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depType: 'apm',
           currentValue: 'v2.0.0',
@@ -105,7 +138,7 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('emits a digest dep for a SHA pin on a git-tags host', () => {
+    it('emits a digest dep for a SHA pin on a git-tags host', async () => {
       // git-tags resolves digests via `git ls-remote`, so the SHA is preserved
       // on a bump rather than dropped to a digest-less tag.
       const content = codeBlock`
@@ -113,7 +146,9 @@ describe('modules/manager/apm/extract', () => {
           apm:
             - bitbucket.org/team/project#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'bitbucket.org/team/project',
           packageName: 'https://bitbucket.org/team/project',
@@ -124,13 +159,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('skips a bare SHA with no tag comment', () => {
+    it('skips a bare SHA with no tag comment', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'acme/playbooks',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
@@ -139,13 +176,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('skips a quoted SHA-pin (exact text not recoverable)', () => {
+    it('skips a quoted SHA-pin (exact text not recoverable)', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - "acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123" # v2.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'acme/playbooks',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
@@ -154,13 +193,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('keeps subpath in depName but uses owner/repo as packageName', () => {
+    it('keeps subpath in depName but uses owner/repo as packageName', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - anthropics/skills/skills/frontend-design#v1.2.3
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'anthropics/skills/skills/frontend-design',
           packageName: 'anthropics/skills',
@@ -170,14 +211,16 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('handles dots in repo names and subpaths', () => {
+    it('handles dots in repo names and subpaths', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - owner/repo.js#v1.0.0
             - github/awesome-copilot/agents/api-architect.agent.md#v2.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'owner/repo.js',
           packageName: 'owner/repo.js',
@@ -193,13 +236,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('extracts gitlab.com dependencies', () => {
+    it('extracts gitlab.com dependencies', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - gitlab.com/team/project#v2.3.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'gitlab.com/team/project',
           packageName: 'team/project',
@@ -208,17 +253,19 @@ describe('modules/manager/apm/extract', () => {
         },
       ]);
       expect(
-        extractPackageFile(content, packageFile)?.deps[0].registryUrls,
+        (await extractPackageFile(content, packageFile))?.deps[0].registryUrls,
       ).toBeUndefined();
     });
 
-    it('supports GitLab nested groups (project slug spans 3+ segments)', () => {
+    it('supports GitLab nested groups (project slug spans 3+ segments)', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - gitlab.com/group/subgroup/project#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'gitlab.com/group/subgroup/project',
           packageName: 'group/subgroup/project',
@@ -228,13 +275,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('splits a GitLab nested project from a virtual subpath', () => {
+    it('splits a GitLab nested project from a virtual subpath', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - gitlab.com/group/subgroup/project/prompts/foo#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'gitlab.com/group/subgroup/project/prompts/foo',
           packageName: 'group/subgroup/project',
@@ -244,13 +293,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('treats a GitLab .chatmode.md virtual file as a subpath boundary', () => {
+    it('treats a GitLab .chatmode.md virtual file as a subpath boundary', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - gitlab.com/group/subgroup/project/my.chatmode.md#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'gitlab.com/group/subgroup/project/my.chatmode.md',
           packageName: 'group/subgroup/project',
@@ -260,13 +311,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('extracts self-hosted github dependencies with registryUrls', () => {
+    it('extracts self-hosted github dependencies with registryUrls', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - github.example.com/team/project#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           packageName: 'team/project',
           datasource: GithubTagsDatasource.id,
@@ -275,13 +328,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('extracts self-hosted gitlab dependencies with registryUrls', () => {
+    it('extracts self-hosted gitlab dependencies with registryUrls', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - gitlab.example.com/team/project#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           packageName: 'team/project',
           datasource: GitlabTagsDatasource.id,
@@ -290,13 +345,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('falls back to git-tags for other hosts', () => {
+    it('falls back to git-tags for other hosts', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - bitbucket.org/team/project#v1.0.0
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'bitbucket.org/team/project',
           packageName: 'https://bitbucket.org/team/project',
@@ -306,14 +363,16 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('skips unpinned dependencies', () => {
+    it('skips unpinned dependencies', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - anthropics/skills/skills/frontend-design
             - owner/repo#
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'anthropics/skills/skills/frontend-design',
           skipReason: 'unspecified-version',
@@ -325,7 +384,7 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('marks entries without owner/repo as invalid', () => {
+    it('marks entries without owner/repo as invalid', async () => {
       const content = codeBlock`
         dependencies:
           apm:
@@ -333,7 +392,9 @@ describe('modules/manager/apm/extract', () => {
             - gitlab.com/foo#v1.0.0
             - '#v1.0.0'
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'foo',
           currentValue: 'v1.0.0',
@@ -352,13 +413,15 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('extracts devDependencies with apm-dev depType', () => {
+    it('extracts devDependencies with apm-dev depType', async () => {
       const content = codeBlock`
         devDependencies:
           apm:
             - owner/repo#v1.2.3
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           depName: 'owner/repo',
           depType: 'apm-dev',
@@ -367,7 +430,7 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
-    it('ignores MCP entries and non-string entries', () => {
+    it('ignores MCP entries and non-string entries', async () => {
       const content = codeBlock`
         dependencies:
           apm:
@@ -377,7 +440,7 @@ describe('modules/manager/apm/extract', () => {
             - name: io.github.github/github-mcp-server
               transport: http
       `;
-      expect(extractPackageFile(content, packageFile)?.deps).toEqual([
+      expect((await extractPackageFile(content, packageFile))?.deps).toEqual([
         {
           depName: 'owner/repo',
           depType: 'apm',
@@ -389,6 +452,49 @@ describe('modules/manager/apm/extract', () => {
             '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
         },
       ]);
+    });
+
+    it('skips a copy that a parent apm.lock.yaml lists as deployed', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(lockFile);
+
+      await expect(
+        extractPackageFile(manifest, '.claude/skills/some-skill/apm.yml'),
+      ).resolves.toBeNull();
+      expect(fs.readLocalFile.mock.calls).toEqual([
+        ['.claude/skills/apm.lock.yaml', 'utf8'],
+        ['.claude/apm.lock.yaml', 'utf8'],
+        ['apm.lock.yaml', 'utf8'],
+      ]);
+    });
+
+    it('resolves deployed files against the lockfile directory', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(lockFile);
+
+      await expect(
+        extractPackageFile(
+          manifest,
+          'project/.claude/skills/some-skill/apm.yml',
+        ),
+      ).resolves.toBeNull();
+      expect(fs.readLocalFile).toHaveBeenLastCalledWith(
+        'project/apm.lock.yaml',
+        'utf8',
+      );
+    });
+
+    it('extracts a project that a parent apm.lock.yaml does not list', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+
+      expect(
+        (await extractPackageFile(manifest, 'project/apm.yml'))?.deps,
+      ).toMatchObject([{ depName: 'owner/repo', currentValue: 'v1.0.0' }]);
+      expect(fs.readLocalFile.mock.calls).toEqual([['apm.lock.yaml', 'utf8']]);
     });
   });
 
@@ -403,14 +509,14 @@ describe('modules/manager/apm/extract', () => {
       ${'foo--v1.2.0-rc.1'}  | ${'foo--'}       | ${'1.2.0-rc.1'}
     `(
       'scopes $ref to tags of the same package',
-      ({ ref, compatibility, version }) => {
+      async ({ ref, compatibility, version }) => {
         const content = codeBlock`
           dependencies:
             apm:
               - owner/repo/plugins/foo#${ref}
         `;
 
-        const dep = extractPackageFile(content, packageFile)?.deps[0];
+        const dep = (await extractPackageFile(content, packageFile))?.deps[0];
 
         expect(dep).toMatchObject({ currentValue: ref });
         expect(
@@ -427,27 +533,29 @@ describe('modules/manager/apm/extract', () => {
       ${'main'}
       ${'foo-v1'}
       ${'foo@1.2.3'}
-    `('leaves $ref compared as-is', ({ ref }) => {
+    `('leaves $ref compared as-is', async ({ ref }) => {
       const content = codeBlock`
         dependencies:
           apm:
             - owner/repo#${ref}
       `;
 
-      const dep = extractPackageFile(content, packageFile)?.deps[0];
+      const dep = (await extractPackageFile(content, packageFile))?.deps[0];
 
       expect(dep).toMatchObject({ currentValue: ref });
       expect(dep).not.toHaveProperty('versionCompatibility');
     });
 
-    it('scopes a SHA pin by the tag in its comment', () => {
+    it('scopes a SHA pin by the tag in its comment', async () => {
       const content = codeBlock`
         dependencies:
           apm:
             - owner/repo/plugins/foo#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # foo--v1.0.0
       `;
 
-      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
         {
           currentValue: 'foo--v1.0.0',
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
