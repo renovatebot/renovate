@@ -15,21 +15,37 @@ describe('config/presets/internal/security.preset', () => {
     );
   });
 
-  it.each(minimumReleaseAgeDatasourceNames)(
-    'generates a strict rule plus unsupported-update-type warnings for datasource %s',
-    (datasource) => {
+  it.each`
+    datasource | manager
+    ${'crate'} | ${'cargo'}
+    ${'npm'}   | ${'npm'}
+    ${'pypi'}  | ${'poetry'}
+  `(
+    'generates a strict rule plus unsupported-update-type warnings for datasource $datasource',
+    ({ datasource, manager }) => {
       const suffix = datasource[0].toUpperCase() + datasource.slice(1);
-      const packageRules = presets[`minimumReleaseAge${suffix}`].packageRules!;
+      const preset = presets[`minimumReleaseAge${suffix}`];
+      const packageRules = preset.packageRules!;
 
-      // the first rule strictly enforces minimumReleaseAge for this datasource
-      expect(packageRules[0]).toEqual({
+      // the manager config passes minimumReleaseAge to the package manager
+      expect(preset[manager]).toEqual({ minimumReleaseAge: '3 days' });
+
+      // which then is reset for the other datasources of the manager
+      expect(packageRules[0]).toMatchObject({
+        matchManagers: [manager],
+        matchDatasources: [`!${datasource}`],
+        minimumReleaseAge: null,
+      });
+
+      // the next rule strictly enforces minimumReleaseAge for this datasource
+      expect(packageRules[1]).toEqual({
         internalChecksFilter: 'strict',
         matchDatasources: [datasource],
-        minimumReleaseAge: expect.any(String),
+        minimumReleaseAge: '3 days',
       });
 
       // then we opt-out updateTypes that aren't supported
-      const updateTypesWithoutReleaseTimestampSupport = packageRules.slice(1);
+      const updateTypesWithoutReleaseTimestampSupport = packageRules.slice(2);
       expect(
         updateTypesWithoutReleaseTimestampSupport.map(
           (rule) => rule.matchUpdateTypes,
@@ -41,8 +57,15 @@ describe('config/presets/internal/security.preset', () => {
         ['bump', 'lockfileUpdate', 'rollback'],
       ]);
 
-      for (const rule of updateTypesWithoutReleaseTimestampSupport) {
+      const [lockFileMaintenanceRule, ...otherRules] =
+        updateTypesWithoutReleaseTimestampSupport;
+      // lock file maintenance has no datasource
+      expect(lockFileMaintenanceRule.matchManagers).toEqual([manager]);
+      expect(lockFileMaintenanceRule.matchDatasources).toBeUndefined();
+      for (const rule of otherRules) {
         expect(rule.matchDatasources).toEqual([datasource]);
+      }
+      for (const rule of updateTypesWithoutReleaseTimestampSupport) {
         expect(rule.minimumReleaseAge).toBeNull();
         expect(rule.prBodyNotes).toHaveLength(1);
       }

@@ -119,15 +119,35 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 /**
- * The minimum release age which Renovate has to check for `upgrade`, which is
- * `0` for lock file maintenance if the package manager enforces it itself.
+ * Whether Renovate checks the minimum release age of `upgrade`, ignoring
+ * `minimumReleaseAgeExtracted` for lock file maintenance and security updates.
+ */
+function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
+  return (
+    isNonEmptyString(upgrade.minimumReleaseAge) ||
+    (!upgrade.isLockFileMaintenance &&
+      !upgrade.isVulnerabilityAlert &&
+      isNonEmptyString(upgrade.minimumReleaseAgeExtracted))
+  );
+}
+
+/**
+ * The minimum release age which Renovate has to check for `upgrade`, which
+ * ignores `minimumReleaseAgeExtracted` for lock file maintenance, and is `0`
+ * for it if the package manager enforces the minimum release age itself.
  */
 async function getMinimumReleaseAgeMsToCheck(
   upgrade: BranchUpgradeConfig,
 ): Promise<number> {
-  const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs(upgrade);
-  if (!minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
-    return minimumReleaseAgeMs;
+  if (!upgrade.isLockFileMaintenance) {
+    return calculateMinimumReleaseAgeMs(upgrade);
+  }
+  const minimumReleaseAgeMs = calculateMinimumReleaseAgeMs({
+    minimumReleaseAge: upgrade.minimumReleaseAge,
+    minimumReleaseAgeBuffer: upgrade.minimumReleaseAgeBuffer,
+  });
+  if (!minimumReleaseAgeMs) {
+    return 0;
   }
   if (!(await enforcesMinimumReleaseAge(upgrade.manager, upgrade))) {
     return minimumReleaseAgeMs;
@@ -460,8 +480,7 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          isNonEmptyString(upgrade.minimumReleaseAge) ||
-          isNonEmptyString(upgrade.minimumReleaseAgeExtracted) ||
+          hasMinimumReleaseAge(upgrade) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!),
       )
     ) {

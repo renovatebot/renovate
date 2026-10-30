@@ -1,6 +1,7 @@
 import * as _dateUtil from './date.ts';
 import {
   calculateMinimumReleaseAgeMs,
+  calculatePackageManagerMinimumReleaseAgeMs,
   checkMinimumReleaseAge,
 } from './minimum-release-age.ts';
 import { toMs } from './pretty-time.ts';
@@ -21,6 +22,16 @@ describe('util/minimum-release-age', () => {
       expect(
         calculateMinimumReleaseAgeMs({ minimumReleaseAge: '3 days' }),
       ).toBe(toMs('3 days'));
+    });
+
+    it('ignores minimumReleaseAgeExtracted for security updates', () => {
+      expect(
+        calculateMinimumReleaseAgeMs({
+          isVulnerabilityAlert: true,
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: '3 days',
+        }),
+      ).toBe(toMs('1 day'));
     });
 
     it('ignores an invalid minimumReleaseAgeBuffer', () => {
@@ -76,6 +87,31 @@ describe('util/minimum-release-age', () => {
         }),
       ).toBe((toMs('3 days') ?? 0) + (toMs('10 minutes') ?? 0));
     });
+  });
+
+  describe('.calculatePackageManagerMinimumReleaseAgeMs()', () => {
+    it.each`
+      minimumReleaseAgeRepository | minimumReleaseAgeExtracted | expected
+      ${undefined}                | ${undefined}               | ${0}
+      ${null}                     | ${'3 days'}                | ${toMs('3 days')}
+      ${'3 days'}                 | ${null}                    | ${toMs('3 days')}
+      ${'3 days'}                 | ${'1 week'}                | ${toMs('1 week')}
+      ${'1 week'}                 | ${'3 days'}                | ${toMs('1 week')}
+    `(
+      'returns $expected for $minimumReleaseAgeRepository and $minimumReleaseAgeExtracted',
+      ({
+        minimumReleaseAgeRepository,
+        minimumReleaseAgeExtracted,
+        expected,
+      }) => {
+        expect(
+          calculatePackageManagerMinimumReleaseAgeMs({
+            minimumReleaseAgeRepository,
+            minimumReleaseAgeExtracted,
+          }),
+        ).toBe(expected);
+      },
+    );
   });
 
   describe('.checkMinimumReleaseAge()', () => {

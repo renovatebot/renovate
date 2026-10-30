@@ -282,10 +282,17 @@ In that case, Renovate does not wait for a release timestamp, and the `renovate/
 For all other managers, lock file maintenance is treated like any other update without a release timestamp.
 With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
 The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
+The minimum release age from the configuration of your package manager does not hold back lock file maintenance on its own, as your package manager applies it itself.
 
 ### What happens to security updates?
 
 Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
+This includes the minimum release age from the configuration of your package manager.
+
+Your package manager still applies its own minimum release age when Renovate updates the lock file.
+If the fixed version is younger than that, the lock file update fails, and the PR shows an artifact error.
+This keeps a fix which your package manager would reject visible, instead of holding it back without a PR.
+Set the minimum release age of your package manager to the smallest age which you want security updates to wait for.
 
 ### What happens if a package has multiple updates available?
 

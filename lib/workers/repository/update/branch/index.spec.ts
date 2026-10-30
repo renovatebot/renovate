@@ -326,6 +326,71 @@ describe('workers/repository/update/branch/index', () => {
         });
         expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
       });
+
+      it('does not skip lock file maintenance without minimumReleaseAge', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            isLockFileMaintenance: true,
+            updateType: 'lockFileMaintenance',
+            minimumReleaseAge: null,
+            minimumReleaseAgeExtracted: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          reuse.shouldReuseExistingBranch.mock.calls[0][0].stabilityStatus,
+        ).toBeUndefined();
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
+      });
+
+      it('does not skip security updates without minimumReleaseAge', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            isVulnerabilityAlert: true,
+            releaseTimestamp: undefined,
+            minimumReleaseAge: null,
+            minimumReleaseAgeExtracted: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          reuse.shouldReuseExistingBranch.mock.calls[0][0].stabilityStatus,
+        ).toBeUndefined();
+      });
+
+      it('does not skip lock file maintenance with minimumReleaseAge=0 days', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            isLockFileMaintenance: true,
+            updateType: 'lockFileMaintenance',
+            minimumReleaseAge: '0 days',
+            minimumReleaseAgeExtracted: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          reuse.shouldReuseExistingBranch.mock.calls[0][0].stabilityStatus,
+        ).toBe('green');
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
+      });
     });
 
     describe('lock file maintenance with minimumReleaseAge set', () => {
