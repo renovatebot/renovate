@@ -10,6 +10,7 @@ export const ReleaseResultZod = z.object({
         releaseTimestamp: MaybeTimestamp,
         sourceUrl: z.string().optional(),
         sourceDirectory: z.string().optional(),
+        changelogContent: z.string().optional().catch(undefined),
         changelogUrl: z.string().optional(),
         digest: z.string().optional(),
         isStable: z.boolean().optional(),
