@@ -360,10 +360,14 @@ export class BaseGoDatasource {
           .split('/')
           .slice(-2)
           .join('/');
+        // the GitHub API is only served over http(s), so an ssh import URL must not leak into the registryUrl
+        const protocol = parsedUrl.protocol.startsWith('http')
+          ? parsedUrl.protocol
+          : 'https:';
 
         return {
           datasource: GithubTagsDatasource.id,
-          registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          registryUrl: `${protocol}//${parsedUrl.host}`,
           packageName,
         };
       }
