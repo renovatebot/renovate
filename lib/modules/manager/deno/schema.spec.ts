@@ -365,6 +365,22 @@ describe('modules/manager/deno/schema', () => {
       });
     });
 
+    it('jsr package under a short scope', () => {
+      expect(
+        DenoDependency.parse({
+          depValue: 'jsr:@db/sqlite@^0.13.0',
+          depType: 'imports',
+        }),
+      ).toEqual({
+        currentRawValue: 'jsr:@db/sqlite@^0.13.0',
+        currentValue: '^0.13.0',
+        datasource: 'jsr',
+        depName: '@db/sqlite',
+        depType: 'imports',
+        versioning: 'deno',
+      });
+    });
+
     it('invalid jsr package versions', () => {
       expect(
         DenoDependency.parse({
@@ -570,6 +586,25 @@ describe('modules/manager/deno/schema', () => {
 
       expect(result.fileName).toBe('deno.json');
       expect(result.content.dependencies).toEqual([]);
+    });
+
+    it('parses deno.json with compilerOptions lacking dependency fields', () => {
+      const result = DenoExtract.parse({
+        content: JSON.stringify({
+          compilerOptions: {
+            lib: ['deno.ns', 'deno.window'],
+            strict: true,
+          },
+          imports: {
+            dep1: 'npm:package@1.0.0',
+          },
+        }),
+        fileName: 'deno.json',
+      });
+
+      expect(result.content.dependencies).toEqual([
+        expect.objectContaining({ depName: 'package', depType: 'imports' }),
+      ]);
     });
 
     it('parses deno.json with workspace', () => {

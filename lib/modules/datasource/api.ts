@@ -1,3 +1,4 @@
+import { ApkDatasource } from './apk/index.ts';
 import { ArtifactoryDatasource } from './artifactory/index.ts';
 import { AwsEKSAddonDataSource } from './aws-eks-addon/index.ts';
 import { AwsMachineImageDatasource } from './aws-machine-image/index.ts';
@@ -80,10 +81,12 @@ import type { DatasourceApi } from './types.ts';
 import { TypstDatasource } from './typst/index.ts';
 import { Unity3dDatasource } from './unity3d/index.ts';
 import { Unity3dPackagesDatasource } from './unity3d-packages/index.ts';
+import { VcpkgDatasource } from './vcpkg/index.ts';
 
 const api = new Map<string, DatasourceApi>();
 export default api;
 
+api.set(ApkDatasource.id, new ApkDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsEKSAddonDataSource.id, new AwsEKSAddonDataSource());
 api.set(AwsMachineImageDatasource.id, new AwsMachineImageDatasource());
@@ -168,3 +171,4 @@ api.set(TerraformProviderDatasource.id, new TerraformProviderDatasource());
 api.set(TypstDatasource.id, new TypstDatasource());
 api.set(Unity3dDatasource.id, new Unity3dDatasource());
 api.set(Unity3dPackagesDatasource.id, new Unity3dPackagesDatasource());
+api.set(VcpkgDatasource.id, new VcpkgDatasource());

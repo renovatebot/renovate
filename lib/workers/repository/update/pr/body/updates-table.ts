@@ -29,10 +29,8 @@ function getNonEmptyColumns(
   const res: string[] = [];
   for (const header of prBodyColumns) {
     for (const row of rows) {
-      if (row[header]?.length) {
-        if (!res.includes(header)) {
-          res.push(header);
-        }
+      if (row[header]?.length && !res.includes(header)) {
+        res.push(header);
       }
     }
   }

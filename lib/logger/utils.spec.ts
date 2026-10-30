@@ -1,5 +1,5 @@
 import { TimeoutError } from 'got';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { ExecError } from '../util/exec/exec-error.ts';
 import prepareError, { prepareZodIssues, sanitizeValue } from './utils.ts';
 
@@ -92,24 +92,24 @@ describe('logger/utils', () => {
       expect(prepareZodIssues({ _errors: ['a', 'b'] })).toEqual(['a', 'b']);
 
       expect(prepareIssues(z.string(), 42)).toBe(
-        'Expected string, received number',
+        'Invalid input: expected string, received number',
       );
 
       expect(prepareIssues(z.string().array(), 42)).toBe(
-        'Expected array, received number',
+        'Invalid input: expected array, received number',
       );
 
       expect(
         prepareIssues(z.string().array(), ['foo', 'bar', 42, 42, 42, 42, 42]),
       ).toEqual({
-        '2': 'Expected string, received number',
-        '3': 'Expected string, received number',
-        '4': 'Expected string, received number',
+        '2': 'Invalid input: expected string, received number',
+        '3': 'Invalid input: expected string, received number',
+        '4': 'Invalid input: expected string, received number',
         ___: '... 2 more',
       });
 
       expect(
-        prepareIssues(z.record(z.string()), {
+        prepareIssues(z.record(z.string(), z.string()), {
           foo: 'foo',
           bar: 'bar',
           key1: 42,
@@ -119,9 +119,9 @@ describe('logger/utils', () => {
           key5: 42,
         }),
       ).toEqual({
-        key1: 'Expected string, received number',
-        key2: 'Expected string, received number',
-        key3: 'Expected string, received number',
+        key1: 'Invalid input: expected string, received number',
+        key2: 'Invalid input: expected string, received number',
+        key3: 'Invalid input: expected string, received number',
         ___: '... 2 more',
       });
 
@@ -136,7 +136,7 @@ describe('logger/utils', () => {
         ),
       ).toEqual({
         foo: {
-          bar: 'Expected string, received array',
+          bar: 'Invalid input: expected string, received array',
         },
       });
 
@@ -172,7 +172,7 @@ describe('logger/utils', () => {
           ]),
           42,
         ),
-      ).toBe('Expected object, received number');
+      ).toBe('Invalid input: expected object, received number');
     });
 
     it('prepareError', () => {
@@ -191,7 +191,7 @@ describe('logger/utils', () => {
         issues: {
           foo: {
             bar: {
-              baz: 'Expected string, received number',
+              baz: 'Invalid input: expected string, received number',
             },
           },
         },

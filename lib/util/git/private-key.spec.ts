@@ -22,7 +22,10 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 vi.mock('../exec/index.ts', () => ({ exec: mockFn() }));
-vi.mock('../sanitize.ts', () => ({ addSecretForSanitizing: mockFn() }));
+vi.mock('../sanitize.ts', () => ({
+  addSecretForSanitizing: mockFn(),
+  clearRepoSanitizedSecretsList: mockFn(),
+}));
 
 const exec = mockedExtended(exec_);
 const sanitize = mockedExtended(sanitize_);
@@ -33,7 +36,6 @@ describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
     });
 
     it('returns if no private key', async () => {
@@ -53,7 +55,7 @@ describe('util/git/private-key', () => {
           stderr: `something wrong`,
           stdout: '',
         });
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports the private GPG key', async () => {
@@ -112,7 +114,7 @@ some-private-key with-passphrase
 `,
         passphrase,
       );
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports SSH key with passphrase successfully', async () => {
@@ -215,8 +217,8 @@ some-private-key
         cwd: repoDir,
       });
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
-      expect(fs.existsSync(publicKeyFile)).toBeTrue();
+      await expect(fs.pathExists(privateKeyFile)).resolves.toBeTrue();
+      await expect(fs.pathExists(publicKeyFile)).resolves.toBeTrue();
 
       processExitSpy.mockImplementationOnce(() => undefined as never);
     });
@@ -244,16 +246,13 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
+      await expect(fs.pathExists(privateKeyFile)).resolves.toBeTrue();
     });
   });
 
   describe('base64 key encoding', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
-      logger.logger.warn.mockReset();
-      sanitize.addSecretForSanitizing.mockReset();
     });
 
     it('decodes base64-encoded GPG key', async () => {

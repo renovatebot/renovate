@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { EmailAddress } from '../../../util/schema-utils/index.ts';
 
 export const User = z.object({

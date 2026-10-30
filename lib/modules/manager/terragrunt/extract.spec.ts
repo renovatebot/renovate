@@ -255,6 +255,14 @@ describe('modules/manager/terragrunt/extract', () => {
           },
           {
             currentValue: 'v1.0.0',
+            datasource: 'forgejo-tags',
+            depName: 'codeberg.org/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://codeberg.org'],
+          },
+          {
+            currentValue: 'v1.0.0',
             datasource: 'git-tags',
             depName: 'bitbucket.example.com/hashicorp/example',
             depType: 'gitTags',
@@ -262,7 +270,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(36);
+      expect(res?.deps).toHaveLength(37);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -478,9 +486,17 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'hashicorp/example',
             registryUrls: ['https://gitea.com'],
           },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'forgejo-tags',
+            depName: 'codeberg.org/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://codeberg.org'],
+          },
         ],
       });
-      expect(res?.deps).toHaveLength(36);
+      expect(res?.deps).toHaveLength(37);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -689,9 +705,17 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'hashicorp/example',
             registryUrls: ['https://gitea.com'],
           },
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'forgejo-tags',
+            depName: 'codeberg.org/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://codeberg.org'],
+          },
         ],
       });
-      expect(res?.deps).toHaveLength(35);
+      expect(res?.deps).toHaveLength(36);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 

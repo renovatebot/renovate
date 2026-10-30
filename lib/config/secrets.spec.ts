@@ -39,6 +39,7 @@ describe('config/secrets', () => {
 
     it('throws for secrets in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid secret value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', secrets: { abc: 123 } }],
         } as any),
@@ -47,6 +48,7 @@ describe('config/secrets', () => {
 
     it('throws for variables in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid variable value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', variables: { abc: 123 } }],
         } as any),

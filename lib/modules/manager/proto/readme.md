@@ -32,7 +32,7 @@ Renovate's `proto` manager supports the following built-in proto tools:
 | `yarn`   | `npm`             | `@yarnpkg/cli`         |
 | `python` | `github-tags`     | `python/cpython`       |
 | `ruby`   | `ruby-version`    | `ruby-version`         |
-| `rust`   | `github-tags`     | `rust-lang/rust`       |
+| `rust`   | `rust-version`    | `rust`                 |
 | `proto`  | `github-releases` | `moonrepo/proto`       |
 | `gh`     | `github-releases` | `cli/cli`              |
 | `poetry` | `github-releases` | `python-poetry/poetry` |

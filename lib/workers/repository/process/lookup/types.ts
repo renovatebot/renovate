@@ -2,6 +2,7 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types.ts';
+import type { DatasourceName } from '../../../../datasource-list.generated.ts';
 import type {
   LookupUpdate,
   RangeConfig,
@@ -34,8 +35,17 @@ export interface RollbackConfig {
 export interface LookupUpdateConfig
   extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
+  /** Whether the dependency should only be updated in the lockfile. */
+  isLockfileOnly?: boolean;
 
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
@@ -61,17 +71,19 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string | null;
+  currentCompatibility?: string;
   currentVersion?: string;
   isSingleVersion?: boolean;
   lookupName?: string;
   skipReason?: SkipReason;
   registryUrl?: string;
+  effectiveDatasource?: DatasourceName;
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
   currentVersionAgeInDays?: number;
-  currentVersionTimestamp?: string;
+  currentVersionTimestamp?: Timestamp;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
   mostRecentTimestamp?: Timestamp | null;

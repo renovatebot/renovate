@@ -11,6 +11,7 @@ import * as conan from '../../versioning/conan/index.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['conan.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://docs.conan.io';
 export const categories: Category[] = ['c'];
 

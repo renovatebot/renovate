@@ -16,8 +16,8 @@ permissions:
 
 jobs:
   reaction:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: dessant/label-actions@809e0f9bc11ce08744e7ccac7cd10621d00aba2f # v5.0.2
+      - uses: dessant/label-actions@65225c179d3b2502f6eda7b3d15101a3f412366b # v5.0.3
         with:
           github-token: ${{ github.token }}

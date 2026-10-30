@@ -1,3 +1,4 @@
+import type { parser } from '@renovatebot/good-enough-parser';
 import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex.ts';
 import type { Ctx } from '../types.ts';
@@ -19,6 +20,7 @@ import {
   handleImplicitDep,
   handleKotlinShortNotationDep,
   handleLongFormDep,
+  handleRichVersionDep,
 } from './handlers.ts';
 
 // "foo:bar:1.2.3"
@@ -153,6 +155,86 @@ export const qLongFormDep = q
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
+// strictly '1.2.3'
+// strictly("1.2.3")
+function qRichVersionValue(
+  tokenMapKey: string,
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q
+    .alt<Ctx>(
+      q.tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        maxMatches: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search: q.begin<Ctx>().join(qValueMatcher).end(),
+      }),
+      qValueMatcher,
+    )
+    .handler((ctx) => storeInTokenMap(ctx, tokenMapKey));
+}
+
+// version { strictly '[1.7, 1.8['; prefer '1.7.25' }
+// version { strictly("[1.7, 1.8["); prefer("1.7.25") }
+const qRichVersion = q.sym<Ctx>('version').tree({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  startsWith: '{',
+  endsWith: '}',
+  search: q.alt<Ctx>(
+    q.sym<Ctx>('strictly').join(qRichVersionValue('strictly')),
+    q.sym<Ctx>('require').join(qRichVersionValue('require')),
+    q.sym<Ctx>('prefer').join(qRichVersionValue('prefer')),
+    // the rejected versions themselves are irrelevant: their mere presence
+    // means Renovate cannot reason about the constraint
+    q
+      .sym<Ctx>(regEx(/^reject(?:All)?$/), storeVarToken)
+      .handler((ctx) => storeInTokenMap(ctx, 'reject')),
+  ),
+});
+
+// implementation('foo:bar') { version { strictly '1.2.3' } }
+// implementation("foo:bar") { version { strictly("1.2.3") } }
+// implementation(group: 'foo', name: 'bar') { version { strictly '1.2.3' } }
+const qRichVersionDep = q
+  .opt<Ctx>(
+    q.sym(storeVarToken).handler((ctx) => storeInTokenMap(ctx, 'methodName')),
+  )
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(
+        qTemplateString.handler((ctx) =>
+          storeInTokenMap(ctx, 'templateStringTokens'),
+        ),
+        q
+          .sym<Ctx>('group')
+          .alt(q.op(':'), q.op('='))
+          .join(qGroupId)
+          .op(',')
+          .sym('name')
+          .alt(q.op(':'), q.op('='))
+          .join(qArtifactId),
+      )
+      .end(),
+  })
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: qRichVersion,
+  })
+  .handler(handleRichVersionDep)
+  .handler(cleanupTempVars);
+
 // pmd { toolVersion = "1.2.3" }
 const qImplicitGradlePlugin = q
   .alt(
@@ -252,9 +334,17 @@ const qIgnoreSubstitutedDependencies = q.sym<Ctx>('substitute').alt(
   }),
 );
 
+// buildConfigField("type", "name", "value")
+// resValue("type", "name", "value")
+const qIgnoreAndroidBuildValues = q.alt(
+  q.sym<Ctx>('buildConfigField').tree(),
+  q.sym<Ctx>('resValue').tree(),
+);
+
 export const qDependencies = q.alt(
   qDependencyStrings,
   qDependencySet,
+  qRichVersionDep,
   qGroovyMapNotationDependencies,
   qKotlinShortNotationDependencies,
   qKotlinMapNotationDependencies,
@@ -264,4 +354,6 @@ export const qDependencies = q.alt(
   qDotOrBraceExpr('java', q.sym<Ctx>('registerFeature').tree()),
   // avoid matching substituted dependency modules
   qIgnoreSubstitutedDependencies,
+  // avoid heuristic matching of Android build values
+  qIgnoreAndroidBuildValues,
 );

@@ -5,12 +5,15 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
 import * as template from '../../../util/template/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
@@ -26,14 +29,17 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
+      branchUpgrades.map(({ depName }) =>
+        depName?.replace(regEx(/^@types\//), ''),
+      ),
     ).size === 1
   );
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
-  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    !!depName?.startsWith('@types/');
+  function isTypesUpgrade({ depName }: BranchUpgradeConfig): boolean {
+    return !!depName?.startsWith('@types/');
+  }
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade),
   );
@@ -48,9 +54,8 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   }
   const { datasource, packageName, depName, currentVersion, newVersion } =
     upgrade;
-  const name = packageName ?? depName;
-  if (datasource && name && currentVersion && newVersion) {
-    return [datasource, name, currentVersion, newVersion];
+  if (datasource && packageName && currentVersion && newVersion) {
+    return [datasource, packageName, currentVersion, newVersion];
   }
   logger.trace(
     {
@@ -87,7 +92,9 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade,
   );
   upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-  upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+  upgrade.commitMessage = withoutUrlCredentials(
+    template.compile(upgrade.commitMessage, upgrade),
+  );
   // istanbul ignore if
   if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
     logger.debug(
@@ -99,8 +106,8 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
   upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
   upgrade.commitMessage = upgrade.commitMessage.replace(
-    regEx(/to vv(\d)/),
-    'to v$1',
+    regEx(/to vv(?<digit>\d)/),
+    'to v$<digit>',
   );
   if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
     // We only need to lowercase the first line
@@ -120,10 +127,12 @@ function compilePrTitle(
   if (upgrade.prTitle) {
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-    upgrade.prTitle = template
-      .compile(upgrade.prTitle, upgrade)
-      .trim()
-      .replace(regEx(/\s+/g), ' ');
+    upgrade.prTitle = withoutUrlCredentials(
+      template
+        .compile(upgrade.prTitle, upgrade)
+        .trim()
+        .replace(regEx(/\s+/g), ' '),
+    );
     // istanbul ignore if
     if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
       logger.debug(
@@ -161,7 +170,9 @@ function compilePrTitle(
     }
   }
   // Compile again to allow for nested templates
-  upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+  upgrade.prTitle = withoutUrlCredentials(
+    template.compile(upgrade.prTitle, upgrade),
+  );
   logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
 }
 
@@ -275,7 +286,13 @@ export function generateBranchConfig(
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
-  const useGroupSettings = hasGroupName && groupEligible;
+  const singleUpdateGroup =
+    hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
+  logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
+  const useGroupSettings =
+    hasGroupName &&
+    (groupEligible ||
+      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -295,9 +312,7 @@ export function generateBranchConfig(
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade
-        .pendingVersions!.slice(-1)
-        .pop()!}\``;
+      upgrade.displayPending = `\`${upgrade.pendingVersions!.at(-1)!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }
@@ -310,6 +325,12 @@ export function generateBranchConfig(
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
       upgrade.isGroup = true;
+      if (singleUpdateGroup) {
+        // Single update using group name instead of dependency name,
+        // so remove version from commit message.
+        delete upgrade.commitMessageExtra;
+        upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+      }
     } else {
       delete upgrade.groupName;
     }
@@ -455,14 +476,14 @@ export function generateBranchConfig(
   config.labels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.labels ?? [])
+        .map((upgrade) => coerceArray(upgrade.labels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => upgrade.addLabels ?? [])
+        .map((upgrade) => coerceArray(upgrade.addLabels))
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
@@ -484,10 +505,36 @@ export function generateBranchConfig(
     }
   }
 
+  // a branch which updates a tool constraint should use its new value, i.e. when installing tools for `postUpgradeTasks` or artifact updates
+  const constraintUpdates = config.upgrades.flatMap(
+    ({ manager, depType, depName, currentValue, newValue }) =>
+      manager === 'renovate-config' &&
+      depType === 'tool-constraint' &&
+      isConstraintName(depName) &&
+      newValue
+        ? [{ depName, currentValue, newValue }]
+        : [],
+  );
+  for (const upgrade of config.upgrades) {
+    for (const { depName, currentValue, newValue } of constraintUpdates) {
+      // only replace the constraint being updated, not a different value which may have been configured i.e. via `packageRules`
+      if (upgrade.constraints?.[depName] === currentValue) {
+        upgrade.constraints = { ...upgrade.constraints, [depName]: newValue };
+      }
+    }
+  }
+
   config.constraints = {};
+  config.extractedConstraints = {};
   for (const upgrade of config.upgrades) {
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
+    }
+    if (upgrade.extractedConstraints) {
+      config.extractedConstraints = {
+        ...config.extractedConstraints,
+        ...upgrade.extractedConstraints,
+      };
     }
   }
 
@@ -534,7 +581,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += `\n\n${markdownTable(table)}\n`;
+    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
   }
   const additionalReviewers = uniq(
     config.upgrades

@@ -9,6 +9,7 @@ export { updateDependency } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['gradle.lockfile'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url =
   'https://docs.gradle.org/current/userguide/getting_started_dep_man.html';

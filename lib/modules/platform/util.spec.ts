@@ -1,9 +1,6 @@
-import * as hostRules from '../../util/host-rules.ts';
 import { getNewBranchName, repoFingerprint } from './util.ts';
 
 describe('modules/platform/util', () => {
-  beforeEach(() => hostRules.clear());
-
   describe('repoFingerprint', () => {
     it.each`
       repoId       | endpoint                | fingerprint

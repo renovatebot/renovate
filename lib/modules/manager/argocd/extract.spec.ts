@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -85,6 +86,49 @@ spec:
       });
     });
 
+    it('resolves registryAliases for OCI charts', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: test
+          spec:
+            source:
+              chart: some/chart
+              repoURL: oci://registry.example.com/charts
+              targetRevision: 1.0.0
+            sources:
+              - repoURL: oci://registry.example.com/charts/other
+                targetRevision: 2.0.0
+        `,
+        'applications.yml',
+        {
+          registryAliases: {
+            'registry.example.com': 'registry-1.docker.io',
+          },
+        },
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'registry.example.com/charts/some/chart',
+            packageName: 'registry-1.docker.io/charts/some/chart',
+            pinDigests: false,
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'docker',
+            depName: 'registry.example.com/charts/other',
+            packageName: 'registry-1.docker.io/charts/other',
+            pinDigests: false,
+          },
+        ],
+      });
+    });
+
     it('full test', () => {
       const result = extractPackageFile(validApplication, 'applications.yml');
       expect(result).toEqual({
@@ -132,26 +176,36 @@ spec:
             currentValue: '1.2.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io/some/image',
+            packageName: 'somecontainer.registry.io/some/image',
+            pinDigests: false,
           },
           {
             currentValue: '1.3.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io/some/image2',
+            packageName: 'somecontainer.registry.io/some/image2',
+            pinDigests: false,
           },
           {
             currentValue: '1.3.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image2',
+            packageName: 'somecontainer.registry.io:443/some/image2',
+            pinDigests: false,
           },
           {
             currentValue: '1.0.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
+            packageName: 'somecontainer.registry.io:443/some/image3',
+            pinDigests: false,
           },
           {
             currentValue: '1.0.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
+            packageName: 'somecontainer.registry.io:443/some/image3',
+            pinDigests: false,
           },
           {
             currentValue: 'v1.2.0',
@@ -162,6 +216,8 @@ spec:
             currentValue: '1.0.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
+            packageName: 'somecontainer.registry.io:443/some/image3',
+            pinDigests: false,
           },
           {
             currentValue: 'v1.2.0',
@@ -195,6 +251,8 @@ spec:
             currentValue: '0.4.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io/org/chart',
+            packageName: 'somecontainer.registry.io/org/chart',
+            pinDigests: false,
           },
         ],
       });
@@ -236,6 +294,8 @@ spec:
             currentValue: '1.0.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
+            packageName: 'somecontainer.registry.io:443/some/image3',
+            pinDigests: false,
           },
           {
             currentValue: 'v1.2.0',
@@ -246,6 +306,8 @@ spec:
             currentValue: '1.0.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
+            packageName: 'somecontainer.registry.io:443/some/image3',
+            pinDigests: false,
           },
           {
             currentValue: 'v1.2.0',

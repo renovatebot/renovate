@@ -1,5 +1,8 @@
 import { GlobalConfig } from '../../config/global.ts';
+import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
+import * as memCache from '../cache/memory/index.ts';
+import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
   getToolConfig,
@@ -16,7 +19,7 @@ describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      delete process.env.CONTAINERBASE;
+      vi.stubEnv('CONTAINERBASE', undefined);
     });
 
     it('returns false if binarySource is not install', () => {
@@ -28,9 +31,16 @@ describe('util/exec/containerbase', () => {
       expect(isDynamicInstall()).toBeFalse();
     });
 
+    it('ignores CONTAINERBASE from the custom env', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      setCustomEnv({ CONTAINERBASE: 'true' });
+      expect(isDynamicInstall()).toBeFalse();
+      setCustomEnv({});
+    });
+
     it('returns false if any unsupported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
         // @ts-expect-error -- intentionally using invalid constraint names
@@ -41,7 +51,7 @@ describe('util/exec/containerbase', () => {
 
     it('returns true if supported tools', () => {
       GlobalConfig.set({ binarySource: 'install' });
-      process.env.CONTAINERBASE = 'true';
+      vi.stubEnv('CONTAINERBASE', 'true');
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
     });
@@ -65,9 +75,9 @@ describe('util/exec/containerbase', () => {
 
   describe('resolveConstraint()', () => {
     it('returns from config', async () => {
-      expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' }),
-      ).toBe('1.1.0');
+      await expect(
+        resolveConstraint({ toolName: 'composer', constraint: '1.1.0' }),
+      ).resolves.toBe('1.1.0');
     });
 
     it('returns highest stable', async () => {
@@ -81,14 +91,16 @@ describe('util/exec/containerbase', () => {
           { version: '2.2.0-pre.0' },
         ],
       });
-      expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
+      await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
+        '2.1.0',
+      );
     });
 
     it('returns highest unstable', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '2.0.14-b.1' }, { version: '2.1.0-a.1' }],
       });
-      expect(await resolveConstraint({ toolName: 'composer' })).toBe(
+      await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
         '2.1.0-a.1',
       );
     });
@@ -107,21 +119,31 @@ describe('util/exec/containerbase', () => {
           { version: '2.2.0-pre.0' },
         ],
       });
-      expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.0.14');
+      await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
+        '2.0.14',
+      );
     });
 
-    it('supports rust docker tags', async () => {
+    it('supports rust release channels', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [
           { version: '1' },
           { version: '1.65' },
           { version: '1.65.0' },
-          { version: '1.65.0-slim' },
-          { version: '1.65.0-buster' },
-          { version: '1.66' },
         ],
       });
-      expect(await resolveConstraint({ toolName: 'rust' })).toBe('1.65.0');
+      await expect(resolveConstraint({ toolName: 'rust' })).resolves.toBe(
+        '1.65.0',
+      );
+    });
+
+    it('supports nightly rust release channels', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'nightly' }, { version: 'nightly-2026-06-19' }],
+      });
+      await expect(resolveConstraint({ toolName: 'rust' })).resolves.toBe(
+        'nightly-2026-06-19',
+      );
     });
 
     it('throws for unknown tools', async () => {
@@ -143,18 +165,18 @@ describe('util/exec/containerbase', () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.2.3' }],
       });
-      expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' }),
-      ).toBe('1.2.3');
+      await expect(
+        resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' }),
+      ).resolves.toBe('1.2.3');
     });
 
     it('falls back to latest version if invalid constraint', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '1.2.3' }],
       });
-      expect(
-        await resolveConstraint({ toolName: 'composer', constraint: 'whoops' }),
-      ).toBe('1.2.3');
+      await expect(
+        resolveConstraint({ toolName: 'composer', constraint: 'whoops' }),
+      ).resolves.toBe('1.2.3');
     });
 
     it.each`
@@ -175,19 +197,19 @@ describe('util/exec/containerbase', () => {
             { version: '3.10.4' },
           ],
         });
-        expect(
-          await resolveConstraint({ toolName: 'python', constraint }),
-        ).toBe(expected);
+        await expect(
+          resolveConstraint({ toolName: 'python', constraint }),
+        ).resolves.toBe(expected);
       },
     );
 
     it('removes pep440 ==', async () => {
-      expect(
-        await resolveConstraint({
+      await expect(
+        resolveConstraint({
           toolName: 'pipenv',
           constraint: '==2020.8.13',
         }),
-      ).toBe('2020.8.13');
+      ).resolves.toBe('2020.8.13');
     });
 
     it.each`
@@ -214,9 +236,9 @@ describe('util/exec/containerbase', () => {
             { version: '2.12.0-4.1.pre', isStable: false },
           ],
         });
-        expect(
-          await resolveConstraint({ toolName: 'flutter', constraint }),
-        ).toBe(expected);
+        await expect(
+          resolveConstraint({ toolName: 'flutter', constraint }),
+        ).resolves.toBe(expected);
       },
     );
 
@@ -246,11 +268,56 @@ describe('util/exec/containerbase', () => {
             { version: '2.19.0-81.0.dev', isStable: false },
           ],
         });
-        expect(await resolveConstraint({ toolName: 'dart', constraint })).toBe(
-          expected,
-        );
+        await expect(
+          resolveConstraint({ toolName: 'dart', constraint }),
+        ).resolves.toBe(expected);
       },
     );
+  });
+
+  describe('resolveConstraint() with resolved tools', () => {
+    // run the real constraints filtering against npm-like releases
+    function mockNpmReleases(...nodeConstraints: string[]): void {
+      datasource.getPkgReleases.mockImplementation((config) =>
+        Promise.resolve(
+          applyConstraintsFiltering(
+            {
+              releases: nodeConstraints.map((node, i) => ({
+                version: `${11 + i}.0.0`,
+                constraints: { node: [node] },
+              })),
+            },
+            config,
+          ),
+        ),
+      );
+    }
+
+    it('picks the newest release compatible with the parent version', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('11.0.0');
+    });
+
+    it('picks the newest release when the parent version supports it', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '24.15.0' }),
+      ).resolves.toBe('12.0.0');
+    });
+
+    it('ignores the parent version when no release is compatible', async () => {
+      mockNpmReleases('^22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('12.0.0');
+      expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+      });
+    });
   });
 
   describe('generateInstallCommands()', () => {
@@ -272,9 +339,113 @@ describe('util/exec/containerbase', () => {
           toolName: 'composer',
         },
       ];
-      expect(await generateInstallCommands(toolConstraints)).toEqual([
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
         'install-tool composer 2.1.0',
       ]);
+    });
+
+    it('only matches a tool against its own parent', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'composer' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool composer 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-releases',
+        packageName: 'containerbase/composer-prebuild',
+        versioning: 'composer',
+      });
+    });
+
+    it('filters tool releases by the resolved parent version', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'npm', constraint: '>=1' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool npm 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+        constraintsFiltering: 'strict',
+        constraints: { node: '20.17.0' },
+      });
+    });
+
+    it('repeats install commands when not memoizing', async () => {
+      const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+      await generateInstallCommands(toolConstraints);
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.1.0' }],
+      });
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool composer 2.1.0',
+      ]);
+    });
+
+    describe('memoize', () => {
+      beforeEach(() => {
+        memCache.init();
+      });
+
+      afterEach(() => {
+        memCache.reset();
+      });
+
+      it('skips a tool already installed this run at the same version', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.1.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual([]);
+      });
+
+      it('re-issues the install command when the resolved version changes', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.2.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.2.0']);
+      });
+
+      it('re-issues the install command when switching back to an earlier version', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.2.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.2.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.1.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+      });
     });
   });
 });

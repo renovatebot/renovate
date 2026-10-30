@@ -1,5 +1,5 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
@@ -10,7 +10,7 @@ export const HexRelease = z
     meta: z
       .object({
         links: z
-          .record(z.string())
+          .record(z.string(), z.string())
           .transform((links) =>
             Object.fromEntries(
               Object.entries(links).map(([key, value]) => [

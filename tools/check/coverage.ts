@@ -15,7 +15,7 @@ const CoverageEntry = z.object({
 
 const CoverageJson = z.record(z.string(), CoverageEntry);
 
-type CoverageData = z.infer<typeof CoverageJson>;
+type CoverageJson = z.infer<typeof CoverageJson>;
 
 function groupConsecutiveNumbers(numbers: number[]): string[] {
   if (numbers.length === 0) {
@@ -43,7 +43,7 @@ function groupConsecutiveNumbers(numbers: number[]): string[] {
 
 async function loadCoverageFile(
   coverageDir: string,
-): Promise<CoverageData | null> {
+): Promise<CoverageJson | null> {
   const coverageFile = upath.resolve(coverageDir, 'coverage-final.json');
   if (!(await fs.pathExists(coverageFile))) {
     return null;
@@ -61,9 +61,9 @@ async function loadCoverageFile(
 }
 
 function normalizeCoveragePaths(
-  data: CoverageData,
-): Map<string, CoverageData[string]> {
-  const normalized = new Map<string, CoverageData[string]>();
+  data: CoverageJson,
+): Map<string, CoverageJson[string]> {
+  const normalized = new Map<string, CoverageJson[string]>();
   for (const [key, value] of Object.entries(data)) {
     normalized.set(upath.normalize(key), value);
   }
@@ -76,7 +76,7 @@ function isSourceFile(path: string): boolean {
 
 function extractFileCoverage(
   file: string,
-  coverage: Map<string, CoverageData[string]>,
+  coverage: Map<string, CoverageJson[string]>,
 ): CoverageInfo | null {
   const absPath = upath.resolve(process.cwd(), file);
   const entry = coverage.get(absPath);
@@ -124,7 +124,7 @@ function extractFileCoverage(
 
 export async function loadCoverage(
   coverageDir: string,
-): Promise<Map<string, CoverageData[string]> | null> {
+): Promise<Map<string, CoverageJson[string]> | null> {
   const data = await loadCoverageFile(coverageDir);
   if (!data) {
     return null;
@@ -133,7 +133,7 @@ export async function loadCoverage(
 }
 
 export function getCoverageForFiles(
-  coverage: Map<string, CoverageData[string]>,
+  coverage: Map<string, CoverageJson[string]>,
   files: string[],
 ): CoverageInfo[] {
   const results: CoverageInfo[] = [];
@@ -150,7 +150,7 @@ export function getCoverageForFiles(
 }
 
 export function getCoverageForDir(
-  coverage: Map<string, CoverageData[string]>,
+  coverage: Map<string, CoverageJson[string]>,
   dir: string,
 ): CoverageInfo[] {
   const absDir = `${upath.resolve(process.cwd(), dir)}/`;

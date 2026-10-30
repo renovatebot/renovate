@@ -1,4 +1,4 @@
-import type { TypeOf, ZodType } from 'zod/v3';
+import type { TypeOf, ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -26,7 +26,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     super(AzurePipelinesTasksDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   override readonly defaultVersioning = versioning;
 
@@ -81,27 +83,22 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         });
 
       return result;
-    } else {
-      const versions =
-        (
-          await this.getTasks(
-            BUILT_IN_TASKS_URL,
-            {},
-            AzurePipelinesFallbackTasks,
-          )
-        )[packageName.toLowerCase()] ??
-        (
-          await this.getTasks(
-            MARKETPLACE_TASKS_URL,
-            {},
-            AzurePipelinesFallbackTasks,
-          )
-        )[packageName.toLowerCase()];
+    }
+    const versions =
+      (
+        await this.getTasks(BUILT_IN_TASKS_URL, {}, AzurePipelinesFallbackTasks)
+      )[packageName.toLowerCase()] ??
+      (
+        await this.getTasks(
+          MARKETPLACE_TASKS_URL,
+          {},
+          AzurePipelinesFallbackTasks,
+        )
+      )[packageName.toLowerCase()];
 
-      if (versions) {
-        const releases = versions.map((version) => ({ version }));
-        return { releases };
-      }
+    if (versions) {
+      const releases = versions.map((version) => ({ version }));
+      return { releases };
     }
 
     return null;

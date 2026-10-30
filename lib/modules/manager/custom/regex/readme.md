@@ -36,7 +36,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency in a named capture group
+- Capture the `currentValue` or `currentDigest` of the dependency in a named capture group
 - Set a `depName` or `packageName` capture group. Or use a template field: `depNameTemplate` and `packageNameTemplate`
 - Set a `datasource` capture group, or a `datasourceTemplate` config field
 
@@ -47,7 +47,6 @@ You may use any of these items:
 - A `depType` capture group, or a `depTypeTemplate` config field
 - A `versioning` capture group, or a `versioningTemplate` config field. If neither are present, Renovate defaults to `semver-coerced`
 - An `extractVersion` capture group, or an `extractVersionTemplate` config field
-- A `currentDigest` capture group
 - A `registryUrl` capture group, or a `registryUrlTemplate` config field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - An `indentation` capture group. It must be either empty, or whitespace only (otherwise `indentation` will be reset to an empty string)
 
