@@ -1,8 +1,153 @@
 import { codeBlock } from 'common-tags';
 import type { UpdateLockedConfig } from '../types.ts';
-import { updateLockedDependency } from './update-locked.ts';
+import {
+  rebindUpdatedToolSelectors,
+  updateLockedDependency,
+} from './update-locked.ts';
 
 describe('modules/manager/mise/update-locked', () => {
+  describe('rebindUpdatedToolSelectors', () => {
+    const content = codeBlock`
+      [[tools.hk]]
+      version = "2.6.0"
+      specifiers = ["2.6.0"]
+      [tools.hk.platforms.linux-x64]
+      url = "https://github.com/jdx/hk/releases/download/v2.6.0/hk.tar.gz"
+      checksum = "keep-checksum"
+
+      [[tools.node]]
+      version = "24.16.0"
+      specifiers = ["24.16.0"]
+    `;
+    const update = { depName: 'hk', newVersion: '2.6.0', newValue: 'latest' };
+
+    it('restores a selector without changing metadata or unrelated entries', () => {
+      expect(rebindUpdatedToolSelectors(content, [update])).toBe(
+        content.replace('["2.6.0"]', '["latest"]'),
+      );
+    });
+
+    it('applies multiple edits in reverse source order', () => {
+      expect(
+        rebindUpdatedToolSelectors(content, [
+          update,
+          { depName: 'core:node', newVersion: '24.16.0', newValue: '24' },
+        ]),
+      ).toBe(
+        content
+          .replace('["2.6.0"]', '["latest"]')
+          .replace('["24.16.0"]', '["24"]'),
+      );
+    });
+
+    it('combines selectors for the same regenerated entry', () => {
+      expect(
+        rebindUpdatedToolSelectors(content, [
+          update,
+          { ...update, newValue: '2' },
+        ]),
+      ).toBe(content.replace('["2.6.0"]', '["latest","2"]'));
+    });
+
+    it('uses the current selector when the update has no new value', () => {
+      expect(
+        rebindUpdatedToolSelectors(content, [
+          { ...update, newValue: undefined, currentValue: 'latest' },
+        ]),
+      ).toBe(content.replace('["2.6.0"]', '["latest"]'));
+    });
+
+    it('removes old version and replaced-selector bindings from the new entry', () => {
+      const stale = content.replace('["2.6.0"]', '["2.5.0","2.6.0","2","lts"]');
+      expect(
+        rebindUpdatedToolSelectors(stale, [
+          { ...update, currentVersion: '2.5.0', currentValue: '2' },
+        ]),
+      ).toBe(stale.replace('["2.5.0","2.6.0","2","lts"]', '["lts","latest"]'));
+    });
+
+    it('preserves an already matching binding and unrelated selectors', () => {
+      const bound = content.replace('["2.6.0"]', '["lts","latest"]');
+      expect(rebindUpdatedToolSelectors(bound, [update])).toBe(bound);
+    });
+
+    it('handles quoted binding keys and canonical versions', () => {
+      const quoted = content
+        .replace('version = "2.6.0"', 'version = "v2.6.0"')
+        .replace('specifiers = ["2.6.0"]', '"specifiers" = ["2.6.0"]');
+      expect(rebindUpdatedToolSelectors(quoted, [update])).toBe(
+        quoted.replace('["2.6.0"]', '["latest"]'),
+      );
+    });
+
+    it('preserves old lock files without request bindings', () => {
+      const legacy = '[[tools.hk]]\nversion = "2.6.0"\n';
+      expect(rebindUpdatedToolSelectors(legacy, [update])).toBe(legacy);
+    });
+
+    it('keeps a legacy sibling while rebinding the selected entry', () => {
+      const mixed = `${content}\n[[tools.hk]]\nversion = "2.5.0"\n`;
+      expect(rebindUpdatedToolSelectors(mixed, [update])).toBe(
+        mixed.replace('["2.6.0"]', '["latest"]'),
+      );
+    });
+
+    it.each([
+      {},
+      { depName: '', newVersion: '2.6.0' },
+      { depName: 'hk', newVersion: '' },
+    ])('ignores an update without an exact selected target: %j', (invalid) => {
+      expect(rebindUpdatedToolSelectors(content, [invalid])).toBe(content);
+    });
+
+    it.each([
+      { ...update, depName: 'missing' },
+      { ...update, newVersion: '2.7.0' },
+      { ...update, newValue: undefined },
+    ])(
+      'rejects a missing entry or unknown configured selector: %j',
+      (invalid) => {
+        expect(() => rebindUpdatedToolSelectors(content, [invalid])).toThrow(
+          /mise/,
+        );
+      },
+    );
+
+    it('rejects multiple matching entries', () => {
+      const duplicate = `${content}\n[[tools.hk]]\nversion = "2.6.0"\nspecifiers = ["preview"]\n`;
+      expect(() => rebindUpdatedToolSelectors(duplicate, [update])).toThrow(
+        'Ambiguous',
+      );
+    });
+
+    it('rejects a selector already bound to a different entry', () => {
+      const conflict = `${content}\n[[tools.hk]]\nversion = "2.5.0"\nspecifiers = ["latest"]\n`;
+      expect(() => rebindUpdatedToolSelectors(conflict, [update])).toThrow(
+        'Conflicting',
+      );
+    });
+
+    it('rejects an unbound target in a mixed-format tool', () => {
+      const mixed = codeBlock`
+        [[tools.hk]]
+        version = "2.6.0"
+        [[tools.hk]]
+        version = "2.5.0"
+        specifiers = ["old"]
+      `;
+      expect(() => rebindUpdatedToolSelectors(mixed, [update])).toThrow(
+        'Unsupported',
+      );
+    });
+
+    it('rejects unsupported inline bindings', () => {
+      const inline = '[tools]\nhk = [{version="2.6.0",specifiers=["2.6.0"]}]\n';
+      expect(() => rebindUpdatedToolSelectors(inline, [update])).toThrow(
+        'Unsupported',
+      );
+    });
+  });
+
   it('updates only the lockfile version for a major selector', () => {
     const packageFileContent = codeBlock`
       [tools]

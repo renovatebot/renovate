@@ -1,6 +1,13 @@
+import { isString } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import {
+  envMock,
+  exec,
+  mockExecAll,
+  mockExecSequence,
+} from '~test/exec-util.ts';
 import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -314,6 +321,334 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
+  });
+
+  describe('selected-version regeneration', () => {
+    const originalLock = '[[tools.ansible]]\nversion = "14.4.0"\n';
+    const updatedLock = '[[tools.ansible]]\nversion = "14.5.0"\n';
+    const packageFileContent =
+      '[tools]\nansible = { version = "latest", expose = ["ansible-core"] }\n';
+
+    it.each([true, false])(
+      'regenerates the selected version and returns sidecars (allowlisted: %s)',
+      async (allowlisted) => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowedUnsafeExecutions: allowlisted ? ['mise'] : [],
+        });
+        fs.readLocalFile
+          .mockResolvedValueOnce(originalLock)
+          .mockResolvedValueOnce(updatedLock)
+          .mockResolvedValueOnce(updatedLock)
+          .mockResolvedValueOnce('updated Python lock');
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['.mise/locks/ansible/14.4.0/uv.lock'],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+        const result = await updateArtifacts({
+          packageFileName: 'mise.toml',
+          updatedDeps: [
+            {
+              depName: 'ansible',
+              datasource: 'pypi',
+              newValue: 'latest',
+              newVersion: '14.5.0',
+            },
+          ],
+          newPackageFileContent: packageFileContent,
+          newLockFileContent: updatedLock,
+          config,
+        });
+
+        expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+          miseVersionCmd,
+          ...(allowlisted ? [trustCmd] : []),
+          'mise lock --bump ansible@14.5.0',
+        ]);
+        expect(result).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.lock',
+              contents: updatedLock,
+            },
+          },
+          {
+            file: {
+              type: 'addition',
+              path: '.mise/locks/ansible/14.4.0/uv.lock',
+              contents: 'updated Python lock',
+            },
+          },
+        ]);
+        expect(fs.writeLocalFile).toHaveBeenCalledWith(
+          'mise.toml',
+          packageFileContent,
+        );
+      },
+    );
+
+    it('regenerates all selected tools in a mixed local-environment update', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        `${originalLock}\n[[tools.node]]\nversion = "24.16.0"\n`,
+      );
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      const result = await updateArtifacts({
+        packageFileName: 'mise.test.local.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+          {
+            depName: 'node',
+            datasource: 'node-version',
+            newVersion: '24.16.0',
+          },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(result).toBeNull();
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustEnvLocalCmd,
+        'mise lock --local --bump ansible@14.5.0 node@24.16.0',
+      ]);
+      expect(execSnapshots.at(-1)?.options?.env).toMatchObject({
+        MISE_ENV: 'test',
+      });
+    });
+
+    it('refreshes tools without a selected version separately', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+          { depName: 'node', datasource: 'node-version' },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustCmd,
+        'mise lock --bump ansible@14.5.0',
+        'mise lock node',
+      ]);
+    });
+
+    it('does not return a phantom artifact when regeneration removes the lock', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(originalLock)
+        .mockResolvedValue(null);
+      mockExecAll(safeMiseVersionOutput);
+
+      const result = await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          {
+            depName: 'ansible',
+            datasource: 'pypi',
+            newVersion: '14.5.0',
+            newValue: 'latest',
+          },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it.each([true, false])(
+      'regenerates aqua platform metadata after a version-only edit (allowlisted: %s)',
+      async (allowlisted) => {
+        GlobalConfig.set({
+          ...adminConfig,
+          allowedUnsafeExecutions: allowlisted ? ['mise'] : [],
+        });
+        const originalLock = codeBlock`
+          [[tools.hk]]
+          version = "2.5.0"
+          backend = "aqua:jdx/hk"
+          specifiers = ["latest"]
+          [tools.hk.platforms.linux-x64]
+          url = "https://github.com/jdx/hk/releases/download/v2.5.0/hk-x86_64-unknown-linux-gnu.tar.gz"
+          checksum = "old-checksum"
+          [tools.hk.platforms.windows-x64]
+          url = "https://github.com/jdx/hk/releases/download/v2.5.0/hk-x86_64-pc-windows-msvc.zip"
+          checksum = "old-checksum"
+
+          [[tools.jq]]
+          version = "1.8.1"
+        `;
+        const regeneratedLock = originalLock
+          .replaceAll('2.5.0', '2.6.0')
+          .replaceAll('old-checksum', 'new-checksum');
+        const exactVersionLock = regeneratedLock.replace(
+          'specifiers = ["latest"]',
+          'specifiers = ["2.5.0","2.6.0"]',
+        );
+        const packageFileContent = '[tools]\nhk = "latest"\njq = "1.8.1"\n';
+        const updated = updateLockedDependency({
+          packageFile: 'mise.toml',
+          lockFile: 'mise.lock',
+          lockFileContent: originalLock,
+          packageFileContent,
+          depName: 'hk',
+          currentVersion: '2.5.0',
+          newVersion: '2.6.0',
+        });
+        if (updated.status !== 'updated') {
+          throw new Error('Expected the version-only lock edit');
+        }
+        expect(updated.files?.['mise.lock']).toContain('version = "2.6.0"');
+        expect(updated.files?.['mise.lock']).toContain('/download/v2.5.0/');
+        let workingLock = originalLock;
+        fs.readLocalFile.mockImplementation(() => Promise.resolve(workingLock));
+        fs.writeLocalFile.mockImplementation((file, contents) => {
+          if (file === 'mise.lock' && isString(contents)) {
+            workingLock = contents;
+          }
+          return Promise.resolve();
+        });
+        exec.mockImplementation((cmd) => {
+          if (cmd === miseVersionCmd) {
+            return Promise.resolve(safeMiseVersionOutput);
+          }
+          // Model mise retaining locked metadata on a plain successful refresh.
+          if (cmd === 'mise lock --bump hk@2.6.0') {
+            workingLock = exactVersionLock;
+          }
+          return Promise.resolve({ stdout: '', stderr: '' });
+        });
+
+        const result = await updateArtifacts({
+          packageFileName: 'mise.toml',
+          updatedDeps: [
+            {
+              depName: 'hk',
+              datasource: 'github-releases',
+              newValue: 'latest',
+              currentVersion: '2.5.0',
+              newVersion: '2.6.0',
+            },
+          ],
+          newPackageFileContent: packageFileContent,
+          newLockFileContent: updated.files?.['mise.lock'],
+          config,
+        });
+
+        expect(result).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'mise.lock',
+              contents: regeneratedLock,
+            },
+          },
+        ]);
+        expect(fs.writeLocalFile).toHaveBeenCalledWith(
+          'mise.toml',
+          packageFileContent,
+        );
+      },
+    );
+
+    it.each(['2026.7.11 linux-x64', 'unparseable'])(
+      'keeps the existing command when mise cannot support --bump: %s',
+      async (stdout) => {
+        fs.readLocalFile.mockResolvedValue(originalLock);
+        const execSnapshots = mockExecAll({ stdout, stderr: '' });
+
+        await updateArtifacts({
+          packageFileName: 'mise.toml',
+          updatedDeps: [
+            { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+          ],
+          newPackageFileContent: packageFileContent,
+          config,
+        });
+
+        expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+          miseVersionCmd,
+          trustCmd,
+          'mise lock ansible',
+        ]);
+      },
+    );
+
+    it('does not bump a Python selector without a selected version', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newValue: 'latest' },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        trustCmd,
+        'mise lock ansible',
+      ]);
+    });
+
+    it('quotes the complete Python tool and version argument', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          {
+            depName: 'pypi:ansible',
+            datasource: 'pypi',
+            newVersion: '14.5.0; echo unwanted',
+          },
+        ],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustCmd,
+        "mise lock --bump 'pypi:ansible@14.5.0; echo unwanted'",
+      ]);
+    });
+
+    it('does not add a targeted Python bump during maintenance', async () => {
+      fs.readLocalFile.mockResolvedValue(originalLock);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [
+          { depName: 'ansible', datasource: 'pypi', newVersion: '14.5.0' },
+        ],
+        newPackageFileContent: packageFileContent,
+        config: lockMaintenanceConfig,
+      });
+
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([
+        miseVersionCmd,
+        trustCmd,
+        'mise lock --bump',
+      ]);
+    });
   });
 
   it('returns restored sidecars when the lock file is unchanged', async () => {
