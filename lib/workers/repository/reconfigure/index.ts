@@ -107,6 +107,9 @@ export async function checkReconfigureBranch(
   let newConfig = GlobalConfig.set(
     applySecretsAndVariablesToConfig({
       config: repoConfig,
+      // keep them for the presets resolved by mergeRenovateConfig
+      deleteSecrets: false,
+      deleteVariables: false,
     }),
   );
   newConfig.defaultBranch = config.defaultBranch;
