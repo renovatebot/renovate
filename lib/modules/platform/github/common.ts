@@ -57,6 +57,16 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.targetBranch = pr.base.ref;
   }
 
+  if (pr.auto_merge === null) {
+    result.autoMerge = null;
+  } else if (pr.auto_merge) {
+    result.autoMerge = {
+      enabledBy: pr.auto_merge.enabled_by?.login,
+      commitTitle: pr.auto_merge.commit_title,
+      commitMessage: pr.auto_merge.commit_message,
+    };
+  }
+
   return result;
 }
 
