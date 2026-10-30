@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -9,6 +10,7 @@ import type {
 } from '../../../../util/exec/types.ts';
 import {
   findLocalSiblingOrParent,
+  getSiblingFileName,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
@@ -245,11 +247,23 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      return await updateLockFile({
+      const fileChanges = await updateLockFile({
         lockFileName,
         existingLockFileContent,
         run: () => gitExec(cmd, execOptions),
       });
+
+      if (
+        fileChanges &&
+        config.postUpdateOptions?.includes('uvExportRequirements')
+      ) {
+        const exportResult = await runUvExport(packageFileName, execOptions);
+        if (exportResult) {
+          fileChanges.push(...exportResult);
+        }
+      }
+
+      return fileChanges;
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
@@ -291,6 +305,202 @@ function generateCMD(updatedDeps: Upgrade[]): string {
  */
 function withoutAnyUserinfo(url: string): string {
   return stripUrlCredentials(url) ?? url;
+}
+
+// PEP 508 normalised package / extra / group names.
+const PEP508_NAME_RE = regEx(/^[a-zA-Z0-9](?:[-a-zA-Z0-9._]*[a-zA-Z0-9])?$/);
+
+// Flags that take no value.
+const UV_EXPORT_BOOLEAN_FLAGS = new Set([
+  '--frozen',
+  '--no-dev',
+  '--only-dev',
+  '--no-editable',
+  '--no-emit-workspace',
+  '--no-hashes',
+  '--no-header',
+  '--all-extras',
+  '--all-groups',
+  '--all-packages',
+  '--no-annotate',
+  '--no-emit-project',
+  '--locked',
+  '--prune',
+  '--no-strip-extras',
+  '--no-strip-markers',
+  '--quiet',
+  '-q',
+]);
+
+// Filenames only; no path separators or traversal.
+const OUTPUT_FILE_RE = regEx(/^[-a-zA-Z0-9._]+$/);
+
+// Flags that take a value, mapped to a validation pattern for that value.
+const UV_EXPORT_VALUE_FLAGS = new Map<string, RegExp>([
+  ['--python', regEx(/^\d+(?:\.\d+){1,2}$/)],
+  ['--output-file', OUTPUT_FILE_RE],
+  // Short alias of --output-file.
+  ['-o', OUTPUT_FILE_RE],
+  ['--no-emit-package', PEP508_NAME_RE],
+  ['--extra', PEP508_NAME_RE],
+  ['--group', PEP508_NAME_RE],
+  ['--only-group', PEP508_NAME_RE],
+  ['--no-group', PEP508_NAME_RE],
+  ['--package', PEP508_NAME_RE],
+  [
+    '--index-strategy',
+    regEx(/^(?:first-index|unsafe-first-match|unsafe-best-match)$/),
+  ],
+  ['--format', regEx(/^requirements-txt$/)],
+]);
+
+function isOutputFileFlag(flag: string): boolean {
+  return flag === '--output-file' || flag === '-o';
+}
+
+type UvExportParseResult =
+  | { status: 'not-found' }
+  | { status: 'rejected' }
+  | { status: 'ok'; cmd: string; outputFile: string };
+
+// Parses the `uv export` command from a requirements.txt header.
+function parseUvExportCmd(content: string): UvExportParseResult {
+  for (const line of content.split('\n')) {
+    if (!regEx(/^#\s+uv export\s/).exec(line)) {
+      continue;
+    }
+
+    // Strip the leading comment marker and split into tokens.
+    const rest = line.replace(regEx(/^#\s+uv export\s+/), '').trim();
+    const tokens = rest.split(regEx(/\s+/));
+    const safeArgs: string[] = [];
+    let outputFile: string | null = null;
+    let i = 0;
+
+    while (i < tokens.length) {
+      const token = tokens[i];
+
+      // --flag=value form (e.g. --python=3.12)
+      const eqIdx = token.indexOf('=');
+      if (eqIdx > 0) {
+        const flag = token.slice(0, eqIdx);
+        const value = token.slice(eqIdx + 1);
+        const pattern = UV_EXPORT_VALUE_FLAGS.get(flag);
+        if (!pattern?.test(value)) {
+          return { status: 'rejected' };
+        }
+        if (isOutputFileFlag(flag)) {
+          outputFile = value;
+        }
+        safeArgs.push(`${flag}=${value}`);
+        i += 1;
+        continue;
+      }
+
+      // Boolean flag
+      if (UV_EXPORT_BOOLEAN_FLAGS.has(token)) {
+        safeArgs.push(token);
+        i += 1;
+        continue;
+      }
+
+      // --flag value form
+      if (UV_EXPORT_VALUE_FLAGS.has(token)) {
+        const value = tokens[i + 1];
+        if (!value || !UV_EXPORT_VALUE_FLAGS.get(token)!.test(value)) {
+          return { status: 'rejected' };
+        }
+        if (isOutputFileFlag(token)) {
+          outputFile = value;
+        }
+        safeArgs.push(token, value);
+        i += 2;
+        continue;
+      }
+
+      // Unknown token — reject the whole header.
+      return { status: 'rejected' };
+    }
+
+    if (!outputFile) {
+      return { status: 'rejected' };
+    }
+
+    return { status: 'ok', cmd: `uv export ${safeArgs.join(' ')}`, outputFile };
+  }
+  return { status: 'not-found' };
+}
+
+async function runUvExport(
+  packageFileName: string,
+  execOptions: ExecOptions,
+): Promise<UpdateArtifactsResult[] | null> {
+  const requirementsFileName = getSiblingFileName(
+    packageFileName,
+    'requirements.txt',
+  );
+
+  const existingRequirements = await readLocalFile(
+    requirementsFileName,
+    'utf8',
+  );
+  if (!existingRequirements) {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: requirements.txt is empty',
+    );
+    return null;
+  }
+
+  const parsed = parseUvExportCmd(existingRequirements);
+  if (parsed.status === 'not-found') {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: no uv export header found in requirements.txt',
+    );
+    return null;
+  }
+  if (parsed.status === 'rejected') {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: header command rejected due to unknown or unsafe arguments',
+    );
+    return null;
+  }
+
+  const { cmd, outputFile } = parsed;
+  if (outputFile !== upath.basename(requirementsFileName)) {
+    logger.debug(
+      { requirementsFileName, outputFile },
+      'uv export: --output-file does not match requirements.txt filename',
+    );
+    return null;
+  }
+
+  try {
+    await gitExec(cmd, execOptions);
+  } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
+    logger.debug({ err }, 'uv export: failed to run uv export');
+    return artifactErrorResult(requirementsFileName, err);
+  }
+  const newRequirements = await readLocalFile(requirementsFileName, 'utf8');
+  if (newRequirements === existingRequirements) {
+    logger.debug(`${requirementsFileName} is unchanged`);
+    return null;
+  }
+
+  return [
+    {
+      file: {
+        type: 'addition',
+        path: requirementsFileName,
+        contents: newRequirements,
+      },
+    },
+  ];
 }
 
 async function getUvExtraIndexUrl(
