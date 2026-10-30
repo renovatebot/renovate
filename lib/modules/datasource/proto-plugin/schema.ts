@@ -7,13 +7,11 @@ import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 
 /**
  * A proto TOML plugin definition. `[resolve] git-url` is the repository proto
- * reads versions (git tags) from; `[install] download-url` is only a fallback
- * for recovering that repository when `git-url` is absent.
+ * reads versions (git tags) from.
  * @see https://moonrepo.dev/docs/proto/non-wasm-plugin
  */
 export const ProtoPlugin = z.object({
   resolve: z.object({ 'git-url': z.string().optional() }).optional(),
-  install: z.object({ 'download-url': z.string().optional() }).optional(),
 });
 export type ProtoPlugin = z.infer<typeof ProtoPlugin>;
 
@@ -54,8 +52,7 @@ const repoUrlRegex = regEx(
  * to the github/gitlab tags datasource for that repository.
  */
 export function resolvePluginConfig(plugin: ProtoPlugin): ResolvedPlugin {
-  const repoUrl =
-    plugin.resolve?.['git-url'] ?? plugin.install?.['download-url'];
+  const repoUrl = plugin.resolve?.['git-url'];
   if (!repoUrl) {
     return { skipReason: 'unsupported-datasource' };
   }

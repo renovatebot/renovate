@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { isHttpUrl } from '../../../util/url.ts';
@@ -19,10 +18,13 @@ import { ProtoPlugin, ProtoPluginToml, resolvePluginConfig } from './schema.ts';
 export class ProtoPluginDatasource extends Datasource {
   static readonly id = 'proto-plugin';
 
-  override readonly customRegistrySupport = false;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     "The source URL is the repository from the plugin's `[resolve] git-url`.";
+
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
 
   private readonly github = new GithubTagsDatasource();
   private readonly gitlab = new GitlabTagsDatasource();
@@ -31,20 +33,11 @@ export class ProtoPluginDatasource extends Datasource {
     super(ProtoPluginDatasource.id);
   }
 
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: `datasource-${ProtoPluginDatasource.id}`,
-        key: config.packageName,
-        fallback: true,
-      },
-      () => this.getReleasesImpl(config.packageName),
-    );
-  }
-
-  private async getReleasesImpl(
-    locator: string,
-  ): Promise<ReleaseResult | null> {
+  // Not cached here: the locator may be a private URL or a repository-relative
+  // path, and the tags datasource it delegates to caches its own lookups.
+  async getReleases({
+    packageName: locator,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const plugin = await this.loadPlugin(locator);
     if (!plugin) {
       return null;

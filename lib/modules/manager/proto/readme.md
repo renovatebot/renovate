@@ -19,7 +19,7 @@ Non-version configuration sections (`[settings]`, `[tools]`, `[env]`, `[shell]`,
 ### Custom plugin tools
 
 Tools that aren't built in are installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
-Renovate resolves these from the plugin's `[resolve] git-url` (falling back to `[install] download-url`), which points at the upstream repository proto reads git tags from:
+Renovate resolves these from the plugin's `[resolve] git-url`, which points at the upstream repository proto reads git tags from:
 
 ```toml
 buf = "1.71.0"
@@ -58,7 +58,9 @@ Renovate's `proto` manager supports the following built-in proto tools:
 - **WASM plugins**: Tools installed via a compiled WASM plugin (a `.wasm` locator, or a `github://` release-asset locator) carry no introspectable version source, so they are reported as `unsupported-datasource` and skipped.
   You can use Renovate's `customManagers` with regex to handle these if needed.
 
-- **Non-GitHub/GitLab repositories**: A custom plugin whose repository is not hosted on `github.com` or `gitlab.com` is reported as `unsupported-url` and skipped.
+- **Plugin resolve options**: Only `[resolve] git-url` is read. A plugin's `version-pattern` is ignored, so tags must be plain versions with an optional leading `v`, and Renovate finds no releases for a plugin that resolves through `manifest-url`.
+
+- **Non-GitHub/GitLab repositories**: A custom plugin whose repository is not hosted on `github.com` or `gitlab.com` has no releases found.
 
 - **Version aliases**: Values like `latest`, `stable`, `canary`, or `nightly` are skipped as they cannot be updated via semver.
 

@@ -28,16 +28,14 @@ describe('modules/datasource/proto-plugin/schema', () => {
       });
     });
 
-    it('falls back to the install download-url when git-url is absent', () => {
+    it('ignores the install download-url, which proto never resolves from', () => {
       const plugin = parse(codeBlock`
         [install]
         download-url = "https://github.com/j178/prek/releases/download/v{version}/{download_file}"
       `);
 
       expect(resolvePluginConfig(plugin)).toEqual({
-        datasource: 'github-tags',
-        packageName: 'j178/prek',
-        registryUrl: 'https://github.com',
+        skipReason: 'unsupported-datasource',
       });
     });
 
