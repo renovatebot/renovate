@@ -160,6 +160,15 @@ describe('modules/versioning/github-actions/index', () => {
         false,
       );
     });
+
+    it('matches only tags with the same component prefix', () => {
+      expect(
+        githubActions.matches('lint-pr-title/v1.2.3', 'lint-pr-title/v1.2.3'),
+      ).toBe(true);
+      expect(
+        githubActions.matches('other/v1.2.3', 'lint-pr-title/v1.2.3'),
+      ).toBe(false);
+    });
   });
 
   describe('.getSatisfyingVersion()', () => {
@@ -196,6 +205,15 @@ describe('modules/versioning/github-actions/index', () => {
         );
       },
     );
+
+    it('selects the newest tag from the current component', () => {
+      expect(
+        githubActions.getSatisfyingVersion(
+          ['lint-pr-title/v1.2.3', 'other/v9.0.0', 'lint-pr-title/v1.2.4'],
+          'lint-pr-title/v1',
+        ),
+      ).toBe('lint-pr-title/v1.2.4');
+    });
   });
 
   describe('.minSatisfyingVersion()', () => {
@@ -281,6 +299,12 @@ describe('modules/versioning/github-actions/index', () => {
         expect(githubActions.equals(version, other)).toBe(expected);
       },
     );
+
+    it('does not equate tags from different components', () => {
+      expect(githubActions.equals('lint-pr-title/v1.2.3', 'other/v1.2.3')).toBe(
+        false,
+      );
+    });
   });
 
   describe('.getMajor()', () => {
@@ -358,6 +382,12 @@ describe('modules/versioning/github-actions/index', () => {
         expect(githubActions.isGreaterThan(version, other)).toBe(expected);
       },
     );
+
+    it('does not order tags from different components', () => {
+      expect(
+        githubActions.isGreaterThan('lint-pr-title/v1.2.4', 'other/v1.2.3'),
+      ).toBe(false);
+    });
   });
 
   describe('.sortVersions()', () => {
@@ -416,6 +446,12 @@ describe('modules/versioning/github-actions/index', () => {
         expect(githubActions.isBreaking!(version, current)).toBe(expected);
       },
     );
+
+    it('does not compare tags from different components', () => {
+      expect(
+        githubActions.isBreaking!('lint-pr-title/v2.0.0', 'other/v1.0.0'),
+      ).toBe(false);
+    });
   });
 
   describe('.isCompatible()', () => {
@@ -429,6 +465,18 @@ describe('modules/versioning/github-actions/index', () => {
       ${'invalid'} | ${false}
     `('isCompatible("$version") === $expected', ({ version, expected }) => {
       expect(githubActions.isCompatible(version)).toBe(expected);
+    });
+
+    it('does not compare different component prefixes', () => {
+      expect(
+        githubActions.isCompatible('other/v1.2.4', 'lint-pr-title/v1.2.3'),
+      ).toBe(false);
+      expect(
+        githubActions.isCompatible(
+          'lint-pr-title/v1.2.4',
+          'lint-pr-title/v1.2.3',
+        ),
+      ).toBe(true);
     });
   });
 
