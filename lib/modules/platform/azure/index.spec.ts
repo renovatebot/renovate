@@ -1769,6 +1769,103 @@ describe('modules/platform/azure/index', () => {
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toBeUndefined();
     });
+
+    it('updates the auto-complete merge commit message with the title', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      const getPullRequestById = vi.fn().mockResolvedValue({
+        pullRequestId: 1234,
+        createdBy: { id: 123, url: 'user-url' },
+        autoCompleteSetBy: { id: 123 },
+        completionOptions: {
+          mergeStrategy: GitPullRequestMergeStrategy.Squash,
+          deleteSourceBranch: true,
+          mergeCommitMessage: 'The Old Title',
+        },
+      });
+      const createPullRequestReviewer = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById,
+          createPullRequestReviewer,
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { autoApprove: true, usePlatformAutomerge: true },
+      });
+
+      expect(getPullRequestById).toHaveBeenCalledOnce();
+      expect(createPullRequestReviewer).toHaveBeenCalledOnce();
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        {
+          title: 'The New Title',
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The New Title',
+          },
+        },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options without auto-complete', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options without platform automerge', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          createPullRequestReviewer: vi.fn().mockResolvedValue({}),
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            createdBy: { id: 123, url: 'user-url' },
+            autoCompleteSetBy: { id: 123 },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { autoApprove: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
+        '1',
+        1234,
+      );
+    });
   });
 
   describe('ensureComment', () => {
