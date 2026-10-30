@@ -113,7 +113,7 @@ pnpm check lib/util/http
 pnpm check lib/util/hash.ts
 ```
 
-Use `--fix` to auto-fix (oxlint, biome, prettier) and `--no-test` to skip tests.
+Use `--fix` to auto-fix (oxlint, prettier) and `--no-test` to skip tests.
 
 ## Do not force push to your pull request branch
 
