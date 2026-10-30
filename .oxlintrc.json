@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
-  "jsPlugins": ["./tools/lint/rules.ts"],
+  "jsPlugins": ["@containerbase/oxlint-plugin", "./tools/lint/rules.ts"],
   "options": {
     "typeAware": true
   },
@@ -76,6 +76,11 @@
     "no-nested-ternary": "error",
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
+
+    "containerbase/no-undeclared-dependencies": [
+      "error",
+      { "allowDevDependencies": true }
+    ],
 
     "renovate/cached-response-headers": "error",
     "renovate/enforce-ts-extension": "error",
@@ -177,6 +182,7 @@
     "typescript/no-array-constructor": "error",
     "typescript/no-confusing-non-null-assertion": "error",
     "typescript/no-namespace": "error",
+    "typescript/parameter-properties": "error",
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
