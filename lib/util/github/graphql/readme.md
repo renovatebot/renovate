@@ -25,6 +25,8 @@ lib/util/github/graphql
 │
 ├── datasource-fetcher.ts            <- Complex pagination loop
 │
+├── tags-by-name.ts                  <- Looks up given tags by name, without pagination
+│
 └── index.ts                         <- Facade that hides whole thing
 ```
 
