@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { sanitize } from '../../../util/sanitize.ts';
 import { getGoEnv } from './env.ts';
 
 describe('modules/datasource/go/env', () => {
@@ -46,6 +47,20 @@ describe('modules/datasource/go/env', () => {
         'https://user:p%40ss@bsr.example.com,https://proxy.golang.org,direct',
       GONOSUMDB: 'bsr.example.com',
     });
+  });
+
+  it('sanitizes the encoded password', () => {
+    hostRules.add({
+      hostType: 'go-proxy',
+      matchHost: 'bsr.example.com',
+      username: 'user',
+      password: 'p@ss/+=',
+    });
+
+    const { GOPROXY } = getGoEnv(true);
+
+    expect(GOPROXY).toContain('p%40ss%2F%2B%3D');
+    expect(sanitize(GOPROXY!)).not.toContain('p%40ss%2F%2B%3D');
   });
 
   it('keeps the proxy path and host rule order', () => {

@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import type { HostRule } from '../../../types/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl, trimTrailingSlash } from '../../../util/url.ts';
 import type { GoEnv } from './types.ts';
 
@@ -37,6 +38,8 @@ function toGoproxyUrl(rule: HostRule, withCredentials: boolean): string | null {
   ) {
     url.username = encodeURIComponent(rule.username);
     url.password = encodeURIComponent(rule.password);
+    // the encoded password differs from the one registered by the host rule
+    addSecretForSanitizing(url.password);
   }
 
   return trimTrailingSlash(url.href);
@@ -66,7 +69,7 @@ function joinNonEmpty(values: (string | null)[]): string | undefined {
  * With `goEnvFromHostRules` enabled, unset values are derived from host rules:
  * - `GOPROXY`: one URL per `hostType: go-proxy` rule, followed by the public proxy and `direct`
  * - `GONOPROXY`: `hostType: go` rules whose `matchHost` includes a path
- * - `GONOSUMDB`: the `go-proxy` hosts and the `GONOPROXY` patterns
+ * - `GONOSUMDB`: the `go-proxy` hosts and the derived `GONOPROXY` patterns
  *
  * `GONOPROXY` and `GONOSUMDB` aren't derived when `GOPRIVATE` is set, as they would override it.
  *
