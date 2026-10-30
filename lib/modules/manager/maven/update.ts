@@ -135,8 +135,14 @@ export function bumpPackageVersion(
   try {
     const project = new XmlDocument(content);
     const versionNode = project.childNamed('version')!;
-    const startTagPosition = versionNode.startTagPosition!; // TODO: should not be null
-    const versionPosition = content.indexOf(versionNode.val, startTagPosition);
+    if (versionNode.val.trim() !== currentValue) {
+      logger.debug('Version was already changed');
+      return { bumpedContent };
+    }
+    const versionPosition = content.indexOf(
+      currentValue,
+      versionNode.position!,
+    );
 
     let newPomVersion: string | null = null;
     const currentPrereleaseValue = semver.prerelease(currentValue);
@@ -176,11 +182,7 @@ export function bumpPackageVersion(
       newPomVersion,
     );
 
-    if (bumpedContent === content) {
-      logger.debug('Version was already bumped');
-    } else {
-      logger.debug('pom.xml version bumped');
-    }
+    logger.debug('pom.xml version bumped');
   } catch {
     logger.warn(
       {
