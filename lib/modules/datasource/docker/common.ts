@@ -26,6 +26,7 @@ import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
   ensureTrailingSlash,
+  isHttpUrl,
   parseUrl,
   trimTrailingSlash,
 } from '../../../util/url.ts';
@@ -60,6 +61,13 @@ export async function getAuthHeaders(
   apiCheckUrl = `${registryHost}/v2/`,
 ): Promise<OutgoingHttpHeaders | undefined> {
   try {
+    if (!isHttpUrl(apiCheckUrl)) {
+      logger.warn(
+        { apiCheckUrl, registryHost, dockerRepository },
+        'Invalid URL',
+      );
+      return undefined;
+    }
     const options = {
       throwHttpErrors: false,
       noAuth: true,
