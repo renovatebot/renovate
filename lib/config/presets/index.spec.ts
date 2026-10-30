@@ -422,6 +422,7 @@ describe('config/presets/index', () => {
           'oxlint',
           'prettier',
           'remark-lint',
+          'rumdl',
           'standard',
         ],
       });
@@ -1575,6 +1576,7 @@ describe('config/presets/index', () => {
           'oxlint',
           'prettier',
           'remark-lint',
+          'rumdl',
           'standard',
         ],
       });
