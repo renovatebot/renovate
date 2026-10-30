@@ -135,6 +135,13 @@ export async function flattenUpdates(
       for (const dep of packageFile.deps) {
         if (dep.updates!.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
+          // dependency managerData extends the package file's, it must not replace it
+          if (packageFileConfig.managerData && dep.managerData) {
+            depConfig.managerData = {
+              ...packageFileConfig.managerData,
+              ...dep.managerData,
+            };
+          }
           // @ts-expect-error -- not easily typed
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
