@@ -2,6 +2,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { ProtoPluginDatasource } from '../../datasource/proto-plugin/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 
@@ -19,6 +20,7 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   NodeVersionDatasource.id,
   NpmDatasource.id,
+  ProtoPluginDatasource.id,
   RubyVersionDatasource.id,
   RustVersionDatasource.id,
 ];

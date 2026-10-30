@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -300,6 +301,157 @@ describe('modules/manager/proto/extract', () => {
       for (const dep of result!.deps) {
         expect(dep.skipReason).toBeUndefined();
       }
+    });
+  });
+
+  describe('custom plugin tools', () => {
+    it('points a remote plugin tool at the proto-plugin datasource', () => {
+      const content = codeBlock`
+        buf = "1.71.0"
+        moon = "1.30.0"
+
+        [plugins.tools]
+        buf = "https://raw.githubusercontent.com/acme/proto-plugins/main/buf/plugin.toml"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toEqual([
+        {
+          depName: 'buf',
+          currentValue: '1.71.0',
+          datasource: 'proto-plugin',
+          packageName:
+            'https://raw.githubusercontent.com/acme/proto-plugins/main/buf/plugin.toml',
+          extractVersion: '^v?(?<version>.+)',
+        },
+        {
+          depName: 'moon',
+          currentValue: '1.30.0',
+          datasource: 'github-releases',
+          packageName: 'moonrepo/moon',
+          extractVersion: '^v(?<version>\\S+)',
+        },
+      ]);
+    });
+
+    it('resolves a file plugin locator to a repository-relative path', () => {
+      fs.getSiblingFileName.mockReturnValue('sub/.proto/plugins/direnv.toml');
+      const content = codeBlock`
+        direnv = "2.37.1"
+
+        [plugins]
+        direnv = "file://./.proto/plugins/direnv.toml"
+      `;
+
+      const result = extractPackageFile(content, 'sub/.prototools');
+      expect(fs.getSiblingFileName).toHaveBeenCalledWith(
+        'sub/.prototools',
+        './.proto/plugins/direnv.toml',
+      );
+      expect(result!.deps).toEqual([
+        {
+          depName: 'direnv',
+          currentValue: '2.37.1',
+          datasource: 'proto-plugin',
+          packageName: 'sub/.proto/plugins/direnv.toml',
+          extractVersion: '^v?(?<version>.+)',
+        },
+      ]);
+    });
+
+    it.each`
+      locator
+      ${'https://example.com/moon.toml'}
+      ${'https://example.com/moon_tool.wasm'}
+      ${'source:https://example.com/moon.toml'}
+    `(
+      'keeps the built-in datasource over the $locator locator',
+      ({ locator }) => {
+        const content = codeBlock`
+        moon = "1.30.0"
+
+        [plugins.tools]
+        moon = "${locator}"
+      `;
+
+        const result = extractPackageFile(content, protoFilename);
+        expect(result!.deps).toMatchObject([
+          { depName: 'moon', datasource: 'github-releases' },
+        ]);
+      },
+    );
+
+    it.each`
+      locator
+      ${'https://example.com/plugin.json'}
+      ${'https://example.com/plugin.yaml'}
+      ${'http://example.com/plugin.toml'}
+    `('skips the $locator plugin locator', ({ locator }) => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "${locator}"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-datasource' },
+      ]);
+    });
+
+    it('skips an absolute file plugin locator', () => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "file:///opt/plugins/my-tool.toml"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-url' },
+      ]);
+      expect(fs.getSiblingFileName).not.toHaveBeenCalled();
+    });
+
+    it('skips a wasm plugin locator', () => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "https://example.com/plugin.wasm"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-datasource' },
+      ]);
+    });
+
+    it('skips an unsupported (github://) plugin locator', () => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "github://moonrepo/tools"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-datasource' },
+      ]);
+    });
+
+    it('skips a non-built-in tool with no plugin locator', () => {
+      const content = codeBlock`
+        unknown-tool = "1.0.0"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'unknown-tool', skipReason: 'unsupported-datasource' },
+      ]);
     });
   });
 });
