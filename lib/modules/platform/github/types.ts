@@ -186,6 +186,25 @@ export interface GhAutomergeResponse {
   };
 }
 
+export interface GhAutoMergeRequestResponse {
+  repository: {
+    pullRequest: {
+      id: string;
+      autoMergeRequest: {
+        commitHeadline: string | null;
+        commitBody: string | null;
+        enabledBy: { login: string } | null;
+      } | null;
+    } | null;
+  } | null;
+}
+
+export interface GhDisableAutomergeResponse {
+  disablePullRequestAutoMerge: {
+    pullRequest: { number: number };
+  };
+}
+
 export interface GhEnqueuePullRequestResponse {
   enqueuePullRequest: {
     mergeQueueEntry: { id: string; position: number } | null;
