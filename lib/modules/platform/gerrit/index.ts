@@ -191,11 +191,13 @@ export async function initRepo({
   }
 
   const baseUrl = defaults.endpoint!;
+  const sshInfo = gitUrl === 'ssh' ? await client.getSshInfo() : undefined;
   const url = getGerritRepoUrl(
     repository,
     baseUrl,
     gitUrl,
     config.gerritUsername!,
+    sshInfo,
   );
   configureScm(repository, config.labels);
   await git.initRepo({

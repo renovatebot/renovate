@@ -35,6 +35,43 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
+  describe('getSshInfo()', () => {
+    it('returns the advertised SSH host and port', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/ssh_info')
+        .reply(200, 'ssh.gerrit.com 2501\n', {
+          'content-type': 'text/plain;charset=utf-8',
+        });
+
+      await expect(client.getSshInfo()).resolves.toEqual({
+        host: 'ssh.gerrit.com',
+        port: 2501,
+      });
+    });
+
+    it('rejects when SSH is unavailable', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/ssh_info')
+        .reply(200, 'NOT_AVAILABLE\n');
+
+      await expect(client.getSshInfo()).rejects.toThrow(
+        'Gerrit SSH is not available',
+      );
+    });
+
+    it.each([
+      'ssh.gerrit.com\n',
+      'ssh.gerrit.com 0\n',
+      'ssh.gerrit.com 65536\n',
+    ])('rejects invalid SSH info %p', async (sshInfo) => {
+      httpMock.scope(gerritEndpointUrl).get('/ssh_info').reply(200, sshInfo);
+
+      await expect(client.getSshInfo()).rejects.toThrow('Invalid Gerrit SSH');
+    });
+  });
+
   describe('getRepos()', () => {
     it('returns repos', async () => {
       httpMock
