@@ -6,6 +6,7 @@ import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getEnv } from '../../../../util/env.ts';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
@@ -130,7 +131,7 @@ export function determineLockFileDirs(
 export async function writeExistingFiles(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
-  originalNpmrcFiles = new Map<string, string>(),
+  originalNpmrcFiles = new Map<string, string | null>(),
 ): Promise<void> {
   if (!packageFiles.npm) {
     return;
@@ -158,10 +159,10 @@ export async function writeExistingFiles(
     ) {
       try {
         if (!originalNpmrcFiles.has(npmrcFilename)) {
-          const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
-          if (isString(originalNpmrc)) {
-            originalNpmrcFiles.set(npmrcFilename, originalNpmrc);
-          }
+          originalNpmrcFiles.set(
+            npmrcFilename,
+            await readLocalFile(npmrcFilename, 'utf8'),
+          );
         }
         await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
@@ -277,11 +278,15 @@ export async function writeExistingFiles(
 }
 
 async function restoreNpmrcFiles(
-  originalNpmrcFiles: Map<string, string>,
+  originalNpmrcFiles: Map<string, string | null>,
 ): Promise<void> {
   for (const [npmrcFilename, originalNpmrc] of originalNpmrcFiles) {
     try {
-      await writeLocalFile(npmrcFilename, originalNpmrc);
+      if (isString(originalNpmrc)) {
+        await writeLocalFile(npmrcFilename, originalNpmrc);
+      } else {
+        await deleteLocalFile(npmrcFilename);
+      }
     } catch (err) {
       logger.warn({ npmrcFilename, err }, 'Error restoring .npmrc');
     }
@@ -443,7 +448,7 @@ export async function updateYarnBinary(
 async function getAdditionalFilesInner(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
-  originalNpmrcFiles: Map<string, string>,
+  originalNpmrcFiles: Map<string, string | null>,
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
@@ -741,7 +746,7 @@ export async function getAdditionalFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles,
 ): Promise<WriteExistingFilesResult> {
-  const originalNpmrcFiles = new Map<string, string>();
+  const originalNpmrcFiles = new Map<string, string | null>();
   try {
     return await getAdditionalFilesInner(
       // The branch config carries the manager data of every upgrade untyped; the npm post-update only reads the optional npm fields of it.
