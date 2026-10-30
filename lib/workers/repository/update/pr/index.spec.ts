@@ -100,7 +100,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr(config);
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(limits.incCountValue).toHaveBeenCalledTimes(2);
         expect(limits.incCountValue).toHaveBeenNthCalledWith(
           1,
@@ -156,7 +156,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(limits.incCountValue).toHaveBeenNthCalledWith(
           1,
           'VulnerabilityConcurrentPRs',
@@ -169,7 +169,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr({ ...config, updateType: 'rollback' });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
 
         expect(logger.logger.info).toHaveBeenCalledWith('Creating Rollback PR');
         expect(prCache.setPrCache).toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr({ ...config, prCreation: 'status-success' });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(platform.createPr).toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -222,7 +222,7 @@ describe('workers/repository/update/pr/index', () => {
           },
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -261,7 +261,7 @@ describe('workers/repository/update/pr/index', () => {
 
         const res = await ensurePr({ ...config, prCreation: 'not-pending' });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
       });
 
       it('creates a PR despite a pending branch when forcePr is set', async () => {
@@ -274,7 +274,7 @@ describe('workers/repository/update/pr/index', () => {
           forcePr: true,
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
       });
 
       it('skips PR creation due to stabilityStatus', async () => {
@@ -311,7 +311,7 @@ describe('workers/repository/update/pr/index', () => {
           prNotPendingHours: 1,
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -609,6 +609,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'with-pr',
           pr: { number: 0 },
+          isNewPr: true,
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
@@ -681,7 +682,7 @@ describe('workers/repository/update/pr/index', () => {
           },
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -698,7 +699,7 @@ describe('workers/repository/update/pr/index', () => {
           },
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -753,7 +754,7 @@ describe('workers/repository/update/pr/index', () => {
           artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(platform.createPr).toHaveBeenCalled();
         expect(participants.addParticipants).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
@@ -775,7 +776,7 @@ describe('workers/repository/update/pr/index', () => {
           prNotPendingHours: 1,
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         expect(platform.createPr).toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -994,7 +995,7 @@ describe('workers/repository/update/pr/index', () => {
           upgrades: [dummyUpgrade],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           hasReleaseNotes: true,
@@ -1027,7 +1028,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
       });
@@ -1050,7 +1051,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           upgrades: [{ hasReleaseNotes: false, releases: [] }],
@@ -1084,7 +1085,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           upgrades: [{ hasReleaseNotes: true, releases: [] }],
@@ -1099,7 +1100,7 @@ describe('workers/repository/update/pr/index', () => {
           upgrades: [dummyUpgrade, { ...dummyUpgrade, depName: 'baz' }],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           upgrades: [{ hasReleaseNotes: true }, { hasReleaseNotes: false }],
@@ -1159,7 +1160,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig.upgrades).toMatchObject([
           { depName: 'bar', hasReleaseNotes: true },
@@ -1191,7 +1192,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
 
         const {
           upgrades: [{ prBodyNotes }],
@@ -1219,7 +1220,7 @@ describe('workers/repository/update/pr/index', () => {
           upgrades: [upgrade, upgrade, { ...upgrade, depType: 'test' }],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           branchName: 'renovate-branch',
@@ -1247,7 +1248,7 @@ describe('workers/repository/update/pr/index', () => {
           upgrades: [upgrade, { ...upgrade, depType: 'test' }],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig).toMatchObject({
           branchName: 'renovate-branch',
@@ -1303,7 +1304,7 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
 
-        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
         const [[bodyConfig]] = prBody.getPrBody.mock.calls;
         expect(bodyConfig.upgrades).toHaveLength(3);
       });
@@ -1339,7 +1340,7 @@ describe('workers/repository/update/pr/index', () => {
                   upgrades: [dummyUpgrade],
                 });
 
-                expect(res).toEqual({ type: 'with-pr', pr });
+                expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
                 const [[bodyConfig]] = prBody.getPrBody.mock.calls;
                 expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
               });
@@ -1371,7 +1372,7 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [dummyUpgrade],
             });
 
-            expect(res).toEqual({ type: 'with-pr', pr });
+            expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
             const [[bodyConfig]] = prBody.getPrBody.mock.calls;
             expect(bodyConfig).toMatchObject({
               upgrades: [
@@ -1419,7 +1420,7 @@ describe('workers/repository/update/pr/index', () => {
               upgrades: [dummyUpgrade],
             });
 
-            expect(res).toEqual({ type: 'with-pr', pr });
+            expect(res).toEqual({ type: 'with-pr', pr, isNewPr: true });
             const [[bodyConfig]] = prBody.getPrBody.mock.calls;
             expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
           });
