@@ -9,6 +9,7 @@ import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
 import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
@@ -19,6 +20,7 @@ import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
 import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
+import { isFreshRelease } from './common.ts';
 import type { ChangeLogSource } from './source.ts';
 import type {
   ChangeLogFile,
@@ -27,6 +29,11 @@ import type {
   ChangeLogRelease,
   ChangeLogResult,
 } from './types.ts';
+
+/**
+ * Cache time of the compare-only fallback for fresh releases.
+ */
+const freshFallbackCacheMinutes = 5;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
@@ -145,7 +152,7 @@ export async function getReleaseNotes(
 ): Promise<ChangeLogNotes | null> {
   return await instrument('getReleaseNotes', async () => {
     const { packageName, depName, repository } = project;
-    const { version, gitRef } = release;
+    const { version } = release;
     // TODO: types (#22198)
     logger.trace(
       `getReleaseNotes(${repository}, ${version}, ${packageName!}, ${depName!})`,
@@ -154,34 +161,65 @@ export async function getReleaseNotes(
     logger.trace({ releases }, 'Release list from getReleaseList');
     let releaseNotes: ChangeLogNotes | null = null;
 
-    let matchedRelease = getExactReleaseMatch(
-      packageName,
-      depName,
-      version,
-      releases,
-    );
-    if (isUndefined(matchedRelease)) {
-      // no exact match of a release then check other cases
-      matchedRelease = releases.find(
-        (r) =>
-          r.tag === version ||
-          r.tag === `v${version}` ||
-          r.tag === gitRef ||
-          r.tag === `v${gitRef}`,
-      );
-    }
-    if (isUndefined(matchedRelease) && config.extractVersion) {
-      const extractVersionRegEx = regEx(config.extractVersion);
-      matchedRelease = releases.find((r) => {
-        const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
-          ?.version;
-        return version === extractedVersion;
-      });
+    let matchedRelease = findRelease(project, release, config, releases);
+    if (isUndefined(matchedRelease) && isFreshRelease(release.date)) {
+      const refreshedReleases = await getRefreshedReleaseList(project, source);
+      matchedRelease = findRelease(project, release, config, refreshedReleases);
     }
     releaseNotes = await releaseNotesResult(matchedRelease, project);
     logger.trace({ releaseNotes });
     return releaseNotes;
   });
+}
+
+async function getRefreshedReleaseList(
+  project: ChangeLogProject,
+  source: ChangeLogSource,
+): Promise<ChangeLogNotes[]> {
+  const { apiBaseUrl, repository, type } = project;
+  try {
+    const releases = await source.getRefreshedReleaseList(project);
+    return coerceArray(releases);
+  } catch (err) {
+    logger.debug(
+      { repository, type, apiBaseUrl, err },
+      'getRefreshedReleaseList error',
+    );
+  }
+  return [];
+}
+
+function findRelease(
+  { packageName, depName }: ChangeLogProject,
+  { version, gitRef }: ChangeLogRelease,
+  config: BranchUpgradeConfig,
+  releases: ChangeLogNotes[],
+): ChangeLogNotes | undefined {
+  let matchedRelease = getExactReleaseMatch(
+    packageName,
+    depName,
+    version,
+    releases,
+  );
+  if (isUndefined(matchedRelease)) {
+    // no exact match of a release then check other cases
+    matchedRelease = releases.find(
+      (r) =>
+        r.tag === version ||
+        r.tag === `v${version}` ||
+        r.tag === gitRef ||
+        r.tag === `v${gitRef}`,
+    );
+  }
+  if (isUndefined(matchedRelease) && config.extractVersion) {
+    const extractVersionRegEx = regEx(config.extractVersion);
+    matchedRelease = releases.find((r) => {
+      const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
+        ?.version;
+      return version === extractedVersion;
+    });
+  }
+  return matchedRelease;
 }
 
 function getExactReleaseMatch(
@@ -520,13 +558,16 @@ export async function addReleaseNotes(
             source,
           );
 
+          let cacheMinutes = releaseNotesCacheMinutes(v.date);
           // If there is no release notes, at least try to show the compare URL
           if (!releaseNotes && v.compare.url) {
             releaseNotes = { url: v.compare.url, notesSourceUrl: '' };
+            if (isFreshRelease(v.date)) {
+              cacheMinutes = freshFallbackCacheMinutes;
+            }
           }
 
           // only write on a miss: writing a hit back would refresh its TTL, so a cached compare-only fallback would never be retried
-          const cacheMinutes = releaseNotesCacheMinutes(v.date);
           await packageCache.set(
             cacheNamespace,
             cacheKey,
