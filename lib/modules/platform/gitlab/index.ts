@@ -93,6 +93,7 @@ export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
   repository: string;
+  repositoryPath: string;
   email: EmailAddress;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
@@ -279,6 +280,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
+  config.repositoryPath = repository;
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
@@ -747,11 +749,88 @@ async function tryPrAutomerge(
   }
 }
 
+interface GitlabVariable {
+  value: string;
+  hidden?: boolean;
+}
+
+async function readAutoApproveVariable(
+  path: string,
+): Promise<GitlabVariable | null> {
+  try {
+    return (
+      await gitlabApi.getJsonUnchecked<GitlabVariable>(path, {
+        memCache: false,
+      })
+    ).body;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+async function getAutoApproveTokenFromVariable(
+  variableName: string,
+): Promise<string | null> {
+  const key = encodeURIComponent(variableName);
+  try {
+    let variable = await readAutoApproveVariable(
+      `projects/${config.repository}/variables/${key}`,
+    );
+    if (!variable) {
+      const namespace = config.repositoryPath.split('/');
+      namespace.pop();
+      while (namespace.length) {
+        variable = await readAutoApproveVariable(
+          `groups/${encodeURIComponent(namespace.join('/'))}/variables/${key}`,
+        );
+        if (variable) {
+          break;
+        }
+        namespace.pop();
+      }
+    }
+
+    if (!variable) {
+      logger.warn(
+        { variableName },
+        'GitLab auto-approve variable is unset or inaccessible',
+      );
+      return null;
+    }
+    if (variable.hidden) {
+      logger.warn({ variableName }, 'GitLab auto-approve variable is hidden');
+      return null;
+    }
+    if (!variable.value) {
+      logger.warn({ variableName }, 'GitLab auto-approve variable is unset');
+      return null;
+    }
+    return variable.value;
+  } catch (err) {
+    logger.warn(
+      { variableName, statusCode: err.statusCode },
+      'GitLab auto-approve variable is inaccessible',
+    );
+    return null;
+  }
+}
+
 async function approveMr(mrNumber: number): Promise<void> {
   const env = getEnv();
   const opts: GitlabHttpOptions = {};
   if (env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN) {
     opts.token = env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
+  } else if (env.RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE) {
+    const token = await getAutoApproveTokenFromVariable(
+      env.RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE,
+    );
+    if (!token) {
+      return;
+    }
+    opts.token = token;
   }
   logger.debug(`approveMr(${mrNumber})`);
   try {

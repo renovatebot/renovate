@@ -81,6 +81,7 @@ describe('modules/platform/gitlab/index', () => {
     vi.stubEnv('RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', undefined);
+    vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY', undefined);
     vi.stubEnv('RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE', undefined);
     vi.stubEnv('RENOVATE_X_PLATFORM_VERSION', undefined);
@@ -3656,6 +3657,166 @@ describe('modules/platform/gitlab/index', () => {
         number: 12345,
         sourceBranch: 'some-branch',
         title: 'some title',
+      });
+    });
+
+    describe('auto-approve variable', () => {
+      const projectPath = 'group/sub/repo';
+      const projectApiPath = '/api/v4/projects/group%2Fsub%2Frepo';
+      const variableName = 'APPROVAL_TOKEN';
+
+      beforeEach(async () => {
+        await initPlatform('13.3.6-ee');
+        await initRepo({ repository: projectPath });
+        vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE', variableName);
+      });
+
+      async function createAutoApprovePr(): Promise<void> {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(
+            `${projectApiPath}/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me`,
+          )
+          .reply(200, [])
+          .post(`${projectApiPath}/merge_requests`)
+          .reply(200, {
+            id: 1,
+            iid: 12345,
+            title: 'some title',
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            description: 'the-body',
+          });
+
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformPrOptions: { autoApprove: true },
+        });
+      }
+
+      it('uses a project CI/CD variable', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(200, { value: 'project-token', hidden: false })
+          .post(`${projectApiPath}/merge_requests/12345/approve`)
+          .matchHeader('Authorization', 'Bearer project-token')
+          .reply(200);
+
+        await createAutoApprovePr();
+
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('uses an inherited subgroup CI/CD variable', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(404)
+          .get(`/api/v4/groups/group%2Fsub/variables/${variableName}`)
+          .reply(200, { value: 'subgroup-token' })
+          .post(`${projectApiPath}/merge_requests/12345/approve`)
+          .matchHeader('Authorization', 'Bearer subgroup-token')
+          .reply(200);
+
+        await createAutoApprovePr();
+
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('uses an inherited parent-group CI/CD variable', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(404)
+          .get(`/api/v4/groups/group%2Fsub/variables/${variableName}`)
+          .reply(404)
+          .get(`/api/v4/groups/group/variables/${variableName}`)
+          .reply(200, { value: 'group-token' })
+          .post(`${projectApiPath}/merge_requests/12345/approve`)
+          .matchHeader('Authorization', 'Bearer group-token')
+          .reply(200);
+
+        await createAutoApprovePr();
+
+        expect(httpMock.allUsed()).toBeTrue();
+      });
+
+      it('does not approve when the variable is hidden', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(200, { value: 'secret', hidden: true });
+
+        await createAutoApprovePr();
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { variableName },
+          'GitLab auto-approve variable is hidden',
+        );
+      });
+
+      it('does not approve when the variable is empty', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(200, { value: '' });
+
+        await createAutoApprovePr();
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { variableName },
+          'GitLab auto-approve variable is unset',
+        );
+      });
+
+      it('does not approve when the variable is missing', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(404)
+          .get(`/api/v4/groups/group%2Fsub/variables/${variableName}`)
+          .reply(404)
+          .get(`/api/v4/groups/group/variables/${variableName}`)
+          .reply(404);
+
+        await createAutoApprovePr();
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { variableName },
+          'GitLab auto-approve variable is unset or inaccessible',
+        );
+      });
+
+      it('does not approve when the variable is inaccessible', async () => {
+        httpMock
+          .scope(gitlabApiHost)
+          .get(`${projectApiPath}/variables/${variableName}`)
+          .reply(403);
+
+        await createAutoApprovePr();
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { variableName, statusCode: 403 },
+          'GitLab auto-approve variable is inaccessible',
+        );
+      });
+
+      it('prefers the explicitly configured token', async () => {
+        vi.stubEnv('RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN', 'explicit-token');
+        httpMock
+          .scope(gitlabApiHost)
+          .post(`${projectApiPath}/merge_requests/12345/approve`)
+          .matchHeader('Authorization', 'Bearer explicit-token')
+          .reply(200);
+
+        await createAutoApprovePr();
+
+        expect(httpMock.allUsed()).toBeTrue();
       });
     });
 
