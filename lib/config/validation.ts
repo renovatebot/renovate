@@ -27,6 +27,7 @@ import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
   anyMatchRegexOrGlobList,
+  getRegexOrGlobPredicate,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -173,7 +174,8 @@ function initOptions(): void {
     optionsByName.set(option.name, option);
 
     const parents = getAllowedParents(option);
-    if (parents) {
+    /* an option which can be used anywhere is valid in any object, even one which `any` doesn't (yet) expand to */
+    if (parents && !option.scopes?.includes('any')) {
       optionParents[option.name] = parents;
       // TODO: types (#22198)
       optionLocations[option.name] = describeAllowedLocations(option)!;
@@ -389,10 +391,16 @@ export async function validateConfig(
             /* an object which may only be top-level is already reported above, with a message which says so more precisely */
             !topLevelObjects.includes(key)
           ) {
+            /* the path of the parent, like `packageRules[1]`, naming a custom manager like we do in `enabledManagers` */
+            const { customType } = config as Partial<CustomManager>;
+            const parent =
+              parentName === 'customManagers' && isString(customType)
+                ? parentPath?.replace('customManagers', `custom.${customType}`)
+                : parentPath;
             const usedIn =
               parentName === '.'
                 ? 'at the top level of a config'
-                : `in "${parentName}"`;
+                : `in "${parent}"`;
             const message = `"${key}" can't be used ${usedIn}, as it can only be used ${optionLocations[key]}.`;
             warnings.push({
               topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
@@ -1390,6 +1398,24 @@ function describeAllowedValues(option: RenovateOptions): string {
   return `allowedValues: ${JSON.stringify(allowedValues)}`;
 }
 
+function isAllowedValue(
+  option: RenovateOptions,
+  allowedValues: readonly string[],
+  val: string,
+): boolean {
+  if (allowedValues.includes(val)) {
+    return true;
+  }
+  if (!option.patternMatch) {
+    return false;
+  }
+  // pattern matching options also accept negation, globs and regexes, which are valid if they can match any of the allowed values
+  const predicate = getRegexOrGlobPredicate(
+    val.startsWith('!') ? val.slice(1) : val,
+  );
+  return allowedValues.some((allowed) => predicate(allowed));
+}
+
 function validateAllowedValues(
   key: string,
   val: unknown,
@@ -1406,7 +1432,9 @@ function validateAllowedValues(
     if (val === null && option.default === null) {
       // do nothing
     } else if (isArray(val, isString)) {
-      const invalidOptions = val.filter((v) => !allowedValues.includes(v));
+      const invalidOptions = val.filter(
+        (v) => !isAllowedValue(option, allowedValues, v),
+      );
       if (invalidOptions.length) {
         errors.push({
           topic: ConfigValidationTopic.Error,
@@ -1422,7 +1450,7 @@ function validateAllowedValues(
           });
         }
       } else if (
-        !allowedValues.includes(val) &&
+        !isAllowedValue(option, allowedValues, val) &&
         // a templated value can't be checked until it's been rendered
         !(option.supportsTemplating && val.includes('{{'))
       ) {

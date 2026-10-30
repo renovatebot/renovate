@@ -30,7 +30,7 @@ import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
 import requireBuildCacheKey from './rules/require-build-cache-key.ts';
-import requireCacheable from './rules/require-cacheable.ts';
+import requireCachePrivacy from './rules/require-cache-privacy.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
 import typesLocation from './rules/types-location.ts';
@@ -76,7 +76,7 @@ export default definePlugin({
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
     'prefer-stub-env': preferStubEnv,
     'require-build-cache-key': requireBuildCacheKey,
-    'require-cacheable': requireCacheable,
+    'require-cache-privacy': requireCachePrivacy,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
     'types-location': typesLocation,

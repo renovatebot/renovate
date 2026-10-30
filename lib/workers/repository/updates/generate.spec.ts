@@ -385,6 +385,59 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
+    it('uses the new value of a tool constraint which the branch updates', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'renovate-config',
+          depName: 'golang',
+          depType: 'tool-constraint',
+          branchName: 'some-branch',
+          currentValue: '1.25',
+          newValue: '1.27',
+          constraints: { golang: '1.25', node: '22' },
+        },
+        {
+          manager: 'mise',
+          depName: 'go',
+          branchName: 'some-branch',
+          currentValue: '1.24.4',
+          newValue: '1.27.0',
+          constraints: { golang: '1.25' },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades.map((upgrade) => upgrade.constraints)).toEqual([
+        { golang: '1.27' },
+        { golang: '1.27', node: '22' },
+      ]);
+    });
+
+    it('keeps a different constraint value configured via `packageRules`', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'renovate-config',
+          depName: 'golang',
+          depType: 'tool-constraint',
+          branchName: 'some-branch',
+          currentValue: '1.25',
+          newValue: '1.27',
+          constraints: { golang: '1.25' },
+        },
+        {
+          manager: 'gomod',
+          depName: 'github.com/some/module',
+          branchName: 'some-branch',
+          currentValue: 'v1.0.0',
+          newValue: 'v1.1.0',
+          constraints: { golang: '1.24' },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(
+        res.upgrades.map((upgrade) => upgrade.constraints),
+      ).toIncludeSameMembers([{ golang: '1.27' }, { golang: '1.24' }]);
+    });
+
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = [
         {

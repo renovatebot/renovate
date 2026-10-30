@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
+import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
@@ -1870,6 +1871,95 @@ describe('workers/repository/update/branch/auto-replace', () => {
     )
         `,
       );
+    });
+
+    // `constraints` has `sharedScopes`, but the `renovate-config` manager only extracts the top-level and `packageRules` constraints
+    it('updates a tool constraint in the top-level, when the same value is set in both', async () => {
+      const content = codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `;
+      upgrade.manager = 'renovate-config';
+      upgrade.packageFile = 'renovate.json';
+      const extracted = extractRenovateConfigPackageFile(
+        content,
+        'renovate.json',
+      );
+      Object.assign(upgrade, extracted!.deps[0], {
+        newValue: '1.27',
+        depIndex: 0,
+      });
+      const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+      expect(res).toBe(codeBlock`
+        {
+          "constraints": {
+            "golang": "1.27"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `);
+    });
+
+    it('updates a tool constraint in a `packageRules` entry, when the same value is set in both', async () => {
+      const content = codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.25"
+              }
+            }
+          ]
+        }
+      `;
+      upgrade.manager = 'renovate-config';
+      upgrade.packageFile = 'renovate.json';
+      const extracted = extractRenovateConfigPackageFile(
+        content,
+        'renovate.json',
+      );
+      Object.assign(upgrade, extracted!.deps[1], {
+        newValue: '1.27',
+        depIndex: 1,
+      });
+      const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+      expect(res).toBe(codeBlock`
+        {
+          "constraints": {
+            "golang": "1.25"
+          },
+          "packageRules": [
+            {
+              "matchManagers": ["gomod"],
+              "constraints": {
+                "golang": "1.27"
+              }
+            }
+          ]
+        }
+      `);
     });
   });
 });

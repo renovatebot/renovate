@@ -4,6 +4,10 @@
     "dockerfile": "Dockerfile"
   },
   "init": true,
+  "containerEnv": {
+    // The devcontainer image is updated separately from the base image used by Renovate
+    "RENOVATE_X_IGNORE_CONTAINERBASE_VERSION": "true"
+  },
   "hostRequirements": {
     "cpus": 4,
     "memory": "8gb",

@@ -1,6 +1,9 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
-import type { ManagerName } from '../manager-list.generated.ts';
+import type {
+  CustomManagerName,
+  ManagerName,
+} from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
@@ -670,7 +673,11 @@ export const namedParents = [
 ] as const;
 
 export type AllowedParents =
-  '.' | (typeof namedParents)[number] | ManagerName | UpdateTypeOptions;
+  | '.'
+  | (typeof namedParents)[number]
+  | ManagerName
+  | CustomManagerName
+  | UpdateTypeOptions;
 export interface RenovateOptionBase {
   /**
    * If true, this option **MUST** be checked at the trust boundary: after resolving the full config that sets it, but **before** the value is applied.
@@ -959,3 +966,31 @@ export interface RepoToolSettingsOptions {
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }
+
+/** All known `VulnerabilityAlertSource`s */
+export const VulnerabilityAlertSources = [
+  /**
+   * The Platform being used provides vulnerability alerts.
+   *
+   * i.e. GitHub Advanced Security's Dependabot Alerts
+   **/
+  '$platform',
+  /**
+   * The Open Source Vulnerability database (OSV) provides vulnerability alerts.
+   *
+   * @link https://github.com/renovatebot/osv-offline
+   **/
+  'OSV',
+  /**
+   * A self-hosted administrator is providing any `packageRules` that will apply Vulnerability Alerts.
+   *
+   * @see PackageRule
+   **/
+  'packageRules',
+] as const;
+
+/**
+ * Where the Vulnerability Alerts are sourced from.
+ */
+export type VulnerabilityAlertSource =
+  (typeof VulnerabilityAlertSources)[number];
