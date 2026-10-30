@@ -427,14 +427,39 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
       scm.branchExists.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'open',
-        }),
-      );
+      const branchPr = partial<Pr>({
+        state: 'open',
+      });
+      platform.getBranchPr.mockResolvedValueOnce(branchPr);
       scm.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        branchPr,
+      );
+    });
+
+    it('passes the fetched branch PR to the branch automerge', async () => {
+      const branchPr = partial<Pr>({ number: 42, state: 'open' });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(branchPr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({ updatedPackageFiles: [] }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+
+      await branchWorker.processBranch(config);
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        branchPr,
+      );
     });
 
     it('skips branch if closed major PR found', async () => {

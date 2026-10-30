@@ -82,11 +82,10 @@ export function decideBranchReuse({
     return { action: 'unchanged', userRebaseRequested };
   }
 
-  const keepUpdatedLabel = config.keepUpdatedLabel;
   if (
     branchExists &&
     config.rebaseWhen === 'never' &&
-    !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
+    !hasKeepUpdatedLabel(config, branchPr) &&
     !dependencyDashboardCheck
   ) {
     logger.debug('rebaseWhen=never so skipping branch update check');
@@ -112,35 +111,26 @@ export function decideBranchReuse({
   return { action: 'check-reuse', userRebaseRequested };
 }
 
-async function shouldKeepUpdated(
+/**
+ * Whether the branch's PR carries the label which asks Renovate to keep the
+ * branch up to date with its base branch.
+ */
+export function hasKeepUpdatedLabel(
   config: BranchConfig,
-  _baseBranch: string,
-  _branchName: string,
-): Promise<boolean> {
+  branchPr: Pr | null,
+): boolean {
   const keepUpdatedLabel = config.keepUpdatedLabel;
-  if (!keepUpdatedLabel) {
-    return false;
-  }
-
-  const branchPr = await platform.getBranchPr(
-    config.branchName,
-    config.baseBranch,
-  );
-
-  if (branchPr?.labels?.includes(keepUpdatedLabel)) {
-    return true;
-  }
-
-  return false;
+  return !!keepUpdatedLabel && !!branchPr?.labels?.includes(keepUpdatedLabel);
 }
 
 export async function shouldReuseExistingBranch(
   config: BranchConfig,
+  branchPr: Pr | null,
 ): Promise<BranchConfig> {
   const { baseBranch, branchName } = config;
   const result: BranchConfig = { ...config, reuseExistingBranch: false };
 
-  const keepUpdated = await shouldKeepUpdated(result, baseBranch, branchName);
+  const keepUpdated = hasKeepUpdatedLabel(result, branchPr);
   await determineRebaseWhenValue(result, keepUpdated);
 
   // Check if branch exists

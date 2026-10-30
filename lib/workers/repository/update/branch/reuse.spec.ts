@@ -5,7 +5,7 @@ import type { BranchReuseDecisionInput } from './reuse.ts';
 import { decideBranchReuse, shouldReuseExistingBranch } from './reuse.ts';
 
 describe('workers/repository/update/branch/reuse', () => {
-  describe('shouldReuseExistingBranch(config)', () => {
+  describe('shouldReuseExistingBranch()', () => {
     const pr: Pr = {
       number: 42,
       sourceBranch: 'master',
@@ -28,22 +28,20 @@ describe('workers/repository/update/branch/reuse', () => {
 
     it('returns false if branch does not exist', async () => {
       scm.branchExists.mockResolvedValueOnce(false);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
     it('returns true if no PR', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValue(null);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
     it('returns true if does not need rebasing', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(false);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
@@ -70,8 +68,7 @@ describe('workers/repository/update/branch/reuse', () => {
       ];
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(false);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBe(false);
     });
 
@@ -92,17 +89,15 @@ describe('workers/repository/update/branch/reuse', () => {
       ];
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(false);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBe(true);
     });
 
     it('returns true if unmergeable and cannot rebase', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
@@ -110,18 +105,16 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'never';
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(false);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
     it('returns false if unmergeable and can rebase', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(false);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
@@ -129,7 +122,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       scm.branchExists.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
@@ -139,7 +132,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automergeType = 'branch';
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
@@ -148,9 +141,8 @@ describe('workers/repository/update/branch/reuse', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
@@ -160,7 +152,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automergeType = 'pr';
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
@@ -169,7 +161,7 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchForceRebase.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
@@ -177,7 +169,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'never';
       config.automerge = true;
       scm.branchExists.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeTrue();
       expect(scm.isBranchBehindBase).not.toHaveBeenCalled();
       expect(scm.isBranchModified).not.toHaveBeenCalled();
@@ -188,28 +180,26 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, null);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
     it('returns false if rebaseWhen=never, keepUpdatedLabel and stale', async () => {
       config.rebaseWhen = 'never';
       config.keepUpdatedLabel = 'keep-updated';
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
     it('returns false if rebaseWhen=conflicted, keepUpdatedLabel and modified', async () => {
       config.rebaseWhen = 'never';
       config.keepUpdatedLabel = 'keep-updated';
-      platform.getBranchPr.mockResolvedValue(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(false);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeFalse();
       expect(res.isModified).toBeUndefined();
     });
@@ -217,10 +207,9 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns true if rebaseWhen=never, miss-match keepUpdatedLabel and stale', async () => {
       config.rebaseWhen = 'never';
       config.keepUpdatedLabel = 'keep-not-updated';
-      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
-      const res = await shouldReuseExistingBranch(config);
+      const res = await shouldReuseExistingBranch(config, pr);
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
@@ -229,7 +218,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
@@ -239,7 +228,7 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.getBranchForceRebase.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
@@ -247,10 +236,9 @@ describe('workers/repository/update/branch/reuse', () => {
     it('converts rebaseWhen=auto to behind-base-branch if keepUpdatedLabel', async () => {
       config.rebaseWhen = 'auto';
       config.keepUpdatedLabel = 'keep-updated';
-      platform.getBranchPr.mockResolvedValue(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, pr);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
@@ -259,7 +247,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'auto';
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('conflicted');
     });
@@ -270,7 +258,7 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
 
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('conflicted');
@@ -280,11 +268,10 @@ describe('workers/repository/update/branch/reuse', () => {
       config.rebaseWhen = 'auto';
       config.keepUpdatedLabel = 'keep-updated';
       platform.isBranchMergeQueueEnabled.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValue(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, pr);
 
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
@@ -296,7 +283,7 @@ describe('workers/repository/update/branch/reuse', () => {
       platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
 
       expect(config.rebaseWhen).toBe('automerging');
       expect(result.rebaseWhen).toBe('conflicted');
@@ -308,7 +295,7 @@ describe('workers/repository/update/branch/reuse', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
 
       expect(config.rebaseWhen).toBe('automerging');
       expect(result.rebaseWhen).toBe('behind-base-branch');
@@ -320,9 +307,8 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = false;
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      platform.getBranchPr.mockResolvedValueOnce(pr);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, pr);
 
       expect(config.rebaseWhen).toBe('automerging');
       expect(result.rebaseWhen).toBe('behind-base-branch');
@@ -333,7 +319,7 @@ describe('workers/repository/update/branch/reuse', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
 
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
 
       expect(config.rebaseWhen).toBe('automerging');
       expect(result.rebaseWhen).toBe('never');
@@ -344,7 +330,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config.automerge = true;
       scm.branchExists.mockResolvedValueOnce(false);
       scm.isBranchBehindBase.mockResolvedValueOnce(false);
-      const result = await shouldReuseExistingBranch(config);
+      const result = await shouldReuseExistingBranch(config, null);
       expect(config.rebaseWhen).toBe('auto');
       expect(result.rebaseWhen).toBe('behind-base-branch');
     });
