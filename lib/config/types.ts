@@ -475,6 +475,7 @@ export interface RenovateConfig
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
   fetchChangeLogs?: FetchChangeLogsOptions;
+  changelogsLocation?: ChangelogsLocation;
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
@@ -575,6 +576,8 @@ export const UpdateTypesOptions = [
 export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
 
 export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
+
+export type ChangelogsLocation = 'body' | 'comment';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
