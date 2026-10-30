@@ -1230,19 +1230,24 @@ export async function updatePr({
 export async function mergePr({
   branchName,
   id: prNo,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
-  logger.debug(`mergePr(${prNo}, ${branchName!})`);
+  logger.debug(`mergePr(${prNo}, ${branchName!}, ${strategy})`);
   // Used for "automerge" feature
   try {
     const pr = await getPr(prNo);
     if (!pr) {
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
+    const mergeBody: PullRequestMerge = {
+      strategyId: utils.getMergeStrategyId(strategy),
+    };
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
       // TODO: types (#22198)
       `./rest/api/1.0/projects/${config.projectKey}/repos/${
         config.repositorySlug
       }/pull-requests/${prNo}/merge?version=${pr.version!}`,
+      { body: mergeBody },
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {
@@ -1285,7 +1290,10 @@ async function tryPrAutomerge(
   }
 
   try {
-    const body: PullRequestMerge = { autoMerge: true };
+    const body: PullRequestMerge = {
+      autoMerge: true,
+      strategyId: utils.getMergeStrategyId(platformPrOptions.automergeStrategy),
+    };
     await bitbucketServerHttp.postJson(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNumber}/merge?version=${prVersion}`,
       { body },
