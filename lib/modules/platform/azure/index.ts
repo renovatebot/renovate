@@ -771,9 +771,11 @@ export async function updatePr({
       );
     }
     // auto-complete keeps the merge commit message it was set with, so keep it in sync with the title
+    // only when Renovate set auto-complete, which it does with the PR creator's id
     if (
       platformPrOptions.usePlatformAutomerge &&
-      pr.autoCompleteSetBy &&
+      pr.autoCompleteSetBy?.id &&
+      pr.autoCompleteSetBy.id === pr.createdBy?.id &&
       pr.completionOptions?.mergeCommitMessage !== title
     ) {
       objToUpdate.completionOptions = {

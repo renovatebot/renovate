@@ -1822,6 +1822,7 @@ describe('modules/platform/azure/index', () => {
           updatePullRequest,
           getPullRequestById: vi.fn().mockResolvedValue({
             pullRequestId: 1234,
+            createdBy: { id: 123 },
             autoCompleteSetBy: { id: 123 },
             completionOptions: {
               mergeStrategy: GitPullRequestMergeStrategy.Squash,
@@ -1840,6 +1841,37 @@ describe('modules/platform/azure/index', () => {
 
       expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
         { title: 'The Title' },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options when auto-complete was set by another user', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            createdBy: { id: 123 },
+            autoCompleteSetBy: { id: 456 },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              mergeCommitMessage: 'Custom message',
+            },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
         '1',
         1234,
       );
