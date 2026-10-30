@@ -1,10 +1,10 @@
 import JSON5 from 'json5';
-import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getFile } from '../../../../util/git/index.ts';
 import { quickStringify } from '../../../../util/stringify.ts';
+import { commitConfigFile } from '../../model/commit-config-file.ts';
 import { getMigrationBranchName } from '../common.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 import type { MigratedData } from './migrated-data.ts';
@@ -18,44 +18,40 @@ export async function rebaseMigrationBranch(
   const baseBranch = config.defaultBranch!;
   const branchName = getMigrationBranchName(config);
   const configFileName = migratedConfigData.filename;
-  let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
   if (
-    jsonStripWhitespaces(contents) === jsonStripWhitespaces(existingContents)
+    jsonStripWhitespaces(migratedConfigData.content) ===
+    jsonStripWhitespaces(existingContents)
   ) {
     logger.debug('Migration branch is up to date');
     return null;
   }
   logger.debug('Rebasing migration branch');
 
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would rebase files in migration branch');
-    return null;
-  }
-
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
     configFileName,
   );
-  const commitMessage = commitMessageFactory.getCommitMessage();
 
-  await scm.checkoutBranch(baseBranch);
-  contents =
-    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
+  return await commitConfigFile({
+    config,
     branchName,
-    files: [
-      {
-        type: 'addition',
-        path: configFileName,
-        contents,
-      },
-    ],
-    message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
-    // Only needed by Gerrit platform
+    getFiles: async () => {
+      await scm.checkoutBranch(baseBranch);
+      return [
+        {
+          type: 'addition',
+          path: configFileName,
+          contents:
+            await MigratedDataFactory.applyPrettierFormatting(
+              migratedConfigData,
+            ),
+        },
+      ];
+    },
+    message: commitMessageFactory.getCommitMessage(),
     prTitle: commitMessageFactory.getPrTitle(),
+    dryRunMessage: 'DRY-RUN: Would rebase files in migration branch',
   });
 }
 
