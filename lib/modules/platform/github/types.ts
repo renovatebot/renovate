@@ -72,12 +72,28 @@ export interface GhRestPr {
   assignees?: { login?: string }[];
   requested_reviewers?: { login?: string }[];
   labels?: { name: string }[];
+  auto_merge?: GhRestAutoMerge | null;
   _links?: unknown;
+}
+
+export interface GhRestAutoMerge {
+  enabled_by?: { login?: string } | null;
+  merge_method?: string;
+  commit_title?: string | null;
+  commit_message?: string | null;
+}
+
+export interface GhAutoMerge {
+  enabledBy?: string;
+  commitTitle?: string | null;
+  commitMessage?: string | null;
 }
 
 export interface GhPr extends Pr {
   updated_at: string;
   node_id: string;
+  /** `null` when automerge is not enabled, missing when unknown */
+  autoMerge?: GhAutoMerge | null;
 }
 
 export interface UserDetails {
