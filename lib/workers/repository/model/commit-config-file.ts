@@ -24,7 +24,7 @@ export interface CommitConfigFileConfig {
   /** Supplies `baseBranch`, `platformCommit`, `commitBody`, `commitTrailers` and `gitAuthor` */
   config: Partial<RenovateConfig>;
   branchName: string;
-  /** Called only once the dry run check has passed, so that a dry run neither checks out a branch nor formats a file */
+  /** Called after the dry run check */
   getFiles: () => FileChange[] | Promise<FileChange[]>;
   message: string;
   /** Only needed by Gerrit platform */
@@ -35,7 +35,7 @@ export interface CommitConfigFileConfig {
 }
 
 /**
- * Commits a Renovate config file to its own branch, as the onboarding and the config migration workers both do when they create or rebase their branch.
+ * Commits a Renovate config file to its branch, shared by onboarding and config migration.
  */
 export async function commitConfigFile({
   config,

@@ -536,7 +536,7 @@ export async function processBranch(
         logJSON: config.upgrades[0].logJSON,
         releases: config.upgrades[0].releases,
       });
-      // compiled after the body, so that `{{{commitMessage}}}` in a trailer includes it
+      // compiled after the body, as before, so the trailer context sees the full commit message
       config.commitTrailers = compileCommitTrailers(config, config);
 
       commitSha = await commitFilesToBranch(config);

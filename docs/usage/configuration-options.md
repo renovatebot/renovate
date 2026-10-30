@@ -743,7 +743,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
-Onboarding and config migration commits only expose `{{{gitAuthor}}}` to this template; any other field renders empty.
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
 
 To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
@@ -848,7 +848,7 @@ If you want Renovate to sign off its commits, you can add the [`:gitSignOff` pre
 }
 ```
 
-Onboarding and config migration commits only expose `{{{gitAuthor}}}` to this template; any other field renders empty.
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
 
 ## `composerIgnorePlatformReqs`
 

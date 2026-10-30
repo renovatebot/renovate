@@ -61,11 +61,11 @@ describe('workers/repository/model/commit-config-file', () => {
         branchName: 'renovate/configure',
         files,
         message: 'Add renovate.json',
-        trailers: undefined,
         platformCommit: 'auto',
         force: true,
         prTitle: 'Configure Renovate',
       });
+      expect(scm.commitAndPush.mock.calls[0][0].trailers).toBeUndefined();
     });
 
     it('applies commitBody and commitTrailers', async () => {
