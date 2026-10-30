@@ -9,11 +9,16 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import type { GithubTagItem } from '../../../util/github/graphql/types.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GoProxyDatasource, getTagPrefix } from './releases-goproxy.ts';
+import {
+  GoProxyDatasource,
+  getTagPrefix,
+  getTagPrefixCandidates,
+} from './releases-goproxy.ts';
 
 const datasource = new GoProxyDatasource();
 
@@ -24,6 +29,18 @@ describe('modules/datasource/go/releases-goproxy', () => {
   );
 
   const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
+
+  it('getTagPrefixCandidates', () => {
+    expect(
+      getTagPrefixCandidates('github.com/aws/aws-sdk-go-v2/service/s3/v2'),
+    ).toEqual([
+      'aws/aws-sdk-go-v2/service/s3/',
+      'aws-sdk-go-v2/service/s3/',
+      'service/s3/',
+      's3/',
+    ]);
+    expect(getTagPrefixCandidates('gopkg.in/yaml.v3')).toEqual(['yaml.v3/']);
+  });
 
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
@@ -100,12 +117,23 @@ describe('modules/datasource/go/releases-goproxy', () => {
     const baseUrl = 'https://proxy.golang.org';
 
     let githubQueryReleases: MockInstance<typeof githubGraphql.queryReleases>;
-    let githubQueryTags: MockInstance<typeof githubGraphql.queryTags>;
+    let githubQueryTags: MockInstance<typeof githubGraphql.queryTagsByName>;
+
+    /**
+     * Answers each lookup with the given tags whose names were asked for, as GitHub does.
+     */
+    function mockGithubTags(tags: GithubTagItem[]): void {
+      githubQueryTags.mockImplementation((_config, _http, tagNames) =>
+        Promise.resolve(
+          tags.filter(({ version }) => tagNames.includes(version)),
+        ),
+      );
+    }
 
     beforeEach(() => {
       githubQueryReleases = vi.spyOn(githubGraphql, 'queryReleases');
       githubQueryReleases.mockResolvedValue([]);
-      githubQueryTags = vi.spyOn(githubGraphql, 'queryTags');
+      githubQueryTags = vi.spyOn(githubGraphql, 'queryTagsByName');
       githubQueryTags.mockResolvedValue([]);
     });
 
@@ -491,7 +519,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      githubQueryTags.mockResolvedValueOnce([
+      mockGithubTags([
         {
           version: 'v0.3.1',
           releaseTimestamp: '2022-10-07T23:12:13.000Z' as Timestamp,
@@ -504,9 +532,19 @@ describe('modules/datasource/go/releases-goproxy', () => {
         packageName: 'github.com/kr/pretty',
       });
 
+      // both versions were looked up while finding the tag prefix
+      expect(githubQueryTags).toHaveBeenCalledOnce();
       expect(githubQueryTags).toHaveBeenCalledWith(
         { packageName: 'kr/pretty', registryUrl: 'https://github.com' },
         expect.anything(),
+        [
+          'kr/pretty/v0.3.1',
+          'kr/pretty/v0.3.0',
+          'pretty/v0.3.1',
+          'pretty/v0.3.0',
+          'v0.3.1',
+          'v0.3.0',
+        ],
       );
       expect(res).toEqual({
         releases: [
@@ -536,7 +574,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
         .get('/v2/@v/list')
         .reply(404);
 
-      githubQueryTags.mockResolvedValueOnce([
+      mockGithubTags([
         {
           version: 'v1.12.0',
           releaseTimestamp: '2026-07-01T00:00:00.000Z' as Timestamp,
@@ -596,6 +634,186 @@ describe('modules/datasource/go/releases-goproxy', () => {
         sourceUrl: 'https://github.com/google/btree',
         tags: { latest: 'v1.0.0' },
       });
+    });
+
+    it('looks up the GitHub tags of a module in a subdirectory by name', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/aws/aws-sdk-go-v2/service/s3`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v1.98.0 2026-06-08T00:00:00Z
+            v1.99.0 2026-06-09T00:00:00Z
+            v1.100.0 2026-06-10T00:00:00Z
+            v1.101.0 2026-06-11T00:00:00Z
+          `,
+        )
+        .get('/@latest')
+        .reply(200, { Version: 'v1.101.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      mockGithubTags([
+        {
+          version: 'service/s3/v1.98.0',
+          releaseTimestamp: '2026-06-29T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.98.0',
+          hash: 'aaa111',
+        },
+        {
+          version: 'service/s3/v1.99.0',
+          releaseTimestamp: '2026-06-30T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.99.0',
+          hash: 'bbb222',
+        },
+        {
+          version: 'service/s3/v1.100.0',
+          releaseTimestamp: '2026-07-01T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.100.0',
+          hash: 'abc123',
+        },
+        {
+          version: 'service/s3/v1.101.0',
+          releaseTimestamp: '2026-07-02T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.101.0',
+          hash: 'def456',
+        },
+        // the root module's tag of the same version must not be used
+        {
+          version: 'v1.101.0',
+          releaseTimestamp: '2026-12-01T00:00:00.000Z' as Timestamp,
+          gitRef: 'v1.101.0',
+          hash: 'ghi789',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
+      });
+
+      // the latest versions were already looked up while finding the tag prefix
+      expect(githubQueryTags).toHaveBeenCalledTimes(2);
+      expect(githubQueryTags).toHaveBeenLastCalledWith(
+        {
+          packageName: 'aws/aws-sdk-go-v2',
+          registryUrl: 'https://github.com',
+        },
+        expect.anything(),
+        ['service/s3/v1.98.0'],
+      );
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v1.98.0',
+            releaseTimestamp: '2026-06-29T00:00:00.000Z',
+          },
+          {
+            version: 'v1.99.0',
+            releaseTimestamp: '2026-06-30T00:00:00.000Z',
+          },
+          {
+            version: 'v1.100.0',
+            releaseTimestamp: '2026-07-01T00:00:00.000Z',
+          },
+          {
+            version: 'v1.101.0',
+            releaseTimestamp: '2026-07-02T00:00:00.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/aws/aws-sdk-go-v2',
+        tags: { latest: 'v1.101.0' },
+      });
+    });
+
+    it('finds the tag prefix from the latest versions, not the order of the proxy list', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/aws/aws-sdk-go-v2/service/s3`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v1.101.0 2026-06-11T00:00:00Z
+            v1.100.0 2026-06-10T00:00:00Z
+            v0.0.1 2020-01-01T00:00:00Z
+            v0.0.2 2020-01-02T00:00:00Z
+            v0.0.3 2020-01-03T00:00:00Z
+            v0.0.0-20200101000000-abcdefabcdef
+          `,
+        )
+        .get('/@latest')
+        .reply(200, { Version: 'v1.101.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      mockGithubTags([
+        {
+          version: 'service/s3/v1.101.0',
+          releaseTimestamp: '2026-07-02T00:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.101.0',
+          hash: 'def456',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
+      });
+
+      const queriedTagNames = githubQueryTags.mock.calls.flatMap(
+        ([, , tagNames]) => tagNames,
+      );
+      expect(queriedTagNames).toContain('service/s3/v1.101.0');
+      expect(queriedTagNames).not.toContain(
+        'service/s3/v0.0.0-20200101000000-abcdefabcdef',
+      );
+      expect(res?.releases).toContainEqual({
+        version: 'v1.101.0',
+        releaseTimestamp: '2026-07-02T00:00:00.000Z',
+      });
+    });
+
+    it('only matches GitHub Releases under the tag prefix of the module', async () => {
+      vi.stubEnv('GOPROXY', baseUrl);
+
+      httpMock
+        .scope(`${baseUrl}/github.com/aws/aws-sdk-go-v2/service/s3`)
+        .get('/@v/list')
+        .reply(200, 'v1.100.0 2026-06-10T00:00:00Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.100.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      mockGithubTags([
+        {
+          version: 'service/s3/v1.100.0',
+          releaseTimestamp: '2026-06-10T01:00:00.000Z' as Timestamp,
+          gitRef: 'service/s3/v1.100.0',
+          hash: 'abc123',
+        },
+      ]);
+      githubQueryReleases.mockResolvedValueOnce([
+        {
+          version: 'v1.100.0',
+          releaseTimestamp: '2026-12-01T00:00:00.000Z' as Timestamp,
+          url: 'https://github.com/aws/aws-sdk-go-v2/releases/tag/v1.100.0',
+        },
+      ]);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/aws/aws-sdk-go-v2/service/s3',
+      });
+
+      expect(res?.releases).toEqual([
+        {
+          version: 'v1.100.0',
+          releaseTimestamp: '2026-06-10T01:00:00.000Z',
+        },
+      ]);
     });
 
     it('handles timestamp fetch errors', async () => {
@@ -1993,6 +2211,48 @@ describe('modules/datasource/go/releases-goproxy', () => {
         });
 
         expect(second).toEqual(first);
+      });
+
+      it('reuses GitHub tag timestamps fetched by an earlier run', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+
+        vi.stubEnv('GOPROXY', baseUrl);
+
+        setHttpMock();
+        httpMock
+          .scope(`${baseUrl}/github.com/google/btree`)
+          .get('/@v/v1.0.0.info')
+          .reply(200, { Version: 'v1.0.0', Time: '2018-01-01T00:00:00Z' });
+        mockGithubTags([
+          {
+            version: 'v1.0.0',
+            releaseTimestamp: '2018-02-01T00:00:00.000Z' as Timestamp,
+            gitRef: 'v1.0.0',
+            hash: 'abc123',
+          },
+        ]);
+
+        const first = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+        // the lookup of the tag prefix already finds the tag
+        expect(githubQueryTags).toHaveBeenCalledOnce();
+
+        // a new run, against the same persistent cache, once the `datasource-go-proxy` cache has expired
+        memCache.init();
+        vi.advanceTimersByTime(31 * 60 * 1000);
+
+        setHttpMock();
+        const second = await datasource.getReleases({
+          packageName: 'github.com/google/btree',
+        });
+
+        expect(second).toEqual(first);
+        expect(second?.releases[0].releaseTimestamp).toBe(
+          '2018-02-01T00:00:00.000Z',
+        );
+        // only the lookup of the tag prefix
+        expect(githubQueryTags).toHaveBeenCalledTimes(2);
       });
 
       it('does not store a version which has no publication time', async () => {
