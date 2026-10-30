@@ -68,7 +68,9 @@ As long as the registry/datasource provides the release timestamp, Renovate will
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
 
 Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
-Renovate does not currently have the ability to determine the `minimumReleaseAge` from your package manager's configuration.
+A manager may read the minimum release age from the configuration of your package manager.
+If it does, Renovate uses the larger of that value and `minimumReleaseAge`.
+Setting `minimumReleaseAge` to `null` does not turn off the value from the configuration of your package manager.
 
 When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.
 In some cases, this can lead to a transitive dependency being introduced, [which Renovate is not aware of](#what-happens-to-transitive-dependencies), and so could lead to a dependency being introduced without Renovate's `minimumReleaseAge` check being followed.
@@ -77,6 +79,11 @@ To protect against this, it's recommended to ensure that your package manager co
 
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
+
+The table below lists the managers with a known integration, per package manager.
+Managers that are not listed do not integrate with the minimum release age of their package manager.
+
+<!-- Autogenerate managerMinimumReleaseAgeSupport -->
 
 #### npm
 
@@ -96,6 +103,7 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 When `minimumReleaseAge` is configured, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
+Poetry added this setting in v2.4.0, and older versions ignore it.
 
 The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
 
@@ -175,7 +183,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
 | `pinDigest`           | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#pindigest-updates).        |
-| `lockFileMaintenance` | ❌                            | Generally not possible, as we delegate to the package manager to perform the required changes. See below. |
+| `lockFileMaintenance` | ❌                            | It can only be enforced by your package manager. [See below for more info](#lockfilemaintenance-updates). |
 | `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
@@ -264,13 +272,20 @@ This decouples "how fresh must a release be before I trust it enough to upgrade 
 
 These are functionally identical options.
 
-#### Lock file maintenance
+#### `lockFileMaintenance` updates
 
-Generally, Renovate delegates lock file maintenance to the package manager.
+Lock file maintenance delegates to the package manager to update package(s), so the updated packages have no release timestamp for Renovate to check.
 
-In some cases, Renovate performs the resolution of versions itself, which leads to Renovate applying `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to the version resolution. This applies to the following managers:
+A manager can tell Renovate that its package manager enforces the minimum release age itself while it regenerates the lock file.
+In that case, Renovate does not wait for a release timestamp, and the `renovate/stability-days` status check of the lock file maintenance branch passes straight away.
 
-- [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`: Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
+For all other managers, lock file maintenance is treated like any other update without a release timestamp.
+With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
+The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
+
+Some managers resolve versions themselves during lock file maintenance, and apply `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to that resolution:
+
+- [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`, Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
 
 ### What happens to security updates?
 

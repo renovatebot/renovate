@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../config/global.ts';
 import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
 import * as memCache from '../cache/memory/index.ts';
+import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
   getToolConfig,
@@ -28,6 +29,13 @@ describe('util/exec/containerbase', () => {
     it('returns false if not containerbase', () => {
       GlobalConfig.set({ binarySource: 'install' });
       expect(isDynamicInstall()).toBeFalse();
+    });
+
+    it('ignores CONTAINERBASE from the custom env', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      setCustomEnv({ CONTAINERBASE: 'true' });
+      expect(isDynamicInstall()).toBeFalse();
+      setCustomEnv({});
     });
 
     it('returns false if any unsupported tools', () => {

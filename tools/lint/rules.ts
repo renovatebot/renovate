@@ -1,4 +1,5 @@
 import { definePlugin } from '@oxlint/plugins';
+import cachedResponseHeaders from './rules/cached-response-headers.ts';
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.ts';
 import consistentHookTimeouts from './rules/consistent-hook-timeouts.ts';
 import enforceTsExtension from './rules/enforce-ts-extension.ts';
@@ -44,6 +45,7 @@ export default definePlugin({
     name: 'renovate',
   },
   rules: {
+    'cached-response-headers': cachedResponseHeaders,
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'consistent-hook-timeouts': consistentHookTimeouts,
     'enforce-ts-extension': enforceTsExtension,
