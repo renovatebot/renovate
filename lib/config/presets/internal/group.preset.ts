@@ -264,6 +264,16 @@ const staticGroups = {
       },
     ],
   },
+  java: {
+    description: 'Group Java runtime versions together.',
+    packageRules: [
+      {
+        groupName: 'Java',
+        matchDatasources: ['java-version'],
+        matchPackageNames: ['java', 'java-jdk', 'java-jre'],
+      },
+    ],
+  },
   jekyllEcosystem: {
     description: 'Group Jekyll and related Ruby packages together.',
     packageRules: [
@@ -507,6 +517,7 @@ const staticGroups = {
       'group:hibernateOgm',
       'group:hibernateCommons',
       'group:illuminate',
+      'group:java',
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
