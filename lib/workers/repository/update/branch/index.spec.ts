@@ -1914,14 +1914,14 @@ describe('workers/repository/update/branch/index', () => {
         type: 'with-pr',
         pr: partial<Pr>({ number: 5 }),
       });
-      commit.commitFilesToBranch.mockResolvedValueOnce('123test');
+      commit.commitFilesToBranch.mockResolvedValueOnce(commitSha);
       const res = await branchWorker.processBranch({
         ...config,
         automerge: true,
       });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
-      expect(res).toMatchObject({ result: 'done', commitSha: '123test' });
+      expect(res).toMatchObject({ result: 'done', commitSha });
     });
 
     it('skips automerge if the PR was newly created', async () => {
