@@ -136,7 +136,7 @@ The steps to enable GitHub's Merge Queue differ based on whether you use GitHub 
 With `platformAutomerge` enabled (which is the default), GitHub's auto-merge takes care of adding the PR to the merge queue.
 This requires the "Allow auto-merge" checkbox in the repository settings to be enabled, as described in the steps below.
 
-Merge queues, configured via classic branch protection or repository rulesets, also work with `platformAutomerge=false`: once all checks have passed, Renovate merges the PR directly if Renovate is on the bypass list of the merge queue, and otherwise adds the PR to the merge queue itself.
+Merge queues, configured via classic branch protection or repository rulesets, also work with `platformAutomerge=false`: once all checks have passed, Renovate merges the PR directly if Renovate is on the bypass list of the merge queue and [`automergeBypassRules`](../configuration-options.md#automergebypassrules) is `true` (the default), and otherwise adds the PR to the merge queue itself.
 In that case the "Allow auto-merge" checkbox is not needed.
 PRs that are already waiting in the merge queue are left untouched on later runs.
 We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
