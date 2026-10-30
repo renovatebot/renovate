@@ -155,6 +155,125 @@ export interface ProcessBranchResult {
   commitSha?: string | null;
 }
 
+interface ProcessBranchErrorContext {
+  branchExists: boolean;
+  branchPr: Pr | null;
+  commitSha: string | null;
+  updatesVerified: boolean;
+}
+
+/**
+ * Passes errors which must stop the run up and returns the branch result for all others.
+ */
+function handleProcessBranchError(
+  err: any,
+  {
+    branchExists,
+    branchPr,
+    commitSha,
+    updatesVerified,
+  }: ProcessBranchErrorContext,
+): ProcessBranchResult {
+  /* v8 ignore if -- needs test */
+  if (err.statusCode === 404) {
+    logger.debug({ err }, 'Received a 404 error - aborting run');
+    throw new Error(REPOSITORY_CHANGED);
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+    logger.debug('Passing rate-limit-exceeded error up');
+    throw err;
+  }
+  if (err.message === REPOSITORY_CHANGED) {
+    logger.debug('Passing repository-changed error up');
+    throw err;
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message?.startsWith('remote: Invalid username or password')) {
+    logger.debug('Throwing bad credentials');
+    throw new Error(PLATFORM_BAD_CREDENTIALS);
+  }
+  /* v8 ignore if -- needs test */
+  if (
+    err.message?.startsWith(
+      'ssh_exchange_identification: Connection closed by remote host',
+    )
+  ) {
+    logger.debug('Throwing bad credentials');
+    throw new Error(PLATFORM_BAD_CREDENTIALS);
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message === PLATFORM_BAD_CREDENTIALS) {
+    logger.debug('Passing bad-credentials error up');
+    throw err;
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
+    logger.debug('Passing integration-unauthorized error up');
+    throw err;
+  }
+  if (err.message === MANAGER_LOCKFILE_ERROR) {
+    logger.debug('Passing lockfile-error up');
+    throw err;
+  }
+  if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
+    logger.debug('Branch PR is in the merge queue - skipping branch update');
+    return {
+      branchExists,
+      prNo: branchPr?.number,
+      result: 'done',
+      commitSha,
+    };
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message?.includes('space left on device')) {
+    throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
+    logger.debug('Passing disk-space error up');
+    throw err;
+  }
+  /* v8 ignore if -- needs test */
+  if (err.message.startsWith('Resource not accessible by integration')) {
+    logger.debug('Passing 403 error up');
+    throw err;
+  }
+  /* v8 ignore next -- needs test */
+  if (err.message === WORKER_FILE_UPDATE_FAILED) {
+    logger.warn('Error updating branch: update failure');
+  } else if (err.message.startsWith('bundler-')) {
+    // we have already warned inside the bundler artifacts error handling, so just return
+    return {
+      branchExists: true,
+      updatesVerified,
+      prNo: branchPr?.number,
+      result: 'error',
+      commitSha,
+    };
+  } else if (err.message?.includes('fatal: Authentication failed')) {
+    throw new Error(PLATFORM_AUTHENTICATION_ERROR);
+  } else if (err.message?.includes('fatal: bad revision')) {
+    logger.debug({ err }, 'Aborting job due to bad revision error');
+    throw new Error(REPOSITORY_CHANGED);
+  } else if (err.message === CONFIG_VALIDATION) {
+    logger.debug('Passing config validation error up');
+    throw err;
+  } else if (err.message === TEMPORARY_ERROR) {
+    logger.debug('Passing TEMPORARY_ERROR error up');
+    throw err;
+  } else if (!(err instanceof ExternalHostError)) {
+    logger.warn({ err }, `Error updating branch`);
+  }
+  // Don't throw here - we don't want to stop the other renovations
+  return {
+    branchExists,
+    prNo: branchPr?.number,
+    result: 'error',
+    commitSha,
+  };
+}
+
 export async function processBranch(
   branchConfig: BranchConfig,
   forceRebase = false,
@@ -944,104 +1063,12 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    /* v8 ignore if -- needs test */
-    if (err.statusCode === 404) {
-      logger.debug({ err }, 'Received a 404 error - aborting run');
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-      logger.debug('Passing rate-limit-exceeded error up');
-      throw err;
-    }
-    if (err.message === REPOSITORY_CHANGED) {
-      logger.debug('Passing repository-changed error up');
-      throw err;
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message?.startsWith('remote: Invalid username or password')) {
-      logger.debug('Throwing bad credentials');
-      throw new Error(PLATFORM_BAD_CREDENTIALS);
-    }
-    /* v8 ignore if -- needs test */
-    if (
-      err.message?.startsWith(
-        'ssh_exchange_identification: Connection closed by remote host',
-      )
-    ) {
-      logger.debug('Throwing bad credentials');
-      throw new Error(PLATFORM_BAD_CREDENTIALS);
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message === PLATFORM_BAD_CREDENTIALS) {
-      logger.debug('Passing bad-credentials error up');
-      throw err;
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
-      logger.debug('Passing integration-unauthorized error up');
-      throw err;
-    }
-    if (err.message === MANAGER_LOCKFILE_ERROR) {
-      logger.debug('Passing lockfile-error up');
-      throw err;
-    }
-    if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
-      logger.debug('Branch PR is in the merge queue - skipping branch update');
-      return {
-        branchExists,
-        prNo: branchPr?.number,
-        result: 'done',
-        commitSha,
-      };
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message?.includes('space left on device')) {
-      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
-      logger.debug('Passing disk-space error up');
-      throw err;
-    }
-    /* v8 ignore if -- needs test */
-    if (err.message.startsWith('Resource not accessible by integration')) {
-      logger.debug('Passing 403 error up');
-      throw err;
-    }
-    /* v8 ignore next -- needs test */
-    if (err.message === WORKER_FILE_UPDATE_FAILED) {
-      logger.warn('Error updating branch: update failure');
-    } else if (err.message.startsWith('bundler-')) {
-      // we have already warned inside the bundler artifacts error handling, so just return
-      return {
-        branchExists: true,
-        updatesVerified,
-        prNo: branchPr?.number,
-        result: 'error',
-        commitSha,
-      };
-    } else if (err.message?.includes('fatal: Authentication failed')) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    } else if (err.message?.includes('fatal: bad revision')) {
-      logger.debug({ err }, 'Aborting job due to bad revision error');
-      throw new Error(REPOSITORY_CHANGED);
-    } else if (err.message === CONFIG_VALIDATION) {
-      logger.debug('Passing config validation error up');
-      throw err;
-    } else if (err.message === TEMPORARY_ERROR) {
-      logger.debug('Passing TEMPORARY_ERROR error up');
-      throw err;
-    } else if (!(err instanceof ExternalHostError)) {
-      logger.warn({ err }, `Error updating branch`);
-    }
-    // Don't throw here - we don't want to stop the other renovations
-    return {
+    return handleProcessBranchError(err, {
       branchExists,
-      prNo: branchPr?.number,
-      result: 'error',
+      branchPr,
       commitSha,
-    };
+      updatesVerified,
+    });
   }
   try {
     logger.debug('Ensuring PR');
