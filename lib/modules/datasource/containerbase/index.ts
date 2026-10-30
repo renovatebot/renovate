@@ -1,0 +1,256 @@
+import {
+  filterByMinCb,
+  isContainerbase,
+  packageVersion,
+  toolVersionsFormat,
+  toolVersionsFormatPath,
+  toolVersionsPath,
+} from '@renovatebot/base-image';
+import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import {
+  type ConstraintName,
+  isConstraintName,
+  isToolName,
+} from '../../../util/exec/types.ts';
+import { readSystemFile } from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { coerceObject } from '../../../util/object.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { ContainerbaseFormats, ContainerbaseToolVersions } from './schema.ts';
+
+export const defaultRegistryUrl =
+  'https://containerbase.github.io/tool-versions';
+
+/**
+ * Converts the runtime constraints of a version, keyed by the parent tool (like
+ * `node`), to release constraints. Unknown constraint names are dropped.
+ */
+function toConstraints(
+  constraints: Record<string, string> | undefined,
+): Partial<Record<ConstraintName, string[]>> | undefined {
+  const result: Partial<Record<ConstraintName, string[]>> = {};
+  for (const [name, constraint] of Object.entries(coerceObject(constraints))) {
+    if (isConstraintName(name)) {
+      result[name] = [constraint];
+    }
+  }
+  return Object.keys(result).length ? result : undefined;
+}
+
+/**
+ * Checks if a lookup failed because the site can't be reached: a server error,
+ * rate limiting or a connection error, but not an error response like 404 or
+ * 401. An `ExternalHostError` is checked by its cause, because `abortOnError`
+ * host rules wrap every error in it.
+ */
+function isUnreachable(err: unknown): boolean {
+  const cause = err instanceof ExternalHostError ? err.err : err;
+  /* v8 ignore next -- the lookup only throws http errors, anything else is a bug */
+  if (!(cause instanceof HttpError)) {
+    return false;
+  }
+  const status = cause.response?.statusCode;
+  return !status || status === 429 || status >= 500;
+}
+
+export class ContainerbaseDatasource extends Datasource {
+  static readonly id = 'containerbase';
+
+  constructor() {
+    super(ContainerbaseDatasource.id);
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timestamp is taken from the `releaseTimestamp` field of each version, when it is known.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is taken from the `sourceUrl` field of the tool file, when it is known.';
+
+  /**
+   * Reads the root index of the registry, `null` when it has none, or
+   * `undefined` when it can't be read. The index is optional, so errors don't
+   * fail the lookup, and `undefined` isn't cached, so the next lookup retries.
+   */
+  private fetchFormats(
+    registryUrl: string,
+  ): Promise<ContainerbaseFormats | null | undefined> {
+    return this.cached(
+      { key: buildCacheKey('formats', registryUrl) },
+      async () => {
+        try {
+          return await this.fetchJsonOrNull(
+            joinUrlParts(registryUrl, 'index.json'),
+            ContainerbaseFormats,
+          );
+        } catch (err) {
+          logger.debug(
+            { err, datasource: this.id, registryUrl },
+            'Failed to read the containerbase root index',
+          );
+          return undefined;
+        }
+      },
+    );
+  }
+
+  /**
+   * Warns once when the root index marks the format this datasource reads as
+   * deprecated.
+   */
+  private async checkFormat(registryUrl: string): Promise<void> {
+    const formats = await this.fetchFormats(registryUrl);
+    const format = formats?.formats.find(
+      ({ version }) => version === toolVersionsFormat,
+    );
+    if (format?.status === 'deprecated') {
+      logger.once.warn(
+        {
+          datasource: this.id,
+          registryUrl,
+          format: toolVersionsFormatPath,
+          removalDate: format.removalDate,
+        },
+        'The containerbase tool-versions format is deprecated, update Renovate',
+      );
+    }
+  }
+
+  /**
+   * Reads the tool file embedded in the Containerbase image, or `null` when
+   * Renovate doesn't run on Containerbase or the file is missing or invalid.
+   */
+  private async readEmbedded(
+    packageName: string,
+  ): Promise<ContainerbaseToolVersions | null> {
+    if (!isContainerbase()) {
+      return null;
+    }
+    const file = `${toolVersionsPath}/${toolVersionsFormatPath}/${packageName}.json`;
+    try {
+      const content = await readSystemFile(file, 'utf8');
+      return Json.pipe(ContainerbaseToolVersions).parse(content);
+    } catch (err) {
+      logger.debug(
+        { err, datasource: this.id, file },
+        'Failed to read the embedded containerbase tool-versions data',
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Converts a tool file to the release result, or `null` without versions.
+   * Versions which need a newer containerbase than the one Renovate runs with
+   * are skipped.
+   */
+  private toReleaseResult(
+    body: ContainerbaseToolVersions,
+    registryUrl: string | undefined,
+  ): ReleaseResult | null {
+    const { versions, needed } = filterByMinCb(body, packageVersion);
+    if (needed.length) {
+      logger.trace(
+        { datasource: this.id, tool: body.tool, needed, packageVersion },
+        'Skipped the versions which need a newer containerbase',
+      );
+    }
+    const result: ReleaseResult = {
+      registryUrl,
+      sourceUrl: body.sourceUrl,
+      homepage: body.homepage,
+      releases: versions.map(
+        ({ version, prerelease, releaseTimestamp, constraints }) => {
+          const release: Release = {
+            version,
+            isStable: prerelease !== true,
+            releaseTimestamp: asTimestamp(releaseTimestamp),
+          };
+          const releaseConstraints = toConstraints(constraints);
+          if (releaseConstraints) {
+            release.constraints = releaseConstraints;
+          }
+          return release;
+        },
+      ),
+    };
+
+    return result.releases.length ? result : null;
+  }
+
+  private async fetchReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* v8 ignore next -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+
+    // the format check only warns, so it doesn't delay the tool request
+    const [, body] = await Promise.all([
+      this.checkFormat(registryUrl),
+      this.fetchJsonOrNull(
+        joinUrlParts(
+          registryUrl,
+          toolVersionsFormatPath,
+          `${packageName}.json`,
+        ),
+        ContainerbaseToolVersions,
+      ),
+    ]);
+    return body ? this.toReleaseResult(body, registryUrl) : null;
+  }
+
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const { packageName, registryUrl } = config;
+    // the package name is a containerbase tool, nothing else is published
+    if (!isToolName(packageName)) {
+      logger.warn(
+        { datasource: this.id, packageName },
+        'Unknown containerbase tool',
+      );
+      throw new Error(`Unknown containerbase tool: ${packageName}`);
+    }
+
+    try {
+      return await this.cached(
+        {
+          key: buildCacheKey(registryUrl, packageName),
+          fallback: true,
+        },
+        () => this.fetchReleases(config),
+      );
+    } catch (err) {
+      // only when the site can't be reached and there is no cached result,
+      // other errors like a wrong token must stay visible
+      if (!isUnreachable(err)) {
+        throw err;
+      }
+      const embedded = await this.readEmbedded(packageName);
+      if (!embedded) {
+        throw err;
+      }
+      // warn once, so an outage or a broken mirror doesn't go unnoticed
+      logger.once.warn(
+        { datasource: this.id, registryUrl },
+        "The containerbase tool-versions site can't be reached, using the data embedded in the image",
+      );
+      logger.debug(
+        { err, datasource: this.id, packageName, registryUrl },
+        'Using the tool-versions data embedded in the containerbase image',
+      );
+      return this.toReleaseResult(embedded, registryUrl);
+    }
+  }
+}
