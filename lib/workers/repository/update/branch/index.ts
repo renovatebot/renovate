@@ -279,6 +279,7 @@ export async function processBranch(
   forceRebase = false,
 ): Promise<ProcessBranchResult> {
   let commitSha: string | null = null;
+  let platformAutomergeDisabled = false;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
   let branchExists = await scm.branchExists(config.branchName);
@@ -927,6 +928,25 @@ export async function processBranch(
         );
       }
 
+      // platform automerge keeps the commit message it was enabled with, so disable it before pushing and re-enable it afterwards
+      const platformPrOptions = getPlatformPrOptions(config);
+      if (
+        branchPr &&
+        platformPrOptions.usePlatformAutomerge &&
+        platform.disablePlatformAutomerge
+      ) {
+        if (GlobalConfig.get('dryRun')) {
+          logger.info(
+            `DRY-RUN: Would disable platform automerge for PR #${branchPr.number}`,
+          );
+        } else {
+          platformAutomergeDisabled = await platform.disablePlatformAutomerge({
+            number: branchPr.number,
+            platformPrOptions,
+          });
+        }
+      }
+
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
@@ -958,7 +978,7 @@ export async function processBranch(
     if (branchPr) {
       const platformPrOptions = getPlatformPrOptions(config);
       if (
-        commitSha &&
+        (commitSha || platformAutomergeDisabled) &&
         platformPrOptions.usePlatformAutomerge &&
         platform.reattemptPlatformAutomerge
       ) {
@@ -967,9 +987,13 @@ export async function processBranch(
             `DRY-RUN: Would reattempt platform automerge for PR #${branchPr.number}`,
           );
         } else {
+          // retry once only when Renovate disabled platform automerge itself
+          const retry = platformAutomergeDisabled;
+          platformAutomergeDisabled = false;
           await platform.reattemptPlatformAutomerge({
             number: branchPr.number,
             platformPrOptions,
+            retry,
           });
         }
       }
@@ -1063,12 +1087,41 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    return handleProcessBranchError(err, {
+    // re-enable platform automerge which was disabled before the commit
+    let reenableRateLimitErr: Error | undefined;
+    if (platformAutomergeDisabled && branchPr) {
+      platformAutomergeDisabled = false;
+      try {
+        await platform.reattemptPlatformAutomerge?.({
+          number: branchPr.number,
+          platformPrOptions: getPlatformPrOptions(config),
+          retry: true,
+        });
+      } catch (reattemptErr) {
+        // keep handling the original error
+        logger.warn(
+          { err: reattemptErr },
+          'Error re-enabling platform automerge',
+        );
+        if (
+          reattemptErr instanceof Error &&
+          reattemptErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
+        ) {
+          reenableRateLimitErr = reattemptErr;
+        }
+      }
+    }
+    const result = handleProcessBranchError(err, {
       branchExists,
       branchPr,
       commitSha,
       updatesVerified,
     });
+    // the original error was handled without being passed up, so pass up the rate limit hit while re-enabling
+    if (reenableRateLimitErr) {
+      throw reenableRateLimitErr;
+    }
+    return result;
   }
   try {
     logger.debug('Ensuring PR');

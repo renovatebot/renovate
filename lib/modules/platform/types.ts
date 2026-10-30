@@ -154,6 +154,8 @@ export interface UpdatePrConfig {
 export interface ReattemptPlatformAutomergeConfig {
   number: number;
   platformPrOptions?: PlatformPrOptions;
+  /** retry once when enabling fails, used after Renovate disabled platform automerge */
+  retry?: boolean;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -310,6 +312,9 @@ export interface Platform {
   reattemptPlatformAutomerge?(
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
+  disablePlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<boolean>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,
