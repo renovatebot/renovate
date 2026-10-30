@@ -34,7 +34,7 @@ import {
   repoInfoQuery,
 } from './graphql.ts';
 import * as github from './index.ts';
-import type { ApiPageCache, GhRestPr } from './types.ts';
+import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
 
 const githubApiHost = 'https://api.github.com';
 const graphqlRateLimitResponse = {
@@ -1918,6 +1918,88 @@ describe('modules/platform/github/index', () => {
         expect(item).toBeDefined();
         expect(item.body).toBeUndefined();
         expect(item.bodyStruct).toEqual({ hash: hashBody('foo') });
+      });
+    });
+
+    describe('Automerge state', () => {
+      type PrCache = ApiPageCache<GhPr>;
+
+      function getCachedItems(): PrCache['items'] {
+        const repoCache = repository.getCache();
+        const pullRequestsCache = repoCache.platform?.github
+          ?.pullRequestsCache as PrCache;
+        return pullRequestsCache.items;
+      }
+
+      it('stores the automerge state in the cache', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [
+          {
+            ...pr2,
+            auto_merge: {
+              enabled_by: { login: 'renovate[bot]' },
+              merge_method: 'squash',
+              commit_title: 'Update foo (#2)',
+              commit_message: 'Some body',
+            },
+          },
+          { ...pr1, auto_merge: null },
+        ]);
+        await github.initRepo({ repository: 'some/repo' });
+
+        await github.getPrList();
+
+        const items = getCachedItems();
+        expect(items[2].autoMerge).toEqual({
+          enabledBy: 'renovate[bot]',
+          commitTitle: 'Update foo (#2)',
+          commitMessage: 'Some body',
+        });
+        expect(items[1].autoMerge).toBeNull();
+      });
+
+      it('leaves the automerge state out when the response has none', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope.get(pagePath(1)).reply(200, [pr1]);
+        await github.initRepo({ repository: 'some/repo' });
+
+        await github.getPrList();
+
+        expect(getCachedItems()[1]).not.toHaveProperty('autoMerge');
+      });
+
+      it('replaces cached items without automerge state when they are synced', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        const repoCache = repository.getCache();
+        repoCache.platform = {
+          github: {
+            pullRequestsCache: {
+              items: {
+                1: {
+                  number: 1,
+                  sourceBranch: 'branch-1',
+                  title: 'PR #1',
+                  state: 'open',
+                  updated_at: t1,
+                  node_id: '12345',
+                },
+              },
+              lastModified: t1,
+            },
+          },
+        };
+        initRepoMock(scope, 'some/repo');
+        scope
+          .get(pagePath(1, 20))
+          .reply(200, [{ ...pr1, updated_at: t2, auto_merge: null }]);
+        await github.initRepo({ repository: 'some/repo' });
+
+        const res = await github.getPrList();
+
+        expect(res).toMatchObject([{ number: 1, autoMerge: null }]);
+        expect(getCachedItems()[1].autoMerge).toBeNull();
       });
     });
 
