@@ -268,6 +268,7 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
+            versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
@@ -577,6 +578,7 @@ export class Vulnerabilities {
       depVersion,
       fixedVersion,
       datasource,
+      versioning: depVersioning,
       packageFileConfig,
     } = vul;
     if (isNullOrUndefined(fixedVersion)) {
@@ -586,8 +588,8 @@ export class Vulnerabilities {
       return null;
     }
 
-    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
-    const versioning = getDefaultVersioning(datasource);
+    // Prefer the `versioning` already assigned to the dependency by its manager
+    const versioning = depVersioning ?? getDefaultVersioning(datasource);
 
     logger.debug(
       {
