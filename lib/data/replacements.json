@@ -1308,6 +1308,7 @@
     "description": "`net.sf.ucanaccess:ucanaccess` is no longer maintained, development continues at `io.github.spannm:ucanaccess`.",
     "packageRules": [
       {
+        "matchCurrentVersion": ">=5.0.1",
         "matchDatasources": ["maven"],
         "matchPackageNames": ["net.sf.ucanaccess:ucanaccess"],
         "replacementName": "io.github.spannm:ucanaccess",
