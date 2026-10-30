@@ -1106,7 +1106,7 @@ export async function processBranch(
     }
     // v8 ignore else -- TODO: add test #40625
     if (ensurePrResult.type === 'with-pr') {
-      const { pr } = ensurePrResult;
+      const { pr, isNewPr } = ensurePrResult;
       branchPr = pr;
       // Retry setting branch statuses after PR/MR creation so that
       // platforms using MR pipelines (e.g. GitLab) have a pipeline to
@@ -1182,9 +1182,8 @@ export async function processBranch(
 
         if (config.automerge) {
           logger.debug('PR is configured for automerge');
-          // skip automerge if there is a new commit since status checks aren't done yet
-          // v8 ignore else -- TODO: add test #40625
-          if (config.ignoreTests === true || !commitSha) {
+          // skip automerge if there is a new commit or a newly created PR since status checks aren't done yet
+          if (config.ignoreTests === true || (!commitSha && !isNewPr)) {
             logger.debug('checking auto-merge');
             const prAutomergeResult = await checkAutoMerge(pr, config);
             if (prAutomergeResult?.automerged) {
@@ -1194,6 +1193,10 @@ export async function processBranch(
                 commitSha,
               };
             }
+          } else {
+            logger.debug(
+              'Skipping automerge until status checks are reported for the new commit or PR',
+            );
           }
         } else {
           logger.debug('PR is not configured for automerge');

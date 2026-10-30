@@ -80,6 +80,7 @@ export function getPlatformPrOptions(
 export interface ResultWithPr {
   type: 'with-pr';
   pr: Pr;
+  isNewPr?: boolean;
 }
 
 export interface ResultWithoutPr {
@@ -643,7 +644,7 @@ export async function ensurePr(
       }
       setPrCache(branchName, prBodyFingerprint, true);
       logger.debug(`Created Pull Request #${pr.number}`);
-      return { type: 'with-pr', pr };
+      return { type: 'with-pr', pr, isNewPr: true };
     }
   } catch (err) {
     if (

@@ -1898,6 +1898,87 @@ describe('workers/repository/update/branch/index', () => {
       expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
 
+    it('skips automerge if a new commit was pushed', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce('123test');
+      const res = await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+      });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toMatchObject({ result: 'done', commitSha: '123test' });
+    });
+
+    it('skips automerge if the PR was newly created', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+        isNewPr: true,
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const res = await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+      });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toMatchObject({ result: 'done' });
+    });
+
+    it('tries automerge for a newly created PR if ignoreTests is enabled', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+        isNewPr: true,
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      const res = await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        ignoreTests: true,
+      });
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+      expect(res).toMatchObject({ result: 'automerged' });
+    });
+
     it('ensures PR when impossible to automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
