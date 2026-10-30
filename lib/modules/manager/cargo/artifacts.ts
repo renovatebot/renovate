@@ -22,6 +22,7 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { extractLockFileContentVersions } from './locked-version.ts';
+import { getMinPublishAgeEnv } from './minimum-release-age.ts';
 
 const gitExec = withGitEnvironment(['cargo', CrateDatasource.id]);
 
@@ -29,6 +30,7 @@ async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
   constraint: string | undefined,
+  extraEnv: Record<string, string>,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
     manifestPath,
@@ -41,6 +43,7 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {},
+    extraEnv,
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await gitExec(cmd, execOptions);
@@ -50,6 +53,7 @@ async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
   constraint: string | undefined,
+  extraEnv: Record<string, string>,
 ): Promise<void> {
   const cmds = [];
 
@@ -78,6 +82,7 @@ async function cargoUpdatePrecise(
 
   const execOptions: ExecOptions = {
     docker: {},
+    extraEnv,
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
 
@@ -123,6 +128,7 @@ async function updateArtifactsImpl(
   }
 
   const rustConstraint = await resolveToolConstraint(config, 'rust');
+  const extraEnv = getMinPublishAgeEnv(config);
 
   try {
     return await updateLockFile({
@@ -133,7 +139,7 @@ async function updateArtifactsImpl(
         logger.debug(`Updating ${lockFileName}`);
 
         if (isLockFileMaintenance) {
-          await cargoUpdate(packageFileName, true, rustConstraint);
+          await cargoUpdate(packageFileName, true, rustConstraint, extraEnv);
           return;
         }
 
@@ -155,13 +161,14 @@ async function updateArtifactsImpl(
               'Missing locked version for dependency',
             );
           }
-          await cargoUpdate(packageFileName, false, rustConstraint);
+          await cargoUpdate(packageFileName, false, rustConstraint, extraEnv);
         } else {
           // If all dependencies have locked versions then update them precisely.
           await cargoUpdatePrecise(
             packageFileName,
             updatedDeps,
             rustConstraint,
+            extraEnv,
           );
         }
       },
