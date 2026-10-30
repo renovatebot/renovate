@@ -3,6 +3,18 @@ import * as monorepos from './monorepos.preset.ts';
 
 const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
 
+const nodeJsMatchers = {
+  matchDatasources: ['docker', 'node-version'],
+  matchPackageNames: [
+    '/(?:^|/)node$/', // node or ends with "/node, except those below"
+    '!calico/node',
+    '!docker.io/calico/node',
+    '!ghcr.io/devcontainers/features/node',
+    '!kindest/node',
+    '!docker.io/kindest/node',
+  ],
+};
+
 const staticGroups = {
   all: {
     description: 'Group all updates together.',
@@ -370,15 +382,22 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        matchDatasources: ['docker', 'node-version'],
-        matchPackageNames: [
-          '/(?:^|/)node$/', // node or ends with "/node, except those below"
-          '!calico/node',
-          '!docker.io/calico/node',
-          '!ghcr.io/devcontainers/features/node',
-          '!kindest/node',
-          '!docker.io/kindest/node',
-        ],
+        ...nodeJsMatchers,
+      },
+    ],
+  },
+  nodeJsWithTypes: {
+    description: 'Group Node.js runtime updates together with `@types/node`.',
+    extends: ['group:nodeJs'],
+    packageRules: [
+      {
+        groupName: 'Node.js',
+        ...nodeJsMatchers,
+      },
+      {
+        groupName: 'Node.js',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@types/node'],
       },
     ],
   },
