@@ -28,7 +28,7 @@ export const publicGoproxyUrl = 'https://proxy.golang.org';
  *
  * An unset `GOPROXY` is the default, so it is public too.
  *
- * A `hostType: go` (or `go-proxy`) host rule with credentials for the module's host is also a declaration that the module is private, as it can't be read without them.
+ * A `hostType: go` host rule with credentials for the module's host is also a declaration that the module is private, as it can't be read without them. The same goes for a `hostType: go-proxy` host rule with credentials for one of the `GOPROXY` hosts, as that is where `go-proxy` credentials are sent.
  *
  * @see https://go.dev/ref/mod#private-modules
  */
@@ -36,16 +36,19 @@ function isPublicProxy({ url }: GoproxyItem): boolean {
   return trimTrailingSlash(url) === publicGoproxyUrl;
 }
 
-function hasGoHostRuleCredentials(packageName: string): boolean {
-  const url = `https://${packageName}`;
-  return [
-    ...hostRules.findAll({ hostType: 'go' }),
-    ...hostRules.findAll({ hostType: 'go-proxy' }),
-  ].some(
-    (rule) =>
-      (!rule.matchHost || hostRules.matchesHost(url, rule.matchHost)) &&
-      [rule.token, rule.password, rule.httpsPrivateKey].some(isNonEmptyString),
-  );
+function hasHostRuleCredentials(hostType: string, urls: string[]): boolean {
+  return hostRules
+    .findAll({ hostType })
+    .some(
+      (rule) =>
+        urls.some(
+          (url) =>
+            !rule.matchHost || hostRules.matchesHost(url, rule.matchHost),
+        ) &&
+        [rule.token, rule.password, rule.httpsPrivateKey].some(
+          isNonEmptyString,
+        ),
+    );
 }
 
 export function isPublicGoPackage(packageName: string): boolean {
@@ -53,11 +56,18 @@ export function isPublicGoPackage(packageName: string): boolean {
     return false;
   }
 
-  if (hasGoHostRuleCredentials(packageName)) {
+  if (hasHostRuleCredentials('go', [`https://${packageName}`])) {
     return false;
   }
 
   const proxies = parseGoproxy();
+
+  const proxyUrls = proxies
+    .map(({ url }) => url)
+    .filter((url) => url !== 'off' && url !== 'direct');
+  if (hasHostRuleCredentials('go-proxy', proxyUrls)) {
+    return false;
+  }
 
   return proxies.every(
     (proxy) =>
