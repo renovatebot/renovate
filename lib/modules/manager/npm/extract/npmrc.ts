@@ -42,6 +42,29 @@ export function parseNpmrcCooldown(
 }
 
 /**
+ * Parses the `minimum-release-age` setting of an `.npmrc`, in minutes, which pnpm reads before v11.
+ */
+export function parseNpmrcPnpmMinimumReleaseAge(
+  npmrcContent: string | null | undefined,
+): number | null {
+  if (!npmrcContent) {
+    return null;
+  }
+  const minimumReleaseAge = ini.parse(npmrcContent)['minimum-release-age'];
+  if (!isNonEmptyString(minimumReleaseAge)) {
+    return null;
+  }
+  const minutes = parseInt(minimumReleaseAge, 10);
+  if (isNumber(minutes) && minutes >= 0) {
+    return minutes;
+  }
+  logger.debug(
+    `Invalid minimum-release-age in .npmrc: ${minimumReleaseAge}, ignoring`,
+  );
+  return null;
+}
+
+/**
  * The minimum release age set by the `before` or `min-release-age` setting of an `.npmrc`, as a duration.
  *
  * A `before` date counts as the time elapsed since that date.

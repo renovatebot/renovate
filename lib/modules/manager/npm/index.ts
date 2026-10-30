@@ -3,7 +3,11 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
-import { minReleaseAgeNpmRange } from './minimum-release-age.ts';
+import {
+  minReleaseAgeNpmRange,
+  minimumReleaseAgeEnforcedPnpmRange,
+  minimumReleaseAgePnpmRange,
+} from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
@@ -37,7 +41,12 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
     enforcedInLockFile: true,
     note: 'Passes `--before`, unless the `.npmrc` has `min-release-age`. Reads `before` and `min-release-age` from the repository `.npmrc`; `before` works with every npm version. If only the `.npmrc` sets `min-release-age`, npm enforces it from v11.10.0.',
   },
-  pnpm: {},
+  pnpm: {
+    passesMinimumReleaseAge: minimumReleaseAgePnpmRange,
+    readsConfiguredAge: minimumReleaseAgePnpmRange,
+    enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
+    note: 'Passes `--config.minimum-release-age` with the larger of `minimumReleaseAge` and the pnpm value. Reads `minimumReleaseAge` from the `pnpm-workspace.yaml`, and before pnpm v11 `minimum-release-age` from the `.npmrc`. From pnpm v11, the pnpm default of 1 day counts. pnpm v10.16.0 and v11.0.0 to v11.0.3 do not enforce it in every case.',
+  },
   yarn: {},
 };
 
