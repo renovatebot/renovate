@@ -18,8 +18,9 @@ Non-version configuration sections (`[settings]`, `[tools]`, `[env]`, `[shell]`,
 
 ### Custom plugin tools
 
-Tools that aren't built in are installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
-Renovate resolves these from the plugin's `[resolve] git-url`, which points at the upstream repository proto reads git tags from:
+A tool can be installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
+As in proto, a plugin you declare overrides a built-in tool of the same name.
+Renovate resolves these from the plugin's `[resolve] git-url` (`git_url` in format v2), which points at the upstream repository proto reads git tags from:
 
 ```toml
 buf = "1.71.0"
@@ -28,7 +29,7 @@ buf = "1.71.0"
 buf = "https://raw.githubusercontent.com/example/proto-plugins/main/buf/plugin.toml"
 ```
 
-Both `file://` and `http(s)://` plugins are resolved lazily by the `proto-plugin` datasource, which reads the plugin definition when looking up versions and maps it to the `github-tags` or `gitlab-tags` datasource for its repository.
+Both `file://` and `https://` plugins are resolved lazily by the `proto-plugin` datasource, which reads the plugin definition when looking up versions and maps it to the `github-tags`, `gitlab-tags` or `git-tags` datasource for its repository.
 Since proto pins are bare versions while git tags are commonly `v`-prefixed, an optional leading `v` is stripped when matching.
 
 ### Supported tools
@@ -55,12 +56,13 @@ Renovate's `proto` manager supports the following built-in proto tools:
 
 ### Limitations
 
-- **WASM plugins**: Tools installed via a compiled WASM plugin (a `.wasm` locator, or a `github://` release-asset locator) carry no introspectable version source, so they are reported as `unsupported-datasource` and skipped.
+- **WASM, JSON and YAML plugins**: Only plugin locators ending in `.toml` are read.
+  Tools installed via a WASM plugin (a `.wasm` or `github://` locator) or a JSON or YAML plugin are reported as `unsupported-datasource` and skipped.
   You can use Renovate's `customManagers` with regex to handle these if needed.
 
-- **Plugin resolve options**: Only `[resolve] git-url` is read. A plugin's `version-pattern` is ignored, so tags must be plain versions with an optional leading `v`, and Renovate finds no releases for a plugin that resolves through `manifest-url`.
+- **Absolute plugin paths**: A `file://` locator with an absolute path points outside the repository and is reported as `unsupported-url`.
 
-- **Non-GitHub/GitLab repositories**: A custom plugin whose repository is not hosted on `github.com` or `gitlab.com` has no releases found.
+- **Plugin resolve options**: Only the repository URL in `[resolve]` is read. A plugin's `version-pattern` is ignored, so tags must be plain versions with an optional leading `v`, and Renovate finds no releases for a plugin that resolves through `manifest-url`.
 
 - **Version aliases**: Values like `latest`, `stable`, `canary`, or `nightly` are skipped as they cannot be updated via semver.
 

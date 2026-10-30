@@ -1,89 +1,35 @@
 import { codeBlock } from 'common-tags';
-import {
-  type ProtoPlugin,
-  ProtoPluginToml,
-  resolvePluginConfig,
-} from './schema.ts';
+import { ProtoPluginGitUrlToml } from './schema.ts';
 
 describe('modules/datasource/proto-plugin/schema', () => {
-  describe('resolvePluginConfig()', () => {
-    function parse(content: string): ProtoPlugin {
-      const parsed = ProtoPluginToml.safeParse(content);
-      if (!parsed.success) {
-        throw parsed.error;
-      }
-      return parsed.data;
-    }
-
-    it('derives a github-tags config from git-url', () => {
-      const plugin = parse(codeBlock`
+  describe('ProtoPluginGitUrlToml', () => {
+    it('reads a format v1 git-url', () => {
+      const gitUrl = ProtoPluginGitUrlToml.parse(codeBlock`
         [resolve]
         git-url = "https://github.com/bufbuild/buf"
       `);
 
-      expect(resolvePluginConfig(plugin)).toEqual({
-        datasource: 'github-tags',
-        packageName: 'bufbuild/buf',
-        registryUrl: 'https://github.com',
-      });
+      expect(gitUrl).toBe('https://github.com/bufbuild/buf');
     });
 
-    it('ignores the install download-url, which proto never resolves from', () => {
-      const plugin = parse(codeBlock`
-        [install]
-        download-url = "https://github.com/j178/prek/releases/download/v{version}/{download_file}"
-      `);
+    it('reads a format v2 git_url', () => {
+      const gitUrl = ProtoPluginGitUrlToml.parse(codeBlock`
+        format = "2"
 
-      expect(resolvePluginConfig(plugin)).toEqual({
-        skipReason: 'unsupported-datasource',
-      });
-    });
-
-    it('derives a gitlab-tags config for gitlab repos', () => {
-      const plugin = parse(codeBlock`
         [resolve]
-        git-url = "https://gitlab.com/gitlab-org/cli"
+        git_url = "https://github.com/bufbuild/buf"
       `);
 
-      expect(resolvePluginConfig(plugin)).toEqual({
-        datasource: 'gitlab-tags',
-        packageName: 'gitlab-org/cli',
-        registryUrl: 'https://gitlab.com',
-      });
+      expect(gitUrl).toBe('https://github.com/bufbuild/buf');
     });
 
-    it('strips a trailing .git suffix from the resolved repo', () => {
-      const plugin = parse(codeBlock`
+    it('returns null for a plugin that resolves through a manifest', () => {
+      const gitUrl = ProtoPluginGitUrlToml.parse(codeBlock`
         [resolve]
-        git-url = "https://github.com/bufbuild/buf.git"
+        manifest-url = "https://example.com/versions.json"
       `);
 
-      expect(resolvePluginConfig(plugin)).toEqual({
-        datasource: 'github-tags',
-        packageName: 'bufbuild/buf',
-        registryUrl: 'https://github.com',
-      });
-    });
-
-    it('returns an unsupported-url skip for non github/gitlab hosts', () => {
-      const plugin = parse(codeBlock`
-        [resolve]
-        git-url = "https://bitbucket.org/foo/bar"
-      `);
-
-      expect(resolvePluginConfig(plugin)).toEqual({
-        skipReason: 'unsupported-url',
-      });
-    });
-
-    it('returns an unsupported-datasource skip when no repo url exists', () => {
-      const plugin = parse(codeBlock`
-        name = "empty"
-      `);
-
-      expect(resolvePluginConfig(plugin)).toEqual({
-        skipReason: 'unsupported-datasource',
-      });
+      expect(gitUrl).toBeNull();
     });
   });
 });

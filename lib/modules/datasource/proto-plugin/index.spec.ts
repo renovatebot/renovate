@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 import { ProtoPluginDatasource } from './index.ts';
@@ -18,6 +19,7 @@ const gitlabGetReleases = vi.spyOn(
   GitlabTagsDatasource.prototype,
   'getReleases',
 );
+const gitTagsGetReleases = vi.spyOn(GitTagsDatasource.prototype, 'getReleases');
 
 const pluginUrl = 'https://example.com/plugins/buf.toml';
 
@@ -78,22 +80,51 @@ describe('modules/datasource/proto-plugin/index', () => {
       expect(res).toEqual(delegateResult);
     });
 
-    it('returns null when the plugin repo host is unsupported', async () => {
+    it('keeps the full path of a gitlab subgroup project', async () => {
       httpMock
         .scope('https://example.com')
-        .get('/plugins/weird.toml')
+        .get('/plugins/tool.toml')
         .reply(
           200,
           codeBlock`
             [resolve]
-            git-url = "https://bitbucket.org/foo/bar"
+            git-url = "https://gitlab.com/group/sub/tool.git"
           `,
         );
+      gitlabGetReleases.mockResolvedValueOnce(null);
+
+      await datasource.getReleases({
+        packageName: 'https://example.com/plugins/tool.toml',
+      });
+
+      expect(gitlabGetReleases).toHaveBeenCalledWith({
+        packageName: 'group/sub/tool',
+        registryUrl: 'https://gitlab.com',
+      });
+    });
+
+    it('delegates other hosts to the git tags datasource', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/plugins/tool.toml')
+        .reply(
+          200,
+          codeBlock`
+            [resolve]
+            git-url = "https://git.example.com/foo/bar.git"
+          `,
+        );
+      const delegateResult = { releases: [{ version: 'v1.0.0' }] };
+      gitTagsGetReleases.mockResolvedValueOnce(delegateResult);
 
       const res = await datasource.getReleases({
-        packageName: 'https://example.com/plugins/weird.toml',
+        packageName: 'https://example.com/plugins/tool.toml',
       });
-      expect(res).toBeNull();
+
+      expect(gitTagsGetReleases).toHaveBeenCalledWith({
+        packageName: 'https://git.example.com/foo/bar.git',
+      });
+      expect(res).toEqual(delegateResult);
     });
 
     it('returns null when the plugin toml has no repo url', async () => {

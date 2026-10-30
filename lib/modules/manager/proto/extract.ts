@@ -1,7 +1,5 @@
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
-import { isHttpUrl } from '../../../util/url.ts';
 import { ProtoPluginDatasource } from '../../datasource/proto-plugin/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { ProtoToolsFile } from './schema.ts';
@@ -22,7 +20,7 @@ export function extractPackageFile(
   if (!parsed.success) {
     logger.debug(
       { err: parsed.error, packageFile },
-      'proto: failed to parse .prototools file',
+      'Error parsing proto .prototools file.',
     );
     return null;
   }
@@ -47,32 +45,28 @@ function toolConfig(
     return { skipReason: 'unsupported-version' };
   }
 
-  const builtin = protoTooling[name]?.config;
-  if (builtin) {
-    return builtin;
+  // proto lets a configured locator override a built-in tool. The proto-plugin
+  // datasource reads the plugin at lookup time, so extraction stays free of I/O.
+  if (locator) {
+    return pluginConfig(locator, packageFile);
   }
 
-  // A non-built-in tool is resolvable via its plugin locator; the proto-plugin
-  // datasource reads the plugin definition (locally or over http) at lookup
-  // time, so extraction stays free of I/O.
-  return locator
-    ? pluginConfig(locator, packageFile)
-    : { skipReason: 'unsupported-datasource' };
+  return protoTooling[name]?.config ?? { skipReason: 'unsupported-datasource' };
 }
 
 function pluginConfig(
   locator: string,
   packageFile: string,
 ): Partial<PackageDependency> {
-  // WASM plugins carry no introspectable version source.
-  if (locator.endsWith('.wasm')) {
+  // Only TOML plugins are read; JSON, YAML and WASM plugins are skipped.
+  if (!locator.endsWith('.toml')) {
     return { skipReason: 'unsupported-datasource' };
   }
 
   // proto pins are bare while git tags are commonly `v`-prefixed.
   const extractVersion = '^v?(?<version>.+)';
 
-  if (isHttpUrl(locator)) {
+  if (locator.startsWith('https://')) {
     return {
       datasource: ProtoPluginDatasource.id,
       packageName: locator,
@@ -81,10 +75,14 @@ function pluginConfig(
   }
 
   if (locator.startsWith('file://')) {
-    const relativePath = locator.replace(regEx(/^file:\/\//), '');
+    const path = locator.slice('file://'.length);
+    // An absolute path points outside the repository.
+    if (path.startsWith('/')) {
+      return { skipReason: 'unsupported-url' };
+    }
     return {
       datasource: ProtoPluginDatasource.id,
-      packageName: getSiblingFileName(packageFile, relativePath),
+      packageName: getSiblingFileName(packageFile, path),
       extractVersion,
     };
   }
