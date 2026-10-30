@@ -3,16 +3,33 @@ import { dir } from 'tmp-promise';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepositoryCacheConfig } from '../../../config/types.ts';
+import * as nugetApi from '../../../modules/datasource/nuget/index.ts';
 import type { WorkerPlatformConfig } from './apis.ts';
-import { initializeCaches } from './cache.ts';
+import { initializeCaches, resetCaches } from './cache.ts';
 
 describe('workers/repository/init/cache', () => {
+  let tmpDir: DirectoryResult;
+
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ cacheDir: tmpDir.path });
+  });
+
+  afterEach(async () => {
+    GlobalConfig.reset();
+    await tmpDir.cleanup();
+  });
+
+  describe('resetCaches()', () => {
+    it('resets caches', async () => {
+      await expect(resetCaches()).resolves.toBeUndefined();
+    });
+  });
+
   describe('initializeCaches()', () => {
     let config: WorkerPlatformConfig;
-    let tmpDir: DirectoryResult;
 
-    beforeEach(async () => {
-      tmpDir = await dir({ unsafeCleanup: true });
+    beforeEach(() => {
       config = {
         repository: '',
         repositoryCache: partial<RepositoryCacheConfig>(),
@@ -21,15 +38,18 @@ describe('workers/repository/init/cache', () => {
         defaultBranch: 'main',
         isFork: false,
       };
-      GlobalConfig.set({ cacheDir: tmpDir.path });
-    });
-
-    afterEach(async () => {
-      await tmpDir.cleanup();
     });
 
     it('initializes', async () => {
       await expect(initializeCaches(config)).resolves.toBeUndefined();
+    });
+
+    it('initializes with nugetConfig', async () => {
+      const spy = vi.spyOn(nugetApi, 'setNugetConfig');
+      config.nugetConfig = '<configuration />';
+      await expect(initializeCaches(config)).resolves.toBeUndefined();
+      expect(spy).toHaveBeenCalledWith();
+      expect(spy).toHaveBeenCalledWith('<configuration />');
     });
   });
 });
