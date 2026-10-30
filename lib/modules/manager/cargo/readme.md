@@ -7,6 +7,14 @@ When using the default rangeStrategy=auto:
 
 The `update-lockfile` default means that most upgrades will update `Cargo.lock` files without the need to change the value in `Cargo.toml`.
 
+### Rust version
+
+Renovate reads the Rust version from the closest `rust-toolchain.toml`, or else the closest `rust-toolchain` file.
+Renovate uses this version as the `rust` constraint, so it runs the `cargo` commands with that Rust version.
+This only applies if the file pins a version like `1.100.0` or `1.100`, not a channel like `stable`.
+A `rust` constraint in your Renovate config takes precedence.
+Renovate does not use `package.rust-version` from `Cargo.toml`, as it only sets the oldest Rust version which the crate supports.
+
 ### Private Modules Authentication
 
 Before running the `cargo` commands to update the `cargo.lock`, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
