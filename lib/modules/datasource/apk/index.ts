@@ -162,10 +162,12 @@ export class ApkDatasource extends Datasource {
         key: componentUrl,
         ttlMinutes: 60,
         fallback: true,
-        // Soft failures resolve to an empty index, which must not be cached as a valid one
-        shouldCacheResult: isNonEmptyObject,
       },
-      () => this._getPackages(componentUrl),
+      async (ctx) => {
+        const packages = await this._getPackages(componentUrl);
+        ctx.cacheable = isNonEmptyObject(packages);
+        return packages;
+      },
     );
   }
 
