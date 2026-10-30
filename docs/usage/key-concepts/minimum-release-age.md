@@ -283,6 +283,10 @@ For all other managers, lock file maintenance is treated like any other update w
 With the default `minimumReleaseAgeBehaviour=timestamp-required`, the `renovate/stability-days` status check stays pending while `minimumReleaseAge` is set.
 The `security:minimumReleaseAge*` presets set `minimumReleaseAge=null` for lock file maintenance, so these branches are not held back.
 
+Some managers resolve versions themselves during lock file maintenance, and apply `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to that resolution:
+
+- [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`, Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
+
 ### What happens to security updates?
 
 Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
