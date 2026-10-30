@@ -58,4 +58,6 @@ export type NugetBracketRange =
     };
 
 export type NugetRange =
-  NugetExactRange | NugetFloatingRange | NugetBracketRange;
+  | NugetExactRange
+  | NugetFloatingRange
+  | NugetBracketRange;

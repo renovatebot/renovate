@@ -393,9 +393,11 @@ export async function processBranch(
     }
     // TODO: types (#22198)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
-    if (!(
-      config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
-    )) {
+    if (
+      !(
+        config.reuseExistingBranch && config.cacheFingerprintMatch === 'matched'
+      )
+    ) {
       await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       if (res.artifactErrors && config.artifactErrors) {
@@ -744,10 +746,12 @@ export async function processBranch(
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);
         // v8 ignore else -- TODO: add test #40625
-        if (!(
-          config.suppressNotifications!.includes('artifactErrors') ||
-          config.suppressNotifications!.includes('lockFileErrors')
-        )) {
+        if (
+          !(
+            config.suppressNotifications!.includes('artifactErrors') ||
+            config.suppressNotifications!.includes('lockFileErrors')
+          )
+        ) {
           if (GlobalConfig.get('dryRun')) {
             logger.info(
               `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`,

@@ -1,6 +1,9 @@
 // managers supported by pip-tools mapped to Renovate's internal names
 export type SupportedManagers =
-  'pip_requirements' | 'pip_setup' | 'setup-cfg' | 'pep621';
+  | 'pip_requirements'
+  | 'pip_setup'
+  | 'setup-cfg'
+  | 'pep621';
 
 export type CommandType = 'pip-compile' | 'uv' | 'custom';
 

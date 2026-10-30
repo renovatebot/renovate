@@ -1,8 +1,9 @@
 {
-  "[javascript][typescript][json][jsonc][yaml][md]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "[javascript][typescript][json][jsonc][yaml]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "[md]": {
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.wordBasedSuggestions": "off"
   },
   "vitest.nodeEnv": {

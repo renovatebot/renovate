@@ -182,7 +182,9 @@ function extractDependency({
   versionSubContent,
 }: {
   descriptor:
-    string | GradleCatalogModuleDescriptor | GradleCatalogArtifactDescriptor;
+    | string
+    | GradleCatalogModuleDescriptor
+    | GradleCatalogArtifactDescriptor;
   versions: Record<string, GradleVersionPointerTarget>;
   depStartIndex: number;
   depSubContent: string;

@@ -300,7 +300,8 @@ export function ensureComment(_config: EnsureCommentConfig): Promise<boolean> {
 
 export function ensureCommentRemoval(
   _ensureCommentRemoval:
-    EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
+    | EnsureCommentRemovalConfigByTopic
+    | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   logger.debug('Not implemented ensureCommentRemoval');
   return Promise.resolve();

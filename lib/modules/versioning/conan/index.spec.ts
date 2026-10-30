@@ -59,7 +59,7 @@ describe('modules/versioning/conan/index', () => {
     ${'[<= 2.0.0, loose=False]'}                                 | ${true}
     ${'[<=  2.0.0, loose=False]'}                                | ${true}
     ${'[<    2.0.0, loose=False]'}                               | ${true}
-    ${'[<	2.0.0, loose=False]'}                                   | ${true}
+    ${'[<	2.0.0, loose=False]'}                                  | ${true}
     ${'[>=0.1.97, loose=False]'}                                 | ${true}
     ${'[>=0.1.97, loose=False]'}                                 | ${true}
     ${'[0.1.20 || 1.2.4, loose=False]'}                          | ${true}

@@ -367,17 +367,19 @@ export async function ensureDependencyDashboard(
       branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
-  if (!(
-    config.dependencyDashboard === true ||
-    config.dependencyDashboardApproval === true ||
-    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-      true ||
-    branches.some(
-      (branch) =>
-        !!branch.dependencyDashboardApproval ||
-        !!branch.dependencyDashboardPrApproval,
+  if (
+    !(
+      config.dependencyDashboard === true ||
+      config.dependencyDashboardApproval === true ||
+      config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
+        true ||
+      branches.some(
+        (branch) =>
+          !!branch.dependencyDashboardApproval ||
+          !!branch.dependencyDashboardPrApproval,
+      )
     )
-  )) {
+  ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { title: config.dependencyDashboardTitle },

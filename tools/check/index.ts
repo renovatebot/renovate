@@ -68,8 +68,8 @@ function pnpmScript(name: string): ParallelCheck {
 
 const PRETTIER_ENV = { PRETTIER_EXPERIMENTAL_CLI: '1' };
 
-const FIX_CHECKS = ['oxlint-fix', 'prettier-fix'].map(pnpmScript);
-const FIXABLE_CHECKS = ['oxlint', 'prettier'].map(pnpmScript);
+const FIX_CHECKS = ['oxlint-fix', 'oxfmt-fix', 'prettier-fix'].map(pnpmScript);
+const FIXABLE_CHECKS = ['oxlint', 'oxfmt', 'prettier'].map(pnpmScript);
 const OTHER_CHECKS = [
   'ls-lint',
   'git-check',
@@ -81,8 +81,19 @@ const OTHER_CHECKS = [
   'type-check',
 ].map(pnpmScript);
 
+/** Maps targets to the Markdown files Prettier formats: `.md` files as is, directories to a glob. */
+function toMarkdownTargets(targets: string[]): string[] {
+  return targets.flatMap((target) => {
+    if (target.endsWith('.md')) {
+      return [target];
+    }
+    return extname(target) === '' ? [`${target}/**/*.md`] : [];
+  });
+}
+
 function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
   const suffix = fix ? '-fix' : '';
+  const markdownTargets = toMarkdownTargets(targets);
   return [
     {
       name: `oxlint${suffix}`,
@@ -98,18 +109,33 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
       ],
     },
     {
-      name: `prettier${suffix}`,
+      name: `oxfmt${suffix}`,
       cmd: 'pnpm',
       args: [
         'exec',
-        'prettier',
-        fix ? '--write' : '--check',
+        'oxfmt',
+        ...(fix ? [] : ['--check']),
         '--no-error-on-unmatched-pattern',
-        '--cache',
         ...targets,
       ],
-      env: PRETTIER_ENV,
     },
+    ...(markdownTargets.length
+      ? [
+          {
+            name: `prettier${suffix}`,
+            cmd: 'pnpm',
+            args: [
+              'exec',
+              'prettier',
+              fix ? '--write' : '--check',
+              '--no-error-on-unmatched-pattern',
+              '--cache',
+              ...markdownTargets,
+            ],
+            env: PRETTIER_ENV,
+          },
+        ]
+      : []),
   ];
 }
 
@@ -170,7 +196,7 @@ function parseCliArgs(): CliArgs {
     .description('Fast local CI check script')
     .argument('[targets...]', 'files or directories to scope checks to')
     .option('--all', 'run fixers first, then all lint checks and tests')
-    .option('--fix', 'run fixers only (oxlint-fix, prettier-fix)')
+    .option('--fix', 'run fixers only (oxlint-fix, oxfmt-fix, prettier-fix)')
     .option('--no-test', 'skip tests')
     .option(
       '--coverage-dir <dir>',
