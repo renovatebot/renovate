@@ -1814,6 +1814,37 @@ describe('modules/platform/azure/index', () => {
       );
     });
 
+    it('does not set completion options when the merge commit message is unchanged', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            autoCompleteSetBy: { id: 123 },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The Title' },
+        '1',
+        1234,
+      );
+    });
+
     it('does not set completion options without auto-complete', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = vi.fn().mockResolvedValue({});

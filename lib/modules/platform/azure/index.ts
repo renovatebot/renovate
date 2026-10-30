@@ -771,7 +771,11 @@ export async function updatePr({
       );
     }
     // auto-complete keeps the merge commit message it was set with, so keep it in sync with the title
-    if (platformPrOptions.usePlatformAutomerge && pr.autoCompleteSetBy) {
+    if (
+      platformPrOptions.usePlatformAutomerge &&
+      pr.autoCompleteSetBy &&
+      pr.completionOptions?.mergeCommitMessage !== title
+    ) {
       objToUpdate.completionOptions = {
         ...pr.completionOptions,
         mergeCommitMessage: title,
