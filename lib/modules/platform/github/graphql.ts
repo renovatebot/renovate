@@ -90,6 +90,23 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
+export const prAutoMergeRequestQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
 export const enqueuePullRequestMutation = `
 mutation EnqueuePullRequest(
   $pullRequestId: ID!,
@@ -120,6 +137,22 @@ mutation EnablePullRequestAutoMerge(
       mergeMethod: $mergeMethod,
       commitHeadline: $commitHeadline,
       commitBody: $commitBody,
+    }
+  ) {
+    pullRequest {
+      number
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge(
+  $pullRequestId: ID!,
+) {
+  disablePullRequestAutoMerge(
+    input: {
+      pullRequestId: $pullRequestId,
     }
   ) {
     pullRequest {

@@ -44,7 +44,10 @@ import type {
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
-import type { GithubHttpOptions } from '../../../util/http/github.ts';
+import type {
+  GithubGraphqlResponse,
+  GithubHttpOptions,
+} from '../../../util/http/github.ts';
 import * as githubHttp from '../../../util/http/github.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -81,9 +84,11 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import { getRepoFile } from './files.ts';
 import {
+  disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  prAutoMergeRequestQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
@@ -104,8 +109,11 @@ import type {
   AggregatedVulnerabilities,
   CombinedBranchStatus,
   Comment,
+  GhAutoMerge,
+  GhAutoMergeRequestResponse,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhDisableAutomergeResponse,
   GhEnqueuePullRequestResponse,
   GhPr,
   GhRepo,
@@ -2211,12 +2219,28 @@ export async function updatePr({
 export async function reattemptPlatformAutomerge({
   number,
   platformPrOptions,
+  retry,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
     const result = (await getPr(number))!;
     const { node_id } = result;
 
-    await tryPrAutomerge(number, node_id, platformPrOptions);
+    const status = await tryPrAutomerge(number, node_id, platformPrOptions);
+    if (status === 'failed' && retry) {
+      logger.debug(`GitHub-native automerge: retrying...PrNo: ${number}`);
+      await setTimeout(5000);
+      const retryStatus = await tryPrAutomerge(
+        number,
+        node_id,
+        platformPrOptions,
+      );
+      if (retryStatus === 'failed') {
+        logger.warn(
+          { prNumber: number },
+          'GitHub-native automerge: could not re-enable after updating the commit message',
+        );
+      }
+    }
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) {
@@ -2224,6 +2248,226 @@ export async function reattemptPlatformAutomerge({
       throw err;
     }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
+}
+
+/**
+ * Returns true when the login matches the Renovate username, ignoring a trailing `[bot]`.
+ */
+function isRenovateLogin(login: string | undefined): boolean {
+  if (!login || !config.renovateUsername) {
+    return false;
+  }
+  const botSuffix = regEx(/\[bot\]$/);
+  return (
+    login.replace(botSuffix, '').toLowerCase() ===
+    config.renovateUsername.replace(botSuffix, '').toLowerCase()
+  );
+}
+
+interface AutoMergeState {
+  nodeId: string;
+  autoMerge: GhAutoMerge;
+}
+
+/**
+ * Queries the PR node id and its live GitHub-native automerge settings.
+ * Returns null when automerge is not enabled and undefined when the state could not be read.
+ */
+async function fetchAutoMergeState(
+  number: number,
+): Promise<AutoMergeState | null | undefined> {
+  const res = await githubApi.requestGraphql<GhAutoMergeRequestResponse>(
+    prAutoMergeRequestQuery,
+    {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        number,
+      },
+      readOnly: true,
+      count: 1, // set count to one to bypass graphql check
+    },
+  );
+  if (res?.errors) {
+    logger.debug(
+      { prNumber: number, errors: res.errors },
+      'GitHub-native automerge: failed to read automerge state',
+    );
+    return undefined;
+  }
+  const pullRequest = res?.data?.repository?.pullRequest;
+  if (!pullRequest) {
+    return undefined;
+  }
+  if (!pullRequest.autoMergeRequest) {
+    return null;
+  }
+
+  const { commitHeadline, commitBody, enabledBy } =
+    pullRequest.autoMergeRequest;
+  return {
+    nodeId: pullRequest.id,
+    autoMerge: {
+      enabledBy: enabledBy?.login,
+      commitTitle: commitHeadline,
+      commitMessage: commitBody,
+    },
+  };
+}
+
+/**
+ * Returns true when the stored automerge commit message equals the new one.
+ */
+function isAutomergeMessageUnchanged(
+  autoMerge: GhAutoMerge,
+  commitHeadline: string,
+  commitBody: string | undefined,
+): boolean {
+  // GitHub may store a default body when none was passed, so only compare the body when one is passed
+  // and treat a missing stored body like an empty one
+  return (
+    autoMerge.commitTitle === commitHeadline &&
+    (commitBody === undefined || (autoMerge.commitMessage ?? '') === commitBody)
+  );
+}
+
+/**
+ * Returns true when automerge was enabled by Renovate with a commit message other than the new one.
+ */
+function needsAutomergeDisable(
+  number: number,
+  autoMerge: GhAutoMerge,
+  commitHeadline: string,
+  commitBody: string | undefined,
+): boolean {
+  if (!isRenovateLogin(autoMerge.enabledBy)) {
+    logger.debug(
+      `GitHub-native automerge: not enabled by Renovate, not disabling...PrNo: ${number}`,
+    );
+    return false;
+  }
+
+  if (isAutomergeMessageUnchanged(autoMerge, commitHeadline, commitBody)) {
+    logger.debug(
+      `GitHub-native automerge: commit message unchanged...PrNo: ${number}`,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Disables GitHub-native automerge when Renovate enabled it with a commit message other than the new one.
+ * Reads the live state unless the cached PR shows Renovate's automerge with the same message.
+ * Returns true when automerge was disabled or may have been disabled.
+ */
+export async function disablePlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<boolean> {
+  if (!platformPrOptions) {
+    return false;
+  }
+
+  try {
+    const { commitHeadline, commitBody } = getAutomergeCommit(
+      number,
+      platformPrOptions,
+    );
+    if (!commitHeadline || !isAutomergeAvailable(number)) {
+      return false;
+    }
+
+    // a merge queue builds the merge commit from the current PR title, so the stored message is not used
+    const pr = (await getPr(number))!;
+    if (pr.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
+      logger.debug(
+        `GitHub-native automerge: merge queue enabled, not disabling...PrNo: ${number}`,
+      );
+      return false;
+    }
+
+    // only a cached state enabled by Renovate with the same message skips the live query
+    const cachedAutoMerge = pr.autoMerge;
+    if (
+      cachedAutoMerge &&
+      isRenovateLogin(cachedAutoMerge.enabledBy) &&
+      isAutomergeMessageUnchanged(cachedAutoMerge, commitHeadline, commitBody)
+    ) {
+      logger.debug(
+        `GitHub-native automerge: commit message unchanged...PrNo: ${number}`,
+      );
+      return false;
+    }
+
+    const state = await fetchAutoMergeState(number);
+    if (state !== undefined) {
+      // store the live state, `null` means the live state is checked again
+      cachePr({ ...pr, autoMerge: state?.autoMerge ?? null });
+    }
+    if (!state) {
+      logger.debug(
+        `GitHub-native automerge: not enabled, nothing to disable...PrNo: ${number}`,
+      );
+      return false;
+    }
+    if (
+      !needsAutomergeDisable(
+        number,
+        state.autoMerge,
+        commitHeadline,
+        commitBody,
+      )
+    ) {
+      return false;
+    }
+
+    let res: GithubGraphqlResponse<GhDisableAutomergeResponse> | null;
+    try {
+      res = await githubApi.requestGraphql<GhDisableAutomergeResponse>(
+        disableAutoMergeMutation,
+        {
+          variables: { pullRequestId: state.nodeId },
+          count: 1, // set count to one to bypass graphql check
+        },
+      );
+    } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message === PLATFORM_RATE_LIMIT_EXCEEDED
+      ) {
+        throw err;
+      }
+      // the request may have been applied although no response arrived, so report it as disabled to get it re-enabled
+      logger.warn(
+        { prNumber: number, err },
+        'GitHub-native automerge: disable may have been applied',
+      );
+      return true;
+    }
+
+    if (res?.errors) {
+      logger.debug(
+        { prNumber: number, errors: res.errors },
+        'GitHub-native automerge: disable failed',
+      );
+      return false;
+    }
+
+    logger.debug(`GitHub-native automerge: disabled...PrNo: ${number}`);
+    cachePr({ ...pr, autoMerge: null });
+    return true;
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.warn(
+      { prNumber: number, err },
+      'GitHub-native automerge: error disabling',
+    );
+    return false;
   }
 }
 
