@@ -24,6 +24,8 @@ Namespaces will not be inferred from the context (e.g. from the parent `Kustomiz
 
 Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
 
+Renovate updates `HelmRelease` resources using an `OCIRepository` chart template (`spec.chart.kind: OCIRepository`) via `spec.chart.spec.ref`, like `OCIRepository` resources.
+
 Renovate updates Docker dependencies inside `HelmRelease` `values` like the [`helm-values`](../helm-values/index.md) manager.
 
 When a referenced `HelmRepository` resource is not present in the scanned manifests (for example, it is defined in another repository or as a cluster-global resource), you can statically map the `sourceRef.name` of the `HelmRelease` (or `HelmChart`) to a registry URL using `registryAliases` in your `flux` configuration:
