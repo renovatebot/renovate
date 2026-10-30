@@ -152,6 +152,40 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('strips the git+ prefix from git sources', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv.sources]
+        dep1 = { git = "git+ssh://git@github.com/foo/dep1", rev = "1ca7d263f0f5038b53f74c5a757f18b8106c9390" }
+        dep2 = { git = "git+https://github.com/foo/dep2", rev = "1ca7d263f0f5038b53f74c5a757f18b8106c9390" }
+      `)!;
+
+      const dependencies = [
+        { depName: 'dep1', packageName: 'dep1' },
+        { depName: 'dep2', packageName: 'dep2' },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'ssh://git@github.com/foo/dep1',
+          currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+          replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          datasource: GitRefsDatasource.id,
+          packageName: 'https://github.com/foo/dep2',
+          currentDigest: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+          replaceString: '1ca7d263f0f5038b53f74c5a757f18b8106c9390',
+        },
+      ]);
+    });
+
     it('pinned to non-default index', () => {
       const pyproject = parsePyProject(codeBlock`
       [tool.uv.sources]
