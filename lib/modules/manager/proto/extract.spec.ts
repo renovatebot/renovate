@@ -359,23 +359,27 @@ describe('modules/manager/proto/extract', () => {
       ]);
     });
 
-    it('lets a plugin locator override a built-in tool', () => {
-      const content = codeBlock`
+    it.each`
+      locator
+      ${'https://example.com/moon.toml'}
+      ${'https://example.com/moon_tool.wasm'}
+      ${'source:https://example.com/moon.toml'}
+    `(
+      'keeps the built-in datasource over the $locator locator',
+      ({ locator }) => {
+        const content = codeBlock`
         moon = "1.30.0"
 
         [plugins.tools]
-        moon = "https://example.com/moon.toml"
+        moon = "${locator}"
       `;
 
-      const result = extractPackageFile(content, protoFilename);
-      expect(result!.deps).toMatchObject([
-        {
-          depName: 'moon',
-          datasource: 'proto-plugin',
-          packageName: 'https://example.com/moon.toml',
-        },
-      ]);
-    });
+        const result = extractPackageFile(content, protoFilename);
+        expect(result!.deps).toMatchObject([
+          { depName: 'moon', datasource: 'github-releases' },
+        ]);
+      },
+    );
 
     it.each`
       locator

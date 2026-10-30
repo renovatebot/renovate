@@ -18,8 +18,7 @@ Non-version configuration sections (`[settings]`, `[tools]`, `[env]`, `[shell]`,
 
 ### Custom plugin tools
 
-A tool can be installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
-As in proto, a plugin you declare overrides a built-in tool of the same name.
+Tools that aren't built in are installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
 Renovate resolves these from the plugin's `[resolve] git-url` (`git_url` in format v2), which points at the upstream repository proto reads git tags from:
 
 ```toml
@@ -59,6 +58,8 @@ Renovate's `proto` manager supports the following built-in proto tools:
 - **WASM, JSON and YAML plugins**: Only plugin locators ending in `.toml` are read.
   Tools installed via a WASM plugin (a `.wasm` or `github://` locator) or a JSON or YAML plugin are reported as `unsupported-datasource` and skipped.
   You can use Renovate's `customManagers` with regex to handle these if needed.
+
+- **Plugins for built-in tools**: A built-in tool is always looked up with its built-in datasource, even when `[plugins]` declares a plugin for it.
 
 - **Absolute plugin paths**: A `file://` locator with an absolute path points outside the repository and is reported as `unsupported-url`.
 

@@ -45,13 +45,16 @@ function toolConfig(
     return { skipReason: 'unsupported-version' };
   }
 
-  // proto lets a configured locator override a built-in tool. The proto-plugin
-  // datasource reads the plugin at lookup time, so extraction stays free of I/O.
-  if (locator) {
-    return pluginConfig(locator, packageFile);
+  const builtin = protoTooling[name]?.config;
+  if (builtin) {
+    return builtin;
   }
 
-  return protoTooling[name]?.config ?? { skipReason: 'unsupported-datasource' };
+  // The proto-plugin datasource reads the plugin at lookup time, so extraction
+  // stays free of I/O.
+  return locator
+    ? pluginConfig(locator, packageFile)
+    : { skipReason: 'unsupported-datasource' };
 }
 
 function pluginConfig(
