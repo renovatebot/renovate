@@ -1,5 +1,6 @@
 import { DefaultAzureCredential } from '@azure/identity';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import {
   joinUrlParts,
@@ -31,7 +32,9 @@ export class AzureComputeGalleryDatasource extends Datasource {
 
   private readonly credential: AzureTokenCredential;
 
-  override readonly defaultRegistryUrls = [AZURE_MANAGEMENT_URL];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [AZURE_MANAGEMENT_URL];
+  }
 
   override readonly defaultVersioning = versioning;
 
@@ -127,10 +130,23 @@ export class AzureComputeGalleryDatasource extends Datasource {
       return null;
     }
 
-    const releases = await this.getGalleryImageVersions(
-      baseUrl,
-      `${origin}/.default`,
-      parsedPackage.data,
+    const releases = await this.cached(
+      {
+        key: buildCacheKey(
+          baseUrl,
+          parsedPackage.data.subscriptionId,
+          parsedPackage.data.resourceGroupName,
+          parsedPackage.data.galleryName,
+          parsedPackage.data.galleryImageName,
+        ),
+        public: false,
+      },
+      () =>
+        this.getGalleryImageVersions(
+          baseUrl,
+          `${origin}/.default`,
+          parsedPackage.data,
+        ),
     ).catch((err: Error) => this.handleGenericErrors(err));
 
     if (!releases.length) {

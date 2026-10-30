@@ -21,6 +21,12 @@ function createDatasource(
 }
 
 describe('modules/datasource/azure-compute-gallery/index', () => {
+  it('defaults to the Azure management endpoint', () => {
+    expect(createDatasource().getDefaultRegistryUrls(packageName)).toEqual([
+      azureHost,
+    ]);
+  });
+
   it('returns null when packageName is invalid', async () => {
     const res = await createDatasource().getReleases({
       packageName: '{not-json}',
