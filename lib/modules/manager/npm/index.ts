@@ -3,10 +3,12 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
+import { minReleaseAgeNpmRange } from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { enforcesMinimumReleaseAge } from './minimum-release-age.ts';
 export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
@@ -31,7 +33,9 @@ export const categories: Category[] = ['js'];
 export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   npm: {
     passesMinimumReleaseAge: true,
-    note: 'Passes `--before`. Uses the older date if the repository `.npmrc` has a `before` setting. Skipped if the `.npmrc` has `min-release-age`.',
+    readsConfiguredAge: minReleaseAgeNpmRange,
+    enforcedInLockFile: true,
+    note: 'Passes `--before`, unless the `.npmrc` has `min-release-age`. Reads `before` and `min-release-age` from the repository `.npmrc`; `before` works with every npm version. If only the `.npmrc` sets `min-release-age`, npm enforces it from v11.10.0.',
   },
   pnpm: {},
   yarn: {},
