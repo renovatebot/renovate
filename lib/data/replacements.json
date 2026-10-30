@@ -8,6 +8,7 @@
       "replacements:aws-sdk-smithy-client-to-smithy",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
+      "replacements:cloudflare-vitest-pool-workers-to-vitest-plugin",
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
@@ -199,6 +200,18 @@
         "matchPackageNames": ["clang-format"],
         "replacementName": "clang-format-node",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "cloudflare-vitest-pool-workers-to-vitest-plugin": {
+    "description": "`@cloudflare/vitest-pool-workers` was renamed to `@cloudflare/vitest-plugin` for the v1 generally available release.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=0.22.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@cloudflare/vitest-pool-workers"],
+        "replacementName": "@cloudflare/vitest-plugin",
+        "replacementVersion": "1.0.0"
       }
     ]
   },
