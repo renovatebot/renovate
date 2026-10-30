@@ -145,6 +145,14 @@ export class GerritScm extends DefaultGitScm {
     }
     return null; // empty commit, no changes in this Gerrit Change
   }
+
+  /**
+   * Merges the virtual branch of an open change, or else the local branch
+   * prepared by commitAndPush() for a change that is not pushed yet.
+   */
+  override async mergeToLocal(branchName: string): Promise<void> {
+    await git.mergeToLocal(branchName, { localBranch: true });
+  }
 }
 
 /**
