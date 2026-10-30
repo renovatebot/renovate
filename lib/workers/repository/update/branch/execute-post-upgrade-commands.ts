@@ -27,7 +27,7 @@ import {
   getRepoStatus,
   isFileModeEnabled,
 } from '../../../../util/git/index.ts';
-import type { FileChange } from '../../../../util/git/types.ts';
+import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
@@ -310,13 +310,20 @@ export async function postUpgradeCommandsExecutor(
               relativePath,
               canReadFileMode,
             );
-            const existingUpdatedArtifacts = updatedArtifacts.find(
-              (ua) => ua.path === relativePath,
+            // A single path can have several entries, because each
+            // updateArtifacts() call appends its own. prepareCommit() writes
+            // them all in order, so every entry needs the new content or a
+            // stale duplicate overwrites the updated one.
+            const existingUpdatedArtifacts = updatedArtifacts.filter(
+              (ua): ua is FileAddition =>
+                ua.path === relativePath && ua.type === 'addition',
             );
-            if (existingUpdatedArtifacts?.type === 'addition') {
-              existingUpdatedArtifacts.contents = existingContent;
-              if (isExecutable !== undefined) {
-                existingUpdatedArtifacts.isExecutable = isExecutable;
+            if (existingUpdatedArtifacts.length > 0) {
+              for (const existingUpdatedArtifact of existingUpdatedArtifacts) {
+                existingUpdatedArtifact.contents = existingContent;
+                if (isExecutable !== undefined) {
+                  existingUpdatedArtifact.isExecutable = isExecutable;
+                }
               }
             } else {
               const updatedArtifact: FileChange = {
