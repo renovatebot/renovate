@@ -96,13 +96,6 @@ When a lock file is present:
   }
   ```
 
-- Lock file maintenance is supported via the `lockFileMaintenance` option.
-  Maintenance runs plain `mise lock`, which refreshes lockfile metadata for
-  the currently locked tool versions without advancing fuzzy selectors.
-  Tool version upgrades are handled by regular Mise dependency updates.
-  See the [mise lock documentation](https://mise.jdx.dev/cli/lock.html) for the
-  difference between `mise lock` and `mise lock --bump`.
-
 When `mise lock` pins a tool's dependencies in a [native dependency sidecar](https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars) (for example `.mise/locks/npm-prettier/3.3.3/aube-lock.yaml`), Renovate commits the sidecar changes together with the lock file, including new sidecar directories and the removal of ones that `mise lock` deleted.
 
 Renovate recognizes environment-specific lock files:

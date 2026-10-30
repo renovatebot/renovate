@@ -167,12 +167,12 @@ export async function updateArtifacts({
   const miseAllowlisted = allowlist.includes('mise');
 
   // The mise version is needed to decide safe mode (untrusted path). Detect it
-  // at runtime rather than requiring a pinned `constraints.mise`. Skip the
-  // probe when it cannot change the outcome: an allowlisted run behaves the
-  // same regardless of version.
+  // at runtime rather than requiring a pinned `constraints.mise`. For lock
+  // file maintenance, the version also determines whether `--bump` is
+  // supported.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
   let miseSupportsSafeMode = false;
-  if (!miseAllowlisted) {
+  if (!miseAllowlisted || config.isLockFileMaintenance) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
       toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
@@ -195,9 +195,10 @@ export async function updateArtifacts({
 
   let lockCmd: string;
   if (config.isLockFileMaintenance) {
-    // Lock file maintenance refreshes metadata for the versions already
-    // selected by mise. Tool version upgrades are handled separately.
-    lockCmd = `mise lock${localFlag}`;
+    // Lock file maintenance also bumps fuzzy selectors when the installed
+    // mise version supports it.
+    const bumpFlag = miseSupportsSafeMode ? ' --bump' : '';
+    lockCmd = `mise lock${localFlag}${bumpFlag}`;
   } else {
     const tools = updatedDeps
       .map(({ depName }) => depName)
