@@ -21,6 +21,7 @@ import { newlineRegex, regEx } from '../regex.ts';
 import { type LongCommitSha, toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
+import { setCredentialStoreConfig } from './config.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
@@ -233,6 +234,40 @@ describe('util/git/index', { timeout: 30000 }, () => {
           'https://git.example.com/repo.git',
         );
         expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
+      });
+
+      it('appends the credential store config to the environment', () => {
+        setCustomEnv({
+          GIT_CONFIG_COUNT: '1',
+          GIT_CONFIG_KEY_0: 'existing-key',
+          GIT_CONFIG_VALUE_0: 'existing-value',
+        });
+        setCredentialStoreConfig([
+          { key: 'credential.https://gitlab.example.com.helper', value: '' },
+          {
+            key: 'credential.https://gitlab.example.com.helper',
+            value: 'store',
+          },
+        ]);
+        const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+
+        try {
+          git.createSimpleGit();
+        } finally {
+          setCredentialStoreConfig([]);
+        }
+
+        expect(envSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            GIT_CONFIG_COUNT: '3',
+            GIT_CONFIG_KEY_0: 'existing-key',
+            GIT_CONFIG_VALUE_0: 'existing-value',
+            GIT_CONFIG_KEY_1: 'credential.https://gitlab.example.com.helper',
+            GIT_CONFIG_VALUE_1: '',
+            GIT_CONFIG_KEY_2: 'credential.https://gitlab.example.com.helper',
+            GIT_CONFIG_VALUE_2: 'store',
+          }),
+        );
       });
     });
 

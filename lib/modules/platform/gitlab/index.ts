@@ -24,6 +24,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { setupGitCredentialStore } from '../../../util/git/credential-store.ts';
 import * as git from '../../../util/git/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
@@ -123,6 +124,7 @@ export async function initPlatform({
   username,
   token,
   gitAuthor,
+  gitCredentialPassing,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -183,7 +185,21 @@ export async function initPlatform({
 
   botUserName ??= username!;
 
+  if (gitCredentialPassing === 'store') {
+    await initGitCredentialStore(token);
+  }
+
   return platformConfig;
+}
+
+async function initGitCredentialStore(token: string): Promise<void> {
+  logger.debug('Passing Git credentials via the Git credential store');
+  try {
+    await setupGitCredentialStore(defaults.endpoint, 'oauth2', token);
+  } catch (err) {
+    logger.error({ err }, 'Failed to set up the Git credential store');
+    throw new Error('Init: Cannot set up the Git credential store');
+  }
 }
 
 // Get all repositories that the user has access to
