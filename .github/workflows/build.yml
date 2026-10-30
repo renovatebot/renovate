@@ -219,9 +219,6 @@ jobs:
       - name: Lint with oxlint
         run: pnpm oxlint -f github
 
-      - name: Lint with biome
-        run: pnpm biome-ci
-
   lint-prettier:
     needs:
       - setup-build

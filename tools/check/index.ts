@@ -68,8 +68,8 @@ function pnpmScript(name: string): ParallelCheck {
 
 const PRETTIER_ENV = { PRETTIER_EXPERIMENTAL_CLI: '1' };
 
-const FIX_CHECKS = ['oxlint-fix', 'biome-fix', 'prettier-fix'].map(pnpmScript);
-const FIXABLE_CHECKS = ['oxlint', 'biome', 'prettier'].map(pnpmScript);
+const FIX_CHECKS = ['oxlint-fix', 'prettier-fix'].map(pnpmScript);
+const FIXABLE_CHECKS = ['oxlint', 'prettier'].map(pnpmScript);
 const OTHER_CHECKS = [
   'ls-lint',
   'git-check',
@@ -94,18 +94,6 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
         '--no-error-on-unmatched-pattern',
         '-c',
         '.oxlintrc.json',
-        ...targets,
-      ],
-    },
-    {
-      name: `biome${suffix}`,
-      cmd: 'pnpm',
-      args: [
-        'exec',
-        'biome',
-        'check',
-        ...(fix ? ['--write'] : []),
-        '--no-errors-on-unmatched',
         ...targets,
       ],
     },
@@ -182,7 +170,7 @@ function parseCliArgs(): CliArgs {
     .description('Fast local CI check script')
     .argument('[targets...]', 'files or directories to scope checks to')
     .option('--all', 'run fixers first, then all lint checks and tests')
-    .option('--fix', 'run fixers only (oxlint-fix, biome-fix, prettier-fix)')
+    .option('--fix', 'run fixers only (oxlint-fix, prettier-fix)')
     .option('--no-test', 'skip tests')
     .option(
       '--coverage-dir <dir>',

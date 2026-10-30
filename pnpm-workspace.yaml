@@ -56,7 +56,7 @@ minimumReleaseAgeExclude:
   - '@renovatebot/pep440'
   - '@renovatebot/pgp'
   - '@renovatebot/ruby-semver'
-  - '@containerbase/eslint-plugin'
+  - '@containerbase/oxlint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
   # Renovate security update: tar@7.5.21
