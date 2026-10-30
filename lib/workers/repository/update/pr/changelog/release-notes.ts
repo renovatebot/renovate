@@ -47,21 +47,23 @@ export async function getReleaseList(
   release: ChangeLogRelease,
   source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
-  logger.trace('getReleaseList()');
-  const { apiBaseUrl, repository, type } = project;
-  try {
-    return await source.getReleaseList(project, release);
-  } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
-      logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
-    } else {
-      logger.debug(
-        { repository, type, apiBaseUrl, err },
-        'getReleaseList error',
-      );
+  return instrument('getReleaseList', async () => {
+    logger.trace('getReleaseList()');
+    const { apiBaseUrl, repository, type } = project;
+    try {
+      return await source.getReleaseList(project, release);
+    } catch (err) /* istanbul ignore next */ {
+      if (err.statusCode === 404) {
+        logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
+      } else {
+        logger.debug(
+          { repository, type, apiBaseUrl, err },
+          'getReleaseList error',
+        );
+      }
     }
-  }
-  return [];
+    return [];
+  });
 }
 
 export function getCachedReleaseList(
@@ -69,16 +71,18 @@ export function getCachedReleaseList(
   release: ChangeLogRelease,
   source: ChangeLogSource,
 ): Promise<ChangeLogNotes[]> {
-  const { repository, apiBaseUrl } = project;
-  const cacheKey = buildCacheKey('getReleaseList', apiBaseUrl, repository);
-  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
-  // istanbul ignore if
-  if (cachedResult !== undefined) {
-    return cachedResult;
-  }
-  const promisedRes = getReleaseList(project, release, source);
-  memCache.set(cacheKey, promisedRes);
-  return promisedRes;
+  return instrument('getCachedReleaseList', async () => {
+    const { repository, apiBaseUrl } = project;
+    const cacheKey = buildCacheKey('getReleaseList', apiBaseUrl, repository);
+    const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
+    // istanbul ignore if
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+    const promisedRes = getReleaseList(project, release, source);
+    memCache.set(cacheKey, promisedRes);
+    return promisedRes;
+  });
 }
 
 export function massageBody(
@@ -332,21 +336,23 @@ export function getReleaseNotesMdFile(
   project: ChangeLogProject,
   source: ChangeLogSource,
 ): Promise<ChangeLogFile | null> {
-  const { sourceDirectory, repository, apiBaseUrl } = project;
-  const cacheKey = buildCacheKey(
-    'getReleaseNotesMdFile@v2',
-    repository,
-    sourceDirectory,
-    apiBaseUrl,
-  );
-  const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
-  // istanbul ignore if
-  if (cachedResult !== undefined) {
-    return cachedResult;
-  }
-  const promisedRes = getReleaseNotesMdFileInner(project, source);
-  memCache.set(cacheKey, promisedRes);
-  return promisedRes;
+  return instrument(`getReleaseNotesMdFile`, () => {
+    const { sourceDirectory, repository, apiBaseUrl } = project;
+    const cacheKey = buildCacheKey(
+      'getReleaseNotesMdFile@v2',
+      repository,
+      sourceDirectory,
+      apiBaseUrl,
+    );
+    const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
+    // istanbul ignore if
+    if (cachedResult !== undefined) {
+      return cachedResult;
+    }
+    const promisedRes = getReleaseNotesMdFileInner(project, source);
+    memCache.set(cacheKey, promisedRes);
+    return promisedRes;
+  });
 }
 
 export async function getReleaseNotesMd(
@@ -354,97 +360,102 @@ export async function getReleaseNotesMd(
   release: ChangeLogRelease,
   source: ChangeLogSource,
 ): Promise<ChangeLogNotes | null> {
-  const { baseUrl, repository, packageName } = project;
-  const version = release.version;
-  logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
+  return await instrument(`getReleaseNotesMd`, async () => {
+    const { baseUrl, repository, packageName } = project;
+    const version = release.version;
+    logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
 
-  if (shouldSkipChangelogMd(repository)) {
-    return null;
-  }
+    if (shouldSkipChangelogMd(repository)) {
+      return null;
+    }
 
-  const changelog = await getReleaseNotesMdFile(project, source);
-  if (!changelog) {
-    return null;
-  }
-  const { changelogFile } = changelog;
-  const changelogMd = changelog.changelogMd.replace(
-    regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
-    '\n',
-  );
-  for (const level of [1, 2, 3, 4, 5, 6, 7]) {
-    const changelogParsed = sectionize(changelogMd, level);
-    if (changelogParsed.length >= 2) {
-      for (const section of changelogParsed) {
-        try {
-          // replace brackets and parenthesis with space
-          const deParenthesizedSection = section.replace(
-            regEx(/[[\]()]/g),
-            ' ',
-          );
-          const [heading] = deParenthesizedSection.split(newlineRegex);
-          const [parenthesizedHeading] = section.split(newlineRegex);
-          const title = heading
-            .replace(regEx(/^\s*#*\s*/), '')
-            .split(' ')
-            .filter(isTruthy);
-          const body = section.replace(regEx(/.*?\n(?:-{3,}\n)?/), '').trim();
-          const notesSourceUrl = source.getNotesSourceUrl(
-            baseUrl,
-            repository,
-            changelogFile,
-          );
-          const url = source.getReleaseNotesMdAnchorUrl(
-            notesSourceUrl,
-            parenthesizedHeading,
-          );
-          // Look for version in title
-          for (const word of title) {
-            if (word.includes(version) && !isHttpUrl(word)) {
-              logger.trace({ body }, `Found release notes for v${version}`);
-              return {
-                body: await linkifyBody(project, body),
-                url,
-                notesSourceUrl,
-              };
+    const changelog = await getReleaseNotesMdFile(project, source);
+    if (!changelog) {
+      return null;
+    }
+    const { changelogFile } = changelog;
+    const changelogMd = changelog.changelogMd.replace(
+      regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
+      '\n',
+    );
+    for (const level of [1, 2, 3, 4, 5, 6, 7]) {
+      const changelogParsed = sectionize(changelogMd, level);
+      if (changelogParsed.length >= 2) {
+        for (const section of changelogParsed) {
+          try {
+            // replace brackets and parenthesis with space
+            const deParenthesizedSection = section.replace(
+              regEx(/[[\]()]/g),
+              ' ',
+            );
+            const [heading] = deParenthesizedSection.split(newlineRegex);
+            const [parenthesizedHeading] = section.split(newlineRegex);
+            const title = heading
+              .replace(regEx(/^\s*#*\s*/), '')
+              .split(' ')
+              .filter(isTruthy);
+            const body = section.replace(regEx(/.*?\n(?:-{3,}\n)?/), '').trim();
+            const notesSourceUrl = source.getNotesSourceUrl(
+              baseUrl,
+              repository,
+              changelogFile,
+            );
+            const url = source.getReleaseNotesMdAnchorUrl(
+              notesSourceUrl,
+              parenthesizedHeading,
+            );
+            // Look for version in title
+            for (const word of title) {
+              if (word.includes(version) && !isHttpUrl(word)) {
+                logger.trace({ body }, `Found release notes for v${version}`);
+                return {
+                  body: await linkifyBody(project, body),
+                  url,
+                  notesSourceUrl,
+                };
+              }
             }
-          }
-          // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
-          const releasesRegex = regEx(/(?:[0-9]{4}-[0-9]{2}-[0-9]{2})/);
-          if (packageName && heading.search(releasesRegex) !== -1) {
-            // Now check if any line contains both the package name and the version
-            // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
-            // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
-            const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
-            const bodyLines = body.split('\n');
-            if (
-              bodyLines.some(
-                (line) =>
-                  line.includes(packageName) &&
-                  line.includes(version) &&
-                  !isHttpUrl(line) &&
-                  !linkRefDefRegex.test(line),
-              )
-            ) {
-              logger.trace({ body }, `Found release notes for v${version}`);
-              return {
-                body: await linkifyBody(project, body),
-                url,
-                notesSourceUrl,
-              };
+            // Look for version in body - useful for monorepos. First check for heading with "(yyyy-mm-dd)"
+            const releasesRegex = regEx(/(?:[0-9]{4}-[0-9]{2}-[0-9]{2})/);
+            if (packageName && heading.search(releasesRegex) !== -1) {
+              // Now check if any line contains both the package name and the version
+              // Skip Markdown link reference definitions (e.g. `[1.2.3]: https://…/compare/...`)
+              // which Keep-a-Changelog files list at the bottom and would otherwise match every version.
+              const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
+              const bodyLines = body.split('\n');
+              if (
+                bodyLines.some(
+                  (line) =>
+                    line.includes(packageName) &&
+                    line.includes(version) &&
+                    !isHttpUrl(line) &&
+                    !linkRefDefRegex.test(line),
+                )
+              ) {
+                logger.trace({ body }, `Found release notes for v${version}`);
+                return {
+                  body: await linkifyBody(project, body),
+                  url,
+                  notesSourceUrl,
+                };
+              }
             }
+          } catch (err) /* istanbul ignore next */ {
+            logger.warn(
+              { file: changelogFile, err },
+              `Error parsing changelog file`,
+            );
           }
-        } catch (err) /* istanbul ignore next */ {
-          logger.warn(
-            { file: changelogFile, err },
-            `Error parsing changelog file`,
-          );
         }
       }
+      logger.trace(
+        { repository },
+        `No level ${level} changelogs headings found`,
+      );
     }
-    logger.trace({ repository }, `No level ${level} changelogs headings found`);
-  }
-  logger.trace({ repository, version }, `No entry found in ${changelogFile}`);
-  return null;
+    logger.trace({ repository, version }, `No entry found in ${changelogFile}`);
+    return null;
+  });
 }
 
 /**
