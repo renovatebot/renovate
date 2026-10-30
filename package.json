@@ -178,7 +178,7 @@
     "@redis/client": "6.3.0",
     "@renovatebot/base-image": "13.149.0",
     "@renovatebot/detect-tools": "4.0.23",
-    "@renovatebot/good-enough-parser": "3.0.0",
+    "@renovatebot/good-enough-parser": "4.0.2",
     "@renovatebot/osv-offline": "4.4.0",
     "@renovatebot/pep440": "5.0.1",
     "@renovatebot/pgp": "2.0.4",
