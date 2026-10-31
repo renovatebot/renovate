@@ -19,6 +19,7 @@ import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
 import { add as addHostRule } from './util/host-rules.ts';
 import { regEx, regexEngineStatus } from './util/regex.ts';
+import { parseUrl } from './util/url.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -46,6 +47,17 @@ async function partiallyGlobalInitialize(): Promise<void> {
     for (const hostRule of globalConfig.hostRules) {
       addHostRule(hostRule, { trusted: true });
     }
+  }
+
+  if (globalConfig.token) {
+    addHostRule(
+      {
+        hostType: globalConfig.platform,
+        matchHost: parseUrl(globalConfig.endpoint)?.hostname,
+        token: globalConfig.token,
+      },
+      { trusted: true },
+    );
   }
 }
 
