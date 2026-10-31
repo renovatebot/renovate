@@ -13,10 +13,12 @@ import {
 import { uniq } from '../../../util/uniq.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 import * as gitVersioning from '../../versioning/git/index.ts';
 import * as pep440Versioning from '../../versioning/pep440/index.ts';
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
@@ -381,6 +383,21 @@ export const PoetryPyProject = Toml.pipe(
       } = pyproject;
 
       const deps: PackageDependency<PoetryManagerData>[] = [];
+      const extractedConstraints: Record<string, string> = {};
+
+      const pythonConstraint = project?.['requires-python'];
+      if (pythonConstraint) {
+        extractedConstraints.python = pythonConstraint;
+        deps.push({
+          packageName: 'python',
+          depType: 'requires-python',
+          currentValue: pythonConstraint,
+          commitMessageTopic: 'Python',
+          datasource: PythonVersionDatasource.id,
+          versioning: pep440Versioning.id,
+        });
+      }
+
       const projectDependencies = coerceArray(project?.dependencies);
       const projectOptionalDependencies = coerceArray(
         project?.['optional-dependencies'],
@@ -417,9 +434,27 @@ export const PoetryPyProject = Toml.pipe(
       ]) {
         const depName = poetryDep.depName;
         const projectDep = depName && projectDepsByName[depName];
+        if (depName === 'python') {
+          // If a Poetry dependency "python" exists and the extracted constraint was not
+          // set through requires-python, set it to the configured Python version.
+          // v8 ignore else -- a python dep always carries a current value
+          if (poetryDep.currentValue) {
+            extractedConstraints.python ??= poetryDep.currentValue;
+          }
+
+          deps.push({
+            ...poetryDep,
+            // We use containerbase python as source, as there are a lot docker tags which can cause
+            // issues with poetry versioning.
+            packageName: 'containerbase/python-prebuild',
+            datasource: GithubReleasesDatasource.id,
+            commitMessageTopic: 'Python',
+            registryUrls: null,
+          });
+        }
         // When the same dep exists in project.dependencies or dependency-groups,
         // Poetry just uses the Poetry dep to enrich the project dependency.
-        if (projectDep) {
+        else if (projectDep) {
           const mergedDep = deepmerge<PackageDependency<PoetryManagerData>>(
             poetryDep,
             projectDep,
@@ -451,6 +486,7 @@ export const PoetryPyProject = Toml.pipe(
       const packageFileContent: PackageFileContent<PoetryManagerData> = {
         deps,
         packageFileVersion,
+        extractedConstraints,
       };
 
       const sourceUrls = tool?.poetry?.source;
