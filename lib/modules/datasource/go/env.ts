@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -24,13 +25,29 @@ function toUrl(matchHost: string | undefined): URL | null {
   );
 }
 
+/**
+ * `go` only sends basic auth from a `GOPROXY` URL, and fails without falling back on a 401/403, so a token-only rule can't be used.
+ */
+function canAuthenticateGo(rule: HostRule): boolean {
+  if (
+    !isNonEmptyString(rule.token) ||
+    (isNonEmptyString(rule.username) && isNonEmptyString(rule.password))
+  ) {
+    return true;
+  }
+  logger.once.warn(
+    { matchHost: rule.matchHost },
+    'go-proxy host rule with only a token is not added to GOPROXY',
+  );
+  return false;
+}
+
 function toGoproxyUrl(rule: HostRule, withCredentials: boolean): string | null {
   const url = toUrl(rule.matchHost);
   if (!url) {
     return null;
   }
 
-  // `go` only sends basic auth from a `GOPROXY` URL, so a token-only rule can't be embedded
   if (
     withCredentials &&
     isNonEmptyString(rule.username) &&
@@ -83,7 +100,9 @@ export function getGoEnv(withCredentials = false): GoEnv {
     return env;
   }
 
-  const proxyRules = hostRules.findAll({ hostType: 'go-proxy' });
+  const proxyRules = hostRules
+    .findAll({ hostType: 'go-proxy' })
+    .filter(canAuthenticateGo);
 
   if (GOPROXY === undefined) {
     const proxies = joinNonEmpty(

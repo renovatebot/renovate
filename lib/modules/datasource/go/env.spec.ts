@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -67,17 +68,37 @@ describe('modules/datasource/go/env', () => {
     hostRules.add({
       hostType: 'go-proxy',
       matchHost: 'https://artifactory.example.com/api/go/remote/',
+      username: 'user',
+      password: 'pass',
       token: 'token',
     });
     hostRules.add({ hostType: 'go-proxy', matchHost: 'bsr.example.com' });
     hostRules.add({ hostType: 'go-proxy', matchHost: '.example.com' });
-    hostRules.add({ hostType: 'go-proxy', token: 'token' });
+    hostRules.add({ hostType: 'go-proxy', username: 'user', password: 'pass' });
 
-    expect(getGoEnv(true)).toEqual({
+    expect(getGoEnv()).toEqual({
       GOPROXY:
         'https://artifactory.example.com/api/go/remote,https://bsr.example.com,https://proxy.golang.org,direct',
       GONOSUMDB: 'artifactory.example.com,bsr.example.com',
     });
+  });
+
+  it('skips go-proxy rules with only a token', () => {
+    hostRules.add({
+      hostType: 'go-proxy',
+      matchHost: 'token.example.com',
+      token: 'token',
+    });
+    hostRules.add({ hostType: 'go-proxy', matchHost: 'bsr.example.com' });
+
+    expect(getGoEnv(true)).toEqual({
+      GOPROXY: 'https://bsr.example.com,https://proxy.golang.org,direct',
+      GONOSUMDB: 'bsr.example.com',
+    });
+    expect(logger.logger.once.warn).toHaveBeenCalledWith(
+      { matchHost: 'token.example.com' },
+      'go-proxy host rule with only a token is not added to GOPROXY',
+    );
   });
 
   it('derives GONOPROXY and GONOSUMDB from go rules with a path', () => {
