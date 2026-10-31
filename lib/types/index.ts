@@ -27,7 +27,7 @@ export type { PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
 export type { RangeStrategy } from './versioning.ts';
 
-export type AutoMergeType = 'branch' | 'pr' | 'pr-comment';
+export type AutoMergeType = 'branch' | 'pr' | 'pr-comment' | 'label';
 
 type Val = NonNullable<unknown>;
 
