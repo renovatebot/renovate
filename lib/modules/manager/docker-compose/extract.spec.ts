@@ -307,5 +307,173 @@ describe('modules/manager/docker-compose/extract', () => {
         ],
       });
     });
+
+    it('extracts images from image-type volume mounts', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              - type: image
+                source: debian:11
+                target: /dbg
+              - type: volume
+                source: app-data
+                target: /data
+              - app-data:/data
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '20.0.0',
+            datasource: 'docker',
+            depName: 'node',
+            packageName: 'node',
+            replaceString: 'node:20.0.0',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '11',
+            datasource: 'docker',
+            depName: 'debian',
+            packageName: 'debian',
+            replaceString: 'debian:11',
+            versioning: 'debian',
+          },
+        ],
+      });
+    });
+
+    it('extracts untagged images from image-type volume mounts', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node
+            volumes:
+              - type: image
+                source: debian
+                target: /dbg
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res?.deps).toMatchObject([
+        { depName: 'node' },
+        { depName: 'debian' },
+      ]);
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('extracts image-type volume mounts with registry aliases', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              - type: image
+                source: quay.io/nginx:0.0.1
+                target: /dbg
+      `;
+      const res = extractPackageFile(compose, '', {
+        registryAliases: {
+          'quay.io': 'my-quay-mirror.registry.com',
+        },
+      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'node' },
+        {
+          depName: 'quay.io/nginx',
+          packageName: 'my-quay-mirror.registry.com/nginx',
+          currentValue: '0.0.1',
+          replaceString: 'quay.io/nginx:0.0.1',
+        },
+      ]);
+    });
+
+    it('ignores volume mounts which are not image volumes', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              - db-data:/var/lib/postgresql/data
+              - type: bind
+                source: ./src
+                target: /src
+              - type: volume
+                source: app-data
+                target: /data
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res?.deps).toMatchObject([{ depName: 'node' }]);
+      expect(res?.deps).toHaveLength(1);
+    });
+
+    it('ignores null volume entries', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              -
+              - type: image
+                source: debian:11
+                target: /dbg
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res?.deps).toMatchObject([
+        { depName: 'node' },
+        { depName: 'debian' },
+      ]);
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('skips image-type volume mounts with variable sources', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              - type: image
+                source: \${DEBUG_IMAGE}
+                target: /dbg
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res?.deps).toMatchObject([
+        { depName: 'node' },
+        {
+          replaceString: '${DEBUG_IMAGE}',
+          skipReason: 'contains-variable',
+        },
+      ]);
+      expect(res?.deps).toHaveLength(2);
+    });
+
+    it('extracts default variable values from image-type volume mounts', () => {
+      const compose = codeBlock`
+        services:
+          app:
+            image: node:20.0.0
+            volumes:
+              - type: image
+                source: \${DEBUG_IMAGE:-debian:11}
+                target: /dbg
+      `;
+      const res = extractPackageFile(compose, '', {});
+      expect(res?.deps).toMatchObject([
+        { depName: 'node' },
+        {
+          depName: 'debian',
+          packageName: 'debian',
+          currentValue: '11',
+          replaceString: 'debian:11',
+        },
+      ]);
+      expect(res?.deps).toHaveLength(2);
+    });
   });
 });

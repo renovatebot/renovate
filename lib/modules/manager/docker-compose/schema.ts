@@ -1,6 +1,11 @@
 import { isObject, isString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 
+const DockerComposeVolumeMount = z.object({
+  type: z.string().optional(),
+  source: z.string().optional(),
+});
+
 const DockerComposeService = z.object({
   image: z.string().optional(),
   build: z
@@ -11,6 +16,9 @@ const DockerComposeService = z.object({
         dockerfile: z.string().optional(),
       }),
     ])
+    .optional(),
+  volumes: z
+    .array(z.union([z.string(), DockerComposeVolumeMount, z.null()]))
     .optional(),
 });
 

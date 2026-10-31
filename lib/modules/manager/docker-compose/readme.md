@@ -28,3 +28,17 @@ Both image reference formats work:
 - Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
 
 The alias value works with or without a trailing slash.
+
+### Image volume mounts
+
+The manager extracts image references from [`type: image`](https://docs.docker.com/engine/storage/image-mounts/) volume mounts:
+
+```yaml
+services:
+  app:
+    image: node:20.0.0
+    volumes:
+      - type: image
+        source: debian:11
+        target: /dbg
+```
