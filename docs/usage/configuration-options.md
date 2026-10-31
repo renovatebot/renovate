@@ -4208,6 +4208,45 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 Enable conservative mode for `bundler` (Ruby dependencies).
 This will only update the immediate dependency in the lockfile instead of all subdependencies.
 
+### `changesets`
+
+If you version your packages with [changesets](https://github.com/changesets/changesets), enable this option to let Renovate add a changeset to its branches.
+Then a dependency update that affects your published packages gets released, without you having to add a changeset to each Renovate PR yourself.
+
+Renovate adds a changeset when a branch changes the dependencies of one of your packages:
+
+- a `major` bump when a peer dependency is added, or when a `peerDependencies` range no longer accepts every version it used to, because the consumers of your package may have to change their dependencies
+- a `patch` bump for any other change to `dependencies`, `optionalDependencies` or `peerDependencies`, including through an updated pnpm or Yarn catalog entry
+
+For example, widening a peer dependency from `^18.0.0` to `^18.0.0 || ^19.0.0`, which Renovate does by default, is a `patch` bump.
+Replacing `^18.0.0` with `^19.0.0` is a `major` bump.
+
+Renovate does not add a changeset for updates to `devDependencies`, or for lock file only updates, because they don't change what you publish.
+
+Renovate never adds a changeset for:
+
+- private packages
+- packages without a `name`
+- packages that match the `ignore` list in your `.changeset/config.json`
+
+This option works with npm, pnpm and Yarn.
+Your repository needs a `.changeset/config.json` file in its root, otherwise Renovate does not add a changeset.
+
+Each changeset lists the updated dependencies of its packages, which end up in their changelogs.
+Packages with the same dependency updates share a changeset.
+For example:
+
+```md
+---
+'@my-org/app': patch
+'@my-org/plugin': major
+---
+
+Updated dependencies:
+
+- Updated `react` from `^18.3.1` to `^19.0.0`
+```
+
 ### `composerNoMinimalChanges`
 
 Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).
