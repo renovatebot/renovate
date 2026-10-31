@@ -233,13 +233,28 @@ const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,
 );
 
+const blacksmithRunnerVersionRegex = regEx(
+  /^\s*(?<prefix>blacksmith-\d+vcpu-)(?<depName>ubuntu)-(?<currentValue>\d{2})(?<minor>\d{2})(?<suffix>-arm)?\s*$/,
+);
+
 function extractRunner(runner: string): PackageDependency | null {
-  const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
+  const runnerVersionGroups =
+    blacksmithRunnerVersionRegex.exec(runner)?.groups ??
+    runnerVersionRegex.exec(runner)?.groups;
   if (!runnerVersionGroups) {
     return null;
   }
 
-  const { depName, currentValue } = runnerVersionGroups;
+  const {
+    depName,
+    currentValue: rawCurrentValue,
+    minor,
+    prefix,
+    suffix = '',
+  } = runnerVersionGroups;
+  const currentValue = minor
+    ? `${rawCurrentValue}.${minor}${suffix}`
+    : rawCurrentValue;
 
   if (!GithubRunnersDatasource.isValidRunner(depName, currentValue)) {
     return null;
@@ -248,10 +263,14 @@ function extractRunner(runner: string): PackageDependency | null {
   const dependency: PackageDependency = {
     depName,
     currentValue,
-    replaceString: `${depName}-${currentValue}`,
+    replaceString: prefix
+      ? `${prefix}${depName}-${rawCurrentValue}${minor}${suffix}`
+      : `${depName}-${currentValue}`,
     depType: 'github-runner',
     datasource: GithubRunnersDatasource.id,
-    autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+    autoReplaceStringTemplate: prefix
+      ? `${prefix}${depName}-{{replace "[.]" "" newValue}}`
+      : '{{depName}}-{{newValue}}',
   };
 
   if (!dockerVersioning.api.isValid(currentValue)) {
