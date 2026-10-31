@@ -31,6 +31,8 @@ async function getResolver(platform: PlatformId): Promise<ResolverOrNull> {
     case 'bitbucket-server':
     case 'gerrit':
       return local;
+    case 'onedev':
+      return local;
     case 'codecommit':
     case 'local':
     case 'scm-manager':
