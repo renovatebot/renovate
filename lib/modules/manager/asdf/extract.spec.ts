@@ -1001,6 +1001,79 @@ awscli    2.8.6
       });
     });
 
+    it.each`
+      id
+      ${'liberica-27.0.1+11'}
+      ${'liberica-jre-27.0.1+11'}
+      ${'liberica-javafx-27.0.1+11'}
+      ${'liberica-jre-javafx-27.0.1+11'}
+      ${'liberica-musl-27.0.1+11'}
+      ${'liberica-jre-musl-27.0.1+11'}
+      ${'liberica-lite-27.0.1+11'}
+      ${'liberica-lite-musl-27.0.1+11'}
+      ${'liberica-crac-27.0.1+11'}
+      ${'liberica-crac-musl-27.0.1+11'}
+      ${'liberica-musl-crac-27.0.1+11'}
+      ${'liberica-27.0.1.0.3+5'}
+      ${'liberica-27+36'}
+      ${'liberica-8u513+5'}
+      ${'liberica-jre-8u482+10'}
+      ${'liberica-8u202'}
+    `('supports liberica java $id', ({ id }) => {
+      expect(extractPackageFile(`java ${id}`)).toEqual({
+        deps: [
+          {
+            currentValue: id.replace(/^liberica-(?:[a-z-]+-)?/, ''),
+            datasource: 'github-releases',
+            depName: 'java',
+            extractVersion: '^(?<version>\\d[^-]*)$',
+            packageName: 'bell-sw/Liberica',
+            versioning: 'loose',
+          },
+        ],
+      });
+    });
+
+    it.each`
+      id                                           | currentValue    | extractVersion
+      ${'liberica-nik-openjdk25-25.0.4+1'}         | ${'25.0.4+1'}   | ${'^(?<version>[^-]+)-25\\.'}
+      ${'liberica-nik-javafx-openjdk21-23.1.12+1'} | ${'23.1.12+1'}  | ${'^(?<version>[^-]+)-21\\.'}
+      ${'liberica-nik-musl-openjdk25-25.0.4.1+1'}  | ${'25.0.4.1+1'} | ${'^(?<version>[^-]+)-25\\.'}
+    `(
+      'supports liberica native image kit $id',
+      ({ id, currentValue, extractVersion }) => {
+        expect(extractPackageFile(`java ${id}`)).toEqual({
+          deps: [
+            {
+              currentValue,
+              datasource: 'github-releases',
+              depName: 'java',
+              extractVersion,
+              packageName: 'bell-sw/LibericaNIK',
+              versioning: 'loose',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
+      id
+      ${'liberica-27'}
+      ${'liberica-27.0'}
+      ${'liberica-foo-27.0.1+11'}
+      ${'liberica-nik-openjdk25'}
+    `('does not support liberica java $id', ({ id }) => {
+      expect(extractPackageFile(`java ${id}`)).toEqual({
+        deps: [
+          {
+            depName: 'java',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
     it('can handle scala v 2 & 3', () => {
       const v2Res = extractPackageFile('scala 2.0.0');
       expect(v2Res).toEqual({
