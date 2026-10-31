@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -7,6 +8,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
+import { RenovateLogger } from '../../../../logger/renovate-logger.ts';
 import { CustomDatasource } from '../../../../modules/datasource/custom/index.ts';
 import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
@@ -4482,6 +4484,146 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [],
       });
+    });
+
+    describe('unsupported value skip logging', () => {
+      const realLogger = new RenovateLogger('test', {});
+      const skipMessage =
+        'Skipping node because no currentDigest or pinDigests';
+
+      function skipLogs() {
+        return logger.logger.debug.mock.calls.filter((args) =>
+          args.includes(skipMessage),
+        );
+      }
+
+      beforeEach(() => {
+        realLogger.once.reset();
+        // Exercise actual deduplication while keeping the output mocked.
+        vi.spyOn(realLogger, 'debug').mockImplementation(logger.logger.debug);
+        logger.logger.once.debug.mockImplementation(realLogger.once.debug);
+        config.currentValue = 'alpine';
+        config.packageName = 'node';
+        config.datasource = DockerDatasource.id;
+      });
+
+      afterEach(() => {
+        realLogger.once.reset();
+      });
+
+      it('logs once across concurrent lookups in different files, managers and base branches', async () => {
+        const results = await Promise.all(
+          [
+            {
+              packageFile: 'Dockerfile',
+              manager: 'dockerfile',
+              baseBranch: 'main',
+            },
+            {
+              packageFile: 'compose.yaml',
+              manager: 'docker-compose',
+              baseBranch: 'main',
+            },
+            {
+              packageFile: 'Dockerfile',
+              manager: 'dockerfile',
+              baseBranch: 'next',
+            },
+          ].map((context) =>
+            Result.wrap(
+              lookup.lookupUpdates({ ...config, ...context }),
+            ).unwrapOrThrow(),
+          ),
+        );
+
+        expect(skipLogs()).toHaveLength(1);
+        for (const result of results) {
+          expect(result).toEqual({
+            skipReason: 'invalid-value',
+            updates: [],
+            versioning: npmVersioningId,
+            warnings: [],
+          });
+        }
+        expect(logger.logger.trace).toHaveBeenCalledTimes(3);
+        expect(
+          logger.logger.debug.mock.calls.filter((args) =>
+            args.includes(
+              'Dependency node has unsupported/unversioned value alpine (versioning=npm)',
+            ),
+          ),
+        ).toHaveLength(3);
+      });
+
+      it('keeps diagnostics for different dependencies', async () => {
+        for (const packageName of ['node', 'ruby', 'node', 'ruby']) {
+          await lookup.lookupUpdates({ ...config, packageName });
+        }
+
+        const messages = logger.logger.debug.mock.calls
+          .map((args) => args[1] ?? args[0])
+          .filter(
+            (message) =>
+              isString(message) &&
+              message.endsWith('because no currentDigest or pinDigests'),
+          );
+
+        expect(messages).toEqual([
+          skipMessage,
+          'Skipping ruby because no currentDigest or pinDigests',
+        ]);
+      });
+
+      it.each`
+        condition             | changed
+        ${'current value'}    | ${{ currentValue: 'latest' }}
+        ${'datasource'}       | ${{ datasource: NpmDatasource.id }}
+        ${'versioning'}       | ${{ versioning: semverVersioningId }}
+        ${'comparison value'} | ${{ isLockfileOnly: true, lockedVersion: 'latest' }}
+      `('keeps distinct $condition diagnostics', async ({ changed }) => {
+        for (const overrides of [{}, changed, {}, changed]) {
+          await lookup.lookupUpdates({ ...config, ...overrides });
+        }
+
+        expect(skipLogs()).toHaveLength(2);
+      });
+
+      it('logs again after the once logger is reset', async () => {
+        for (const repository of ['org/first', 'org/second', 'org/first']) {
+          realLogger.once.reset();
+          await lookup.lookupUpdates({ ...config, repository });
+          await lookup.lookupUpdates({ ...config, repository });
+        }
+
+        expect(skipLogs()).toHaveLength(3);
+      });
+
+      it.each`
+        updateType     | changed
+        ${'pinDigest'} | ${{ pinDigests: true }}
+        ${'digest'}    | ${{ currentDigest: 'sha256:old' }}
+      `(
+        'still generates a $updateType update after a skipped lookup',
+        async ({ updateType, changed }) => {
+          getDockerDigest.mockResolvedValue('sha256:new');
+          await lookup.lookupUpdates(config);
+
+          const result = await Result.wrap(
+            lookup.lookupUpdates({ ...config, ...changed }),
+          ).unwrapOrThrow();
+
+          expect(skipLogs()).toHaveLength(1);
+          expect(result.skipReason).toBeUndefined();
+          expect(result.warnings).toEqual([]);
+          expect(result.updates).toEqual([
+            expect.objectContaining({
+              updateType,
+              newValue: 'alpine',
+              newDigest: 'sha256:new',
+            }),
+          ]);
+        },
+      );
     });
 
     it('skips undefined values', async () => {
