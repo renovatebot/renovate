@@ -277,18 +277,47 @@ async function releaseNotesResult(
   return releaseNotes;
 }
 
-function sectionize(text: string, level: number): string[] {
-  const sections: [number, number][] = [];
-  const lines = text.split(newlineRegex);
-  const tokens = markdown.parse(text, {});
-  tokens.forEach((token) => {
+/** Changelog lines and the level and starting line of each heading. */
+interface ParsedChangelog {
+  lines: string[];
+  headings: [level: number, line: number][];
+}
+
+/**
+ * Parses and caches changelog lines and headings for reuse by `getReleaseNotesMd`
+ * across versions and heading levels within a repository run.
+ */
+function parseChangelog(
+  changelogMd: string,
+  cacheKey: string,
+): ParsedChangelog {
+  const cached = memCache.get<ParsedChangelog>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const text = changelogMd.replace(
+    regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
+    '\n',
+  );
+  const headings: [number, number][] = [];
+  for (const token of markdown.parse(text, {})) {
     if (token.type === 'heading_open') {
-      const lev = +token.tag.substring(1);
-      if (lev <= level) {
-        sections.push([lev, token.map![0]]);
-      }
+      headings.push([+token.tag.substring(1), token.map![0]]);
     }
-  });
+  }
+  const parsed: ParsedChangelog = {
+    lines: text.split(newlineRegex),
+    headings,
+  };
+  memCache.set(cacheKey, parsed);
+  return parsed;
+}
+
+function sectionize(
+  { lines, headings }: ParsedChangelog,
+  level: number,
+): string[] {
+  const sections: [number, number][] = headings.filter(([lev]) => lev <= level);
   sections.push([-1, lines.length]);
   const result: string[] = [];
   for (let i = 1; i < sections.length; i += 1) {
@@ -367,12 +396,18 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { changelogFile } = changelog;
-  const changelogMd = changelog.changelogMd.replace(
-    regEx(/\n\s*<a name="[^"]*">.*?<\/a>\n/g),
-    '\n',
+  const parsedChangelog = parseChangelog(
+    changelog.changelogMd,
+    buildCacheKey(
+      'parseChangelog',
+      project.apiBaseUrl,
+      repository,
+      coerceString(project.sourceDirectory),
+      changelogFile,
+    ),
   );
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
-    const changelogParsed = sectionize(changelogMd, level);
+    const changelogParsed = sectionize(parsedChangelog, level);
     if (changelogParsed.length >= 2) {
       for (const section of changelogParsed) {
         try {
