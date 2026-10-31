@@ -48,6 +48,43 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(deps).toHaveLength(8);
     });
 
+    it('ignores !reference tags', () => {
+      const content = codeBlock`
+        .postgres:
+          services:
+            - postgres:16.4
+
+        test:
+          image: !reference [.base, image]
+          services: !reference [.postgres, services]
+          script:
+            - !reference [.setup, script]
+
+        nested:
+          image:
+            name: !reference [.base, image, name]
+          services:
+            - !reference [.postgres, services]
+            - name: !reference [.redis, name]
+            - redis:7.4
+      `;
+      const res = extractPackageFile(content, '', {});
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '16.4',
+          datasource: 'docker',
+          depName: 'postgres',
+          depType: 'service-image',
+        },
+        {
+          currentValue: '7.4',
+          datasource: 'docker',
+          depName: 'redis',
+          depType: 'service-image',
+        },
+      ]);
+    });
+
     it('extracts multiple included image lines', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
