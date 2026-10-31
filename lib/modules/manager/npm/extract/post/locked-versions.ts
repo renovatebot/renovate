@@ -1,4 +1,5 @@
-import { isString } from '@sindresorhus/is';
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
@@ -11,6 +12,38 @@ import type { LockFile } from '../types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
 
 const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
+
+function getParentName(parent: string): string {
+  try {
+    return parsePkgAndParentSelector(parent).targetPkg.name;
+  } catch {
+    // keep the raw name for unparsable parent selectors
+    return parent;
+  }
+}
+
+/**
+ * Builds the lockfile path of a nested override target, e.g. the override
+ * `"minimatch@3.1.5": { "brace-expansion": "1.1.21" }` is locked as
+ * `node_modules/minimatch/node_modules/brace-expansion` and not as the
+ * hoisted `node_modules/brace-expansion`
+ */
+function getOverrideLockedDepName(
+  depName: string,
+  parents: string[],
+  relativeDir: string,
+): string {
+  const pathPrefix =
+    relativeDir && relativeDir !== '.' ? `${relativeDir}/node_modules/` : '';
+  const parentPath = parents
+    .map((parent) => getParentName(parent))
+    .join('/node_modules/');
+  // a "." override applies to the parent package itself
+  if (depName === parents.at(-1)) {
+    return `${pathPrefix}${parentPath}`;
+  }
+  return `${pathPrefix}${parentPath}/node_modules/${depName}`;
+}
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
@@ -133,6 +166,18 @@ export async function getLockedVersions(
         let lockedDepName = dep.depName!;
         if (relativeDir && relativeDir !== '.') {
           lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
+        }
+
+        const parents = dep.managerData?.parents;
+        if (dep.depType === 'overrides' && isNonEmptyArray(parents)) {
+          const overrideLockedDepName = getOverrideLockedDepName(
+            dep.depName!,
+            parents,
+            relativeDir,
+          );
+          if (lockFileCache[npmLock].lockedVersions?.[overrideLockedDepName]) {
+            lockedDepName = overrideLockedDepName;
+          }
         }
 
         dep.lockedVersion = semver.valid(
