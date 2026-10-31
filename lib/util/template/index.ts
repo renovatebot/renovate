@@ -228,6 +228,8 @@ export const allowedFields = {
   packageFileDir:
     'The directory with full path where the packageFile was found',
   packageName: 'The full name that was used to look up the dependency',
+  packageNameLinked:
+    'For renamed Cargo registry dependencies, the registry-name display, linked when a package URL is available, with source and changelog links. Does not include the local alias annotation.',
   packageScope: 'The scope of the package name. Supports Maven group ID only',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
