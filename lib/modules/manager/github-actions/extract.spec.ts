@@ -5601,6 +5601,144 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [],
     },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'cargo-hack@0.6.14' },
+      },
+      expected: [
+        {
+          currentValue: '0.6.14',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      // installs the latest `0.6.x`
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'cargo-hack@0.6' },
+      },
+      expected: [
+        {
+          currentValue: '0.6',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'wasmtime@46.0.0' },
+      },
+      expected: [
+        {
+          currentValue: '46.0.0',
+          datasource: 'crate',
+          depName: 'wasmtime',
+          depType: 'uses-with',
+          packageName: 'wasmtime-cli',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'shellcheck@0.10.0' },
+      },
+      expected: [
+        {
+          currentValue: '0.10.0',
+          datasource: 'github-releases',
+          depName: 'shellcheck',
+          depType: 'uses-with',
+          extractVersion: '^v(?<version>.+)$',
+          packageName: 'koalaman/shellcheck',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'rust@1.90.0 + rustfmt' },
+      },
+      expected: [
+        {
+          currentValue: '1.90.0',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'cargo-hack, wasmtime@46.0.1' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-hack',
+          depType: 'uses-with',
+          packageName: 'cargo-hack',
+          versioning: 'semver-partial',
+        },
+        {
+          currentValue: '46.0.1',
+          datasource: 'crate',
+          depName: 'wasmtime',
+          depType: 'uses-with',
+          packageName: 'wasmtime-cli',
+          versioning: 'semver-partial',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'taiki-e/install-action@v2.87.27',
+        with: { tool: 'cargo-nextest@latest\nbiome@2.3.10\n' },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'crate',
+          depName: 'cargo-nextest',
+          depType: 'uses-with',
+          packageName: 'cargo-nextest',
+          versioning: 'semver-partial',
+        },
+        {
+          currentValue: '2.3.10',
+          datasource: 'github-releases',
+          depName: 'biome',
+          depType: 'uses-with',
+          extractVersion: '^(?:@biomejs/biome@|cli/v)(?<version>.+)$',
+          packageName: 'biomejs/biome',
+        },
+      ],
+    },
+    {
+      // the `@<tool>` shorthand ref has no `tool` input to extract
+      step: {
+        uses: 'taiki-e/install-action@cargo-hack',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
