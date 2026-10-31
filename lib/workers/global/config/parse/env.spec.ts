@@ -140,10 +140,10 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports GitHub custom endpoint', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_ENDPOINT: 'a ghe endpoint',
+        RENOVATE_ENDPOINT: 'a GHES endpoint',
       };
       await expect(env.getConfig(envParam)).resolves.toEqual({
-        endpoint: 'a ghe endpoint',
+        endpoint: 'a GHES endpoint',
         hostRules: [],
       });
     });
@@ -151,11 +151,11 @@ describe('workers/global/config/parse/env', () => {
     it('supports GitHub custom endpoint and github.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'a github.com token',
-        RENOVATE_ENDPOINT: 'a ghe endpoint',
-        RENOVATE_TOKEN: 'a ghe token',
+        RENOVATE_ENDPOINT: 'a GHES endpoint',
+        RENOVATE_TOKEN: 'a GHES token',
       };
       await expect(env.getConfig(envParam)).resolves.toEqual({
-        endpoint: 'a ghe endpoint',
+        endpoint: 'a GHES endpoint',
         hostRules: [
           {
             hostType: 'github',
@@ -163,7 +163,7 @@ describe('workers/global/config/parse/env', () => {
             token: 'a github.com token',
           },
         ],
-        token: 'a ghe token',
+        token: 'a GHES token',
       });
     });
 
@@ -221,13 +221,13 @@ describe('workers/global/config/parse/env', () => {
 
     it('supports GitHub custom endpoint and gitlab.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_ENDPOINT: 'a ghe endpoint',
-        RENOVATE_TOKEN: 'a ghe token',
+        RENOVATE_ENDPOINT: 'a GHES endpoint',
+        RENOVATE_TOKEN: 'a GHES token',
       };
       await expect(env.getConfig(envParam)).resolves.toEqual({
-        endpoint: 'a ghe endpoint',
+        endpoint: 'a GHES endpoint',
         hostRules: [],
-        token: 'a ghe token',
+        token: 'a GHES token',
       });
     });
 

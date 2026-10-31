@@ -52,7 +52,7 @@ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/ren
 ### Kubernetes
 
 Renovate's official Docker image is compatible with Kubernetes.
-The following is an example manifest of running Renovate against a GitHub Enterprise server.
+The following is an example manifest of running Renovate against GitHub Enterprise Server.
 
 ```yaml title="Kubernetes manifest"
 apiVersion: batch/v1
@@ -98,7 +98,7 @@ stringData:
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
   RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
-  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
+  RENOVATE_TOKEN: 'your-github-enterprise-server-renovate-user-token'
 ```
 
 A `config.json` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
@@ -342,7 +342,7 @@ stringData:
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
   RENOVATE_GIT_AUTHOR: 'Renovate <bot@renovateapp.com>'
   RENOVATE_PLATFORM: 'github'
-  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
+  RENOVATE_TOKEN: 'your-github-enterprise-server-renovate-user-token'
 ---
 apiVersion: v1
 data:
