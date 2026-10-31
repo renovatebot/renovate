@@ -19,6 +19,7 @@ import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { getGoEnv } from '../../datasource/go/env.ts';
 import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
@@ -217,14 +218,15 @@ export async function updateArtifacts({
 
     const cmd = 'go';
     const env = getEnv();
+    const goEnv = getGoEnv(true);
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: env.GOPROXY,
-        GOPRIVATE: env.GOPRIVATE,
-        GONOPROXY: env.GONOPROXY,
-        GONOSUMDB: env.GONOSUMDB,
+        GOPROXY: goEnv.GOPROXY,
+        GOPRIVATE: goEnv.GOPRIVATE,
+        GONOPROXY: goEnv.GONOPROXY,
+        GONOSUMDB: goEnv.GONOSUMDB,
         GOSUMDB: env.GOSUMDB,
         GOINSECURE: env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */

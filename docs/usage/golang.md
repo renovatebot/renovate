@@ -167,8 +167,6 @@ When Renovate looks up a module directly, it follows the `mod` proxy URL, as the
 
 Renovate looks up a module directly when `GOPROXY` is set to `direct`, or the module matches `GONOPROXY` or `GOPRIVATE`.
 
-<!-- TODO: #47041 -->
-
 For a private registry, set `GOPRIVATE` (or `GONOPROXY`) to the registry's host so that the module is not sent to the public proxy:
 
 ```sh
@@ -188,3 +186,43 @@ module.exports = {
   ],
 };
 ```
+
+### Deriving Go environment variables from host rules
+
+If you're self-hosting Renovate, you can set [`goEnvFromHostRules`](./self-hosted-configuration.md#goenvfromhostrules) to `true` to have Renovate derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from your host rules.
+Renovate uses the derived values to look up modules and to run `go`, so you don't have to configure the same hosts twice.
+
+- `GOPROXY`: one URL for each host rule with `hostType` set to `go-proxy`, followed by `https://proxy.golang.org,direct`.
+  When Renovate runs `go`, the rule's `username` and `password` are added to the URL.
+  Rules with only a `token` are skipped, because `go` can't send a token from a `GOPROXY` URL. Use `username` and `password` instead.
+- `GONOPROXY`: each host rule with `hostType` set to `go` whose `matchHost` includes a path, for example `https://github.com/my-org` becomes `github.com/my-org`.
+  Rules for a host without a path are skipped, so public modules on that host still use the proxy.
+- `GONOSUMDB`: the `go-proxy` hosts, and the `GONOPROXY` values derived from `go` host rules.
+
+Renovate only derives a value if you have not set the environment variable yourself.
+If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY` or `GONOSUMDB`.
+
+For example, with this config:
+
+```js
+module.exports = {
+  goEnvFromHostRules: true,
+  hostRules: [
+    {
+      matchHost: 'bsr.example.com',
+      hostType: 'go-proxy',
+      username: process.env.BSR_USERNAME,
+      password: process.env.BSR_TOKEN,
+    },
+  ],
+};
+```
+
+Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GONOSUMDB=bsr.example.com
+```
+
+If you only want to use your own proxy, without the public proxy, set `GOPROXY` yourself.

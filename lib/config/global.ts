@@ -40,6 +40,7 @@ export class GlobalConfig {
     'exposeAllEnv',
     'gitTimeout',
     'githubTokenWarn',
+    'goEnvFromHostRules',
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
