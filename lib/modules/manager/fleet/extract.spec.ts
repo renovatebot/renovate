@@ -149,6 +149,98 @@ kind: Fleet
         ]);
       });
 
+      it('should support OCI charts referenced via repo', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: uyuni-server
+            helm:
+              repo: oci://registry.suse.com/suse/multi-linux-manager/5.2/server-helm
+              version: 5.2.0
+              releaseName: smlm-server
+              createNamespace: true
+              valuesFiles:
+                - values.yaml
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            currentValue: '5.2.0',
+            datasource: 'docker',
+            depName:
+              'registry.suse.com/suse/multi-linux-manager/5.2/server-helm',
+            depType: 'fleet',
+            packageName:
+              'registry.suse.com/suse/multi-linux-manager/5.2/server-helm',
+            pinDigests: false,
+          },
+        ]);
+      });
+
+      it('should ignore chart when repo is an OCI URL', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: external-dns
+            helm:
+              repo: oci://registry-1.docker.io/bitnamicharts/external-dns
+              chart: oci://registry-1.docker.io/bitnamicharts/nginx
+              version: 7.1.2
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            pinDigests: false,
+          },
+        ]);
+      });
+
+      it('should keep an inherited OCI repo over a customization chart', () => {
+        const result = extractPackageFile(
+          codeBlock`
+            defaultNamespace: external-dns
+            helm:
+              repo: oci://registry-1.docker.io/bitnamicharts/external-dns
+              version: 7.1.2
+            targetCustomizations:
+              - name: nginx
+                helm:
+                  chart: oci://registry-1.docker.io/bitnamicharts/nginx
+                  version: 15.0.0
+          `,
+          'fleet.yaml',
+          {},
+        );
+
+        expect(result?.deps).toEqual([
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            pinDigests: false,
+          },
+          {
+            currentValue: '15.0.0',
+            datasource: 'docker',
+            depName: 'nginx',
+            depType: 'fleet',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            pinDigests: false,
+          },
+        ]);
+      });
+
       it('should not treat a repository qualified chart name as a local chart', () => {
         const result = extractPackageFile(
           codeBlock`
