@@ -1236,24 +1236,34 @@ export async function getBranchStatus(
     };
     const checkRunsRaw = (
       await githubApi.getJsonUnchecked<{
-        check_runs: { name: string; status: string; conclusion: string }[];
+        check_runs: {
+          id: number;
+          name: string;
+          status: string;
+          conclusion: string;
+          app?: { id: number } | null;
+        }[];
       }>(checkRunsUrl, opts)
     ).body;
     if (checkRunsRaw.check_runs?.length) {
-      // The API lists the newest runs first, so for re-run checks keep only the latest one
-      const seenNames = new Set<string>();
-      checkRuns = [];
+      // A re-run check gets a new run with a higher id under the same app and name,
+      // so keep only the run with the highest id per app and name
+      const latestRuns = new Map<
+        string,
+        (typeof checkRunsRaw.check_runs)[number]
+      >();
       for (const run of checkRunsRaw.check_runs) {
-        if (seenNames.has(run.name)) {
-          continue;
+        const key = `${run.app?.id}:${run.name}`;
+        const latest = latestRuns.get(key);
+        if (!latest || run.id > latest.id) {
+          latestRuns.set(key, run);
         }
-        seenNames.add(run.name);
-        checkRuns.push({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion,
-        });
       }
+      checkRuns = [...latestRuns.values()].map((run) => ({
+        name: run.name,
+        status: run.status,
+        conclusion: run.conclusion,
+      }));
       logger.debug({ checkRuns }, 'check runs result');
     } /* v8 ignore next -- specs always mock a non-empty check_runs response */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');

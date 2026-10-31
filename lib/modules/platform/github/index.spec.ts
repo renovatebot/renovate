@@ -2630,16 +2630,70 @@ describe('modules/platform/github/index', () => {
         })
         .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, {
-          total_count: 2,
+          total_count: 3,
           check_runs: [
-            { name: 'ci', status: 'completed', conclusion: 'success' },
-            { name: 'ci', status: 'completed', conclusion: 'failure' },
+            {
+              id: 2,
+              app: { id: 15368 },
+              name: 'ci',
+              status: 'completed',
+              conclusion: 'failure',
+            },
+            {
+              id: 3,
+              app: { id: 15368 },
+              name: 'ci',
+              status: 'completed',
+              conclusion: 'success',
+            },
+            {
+              id: 1,
+              app: { id: 15368 },
+              name: 'ci',
+              status: 'completed',
+              conclusion: 'failure',
+            },
           ],
         });
 
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('keeps check runs of different apps that share a name', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
+        .reply(200, {
+          total_count: 2,
+          check_runs: [
+            {
+              id: 1,
+              app: { id: 15368 },
+              name: 'ci',
+              status: 'completed',
+              conclusion: 'failure',
+            },
+            {
+              id: 2,
+              app: { id: 99 },
+              name: 'ci',
+              status: 'completed',
+              conclusion: 'success',
+            },
+          ],
+        });
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('red');
     });
 
     it('should fail if a check run has failed', async () => {
