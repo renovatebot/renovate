@@ -1240,11 +1240,20 @@ export async function getBranchStatus(
       }>(checkRunsUrl, opts)
     ).body;
     if (checkRunsRaw.check_runs?.length) {
-      checkRuns = checkRunsRaw.check_runs.map((run) => ({
-        name: run.name,
-        status: run.status,
-        conclusion: run.conclusion,
-      }));
+      // The API lists the newest runs first, so for re-run checks keep only the latest one
+      const seenNames = new Set<string>();
+      checkRuns = [];
+      for (const run of checkRunsRaw.check_runs) {
+        if (seenNames.has(run.name)) {
+          continue;
+        }
+        seenNames.add(run.name);
+        checkRuns.push({
+          name: run.name,
+          status: run.status,
+          conclusion: run.conclusion,
+        });
+      }
       logger.debug({ checkRuns }, 'check runs result');
     } /* v8 ignore next -- specs always mock a non-empty check_runs response */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');

@@ -2619,6 +2619,29 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe('yellow');
     });
 
+    it('ignores older runs of a re-run check', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
+        .reply(200, {
+          total_count: 2,
+          check_runs: [
+            { name: 'ci', status: 'completed', conclusion: 'success' },
+            { name: 'ci', status: 'completed', conclusion: 'failure' },
+          ],
+        });
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatus('somebranch', true);
+      expect(res).toBe('green');
+    });
+
     it('should fail if a check run has failed', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
