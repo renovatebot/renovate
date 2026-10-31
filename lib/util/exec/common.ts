@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
 import type { Readable } from 'node:stream';
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { execa } from 'execa';
+import { ExecaError, execa } from 'execa';
 import { join, split } from 'shlex';
 import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
@@ -33,6 +33,7 @@ const NONTERM = [
   'SIGWINCH',
 ];
 
+const EXEC_RESULT_TIMEOUT_MS = 1000;
 const encoding = 'utf8';
 
 function stringify(list: Buffer[], writer: OutputWriter | undefined): string {
@@ -155,20 +156,71 @@ export function exec(
       ...opts,
       maxBuffer,
     });
+    let settled = false;
 
     // handle process events
     void cp.on('error', (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
       kill(cp, 'SIGTERM');
       // rethrowing, use originally emitted error message
       reject(new ExecError(error.message, rejectInfo(), error));
     });
 
-    void cp.on('exit', (code: number, signal: NodeJS.Signals) => {
-      if (NONTERM.includes(signal)) {
+    void cp.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
+      if (signal && NONTERM.includes(signal)) {
         return;
       }
+      if (settled) {
+        return;
+      }
+      settled = true;
       if (signal) {
         kill(cp, signal);
+      }
+      void settleAfterExit(code, signal).catch(reject);
+    });
+
+    async function settleAfterExit(
+      code: number | null,
+      signal: NodeJS.Signals | null,
+    ): Promise<void> {
+      let resultTimer: NodeJS.Timeout | undefined;
+      const resultTimeout = new Promise<undefined>((resolve) => {
+        resultTimer = setTimeout(
+          () => resolve(undefined),
+          EXEC_RESULT_TIMEOUT_MS,
+        );
+      });
+      const result = await Promise.race([subprocess, resultTimeout]);
+      clearTimeout(resultTimer);
+      if (result === undefined) {
+        cleanupChildProcess(cp);
+        logger.debug(
+          { command: cp.spawnargs.join(' ') },
+          'Timed out waiting for command result after exit',
+        );
+      }
+
+      if (result instanceof ExecaError && result.timedOut) {
+        reject(
+          new ExecError(
+            result.shortMessage,
+            {
+              ...rejectInfo(),
+              signal: signal ?? undefined,
+              exitCode: code ?? undefined,
+              timedOut: true,
+            },
+            result,
+          ),
+        );
+        return;
+      }
+
+      if (signal) {
         reject(
           new ExecError(
             `Command failed: ${cp.spawnargs.join(' ')}\nInterrupted by ${signal}`,
@@ -187,7 +239,7 @@ export function exec(
               `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
               {
                 ...rejectInfo(),
-                exitCode: code,
+                exitCode: code ?? undefined,
               },
             ),
           );
@@ -199,7 +251,7 @@ export function exec(
             command: cp.spawnargs.join(' '),
             stdout: stringify(stdout, opts.outputWriters?.stdout),
             stderr: stringify(stderr, opts.outputWriters?.stderr),
-            exitCode: code,
+            exitCode: code ?? undefined,
           },
           `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
@@ -207,7 +259,7 @@ export function exec(
         resolve({
           stderr: stringify(stderr, opts.outputWriters?.stderr),
           stdout: stringify(stdout, opts.outputWriters?.stdout),
-          exitCode: code,
+          exitCode: code ?? undefined,
         });
         return;
       }
@@ -215,7 +267,7 @@ export function exec(
         stderr: stringify(stderr, opts.outputWriters?.stderr),
         stdout: stringify(stdout, opts.outputWriters?.stdout),
       });
-    });
+    }
 
     function rejectInfo(): ExecErrorData {
       return {
@@ -226,6 +278,15 @@ export function exec(
       };
     }
   });
+}
+
+function cleanupChildProcess(cp: ChildProcess): void {
+  // destroying stdio is needed for unref to work
+  // https://nodejs.org/api/child_process.html#subprocessunref
+  // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+  cp.stderr?.destroy();
+  cp.stdout?.destroy();
+  cp.unref();
 }
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
@@ -239,12 +300,7 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
        */
       return process.kill(-cp.pid, signal);
     }
-    // destroying stdio is needed for unref to work
-    // https://nodejs.org/api/child_process.html#subprocessunref
-    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-    cp.stderr?.destroy();
-    cp.stdout?.destroy();
-    cp.unref();
+    cleanupChildProcess(cp);
     return cp.kill(signal);
   } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
