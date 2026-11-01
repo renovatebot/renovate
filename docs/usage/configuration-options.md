@@ -3038,6 +3038,28 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgePackageManager`
+
+Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
+Examples are npm's `--before`, pnpm's `--config.minimum-release-age`, Poetry's `POETRY_SOLVER_MIN_RELEASE_AGE` and Cargo's `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE`.
+Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn which managers support this.
+
+This option does not change when Renovate raises an update.
+You can only set it at the top level of a config or in a manager's config, not in `packageRules`, because the package manager applies one value to the whole lock file.
+Security updates pass no minimum release age to the package manager.
+
+```json
+{
+  "npm": {
+    "minimumReleaseAgePackageManager": "7 days"
+  }
+}
+```
+
+The package manager can fail to update a lock file to a version which is younger than `minimumReleaseAgePackageManager`.
+Set `minimumReleaseAge` for those updates to at least the same duration.
+
 ## `minor`
 
 Add to this object if you wish to define rules that apply only to minor updates.
