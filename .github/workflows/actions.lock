@@ -60,7 +60,7 @@ workflows:
     '.github/workflows/pr-size-labeler-apply.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
-        - 'cbrgm/pr-size-labeler-action@503e76dd1fa75f044f303a7d1460f5e2f396df01'
+        - 'cbrgm/pr-size-labeler-action@371213a8a3de4b4c8f107ec8adcbb7ca293e970f'
     '.github/workflows/pr-size-labeler.yml':
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
     '.github/workflows/scorecard.yml':
@@ -135,9 +135,9 @@ dependencies:
         commit: 'sha1-68559e99cc807c1eb7e9238fd43a15bba460eec2'
         owner_id: 115962839
         repo_id: 846733598
-    'cbrgm/pr-size-labeler-action@503e76dd1fa75f044f303a7d1460f5e2f396df01':
-        ref: 'v1.4.0'
-        commit: 'sha1-503e76dd1fa75f044f303a7d1460f5e2f396df01'
+    'cbrgm/pr-size-labeler-action@371213a8a3de4b4c8f107ec8adcbb7ca293e970f':
+        ref: 'v1.4.1'
+        commit: 'sha1-371213a8a3de4b4c8f107ec8adcbb7ca293e970f'
         owner_id: 24737434
         repo_id: 724591626
     'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5':
