@@ -83,6 +83,8 @@ If you have a package manager you'd like supported, please raise a [Suggest an I
 Renovate passes the `minimumReleaseAge` of your repository or manager config to package managers, but not a `minimumReleaseAge` from `packageRules`.
 A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
 A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
+Set [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) at the top level or in a manager's config to set a lower bound for the value which Renovate passes to the package manager.
+The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 
 The table below lists the managers with a known integration, per package manager.
 Managers that are not listed do not integrate with the minimum release age of their package manager.
@@ -153,13 +155,13 @@ Renovate reads the pnpm version from the `constraints` config, the `package.json
 
 #### Poetry
 
-When the repository or manager config sets `minimumReleaseAge`, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
+When the repository or manager config sets `minimumReleaseAge` or `minimumReleaseAgePackageManager`, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 Renovate rounds the value up to whole days.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
 Poetry added this setting in v2.4.0, and older versions ignore it.
 
-The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an integer number of days.
+If both are set, Renovate passes the larger value.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
