@@ -127,48 +127,6 @@ export function extractPkgver(content: string): string | null {
 }
 
 /**
- * Extract pkgname from PKGBUILD
- * Handles comments, quotes, and bash variables
- */
-export function extractPkgname(content: string): string | null {
-  const pkgnameRegex = regEx(/^pkgname=(?<pkgname>.+)$/m);
-  const match = pkgnameRegex.exec(content);
-  if (!match) {
-    return null;
-  }
-
-  let pkgname = match[1].trim();
-
-  // Remove inline comments (everything after #)
-  const commentIndex = pkgname.indexOf('#');
-  if (commentIndex !== -1) {
-    pkgname = pkgname.substring(0, commentIndex).trim();
-  }
-
-  // Remove surrounding quotes
-  pkgname = pkgname.replace(regEx(/^["']|["']$/g), '');
-
-  // Skip packages with unresolved bash variables
-  // These need variable expansion which is complex in PKGBUILD context
-  if (
-    pkgname.includes('${') ||
-    pkgname.includes('$_') ||
-    pkgname.includes('$(')
-  ) {
-    logger.debug(`Skipping package with bash variables: ${pkgname}`);
-    return null;
-  }
-
-  // Skip array-style package names for now
-  if (pkgname.startsWith('(')) {
-    logger.debug(`Skipping array-style package name: ${pkgname}`);
-    return null;
-  }
-
-  return pkgname;
-}
-
-/**
  * Extract variable definitions from PKGBUILD
  * Extracts standard variables (url, pkgname, pkgver) and all underscore-prefixed
  * custom variables (e.g., _pkgver, _basever, _commit) which are commonly used

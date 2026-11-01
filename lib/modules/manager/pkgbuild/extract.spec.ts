@@ -625,34 +625,6 @@ describe('modules/manager/pkgbuild/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('uses Repology as fallback for unsupported sources with pkgname', () => {
-      const content = codeBlock`
-        pkgname=custom-package
-        pkgver=1.5.0
-        source=("https://example.com/downloads/custom-package-\${pkgver}.tar.gz")
-        sha256sums=('1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
-      `;
-      const result = extractPackageFile(content);
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depName: 'aur/custom-package',
-            currentValue: '1.5.0',
-            datasource: 'repology',
-            managerData: {
-              sourceUrl:
-                'https://example.com/downloads/custom-package-1.5.0.tar.gz',
-              checksums: {
-                sha256:
-                  '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-              },
-              pkgver: '1.5.0',
-            },
-          },
-        ],
-      });
-    });
-
     it('extracts dependency from GitLab source', () => {
       const content = codeBlock`
         pkgname=example-gitlab-package
@@ -714,22 +686,6 @@ describe('modules/manager/pkgbuild/extract', () => {
       });
     });
 
-    it('falls back to Repology for unparseable source URLs', () => {
-      const content = codeBlock`
-        pkgname=invalid-url-pkg
-        pkgver=1.0.0
-        source=("hxxp://invalid-protocol-url")
-      `;
-      const result = extractPackageFile(content);
-      expect(result).not.toBeNull();
-      // Should fall back to Repology when URL can't be parsed but pkgname exists
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/invalid-url-pkg',
-        currentValue: '1.0.0',
-        datasource: 'repology',
-      });
-    });
-
     it('logs debug message when no checksums are found', () => {
       const content = codeBlock`
         pkgname=no-checksums
@@ -748,9 +704,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://github.com/only-one-part")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for GitHub URLs without version info', () => {
@@ -760,9 +714,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://github.com/owner/repo/somethingelse")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for GitLab URLs with insufficient path parts', () => {
@@ -772,9 +724,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitlab.com/only-one")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for GitLab URLs without archive path', () => {
@@ -784,9 +734,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitlab.com/owner/repo/somethingelse")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('extracts dependency from Packagist URL with packages path', () => {
@@ -825,9 +773,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://packagist.org/invalid")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('handles tar.bz2 file extension in GitHub archive URLs', () => {
@@ -900,9 +846,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://registry.npmjs.org/package")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for npm URLs with invalid filename', () => {
@@ -912,9 +856,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://registry.npmjs.org/package/-/invalid-filename")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for npm scoped package with insufficient path parts', () => {
@@ -924,9 +866,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://registry.npmjs.org/@scope/package/-")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for CPAN URLs without filename', () => {
@@ -936,9 +876,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://cpan.metacpan.org/authors/id/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for CPAN URLs with invalid filename format', () => {
@@ -948,9 +886,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://cpan.metacpan.org/authors/id/A/AB/ABC/invalidfile")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for generic git URLs without archive path and not ending in .git', () => {
@@ -960,9 +896,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://git.example.com/owner/repo/something")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for generic git URLs with insufficient path parts for .git', () => {
@@ -972,9 +906,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://git.example.com/repo.git")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for Gitea URLs with archive but no version after extension removal', () => {
@@ -984,9 +916,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitea.com/owner/repo/archive/.tar.gz")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for Forgejo URLs with archive but no version after extension removal', () => {
@@ -996,9 +926,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://code.forgejo.org/owner/repo/archive/.tar.gz")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('returns null for generic git URLs with archive but no version after extension removal', () => {
@@ -1008,9 +936,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://git.example.com/owner/repo/archive/.tar.gz")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result).not.toBeNull();
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result).toBeNull();
     });
 
     it('handles pypi.python.org hostname variant', () => {
@@ -1044,10 +970,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://www.cpan.org/authors/id/A/AB/ABC/Module-Name-1.0.0.tar.gz")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/cpan-mirror',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles filename without version pattern as fallback', () => {
@@ -1057,10 +980,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://example.com/downloads/simple-archive.tar.gz")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/simple-pkg',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('returns null when unable to determine source data after all fallbacks', () => {
@@ -1073,30 +993,24 @@ describe('modules/manager/pkgbuild/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('falls back to Repology for CPAN URL with empty path', () => {
+    it('returns null for CPAN URL with empty path', () => {
       const content = codeBlock`
         pkgname=empty-cpan
         pkgver=1.0.0
         source=("https://cpan.metacpan.org/")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/empty-cpan',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
-    it('falls back to Repology for Forgejo URL without archive path', () => {
+    it('returns null for Forgejo URL without archive path', () => {
       const content = codeBlock`
         pkgname=forgejo-no-archive
         pkgver=1.0.0
         source=("https://code.forgejo.org/owner/repo/releases")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/forgejo-no-archive',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles URL parsing errors gracefully', () => {
@@ -1106,10 +1020,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("not-a-valid-url-at-all")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/invalid-url',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('returns null for filename-based source without pkgname', () => {
@@ -1159,30 +1070,24 @@ describe('modules/manager/pkgbuild/extract', () => {
       ]);
     });
 
-    it('falls back to Repology for PyPI URL with empty filename', () => {
+    it('returns null for PyPI URL with empty filename', () => {
       const content = codeBlock`
         pkgname=pypi-empty
         pkgver=1.0.0
         source=("https://files.pythonhosted.org/packages/source/p/package/")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/pypi-empty',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
-    it('falls back to Repology for PyPI URL with non-matching filename', () => {
+    it('returns null for PyPI URL with non-matching filename', () => {
       const content = codeBlock`
         pkgname=pypi-nomatch
         pkgver=1.0.0
         source=("https://files.pythonhosted.org/packages/source/p/package/README.txt")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/pypi-nomatch',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('returns null for filename that matches no pattern', () => {
@@ -1194,17 +1099,14 @@ describe('modules/manager/pkgbuild/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('falls back to Repology for PyPI URL with root path only', () => {
+    it('returns null for PyPI URL with root path only', () => {
       const content = codeBlock`
         pkgname=pypi-root
         pkgver=1.0.0
         source=("https://files.pythonhosted.org/")
       `;
       const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/pypi-root',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('extracts multiple sources with pkgver tracking', () => {
@@ -1308,7 +1210,6 @@ describe('modules/manager/pkgbuild/extract', () => {
         sha256sums=('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc1')
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology since no extension to remove
       expect(result?.deps[0]).toMatchObject({
         depName: 'owner/repo',
         currentValue: 'v1.0.0',
@@ -1323,11 +1224,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://repo.packagist.org/downloads/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/packagist-nofn',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles Gitea archive URL without version', () => {
@@ -1376,20 +1273,6 @@ describe('modules/manager/pkgbuild/extract', () => {
       });
     });
 
-    it('handles .git URL with single path component', () => {
-      const content = codeBlock`
-        pkgname=single-path-git
-        pkgver=1.0.0
-        source=("https://git.example.com/repo.git")
-      `;
-      const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/single-path-git',
-        datasource: 'repology',
-      });
-    });
-
     it('handles source with mixed quoted and unquoted entries', () => {
       const content = codeBlock`
         pkgname=mixed-quotes
@@ -1417,14 +1300,14 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=underscore-pkgver
         pkgver=1.0.0
         _pkgver=1.0.0
-        source=("https://example.com/package-$_pkgver.tar.gz")
+        source=("https://github.com/owner/repo/archive/package-$_pkgver.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(
         result?.deps[0].managerData?.multiSource?.sources[0],
       ).toMatchObject({
-        url: 'https://example.com/package-$_pkgver.tar.gz',
+        url: 'https://github.com/owner/repo/archive/package-$_pkgver.tar.gz',
         usesPkgver: true,
       });
     });
@@ -1434,14 +1317,14 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=braced-underscore-pkgver
         pkgver=1.0.0
         _pkgver=1.0.0
-        source=("https://example.com/package-\${_pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/package-\${_pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(
         result?.deps[0].managerData?.multiSource?.sources[0],
       ).toMatchObject({
-        url: 'https://example.com/package-${_pkgver}.tar.gz',
+        url: 'https://github.com/owner/repo/archive/package-${_pkgver}.tar.gz',
         usesPkgver: true,
       });
     });
@@ -1465,7 +1348,7 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=test-novar
         pkgver=1.0.0
-        source=("https://example.com/\${nonexistent}/file.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${nonexistent}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
@@ -1477,13 +1360,13 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=test-prefix-nomatch
         pkgver=1.0.0
-        source=("https://example.com/\${pkgver#v}/file.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgver#v}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       // Prefix 'v' doesn't match, should return original value
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/1.0.0/file.tar.gz',
+        'https://github.com/owner/repo/archive/1.0.0.tar.gz',
       );
     });
 
@@ -1491,13 +1374,13 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=test-suffix-nomatch
         pkgver=1.0.0
-        source=("https://example.com/\${pkgver%-beta}/file.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgver%-beta}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       // Suffix '-beta' doesn't match, should return original value
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/1.0.0/file.tar.gz',
+        'https://github.com/owner/repo/archive/1.0.0.tar.gz',
       );
     });
 
@@ -1520,12 +1403,12 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=multi-var
         pkgver=1.0.0
         _name=package
-        source=("https://example.com/\${_name}-\${pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${_name}-\${pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/package-1.0.0.tar.gz',
+        'https://github.com/owner/repo/archive/package-1.0.0.tar.gz',
       );
     });
 
@@ -1534,12 +1417,12 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=simple-var
         pkgver=1.0.0
         _name=package
-        source=("https://example.com/$_name-$pkgver.tar.gz")
+        source=("https://github.com/owner/repo/archive/$_name-$pkgver.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/package-1.0.0.tar.gz',
+        'https://github.com/owner/repo/archive/package-1.0.0.tar.gz',
       );
     });
 
@@ -1548,12 +1431,12 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=mixed-syntax
         pkgver=1.0.0
         _name=package
-        source=("https://example.com/$_name-\${pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/$_name-\${pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/package-1.0.0.tar.gz',
+        'https://github.com/owner/repo/archive/package-1.0.0.tar.gz',
       );
     });
 
@@ -1561,12 +1444,12 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=prefix-match
         pkgver=v1.0.0
-        source=("https://example.com/\${pkgver#v}/file.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgver#v}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/1.0.0/file.tar.gz',
+        'https://github.com/owner/repo/archive/1.0.0.tar.gz',
       );
     });
 
@@ -1574,12 +1457,12 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=suffix-match
         pkgver=1.0.0-rc1
-        source=("https://example.com/\${pkgver%-rc1}/file.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgver%-rc1}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/1.0.0/file.tar.gz',
+        'https://github.com/owner/repo/archive/1.0.0.tar.gz',
       );
     });
 
@@ -1587,40 +1470,26 @@ describe('modules/manager/pkgbuild/extract', () => {
       const content = codeBlock`
         pkgname=complex-pkg
         pkgver=1.0.0
-        source=("https://example.com/\${pkgname}-\${pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgname}-\${pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/complex-pkg-1.0.0.tar.gz',
+        'https://github.com/owner/repo/archive/complex-pkg-1.0.0.tar.gz',
       );
-    });
-
-    it('falls back to Repology when URL has unexpanded variables', () => {
-      const content = codeBlock`
-        pkgname=preserve-unknown
-        pkgver=1.0.0
-        source=("https://example.com/$unknown_var/file-\${pkgver}.tar.gz")
-        sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-      `;
-      const result = extractPackageFile(content);
-      // URL with unknown variable falls back to Repology
-      expect(result?.deps[0].datasource).toBe('repology');
-      expect(result?.deps[0].depName).toBe('aur/preserve-unknown');
     });
 
     it('handles pkgname variable expansion in sources', () => {
       const content = codeBlock`
         pkgname=my-package
         pkgver=2.5.0
-        source=("https://example.com/downloads/\${pkgname}-\${pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${pkgname}-\${pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
-      // Falls back to Repology but sourceUrl should be expanded
-      expect(result?.deps[0].datasource).toBe('repology');
+      expect(result?.deps[0].datasource).toBe('github-tags');
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/downloads/my-package-2.5.0.tar.gz',
+        'https://github.com/owner/repo/archive/my-package-2.5.0.tar.gz',
       );
     });
 
@@ -1629,12 +1498,12 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=test-pkg
         pkgver=1.0.0
         _pkgname=actual-package
-        source=("https://example.com/\${_pkgname}-\${pkgver}.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${_pkgname}-\${pkgver}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/actual-package-1.0.0.tar.gz',
+        'https://github.com/owner/repo/archive/actual-package-1.0.0.tar.gz',
       );
     });
 
@@ -1643,13 +1512,13 @@ describe('modules/manager/pkgbuild/extract', () => {
         pkgname=filename-var
         pkgver=3.2.1
         _name=myapp
-        source=("https://example.com/downloads/\${_name}.tar.gz")
+        source=("https://github.com/owner/repo/archive/\${_name}.tar.gz")
         sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       `;
       const result = extractPackageFile(content);
       // Should use expanded _name in sourceUrl
       expect(result?.deps[0].managerData?.sourceUrl).toBe(
-        'https://example.com/downloads/myapp.tar.gz',
+        'https://github.com/owner/repo/archive/myapp.tar.gz',
       );
     });
 
@@ -1783,49 +1652,6 @@ describe('modules/manager/pkgbuild/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('handles pkgname with inline comment', () => {
-      const content = codeBlock`
-        pkgname=commented-name # this is a comment
-        pkgver=1.0.0
-        source=("https://example.com/commented-name-1.0.0.tar.gz")
-      `;
-      const result = extractPackageFile(content);
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/commented-name',
-        datasource: 'repology',
-      });
-    });
-
-    it('returns null when pkgname contains $_ bash variable', () => {
-      const content = codeBlock`
-        pkgname=$_dynamic_name
-        pkgver=1.0.0
-        source=("https://example.com/pkg-1.0.0.tar.gz")
-      `;
-      const result = extractPackageFile(content);
-      expect(result).toBeNull();
-    });
-
-    it('returns null when pkgname contains $( subshell', () => {
-      const content = codeBlock`
-        pkgname=$(echo test)
-        pkgver=1.0.0
-        source=("https://example.com/pkg-1.0.0.tar.gz")
-      `;
-      const result = extractPackageFile(content);
-      expect(result).toBeNull();
-    });
-
-    it('returns null for array-style pkgname without supported source', () => {
-      const content = codeBlock`
-        pkgname=(foo bar baz)
-        pkgver=1.0.0
-        source=("https://example.com/pkg-1.0.0.tar.gz")
-      `;
-      const result = extractPackageFile(content);
-      expect(result).toBeNull();
-    });
-
     it('handles parameter substitution with unknown variable', () => {
       const content = codeBlock`
         pkgname=test-unknown-param
@@ -1873,16 +1699,6 @@ describe('modules/manager/pkgbuild/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when pkgname contains ${ bash variable', () => {
-      const content = codeBlock`
-        pkgname=\${_base_name}-git
-        pkgver=1.0.0
-        source=("https://example.com/pkg-1.0.0.tar.gz")
-      `;
-      const result = extractPackageFile(content);
-      expect(result).toBeNull();
-    });
-
     it('handles GitHub archive URL with no version segment', () => {
       const content = codeBlock`
         pkgname=gh-no-version
@@ -1890,11 +1706,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://github.com/owner/repo/archive/")
       `;
       const result = extractPackageFile(content);
-      // GitHub archive with no version should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gh-no-version',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles GitLab archive URL with missing version segment', () => {
@@ -1904,11 +1716,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitlab.com/owner/repo/-/archive/")
       `;
       const result = extractPackageFile(content);
-      // GitLab archive with no version should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gl-no-version',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles Gitea archive URL with missing version after archive', () => {
@@ -1918,11 +1726,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitea.com/owner/repo/archive/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gitea-missing-ver',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles Forgejo archive URL with missing version after archive', () => {
@@ -1932,11 +1736,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://code.forgejo.org/owner/repo/archive/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/forgejo-missing-ver',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles generic git archive URL with missing version after archive', () => {
@@ -1946,11 +1746,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://git.example.com/owner/repo/archive/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/git-missing-ver',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles Packagist URL with root-only path (no filename)', () => {
@@ -1960,11 +1756,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://repo.packagist.org/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology since no parseable path
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/packagist-rootonly',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles GitHub refs/tags URL with missing tag version', () => {
@@ -1974,11 +1766,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://github.com/owner/repo/archive/refs/tags/")
       `;
       const result = extractPackageFile(content);
-      // Should fall back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gh-refs-tags-noversion',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles source URL with $_ that cannot be expanded', () => {
@@ -2011,10 +1799,7 @@ describe('modules/manager/pkgbuild/extract', () => {
       `;
       const result = extractPackageFile(content);
       // archive is the last segment, no version after it
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gitea-archive-end',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles Forgejo URL with archive as last path segment', () => {
@@ -2025,10 +1810,7 @@ describe('modules/manager/pkgbuild/extract', () => {
       `;
       const result = extractPackageFile(content);
       // archive is the last segment, no version after it
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/forgejo-archive-end',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('handles generic git URL with archive as last path segment (trailing slash)', () => {
@@ -2039,10 +1821,7 @@ describe('modules/manager/pkgbuild/extract', () => {
       `;
       const result = extractPackageFile(content);
       // archive is the last segment, no version after it (version undefined)
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/git-archive-end',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
 
     it('returns null for GitLab URL where version is only an extension', () => {
@@ -2052,11 +1831,7 @@ describe('modules/manager/pkgbuild/extract', () => {
         source=("https://gitlab.com/owner/repo/-/archive/.tar.gz")
       `;
       const result = extractPackageFile(content);
-      // version becomes empty after stripping extension → falls back to Repology
-      expect(result?.deps[0]).toMatchObject({
-        depName: 'aur/gl-ext-only',
-        datasource: 'repology',
-      });
+      expect(result).toBeNull();
     });
   });
 

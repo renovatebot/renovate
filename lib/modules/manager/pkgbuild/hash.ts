@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
@@ -59,10 +60,10 @@ export function computeChecksums(url: string): Promise<ChecksumData> {
   return withCache(
     {
       namespace: 'pkgbuild-hash',
-      key: `computeChecksums:${url}`,
+      key: buildCacheKey('computeChecksums', url),
       ttlMinutes: hashCacheTTL,
       // source URLs may point at private hosts; never share across repos
-      cacheable: false,
+      public: false,
     },
     () => _computeChecksums(url),
   );

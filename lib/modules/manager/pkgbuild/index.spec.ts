@@ -37,7 +37,6 @@ describe('modules/manager/pkgbuild/index', () => {
       'npm',
       'packagist',
       'pypi',
-      'repology',
     ]);
   });
 });

@@ -2,7 +2,6 @@ import { logger } from '../../../../logger/index.ts';
 import { detectPlatform } from '../../../../util/common.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { parseUrl } from '../../../../util/url.ts';
-import { RepologyDatasource } from '../../../datasource/repology/index.ts';
 import type { PackageDependency, PackageFileContent } from '../../types.ts';
 import type { PkgbuildManagerData, SourceData } from '../types.ts';
 import { parseCPANUrl } from './cpan.ts';
@@ -17,7 +16,6 @@ import { parsePyPIUrl } from './pypi.ts';
 import {
   extractChecksums,
   extractMultiSourceData,
-  extractPkgname,
   extractPkgver,
   extractSource,
   extractVariables,
@@ -121,23 +119,7 @@ export function extractPackageFile(
     return null;
   }
 
-  let sourceData: SourceData | null = parseSourceUrl(sourceUrl, pkgver);
-
-  if (!sourceData) {
-    const pkgname = extractPkgname(content);
-    if (pkgname) {
-      logger.debug(
-        `Using Repology datasource as fallback for package: ${pkgname}`,
-      );
-      sourceData = {
-        url: sourceUrl,
-        version: pkgver,
-        datasource: RepologyDatasource.id,
-        packageName: `aur/${pkgname}`,
-      };
-    }
-  }
-
+  const sourceData = parseSourceUrl(sourceUrl, pkgver);
   if (!sourceData) {
     logger.debug('Unable to parse source URL or unsupported source');
     return null;

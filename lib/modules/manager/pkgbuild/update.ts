@@ -143,7 +143,7 @@ function expandUrl(
       const escapedName = RegExp.escape(varName);
       result = result
         .replace(regEx(`\\$\\{${escapedName}\\}`, 'g'), ver)
-        .replace(regEx(`\\$${escapedName}(?![a-zA-Z0-9_])`, 'g'), ver);
+        .replace(regEx(`\\$${escapedName}\\b`, 'g'), ver);
     }
   }
 
@@ -262,7 +262,7 @@ async function updateMultiSourceChecksums(
   multiSource: MultiSourceData,
   newValue: string,
   versionVariables?: string[],
-): Promise<string> {
+): Promise<string | null> {
   let updatedContent = content;
   const { sources, checksums } = multiSource;
 
@@ -326,9 +326,9 @@ async function updateMultiSourceChecksums(
     } catch (err) {
       logger.warn(
         { err, index: i, url: source.url },
-        'Failed to compute checksums for source',
+        'Failed to compute checksums for source - aborting update',
       );
-      // Continue with other sources
+      return null;
     }
   }
 
@@ -422,12 +422,16 @@ export async function updateDependency({
       { sourceCount: multiSource.sources.length },
       'Processing multi-source PKGBUILD',
     );
-    updatedContent = await updateMultiSourceChecksums(
+    const multiSourceContent = await updateMultiSourceChecksums(
       updatedContent,
       multiSource,
       newValue,
       versionVariables,
     );
+    if (!multiSourceContent) {
+      return null;
+    }
+    updatedContent = multiSourceContent;
   }
   // Handle single-source PKGBUILDs (backward compatibility)
   else if (checksums && Object.keys(checksums).length > 0) {
@@ -479,10 +483,10 @@ export async function updateDependency({
       logger.debug('Successfully updated checksums');
     } catch (err) {
       logger.warn(
-        { err },
-        'Failed to compute new checksums - continuing without checksum update',
+        { err, url: newUrl },
+        'Failed to compute new checksums - aborting update',
       );
-      // Continue without checksum update - user can run updpkgsums manually
+      return null;
     }
   }
 

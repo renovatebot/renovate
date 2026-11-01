@@ -104,9 +104,9 @@ source=("https://git.example.com/owner/repo/archive/v${pkgver}.tar.gz")
 source=("https://git.example.com/org/repo.git")
 ```
 
-### Repology (Fallback)
+### Unsupported Sources
 
-For sources that don't match any of the above patterns, Renovate automatically uses [Repology](https://repology.org/) as a fallback datasource using the `pkgname` to look up the package in the AUR.
+PKGBUILD files whose source URL doesn't match any of the above patterns are skipped. Use the [custom regex manager](../regex/index.md) to track them.
 
 **Examples:**
 
@@ -194,4 +194,5 @@ The manager downloads the new source archive and computes all checksums automati
 
 **Limitations:**
 
-- When falling back to Repology, version updates depend on the accuracy of the Repology database
+- Source URLs that don't match a supported datasource are skipped
+- If checksums cannot be computed for the new version, no update is made

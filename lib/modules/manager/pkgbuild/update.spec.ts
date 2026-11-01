@@ -154,7 +154,7 @@ sha512sums=('${sha512Hash}')
       expect(result).not.toContain(sha512Hash);
     });
 
-    it('continues without checksum update on download failure', async () => {
+    it('returns null when checksum download fails', async () => {
       mockComputeChecksums.mockRejectedValueOnce(new Error('download failed'));
 
       const result = await updateDependency({
@@ -176,13 +176,8 @@ sha512sums=('${sha512Hash}')
         },
       });
 
-      expect(result).not.toBeNull();
-      expect(result).toContain('pkgver=1.2.4');
-      expect(result).toContain('archive/v${pkgver}.tar.gz');
-      // Old checksum should remain since download failed
-      expect(result).toContain(
-        'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-      );
+      // No PR should be opened with stale checksums
+      expect(result).toBeNull();
     });
 
     it('updates all checksum types when available', async () => {
@@ -867,7 +862,7 @@ sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
       expect(result).toContain('pkgver=2.0.0');
     });
 
-    it('handles download failure for multi-source', async () => {
+    it('returns null when checksum download fails for multi-source', async () => {
       const content = `
 pkgname=multi-fail
 pkgver=1.0.0
@@ -878,7 +873,6 @@ sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
             'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
 `;
 
-      mockComputeChecksums.mockRejectedValueOnce(new Error('download failed'));
       mockComputeChecksums.mockRejectedValueOnce(new Error('download failed'));
 
       const result = await updateDependency({
@@ -915,12 +909,8 @@ sha256sums=('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
         },
       });
 
-      expect(result).not.toBeNull();
-      expect(result).toContain('pkgver=2.0.0');
-      // Checksums should remain unchanged due to download failure
-      expect(result).toContain(
-        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      );
+      // No PR should be opened with stale checksums
+      expect(result).toBeNull();
     });
 
     it('handles only b2sums in single-source', async () => {

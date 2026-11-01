@@ -7,7 +7,6 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
-import { RepologyDatasource } from '../../datasource/repology/index.ts';
 
 export { extractPackageFile } from './extract/index.ts';
 export { updateDependency } from './update.ts';
@@ -30,5 +29,4 @@ export const supportedDatasources = [
   NpmDatasource.id,
   PackagistDatasource.id,
   PypiDatasource.id,
-  RepologyDatasource.id,
 ];
