@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNumber, isString } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -11,7 +11,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { toMs } from '../../../util/pretty-time.ts';
+import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import {
@@ -202,17 +202,13 @@ export async function updateArtifacts({
           PIP_CACHE_DIR: await ensureCacheDir('pip'),
         };
 
-        if (config.minimumReleaseAge) {
-          const ageMs = toMs(config.minimumReleaseAge);
-          if (isNumber(ageMs)) {
-            const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-            extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
-          } else {
-            logger.debug(
-              { minimumReleaseAge: config.minimumReleaseAge },
-              'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
-            );
-          }
+        const ageMs = calculatePackageManagerMinimumReleaseAgeMs(
+          config,
+          updatedDeps,
+        );
+        if (ageMs) {
+          const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
+          extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
         }
 
         const execOptions: ExecOptions = {

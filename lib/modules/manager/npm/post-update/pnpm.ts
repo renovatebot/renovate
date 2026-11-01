@@ -82,9 +82,7 @@ function mayRejectUpgrade(upgrade: Upgrade, minutes: number): boolean {
 /**
  * The `--config.minimum-release-age` flag, in minutes, which passes the larger of Renovate's minimum release age and the pnpm value to pnpm.
  *
- * Lock file maintenance uses its own `minimumReleaseAge`.
- * Other updates use `minimumReleaseAgeRepository`, as pnpm applies the value to every package in the lock file, and a larger `minimumReleaseAge` from `packageRules` would fail on packages which other updates locked.
- * Both come from the upgrades of the lock file, as the branch config is the one of the first upgrade of the branch, which can belong to another manager.
+ * Renovate's value comes from `calculatePackageManagerMinimumReleaseAgeMs`.
  * The notice warns about updates whose own minimum release age is smaller than the value which pnpm gets.
  *
  * The pnpm value comes from the `pnpm-workspace.yaml`, the `.npmrc` before pnpm v11, or the pnpm v11 default.
@@ -98,22 +96,11 @@ async function getMinimumReleaseAgeFlag(
   npmrcContent: string | null,
   pnpmConstraint: string | null | undefined,
 ): Promise<MinimumReleaseAgeFlag | null> {
-  // security updates bypass minimumReleaseAge
-  if (upgrades.some((upgrade) => upgrade.isVulnerabilityAlert)) {
-    return null;
-  }
-  const lockFileMaintenance = upgrades.find(
-    (upgrade) => upgrade.isLockFileMaintenance,
-  );
-  const minimumReleaseAge = lockFileMaintenance
-    ? lockFileMaintenance.minimumReleaseAge
-    : (upgrades[0] ?? config).minimumReleaseAgeRepository;
   // the pnpm value is added below, as it depends on the pnpm version
-  const minimumReleaseAgeMs = lockFileMaintenance
-    ? calculateMinimumReleaseAgeMs({ minimumReleaseAge })
-    : calculatePackageManagerMinimumReleaseAgeMs({
-        minimumReleaseAgeRepository: minimumReleaseAge,
-      });
+  const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs(
+    config,
+    upgrades,
+  );
   if (!minimumReleaseAgeMs) {
     return null;
   }
@@ -129,14 +116,17 @@ async function getMinimumReleaseAgeFlag(
     pnpmMinutes ?? 0,
   );
   logger.debug(
-    { minimumReleaseAge, pnpmMinimumReleaseAge: pnpmMinutes },
+    { minimumReleaseAgeMs, pnpmMinimumReleaseAge: pnpmMinutes },
     `Passing a minimum release age of ${minutes} minutes to pnpm`,
   );
   const result: MinimumReleaseAgeFlag = {
     flag: `--config.minimum-release-age=${minutes}`,
   };
 
-  const lowerUpgrades = lockFileMaintenance
+  // lock file maintenance has no own updates which pnpm may reject
+  const lowerUpgrades = upgrades.some(
+    (upgrade) => upgrade.isLockFileMaintenance,
+  )
     ? []
     : upgrades.filter((upgrade) => mayRejectUpgrade(upgrade, minutes));
   if (lowerUpgrades.length) {
