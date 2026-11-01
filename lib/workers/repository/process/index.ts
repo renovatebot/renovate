@@ -116,7 +116,7 @@ function unfoldBaseBranches(
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
-        `baseBranchePatterns regex "${baseBranchPattern}" matches [${matchingBranches.join()}]`,
+        `baseBranchPatterns regex "${baseBranchPattern}" matches [${matchingBranches.join()}]`,
       );
       unfoldedList.push(...matchingBranches);
     } else if (baseBranchPattern === '$default') {

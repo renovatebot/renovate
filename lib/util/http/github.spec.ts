@@ -16,7 +16,7 @@ import * as _repositoryCache from '../cache/repository/index.ts';
 import type { RepoCacheData } from '../cache/repository/types.ts';
 import * as hostRules from '../host-rules.ts';
 import type { GraphqlPageCache } from './github.ts';
-import { GithubHttp, setBaseUrl } from './github.ts';
+import { GithubHttp, isPrAlreadyExistsError, setBaseUrl } from './github.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
@@ -781,6 +781,28 @@ describe('util/http/github', () => {
           'Validation Failed',
         );
       });
+    });
+  });
+
+  describe('isPrAlreadyExistsError', () => {
+    const prExists = { errors: [{ message: 'A pull request already exists' }] };
+
+    it('detects the PR already exists error', () => {
+      expect(
+        isPrAlreadyExistsError({
+          response: { statusCode: 422, body: prExists },
+        }),
+      ).toBeTrue();
+    });
+
+    it.each`
+      response
+      ${undefined}
+      ${{ statusCode: 500, body: prExists }}
+      ${{ statusCode: 422 }}
+      ${{ statusCode: 422, body: { errors: [{ message: 'Other' }] } }}
+    `('returns false for $response', ({ response }) => {
+      expect(isPrAlreadyExistsError({ response })).toBeFalse();
     });
   });
 
