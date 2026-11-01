@@ -98,6 +98,7 @@ This ensures that npm only resolves package versions that were available before 
 
 The `--before` date is calculated as `now - minimumReleaseAge`.
 Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
+A larger `minimumReleaseAgePackageManager` raises it.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not pass `--before`.
 If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
 If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
@@ -132,6 +133,7 @@ The flag takes precedence over both files, and pnpm applies the value strictly b
 
 pnpm applies the value to every package it resolves, including the ones already in the `pnpm-lock.yaml`.
 For dependency updates, Renovate therefore passes the `minimumReleaseAge` of your repository or `npm` manager config, and not a `minimumReleaseAge` from `packageRules`.
+A larger `minimumReleaseAgePackageManager` raises it.
 Otherwise a larger `minimumReleaseAge` for major updates would fail on packages which patch and minor updates locked before.
 If you set `minimumReleaseAge` only in `packageRules`, Renovate passes no value to pnpm for dependency updates.
 If Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate adds a warning to the PR, as pnpm may reject the version.
