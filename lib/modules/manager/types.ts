@@ -316,6 +316,12 @@ export interface Upgrade<
   updateType?: UpdateType;
   version?: string;
   isLockFileMaintenance?: boolean;
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeBuffer?: string | null;
+  minimumReleaseAgeExtracted?: string | null;
+  /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
+  minimumReleaseAgeRepository?: string | null;
+  releaseTimestamp?: Timestamp;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;

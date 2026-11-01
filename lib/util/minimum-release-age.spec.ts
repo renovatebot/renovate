@@ -90,28 +90,63 @@ describe('util/minimum-release-age', () => {
   });
 
   describe('.calculatePackageManagerMinimumReleaseAgeMs()', () => {
-    it.each`
-      minimumReleaseAgeRepository | minimumReleaseAgeExtracted | expected
-      ${undefined}                | ${undefined}               | ${0}
-      ${null}                     | ${'3 days'}                | ${toMs('3 days')}
-      ${'3 days'}                 | ${null}                    | ${toMs('3 days')}
-      ${'3 days'}                 | ${'1 week'}                | ${toMs('1 week')}
-      ${'1 week'}                 | ${'3 days'}                | ${toMs('1 week')}
-    `(
-      'returns $expected for $minimumReleaseAgeRepository and $minimumReleaseAgeExtracted',
-      ({
-        minimumReleaseAgeRepository,
-        minimumReleaseAgeExtracted,
-        expected,
-      }) => {
-        expect(
-          calculatePackageManagerMinimumReleaseAgeMs({
-            minimumReleaseAgeRepository,
-            minimumReleaseAgeExtracted,
-          }),
-        ).toBe(expected);
-      },
-    );
+    const update = {
+      minimumReleaseAge: '2 weeks',
+      minimumReleaseAgeRepository: '3 days',
+    };
+
+    it('returns 0 without minimumReleaseAgeRepository', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({
+          minimumReleaseAge: '3 days',
+        }),
+      ).toBe(0);
+    });
+
+    it('returns minimumReleaseAgeRepository of the config without upgrades', () => {
+      expect(calculatePackageManagerMinimumReleaseAgeMs(update, [])).toBe(
+        toMs('3 days'),
+      );
+    });
+
+    it('returns minimumReleaseAgeRepository of the first upgrade', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({}, [
+          update,
+          { minimumReleaseAgeRepository: '1 week' },
+        ]),
+      ).toBe(toMs('3 days'));
+    });
+
+    it('returns minimumReleaseAge for lock file maintenance', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({
+          ...update,
+          isLockFileMaintenance: true,
+        }),
+      ).toBe(toMs('2 weeks'));
+    });
+
+    it('returns 0 for lock file maintenance without minimumReleaseAge', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({}, [
+          {
+            isLockFileMaintenance: true,
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]),
+      ).toBe(0);
+    });
+
+    it('returns 0 if an upgrade is a security update', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs(update, [
+          update,
+          { ...update, isVulnerabilityAlert: true },
+        ]),
+      ).toBe(0);
+    });
   });
 
   describe('.checkMinimumReleaseAge()', () => {
