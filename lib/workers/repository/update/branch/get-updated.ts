@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isObject } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -352,12 +352,15 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const result = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
+      const { content, updatedOutOfBand } = isObject(result)
+        ? result
+        : { content: result, updatedOutOfBand: false };
+      const newContent = await applyManagerBumpPackageVersion(content, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -392,11 +395,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      }
-      if (
-        newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
-      ) {
+      } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
