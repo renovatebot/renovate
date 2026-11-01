@@ -51,21 +51,47 @@ export function calculateMinimumReleaseAgeMs(
   return minimumReleaseAgeMs + Math.max(bufferMs, 0);
 }
 
+export interface PackageManagerMinimumReleaseAgeConfig {
+  isLockFileMaintenance?: boolean;
+  isVulnerabilityAlert?: boolean;
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeRepository?: string | null;
+}
+
 /**
  * Calculates the minimum release age in milliseconds which Renovate passes to
- * a package manager for a dependency update: the larger of
- * `minimumReleaseAgeRepository` and `minimumReleaseAgeExtracted`, without
- * `minimumReleaseAgeBuffer`.
+ * a package manager when it updates a lock file:
+ *
+ * - `0` for security updates, which bypass the minimum release age
+ * - the own `minimumReleaseAge` of lock file maintenance
+ * - `minimumReleaseAgeRepository` for other updates, as the package manager
+ *   applies the value to every package of the lock file, and a larger
+ *   `minimumReleaseAge` from `packageRules` would fail on packages which other
+ *   updates locked
+ *
+ * It reads `upgrades`, the updates of the lock file, as the branch config is
+ * the one of the first upgrade of the branch, which can belong to another
+ * manager. Without upgrades, e.g. for lock file maintenance, it reads `config`.
+ *
+ * `minimumReleaseAgeExtracted` and `minimumReleaseAgeBuffer` are not included,
+ * as the package manager applies its own value itself.
  */
 export function calculatePackageManagerMinimumReleaseAgeMs(
-  config: Pick<MinimumReleaseAgeConfig, 'minimumReleaseAgeExtracted'> & {
-    minimumReleaseAgeRepository?: string | null;
-  },
+  config: PackageManagerMinimumReleaseAgeConfig,
+  upgrades: PackageManagerMinimumReleaseAgeConfig[] = [],
 ): number {
-  return calculateMinimumReleaseAgeMs({
-    minimumReleaseAge: config.minimumReleaseAgeRepository,
-    minimumReleaseAgeExtracted: config.minimumReleaseAgeExtracted,
-  });
+  const updates = upgrades.length ? upgrades : [config];
+  if (updates.some((update) => update.isVulnerabilityAlert)) {
+    return 0;
+  }
+  const lockFileMaintenance = updates.find(
+    (update) => update.isLockFileMaintenance,
+  );
+  return durationToMs(
+    lockFileMaintenance
+      ? lockFileMaintenance.minimumReleaseAge
+      : updates[0].minimumReleaseAgeRepository,
+  );
 }
 
 /**
