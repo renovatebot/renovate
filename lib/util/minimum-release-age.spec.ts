@@ -147,6 +147,66 @@ describe('util/minimum-release-age', () => {
         ]),
       ).toBe(0);
     });
+
+    it.each`
+      minimumReleaseAgePackageManager | expected
+      ${'1 week'}                     | ${'1 week'}
+      ${'1 day'}                      | ${'3 days'}
+      ${null}                         | ${'3 days'}
+      ${'bananas'}                    | ${'3 days'}
+    `(
+      'returns the larger of minimumReleaseAgeRepository and minimumReleaseAgePackageManager=$minimumReleaseAgePackageManager',
+      ({ minimumReleaseAgePackageManager, expected }) => {
+        expect(
+          calculatePackageManagerMinimumReleaseAgeMs({}, [
+            { ...update, minimumReleaseAgePackageManager },
+          ]),
+        ).toBe(toMs(expected));
+      },
+    );
+
+    it('returns minimumReleaseAgePackageManager without minimumReleaseAgeRepository', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({
+          minimumReleaseAgePackageManager: '5 days',
+        }),
+      ).toBe(toMs('5 days'));
+    });
+
+    it('raises minimumReleaseAge of lock file maintenance to minimumReleaseAgePackageManager', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({}, [
+          update,
+          {
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgePackageManager: '4 days',
+          },
+        ]),
+      ).toBe(toMs('4 days'));
+    });
+
+    it('keeps a larger minimumReleaseAge of lock file maintenance', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({
+          ...update,
+          isLockFileMaintenance: true,
+          minimumReleaseAgePackageManager: '4 days',
+        }),
+      ).toBe(toMs('2 weeks'));
+    });
+
+    it('returns 0 for a security update with minimumReleaseAgePackageManager', () => {
+      expect(
+        calculatePackageManagerMinimumReleaseAgeMs({}, [
+          {
+            ...update,
+            isVulnerabilityAlert: true,
+            minimumReleaseAgePackageManager: '1 week',
+          },
+        ]),
+      ).toBe(0);
+    });
   });
 
   describe('.checkMinimumReleaseAge()', () => {
