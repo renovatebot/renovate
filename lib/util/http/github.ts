@@ -102,6 +102,18 @@ const GithubErrors = z
   .union([LooseArray(GithubError), GithubError.transform((error) => [error])])
   .catch([]);
 
+/**
+ * Whether `err` is GitHub's response to creating a PR for a branch which already has one, usually because a different user created it so Renovate could not find it.
+ */
+export function isPrAlreadyExistsError(err: any): boolean {
+  return (
+    err?.response?.statusCode === 422 &&
+    GithubErrors.parse(err.response.body?.errors).some((e) =>
+      e.message?.startsWith('A pull request already exists'),
+    )
+  );
+}
+
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
@@ -224,9 +236,7 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     }
-    if (
-      errors.some((e) => e.message?.startsWith('A pull request already exists'))
-    ) {
+    if (isPrAlreadyExistsError(err)) {
       return err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');

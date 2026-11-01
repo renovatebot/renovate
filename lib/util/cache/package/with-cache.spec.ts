@@ -1,9 +1,12 @@
 import { dir as tmpDir } from 'tmp-promise';
-import type { MockInstance } from 'vitest';
+import { type MockInstance, expectTypeOf } from 'vitest';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../memory/index.ts';
 import * as packageCache from './index.ts';
+import type { CacheContext, CachedOptions } from './with-cache.ts';
 import { withCache } from './with-cache.ts';
+
+vi.unmock('../../mutex.ts');
 
 describe('util/cache/package/with-cache', () => {
   let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
@@ -33,7 +36,8 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('caches string result', async () => {
-    function fn() {
+    function fn(ctx: CacheContext) {
+      ctx.public = true;
       return getValue();
     }
 
@@ -56,70 +60,212 @@ describe('util/cache/package/with-cache', () => {
     );
   });
 
-  it('disables cache if cacheable is false', async () => {
-    function fn() {
-      return getValue();
-    }
+  it('caches synchronous results', async () => {
+    const options = {
+      namespace: '_test-namespace',
+      key: 'sync',
+    } as const;
+    let callCount = 0;
+    const result = withCache(options, (ctx) => {
+      expectTypeOf(ctx).toEqualTypeOf<CacheContext>();
+      expect(ctx.cacheable).toBe(true);
+      expect(ctx.public).toBe(true);
+      callCount += 1;
+      return { version: callCount };
+    });
 
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('111');
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('222');
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('333');
-
-    expect(getValue).toHaveBeenCalledTimes(3);
-    expect(setCache).not.toHaveBeenCalled();
+    expectTypeOf(result).toEqualTypeOf<Promise<{ version: number }>>();
+    await expect(result).resolves.toEqual({ version: 1 });
+    await expect(withCache(options, () => ({ version: 99 }))).resolves.toEqual({
+      version: 1,
+    });
+    expect(callCount).toBe(1);
   });
 
-  it('forces cache if cachePrivatePackages=true', async () => {
-    GlobalConfig.set({ cachePrivatePackages: true });
-    function fn() {
-      return getValue();
+  it('does not cache private results', async () => {
+    const options = { namespace: '_test-namespace', key: 'async' } as const;
+    let callCount = 0;
+    async function callback(ctx: CacheContext) {
+      callCount += 1;
+      const response = await Promise.resolve({
+        shareable: callCount > 1,
+        version: callCount,
+      });
+      ctx.public = response.shareable;
+      return { version: response.version };
     }
 
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('111');
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('111');
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', cacheable: false },
-        fn,
-      ),
-    ).resolves.toBe('111');
+    const result = withCache(options, callback);
 
-    expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      '_test-namespace',
-      'cache-decorator:key',
-      { cachedAt: expect.any(String), value: '111' },
-      30,
+    expectTypeOf(result).toEqualTypeOf<Promise<{ version: number }>>();
+    await expect(result).resolves.toEqual({ version: 1 });
+    await expect(withCache(options, callback)).resolves.toEqual({ version: 2 });
+    await expect(withCache(options, callback)).resolves.toEqual({ version: 2 });
+    expect(callCount).toBe(2);
+  });
+
+  it('caches thenable results', async () => {
+    const options = { namespace: '_test-namespace', key: 'thenable' } as const;
+    const thenable: PromiseLike<string | null> = {
+      // oxlint-disable-next-line unicorn/no-thenable -- the `PromiseLike` contract requires a `then` method
+      then: (onfulfilled, onrejected) =>
+        Promise.resolve<string | null>(null).then(onfulfilled, onrejected),
+    };
+
+    const result = withCache(options, (ctx) => {
+      ctx.public = true;
+      return thenable;
+    });
+
+    expectTypeOf(result).toEqualTypeOf<Promise<string | null>>();
+    await expect(result).resolves.toBeNull();
+    await expect(withCache(options, () => 'fresh')).resolves.toBeNull();
+  });
+
+  it('resets context between calls', async () => {
+    const options = { namespace: '_test-namespace', key: 'context' } as const;
+
+    await expect(
+      withCache(options, (ctx) => {
+        ctx.cacheable = false;
+        ctx.public = false;
+        return 'not cached';
+      }),
+    ).resolves.toBe('not cached');
+    await expect(
+      withCache(options, (ctx) => {
+        expect(ctx.cacheable).toBe(true);
+        expect(ctx.public).toBe(true);
+        return 'cached';
+      }),
+    ).resolves.toBe('cached');
+    await expect(withCache(options, () => 'unused')).resolves.toBe('cached');
+  });
+
+  it('skips callback on cache hit', async () => {
+    const options = { namespace: '_test-namespace', key: 'warm' } as const;
+    let callCount = 0;
+    await withCache({ ...options, public: true }, () => 'cached');
+
+    const result = await withCache(options, (ctx) => {
+      callCount += 1;
+      ctx.cacheable = false;
+      return 'fresh';
+    });
+
+    expect(result).toBe('cached');
+    expect(callCount).toBe(0);
+  });
+
+  it('bypasses cache when public is false', async () => {
+    const options = {
+      namespace: '_test-namespace',
+      key: 'disabled',
+    } as const;
+    await withCache({ ...options, public: true }, () => 'cached');
+
+    const result = await withCache(
+      { ...options, public: false },
+      () => 'fresh',
     );
+
+    expect(result).toBe('fresh');
+    await expect(withCache(options, () => 'unused')).resolves.toBe('cached');
+  });
+
+  it.each`
+    cacheable | isPublic | override | stored
+    ${false}  | ${true}  | ${false} | ${false}
+    ${false}  | ${true}  | ${true}  | ${false}
+    ${false}  | ${false} | ${false} | ${false}
+    ${false}  | ${false} | ${true}  | ${false}
+    ${true}   | ${true}  | ${false} | ${true}
+    ${true}   | ${true}  | ${true}  | ${true}
+    ${true}   | ${false} | ${false} | ${false}
+    ${true}   | ${false} | ${true}  | ${true}
+  `(
+    'caches=$stored for cacheable=$cacheable, public=$isPublic, cachePrivatePackages=$override',
+    async ({ cacheable, isPublic, override, stored }) => {
+      GlobalConfig.set({ cachePrivatePackages: override });
+
+      for (const mode of ['options', 'context']) {
+        const options: CachedOptions = {
+          namespace: '_test-namespace',
+          key: mode,
+        };
+        if (mode === 'options') {
+          options.public = isPublic;
+        }
+
+        let callCount = 0;
+        async function callback(ctx: CacheContext) {
+          expect(ctx.cacheable).toBe(true);
+          expect(ctx.public).toBe(mode === 'options' ? isPublic : true);
+          await Promise.resolve();
+          ctx.cacheable = cacheable;
+          ctx.public = isPublic;
+          callCount += 1;
+          return callCount;
+        }
+
+        await expect(withCache(options, callback)).resolves.toBe(1);
+        await expect(withCache(options, callback)).resolves.toBe(
+          stored ? 1 : 2,
+        );
+        expect(callCount).toBe(stored ? 1 : 2);
+      }
+    },
+  );
+
+  it('serializes callbacks for the same key', async () => {
+    const options = {
+      namespace: '_test-namespace',
+      key: 'concurrent',
+      public: true,
+    } as const;
+    let callCount = 0;
+    async function callback(ctx: CacheContext) {
+      callCount += 1;
+      const value = callCount;
+      ctx.cacheable = value !== 1;
+      await Promise.resolve();
+      return value;
+    }
+
+    const results = await Promise.all([
+      withCache(options, callback),
+      withCache(options, callback),
+      withCache(options, callback),
+    ]);
+
+    expect(results.toSorted()).toEqual([1, 2, 2]);
+    expect(callCount).toBe(2);
+  });
+
+  it('releases the lock after a callback error', async () => {
+    const options = {
+      namespace: '_test-namespace',
+      key: 'error',
+      public: true,
+    } as const;
+    const error = new Error('callback failed');
+
+    await expect(
+      withCache(options, (ctx) => {
+        ctx.cacheable = false;
+        throw error;
+      }),
+    ).rejects.toBe(error);
+
+    await expect(withCache(options, () => 'recovered')).resolves.toBe(
+      'recovered',
+    );
+    await expect(withCache(options, () => 'unused')).resolves.toBe('recovered');
   });
 
   it('caches null values', async () => {
-    async function fn(): Promise<string | null> {
+    async function fn(ctx: CacheContext): Promise<string | null> {
+      ctx.public = true;
       await getValue();
       return null;
     }
@@ -143,86 +289,9 @@ describe('util/cache/package/with-cache', () => {
     );
   });
 
-  it('does not cache values rejected by cacheResult predicate', async () => {
-    async function fn(): Promise<string | null> {
-      await getValue();
-      return null;
-    }
-    function shouldCacheResult(value: unknown): boolean {
-      return value !== null;
-    }
-
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', shouldCacheResult },
-        fn,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', shouldCacheResult },
-        fn,
-      ),
-    ).resolves.toBeNull();
-    await expect(
-      withCache(
-        { namespace: '_test-namespace', key: 'key', shouldCacheResult },
-        fn,
-      ),
-    ).resolves.toBeNull();
-
-    expect(getValue).toHaveBeenCalledTimes(3);
-    expect(setCache).not.toHaveBeenCalled();
-  });
-
-  it('ignores cached values rejected by cacheResult predicate', async () => {
-    async function nullFn(): Promise<string | null> {
-      await getValue();
-      return null;
-    }
-    function fn() {
-      return getValue();
-    }
-    function cacheResult(value: unknown): boolean {
-      return value !== null;
-    }
-
-    await expect(
-      withCache({ namespace: '_test-namespace', key: 'key' }, nullFn),
-    ).resolves.toBeNull();
-    await expect(
-      withCache(
-        {
-          namespace: '_test-namespace',
-          key: 'key',
-          shouldCacheResult: cacheResult,
-        },
-        fn,
-      ),
-    ).resolves.toBe('222');
-    await expect(
-      withCache(
-        {
-          namespace: '_test-namespace',
-          key: 'key',
-          shouldCacheResult: cacheResult,
-        },
-        fn,
-      ),
-    ).resolves.toBe('222');
-
-    expect(getValue).toHaveBeenCalledTimes(2);
-    expect(setCache).toHaveBeenCalledTimes(2);
-    expect(setCache).toHaveBeenLastCalledWith(
-      '_test-namespace',
-      'cache-decorator:key',
-      { cachedAt: expect.any(String), value: '222' },
-      30,
-    );
-  });
-
   it('does not cache undefined', async () => {
-    async function fn(): Promise<string | undefined> {
+    async function fn(ctx: CacheContext): Promise<string | undefined> {
+      ctx.public = true;
       await getValue();
       return undefined;
     }
@@ -242,7 +311,8 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('uses custom ttlMinutes', async () => {
-    function fn() {
+    function fn(ctx: CacheContext) {
+      ctx.public = true;
       return getValue();
     }
 
@@ -268,7 +338,8 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('updates cached result after soft TTL expires', async () => {
-      function fn() {
+      function fn(ctx: CacheContext) {
+        ctx.public = true;
         return getValue();
       }
 
@@ -331,7 +402,8 @@ describe('util/cache/package/with-cache', () => {
         cacheTtlOverride: { '_test-namespace': 2 },
         cacheHardTtlMinutes: 3,
       });
-      function fn() {
+      function fn(ctx: CacheContext) {
+        ctx.public = true;
         return getValue();
       }
 
@@ -391,7 +463,8 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('returns stale result on error', async () => {
-      function fn() {
+      function fn(ctx: CacheContext) {
+        ctx.public = true;
         return getValue();
       }
 
@@ -431,52 +504,9 @@ describe('util/cache/package/with-cache', () => {
       expect(setCache).toHaveBeenCalledTimes(1);
     });
 
-    it('does not return stale values rejected by cacheResult predicate', async () => {
-      async function nullFn(): Promise<string | null> {
-        await getValue();
-        return null;
-      }
-      function fn() {
-        return getValue();
-      }
-      function shouldCacheResult(value: unknown): boolean {
-        return value !== null;
-      }
-
-      await expect(
-        withCache(
-          {
-            namespace: '_test-namespace',
-            key: 'key',
-            ttlMinutes: 1,
-            fallback: true,
-          },
-          nullFn,
-        ),
-      ).resolves.toBeNull();
-      expect(getValue).toHaveBeenCalledTimes(1);
-      expect(setCache).toHaveBeenCalledTimes(1);
-
-      vi.advanceTimersByTime(60 * 1000);
-      getValue.mockRejectedValueOnce(new Error('test'));
-      await expect(
-        withCache(
-          {
-            namespace: '_test-namespace',
-            key: 'key',
-            ttlMinutes: 1,
-            fallback: true,
-            shouldCacheResult,
-          },
-          fn,
-        ),
-      ).rejects.toThrow('test');
-      expect(getValue).toHaveBeenCalledTimes(2);
-      expect(setCache).toHaveBeenCalledTimes(1);
-    });
-
     it('drops stale value after hard TTL expires', async () => {
-      function fn() {
+      function fn(ctx: CacheContext) {
+        ctx.public = true;
         return getValue();
       }
 
@@ -529,7 +559,8 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('does not use fallback when fallback=false', async () => {
-      function fn() {
+      function fn(ctx: CacheContext) {
+        ctx.public = true;
         return getValue();
       }
 
