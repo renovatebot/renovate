@@ -91,6 +91,8 @@ When `minimumReleaseAge` is configured, Renovate passes `--before=<date>` to npm
 This ensures that npm only resolves package versions that were available before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
 
 The `--before` date is calculated as `now - minimumReleaseAge`.
+Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
+Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not pass `--before`.
 If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
 If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
 

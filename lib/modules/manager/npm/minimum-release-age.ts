@@ -1,7 +1,6 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { toMs } from '../../../util/pretty-time.ts';
+import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
 import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -20,12 +19,6 @@ const dayMs = 24 * 60 * 60 * 1000;
 interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
   managerData?: NpmManagerData;
   npmrc?: string;
-}
-
-function getMinimumReleaseAgeMs(
-  minimumReleaseAge: string | null | undefined,
-): number | null {
-  return isNonEmptyString(minimumReleaseAge) ? toMs(minimumReleaseAge) : null;
 }
 
 async function isNpmMinReleaseAgeSupported(
@@ -54,17 +47,19 @@ export async function enforcesMinimumReleaseAge(
   }
 
   const npmrcCooldown = parseNpmrcCooldown(config.npmrc);
-  const minimumReleaseAgeMs = getMinimumReleaseAgeMs(config.minimumReleaseAge);
+  // the value which Renovate passes as `--before` to npm
+  const minimumReleaseAgeMs =
+    calculatePackageManagerMinimumReleaseAgeMs(config);
 
   if (npmrcCooldown?.source !== 'min-release-age') {
     // npm applies a `before` from the `.npmrc` itself, and Renovate passes
     // `--before` for `minimumReleaseAge`, which every npm version supports
-    return npmrcCooldown?.source === 'before' || minimumReleaseAgeMs !== null;
+    return npmrcCooldown?.source === 'before' || minimumReleaseAgeMs > 0;
   }
 
   // Renovate does not pass `--before` next to a `min-release-age`, so npm
   // only enforces the `min-release-age`
-  if ((minimumReleaseAgeMs ?? 0) > npmrcCooldown.days * dayMs) {
+  if (minimumReleaseAgeMs > npmrcCooldown.days * dayMs) {
     logger.debug(
       `${npmLock}: min-release-age in .npmrc is shorter than minimumReleaseAge`,
     );

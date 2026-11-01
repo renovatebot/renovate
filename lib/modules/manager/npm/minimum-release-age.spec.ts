@@ -31,7 +31,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
     it.each`
       minimumReleaseAge | npmrc                                  | expected
       ${'3 days'}       | ${undefined}                           | ${true}
-      ${'0 days'}       | ${undefined}                           | ${true}
+      ${'0 days'}       | ${undefined}                           | ${false}
       ${'3 days'}       | ${'before=2026-06-01T00:00:00.000Z\n'} | ${true}
       ${null}           | ${'before=2026-06-01T00:00:00.000Z\n'} | ${true}
       ${null}           | ${undefined}                           | ${false}
@@ -42,12 +42,25 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
+            isLockFileMaintenance: true,
             minimumReleaseAge,
             npmrc,
           }),
         ).resolves.toBe(expected);
       },
     );
+
+    it('reads the repository minimumReleaseAge outside lock file maintenance', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: npmLockManagerData,
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeRepository: '1 day',
+          npmrc: 'min-release-age=2\n',
+          constraints: { npm: '11.10.0' },
+        }),
+      ).resolves.toBeTrue();
+    });
 
     describe('with min-release-age in .npmrc', () => {
       const npmrc = 'min-release-age=3\n';
@@ -67,6 +80,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
           await expect(
             enforcesMinimumReleaseAge({
               managerData: npmLockManagerData,
+              isLockFileMaintenance: true,
               minimumReleaseAge: '3 days',
               npmrc,
               constraints: { npm: constraint },
@@ -83,6 +97,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
+            isLockFileMaintenance: true,
             minimumReleaseAge: '1 day',
             npmrc,
             extractedConstraints: { npm: '>=10' },
@@ -100,6 +115,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
+            isLockFileMaintenance: true,
             npmrc,
             extractedConstraints: { npm: '>=11.10.0' },
           }),
@@ -112,6 +128,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
+            isLockFileMaintenance: true,
             npmrc,
           }),
         ).resolves.toBeFalse();
@@ -121,6 +138,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
+            isLockFileMaintenance: true,
             minimumReleaseAge: '5 days',
             npmrc,
             constraints: { npm: '11.10.0' },

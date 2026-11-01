@@ -1104,12 +1104,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
       );
@@ -1123,17 +1124,42 @@ describe('modules/manager/npm/post-update/npm', () => {
       ]);
     });
 
-    it('skips --before on unparseable minimumReleaseAge', async () => {
+    it('uses the repository minimumReleaseAge over a larger packageRules one', async () => {
       await npmHelper.generateLockFile(
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: 'invalid garbage' },
+        { skipInstalls: true, minimumReleaseAge: '14 days' },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '2.0.0',
+            isLockfileUpdate: false,
+            minimumReleaseAge: '14 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before without a repository minimumReleaseAge', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true, minimumReleaseAge: '3 days' },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
           },
         ],
       );
@@ -1145,18 +1171,70 @@ describe('modules/manager/npm/post-update/npm', () => {
       ]);
     });
 
+    it('skips --before for security updates', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+            isVulnerabilityAlert: true,
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('uses the own minimumReleaseAge of lock file maintenance', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeRepository: '1 day',
+          },
+        ],
+      );
+
+      expect(res.error).toBeFalse();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
     it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
       // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
       await npmHelper.generateLockFile(
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
         'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
@@ -1175,12 +1253,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
         'before=2026-06-14T00:00:00.000Z\n',
@@ -1221,12 +1300,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
         'min-release-age=30\n',
@@ -1263,12 +1343,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
       );
@@ -1299,12 +1380,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        { skipInstalls: true },
         [
           {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
       );
@@ -1332,8 +1414,8 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
-        [{ isLockFileMaintenance: true }],
+        { skipInstalls: true },
+        [{ isLockFileMaintenance: true, minimumReleaseAge: '3 days' }],
       );
 
       expect(res).toEqual({
