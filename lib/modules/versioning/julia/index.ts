@@ -157,18 +157,24 @@ function widen(currentValue: string, newVersion: string): string {
   if (matches(newVersion, currentValue)) {
     return currentValue;
   }
-  // Keep the last specifier's `~` or `^`: a plain `1.3` is `[1.3, 2.0)`, so
-  // next to `~1.2` it would let in all of 1.x.
+  // Keep the last specifier's `~`, `^` or `=`: a plain `1.3` is `[1.3, 2.0)`,
+  // so next to `~1.2` or `=1.2.5` it would let in all of 1.x.
   const last = lastSpecifier(currentValue);
-  const operator = regEx(/^[~^]/).exec(last)?.[0] ?? '';
+  const operator = regEx(/^(?:[~^]|=\s*)/).exec(last)?.[0] ?? '';
   // Next to a bare major such as `5`, write `6`, not `6.0`: the entry's own
   // style, and CompatHelper's.
   const major = npm.getMajor(newVersion)!;
-  const newSpec =
-    operator +
-    (major > 0 && regEx(/^\d+$/).test(last.slice(operator.length).trim())
-      ? `${major}`
-      : simplifiedSpec(newVersion));
+  let newSpec: string;
+  if (operator.startsWith('=')) {
+    newSpec = operator + newVersion;
+  } else if (
+    major > 0 &&
+    regEx(/^\d+$/).test(last.slice(operator.length).trim())
+  ) {
+    newSpec = `${operator}${major}`;
+  } else {
+    newSpec = operator + simplifiedSpec(newVersion);
+  }
   const separator =
     currentValue.includes(',') && !currentValue.includes(', ') ? ',' : ', ';
   const specs = currentValue.split(',').map((spec) => spec.trim());
