@@ -23,7 +23,7 @@ import {
   renameLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
+import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
@@ -123,52 +123,43 @@ export async function generateLockFile(
     }
 
     let beforeFlag = '';
-    if (config.minimumReleaseAge) {
-      const ms = toMs(config.minimumReleaseAge);
-      if (ms === null) {
+    const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs(
+      config,
+      upgrades,
+    );
+    if (minimumReleaseAgeMs) {
+      const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
+
+      // npm rejects --before when min-release-age is set in .npmrc,
+      // so let the .npmrc handle cooldown natively in that case
+      if (npmrcCooldown?.source === 'min-release-age') {
         logger.debug(
           {
-            minimumReleaseAge: config.minimumReleaseAge,
+            npmrcMinReleaseAge: npmrcCooldown.days,
+            minimumReleaseAgeMs,
           },
-          'Invalid minimumReleaseAge, skipping --before for npm install',
+          'Skipping --before flag because .npmrc already contains min-release-age',
         );
       } else {
-        const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
+        let beforeDate = DateTime.now().minus(minimumReleaseAgeMs).toUTC();
 
-        // npm rejects --before when min-release-age is set in .npmrc,
-        // so let the .npmrc handle cooldown natively in that case
-        if (npmrcCooldown?.source === 'min-release-age') {
+        if (npmrcCooldown && npmrcCooldown.date < beforeDate) {
           logger.debug(
             {
-              npmrcMinReleaseAge: npmrcCooldown.days,
-              minimumReleaseAge: config.minimumReleaseAge,
+              npmrcDate: npmrcCooldown.date.toISO(),
+              beforeDate: beforeDate.toISO(),
             },
-            'Skipping --before flag because .npmrc already contains min-release-age',
+            'Using stricter .npmrc cooldown date over minimumReleaseAge date',
           );
-        } else {
-          let beforeDate = DateTime.now().minus(ms).toUTC();
-
-          if (npmrcCooldown && npmrcCooldown.date < beforeDate) {
-            logger.debug(
-              {
-                npmrcDate: npmrcCooldown.date.toISO(),
-                beforeDate: beforeDate.toISO(),
-              },
-              'Using stricter .npmrc cooldown date over minimumReleaseAge date',
-            );
-            beforeDate = npmrcCooldown.date;
-          }
-
-          const beforeISO = beforeDate.toISO();
-          logger.debug(
-            {
-              beforeISO,
-              minimumReleaseAge: config.minimumReleaseAge,
-            },
-            'Setting npm --before based on minimumReleaseAge',
-          );
-          beforeFlag = ` --before=${beforeISO}`;
+          beforeDate = npmrcCooldown.date;
         }
+
+        const beforeISO = beforeDate.toISO();
+        logger.debug(
+          { beforeISO, minimumReleaseAgeMs },
+          'Setting npm --before based on minimumReleaseAge',
+        );
+        beforeFlag = ` --before=${beforeISO}`;
       }
     }
 

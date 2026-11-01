@@ -1,8 +1,7 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
+import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
 import { coerceObject } from '../../../util/object.ts';
-import { toMs } from '../../../util/pretty-time.ts';
 import { isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -41,12 +40,6 @@ interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
   npmrc?: string;
 }
 
-function getMinimumReleaseAgeMs(
-  minimumReleaseAge: string | null | undefined,
-): number | null {
-  return isNonEmptyString(minimumReleaseAge) ? toMs(minimumReleaseAge) : null;
-}
-
 async function resolveConstraint(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   toolName: 'npm' | 'pnpm',
@@ -65,17 +58,19 @@ async function npmEnforcesMinimumReleaseAge(
   npmLock: string,
 ): Promise<boolean> {
   const npmrcCooldown = parseNpmrcCooldown(config.npmrc);
-  const minimumReleaseAgeMs = getMinimumReleaseAgeMs(config.minimumReleaseAge);
+  // the value which Renovate passes as `--before` to npm
+  const minimumReleaseAgeMs =
+    calculatePackageManagerMinimumReleaseAgeMs(config);
 
   if (npmrcCooldown?.source !== 'min-release-age') {
     // npm applies a `before` from the `.npmrc` itself, and Renovate passes
     // `--before` for `minimumReleaseAge`, which every npm version supports
-    return npmrcCooldown?.source === 'before' || minimumReleaseAgeMs !== null;
+    return npmrcCooldown?.source === 'before' || minimumReleaseAgeMs > 0;
   }
 
   // Renovate does not pass `--before` next to a `min-release-age`, so npm
   // only enforces the `min-release-age`
-  if ((minimumReleaseAgeMs ?? 0) > npmrcCooldown.days * dayMs) {
+  if (minimumReleaseAgeMs > npmrcCooldown.days * dayMs) {
     logger.debug(
       `${npmLock}: min-release-age in .npmrc is shorter than minimumReleaseAge`,
     );
@@ -108,14 +103,14 @@ async function pnpmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  // Renovate passes the larger of `minimumReleaseAge` and the pnpm value,
+  // Renovate passes the larger of its own value and the pnpm value,
   // otherwise pnpm applies its own value. The pnpm v11 default does not
   // count, as pnpm does not apply it strictly.
   const pnpmMinutes =
     getPnpmMinimumReleaseAgeMinutes(workspace, config.npmrc, constraint) ?? 0;
   return (
     Math.max(
-      getMinimumReleaseAgeMs(config.minimumReleaseAge) ?? 0,
+      calculatePackageManagerMinimumReleaseAgeMs(config),
       pnpmMinutes * minuteMs,
     ) > 0
   );
