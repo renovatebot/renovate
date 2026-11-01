@@ -398,7 +398,7 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
-  ): Promise<string | null | undefined> {
+  ): Promise<string | undefined> {
     try {
       let manifestResponse: HttpResponse | null;
 
@@ -422,7 +422,7 @@ export class DockerDatasource extends Datasource {
           err.statusCode < 600
         ) {
           // querying the digest manifest for a non existent image leads to a 500 statusCode
-          return null;
+          return undefined;
         }
 
         /* istanbul ignore next */
@@ -435,7 +435,7 @@ export class DockerDatasource extends Datasource {
         manifestResponse?.headers['content-type'] !==
           'application/vnd.oci.image.manifest.v1+json'
       ) {
-        return null;
+        return undefined;
       }
 
       const configDigest = await this.getConfigDigest(
@@ -444,7 +444,7 @@ export class DockerDatasource extends Datasource {
         currentDigest,
       );
       if (!configDigest) {
-        return null;
+        return undefined;
       }
 
       const configResponse = await this.getImageConfig(
@@ -467,6 +467,10 @@ export class DockerDatasource extends Datasource {
           }`,
         );
 
+        if (!isNonEmptyString(architecture)) {
+          return undefined;
+        }
+
         return architecture;
       }
     } catch (err) /* istanbul ignore next */ {
@@ -486,22 +490,19 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
-  ): Promise<string | null | undefined> {
+  ): Promise<string | undefined> {
     return withCache(
       {
         namespace: 'datasource-docker-architecture',
         key: buildCacheKey(registryHost, dockerRepository, currentDigest),
         ttlMinutes: 1440 * 28,
       },
-      async (ctx) => {
-        const architecture = await this._getImageArchitecture(
+      () =>
+        this._getImageArchitecture(
           registryHost,
           dockerRepository,
           currentDigest,
-        );
-        ctx.cacheable = isNonEmptyString(architecture);
-        return architecture;
-      },
+        ),
     );
   }
 
@@ -956,7 +957,7 @@ export class DockerDatasource extends Datasource {
   private async _getDigest(
     { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
     newValue?: string,
-  ): Promise<string | null> {
+  ): Promise<string | undefined> {
     let registryHost: string;
     let dockerRepository: string;
     if (registryUrl && lookupName) {
@@ -975,9 +976,9 @@ export class DockerDatasource extends Datasource {
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
     );
     const newTag = isNonEmptyString(newValue) ? newValue : 'latest';
-    let digest: string | null = null;
+    let digest: string | undefined;
     try {
-      let architecture: string | null | undefined = null;
+      let architecture: string | undefined;
       if (currentDigest && isDockerDigest(currentDigest)) {
         architecture = await this.getImageArchitecture(
           registryHost,
@@ -1008,9 +1009,7 @@ export class DockerDatasource extends Datasource {
           manifestResponse &&
           hasKey('docker-content-digest', manifestResponse.headers)
         ) {
-          digest =
-            (manifestResponse.headers['docker-content-digest'] as string) ||
-            null;
+          digest = manifestResponse.headers['docker-content-digest'] as string;
         }
       }
 
@@ -1108,7 +1107,7 @@ export class DockerDatasource extends Datasource {
             currentDigest,
           },
           newValue,
-        );
+        ).then((digest) => digest ?? undefined);
       }
 
       if (manifestResponse) {
@@ -1128,10 +1127,15 @@ export class DockerDatasource extends Datasource {
         'Unknown Error looking up docker image digest',
       );
     }
+
+    if (!isNonEmptyString(digest)) {
+      return undefined;
+    }
+
     return digest;
   }
 
-  override getDigest(
+  override async getDigest(
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -1140,7 +1144,7 @@ export class DockerDatasource extends Datasource {
       config.packageName,
       config.registryUrl!,
     );
-    return withCache(
+    const digest = await withCache(
       {
         namespace: 'datasource-docker-digest',
         key: buildCacheKey(
@@ -1151,12 +1155,10 @@ export class DockerDatasource extends Datasource {
         ),
         fallback: true,
       },
-      async (ctx) => {
-        const digest = await this._getDigest(config, newValue);
-        ctx.cacheable = isNonEmptyString(digest);
-        return digest;
-      },
+      () => this._getDigest(config, newValue),
     );
+
+    return digest ?? null;
   }
 
   private async _getDockerHubTags(

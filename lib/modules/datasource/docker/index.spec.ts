@@ -344,35 +344,6 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
-    it('does not cache null digest results', async () => {
-      const registryUrl = 'https://registry.company.com/v2';
-      const packageName = 'registry.company.com/cache-poison';
-
-      httpMock
-        .scope(registryUrl)
-        .get('/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/cache-poison/manifests/some-tag')
-        .reply(403);
-      httpMock
-        .scope(registryUrl)
-        .get('/', undefined, { badheaders: ['authorization'] })
-        .reply(401, '', {
-          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
-        })
-        .head('/cache-poison/manifests/some-tag')
-        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
-
-      await expect(
-        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).resolves.toBeNull();
-      await expect(
-        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
-      ).resolves.toBe('sha256:some-digest');
-    });
-
     it.each(amazonHosts)(
       'passes credentials to ECR client for host $host',
       async ({ host, region }) => {
@@ -1747,64 +1718,6 @@ describe('modules/datasource/docker/index', () => {
       );
 
       expect(res).toBe(newDigest);
-    });
-  });
-
-  describe('getImageArchitecture', () => {
-    it('does not cache null architecture results', async () => {
-      const datasource = new DockerDatasource();
-      const registryHost = 'https://registry.company.com';
-      const dockerRepository = 'cache-arch';
-      const currentDigest =
-        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
-
-      httpMock
-        .scope(`${registryHost}/v2`)
-        .get('/')
-        .reply(200)
-        .head(`/cache-arch/manifests/${currentDigest}`)
-        .reply(200, '', {
-          'content-type':
-            'application/vnd.docker.distribution.manifest.list.v2+json',
-        });
-      httpMock
-        .scope(`${registryHost}/v2`)
-        .get('/')
-        .times(3)
-        .reply(200)
-        .head(`/cache-arch/manifests/${currentDigest}`)
-        .reply(200, '', {
-          'content-type':
-            'application/vnd.docker.distribution.manifest.v2+json',
-        })
-        .get(`/cache-arch/manifests/${currentDigest}`)
-        .reply(200, {
-          schemaVersion: 2,
-          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-          config: {
-            digest: 'sha256:config-digest',
-            mediaType: 'application/vnd.docker.container.image.v1+json',
-          },
-        })
-        .get('/cache-arch/blobs/sha256:config-digest')
-        .reply(200, {
-          architecture: 'amd64',
-        });
-
-      await expect(
-        datasource.getImageArchitecture(
-          registryHost,
-          dockerRepository,
-          currentDigest,
-        ),
-      ).resolves.toBeNull();
-      await expect(
-        datasource.getImageArchitecture(
-          registryHost,
-          dockerRepository,
-          currentDigest,
-        ),
-      ).resolves.toBe('amd64');
     });
   });
 
@@ -3738,7 +3651,7 @@ describe('modules/datasource/docker/index', () => {
       });
     });
   });
-  describe('getTags caching', () => {
+  describe('package caching', () => {
     let dirResult: Awaited<ReturnType<typeof tmpDir>>;
 
     beforeEach(async () => {
@@ -3752,6 +3665,148 @@ describe('modules/datasource/docker/index', () => {
     afterEach(async () => {
       await packageCache.cleanup({});
       await dirResult.cleanup();
+    });
+
+    it('does not cache missing digests', async () => {
+      const registryUrl = 'https://registry.company.com/v2';
+      const packageName = 'registry.company.com/cache-poison';
+
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(403);
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
+
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBeNull();
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBe('sha256:some-digest');
+      await expect(
+        getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).resolves.toBe('sha256:some-digest');
+    });
+
+    it('does not cache a failed library-prefix retry', async () => {
+      const config = {
+        datasource: 'docker',
+        packageName: 'some-dep',
+        registryUrls: ['https://registry.company.com'],
+      };
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .head('/some-dep/manifests/3.17')
+        .twice()
+        .reply(404)
+        .head('/library/some-dep/manifests/3.17')
+        .reply(404)
+        .head('/library/some-dep/manifests/3.17')
+        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
+
+      await expect(getDigest(config, '3.17')).resolves.toBeNull();
+      await expect(getDigest(config, '3.17')).resolves.toBe(
+        'sha256:some-digest',
+      );
+      await expect(getDigest(config, '3.17')).resolves.toBe(
+        'sha256:some-digest',
+      );
+    });
+
+    it.each`
+      architecture
+      ${undefined}
+      ${''}
+    `('does not cache architecture=$architecture', async ({ architecture }) => {
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://registry.company.com';
+      const dockerRepository = 'cache-arch';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .times(3)
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'sha256:missing-config',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/cache-arch/blobs/sha256:missing-config')
+        .reply(200, {
+          config: {},
+          architecture,
+        });
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .times(3)
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'sha256:config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/cache-arch/blobs/sha256:config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+
+      await expect(
+        datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).resolves.toBeUndefined();
+      await expect(
+        datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).resolves.toBe('amd64');
+      await expect(
+        datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).resolves.toBe('amd64');
     });
 
     it('caches tags for Docker Hub', async () => {

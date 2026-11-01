@@ -68,7 +68,6 @@ describe('util/cache/package/with-cache', () => {
     let callCount = 0;
     const result = withCache(options, (ctx) => {
       expectTypeOf(ctx).toEqualTypeOf<CacheContext>();
-      expect(ctx.cacheable).toBe(true);
       expect(ctx.public).toBe(true);
       callCount += 1;
       return { version: callCount };
@@ -127,14 +126,12 @@ describe('util/cache/package/with-cache', () => {
 
     await expect(
       withCache(options, (ctx) => {
-        ctx.cacheable = false;
         ctx.public = false;
         return 'not cached';
       }),
     ).resolves.toBe('not cached');
     await expect(
       withCache(options, (ctx) => {
-        expect(ctx.cacheable).toBe(true);
         expect(ctx.public).toBe(true);
         return 'cached';
       }),
@@ -147,9 +144,8 @@ describe('util/cache/package/with-cache', () => {
     let callCount = 0;
     await withCache({ ...options, public: true }, () => 'cached');
 
-    const result = await withCache(options, (ctx) => {
+    const result = await withCache(options, () => {
       callCount += 1;
-      ctx.cacheable = false;
       return 'fresh';
     });
 
@@ -174,18 +170,14 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it.each`
-    cacheable | isPublic | override | stored
-    ${false}  | ${true}  | ${false} | ${false}
-    ${false}  | ${true}  | ${true}  | ${false}
-    ${false}  | ${false} | ${false} | ${false}
-    ${false}  | ${false} | ${true}  | ${false}
-    ${true}   | ${true}  | ${false} | ${true}
-    ${true}   | ${true}  | ${true}  | ${true}
-    ${true}   | ${false} | ${false} | ${false}
-    ${true}   | ${false} | ${true}  | ${true}
+    isPublic | override | stored
+    ${true}  | ${false} | ${true}
+    ${true}  | ${true}  | ${true}
+    ${false} | ${false} | ${false}
+    ${false} | ${true}  | ${true}
   `(
-    'caches=$stored for cacheable=$cacheable, public=$isPublic, cachePrivatePackages=$override',
-    async ({ cacheable, isPublic, override, stored }) => {
+    'caches=$stored for public=$isPublic, cachePrivatePackages=$override',
+    async ({ isPublic, override, stored }) => {
       GlobalConfig.set({ cachePrivatePackages: override });
 
       for (const mode of ['options', 'context']) {
@@ -199,10 +191,8 @@ describe('util/cache/package/with-cache', () => {
 
         let callCount = 0;
         async function callback(ctx: CacheContext) {
-          expect(ctx.cacheable).toBe(true);
           expect(ctx.public).toBe(mode === 'options' ? isPublic : true);
           await Promise.resolve();
-          ctx.cacheable = cacheable;
           ctx.public = isPublic;
           callCount += 1;
           return callCount;
@@ -224,11 +214,15 @@ describe('util/cache/package/with-cache', () => {
       public: true,
     } as const;
     let callCount = 0;
-    async function callback(ctx: CacheContext) {
+    async function callback() {
       callCount += 1;
       const value = callCount;
-      ctx.cacheable = value !== 1;
       await Promise.resolve();
+
+      if (value === 1) {
+        return undefined;
+      }
+
       return value;
     }
 
@@ -238,7 +232,7 @@ describe('util/cache/package/with-cache', () => {
       withCache(options, callback),
     ]);
 
-    expect(results.toSorted()).toEqual([1, 2, 2]);
+    expect(results.toSorted()).toEqual([2, 2, undefined]);
     expect(callCount).toBe(2);
   });
 
@@ -251,8 +245,7 @@ describe('util/cache/package/with-cache', () => {
     const error = new Error('callback failed');
 
     await expect(
-      withCache(options, (ctx) => {
-        ctx.cacheable = false;
+      withCache(options, () => {
         throw error;
       }),
     ).rejects.toBe(error);
@@ -289,26 +282,27 @@ describe('util/cache/package/with-cache', () => {
     );
   });
 
-  it('does not cache undefined', async () => {
-    async function fn(ctx: CacheContext): Promise<string | undefined> {
-      ctx.public = true;
-      await getValue();
-      return undefined;
-    }
+  it.each`
+    override
+    ${false}
+    ${true}
+  `(
+    'does not cache undefined with cachePrivatePackages=$override',
+    async ({ override }) => {
+      GlobalConfig.set({ cachePrivatePackages: override });
+      const options = {
+        namespace: '_test-namespace',
+        key: 'key',
+        public: true,
+      } as const;
 
-    await expect(
-      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).resolves.toBeUndefined();
-    await expect(
-      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).resolves.toBeUndefined();
-    await expect(
-      withCache({ namespace: '_test-namespace', key: 'key' }, fn),
-    ).resolves.toBeUndefined();
-
-    expect(getValue).toHaveBeenCalledTimes(3);
-    expect(setCache).not.toHaveBeenCalled();
-  });
+      await expect(
+        withCache(options, () => undefined),
+      ).resolves.toBeUndefined();
+      await expect(withCache(options, () => 'fresh')).resolves.toBe('fresh');
+      await expect(withCache(options, () => 'unused')).resolves.toBe('fresh');
+    },
+  );
 
   it('uses custom ttlMinutes', async () => {
     function fn(ctx: CacheContext) {

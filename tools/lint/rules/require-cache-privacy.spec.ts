@@ -65,10 +65,6 @@ ruleTester.run('require-cache-privacy', rule, {
       errors: [{ messageId: 'requirePublic' }],
     },
     {
-      code: `withCache({ namespace, key }, (ctx) => { ctx.cacheable = isUsable(value); return value; });`,
-      errors: [{ messageId: 'requirePublic' }],
-    },
-    {
       code: `this.cached({ key }, (ctx) => load(ctx));`,
       errors: [{ messageId: 'requirePublic' }],
     },

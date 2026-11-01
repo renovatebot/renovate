@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { isNonEmptyObject } from '@sindresorhus/is';
 import { extract as tarExtract } from 'tar';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -91,7 +90,7 @@ export class ApkDatasource extends Datasource {
    */
   private async _getPackages(
     componentUrl: string,
-  ): Promise<Record<string, ApkPackage[]>> {
+  ): Promise<Record<string, ApkPackage[]> | undefined> {
     logger.debug(`Fetching APK packages from ${componentUrl}`);
 
     const extractId = randomUUID();
@@ -114,7 +113,7 @@ export class ApkDatasource extends Datasource {
 
       if (!(await fs.cachePathExists(extractedFile))) {
         logger.warn({ componentUrl }, 'APKINDEX file not found in tar archive');
-        return {};
+        return undefined;
       }
 
       logger.debug('Successfully extracted APKINDEX content');
@@ -124,13 +123,17 @@ export class ApkDatasource extends Datasource {
         packages = await parseApkIndexFile(extractedFile);
       } catch (err) {
         logger.warn({ componentUrl, err }, 'Error parsing APK index file');
-        return {};
+        return undefined;
       }
 
       logger.debug(
         { componentUrl, packageCount: packages.length },
         'Successfully parsed APK index',
       );
+
+      if (!packages.length) {
+        return undefined;
+      }
 
       return groupPackagesByName(packages);
     } catch (err) {
@@ -147,7 +150,7 @@ export class ApkDatasource extends Datasource {
         { componentUrl, err },
         'Error extracting APK index from tar.gz',
       );
-      return {};
+      return undefined;
     } finally {
       await fs.rmCache(cacheDir);
     }
@@ -155,7 +158,7 @@ export class ApkDatasource extends Datasource {
 
   private getPackages(
     componentUrl: string,
-  ): Promise<Record<string, ApkPackage[]>> {
+  ): Promise<Record<string, ApkPackage[]> | undefined> {
     return withCache(
       {
         namespace: `datasource-${ApkDatasource.id}`,
@@ -163,11 +166,7 @@ export class ApkDatasource extends Datasource {
         ttlMinutes: 60,
         fallback: true,
       },
-      async (ctx) => {
-        const packages = await this._getPackages(componentUrl);
-        ctx.cacheable = isNonEmptyObject(packages);
-        return packages;
-      },
+      () => this._getPackages(componentUrl),
     );
   }
 
@@ -194,7 +193,7 @@ export class ApkDatasource extends Datasource {
     for (const componentUrl of componentUrls) {
       try {
         const packages = await this.getPackages(componentUrl);
-        const matchingPackages = packages[packageName];
+        const matchingPackages = packages?.[packageName];
 
         if (!matchingPackages) {
           logger.debug(

@@ -8,6 +8,7 @@ import { vi } from 'vitest';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import { getPkgReleases } from '../index.ts';
 import type { GetPkgReleasesConfig } from '../types.ts';
 import { ApkDatasource } from './index.ts';
@@ -86,6 +87,50 @@ describe('modules/datasource/apk/index', () => {
 
   it('should support custom registries', () => {
     expect(apkDatasource.supportsCustomRegistry('')).toBe(true);
+  });
+
+  describe('package caching', () => {
+    beforeEach(async () => {
+      await packageCache.init({ cacheDir: GlobalConfig.get('cacheDir') });
+    });
+
+    afterEach(async () => {
+      await packageCache.cleanup({});
+    });
+
+    it('does not cache empty indexes', async () => {
+      const emptyArchive = await createTarGz([
+        { name: 'APKINDEX', content: '' },
+      ]);
+      const config = {
+        packageName: 'nginx',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
+      };
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, emptyArchive)
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, apkIndexArchive);
+
+      await expect(apkDatasource.getReleases(config)).resolves.toBeNull();
+      const expected = {
+        homepage: 'https://www.nginx.org/',
+        registryUrl: config.registryUrl,
+        releases: [
+          {
+            version: '1.24.0-r16',
+            releaseTimestamp: '2024-04-26T22:27:14.000Z',
+          },
+        ],
+      };
+      await expect(apkDatasource.getReleases(config)).resolves.toEqual(
+        expected,
+      );
+      await expect(apkDatasource.getReleases(config)).resolves.toEqual(
+        expected,
+      );
+    });
   });
 
   describe('getReleases', () => {
