@@ -55,6 +55,7 @@ export interface PackageManagerMinimumReleaseAgeConfig {
   isLockFileMaintenance?: boolean;
   isVulnerabilityAlert?: boolean;
   minimumReleaseAge?: string | null;
+  minimumReleaseAgePackageManager?: string | null;
   minimumReleaseAgeRepository?: string | null;
 }
 
@@ -68,6 +69,9 @@ export interface PackageManagerMinimumReleaseAgeConfig {
  *   applies the value to every package of the lock file, and a larger
  *   `minimumReleaseAge` from `packageRules` would fail on packages which other
  *   updates locked
+ *
+ * The result is raised to `minimumReleaseAgePackageManager` of the same update
+ * if that is larger.
  *
  * It reads `upgrades`, the updates of the lock file, as the branch config is
  * the one of the first upgrade of the branch, which can belong to another
@@ -87,11 +91,13 @@ export function calculatePackageManagerMinimumReleaseAgeMs(
   const lockFileMaintenance = updates.find(
     (update) => update.isLockFileMaintenance,
   );
-  return durationToMs(
+  const update = lockFileMaintenance ?? updates[0];
+  const baseMs = durationToMs(
     lockFileMaintenance
-      ? lockFileMaintenance.minimumReleaseAge
-      : updates[0].minimumReleaseAgeRepository,
+      ? update.minimumReleaseAge
+      : update.minimumReleaseAgeRepository,
   );
+  return Math.max(baseMs, durationToMs(update.minimumReleaseAgePackageManager));
 }
 
 /**
