@@ -224,6 +224,14 @@ export async function processBranch(
         result: 'commit-hourly-limit-reached',
       };
     }
+    const reuseDecision = decideBranchReuse({
+      config,
+      branchPr,
+      branchExists,
+      dependencyDashboardCheck,
+      forceRebase,
+    });
+    const { userRebaseRequested } = reuseDecision;
     if (branchExists) {
       // check if branch is labelled to stop
       config.stopUpdating = branchPr?.labels?.includes(
@@ -295,8 +303,8 @@ export async function processBranch(
         }
         if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
-          await handleModifiedPr(config, branchPr);
-          if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
+          await handleModifiedPr(config, branchPr, userRebaseRequested);
+          if (!userRebaseRequested) {
             return {
               branchExists,
               prNo: branchPr.number,
@@ -306,7 +314,7 @@ export async function processBranch(
         }
       } else if (
         branchIsModified &&
-        !dependencyDashboardCheck &&
+        !userRebaseRequested &&
         !(await findClosedPrForModifiedBranch(config))
       ) {
         return {
@@ -371,14 +379,6 @@ export async function processBranch(
       }
     }
 
-    const reuseDecision = decideBranchReuse({
-      config,
-      branchPr,
-      branchExists,
-      dependencyDashboardCheck,
-      forceRebase,
-    });
-    const { userRebaseRequested } = reuseDecision;
     if (reuseDecision.action === 'skip-update') {
       return {
         branchExists,

@@ -106,16 +106,14 @@ describe('workers/repository/update/branch/handle-existing', () => {
     it('does nothing when the notification is suppressed', async () => {
       config.suppressNotifications = ['prEditedNotification'];
 
-      await handleModifiedPr(config, pr);
+      await handleModifiedPr(config, pr, false);
 
       expect(comment.ensureComment).not.toHaveBeenCalled();
       expect(comment.ensureCommentRemoval).not.toHaveBeenCalled();
     });
 
     it('removes the comment when a rebase was requested', async () => {
-      config.rebaseRequested = true;
-
-      await handleModifiedPr(config, pr);
+      await handleModifiedPr(config, pr, true);
 
       expect(comment.ensureCommentRemoval).toHaveBeenCalledExactlyOnceWith({
         type: 'by-topic',
@@ -125,16 +123,14 @@ describe('workers/repository/update/branch/handle-existing', () => {
     });
 
     it('adds the comment when no rebase was requested', async () => {
-      await handleModifiedPr(config, pr);
+      await handleModifiedPr(config, pr, false);
 
       expect(comment.ensureComment).toHaveBeenCalledOnce();
     });
 
     it('removes nothing in dry run mode when a rebase was requested', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      config.rebaseRequested = true;
-
-      await handleModifiedPr(config, pr);
+      await handleModifiedPr(config, pr, true);
 
       expect(comment.ensureCommentRemoval).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
@@ -145,7 +141,7 @@ describe('workers/repository/update/branch/handle-existing', () => {
     it('adds nothing in dry run mode when no rebase was requested', async () => {
       GlobalConfig.set({ dryRun: 'full' });
 
-      await handleModifiedPr(config, pr);
+      await handleModifiedPr(config, pr, false);
 
       expect(comment.ensureComment).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
