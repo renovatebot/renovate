@@ -133,6 +133,7 @@ The flag takes precedence over both files, and pnpm applies the value strictly b
 
 pnpm applies the value to every package it resolves, including the ones already in the `pnpm-lock.yaml`.
 For dependency updates, Renovate therefore passes the `minimumReleaseAge` of your repository or `npm` manager config, and not a `minimumReleaseAge` from `packageRules`.
+A larger `minimumReleaseAgePackageManager` raises it.
 Otherwise a larger `minimumReleaseAge` for major updates would fail on packages which patch and minor updates locked before.
 If you set `minimumReleaseAge` only in `packageRules`, Renovate passes no value to pnpm for dependency updates.
 If Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate adds a warning to the PR, as pnpm may reject the version.
