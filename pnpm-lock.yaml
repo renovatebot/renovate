@@ -17,7 +17,7 @@ overrides:
   '@yarnpkg/core@4.5.0>tar': 7.5.22
   esbuild: 0.28.2
   http-cache-semantics@<=4.2.0: 4.3.0
-  katex@>=0.11.0 <0.18.2: 0.19.0
+  katex@>=0.11.0 <0.18.2: 0.19.1
   markdown-it@>=15.0.0 <15.0.3: 15.0.3
   protobufjs@8.0.1: 8.8.1
   shell-quote@>=1.8.4 <1.11.0: 1.12.0
@@ -4091,8 +4091,8 @@ packages:
   jws@4.0.1:
     resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
 
-  katex@0.19.0:
-    resolution: {integrity: sha512-v6Tznz3zJ7u3niRCoDTsumM2+HA2XXcCu+WAacCeHD2z3p9A9Ks987o5FzfTGBN0e8A0vjEgIDvLbICrXpdw/Q==}
+  katex@0.19.1:
+    resolution: {integrity: sha512-jG8uKntjSEcm2EpQOh0XturpPuuC9r3Sq5HLHdsFdWZT27E672SF19QEi+of0/YeOy15lDgRhKvr5614uRrEfA==}
     hasBin: true
 
   keyv@4.5.4:
@@ -9443,7 +9443,7 @@ snapshots:
       jwa: 2.0.1
       safe-buffer: 5.2.1
 
-  katex@0.19.0:
+  katex@0.19.1:
     dependencies:
       commander: 15.0.0
 
@@ -9905,7 +9905,7 @@ snapshots:
     dependencies:
       '@types/katex': 0.16.8
       devlop: 1.1.0
-      katex: 0.19.0
+      katex: 0.19.1
       micromark-factory-space: 2.1.0
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
