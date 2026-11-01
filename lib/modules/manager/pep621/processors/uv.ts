@@ -291,10 +291,15 @@ export class UvProcessor extends BasePyProjectProcessor {
           // resolve because the existing lock file contains packages published
           // after the cutoff.
           try {
-            await gitExec(
-              excludeNewerFlag ? `${cmd} ${excludeNewerFlag}` : cmd,
-              execOptions,
-            );
+            if (excludeNewerFlag) {
+              await gitExec(`${cmd} ${excludeNewerFlag}`, execOptions);
+              // Run plain `uv lock` after the run with --exclude-newer to avoid
+              // recording the cutoff in uv.lock, which fails subsequent
+              // `uv sync --locked`/`uv lock --check` without the flag.
+              await gitExec(uvUpdateCMD, execOptions);
+            } else {
+              await gitExec(cmd, execOptions);
+            }
           } catch (err) {
             if (
               excludeNewerFlag &&

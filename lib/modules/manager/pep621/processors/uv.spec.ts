@@ -1263,6 +1263,9 @@ describe('modules/manager/pep621/processors/uv', () => {
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
           },
+          {
+            cmd: 'uv lock',
+          },
         ]);
       });
 
@@ -1291,6 +1294,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         expect(execSnapshots).toMatchObject([
           {
             cmd: 'uv lock --upgrade --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+          {
+            cmd: 'uv lock',
           },
         ]);
       });
@@ -1356,6 +1362,9 @@ describe('modules/manager/pep621/processors/uv', () => {
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
           },
+          {
+            cmd: 'uv lock',
+          },
         ]);
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
@@ -1387,6 +1396,9 @@ describe('modules/manager/pep621/processors/uv', () => {
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
           },
+          {
+            cmd: 'uv lock',
+          },
         ]);
       });
 
@@ -1409,6 +1421,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         expect(execSnapshots).toMatchObject([
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+          {
+            cmd: 'uv lock',
           },
         ]);
       });
@@ -1433,6 +1448,9 @@ describe('modules/manager/pep621/processors/uv', () => {
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-01T00:00:00.000Z',
           },
+          {
+            cmd: 'uv lock',
+          },
         ]);
       });
 
@@ -1455,6 +1473,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         expect(execSnapshots).toMatchObject([
           {
             cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          },
+          {
+            cmd: 'uv lock',
           },
         ]);
         expect(logger.logger.debug).toHaveBeenCalledWith(
