@@ -4884,6 +4884,34 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('keeps the versionCompatibility variant for vulnerability fixes', async () => {
+      config.currentValue = '33.7.1-jre';
+      config.packageName = 'com.google.guava:guava';
+      config.versioning = mavenVersioningId;
+      config.versionCompatibility =
+        '^(?<version>.+)-(?<compatibility>jre|android)$';
+      config.datasource = MavenDatasource.id;
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '33.7.2';
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '33.7.1-android' },
+          { version: '33.7.1-jre' },
+          { version: '33.7.2-android' },
+          { version: '33.7.2-jre' },
+          { version: '33.8.0-android' },
+          { version: '33.8.0-jre' },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toMatchObject([{ newValue: '33.7.2-jre' }]);
+    });
+
     it('handles versionCompatibility mismatch', async () => {
       config.currentValue = '18.10.0-alpine';
       config.packageName = 'node';

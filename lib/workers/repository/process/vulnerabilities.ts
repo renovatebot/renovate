@@ -8,7 +8,7 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as _aeCvss from 'ae-cvss-calculator';
+import aeCvss from 'ae-cvss-calculator';
 import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
@@ -37,8 +37,7 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
-  .default;
+const { fromVector } = aeCvss;
 
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
