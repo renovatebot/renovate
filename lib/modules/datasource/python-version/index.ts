@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
 import { Datasource } from '../datasource.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -19,10 +20,6 @@ export class PythonVersionDatasource extends Datasource {
     super(datasource);
     this.pythonPrebuildDatasource = new GithubReleasesDatasource();
     this.pythonEolDatasource = new EndoflifeDateDatasource();
-  }
-
-  override supportsCustomRegistry(_packageName: string): boolean {
-    return false;
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
@@ -52,6 +49,16 @@ export class PythonVersionDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
+
+    const parsedUrl = parseUrl(registryUrl);
+    if (!parsedUrl) {
+      logger.warn(
+        { registryUrl },
+        'python-version datasource: Invalid registryUrl',
+      );
+      return null;
+    }
+
     const pythonPrebuildReleases = await this.getPrebuildReleases();
     const pythonPrebuildVersions = new Set<string>(
       pythonPrebuildReleases?.releases.map((release) => release.version),
