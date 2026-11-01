@@ -4,6 +4,7 @@ import { extractPackageFile } from './index.ts';
 
 const kubernetesImagesFile = Fixtures.get('kubernetes.yaml');
 const kubernetesConfigMapFile = Fixtures.get('configmap.yaml');
+const versionLabelFile = Fixtures.get('version-label.yaml');
 const kubernetesArraySyntaxFile = Fixtures.get('array-syntax.yaml');
 const underscoreTagFile = Fixtures.get('underscore-tag.yaml');
 const kubernetesRegistryAlias = Fixtures.get('kubernetes.registry-alias.yaml');
@@ -66,6 +67,140 @@ describe('modules/manager/kubernetes/extract', () => {
           versioning: 'kubernetes-api',
         },
       ]);
+    });
+
+    it('does not extract app version labels by default', () => {
+      const res = extractPackageFile(versionLabelFile, 'file.yaml', {});
+
+      expect(res?.deps).not.toContainEqual(
+        expect.objectContaining({ autoReplaceStringTemplate: '{{newValue}}' }),
+      );
+    });
+
+    it('extracts matching app version labels when enabled', () => {
+      const res = extractPackageFile(versionLabelFile, 'file.yaml', {
+        updateVersionLabels: true,
+      });
+
+      expect(res?.deps).toContainEqual({
+        autoReplaceStringTemplate: '{{newValue}}',
+        currentDigest: undefined,
+        currentValue: '1.22.1',
+        datasource: 'docker',
+        depName: 'nginx',
+        packageName: 'nginx',
+        pinDigests: false,
+        digestManagedExternally: true,
+        replaceString: '1.22.1',
+      });
+      expect(res?.deps).toContainEqual({
+        autoReplaceStringTemplate: '{{newValue}}',
+        currentDigest: undefined,
+        currentValue: 'v1.11.1',
+        datasource: 'docker',
+        depName: 'k8s.gcr.io/kube-proxy-amd64',
+        packageName: 'k8s.gcr.io/kube-proxy-amd64',
+        pinDigests: false,
+        digestManagedExternally: true,
+        replaceString: 'v1.11.1',
+      });
+      expect(
+        res?.deps.filter(
+          (dep) => dep.autoReplaceStringTemplate === '{{newValue}}',
+        ),
+      ).toHaveLength(3);
+    });
+
+    it('keeps label extraction stable while the image is updated', () => {
+      const updatedContent = versionLabelFile.replace(
+        'image: nginx:1.22.1',
+        'image: nginx:1.22.2',
+      );
+      const res = extractPackageFile(updatedContent, 'file.yaml', {
+        updateVersionLabels: true,
+        depName: 'nginx',
+        currentValue: '1.22.1',
+      });
+
+      expect(res?.deps).toContainEqual(
+        expect.objectContaining({
+          autoReplaceStringTemplate: '{{newValue}}',
+          currentValue: '1.22.1',
+          depName: 'nginx',
+          replaceString: '1.22.1',
+        }),
+      );
+    });
+
+    it('keeps label extraction stable after the label is updated', () => {
+      const updatedContent = versionLabelFile.replace('"1.22.1"', '"1.22.2"');
+      const res = extractPackageFile(updatedContent, 'file.yaml', {
+        updateVersionLabels: true,
+        depName: 'nginx',
+        currentValue: '1.22.1',
+        newValue: '1.22.2',
+      });
+
+      expect(res?.deps).toContainEqual(
+        expect.objectContaining({
+          autoReplaceStringTemplate: '{{newValue}}',
+          currentValue: '1.22.2',
+          depName: 'nginx',
+          replaceString: '1.22.2',
+        }),
+      );
+    });
+
+    it('re-extracts a label dependency without the manager option', () => {
+      const updatedContent = versionLabelFile.replace('"1.22.1"', '"1.22.2"');
+      const res = extractPackageFile(updatedContent, 'file.yaml', {
+        digestManagedExternally: true,
+        depName: 'nginx',
+        currentValue: '1.22.1',
+        newValue: '1.22.2',
+      });
+
+      expect(res?.deps).toContainEqual(
+        expect.objectContaining({
+          autoReplaceStringTemplate: '{{newValue}}',
+          currentValue: '1.22.2',
+          depName: 'nginx',
+          replaceString: '1.22.2',
+        }),
+      );
+    });
+
+    it('ignores manifests without app version labels', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: test
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: test
+                    image: nginx:1.2.3
+        `,
+        'file.yaml',
+        { updateVersionLabels: true },
+      );
+
+      expect(res?.deps).not.toContainEqual(
+        expect.objectContaining({ autoReplaceStringTemplate: '{{newValue}}' }),
+      );
+    });
+
+    it('can disable app version label extraction', () => {
+      const res = extractPackageFile(versionLabelFile, 'file.yaml', {
+        updateVersionLabels: false,
+      });
+
+      expect(res?.deps).not.toContainEqual(
+        expect.objectContaining({ autoReplaceStringTemplate: '{{newValue}}' }),
+      );
     });
 
     it('extracts image line in a YAML array', () => {

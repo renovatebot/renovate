@@ -4,6 +4,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
+import { extractPackageFile as extractKubernetesPackageFile } from '../../../../modules/manager/kubernetes/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
@@ -90,6 +91,49 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
       expect(res).toEqual(src.replace('7.1.0', '7.1.1'));
+    });
+
+    it('updates a Kubernetes image and its version label', async () => {
+      const content = codeBlock`
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: nginx
+          labels:
+            app.kubernetes.io/version: "1.2.3"
+        spec:
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/version: "1.2.3"
+            spec:
+              containers:
+                - name: nginx
+                  image: nginx:1.2.3
+      `;
+      const deps = extractKubernetesPackageFile(content, 'deployment.yaml', {
+        updateVersionLabels: true,
+      })!.deps;
+
+      let updatedContent = content;
+      for (const depIndex of [1, 2, 0]) {
+        const dep = deps[depIndex];
+        Object.assign(upgrade, dep, {
+          manager: 'kubernetes',
+          packageFile: 'deployment.yaml',
+          depIndex,
+          currentValue: '1.2.3',
+          newValue: '1.2.4',
+        });
+        updatedContent = (await doAutoReplace(
+          upgrade,
+          updatedContent,
+          reuseExistingBranch,
+        ))!;
+      }
+
+      expect(updatedContent).toContain('app.kubernetes.io/version: "1.2.4"');
+      expect(updatedContent).toContain('image: nginx:1.2.4');
     });
 
     it('handles a double attempt', async () => {

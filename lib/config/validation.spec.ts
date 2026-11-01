@@ -1815,6 +1815,21 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('allows updateVersionLabels in the kubernetes manager config', async () => {
+      const config: AllConfig & {
+        kubernetes: { updateVersionLabels: boolean };
+      } = {
+        kubernetes: { updateVersionLabels: false },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
     it('allows manager options in a custom manager config', async () => {
       const config: RenovateConfig &
         Partial<Record<CustomManagerName, RenovateConfig>> = {
