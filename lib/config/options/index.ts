@@ -3129,6 +3129,17 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['customManagers'],
   },
   {
+    name: 'updateVersionLabels',
+    parents: ['kubernetes'],
+    description:
+      'Update the standard Kubernetes app version label when it matches an image tag.',
+    type: 'boolean',
+    default: false,
+    stage: 'package',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'postUpdateOptions',
     scopes: sharedScopes,
     description:

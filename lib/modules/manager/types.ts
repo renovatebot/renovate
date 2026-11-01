@@ -32,6 +32,7 @@ export interface ManagerData<T> {
 
 export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
+  updateVersionLabels?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;

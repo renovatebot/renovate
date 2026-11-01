@@ -2885,6 +2885,12 @@ Alternatively, to limit major upgrades to within 10 versions:
 }
 ```
 
+## `kubernetes`
+
+### `kubernetes.updateVersionLabels`
+
+Set to `true` to update the standard `app.kubernetes.io/version` label. This is disabled by default.
+
 ## `managerFilePatterns`
 
 Formerly known as `fileMatch`, which supported regex-only.

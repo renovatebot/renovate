@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { withDebugMessage } from '../../../util/schema-utils/index.ts';
@@ -32,13 +33,67 @@ export function extractPackageFile(
     withDebugMessage([], `${packageFile} does not match Kubernetes schema`),
   ).parse(content);
 
+  const imageDeps = extractImages(content, config);
+  const isVersionLabelUpdate =
+    config.updateVersionLabels === true ||
+    ('digestManagedExternally' in config &&
+      config.digestManagedExternally === true);
   const deps: PackageDependency[] = [
-    ...extractImages(content, config),
+    ...imageDeps,
     ...extractImageVolumes(manifests, config),
+    ...(isVersionLabelUpdate
+      ? extractVersionLabels(manifests, imageDeps, config)
+      : []),
     ...extractApis(manifests),
   ];
 
   return deps.length ? { deps } : null;
+}
+
+function extractVersionLabels(
+  manifests: KubernetesManifest[],
+  imageDeps: PackageDependency[],
+  config: ExtractConfig,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  const currentDepName =
+    'depName' in config && isString(config.depName)
+      ? config.depName
+      : undefined;
+  const currentValue =
+    'currentValue' in config && isString(config.currentValue)
+      ? config.currentValue
+      : undefined;
+  const newValue =
+    'newValue' in config && isString(config.newValue)
+      ? config.newValue
+      : undefined;
+
+  for (const manifest of manifests) {
+    for (const versionLabel of manifest.versionLabels) {
+      if (!versionLabel) {
+        continue;
+      }
+
+      const imageDep =
+        imageDeps.find((dep) => dep.currentValue === versionLabel) ??
+        (currentValue === versionLabel || newValue === versionLabel
+          ? imageDeps.find((dep) => dep.depName === currentDepName)
+          : undefined);
+      if (imageDep) {
+        deps.push({
+          ...imageDep,
+          currentValue: versionLabel,
+          pinDigests: false,
+          digestManagedExternally: true,
+          autoReplaceStringTemplate: '{{newValue}}',
+          replaceString: versionLabel,
+        });
+      }
+    }
+  }
+
+  return deps;
 }
 
 // Comes from https://github.com/distribution/reference/blob/v0.6.0/regexp.go

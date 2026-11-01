@@ -11,6 +11,48 @@ const TemplateSpecVolumes = z.object({
   template: z.object({ spec: PodSpecVolumes }),
 });
 
+const PodTemplateLabels = z
+  .discriminatedUnion('kind', [
+    z.object({
+      kind: z.enum([
+        'DaemonSet',
+        'Deployment',
+        'Job',
+        'ReplicaSet',
+        'ReplicationController',
+        'StatefulSet',
+      ]),
+      spec: z.object({
+        template: z.object({
+          metadata: z.object({
+            labels: z.record(z.string(), z.string()).optional(),
+          }),
+        }),
+      }),
+    }),
+    z.object({
+      kind: z.literal('CronJob'),
+      spec: z.object({
+        jobTemplate: z.object({
+          spec: z.object({
+            template: z.object({
+              metadata: z.object({
+                labels: z.record(z.string(), z.string()).optional(),
+              }),
+            }),
+          }),
+        }),
+      }),
+    }),
+  ])
+  .transform(({ kind, spec }) =>
+    kind === 'CronJob'
+      ? spec.jobTemplate.spec.template.metadata.labels
+      : spec.template.metadata.labels,
+  )
+  .transform((labels) => (labels ? [labels] : []))
+  .catch([]);
+
 const ImageVolumeReferences = z
   .discriminatedUnion('kind', [
     z.object({
@@ -44,6 +86,7 @@ export const KubernetesResource = z.object({
   metadata: z.object({
     name: z.string(),
     namespace: z.string().optional(),
+    labels: z.record(z.string(), z.string()).optional(),
   }),
 });
 
@@ -51,6 +94,12 @@ export const KubernetesManifest = KubernetesResource.extend({
   spec: z.unknown().optional(),
 }).transform(({ spec, ...resource }) => ({
   ...resource,
+  versionLabels: [
+    resource.metadata.labels?.['app.kubernetes.io/version'],
+    ...PodTemplateLabels.parse({ kind: resource.kind, spec }).map(
+      (labels) => labels['app.kubernetes.io/version'],
+    ),
+  ],
   imageVolumeReferences: ImageVolumeReferences.parse({
     kind: resource.kind,
     spec,

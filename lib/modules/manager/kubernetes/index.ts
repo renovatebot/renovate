@@ -9,6 +9,7 @@ export const categories: Category[] = ['kubernetes'];
 
 export const defaultConfig = {
   managerFilePatterns: [],
+  updateVersionLabels: false,
 };
 
 export const supportedDatasources = [
