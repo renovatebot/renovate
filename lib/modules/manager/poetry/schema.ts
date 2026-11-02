@@ -530,3 +530,34 @@ export const Lockfile = Toml.pipe(
     pythonVersions,
   }),
 );
+
+/**
+ * The `solver.min-release-age` in days and the normalized `solver.min-release-age-exclude` package names of a `poetry.toml`.
+ */
+export const PoetryMinReleaseAgeConfig = Toml.pipe(
+  z.object({
+    solver: z
+      .object({
+        'min-release-age': z
+          .number()
+          .int()
+          .nonnegative()
+          .optional()
+          .catch(undefined),
+        'min-release-age-exclude': LooseArray(z.string())
+          .optional()
+          .catch(undefined),
+      })
+      .optional()
+      .catch(undefined),
+  }),
+).transform(({ solver }) => ({
+  days: solver?.['min-release-age'] ?? 0,
+  exclude: coerceArray(solver?.['min-release-age-exclude']).map((name) =>
+    normalizePythonDepName(name),
+  ),
+}));
+
+export type PoetryMinReleaseAgeConfig = z.infer<
+  typeof PoetryMinReleaseAgeConfig
+>;

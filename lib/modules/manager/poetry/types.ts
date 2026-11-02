@@ -41,3 +41,8 @@ export interface PoetrySource {
 export interface PoetryGroup {
   dependencies: Record<string, PoetryDependency | string>;
 }
+
+export interface MinReleaseAgeEnv {
+  env: NodeJS.ProcessEnv;
+  notice?: string;
+}
