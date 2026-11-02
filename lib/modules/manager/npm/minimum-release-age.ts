@@ -7,13 +7,8 @@ import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { parseNpmrcCooldown } from './extract/npmrc.ts';
-import {
-  getPnpmMinimumReleaseAgeMinutes,
-  readPnpmWorkspaceMinimumReleaseAge,
-} from './extract/pnpm-minimum-release-age.ts';
-import { getPackageManagerVersion } from './post-update/utils.ts';
+import { getPnpmMinimumReleaseAgeMinutes } from './extract/pnpm-minimum-release-age.ts';
 import type { NpmManagerData } from './types.ts';
-import { loadPackageJson } from './utils.ts';
 
 // npm supports `min-release-age` since v11.10.0
 // https://github.com/npm/cli/releases/tag/v11.10.0
@@ -40,19 +35,6 @@ const minuteMs = 60 * 1000;
 interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
   managerData?: NpmManagerData;
   npmrc?: string;
-}
-
-async function resolveConstraint(
-  config: NpmEnforcesMinimumReleaseAgeConfig,
-  toolName: 'npm' | 'pnpm',
-  lockFile: string,
-): Promise<string | undefined> {
-  return await resolveToolConstraint(config, toolName, async () =>
-    getPackageManagerVersion(
-      toolName,
-      await loadPackageJson(upath.dirname(lockFile)),
-    ),
-  );
 }
 
 /**
@@ -93,25 +75,28 @@ async function npmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  return isSubsetOf(
-    npmVersioning,
-    await resolveConstraint(config, 'npm', npmLock),
-    minReleaseAgeNpmRange,
-  );
+  // the status checks run before the base branch is checked out, so the
+  // constraint is not derived from the package.json in the working tree
+  const constraint = await resolveToolConstraint(config, 'npm');
+  return isSubsetOf(npmVersioning, constraint, minReleaseAgeNpmRange);
 }
 
 async function pnpmEnforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   pnpmLockFile: string,
 ): Promise<boolean> {
-  const constraint = await resolveConstraint(config, 'pnpm', pnpmLockFile);
+  const constraint = await resolveToolConstraint(config, 'pnpm');
   if (
     !isSubsetOf(npmVersioning, constraint, minimumReleaseAgeEnforcedPnpmRange)
   ) {
     return false;
   }
 
-  const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
+  // the status checks run before the base branch is checked out, so the
+  // pnpm-workspace.yaml settings come from the extraction
+  const workspace = coerceObject(
+    config.managerData?.pnpmWorkspaceMinimumReleaseAge,
+  );
   if (workspace.minimumReleaseAgeStrict === false) {
     logger.debug(
       `${pnpmLockFile}: minimumReleaseAgeStrict=false lets pnpm install versions which are too new`,

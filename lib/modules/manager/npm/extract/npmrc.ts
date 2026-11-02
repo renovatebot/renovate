@@ -90,11 +90,11 @@ export function getNpmrcMinimumReleaseAge(
 export function setNpmrcMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
 ): void {
-  for (const packageFile of packageFiles) {
+  const npmPackageFiles = packageFiles.filter(
+    ({ managerData }) => !managerData?.yarnLock && !managerData?.pnpmLockFile,
+  );
+  for (const packageFile of npmPackageFiles) {
     const { managerData } = packageFile;
-    if (managerData?.yarnLock || managerData?.pnpmLockFile) {
-      continue;
-    }
     const minimumReleaseAge = getNpmrcMinimumReleaseAge(
       managerData?.repoNpmrc?.content,
     );

@@ -90,11 +90,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         },
       );
 
-      it('derives the npm constraint from package.json', async () => {
-        fs.readLocalFile.mockResolvedValueOnce(
-          JSON.stringify({ packageManager: 'npm@11.12.0' }),
-        );
-
+      it('does not read the package.json in the working tree', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -103,16 +99,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
             npmrc,
             extractedConstraints: { npm: '>=10' },
           }),
-        ).resolves.toBeTrue();
-        expect(fs.readLocalFile).toHaveBeenCalledWith(
-          'some-dir/package.json',
-          'utf8',
-        );
+        ).resolves.toBeFalse();
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
       });
 
-      it('falls back to the extracted npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
+      it('uses the extracted npm constraint', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -124,8 +115,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
       });
 
       it('returns false without an npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -154,18 +143,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
       pnpmLockFile: 'some-dir/pnpm-lock.yaml',
     };
 
-    function mockPnpmFiles(workspace?: string, packageJson = '{}'): void {
-      fs.readLocalFile.mockImplementation((fileName: string) => {
-        if (fileName === 'some-dir/pnpm-workspace.yaml') {
-          return Promise.resolve(workspace ?? null);
-        }
-        if (fileName === 'some-dir/package.json') {
-          return Promise.resolve(packageJson);
-        }
-        return Promise.resolve(null);
-      });
-    }
-
     it.each`
       constraint     | expected
       ${'10.17.0'}   | ${true}
@@ -186,8 +163,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
     `(
       'returns $expected for the pnpm constraint $constraint',
       async ({ constraint, expected }) => {
-        mockPnpmFiles();
-
         await expect(
           enforcesMinimumReleaseAge({
             managerData: pnpmLockManagerData,
@@ -201,21 +176,22 @@ describe('modules/manager/npm/minimum-release-age', () => {
 
     it.each`
       minimumReleaseAge | workspace                                                      | expected
-      ${null}           | ${'minimumReleaseAge: 1440\n'}                                 | ${true}
-      ${'0 days'}       | ${'minimumReleaseAge: 1440\n'}                                 | ${true}
+      ${null}           | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
+      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
       ${null}           | ${undefined}                                                   | ${false}
-      ${'bananas'}      | ${'minimumReleaseAge: 0\n'}                                    | ${false}
-      ${'3 days'}       | ${'minimumReleaseAgeStrict: false\n'}                          | ${false}
-      ${null}           | ${'minimumReleaseAge: 1440\nminimumReleaseAgeStrict: false\n'} | ${false}
-      ${'3 days'}       | ${'minimumReleaseAgeStrict: true\n'}                           | ${true}
+      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                    | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                          | ${false}
+      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }} | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                           | ${true}
     `(
       'returns $expected for minimumReleaseAge=$minimumReleaseAge and workspace=$workspace',
       async ({ minimumReleaseAge, workspace, expected }) => {
-        mockPnpmFiles(workspace);
-
         await expect(
           enforcesMinimumReleaseAge({
-            managerData: pnpmLockManagerData,
+            managerData: {
+              ...pnpmLockManagerData,
+              pnpmWorkspaceMinimumReleaseAge: workspace,
+            },
             isLockFileMaintenance: true,
             minimumReleaseAge,
             constraints: { pnpm: '10.17.0' },
@@ -223,6 +199,20 @@ describe('modules/manager/npm/minimum-release-age', () => {
         ).resolves.toBe(expected);
       },
     );
+
+    it('does not read the pnpm-workspace.yaml in the working tree', async () => {
+      fs.readLocalFile.mockResolvedValue('minimumReleaseAgeStrict: false\n');
+
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: pnpmLockManagerData,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { pnpm: '10.17.0' },
+        }),
+      ).resolves.toBeTrue();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
 
     it.each`
       pnpm         | npmrc                           | expected
@@ -233,8 +223,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
     `(
       'returns $expected for pnpm $pnpm with npmrc=$npmrc and no minimumReleaseAge',
       async ({ pnpm, npmrc, expected }) => {
-        mockPnpmFiles();
-
         await expect(
           enforcesMinimumReleaseAge({
             managerData: pnpmLockManagerData,
@@ -246,9 +234,8 @@ describe('modules/manager/npm/minimum-release-age', () => {
       },
     );
 
-    it('derives the pnpm constraint from package.json', async () => {
-      mockPnpmFiles(
-        undefined,
+    it('does not derive the pnpm constraint from the package.json in the working tree', async () => {
+      fs.readLocalFile.mockResolvedValue(
         JSON.stringify({ packageManager: 'pnpm@11.28.7' }),
       );
 
@@ -259,12 +246,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
           minimumReleaseAge: '1 day',
           extractedConstraints: { pnpm: '>=9' },
         }),
-      ).resolves.toBeTrue();
+      ).resolves.toBeFalse();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
     it('returns false without a pnpm constraint', async () => {
-      mockPnpmFiles();
-
       await expect(
         enforcesMinimumReleaseAge({
           managerData: pnpmLockManagerData,

@@ -117,7 +117,7 @@ Lock file maintenance does not retry, and reports the `ETARGET` error as an arti
 npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
 
 - Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
-- the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the npm version used is v11.10.0 or later, which added `min-release-age`
+- the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the `constraints` config or the `packageManager`, `devEngines` or `engines` field of the `package.json` only allow npm v11.10.0 or later, which added `min-release-age`
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
@@ -144,7 +144,7 @@ Renovate already applied its own `minimumReleaseAge` to the updated versions, so
 New transitive dependencies still get the passed value.
 The flag replaces the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`, so Renovate passes those entries first.
 Renovate passes the exclusions if the pnpm version is v10.19.0 or later, which added exact versions to `minimumReleaseAgeExclude`, or if Renovate does not know the pnpm version.
-For older pnpm versions, Renovate adds a warning to the PR if it looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, as pnpm may reject the version.
+For pnpm v10.16.0 to v10.18.x, Renovate adds a warning to the PR if it looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, as pnpm may reject the version.
 To let pnpm install such packages earlier, add them to `minimumReleaseAgeExclude` in the `pnpm-workspace.yaml`.
 Renovate neither passes exclusions for nor warns about versions which `minimumReleaseAgeExclude` already excludes.
 Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
