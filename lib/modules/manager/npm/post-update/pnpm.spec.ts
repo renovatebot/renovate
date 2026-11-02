@@ -4,6 +4,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as pnpmHelper from './pnpm.ts';
@@ -979,6 +980,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         depName: 'foo',
         datasource: 'npm',
         newVersion: '1.2.3',
+        releaseTimestamp: '2020-01-01T00:00:00.000Z' as Timestamp,
       };
 
       it.each`
@@ -1094,6 +1096,41 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         );
 
         expect(res.minimumReleaseAgeNotice).toBeUndefined();
+      });
+
+      it.each`
+        name                                         | pnpm          | workspace                      | hoursAgo     | expected
+        ${'a release as old as the workspace value'} | ${'^11.0.0'}  | ${'minimumReleaseAge: 2880\n'} | ${49}        | ${`${flag} ${foo} ${foo}`}
+        ${'no release younger than the workspace'}   | ${'^11.0.0'}  | ${'minimumReleaseAge: 2880\n'} | ${24}        | ${flag}
+        ${'no release younger than the v11 default'} | ${'^11.0.0'}  | ${undefined}                   | ${1}         | ${flag}
+        ${'no release without a timestamp'}          | ${'^11.0.0'}  | ${undefined}                   | ${undefined} | ${flag}
+        ${'a release without a pnpm value'}          | ${'~10.19.0'} | ${undefined}                   | ${undefined} | ${`${flag} ${foo} ${foo}`}
+      `('excludes $name', async ({ pnpm, workspace, hoursAgo, expected }) => {
+        const execSnapshots = mockExecAll();
+        mockPnpmFiles(workspace);
+
+        await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, constraints: { pnpm } },
+          [
+            {
+              ...update,
+              manager: 'npm',
+              minimumReleaseAge: null,
+              minimumReleaseAgeRepository: '3 days',
+              releaseTimestamp:
+                hoursAgo &&
+                (new Date(
+                  Date.now() - hoursAgo * 60 * 60 * 1000,
+                ).toISOString() as Timestamp),
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          { cmd: `${pnpmInstall} ${expected} --no-frozen-lockfile` },
+        ]);
       });
     });
 
@@ -1233,7 +1270,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     );
 
-    it('warns about updates below the pnpm v11 default, which Renovate does not look up with', async () => {
+    it('does not lower the minimum release age below the pnpm v11 default', async () => {
       mockExecAll();
       mockPnpmFiles();
 
@@ -1252,9 +1289,36 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         ],
       );
 
-      expect(res.minimumReleaseAgeNotice).toStartWith(
-        'pnpm checked a minimum release age of 0 minutes instead of 1440',
+      expect(res.minimumReleaseAgeNotice).toBeUndefined();
+    });
+
+    it('lowers the minimum release age no further than the pnpm-workspace.yaml value', async () => {
+      const execSnapshots = mockExecAll();
+      mockPnpmFiles('minimumReleaseAge: 2880\n');
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        { ...config, constraints: { pnpm: '~10.18.0' } },
+        [
+          {
+            manager: 'npm',
+            depName: 'foo',
+            datasource: 'npm',
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
       );
+
+      expect(res.minimumReleaseAgeNotice).toStartWith(
+        'pnpm checked a minimum release age of 2880 minutes instead of 4320',
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: `${pnpmInstall} --config.minimum-release-age=2880 --no-frozen-lockfile`,
+        },
+      ]);
     });
 
     it('keeps the notice if pnpm fails', async () => {

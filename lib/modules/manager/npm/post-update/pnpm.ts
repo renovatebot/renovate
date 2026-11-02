@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
 import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
@@ -22,6 +23,7 @@ import {
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
 } from '../../../../util/minimum-release-age.ts';
+import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
@@ -100,7 +102,18 @@ function getInstalledPackageName(upgrade: Upgrade): string | undefined {
 }
 
 /**
- * The `minimumReleaseAgeExclude` entries which exclude the updated versions of npm packages from the minimum release age which Renovate passes to pnpm, as Renovate already applied its own minimum release age to them.
+ * Whether the release of `upgrade` is at least as old as the minimum release age of `pnpmMinutes` which pnpm configures itself, where a release without a timestamp only passes `0`.
+ */
+function isOldEnoughForPnpm(upgrade: Upgrade, pnpmMinutes: number): boolean {
+  return (
+    !pnpmMinutes ||
+    (!!upgrade.releaseTimestamp &&
+      getElapsedMs(upgrade.releaseTimestamp) >= pnpmMinutes * minuteMs)
+  );
+}
+
+/**
+ * The `minimumReleaseAgeExclude` entries which exclude the updated versions of npm packages from the minimum release age which Renovate passes to pnpm, as Renovate already applied its own minimum release age to them, for releases at least as old as the minimum release age of `pnpmMinutes` which pnpm configures itself.
  *
  * The `--config.minimum-release-age-exclude` flags replace the `pnpm-workspace.yaml` list, so the entries start with the workspace ones.
  * pnpm before v11.23.0 reads a single flag as a string, one character at a time, so a single entry is repeated.
@@ -109,6 +122,7 @@ function getMinimumReleaseAgeExcludes(
   upgrades: Upgrade[],
   workspaceExclude: string[] | undefined,
   exclude: PnpmMinimumReleaseAgeExclude,
+  pnpmMinutes: number,
 ): string[] {
   const updated: string[] = [];
   for (const upgrade of upgrades) {
@@ -117,7 +131,12 @@ function getMinimumReleaseAgeExcludes(
       upgrade.datasource === NpmDatasource.id &&
       packageName &&
       upgrade.newVersion &&
-      !isPnpmMinimumReleaseAgeExcluded(exclude, packageName, upgrade.newVersion)
+      !isPnpmMinimumReleaseAgeExcluded(
+        exclude,
+        packageName,
+        upgrade.newVersion,
+      ) &&
+      isOldEnoughForPnpm(upgrade, pnpmMinutes)
     ) {
       updated.push(`${packageName}@${upgrade.newVersion}`);
     }
@@ -154,8 +173,8 @@ function isCheckedByPnpm(
  * Renovate's value comes from `calculatePackageManagerMinimumReleaseAgeMs`.
  * The pnpm value comes from the `pnpm-workspace.yaml`, the `.npmrc` before pnpm v11, or the pnpm v11 default.
  *
- * If the pnpm version supports exact versions in `minimumReleaseAgeExclude`, `--config.minimum-release-age-exclude` flags exclude the updated versions.
- * Otherwise the flag is lowered to the smaller own minimum release age of exempted updates, with a notice.
+ * If the pnpm version supports exact versions in `minimumReleaseAgeExclude`, `--config.minimum-release-age-exclude` flags exclude the updated versions whose release is at least as old as the pnpm value.
+ * Otherwise the flag is lowered to the smaller own minimum release age of exempted updates, but not below the pnpm value, with a notice.
  *
  * pnpm reads `--config.minimum-release-age` since v10.16.0, and the flag takes precedence over the `pnpm-workspace.yaml`.
  */
@@ -183,9 +202,10 @@ async function getMinimumReleaseAgeArgs(
     pnpmConstraint,
     true,
   );
+  const configMinutes = pnpmMinutes ?? 0;
   const minutes = Math.max(
     Math.ceil(minimumReleaseAgeMs / minuteMs),
-    pnpmMinutes ?? 0,
+    configMinutes,
   );
   logger.debug(
     { minimumReleaseAgeMs, pnpmMinimumReleaseAge: pnpmMinutes },
@@ -208,6 +228,7 @@ async function getMinimumReleaseAgeArgs(
       upgrades,
       workspace.minimumReleaseAgeExclude,
       exclude,
+      configMinutes,
     )) {
       result.args += ` ${quote(`--config.minimum-release-age-exclude=${entry}`)}`;
     }
@@ -224,11 +245,14 @@ async function getMinimumReleaseAgeArgs(
     'npm',
     minutes * minuteMs,
   );
-  if (!exemption) {
+  // rounds down, so that pnpm accepts the releases of the exempted updates, but never below the pnpm value
+  const loweredMinutes = Math.max(
+    Math.floor(coerceNumber(exemption?.ageMs) / minuteMs),
+    configMinutes,
+  );
+  if (!exemption || loweredMinutes >= minutes) {
     return result;
   }
-  // rounds down, so that pnpm accepts the releases of the exempted updates
-  const loweredMinutes = Math.floor(exemption.ageMs / minuteMs);
   logger.debug(
     `Lowering the pnpm minimum release age from ${minutes} to ${loweredMinutes} minutes, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
   );
