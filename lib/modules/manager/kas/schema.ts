@@ -6,7 +6,7 @@ export const KasRepo = z.object({
   commit: z.string().optional(),
   branch: Nullish(z.string()),
   tag: Nullish(z.string()),
-  type: z.enum(['git', 'hg']).default('git').optional(),
+  type: z.enum(['git', 'hg']).default('git'),
 });
 
 export const KasInclude = z.union([
