@@ -137,6 +137,8 @@ export interface LocalRepoConfig {
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
   mergeQueueEnabled: Record<string, boolean>;
+  /** PRs whose automerge was disabled for a push in this run */
+  automergeDisabledPrs: Set<number>;
 }
 
 export interface GhRepo {
@@ -166,6 +168,27 @@ export interface GhRepo {
 
 export interface GhAutomergeResponse {
   enablePullRequestAutoMerge: {
+    pullRequest: { number: number };
+  };
+}
+
+export interface GhPrAutoMergeState {
+  id: string;
+  autoMergeRequest: {
+    commitHeadline: string | null;
+    commitBody: string | null;
+    enabledBy: { login: string } | null;
+  } | null;
+}
+
+export interface GhPrAutoMergeStateResponse {
+  repository: {
+    pullRequest: GhPrAutoMergeState | null;
+  } | null;
+}
+
+export interface GhDisableAutomergeResponse {
+  disablePullRequestAutoMerge: {
     pullRequest: { number: number };
   };
 }
