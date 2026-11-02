@@ -10,6 +10,7 @@ import type {
 } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
   PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
@@ -4051,6 +4052,113 @@ describe('workers/repository/update/branch/index', () => {
 
       await branchWorker.processBranch(config);
       expect(platform.reattemptPlatformAutomerge).not.toHaveBeenCalled();
+    });
+
+    describe('restorePlatformAutomerge', () => {
+      const platformPrOptions = { usePlatformAutomerge: true };
+
+      beforeEach(() => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+          ...updatedPackageFiles,
+        });
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [],
+        });
+        scm.branchExists.mockResolvedValue(true);
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({
+            number: 123,
+            state: 'open',
+          }),
+        );
+        prWorker.getPlatformPrOptions.mockReturnValue(platformPrOptions);
+      });
+
+      it('restores platform automerge when nothing was pushed', async () => {
+        commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+        await branchWorker.processBranch(config);
+
+        expect(
+          platform.restorePlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
+      it('does not restore platform automerge after a push', async () => {
+        await branchWorker.processBranch(config);
+
+        expect(platform.restorePlatformAutomerge).not.toHaveBeenCalled();
+        expect(
+          platform.reattemptPlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
+      it('restores platform automerge when a later step throws', async () => {
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(new Error('checkout failed'));
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(
+          platform.restorePlatformAutomerge,
+        ).toHaveBeenCalledExactlyOnceWith({ number: 123, platformPrOptions });
+      });
+
+      it('handles the original error when restoring throws', async () => {
+        const restoreErr = new Error('unknown');
+        platform.restorePlatformAutomerge.mockRejectedValueOnce(restoreErr);
+        const checkoutErr = new Error('checkout failed');
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toMatchObject({ result: 'error', prNo: 123 });
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: restoreErr },
+          'Error restoring platform automerge',
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: checkoutErr },
+          'Error updating branch',
+        );
+      });
+
+      it('passes a rate limit from restoring up after handling the original error', async () => {
+        const restoreErr = new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+        platform.restorePlatformAutomerge.mockRejectedValueOnce(restoreErr);
+        const checkoutErr = new Error('checkout failed');
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        await expect(branchWorker.processBranch(config)).rejects.toBe(
+          restoreErr,
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          { err: checkoutErr },
+          'Error updating branch',
+        );
+      });
+
+      it('passes the original error up when it is passed up itself', async () => {
+        platform.restorePlatformAutomerge.mockRejectedValueOnce(
+          new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+        );
+        const checkoutErr = new Error(REPOSITORY_CHANGED);
+        scm.checkoutBranch
+          .mockResolvedValueOnce(commitSha)
+          .mockRejectedValueOnce(checkoutErr);
+
+        await expect(branchWorker.processBranch(config)).rejects.toBe(
+          checkoutErr,
+        );
+      });
     });
 
     it('should not reattempt platform automerge in dry run', async () => {
