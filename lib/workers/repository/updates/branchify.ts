@@ -30,6 +30,14 @@ export async function branchifyUpgrades(
       .filter((txt) => txt?.trim().length)
       .join(', ')}`,
   );
+  const hasLookupFailure = Object.values(packageFiles)
+    .flat()
+    .flatMap((file) => file.deps)
+    .some((dep) => dep.lookupFailed);
+  // `generateBranchConfig()` removes `groupName` from single-update groups, so group branches are collected beforehand
+  const groupBranches = new Set(
+    updates.filter((u) => u.groupName).map((u) => u.branchName),
+  );
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
@@ -83,6 +91,9 @@ export async function branchifyUpgrades(
     );
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
+    if (hasLookupFailure && groupBranches.has(branchName)) {
+      branch.skippedForLookupFailure = true;
+    }
     branches.push(branch);
   }
   removeMeta(['branch']);
