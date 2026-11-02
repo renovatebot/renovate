@@ -9,6 +9,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { uniqueStrings } from '../../../util/string.ts';
+import { PackageFiles } from '../package-files.ts';
 import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
@@ -176,6 +177,12 @@ export async function pruneStaleBranches(
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
+    return;
+  }
+  if (PackageFiles.hasLookupFailure()) {
+    logger.debug(
+      'A dependency lookup failed in this run - skipping branch pruning',
+    );
     return;
   }
   if (!config.defaultBranch) {
