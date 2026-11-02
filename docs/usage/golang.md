@@ -235,4 +235,24 @@ GONOSUMDB=bsr.example.com,github.com/my-org
 Modules under `github.com/my-org` are fetched directly from GitHub with the token, and skip both proxies and the public checksum database.
 Other modules go through `bsr.example.com`, then the public proxy.
 
+You can also mark private modules with `GOPRIVATE` instead of `go` host rules, for example in the repository config's [`env`](./configuration-options.md#env):
+
+```json
+{
+  "env": {
+    "GOPRIVATE": "github.com/my-org"
+  }
+}
+```
+
+With the same `go-proxy` rule for `bsr.example.com`, Renovate uses:
+
+```sh
+GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
+GOPRIVATE=github.com/my-org
+GONOSUMDB=github.com/my-org,bsr.example.com
+```
+
+`GOPROXY` is still derived from the `go-proxy` rule, and `go` uses `GOPRIVATE` in place of `GONOPROXY`.
+
 If you only want to use your own proxy, without the public proxy, set `GOPROXY` yourself.
