@@ -57,7 +57,6 @@ export interface PackageManagerMinimumReleaseAgeConfig {
   isVulnerabilityAlert?: boolean;
   manager?: string | null;
   minimumReleaseAge?: string | null;
-  minimumReleaseAgePackageManager?: string | null;
   minimumReleaseAgeRepository?: string | null;
   packageFile?: string | null;
 }
@@ -86,8 +85,7 @@ function findManagerUpdate(
  * Calculates the minimum release age in milliseconds which Renovate passes to
  * a package manager when it updates the lock file of `packageFile`: `0` if any
  * update of the lock file is a security update, the own `minimumReleaseAge` for
- * lock file maintenance, else `minimumReleaseAgeRepository`, raised to
- * `minimumReleaseAgePackageManager` if that is larger.
+ * lock file maintenance, else `minimumReleaseAgeRepository`.
  *
  * It reads the values from an update of `manager`, preferring lock file
  * maintenance, in `upgrades`, then in the upgrades of the branch for
@@ -113,12 +111,11 @@ export function calculatePackageManagerMinimumReleaseAgeMs({
   if ([...upgrades, update].some((upgrade) => upgrade.isVulnerabilityAlert)) {
     return 0;
   }
-  const baseMs = durationToMs(
+  return durationToMs(
     update.isLockFileMaintenance
       ? update.minimumReleaseAge
       : update.minimumReleaseAgeRepository,
   );
-  return Math.max(baseMs, durationToMs(update.minimumReleaseAgePackageManager));
 }
 
 export interface MinimumReleaseAgeExemptionConfig

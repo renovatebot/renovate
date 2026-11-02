@@ -6,7 +6,6 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
-import { poetryMinReleaseAgeVersion } from './minimum-release-age.ts';
 
 export { bumpPackageVersion } from '../pep621/update.ts';
 export { updateArtifacts } from './artifacts.ts';
@@ -23,9 +22,8 @@ export const categories: Category[] = ['python'];
 
 export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   poetry: {
-    passesMinimumReleaseAge: `>=${poetryMinReleaseAgeVersion}`,
-    readsConfiguredAge: `>=${poetryMinReleaseAgeVersion}`,
-    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days, unless it equals the Poetry value. Reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`. Older Poetry versions ignore them.',
+    passesMinimumReleaseAge: '>=2.4.0',
+    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days. Older Poetry versions ignore it.',
   },
 };
 
