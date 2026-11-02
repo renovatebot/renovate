@@ -145,11 +145,12 @@ A larger `minimumReleaseAgePackageManager` raises it.
 Otherwise a larger `minimumReleaseAge` for major updates would fail on packages which patch and minor updates locked before.
 If you set `minimumReleaseAge` only in `packageRules`, Renovate passes no value to pnpm for dependency updates.
 
-Renovate already applied its own `minimumReleaseAge` to the updated versions, so it also passes `--config.minimum-release-age-exclude=<name>@<version>` for each updated npm package.
+Renovate already applied its own `minimumReleaseAge` to the updated versions, so it also passes `--config.minimum-release-age-exclude=<name>@<version>` for each updated npm package whose release is at least as old as the value that pnpm uses.
+pnpm still checks a younger version, or one without a release timestamp, and refuses it if it is younger than the passed value.
 New transitive dependencies still get the passed value.
 The flag replaces the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`, so Renovate passes those entries first.
 Renovate passes the exclusions if the pnpm version is v10.19.0 or later, which added exact versions to `minimumReleaseAgeExclude`, or if Renovate does not know the pnpm version.
-For pnpm v10.16.0 to v10.18.x, if Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate passes the smaller value, rounded down to whole minutes, and adds a notice to the PR.
+For pnpm v10.16.0 to v10.18.x, if Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate passes the smaller value, rounded down to whole minutes but not below the value that pnpm uses, and adds a notice to the PR.
 Renovate neither passes exclusions for nor lowers the value for versions which `minimumReleaseAgeExclude` already excludes.
 Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
 
