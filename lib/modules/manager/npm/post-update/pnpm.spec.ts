@@ -1037,6 +1037,42 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     );
 
+    it.each`
+      exclude                   | upgrade                                          | warns
+      ${'foo'}                  | ${{ depName: 'foo' }}                            | ${false}
+      ${"'@scope/*'"}           | ${{ depName: 'bar', packageName: '@scope/foo' }} | ${false}
+      ${"'*-plugin'"}           | ${{ depName: '@scope/a-plugin' }}                | ${false}
+      ${"'foo@1.0.0 || 2.0.0'"} | ${{ depName: 'foo', newVersion: '2.0.0' }}       | ${false}
+      ${"'foo@1.0.0'"}          | ${{ depName: 'foo', newVersion: '2.0.0' }}       | ${true}
+      ${"'foo@1.0.0'"}          | ${{ depName: 'foo' }}                            | ${true}
+      ${"'!foo'"}               | ${{ depName: 'bar' }}                            | ${false}
+      ${"'!foo'"}               | ${{ depName: 'foo' }}                            | ${true}
+      ${'bar'}                  | ${{ depName: 'foo' }}                            | ${true}
+      ${'bar'}                  | ${{ depName: undefined }}                        | ${true}
+    `(
+      'warns about the update $upgrade with minimumReleaseAgeExclude $exclude: $warns',
+      async ({ exclude, upgrade, warns }) => {
+        mockExecAll();
+        mockPnpmFiles(`minimumReleaseAgeExclude:\n  - ${exclude}\n`);
+
+        const res = await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, constraints: { pnpm: '^10.20.0' } },
+          [
+            {
+              manager: 'npm',
+              datasource: 'npm',
+              minimumReleaseAgeRepository: '3 days',
+              ...upgrade,
+            },
+          ],
+        );
+
+        expect(!!res.minimumReleaseAgeNotice).toBe(warns);
+      },
+    );
+
     it('warns about updates below the pnpm v11 default, which Renovate does not look up with', async () => {
       mockExecAll();
       mockPnpmFiles();

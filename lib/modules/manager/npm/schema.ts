@@ -135,6 +135,12 @@ export const PnpmWorkspaceMinimumReleaseAge = Yaml.pipe(
   z.object({
     minimumReleaseAge: z.number().nonnegative().optional().catch(undefined),
     minimumReleaseAgeStrict: z.boolean().optional().catch(undefined),
+    // pnpm accepts a lone string as well
+    minimumReleaseAgeExclude: z
+      .array(z.string())
+      .or(z.string().transform((entry) => [entry]))
+      .optional()
+      .catch(undefined),
   }),
 );
 export type PnpmWorkspaceMinimumReleaseAge = z.infer<

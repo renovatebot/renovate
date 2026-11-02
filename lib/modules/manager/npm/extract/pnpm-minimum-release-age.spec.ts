@@ -1,12 +1,17 @@
+import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
 import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
+import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
 import type { PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   getPnpmMinimumReleaseAgeMinutes,
+  isPnpmMinimumReleaseAgeExcluded,
+  parsePnpmMinimumReleaseAgeExclude,
   readPnpmWorkspaceMinimumReleaseAge,
   setPnpmMinimumReleaseAge,
+  toMatchPackageNamesPattern,
 } from './pnpm-minimum-release-age.ts';
 
 vi.mock('../../../../util/fs/index.ts');
@@ -30,6 +35,9 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${'minimumReleaseAge: -1\n'}                                  | ${{}}
       ${'minimumReleaseAge: bananas\nminimumReleaseAgeStrict: 1\n'} | ${{}}
       ${'minimumReleaseAge: 60\nminimumReleaseAgeStrict: false\n'}  | ${{ minimumReleaseAge: 60, minimumReleaseAgeStrict: false }}
+      ${'minimumReleaseAgeExclude:\n  - foo\n'}                     | ${{ minimumReleaseAgeExclude: ['foo'] }}
+      ${'minimumReleaseAgeExclude: foo\n'}                          | ${{ minimumReleaseAgeExclude: ['foo'] }}
+      ${'minimumReleaseAgeExclude: 1\n'}                            | ${{}}
     `('returns $expected for $content', async ({ content, expected }) => {
       mockWorkspace(content);
 
@@ -47,15 +55,32 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       return { packageFile, managerData };
     }
 
-    it('sets minimumReleaseAgeExtracted on the package files which pnpm manages', async () => {
+    const repoNpmrc = {
+      fileName: '.npmrc',
+      content: 'minimum-release-age=2880\n',
+      detectedLineEnding: '\n',
+    } as const;
+
+    function rule(minimumReleaseAgeExtracted: string) {
+      return { matchDatasources: ['npm'], minimumReleaseAgeExtracted };
+    }
+
+    it('adds packageRules to the package files of each pnpm lock file', async () => {
       mockWorkspace('minimumReleaseAge: 1440\n');
+      const existing = {
+        matchPackageNames: ['foo'],
+        minimumReleaseAgeExtracted: null,
+      };
       const packageFiles = [
         packageFile('some-dir/package.json', {
           pnpmLockFile: 'some-dir/pnpm-lock.yaml',
         }),
-        packageFile('some-dir/pkgs/a/package.json', {
-          pnpmLockFile: 'some-dir/pnpm-lock.yaml',
-        }),
+        {
+          ...packageFile('some-dir/pkgs/a/package.json', {
+            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+          }),
+          packageRules: [existing],
+        },
         packageFile('some-dir/pnpm-workspace.yaml', {
           pnpmLockFile: 'some-dir/pnpm-lock.yaml',
         }),
@@ -67,10 +92,10 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
 
       await setPnpmMinimumReleaseAge(packageFiles);
 
-      expect(packageFiles.map((p) => p.minimumReleaseAgeExtracted)).toEqual([
-        '1440 minutes',
-        '1440 minutes',
-        '1440 minutes',
+      expect(packageFiles.map((p) => p.packageRules)).toEqual([
+        [rule('1440 minutes')],
+        [existing, rule('1440 minutes')],
+        [rule('1440 minutes')],
         undefined,
         undefined,
       ]);
@@ -88,20 +113,50 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
 
       await setPnpmMinimumReleaseAge(packageFiles);
 
+      const { minimumReleaseAgeExtracted } = packageFiles[0].packageRules![0];
       expect(
         calculateMinimumReleaseAgeMs({
           minimumReleaseAge: '7 days',
-          minimumReleaseAgeExtracted:
-            packageFiles[0].minimumReleaseAgeExtracted,
+          minimumReleaseAgeExtracted,
         }),
       ).toBe(toMs('7 days'));
       expect(
         calculateMinimumReleaseAgeMs({
           minimumReleaseAge: '1 hour',
-          minimumReleaseAgeExtracted:
-            packageFiles[0].minimumReleaseAgeExtracted,
+          minimumReleaseAgeExtracted,
         }),
       ).toBe(toMs('1 day'));
+    });
+
+    it('excludes the packages of minimumReleaseAgeExclude', async () => {
+      mockWorkspace(codeBlock`
+        minimumReleaseAge: 60
+        minimumReleaseAgeExclude:
+          - foo
+          - '@scope/*'
+          - bar@1.0.0
+      `);
+      const packageFiles = [
+        packageFile('some-dir/pnpm-workspace.yaml', {
+          pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+        }),
+      ];
+
+      await setPnpmMinimumReleaseAge(packageFiles);
+
+      expect(packageFiles[0].packageRules).toEqual([
+        rule('60 minutes'),
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['foo'],
+          minimumReleaseAgeExtracted: null,
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['/^@scope/.*$/'],
+          minimumReleaseAgeExtracted: null,
+        },
+      ]);
     });
 
     it.each`
@@ -120,7 +175,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
 
         await setPnpmMinimumReleaseAge(packageFiles);
 
-        expect(packageFiles[0].minimumReleaseAgeExtracted).toBeUndefined();
+        expect(packageFiles[0].packageRules).toBeUndefined();
       },
     );
 
@@ -135,23 +190,159 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       async ({ pnpm, workspace, expected }) => {
         mockWorkspace(workspace);
         const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+          packageFile('some-dir/pnpm-workspace.yaml', {
+            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+          }),
           {
             packageFile: 'some-dir/package.json',
             extractedConstraints: { pnpm },
             managerData: {
               pnpmLockFile: 'some-dir/pnpm-lock.yaml',
-              repoNpmrc: {
-                fileName: '.npmrc',
-                content: 'minimum-release-age=2880\n',
-                detectedLineEnding: '\n',
-              },
+              repoNpmrc,
             },
           },
         ];
 
         await setPnpmMinimumReleaseAge(packageFiles);
 
-        expect(packageFiles[0].minimumReleaseAgeExtracted).toBe(expected);
+        // the pnpm-workspace.yaml gets the value of the root package.json
+        for (const file of packageFiles) {
+          expect(file.packageRules?.[0].minimumReleaseAgeExtracted).toBe(
+            expected,
+          );
+        }
+      },
+    );
+
+    it('reads the repository .npmrc of another package file without a root package.json', async () => {
+      mockWorkspace(null);
+      const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+        packageFile('some-dir/pnpm-workspace.yaml', {
+          pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+        }),
+        {
+          packageFile: 'some-dir/pkgs/a/package.json',
+          extractedConstraints: { pnpm: '^10.20.0' },
+          managerData: {
+            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+            repoNpmrc,
+          },
+        },
+      ];
+
+      await setPnpmMinimumReleaseAge(packageFiles);
+
+      expect(packageFiles.map((p) => p.packageRules)).toEqual([
+        [rule('2880 minutes')],
+        [rule('2880 minutes')],
+      ]);
+    });
+  });
+
+  describe('toMatchPackageNamesPattern()', () => {
+    // pnpm: `*` matches any characters including `/`, `?` one character, and
+    // `!` negates the rest of the pattern
+    it.each`
+      pnpm            | renovate
+      ${'foo'}        | ${'foo'}
+      ${'@scope/foo'} | ${'@scope/foo'}
+      ${'lodash.get'} | ${'lodash.get'}
+      ${'*'}          | ${'*'}
+      ${'@scope/*'}   | ${'/^@scope/.*$/'}
+      ${'*-plugin'}   | ${'/^.*-plugin$/'}
+      ${'@*/core'}    | ${'/^@.*/core$/'}
+      ${'foo?'}       | ${'/^foo.$/'}
+      ${'foo.*'}      | ${'/^foo\\..*$/'}
+      ${'(foo)+'}     | ${'/^\\(foo\\)\\+$/'}
+      ${'!foo'}       | ${'!foo'}
+      ${'!@scope/*'}  | ${'!/^@scope/.*$/'}
+      ${'!*'}         | ${null}
+    `('translates $pnpm to $renovate', ({ pnpm, renovate }) => {
+      expect(toMatchPackageNamesPattern(pnpm)).toBe(renovate);
+    });
+
+    it.each`
+      pnpm           | packageName          | matches
+      ${'foo'}       | ${'foo'}             | ${true}
+      ${'foo'}       | ${'foo-bar'}         | ${false}
+      ${'*'}         | ${'@scope/foo'}      | ${true}
+      ${'@scope/*'}  | ${'@scope/foo'}      | ${true}
+      ${'@scope/*'}  | ${'@scope/foo/bar'}  | ${true}
+      ${'@scope/*'}  | ${'@other/foo'}      | ${false}
+      ${'*-plugin'}  | ${'@scope/a-plugin'} | ${true}
+      ${'*-plugin'}  | ${'a-plugins'}       | ${false}
+      ${'@*/core'}   | ${'@babel/core'}     | ${true}
+      ${'foo?'}      | ${'foo1'}            | ${true}
+      ${'foo?'}      | ${'foo12'}           | ${false}
+      ${'foo.*'}     | ${'foo.bar'}         | ${true}
+      ${'foo.*'}     | ${'foo-bar'}         | ${false}
+      ${'(foo)+'}    | ${'(foo)+'}          | ${true}
+      ${'(foo)+'}    | ${'foofoo'}          | ${false}
+      ${'!foo'}      | ${'foo'}             | ${false}
+      ${'!foo'}      | ${'bar'}             | ${true}
+      ${'!@scope/*'} | ${'@scope/foo'}      | ${false}
+      ${'!@scope/*'} | ${'@other/foo'}      | ${true}
+    `(
+      'matches $packageName with $pnpm like pnpm: $matches',
+      ({ pnpm, packageName, matches }) => {
+        expect(
+          matchRegexOrGlobList(packageName, [
+            toMatchPackageNamesPattern(pnpm)!,
+          ]),
+        ).toBe(matches);
+      },
+    );
+  });
+
+  describe('parsePnpmMinimumReleaseAgeExclude()', () => {
+    it('parses package names, patterns and exact versions', () => {
+      expect(
+        parsePnpmMinimumReleaseAgeExclude([
+          'foo',
+          '@scope/*',
+          '!bar',
+          '!*',
+          'baz@1.0.0',
+          '@scope/qux@1.0.0 || v2.0.0',
+          'invalid@^1.0.0',
+          'foo*@1.0.0',
+        ]),
+      ).toEqual({
+        packageNames: ['foo', '/^@scope/.*$/', '!bar'],
+        versions: [
+          { packageName: 'baz', versions: ['1.0.0'] },
+          { packageName: '@scope/qux', versions: ['1.0.0', '2.0.0'] },
+        ],
+      });
+    });
+
+    it('returns no entries without minimumReleaseAgeExclude', () => {
+      expect(parsePnpmMinimumReleaseAgeExclude(undefined)).toEqual({
+        packageNames: [],
+        versions: [],
+      });
+    });
+  });
+
+  describe('isPnpmMinimumReleaseAgeExcluded()', () => {
+    const exclude = parsePnpmMinimumReleaseAgeExclude([
+      '@scope/*',
+      'foo@1.0.0 || 2.0.0',
+    ]);
+
+    it.each`
+      packageName   | version      | excluded
+      ${'@scope/a'} | ${'3.0.0'}   | ${true}
+      ${'foo'}      | ${'2.0.0'}   | ${true}
+      ${'foo'}      | ${'3.0.0'}   | ${false}
+      ${'foo'}      | ${undefined} | ${false}
+      ${'bar'}      | ${'1.0.0'}   | ${false}
+    `(
+      'returns $excluded for $packageName@$version',
+      ({ packageName, version, excluded }) => {
+        expect(
+          isPnpmMinimumReleaseAgeExcluded(exclude, packageName, version),
+        ).toBe(excluded);
       },
     );
   });

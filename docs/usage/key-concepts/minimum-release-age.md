@@ -107,7 +107,7 @@ If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does 
 
 Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
 A `before=<date>` setting counts as the time elapsed since that date.
-This applies to every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
+This applies to the npm dependencies of every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
 
 If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
 In this case, Renovate automatically retries without `--before` and logs a warning.
@@ -141,10 +141,13 @@ Otherwise a larger `minimumReleaseAge` for major updates would fail on packages 
 If you set `minimumReleaseAge` only in `packageRules`, Renovate passes no value to pnpm for dependency updates.
 If Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate adds a warning to the PR, as pnpm may reject the version.
 To let pnpm install such packages earlier, add them to `minimumReleaseAgeExclude` in the `pnpm-workspace.yaml`.
+Renovate does not warn about versions which `minimumReleaseAgeExclude` already excludes.
 Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`.
 
 Renovate also uses the larger of the project's pnpm setting and `minimumReleaseAge` when it looks up updates.
-This applies to every `package.json` of the `npm` manager that belongs to a `pnpm-lock.yaml`.
+This applies per dependency to the npm packages of every `package.json` and `pnpm-workspace.yaml` of the `npm` manager that belongs to a `pnpm-lock.yaml`.
+Renovate honours the package names and name patterns of `minimumReleaseAgeExclude`, and then uses only `minimumReleaseAge` for those packages.
+Entries with exact versions, like `foo@1.2.3`, exclude only those versions from pnpm's check, so Renovate does not use them when it looks up updates.
 
 If pnpm finds no version old enough, or the existing lock file contains packages published within the cooldown, pnpm fails with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` or `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`.
 Renovate does not retry, and reports an artifact error which names the rejected packages.
