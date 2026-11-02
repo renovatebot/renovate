@@ -117,7 +117,7 @@ Lock file maintenance does not retry, and reports the `ETARGET` error as an arti
 npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
 
 - Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
-- the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the npm version used is v11.10.0 or later, which added `min-release-age`
+- the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the `constraints` config or the `packageManager`, `devEngines` or `engines` field of the `package.json` only allow npm v11.10.0 or later, which added `min-release-age`
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 

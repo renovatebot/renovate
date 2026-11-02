@@ -89,11 +89,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         },
       );
 
-      it('derives the npm constraint from package.json', async () => {
-        fs.readLocalFile.mockResolvedValueOnce(
-          JSON.stringify({ packageManager: 'npm@11.12.0' }),
-        );
-
+      it('does not read the package.json in the working tree', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -102,16 +98,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
             npmrc,
             extractedConstraints: { npm: '>=10' },
           }),
-        ).resolves.toBeTrue();
-        expect(fs.readLocalFile).toHaveBeenCalledWith(
-          'some-dir/package.json',
-          'utf8',
-        );
+        ).resolves.toBeFalse();
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
       });
 
-      it('falls back to the extracted npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
+      it('uses the extracted npm constraint', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -123,8 +114,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
       });
 
       it('returns false without an npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,

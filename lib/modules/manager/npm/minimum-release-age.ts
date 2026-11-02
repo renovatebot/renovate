@@ -6,9 +6,7 @@ import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { parseNpmrcCooldown } from './extract/npmrc.ts';
-import { getPackageManagerVersion } from './post-update/utils.ts';
 import type { NpmManagerData } from './types.ts';
-import { loadPackageJson } from './utils.ts';
 
 // npm supports `min-release-age` since v11.10.0
 // https://github.com/npm/cli/releases/tag/v11.10.0
@@ -19,19 +17,6 @@ const dayMs = 24 * 60 * 60 * 1000;
 interface NpmEnforcesMinimumReleaseAgeConfig extends UpdateArtifactsConfig {
   managerData?: NpmManagerData;
   npmrc?: string;
-}
-
-async function isNpmMinReleaseAgeSupported(
-  config: NpmEnforcesMinimumReleaseAgeConfig,
-  npmLock: string,
-): Promise<boolean> {
-  const constraint = await resolveToolConstraint(config, 'npm', async () =>
-    getPackageManagerVersion(
-      'npm',
-      await loadPackageJson(upath.dirname(npmLock)),
-    ),
-  );
-  return isSubsetOf(npmVersioning, constraint, minReleaseAgeNpmRange);
 }
 
 /**
@@ -70,5 +55,8 @@ export async function enforcesMinimumReleaseAge(
     return false;
   }
 
-  return await isNpmMinReleaseAgeSupported(config, npmLock);
+  // the status checks run before the base branch is checked out, so the
+  // constraint is not derived from the package.json in the working tree
+  const constraint = await resolveToolConstraint(config, 'npm');
+  return isSubsetOf(npmVersioning, constraint, minReleaseAgeNpmRange);
 }
