@@ -1,9 +1,10 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import type { MinimumReleaseAgeBehaviour } from '../config/types.ts';
 import { coerceArray } from './array.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
+import { uniqueStrings } from './string.ts';
 import type { Timestamp } from './timestamp.ts';
 
 export interface MinimumReleaseAgeCheckResult {
@@ -118,6 +119,50 @@ export function calculatePackageManagerMinimumReleaseAgeMs({
       : update.minimumReleaseAgeRepository,
   );
   return Math.max(baseMs, durationToMs(update.minimumReleaseAgePackageManager));
+}
+
+export interface MinimumReleaseAgeExemptionConfig
+  extends MinimumReleaseAgeConfig, PackageManagerMinimumReleaseAgeConfig {
+  depName?: string;
+  releaseTimestamp?: Timestamp | null;
+}
+
+export interface MinimumReleaseAgeExemption {
+  /** The smallest own minimum release age of the exempted updates. */
+  ageMs: number;
+  /** The `depName` of each exempted update. */
+  depNames: string[];
+}
+
+/**
+ * Returns the updates of `manager` in `upgrades`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
+ */
+export function getMinimumReleaseAgeExemption(
+  upgrades: MinimumReleaseAgeExemptionConfig[],
+  manager: string,
+  ageMs: number,
+): MinimumReleaseAgeExemption | null {
+  const exempted = upgrades.filter(
+    (upgrade) =>
+      upgrade.manager === manager &&
+      !upgrade.isLockFileMaintenance &&
+      !upgrade.isVulnerabilityAlert &&
+      calculateMinimumReleaseAgeMs(upgrade) < ageMs &&
+      (!upgrade.releaseTimestamp ||
+        getElapsedMs(upgrade.releaseTimestamp) < ageMs),
+  );
+  if (!exempted.length) {
+    return null;
+  }
+  return {
+    ageMs: Math.min(
+      ...exempted.map((upgrade) => calculateMinimumReleaseAgeMs(upgrade)),
+    ),
+    depNames: exempted
+      .map((upgrade) => upgrade.depName)
+      .filter(isString)
+      .filter(uniqueStrings),
+  };
 }
 
 /**

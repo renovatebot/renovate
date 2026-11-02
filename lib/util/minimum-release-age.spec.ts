@@ -7,6 +7,7 @@ import {
   calculateMinimumReleaseAgeMs,
   calculatePackageManagerMinimumReleaseAgeMs,
   checkMinimumReleaseAge,
+  getMinimumReleaseAgeExemption,
 } from './minimum-release-age.ts';
 import { toMs } from './pretty-time.ts';
 import type { Timestamp } from './timestamp.ts';
@@ -282,6 +283,76 @@ describe('util/minimum-release-age', () => {
           },
         ]),
       ).toBe(0);
+    });
+  });
+
+  describe('.getMinimumReleaseAgeExemption()', () => {
+    const ageMs = toMs('3 days') ?? 0;
+    const releaseTimestamp = '2021-01-01T00:00:00.000Z' as Timestamp;
+    const update = {
+      depName: 'dep1',
+      manager: 'poetry',
+      minimumReleaseAge: '1 day',
+      releaseTimestamp,
+    };
+
+    it('returns the updates whose release is younger than the age', () => {
+      dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
+
+      const res = getMinimumReleaseAgeExemption(
+        [
+          update,
+          { ...update, depName: 'dep2', minimumReleaseAge: null },
+          { ...update, depName: 'dep2', minimumReleaseAge: '12 hours' },
+        ],
+        'poetry',
+        ageMs,
+      );
+
+      expect(res).toEqual({ ageMs: 0, depNames: ['dep1', 'dep2'] });
+    });
+
+    it('returns the updates without release timestamp', () => {
+      const res = getMinimumReleaseAgeExemption(
+        [{ ...update, releaseTimestamp: undefined }],
+        'poetry',
+        ageMs,
+      );
+
+      expect(res).toEqual({ ageMs: toMs('1 day'), depNames: ['dep1'] });
+    });
+
+    it('returns null if the release is older than the age', () => {
+      dateUtil.getElapsedMs.mockReturnValue(toMs('4 days') ?? 0);
+
+      expect(getMinimumReleaseAgeExemption([update], 'poetry', ageMs)).toBe(
+        null,
+      );
+    });
+
+    it.each`
+      name                             | upgrade
+      ${'of another manager'}          | ${{ ...update, manager: 'pep621' }}
+      ${'for lock file maintenance'}   | ${{ ...update, isLockFileMaintenance: true }}
+      ${'for security updates'}        | ${{ ...update, isVulnerabilityAlert: true }}
+      ${'with an own age of the age'}  | ${{ ...update, minimumReleaseAge: '3 days' }}
+      ${'with a larger extracted age'} | ${{ ...update, minimumReleaseAgeExtracted: '1 week' }}
+    `('returns null for updates $name', ({ upgrade }) => {
+      dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
+
+      expect(getMinimumReleaseAgeExemption([upgrade], 'poetry', ageMs)).toBe(
+        null,
+      );
+    });
+
+    it('returns null without an age', () => {
+      expect(
+        getMinimumReleaseAgeExemption(
+          [{ ...update, minimumReleaseAge: null, releaseTimestamp: undefined }],
+          'poetry',
+          0,
+        ),
+      ).toBe(null);
     });
   });
 

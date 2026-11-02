@@ -3061,8 +3061,7 @@ Security updates pass no minimum release age to the package manager.
 }
 ```
 
-The package manager can fail to update a lock file to a version which is younger than `minimumReleaseAgePackageManager`.
-Set `minimumReleaseAge` for those updates to at least the same duration.
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch.
 
 ## `minor`
 
