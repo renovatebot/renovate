@@ -34,9 +34,14 @@ import {
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
 import {
   getPnpmMinimumReleaseAgeMinutes,
+  isPnpmMinimumReleaseAgeExcluded,
+  parsePnpmMinimumReleaseAgeExclude,
   readPnpmWorkspaceMinimumReleaseAge,
 } from '../extract/pnpm-minimum-release-age.ts';
-import type { PnpmWorkspaceFile } from '../extract/types.ts';
+import type {
+  PnpmMinimumReleaseAgeExclude,
+  PnpmWorkspaceFile,
+} from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
 import {
@@ -64,10 +69,21 @@ interface MinimumReleaseAgeFlag {
 /**
  * Whether pnpm may reject the version which Renovate proposes for `upgrade`, as Renovate looked it up with a smaller minimum release age than the `minutes` which pnpm gets.
  *
- * pnpm applies the minimum release age only to npm packages.
+ * pnpm applies the minimum release age only to npm packages which `minimumReleaseAgeExclude` does not exclude.
  */
-function mayRejectUpgrade(upgrade: Upgrade, minutes: number): boolean {
+function mayRejectUpgrade(
+  upgrade: Upgrade,
+  minutes: number,
+  exclude: PnpmMinimumReleaseAgeExclude,
+): boolean {
   if (upgrade.datasource !== NpmDatasource.id) {
+    return false;
+  }
+  const packageName = upgrade.packageName ?? upgrade.depName;
+  if (
+    packageName &&
+    isPnpmMinimumReleaseAgeExcluded(exclude, packageName, upgrade.newVersion)
+  ) {
     return false;
   }
   if (Math.ceil(calculateMinimumReleaseAgeMs(upgrade) / minuteMs) >= minutes) {
@@ -125,12 +141,15 @@ async function getMinimumReleaseAgeFlag(
     flag: `--config.minimum-release-age=${minutes}`,
   };
 
+  const exclude = parsePnpmMinimumReleaseAgeExclude(
+    workspace.minimumReleaseAgeExclude,
+  );
   // lock file maintenance has no own updates which pnpm may reject
   const lowerUpgrades = upgrades.some(
     (upgrade) => upgrade.isLockFileMaintenance,
   )
     ? []
-    : upgrades.filter((upgrade) => mayRejectUpgrade(upgrade, minutes));
+    : upgrades.filter((upgrade) => mayRejectUpgrade(upgrade, minutes, exclude));
   if (lowerUpgrades.length) {
     const depNames = lowerUpgrades
       .map((upgrade) => `\`${upgrade.depName!}\``)
