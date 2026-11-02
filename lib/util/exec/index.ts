@@ -18,6 +18,7 @@ import {
   removeDockerContainer,
 } from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -86,6 +87,7 @@ function isDocker(docker: Opt<DockerOptions>): docker is DockerOptions {
 interface RawExecArguments {
   rawCommands: (string | CommandWithOptions)[];
   rawOptions: RawExecOptions;
+  installCommandCount: number;
 }
 
 async function prepareRawExec(
@@ -109,6 +111,7 @@ async function prepareRawExec(
   let rawOptions = getRawExecOptions(opts);
 
   let rawCommands = isString(cmd) ? [cmd] : cmd;
+  let installCommandCount = 0;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -139,13 +142,14 @@ async function prepareRawExec(
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
     logger.debug('Using containerbase dynamic installs');
-    rawCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints, true)),
-      ...preCommands,
-      ...rawCommands,
-    ];
+    const installCommands = await generateInstallCommands(
+      opts.toolConstraints,
+      true,
+    );
+    installCommandCount = installCommands.length;
+    rawCommands = [...installCommands, ...preCommands, ...rawCommands];
   } else if (isHermit()) {
-    const hermitEnvVars = await getHermitEnvs(rawOptions);
+    const hermitEnvVars = await getHermitEnvs(withoutInput(rawOptions));
     logger.debug(
       { hermitEnvVars },
       'merging hermit environment variables into the execution options',
@@ -169,7 +173,7 @@ async function prepareRawExec(
     );
   }
 
-  return { rawCommands, rawOptions };
+  return { rawCommands, rawOptions, installCommandCount };
 }
 
 export async function exec(
@@ -181,7 +185,7 @@ export async function exec(
   const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
   const sideCarImage = GlobalConfig.get('dockerSidecarImage');
 
-  const { rawCommands, rawOptions } = await prepareRawExec(
+  const { rawCommands, rawOptions, installCommandCount } = await prepareRawExec(
     cmd,
     opts,
     sideCarImage,
@@ -202,19 +206,23 @@ export async function exec(
       { command: rawCmd, env: Object.keys(coerceObject(rawOptions.env)) },
       'Executing command',
     );
-    const { input: _input, ...loggedOptions } = commandOptions;
+    const { input, ...loggedOptions } = commandOptions;
     logger.trace(
-      { commandOptions: loggedOptions, hasInput: _input !== undefined },
+      { commandOptions: loggedOptions, hasInput: input !== undefined },
       'Command options',
     );
     try {
       res = await rawExec(rawCmd, commandOptions);
     } catch (err) {
-      if (isDynamicInstall(opts.toolConstraints)) {
+      if (index < installCommandCount) {
         invalidateActiveTools(opts.toolConstraints);
       }
       const durationMs = Math.round(Date.now() - startTime);
-      const errorFields = opts.redactOutput ? {} : { err };
+      const redactedErrorFields =
+        err instanceof ExecError
+          ? { exitCode: err.exitCode, signal: err.signal }
+          : {};
+      const errorFields = opts.redactOutput ? redactedErrorFields : { err };
       logger.debug({ ...errorFields, durationMs }, 'rawExec err');
       if (useDocker) {
         await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
