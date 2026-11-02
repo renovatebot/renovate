@@ -39,13 +39,18 @@ query($owner: String!, $name: String!, $user: String) {
 }
 `;
 
-export const prAutoMergeQuery = `
+export const prAutoMergeStateQuery = `
 query($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
       id
       autoMergeRequest {
-        enabledAt
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
       }
     }
   }
@@ -58,7 +63,12 @@ mutation DisablePullRequestAutoMerge($pullRequestId: ID!) {
     pullRequest {
       id
       autoMergeRequest {
-        enabledAt
+        commitHeadline
+        commitBody
+        enabledBy {
+          __typename
+          login
+        }
       }
     }
   }

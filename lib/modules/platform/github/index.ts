@@ -59,6 +59,7 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
+  CancelPlatformAutomergeConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -85,7 +86,7 @@ import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
-  prAutoMergeQuery,
+  prAutoMergeStateQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
@@ -99,7 +100,7 @@ import {
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubPullRequestAutoMerge,
+  GithubPullRequestAutoMergeState,
   GithubVulnerabilityAlerts,
   GithubIssue as Issue,
 } from './schema.ts';
@@ -2170,10 +2171,12 @@ export async function updatePr({
   }
 }
 
-export async function cancelPlatformAutomerge(prNo: number): Promise<boolean> {
+export async function getPrAutoMergeState(
+  prNo: number,
+): Promise<GithubPullRequestAutoMergeState | null> {
   const res = await githubApi.requestGraphql<{
     repository: { pullRequest: unknown };
-  }>(prAutoMergeQuery, {
+  }>(prAutoMergeStateQuery, {
     variables: {
       owner: config.repositoryOwner,
       name: config.repositoryName,
@@ -2187,24 +2190,46 @@ export async function cancelPlatformAutomerge(prNo: number): Promise<boolean> {
       { prNo, errors: res.errors },
       'Failed to fetch PR auto-merge state',
     );
-    return false;
+    return null;
   }
 
-  const pr = GithubPullRequestAutoMerge.safeParse(
+  const pr = GithubPullRequestAutoMergeState.safeParse(
     res?.data?.repository?.pullRequest,
   );
   if (!pr.success) {
     logger.debug({ prNo }, 'Could not confirm PR auto-merge state');
+    return null;
+  }
+  return pr.data;
+}
+
+export async function cancelPlatformAutomerge({
+  number: prNo,
+  enabledBy,
+}: CancelPlatformAutomergeConfig): Promise<boolean> {
+  const pr = await getPrAutoMergeState(prNo);
+  if (!pr) {
     return false;
   }
-  if (pr.data.autoMergeRequest === null) {
+  if (pr.autoMergeRequest === null) {
     return true;
+  }
+  const actor = pr.autoMergeRequest.enabledBy;
+  // GraphQL omits the REST login's [bot] suffix. Use actor type to avoid matching a user with the same name.
+  const login =
+    actor?.__typename === 'Bot' ? `${actor.login}[bot]` : actor?.login;
+  if (login?.toLowerCase() !== enabledBy.toLowerCase()) {
+    logger.debug(
+      { prNo },
+      'PR auto-merge actor does not match cancellation filter',
+    );
+    return false;
   }
 
   const cancellation = await githubApi.requestGraphql<{
     disablePullRequestAutoMerge: { pullRequest: unknown };
   }>(disableAutoMergeMutation, {
-    variables: { pullRequestId: pr.data.id },
+    variables: { pullRequestId: pr.id },
     count: 1,
   });
   if (cancellation?.errors) {
@@ -2215,12 +2240,12 @@ export async function cancelPlatformAutomerge(prNo: number): Promise<boolean> {
     return false;
   }
 
-  const disabledPr = GithubPullRequestAutoMerge.safeParse(
+  const disabledPr = GithubPullRequestAutoMergeState.safeParse(
     cancellation?.data?.disablePullRequestAutoMerge?.pullRequest,
   );
   if (
     !disabledPr.success ||
-    disabledPr.data.id !== pr.data.id ||
+    disabledPr.data.id !== pr.id ||
     disabledPr.data.autoMergeRequest !== null
   ) {
     logger.debug({ prNo }, 'Could not confirm PR auto-merge cancellation');

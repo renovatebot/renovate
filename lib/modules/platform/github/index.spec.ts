@@ -32,7 +32,7 @@ import {
   disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
-  prAutoMergeQuery,
+  prAutoMergeStateQuery,
   repoInfoQuery,
 } from './graphql.ts';
 import * as github from './index.ts';
@@ -5330,18 +5330,23 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('cancelPlatformAutomerge(number)', () => {
+  describe('platform auto-merge', () => {
     const autoMergeQueryBody = {
-      query: prAutoMergeQuery,
+      query: prAutoMergeStateQuery,
       variables: { owner: 'some', name: 'repo', number: 123 },
     };
+    const cancellationConfig = { number: 123, enabledBy: 'renovate[bot]' };
     const cancellationBody = {
       query: disableAutoMergeMutation,
       variables: { pullRequestId: 'abcd' },
     };
     const enabledPr = {
       id: 'abcd',
-      autoMergeRequest: { enabledAt: '2026-10-08T12:00:00Z' },
+      autoMergeRequest: {
+        commitHeadline: 'Update dependency to v1.2.3',
+        commitBody: 'dependency update',
+        enabledBy: { __typename: 'Bot', login: 'renovate' },
+      },
     };
     const disabledPr = { id: 'abcd', autoMergeRequest: null };
 
@@ -5351,6 +5356,74 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       return scope;
     }
+
+    describe('getPrAutoMergeState()', () => {
+      it('returns the enabling account and stored message', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql', autoMergeQueryBody).reply(200, {
+          data: { repository: { pullRequest: enabledPr } },
+        });
+
+        await expect(github.getPrAutoMergeState(123)).resolves.toEqual(
+          enabledPr,
+        );
+      });
+
+      it('preserves nullable auto-merge fields', async () => {
+        const scope = await mockScope();
+        const pr = {
+          id: 'abcd',
+          autoMergeRequest: {
+            commitHeadline: null,
+            commitBody: null,
+            enabledBy: null,
+          },
+        };
+        scope.post('/graphql', autoMergeQueryBody).reply(200, {
+          data: { repository: { pullRequest: pr } },
+        });
+
+        await expect(github.getPrAutoMergeState(123)).resolves.toEqual(pr);
+      });
+
+      it('returns disabled state separately from unconfirmed state', async () => {
+        const scope = await mockScope();
+        scope
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, { data: { repository: { pullRequest: disabledPr } } })
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, { data: { repository: { pullRequest: null } } });
+
+        await expect(github.getPrAutoMergeState(123)).resolves.toEqual(
+          disabledPr,
+        );
+        await expect(github.getPrAutoMergeState(123)).resolves.toBeNull();
+      });
+
+      it.each`
+        autoMergeRequest
+        ${{}}
+        ${{ ...enabledPr.autoMergeRequest, enabledBy: {} }}
+        ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Bot', login: '' } }}
+        ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Bot', login: 123 } }}
+        ${{ ...enabledPr.autoMergeRequest, enabledBy: { login: 'renovate' } }}
+        ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Mannequin', login: 'renovate' } }}
+        ${{ ...enabledPr.autoMergeRequest, commitHeadline: 123 }}
+        ${{ ...enabledPr.autoMergeRequest, commitBody: 123 }}
+      `(
+        'rejects malformed metadata: $autoMergeRequest',
+        async ({ autoMergeRequest }) => {
+          const scope = await mockScope();
+          scope.post('/graphql', autoMergeQueryBody).reply(200, {
+            data: {
+              repository: { pullRequest: { id: 'abcd', autoMergeRequest } },
+            },
+          });
+
+          await expect(github.getPrAutoMergeState(123)).resolves.toBeNull();
+        },
+      );
+    });
 
     it('confirms auto-merge is disabled after cancellation', async () => {
       const scope = await mockScope();
@@ -5366,7 +5439,113 @@ describe('modules/platform/github/index', () => {
           },
         });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
+    });
+
+    it.each`
+      login                     | actorType | enabledBy
+      ${'RENOVATE'}             | ${'Bot'}  | ${'renovate[bot]'}
+      ${'renovate'}             | ${'Bot'}  | ${'RENOVATE[BOT]'}
+      ${'self-hosted-renovate'} | ${'User'} | ${'self-hosted-renovate'}
+      ${'renovate'}             | ${'User'} | ${'renovate'}
+    `(
+      'matches the expected account $enabledBy against $login',
+      async ({ login, actorType, enabledBy }) => {
+        const scope = await mockScope();
+        scope
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, {
+            data: {
+              repository: {
+                pullRequest: {
+                  ...enabledPr,
+                  autoMergeRequest: {
+                    ...enabledPr.autoMergeRequest,
+                    enabledBy: { __typename: actorType, login },
+                  },
+                },
+              },
+            },
+          })
+          .post('/graphql', cancellationBody)
+          .reply(200, {
+            data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
+          });
+
+        await expect(
+          github.cancelPlatformAutomerge({ number: 123, enabledBy }),
+        ).resolves.toBeTrue();
+      },
+    );
+
+    it.each`
+      expectedActor
+      ${''}
+      ${'maintainer'}
+      ${'renovate'}
+    `(
+      'refuses a non-matching expected actor: $expectedActor',
+      async ({ expectedActor }) => {
+        const scope = await mockScope();
+        scope.post('/graphql', autoMergeQueryBody).reply(200, {
+          data: { repository: { pullRequest: enabledPr } },
+        });
+
+        await expect(
+          github.cancelPlatformAutomerge({
+            number: 123,
+            enabledBy: expectedActor,
+          }),
+        ).resolves.toBeFalse();
+      },
+    );
+
+    it('checks the actor again after a caller has read the state', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, {
+          data: {
+            repository: {
+              pullRequest: {
+                ...enabledPr,
+                autoMergeRequest: {
+                  ...enabledPr.autoMergeRequest,
+                  enabledBy: { __typename: 'User', login: 'maintainer' },
+                },
+              },
+            },
+          },
+        });
+
+      await expect(github.getPrAutoMergeState(123)).resolves.toEqual(enabledPr);
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeFalse();
+    });
+
+    it('does not mutate again after a successful cancellation', async () => {
+      const scope = await mockScope();
+      scope
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+        .post('/graphql', cancellationBody)
+        .reply(200, {
+          data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
+        })
+        .post('/graphql', autoMergeQueryBody)
+        .reply(200, { data: { repository: { pullRequest: disabledPr } } });
+
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
     });
 
     it('confirms already-disabled auto-merge without a mutation', async () => {
@@ -5375,8 +5554,36 @@ describe('modules/platform/github/index', () => {
         data: { repository: { pullRequest: disabledPr } },
       });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
     });
+
+    it.each`
+      enabledBy
+      ${{ __typename: 'User', login: 'maintainer' }}
+      ${{ __typename: 'User', login: 'renovate' }}
+      ${null}
+    `(
+      'does not cancel auto-merge enabled by $enabledBy',
+      async ({ enabledBy }) => {
+        const scope = await mockScope();
+        scope.post('/graphql', autoMergeQueryBody).reply(200, {
+          data: {
+            repository: {
+              pullRequest: {
+                ...enabledPr,
+                autoMergeRequest: { ...enabledPr.autoMergeRequest, enabledBy },
+              },
+            },
+          },
+        });
+
+        await expect(
+          github.cancelPlatformAutomerge(cancellationConfig),
+        ).resolves.toBeFalse();
+      },
+    );
 
     it('does not reuse cached PR state or repository auto-merge settings', async () => {
       const scope = await mockScope(false);
@@ -5390,11 +5597,15 @@ describe('modules/platform/github/index', () => {
           data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
         });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeTrue();
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
     });
 
-    it('cancels requests without an enabled timestamp', async () => {
+    it('cancels requests without a stored message', async () => {
       const scope = await mockScope();
       scope
         .post('/graphql', autoMergeQueryBody)
@@ -5403,7 +5614,11 @@ describe('modules/platform/github/index', () => {
             repository: {
               pullRequest: {
                 id: 'abcd',
-                autoMergeRequest: { enabledAt: null },
+                autoMergeRequest: {
+                  ...enabledPr.autoMergeRequest,
+                  commitHeadline: null,
+                  commitBody: null,
+                },
               },
             },
           },
@@ -5413,7 +5628,9 @@ describe('modules/platform/github/index', () => {
           data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
         });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeTrue();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeTrue();
     });
 
     it.each`
@@ -5434,7 +5651,9 @@ describe('modules/platform/github/index', () => {
           .post('/graphql', autoMergeQueryBody)
           .reply(200, JSON.stringify(response));
 
-        await expect(github.cancelPlatformAutomerge(123)).resolves.toBeFalse();
+        await expect(
+          github.cancelPlatformAutomerge(cancellationConfig),
+        ).resolves.toBeFalse();
       },
     );
 
@@ -5459,7 +5678,9 @@ describe('modules/platform/github/index', () => {
           .post('/graphql', cancellationBody)
           .reply(200, JSON.stringify(response));
 
-        await expect(github.cancelPlatformAutomerge(123)).resolves.toBeFalse();
+        await expect(
+          github.cancelPlatformAutomerge(cancellationConfig),
+        ).resolves.toBeFalse();
       },
     );
 
@@ -5470,7 +5691,9 @@ describe('modules/platform/github/index', () => {
         errors: [{ message: 'Failed to read auto-merge state' }],
       });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeFalse();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeFalse();
     });
 
     it('rejects GraphQL errors when cancelling auto-merge', async () => {
@@ -5484,7 +5707,9 @@ describe('modules/platform/github/index', () => {
           errors: [{ message: 'Failed to cancel auto-merge' }],
         });
 
-      await expect(github.cancelPlatformAutomerge(123)).resolves.toBeFalse();
+      await expect(
+        github.cancelPlatformAutomerge(cancellationConfig),
+      ).resolves.toBeFalse();
     });
 
     it.each`
@@ -5504,9 +5729,9 @@ describe('modules/platform/github/index', () => {
           .post('/graphql', mutation ? cancellationBody : autoMergeQueryBody)
           .reply(200, graphqlRateLimitResponse);
 
-        await expect(github.cancelPlatformAutomerge(123)).rejects.toThrow(
-          PLATFORM_RATE_LIMIT_EXCEEDED,
-        );
+        await expect(
+          github.cancelPlatformAutomerge(cancellationConfig),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       },
     );
 
@@ -5528,7 +5753,7 @@ describe('modules/platform/github/index', () => {
           .reply(500);
 
         await expect(
-          github.cancelPlatformAutomerge(123),
+          github.cancelPlatformAutomerge(cancellationConfig),
         ).rejects.toBeInstanceOf(ExternalHostError);
       },
     );

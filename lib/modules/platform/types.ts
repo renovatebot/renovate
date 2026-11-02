@@ -155,6 +155,11 @@ export interface ReattemptPlatformAutomergeConfig {
   number: number;
   platformPrOptions?: PlatformPrOptions;
 }
+export interface CancelPlatformAutomergeConfig {
+  number: number;
+  /** Expected platform login. On GitHub, include [bot] for app accounts. */
+  enabledBy: string;
+}
 export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
@@ -311,11 +316,14 @@ export interface Platform {
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
   /**
-   * Confirms platform-native auto-merge is disabled at the time of the response.
+   * Cancels platform auto-merge for the expected actor without scheduling restoration.
+   * Returns true if disabled at the response, false for another actor or unconfirmed state.
    * Does not confirm the PR is open or prevent queued merges or re-enablement.
-   * Returns false for unconfirmed state and propagates request failures.
+   * Propagates request failures.
    */
-  cancelPlatformAutomerge?(number: number): Promise<boolean>;
+  cancelPlatformAutomerge?(
+    prConfig: CancelPlatformAutomergeConfig,
+  ): Promise<boolean>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,
