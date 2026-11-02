@@ -52,8 +52,12 @@ async function raiseWarningIssue(
   }
   // each detail is its own Markdown paragraph, so they don't render as one run-on line
   const paragraphs = [initialBody];
-  if (error.validationSource) {
-    paragraphs.push(`Location: \`${error.validationSource}\``);
+  if (error.validationSource?.length) {
+    const locations = [error.validationSource]
+      .flat()
+      .map((location) => `\`${location}\``)
+      .join(', ');
+    paragraphs.push(`Location: ${locations}`);
   }
   if (error.validationError) {
     paragraphs.push(`Error type: ${error.validationError}`);

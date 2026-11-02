@@ -3,7 +3,8 @@
  */
 
 declare interface Error {
-  validationSource?: string;
+  /** Where the error is, or several places, such as when several presets could not be resolved. */
+  validationSource?: string | string[];
 
   validationError?: string;
   validationMessage?: string;
