@@ -88,7 +88,7 @@ A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an 
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
-How Renovate does this depends on the package manager, for example npm and Poetry get the smaller value for that branch.
+How Renovate does this depends on the package manager, for example pnpm excludes the updated versions, while npm and Poetry get the smaller value for that branch.
 
 The table below lists the managers with a known integration, per package manager.
 Managers that are not listed do not integrate with the minimum release age of their package manager.
@@ -147,9 +147,8 @@ Renovate already applied its own `minimumReleaseAge` to the updated versions, so
 New transitive dependencies still get the passed value.
 The flag replaces the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`, so Renovate passes those entries first.
 Renovate passes the exclusions if the pnpm version is v10.19.0 or later, which added exact versions to `minimumReleaseAgeExclude`, or if Renovate does not know the pnpm version.
-For pnpm v10.16.0 to v10.18.x, Renovate adds a warning to the PR if it looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, as pnpm may reject the version.
-To let pnpm install such packages earlier, add them to `minimumReleaseAgeExclude` in the `pnpm-workspace.yaml`.
-Renovate neither passes exclusions for nor warns about versions which `minimumReleaseAgeExclude` already excludes.
+For pnpm v10.16.0 to v10.18.x, if Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate passes the smaller value, rounded down to whole minutes, and adds a notice to the PR.
+Renovate neither passes exclusions for nor lowers the value for versions which `minimumReleaseAgeExclude` already excludes.
 Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
 
 Renovate also uses the larger of the project's pnpm setting and `minimumReleaseAge` when it looks up updates.
