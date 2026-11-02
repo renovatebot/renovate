@@ -224,14 +224,13 @@ export async function processBranch(
         result: 'commit-hourly-limit-reached',
       };
     }
-    const reuseDecision = decideBranchReuse({
+    const { action: reuseAction, userRebaseRequested } = decideBranchReuse({
       config,
       branchPr,
       branchExists,
       dependencyDashboardCheck,
       forceRebase,
     });
-    const { userRebaseRequested } = reuseDecision;
     if (branchExists) {
       // check if branch is labelled to stop
       config.stopUpdating = branchPr?.labels?.includes(
@@ -379,16 +378,16 @@ export async function processBranch(
       }
     }
 
-    if (reuseDecision.action === 'skip-update') {
+    if (reuseAction === 'skip-update') {
       return {
         branchExists,
         prNo: branchPr?.number,
         result: 'no-work',
       };
     }
-    if (reuseDecision.action === 'no-reuse') {
+    if (reuseAction === 'no-reuse') {
       config.reuseExistingBranch = false;
-    } else if (reuseDecision.action === 'check-reuse') {
+    } else if (reuseAction === 'check-reuse') {
       config = await shouldReuseExistingBranch(config, branchPr);
     }
     // TODO: types (#22198)

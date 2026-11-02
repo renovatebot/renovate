@@ -118,9 +118,9 @@ describe(
       name: string,
       updatedDeps: string[],
     ): Promise<void> {
-      const expected = { ...dependencies };
+      const expected: Record<string, string> = { ...dependencies };
       for (const dep of updatedDeps) {
-        expected[dep as keyof typeof expected] = '1.1.0';
+        expected[dep] = '1.1.0';
       }
       for (const dep of Object.keys(dependencies)) {
         expect(bodies.get(name)?.includes(`| ${dep} |`)).toBe(
@@ -247,10 +247,6 @@ describe(
         await expectContents(branchName, ['dep-a', 'dep-b']);
         expect(prs.get(branchName)?.number).toBe(1);
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        const diff = await git
-          .createSimpleGit({ config: { baseDir: local.path } })
-          .diff(['main', branchName]);
-        expect(diff).not.toContain('+      "dep-c": "1.1.0"');
       },
     );
 

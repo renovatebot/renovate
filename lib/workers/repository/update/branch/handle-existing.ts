@@ -60,7 +60,6 @@ export async function handleModifiedPr(
   }
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
-  const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
 
   if (userRebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
@@ -83,6 +82,7 @@ export async function handleModifiedPr(
       );
       return;
     }
+    const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
     logger.debug('Ensuring comment to indicate that rebasing is not possible');
     await ensureComment({
       number: pr.number,
