@@ -6,12 +6,14 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { safeStringify } from '../../../util/stringify.ts';
 import * as template from '../../../util/template/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
@@ -90,7 +92,9 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade,
   );
   upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
-  upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+  upgrade.commitMessage = withoutUrlCredentials(
+    template.compile(upgrade.commitMessage, upgrade),
+  );
   // istanbul ignore if
   if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
     logger.debug(
@@ -123,10 +127,12 @@ function compilePrTitle(
   if (upgrade.prTitle) {
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-    upgrade.prTitle = template
-      .compile(upgrade.prTitle, upgrade)
-      .trim()
-      .replace(regEx(/\s+/g), ' ');
+    upgrade.prTitle = withoutUrlCredentials(
+      template
+        .compile(upgrade.prTitle, upgrade)
+        .trim()
+        .replace(regEx(/\s+/g), ' '),
+    );
     // istanbul ignore if
     if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
       logger.debug(
@@ -164,7 +170,9 @@ function compilePrTitle(
     }
   }
   // Compile again to allow for nested templates
-  upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
+  upgrade.prTitle = withoutUrlCredentials(
+    template.compile(upgrade.prTitle, upgrade),
+  );
   logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
 }
 
@@ -497,6 +505,25 @@ export function generateBranchConfig(
     }
   }
 
+  // a branch which updates a tool constraint should use its new value, i.e. when installing tools for `postUpgradeTasks` or artifact updates
+  const constraintUpdates = config.upgrades.flatMap(
+    ({ manager, depType, depName, currentValue, newValue }) =>
+      manager === 'renovate-config' &&
+      depType === 'tool-constraint' &&
+      isConstraintName(depName) &&
+      newValue
+        ? [{ depName, currentValue, newValue }]
+        : [],
+  );
+  for (const upgrade of config.upgrades) {
+    for (const { depName, currentValue, newValue } of constraintUpdates) {
+      // only replace the constraint being updated, not a different value which may have been configured i.e. via `packageRules`
+      if (upgrade.constraints?.[depName] === currentValue) {
+        upgrade.constraints = { ...upgrade.constraints, [depName]: newValue };
+      }
+    }
+  }
+
   config.constraints = {};
   config.extractedConstraints = {};
   for (const upgrade of config.upgrades) {
@@ -554,7 +581,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += `\n\n${markdownTable(table)}\n`;
+    config.commitMessage += `\n\n${withoutUrlCredentials(markdownTable(table))}\n`;
   }
   const additionalReviewers = uniq(
     config.upgrades

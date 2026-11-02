@@ -1282,6 +1282,49 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         expect(res.artifactErrors).toHaveLength(0);
       });
 
+      it('passes the branch-level constraints when using executionMode=branch', async () => {
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+          ],
+          constraints: { npm: '10.2.3' },
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'branch',
+            installTools: { npm: {} },
+          },
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+        );
+        GlobalConfig.set({
+          localDir: upath.join(tmpDir.path, 'local'),
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        const res = await postUpgradeCommands.default(config);
+
+        expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+          'some-command',
+          expect.objectContaining({
+            toolConstraints: [{ toolName: 'npm', constraint: '10.2.3' }],
+          }),
+        );
+        expect(res?.artifactErrors).toHaveLength(0);
+      });
+
       it(`logs when skipping a constraint that isn't a known tool`, async () => {
         const commands = partial<BranchUpgradeConfig>([
           {

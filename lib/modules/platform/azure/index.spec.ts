@@ -1769,6 +1769,166 @@ describe('modules/platform/azure/index', () => {
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toBeUndefined();
     });
+
+    it('updates the auto-complete merge commit message with the title', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      const getPullRequestById = vi.fn().mockResolvedValue({
+        pullRequestId: 1234,
+        createdBy: { id: 123, url: 'user-url' },
+        autoCompleteSetBy: { id: 123 },
+        completionOptions: {
+          mergeStrategy: GitPullRequestMergeStrategy.Squash,
+          deleteSourceBranch: true,
+          mergeCommitMessage: 'The Old Title',
+        },
+      });
+      const createPullRequestReviewer = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById,
+          createPullRequestReviewer,
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { autoApprove: true, usePlatformAutomerge: true },
+      });
+
+      expect(getPullRequestById).toHaveBeenCalledOnce();
+      expect(createPullRequestReviewer).toHaveBeenCalledOnce();
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        {
+          title: 'The New Title',
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The New Title',
+          },
+        },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options when the merge commit message is unchanged', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            createdBy: { id: 123 },
+            autoCompleteSetBy: { id: 123 },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The Title' },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options when auto-complete was set by another user', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            createdBy: { id: 123 },
+            autoCompleteSetBy: { id: 456 },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              mergeCommitMessage: 'Custom message',
+            },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options without auto-complete', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
+        '1',
+        1234,
+      );
+    });
+
+    it('does not set completion options without platform automerge', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+          createPullRequestReviewer: vi.fn().mockResolvedValue({}),
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: 1234,
+            createdBy: { id: 123, url: 'user-url' },
+            autoCompleteSetBy: { id: 123 },
+          }),
+        }),
+      );
+
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        platformPrOptions: { autoApprove: true },
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledExactlyOnceWith(
+        { title: 'The New Title' },
+        '1',
+        1234,
+      );
+    });
   });
 
   describe('ensureComment', () => {
@@ -2778,6 +2938,43 @@ describe('modules/platform/azure/index', () => {
       'Issue',
     );
   });
+
+  it.each`
+    repoWorkItemType | expected
+    ${'Task'}        | ${'Task'}
+    ${'Issue'}       | ${'Issue'}
+    ${undefined}     | ${'Issue'}
+  `(
+    'ensureIssue uses work item type $expected for repo config $repoWorkItemType',
+    async ({ repoWorkItemType, expected }) => {
+      await initRepo({ repository: 'some/repo' });
+      azure.applyRepoConfig?.({ azureWorkItemType: repoWorkItemType });
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValueOnce(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi
+            .fn()
+            .mockResolvedValue([{ name: 'Issue' }, { name: 'Task' }]),
+        }),
+      );
+      const result = await azure.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body',
+      });
+
+      expect(result).toBe('created');
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.any(Array),
+        'some',
+        expected,
+      );
+    },
+  );
+
   it('ensureIssue updates an existing issue', async () => {
     await initRepo({ repository: 'some/repo' });
 

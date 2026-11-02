@@ -157,6 +157,16 @@ describe('workers/repository/reconfigure/index', () => {
     expect(prComment.ensureReconfigurePrComment).toHaveBeenCalled();
   });
 
+  it('passes the default branch to the extraction config', async () => {
+    await checkReconfigureBranch(
+      { ...config, defaultBranch: 'main' },
+      repoConfig,
+    );
+    expect(inherited.mergeInheritedConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultBranch: 'main', baseBranch: 'main' }),
+    );
+  });
+
   it('skips pr comment if error during deps extraction', async () => {
     process.extractDependencies.mockRejectedValue(new Error());
     await expect(checkReconfigureBranch(config, repoConfig)).toResolve();

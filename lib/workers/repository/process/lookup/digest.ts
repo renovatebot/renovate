@@ -9,6 +9,7 @@ import { getDigest } from '../../../../modules/datasource/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
+import { withoutUrlCredentials } from '../../../../util/url.ts';
 import {
   missingReleaseTimestampWarning,
   resolveUpdateTypeConfig,
@@ -186,12 +187,29 @@ async function resolveUpdateDigest(
       'Could not determine new digest for update.',
     );
 
+    // A tag such as `v1.2.3` is commonly referenced without its `v` prefix, which we treat as a misconfiguration rather than silently retrying with the prefix
+    if (
+      update.newValue &&
+      dependency?.releases.some((r) => r.version === `v${update.newValue}`)
+    ) {
+      logger.warn(
+        {
+          packageName: config.packageName,
+          datasource: config.datasource,
+          newValue: update.newValue,
+          suggestedValue: `v${update.newValue}`,
+        },
+        'Could not determine new digest for update. Check the tag in the `newValue` - did you maybe mean the `suggestedValue`, with a `v` prefix?',
+      );
+    }
+
     // Only report a warning if there is a current digest.
     // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
     if (config.currentDigest) {
+      const packageName = withoutUrlCredentials(config.packageName);
       res.warnings.push({
-        message: `Could not determine new digest for update (${config.datasource} package ${config.packageName})`,
-        topic: config.packageName,
+        message: `Could not determine new digest for update (${config.datasource} package ${packageName})`,
+        topic: packageName,
       });
     }
   }

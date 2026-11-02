@@ -20,6 +20,7 @@ import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import * as p from '../../../util/promises.ts';
 import { Result } from '../../../util/result.ts';
 import { LookupStats } from '../../../util/stats.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import { PackageFiles } from '../package-files.ts';
 import { lookupUpdates } from './lookup/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
@@ -68,7 +69,16 @@ async function lookup(
   // here - unless its manager already gave it a registry it could not use.
   const mayBeGivenARegistry =
     dep.skipReason === 'unknown-registry' && !isNonEmptyArray(dep.registryUrls);
-  if (dep.skipReason && !mayBeGivenARegistry) {
+
+  // A `lockfile-only` dependency is skipped for routine updates, because it is
+  // not declared anywhere for an update to change. A vulnerability fix still
+  // has to be able to reach it.
+  // Whether an alert matches is not known until the package rules have been
+  // applied, so the dependency passes through to them, and is skipped again
+  // below if none did.
+  const mayBeAVulnerabilityAlert = dep.skipReason === 'lockfile-only';
+
+  if (dep.skipReason && !mayBeGivenARegistry && !mayBeAVulnerabilityAlert) {
     return Result.ok(dep);
   }
 
@@ -98,6 +108,18 @@ async function lookup(
       return Result.ok(dep);
     }
 
+    delete dep.skipReason;
+    delete dep.skipStage;
+  }
+
+  if (mayBeAVulnerabilityAlert) {
+    if (!depConfig.isVulnerabilityAlert) {
+      return Result.ok(dep);
+    }
+
+    logger.debug(
+      `Dependency: ${depName!}, is only in a lock file, but a vulnerability alert matches it - looking it up`,
+    );
     delete dep.skipReason;
     delete dep.skipStage;
   }
@@ -163,7 +185,7 @@ async function lookup(
           warnings: [
             {
               topic: 'Lookup Error',
-              message: `${depName}: ${cause.message}`,
+              message: withoutUrlCredentials(`${depName}: ${cause.message}`),
             },
           ],
         });

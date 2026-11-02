@@ -2,6 +2,7 @@ import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 import type { GoModManagerData } from './types.ts';
@@ -28,19 +29,12 @@ const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
 
-const pseudoVersionRegex = regEx(GoDatasource.pversionRegexp);
-
 // Go writes this version for a module whose `replace` directive points to a
 // local path, with the major version of the module path, such as
 // `v2.0.0-00010101000000-000000000000` for a `/v2` module
 const placeholderPseudoVersionRegex = regEx(
   /^v\d+\.\d+\.\d+-00010101000000-000000000000$/,
 );
-
-function extractDigest(input: string): string | undefined {
-  const match = pseudoVersionRegex.exec(input);
-  return match?.groups?.digest;
-}
 
 function isPlaceholderPseudoVersion(version: string): boolean {
   return placeholderPseudoVersionRegex.test(version);
@@ -102,7 +96,7 @@ export function parseLine(
     };
 
     if (isVersion(currentValue)) {
-      const digest = extractDigest(currentValue);
+      const digest = parseVersionCommit(currentValue)?.revision;
       if (digest) {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;
@@ -146,7 +140,7 @@ export function parseLine(
     };
 
     if (isVersion(currentValue)) {
-      const digest = extractDigest(currentValue);
+      const digest = parseVersionCommit(currentValue)?.revision;
       if (digest) {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;

@@ -183,9 +183,10 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   swift: {
     misePluginUrl: 'https://mise.jdx.dev/lang/swift.html',
     config: {
-      packageName: 'swift-lang/swift',
+      packageName: 'swiftlang/swift',
       datasource: GithubReleasesDatasource.id,
-      extractVersion: '^swift-(?<version>\\S+)',
+      // swiftlang/swift tags releases like `swift-6.3.3-RELEASE`
+      extractVersion: '^swift-(?<version>.+)-RELEASE$',
     },
   },
   zig: {

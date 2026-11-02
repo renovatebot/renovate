@@ -1576,6 +1576,78 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('preserves poetry versioning when generating vulnerability package rules', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              {
+                depName: 'weasyprint',
+                packageName: 'weasyprint',
+                currentValue: '^69.0',
+                currentVersion: '69.0',
+                lockedVersion: '69.0',
+                versioning: 'poetry',
+                datasource: 'pypi',
+              },
+            ],
+            packageFile: 'pyproject.toml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jf6q-chmf-3h3v',
+          modified: '',
+          aliases: ['CVE-2026-1234'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'PyPI',
+                name: 'weasyprint',
+                purl: 'pkg:pypi/weasyprint',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '70.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-jf6q-chmf-3h3v affects weasyprint 69.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'pypi',
+          versioning: 'poetry',
+        },
+        'Setting allowed version >= 70.0 to fix vulnerability GHSA-jf6q-chmf-3h3v in weasyprint 69.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['weasyprint'],
+          matchCurrentVersion: '69.0',
+          allowedVersions: '>= 70.0',
+          versioning: 'poetry',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
     it('proposes a fresh security fix immediately despite minimumReleaseAge', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         maven: [

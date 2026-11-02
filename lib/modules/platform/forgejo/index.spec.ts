@@ -803,9 +803,10 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
+          url: `https://${token}:x-oauth-basic@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
       );
     });
@@ -833,6 +834,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );

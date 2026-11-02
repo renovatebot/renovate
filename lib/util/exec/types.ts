@@ -25,8 +25,6 @@ export const toolDefinitionDocumentation = [
 
 /**
  * A `tool` that Containerbase supports, but may not be supported by Renovate.
- *
- * @see SupportedToolNames
  */
 export type ToolName = (typeof toolNames)[number];
 

@@ -10,22 +10,47 @@ import {
 import { Result } from '../../../util/result.ts';
 import { massage as massageToml } from '../../../util/toml.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type { PackageFileContent } from '../types.ts';
-import { Lockfile, PoetryPyProject } from './schema.ts';
+import {
+  Lockfile,
+  PoetryPyProject,
+  getRegistryUrls,
+  withImplicitPypi,
+} from './schema.ts';
+import { getLockfilePoetryVersion } from './utils.ts';
+
+/**
+ * Before Poetry 1.8, PyPI was implicitly added as a secondary source
+ * even when a primary source was configured.
+ */
+function isLegacyPoetry(lockContents: string | undefined): boolean {
+  const version = lockContents && getLockfilePoetryVersion(lockContents);
+  if (!version) {
+    return false;
+  }
+
+  // a non-exact value is a constraint inferred from lock-version, i.e. < 1.4
+  return (
+    !poetryVersioning.api.isVersion(version) ||
+    poetryVersioning.api.isGreaterThan('1.8.0', version)
+  );
+}
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
-  const { val: res, err } = Result.parse(
+  const { val: parsed, err } = Result.parse(
     massageToml(content),
-    PoetryPyProject.transform(({ packageFileContent }) => packageFileContent),
+    PoetryPyProject,
   ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
     return null;
   }
+  const { packageFileContent: res, poetrySources } = parsed;
 
   const lockfileName = getSiblingFileName(packageFile, 'poetry.lock');
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
@@ -33,6 +58,10 @@ export async function extractPackageFile(
     lockContents,
     Lockfile.transform(({ lock }) => lock),
   ).unwrapOr({});
+
+  if (poetrySources?.length && isLegacyPoetry(lockContents)) {
+    res.registryUrls = getRegistryUrls(withImplicitPypi(poetrySources, true));
+  }
 
   let pythonVersion: string | undefined;
   filterMap(res.deps, (dep) => {
