@@ -54,7 +54,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
-  describe('dispose()', () => {
+  describe('cleanup()', () => {
     beforeEach(resetOsv);
 
     it('disposes the shared databases once', async () => {
@@ -65,21 +65,21 @@ describe('workers/repository/process/vulnerabilities', () => {
       });
       await Vulnerabilities.create();
 
-      await Vulnerabilities.dispose();
-      await Vulnerabilities.dispose();
+      await Vulnerabilities.cleanup();
+      await Vulnerabilities.cleanup();
 
       expect(dispose).toHaveBeenCalledOnce();
     });
 
     it('does nothing when the databases were never opened', async () => {
-      await expect(Vulnerabilities.dispose()).toResolve();
+      await expect(Vulnerabilities.cleanup()).toResolve();
     });
 
     it('ignores a failed initialization', async () => {
       createMock.mockRejectedValue(new Error());
       await expect(Vulnerabilities.create()).rejects.toThrow(Error);
 
-      await expect(Vulnerabilities.dispose()).toResolve();
+      await expect(Vulnerabilities.cleanup()).toResolve();
     });
   });
 

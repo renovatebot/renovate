@@ -137,7 +137,7 @@ export async function globalInitialize(
 }
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
-  await Vulnerabilities.dispose();
+  await Vulnerabilities.cleanup();
   await packageCache.cleanup(config);
   resetGlobalLogLevelRemaps();
 }

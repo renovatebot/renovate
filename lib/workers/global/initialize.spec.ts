@@ -215,10 +215,10 @@ describe('workers/global/initialize', () => {
   });
 
   describe('globalFinalize()', () => {
-    it('disposes the OSV databases', async () => {
-      const dispose = vi.spyOn(Vulnerabilities, 'dispose');
+    it('cleans up the vulnerabilities', async () => {
+      const cleanup = vi.spyOn(Vulnerabilities, 'cleanup');
       await expect(globalFinalize({})).toResolve();
-      expect(dispose).toHaveBeenCalledOnce();
+      expect(cleanup).toHaveBeenCalledOnce();
     });
   });
 });
