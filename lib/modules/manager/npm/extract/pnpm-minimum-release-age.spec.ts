@@ -103,6 +103,35 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       expect(fs.readLocalFile).toHaveBeenCalledOnce();
     });
 
+    it.each`
+      workspace                                                 | expected
+      ${'minimumReleaseAge: 60\n'}                              | ${{ minimumReleaseAge: 60 }}
+      ${'minimumReleaseAge: 0\nminimumReleaseAgeStrict: false'} | ${{ minimumReleaseAge: 0, minimumReleaseAgeStrict: false }}
+      ${'minimumReleaseAgeStrict: false\n'}                     | ${{ minimumReleaseAgeStrict: false }}
+      ${'packages: []\n'}                                       | ${undefined}
+    `(
+      'keeps the pnpm-workspace.yaml settings $workspace in managerData',
+      async ({ workspace, expected }) => {
+        mockWorkspace(workspace);
+        const packageFiles = [
+          packageFile('some-dir/package.json', {
+            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+          }),
+          packageFile('some-dir/pnpm-workspace.yaml', {
+            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+          }),
+        ];
+
+        await setPnpmMinimumReleaseAge(packageFiles);
+
+        expect(
+          packageFiles.map(
+            (p) => p.managerData?.pnpmWorkspaceMinimumReleaseAge,
+          ),
+        ).toEqual([expected, expected]);
+      },
+    );
+
     it('uses the larger of the pnpm-workspace.yaml value and minimumReleaseAge', async () => {
       mockWorkspace('minimumReleaseAge: 1440\n');
       const packageFiles = [
@@ -335,6 +364,8 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
           '@scope/qux@1.0.0 || v2.0.0',
           'invalid@^1.0.0',
           'foo*@1.0.0',
+          'foo?@1.0.0',
+          '!foo@1.0.0',
         ]),
       ).toEqual({
         packageNames: ['foo', '/^@scope/.*$/', '!bar'],

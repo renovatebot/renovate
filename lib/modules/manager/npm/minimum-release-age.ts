@@ -7,10 +7,7 @@ import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { parseNpmrcCooldown } from './extract/npmrc.ts';
-import {
-  getPnpmMinimumReleaseAgeMinutes,
-  readPnpmWorkspaceMinimumReleaseAge,
-} from './extract/pnpm-minimum-release-age.ts';
+import { getPnpmMinimumReleaseAgeMinutes } from './extract/pnpm-minimum-release-age.ts';
 import type { NpmManagerData } from './types.ts';
 
 // npm supports `min-release-age` since v11.10.0
@@ -95,7 +92,11 @@ async function pnpmEnforcesMinimumReleaseAge(
     return false;
   }
 
-  const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
+  // the status checks run before the base branch is checked out, so the
+  // pnpm-workspace.yaml settings come from the extraction
+  const workspace = coerceObject(
+    config.managerData?.pnpmWorkspaceMinimumReleaseAge,
+  );
   if (workspace.minimumReleaseAgeStrict === false) {
     logger.debug(
       `${pnpmLockFile}: minimumReleaseAgeStrict=false lets pnpm install versions which are too new`,

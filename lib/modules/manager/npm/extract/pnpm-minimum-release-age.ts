@@ -146,7 +146,8 @@ export function parsePnpmMinimumReleaseAgeExclude(
       .slice(atIndex + 1)
       .split('||')
       .map((version) => semver.valid(version));
-    if (name.includes('*') || versions.includes(null)) {
+    // pnpm accepts exact versions only for a plain package name
+    if (!plainPackageNameRegex.test(name) || versions.includes(null)) {
       logger.debug(`Invalid minimumReleaseAgeExclude entry ${entry}, ignoring`);
       continue;
     }
@@ -201,7 +202,7 @@ export function getPnpmMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the repository `.npmrc` `minimum-release-age`, or the pnpm v11 default.
+ * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the repository `.npmrc` `minimum-release-age`, or the pnpm v11 default, and keeps the `pnpm-workspace.yaml` settings in `managerData`.
  */
 export async function setPnpmMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
@@ -223,6 +224,18 @@ export async function setPnpmMinimumReleaseAge(
   }
   for (const [pnpmLockFile, lockFilePackageFiles] of packageFilesByLockFile) {
     const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
+    const { minimumReleaseAge, minimumReleaseAgeStrict } = workspace;
+    if (
+      minimumReleaseAge !== undefined ||
+      minimumReleaseAgeStrict !== undefined
+    ) {
+      for (const packageFile of lockFilePackageFiles) {
+        packageFile.managerData!.pnpmWorkspaceMinimumReleaseAge = {
+          minimumReleaseAge,
+          minimumReleaseAgeStrict,
+        };
+      }
+    }
     // the pnpm-workspace.yaml has no .npmrc or pnpm constraint of its own, so
     // the root package.json sets them for every package file of the lock file
     const rootPackageFile = upath.join(

@@ -987,6 +987,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         ${'a single entry twice'}         | ${undefined}                                               | ${[update]}                                                             | ${`${flag} ${foo} ${foo}`}
         ${'each update once'}             | ${undefined}                                               | ${[update, update, { ...update, depName: 'bar', newVersion: '2.0.0' }]} | ${`${flag} ${foo} ${bar}`}
         ${'the packageName of overrides'} | ${undefined}                                               | ${[{ ...update, depName: 'foo@<1.0.0', packageName: 'foo' }]}           | ${`${flag} ${foo} ${foo}`}
+        ${'the newName of replacements'}  | ${undefined}                                               | ${[{ ...update, newName: 'bar', newVersion: '2.0.0' }]}                 | ${`${flag} ${bar} ${bar}`}
         ${'a version union'}              | ${"minimumReleaseAgeExclude:\n  - 'bar@1.0.0 || 2.0.0'\n"} | ${[update]}                                                             | ${`${flag} '--config.minimum-release-age-exclude=bar@1.0.0 || 2.0.0' ${foo}`}
         ${'no excluded packages'}         | ${'minimumReleaseAgeExclude:\n  - foo\n'}                  | ${[update]}                                                             | ${flag}
         ${'no excluded versions'}         | ${"minimumReleaseAgeExclude:\n  - 'foo@1.2.3'\n"}          | ${[update]}                                                             | ${flag}
@@ -1163,6 +1164,35 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
 
     it.each`
+      pnpm          | warns
+      ${'^9.0.0'}   | ${false}
+      ${'10.15.1'}  | ${false}
+      ${'~10.16.0'} | ${true}
+    `(
+      'warns for pnpm $pnpm, which reads the minimum release age from v10.16.0: $warns',
+      async ({ pnpm, warns }) => {
+        mockExecAll();
+        mockPnpmFiles();
+
+        const res = await pnpmHelper.generateLockFile(
+          'some-folder',
+          {},
+          { ...config, constraints: { pnpm } },
+          [
+            {
+              manager: 'npm',
+              depName: 'foo',
+              datasource: 'npm',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(!!res.minimumReleaseAgeNotice).toBe(warns);
+      },
+    );
+
+    it.each`
       exclude                   | upgrade                                          | warns
       ${'foo'}                  | ${{ depName: 'foo' }}                            | ${false}
       ${"'@scope/*'"}           | ${{ depName: 'bar', packageName: '@scope/foo' }} | ${false}
@@ -1226,14 +1256,19 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       mockExecSequence([immatureError('ERR_PNPM_FETCH_404  Not Found')]);
       mockPnpmFiles();
 
-      const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
-        {
-          manager: 'npm',
-          depName: 'foo',
-          datasource: 'npm',
-          minimumReleaseAgeRepository: '3 days',
-        },
-      ]);
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        { ...config, constraints: { pnpm: '~10.18.0' } },
+        [
+          {
+            manager: 'npm',
+            depName: 'foo',
+            datasource: 'npm',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
+      );
 
       expect(res).toMatchObject({
         error: true,

@@ -27,7 +27,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { parseSingleYaml } from '../../../../util/yaml.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-import { isSubsetOf } from '../../../versioning/common.ts';
+import { intersectsWith, isSubsetOf } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import {
@@ -45,6 +45,7 @@ import type {
   PnpmMinimumReleaseAgeExclude,
   PnpmWorkspaceFile,
 } from '../extract/types.ts';
+import { minimumReleaseAgePnpmRange } from '../minimum-release-age.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
 import {
@@ -91,6 +92,15 @@ function supportsExactVersionExclude(
 }
 
 /**
+ * The name of the npm package whose `newVersion` pnpm installs for `upgrade`.
+ */
+function getInstalledPackageName(upgrade: Upgrade): string | undefined {
+  // a replacement installs `newName`, and the depName of a pnpm override with
+  // a selector is the override key
+  return upgrade.newName ?? upgrade.packageName ?? upgrade.depName;
+}
+
+/**
  * The `minimumReleaseAgeExclude` entries which exclude the updated versions of npm packages from the minimum release age which Renovate passes to pnpm, as Renovate already applied its own minimum release age to them.
  *
  * The `--config.minimum-release-age-exclude` flags replace the `pnpm-workspace.yaml` list, so the entries start with the workspace ones.
@@ -103,8 +113,7 @@ function getMinimumReleaseAgeExcludes(
 ): string[] {
   const updated: string[] = [];
   for (const upgrade of upgrades) {
-    // the depName of a pnpm override with a selector is the override key
-    const packageName = upgrade.packageName ?? upgrade.depName;
+    const packageName = getInstalledPackageName(upgrade);
     if (
       upgrade.datasource === NpmDatasource.id &&
       packageName &&
@@ -136,7 +145,7 @@ function mayRejectUpgrade(
   if (upgrade.datasource !== NpmDatasource.id) {
     return false;
   }
-  const packageName = upgrade.packageName ?? upgrade.depName;
+  const packageName = getInstalledPackageName(upgrade);
   if (
     packageName &&
     isPnpmMinimumReleaseAgeExcluded(exclude, packageName, upgrade.newVersion)
@@ -215,6 +224,12 @@ async function getMinimumReleaseAgeArgs(
     )) {
       result.args += ` ${quote(`--config.minimum-release-age-exclude=${entry}`)}`;
     }
+    return result;
+  }
+  // pnpm ignores the minimum release age before v10.16.0
+  if (
+    !intersectsWith(npmVersioning, pnpmConstraint, minimumReleaseAgePnpmRange)
+  ) {
     return result;
   }
   const lowerUpgrades = upgrades.filter((upgrade) =>
