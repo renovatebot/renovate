@@ -89,7 +89,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
-  /** @see PackageFile.minimumReleaseAgeExtracted */
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: Nullish<string>;
   /**
    * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
@@ -342,7 +342,7 @@ export interface Upgrade<
   isLockFileMaintenance?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
-  /** @see PackageFile.minimumReleaseAgeExtracted */
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: string | null;
   /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
   minimumReleaseAgeRepository?: string | null;
