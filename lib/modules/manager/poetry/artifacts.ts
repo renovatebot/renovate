@@ -1,5 +1,4 @@
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
-import { Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -11,10 +10,6 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import {
-  calculatePackageManagerMinimumReleaseAgeMs,
-  getMinimumReleaseAgeExemption,
-} from '../../../util/minimum-release-age.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import {
@@ -22,17 +17,13 @@ import {
   parse as parseToml,
 } from '../../../util/toml.ts';
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-  Upgrade,
-} from '../types.ts';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
   resolveToolConstraint,
   updateLockFile,
 } from '../util.ts';
+import { getMinReleaseAgeEnv } from './minimum-release-age.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
 import { getLockfilePoetryVersion } from './utils.ts';
@@ -144,48 +135,6 @@ async function getSourceCredentialVars(
   return envVars;
 }
 
-interface MinReleaseAgeEnv {
-  env: NodeJS.ProcessEnv;
-  notice?: string;
-}
-
-/**
- * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` for the lock file update, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
- */
-function getMinReleaseAgeEnv(
-  config: UpdateArtifactsConfig,
-  packageFileName: string,
-  updatedDeps: Upgrade[],
-): MinReleaseAgeEnv {
-  const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
-    config,
-    manager: 'poetry',
-    packageFile: packageFileName,
-    upgrades: updatedDeps,
-  });
-  if (!ageMs) {
-    return { env: {} };
-  }
-  const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-  const exemption = getMinimumReleaseAgeExemption(updatedDeps, 'poetry', ageMs);
-  if (!exemption) {
-    return { env: { POETRY_SOLVER_MIN_RELEASE_AGE: days.toString() } };
-  }
-  // rounds down, so that Poetry accepts the releases of the exempted updates
-  const loweredDays = Math.floor(
-    Duration.fromMillis(exemption.ageMs).as('days'),
-  );
-  logger.debug(
-    `Lowering the Poetry minimum release age from ${days} to ${loweredDays} days, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
-  );
-  const packages = exemption.depNames.map((name) => `\`${name}\``).join(', ');
-  return {
-    // `0` also overrides `solver.min-release-age` of the Poetry config
-    env: { POETRY_SOLVER_MIN_RELEASE_AGE: loweredDays.toString() },
-    notice: `Poetry checked a minimum release age of ${loweredDays} days instead of ${days} for this update, because the \`minimumReleaseAge\` of ${packages} is smaller. Poetry has no per-package exclude.`,
-  };
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -227,7 +176,7 @@ export async function updateArtifacts({
     );
   }
 
-  const { env: minReleaseAgeEnv, notice } = getMinReleaseAgeEnv(
+  const { env: minReleaseAgeEnv, notice } = await getMinReleaseAgeEnv(
     config,
     packageFileName,
     updatedDeps,
