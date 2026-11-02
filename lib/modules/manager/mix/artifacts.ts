@@ -149,7 +149,7 @@ export async function updateArtifacts({
   }, [] as string[]);
 
   // renovate: will update this
-  const erlangVersion = '26';
+  const erlangVersion = '27';
 
   const execOptions: ExecOptions = {
     extraEnv: {
