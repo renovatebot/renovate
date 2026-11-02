@@ -64,6 +64,15 @@ export class Vulnerabilities {
     return instance;
   }
 
+  /**
+   * Closes the shared OSV databases, if they were opened.
+   */
+  static async cleanup(): Promise<void> {
+    const osvOffline = await Vulnerabilities.osvOffline?.catch(() => undefined);
+    Vulnerabilities.osvOffline = undefined;
+    osvOffline?.[Symbol.dispose]();
+  }
+
   async appendVulnerabilityPackageRules(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
