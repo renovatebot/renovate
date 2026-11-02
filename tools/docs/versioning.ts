@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import {
-  type VersioningApi,
   getVersioningList,
+  type VersioningApi,
 } from '../../lib/modules/versioning/index.ts';
 import type { RangeStrategy } from '../../lib/types/versioning.ts';
 import { readFile, updateFile } from '../utils/index.ts';
 import {
-  type OpenItems,
   generateFeatureAndBugMarkdown,
+  type OpenItems,
 } from './github-query-items.ts';
 import {
   formatDescription,

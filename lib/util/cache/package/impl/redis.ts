@@ -7,7 +7,7 @@ import type {
   RedisScripts,
   TypeMapping,
 } from '@redis/client';
-import { RESP_TYPES, createClient, createCluster } from '@redis/client';
+import { createClient, createCluster, RESP_TYPES } from '@redis/client';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../regex.ts';
 import { parseUrl } from '../../../url.ts';

@@ -31,7 +31,7 @@ import {
   exportStats,
   finalizeReport,
 } from '../../instrumentation/reporting.ts';
-import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
+import { getProblems, logger, logLevel, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { getEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';

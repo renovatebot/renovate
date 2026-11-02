@@ -3,8 +3,8 @@ import { LOGGER_NOT_INITIALIZED } from '../constants/error-messages.ts';
 import { once, reset as onceReset } from './once.ts';
 import { getRemappedLevel } from './remap.ts';
 import type {
-  BunyanLogLevel,
   BunyanLogger,
+  BunyanLogLevel,
   BunyanSerializers,
   BunyanStream,
   Logger,

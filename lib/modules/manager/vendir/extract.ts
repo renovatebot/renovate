@@ -11,8 +11,8 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import type {
-  GitRef,
   GithubRelease,
+  GitRef,
   HelmChart,
   HttpRelease,
 } from './schema.ts';

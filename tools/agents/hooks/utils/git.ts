@@ -1,4 +1,4 @@
-import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git';
+import { type SimpleGit, simpleGit, type SimpleGitOptions } from 'simple-git';
 
 const config: Partial<SimpleGitOptions> = {
   completion: { onClose: true, onExit: false },

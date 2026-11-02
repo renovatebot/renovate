@@ -1,6 +1,5 @@
 // TODO: refactor code to remove this (#9651)
 import './legacy.ts';
-
 import { isNumber } from '@sindresorhus/is';
 import type { OptionsInit } from 'got';
 import got, { RequestError } from 'got';

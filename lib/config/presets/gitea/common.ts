@@ -8,10 +8,10 @@ import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import {
-  PRESET_DEP_NOT_FOUND,
-  PRESET_INVALID,
   fetchPreset,
   parsePreset,
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID,
 } from '../util.ts';
 
 export interface GiteaPresetSource {

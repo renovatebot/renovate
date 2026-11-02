@@ -4,7 +4,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import type { Nullish } from '../../../types/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import type { Preset, PresetConfig } from '../types.ts';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
+import { fetchPreset, parsePreset, PRESET_DEP_NOT_FOUND } from '../util.ts';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';

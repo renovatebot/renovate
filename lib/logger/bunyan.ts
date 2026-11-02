@@ -5,11 +5,11 @@ import { bunyan } from '../expose.ts';
 import cmdSerializer from './cmd-serializer.ts';
 import configSerializer from './config-serializer.ts';
 import errSerializer from './err-serializer.ts';
-import { PrettyStdoutStream, formatRecord } from './pretty-stdout.ts';
+import { formatRecord, PrettyStdoutStream } from './pretty-stdout.ts';
 import type { ProblemStream } from './problem-stream.ts';
 import type {
-  BunyanLogLevel,
   BunyanLogger,
+  BunyanLogLevel,
   BunyanRecord,
   BunyanStream,
 } from './types.ts';

@@ -2,11 +2,11 @@ import dataFiles from '../../../data-files.generated.ts';
 import { logger } from '../../../logger/index.ts';
 import { DistroInfo } from '../distro.ts';
 import {
-  RollingReleasesData,
   getDatedContainerImageCodename,
   getDatedContainerImageSuffix,
   getDatedContainerImageVersion,
   isDatedCodeName,
+  RollingReleasesData,
 } from './common.ts';
 
 describe('modules/versioning/debian/common', () => {

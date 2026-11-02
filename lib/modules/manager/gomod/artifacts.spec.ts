@@ -14,8 +14,8 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
-import { deriveGoToolchainConstraints } from './artifacts.ts';
 import * as _artifactsExtra from './artifacts-extra.ts';
+import { deriveGoToolchainConstraints } from './artifacts.ts';
 import * as gomod from './index.ts';
 
 type FS = typeof import('../../../util/fs/index.ts');

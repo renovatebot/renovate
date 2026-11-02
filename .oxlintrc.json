@@ -81,6 +81,7 @@
       "error",
       { "allowDevDependencies": true }
     ],
+    "containerbase/sort-imports": "error",
 
     "renovate/cached-response-headers": "error",
     "renovate/enforce-ts-extension": "error",

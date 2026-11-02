@@ -2,7 +2,7 @@ import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
-import { type RenovateConfig, logger, partial } from '~test/util.ts';
+import { logger, partial, type RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';

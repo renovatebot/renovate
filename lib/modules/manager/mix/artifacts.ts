@@ -16,7 +16,6 @@ import {
 } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
-
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactError,

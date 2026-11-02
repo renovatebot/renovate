@@ -3,16 +3,16 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, logger } from '~test/util.ts';
 import {
-  GRADLE_PLUGINS,
-  GRADLE_TEST_SUITES,
-  REGISTRY_URLS,
-} from './parser/common.ts';
-import {
   parseGradle,
   parseJavaToolchainVersion,
   parseKotlinSource,
   parseProps,
 } from './parser.ts';
+import {
+  GRADLE_PLUGINS,
+  GRADLE_TEST_SUITES,
+  REGISTRY_URLS,
+} from './parser/common.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

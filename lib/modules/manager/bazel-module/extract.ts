@@ -12,15 +12,15 @@ import type {
 import * as bazelrc from './bazelrc.ts';
 import { RuleToCratePackageDep } from './parser/crate.ts';
 import { parse } from './parser/index.ts';
-import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
+import { fillRegistryUrls, RuleToMavenPackageDep } from './parser/maven.ts';
 import { RuleToDockerPackageDep } from './parser/oci.ts';
 import type { ResultFragment } from './parser/types.ts';
+import { transformRulesImgCalls } from './rules-img.ts';
 import * as rules from './rules.ts';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
 } from './rules.ts';
-import { transformRulesImgCalls } from './rules-img.ts';
 
 export async function extractPackageFile(
   content: string,

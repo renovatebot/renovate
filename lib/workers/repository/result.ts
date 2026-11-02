@@ -1,5 +1,4 @@
 import type { RenovateConfig } from '../../config/types.ts';
-
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -13,7 +12,6 @@ import {
   TemporaryErrors,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
-
 import { addRepositoryStatus } from '../../instrumentation/reporting.ts';
 import { logger } from '../../logger/index.ts';
 

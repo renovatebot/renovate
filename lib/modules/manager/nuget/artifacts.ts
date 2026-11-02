@@ -30,10 +30,10 @@ import {
 import { createNuGetConfigXml } from './config-formatter.ts';
 import {
   DIRECTORY_BUILD_PROPS,
+  getDependentPackageFiles,
   GLOBAL_JSON,
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
-  getDependentPackageFiles,
 } from './package-tree.ts';
 import type { Registry } from './types.ts';
 import {

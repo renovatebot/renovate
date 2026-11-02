@@ -1,8 +1,8 @@
 import type { PackageDependency } from '../types.ts';
 import {
   analyseTerragruntModule,
-  gitTagsRefMatchRegex,
   githubRefMatchRegex,
+  gitTagsRefMatchRegex,
 } from './modules.ts';
 import type { TerraformManagerData } from './types.ts';
 

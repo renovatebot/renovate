@@ -1,5 +1,5 @@
-import { BitbucketChangeLogSource } from './bitbucket/source.ts';
 import { BitbucketServerChangeLogSource } from './bitbucket-server/source.ts';
+import { BitbucketChangeLogSource } from './bitbucket/source.ts';
 import { ForgejoChangeLogSource } from './forgejo/source.ts';
 import { GiteaChangeLogSource } from './gitea/source.ts';
 import { GitHubChangeLogSource } from './github/source.ts';

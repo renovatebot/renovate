@@ -1,4 +1,4 @@
-import { type ReleaseType, inc } from 'semver';
+import { inc, type ReleaseType } from 'semver';
 import type { BumpVersionConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';

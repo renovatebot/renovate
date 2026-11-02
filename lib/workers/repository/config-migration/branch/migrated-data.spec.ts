@@ -8,8 +8,8 @@ import { readLocalFile } from '../../../../util/fs/index.ts';
 import { EditorConfig } from '../../../../util/json-writer/index.ts';
 import { detectRepoFileConfig } from '../../init/merge.ts';
 import {
-  MigratedDataFactory,
   applyPrettierFormatting,
+  MigratedDataFactory,
 } from './migrated-data.ts';
 
 vi.mock('../../../../config/migration.ts');

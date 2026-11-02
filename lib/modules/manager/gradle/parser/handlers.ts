@@ -19,9 +19,9 @@ import {
   parseDependencyString,
 } from '../utils.ts';
 import {
+  findVariable,
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
-  findVariable,
   interpolateString,
   loadFromTokenMap,
 } from './common.ts';

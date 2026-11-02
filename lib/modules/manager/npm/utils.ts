@@ -6,7 +6,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-
 import { PackageJson } from './schema.ts';
 import type { LockFile, ParseLockFileResult } from './types.ts';
 

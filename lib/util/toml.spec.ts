@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { massage, parseTOMLDocument, parse as parseToml } from './toml.ts';
+import { massage, parse as parseToml, parseTOMLDocument } from './toml.ts';
 
 describe('util/toml', () => {
   it('exposes source ranges from the TOML AST', () => {

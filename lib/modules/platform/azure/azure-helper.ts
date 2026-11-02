@@ -15,8 +15,8 @@ import * as azureApi from './azure-got-wrapper.ts';
 import { WrappedException } from './schema.ts';
 import type { AzureBranchObj } from './types.ts';
 import {
-  getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
+  getBranchNameWithoutRefsPrefix,
 } from './util.ts';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations

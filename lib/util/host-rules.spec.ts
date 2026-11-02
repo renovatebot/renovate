@@ -3,7 +3,6 @@ import { GlobalConfig } from '../config/global.ts';
 import { NugetDatasource } from '../modules/datasource/nuget/index.ts';
 import type { HostRule } from '../types/index.ts';
 import {
-  type LegacyHostRule,
   add,
   clear,
   confidentialFields,
@@ -15,8 +14,9 @@ import {
   getAll,
   getDetachedCredentialsHash,
   hasDetachedCredentials,
-  hostType,
   hosts,
+  hostType,
+  type LegacyHostRule,
   matchesHost,
   usesGithubUrlFallback,
 } from './host-rules.ts';

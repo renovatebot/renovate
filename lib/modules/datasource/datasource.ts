@@ -1,4 +1,4 @@
-import type { ZodType, z } from 'zod/v4';
+import type { z, ZodType } from 'zod/v4';
 import { ZodError } from 'zod/v4';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';

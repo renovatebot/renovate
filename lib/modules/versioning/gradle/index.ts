@@ -4,7 +4,6 @@ import { regEx } from '../../../util/regex.ts';
 import mavenVersion from '../maven/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
-  TokenType,
   compare,
   isValid,
   isVersion,
@@ -12,6 +11,7 @@ import {
   parseMavenBasedRange,
   parsePrefixRange,
   parseSingleVersionRange,
+  TokenType,
 } from './compare.ts';
 
 export const id = 'gradle';

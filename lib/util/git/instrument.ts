@@ -7,8 +7,8 @@ import type {
   LogOptions,
   LogResult,
   Options,
-  RemoteWithRefs,
   RemoteWithoutRefs,
+  RemoteWithRefs,
   Response,
   SimpleGit,
   StatusResult,
@@ -16,7 +16,6 @@ import type {
   VersionResult,
 } from 'simple-git';
 import { instrument } from '../../instrumentation/index.ts';
-
 import type { RenovateSpanOptions } from '../../instrumentation/types.ts';
 import {
   ATTR_VCS_GIT_OPERATION_TYPE,

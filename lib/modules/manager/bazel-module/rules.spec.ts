@@ -5,10 +5,10 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { parse } from './parser/index.ts';
 import {
-  GitRepositoryToPackageDep,
-  RuleToBazelModulePackageDep,
   bazelModulePackageDepToPackageDependency,
+  GitRepositoryToPackageDep,
   processModulePkgDeps,
+  RuleToBazelModulePackageDep,
   toPackageDependencies,
 } from './rules.ts';
 import type {

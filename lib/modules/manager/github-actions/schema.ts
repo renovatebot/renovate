@@ -3,8 +3,8 @@ import {
   Json,
   LooseArray,
   LooseRecord,
-  Yaml,
   withDebugMessage,
+  Yaml,
 } from '../../../util/schema-utils/index.ts';
 import { actionSchema, knownActions } from './known-actions.ts';
 import type { ActionSchema } from './types.ts';

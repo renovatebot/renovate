@@ -1,4 +1,4 @@
-import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
+import { DEBUG, ERROR, FATAL, INFO, nameFromLevel, TRACE, WARN } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
 import type { PackageDependency } from '../../modules/manager/types.ts';
 import { emojify } from '../../util/emoji.ts';

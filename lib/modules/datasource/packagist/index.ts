@@ -13,11 +13,11 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import type { RegistryFile } from './schema.ts';
 import {
+  extractDepReleases,
   PackagesResponse,
   PackagistFile,
-  RegistryMeta,
-  extractDepReleases,
   parsePackagesResponses,
+  RegistryMeta,
 } from './schema.ts';
 
 interface PackagistLookupError {

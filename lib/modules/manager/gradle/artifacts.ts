@@ -19,8 +19,8 @@ import { getFiles, getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { scm } from '../../platform/scm.ts';
 import {
-  extraEnv,
   extractGradleVersion,
+  extraEnv,
   getJavaConstraint,
   gradleWrapperFileName,
   prepareGradleCommand,

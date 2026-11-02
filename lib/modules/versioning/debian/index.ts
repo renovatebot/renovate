@@ -7,11 +7,11 @@ import type {
   VersioningApi,
 } from '../types.ts';
 import {
-  RollingReleasesData,
   getDatedContainerImageCodename,
   getDatedContainerImageSuffix,
   getDatedContainerImageVersion,
   isDatedCodeName,
+  RollingReleasesData,
 } from './common.ts';
 
 export const id = 'debian';

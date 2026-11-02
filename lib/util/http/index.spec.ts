@@ -1,5 +1,5 @@
 import dnsPromises from 'node:dns/promises';
-import { ZodError, z } from 'zod/v4';
+import { z, ZodError } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';

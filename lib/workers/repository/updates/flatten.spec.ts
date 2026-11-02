@@ -1,5 +1,5 @@
 import { isNumber } from '@sindresorhus/is';
-import { type RenovateConfig, partial } from '~test/util.ts';
+import { partial, type RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { SkipReason } from '../../../types/skip-reason.ts';

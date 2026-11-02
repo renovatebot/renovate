@@ -8,7 +8,7 @@ import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../types.ts';
 import { checkIsValidDependency, validMatchFields } from '../utils.ts';
 import { QueryResultZod } from './schema.ts';
-import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
+import type { JsonataExtractConfig, JSONataManagerTemplates } from './types.ts';
 
 export async function handleMatching(
   json: unknown,

@@ -4,9 +4,9 @@ import {
   ComposerRelease,
   ComposerReleases,
   MinifiedArray,
-  RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
+  RegistryMeta,
 } from './schema.ts';
 
 describe('modules/datasource/packagist/schema', () => {

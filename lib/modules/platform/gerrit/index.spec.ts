@@ -17,9 +17,9 @@ import type {
 } from './schema.ts';
 import { configureScm } from './scm.ts';
 import {
+  mapGerritChangeToPr,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
-  mapGerritChangeToPr,
 } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';

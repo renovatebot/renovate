@@ -22,9 +22,9 @@ import type {
   GerritRequestDetail,
 } from './types.ts';
 import {
+  mapPrStateToGerritFilter,
   MAX_GERRIT_COMMENT_SIZE,
   MIN_GERRIT_VERSION,
-  mapPrStateToGerritFilter,
 } from './utils.ts';
 
 class GerritClient {

@@ -3,8 +3,8 @@ import { fs } from '~test/util.ts';
 import {
   BazelOption,
   CommandEntry,
-  ImportEntry,
   expandWorkspacePath,
+  ImportEntry,
   parse,
   read,
   sanitizeOptions,

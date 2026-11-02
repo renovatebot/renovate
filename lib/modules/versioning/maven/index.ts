@@ -2,18 +2,18 @@ import type { RangeStrategy } from '../../../types/versioning.ts';
 import { coerceString } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import {
-  EXCLUDING_POINT,
-  QualifierTypes,
-  TYPE_NUMBER,
-  TYPE_QUALIFIER,
   autoExtendMavenRange,
   compare,
+  EXCLUDING_POINT,
   isSingleVersion,
   isValid,
   isVersion,
   parseRange,
   qualifierType,
+  QualifierTypes,
   tokenize,
+  TYPE_NUMBER,
+  TYPE_QUALIFIER,
 } from './compare.ts';
 
 export const id = 'maven';

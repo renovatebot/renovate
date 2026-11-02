@@ -1,4 +1,4 @@
-import { type ReleaseType, inc } from 'semver';
+import { inc, type ReleaseType } from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { BumpPackageVersionResult } from '../types.ts';
