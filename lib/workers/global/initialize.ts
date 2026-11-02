@@ -1,5 +1,6 @@
 import os from 'node:os';
 import {
+  configure as configureContainerbase,
   isContainerbase,
   validateContainerbaseVersion,
 } from '@renovatebot/base-image';
@@ -120,6 +121,8 @@ export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
+  // containerbase and osv-offline log to Renovate's logger instead of `debug`
+  configureContainerbase({ logger });
   setHttpRateLimits();
   await checkVersions();
   setGlobalHostRules(config);
