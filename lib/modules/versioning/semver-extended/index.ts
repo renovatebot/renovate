@@ -1,15 +1,32 @@
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { GenericVersion, VersioningApi } from '../types.ts';
-import { isBelowRange, parseRange, satisfiesRange } from './range.ts';
+import type {
+  GenericVersion,
+  NewValueConfig,
+  VersioningApi,
+} from '../types.ts';
+import {
+  isBelowRange,
+  parseRange,
+  parseRangeAlternatives,
+  satisfiesRange,
+} from './range.ts';
 import type { ParsedVersion } from './types.ts';
+import { updateRange } from './update.ts';
 import { compareVersions, parseVersion } from './version.ts';
 
 export const id = 'semver-extended';
 export const displayName = 'Semver Extended';
 export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = ['pin'];
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'pin',
+  'replace',
+];
+
+const prefixPattern = regEx(/^[vV]/);
 
 const sectionIndexes = {
   major: 0,
@@ -83,6 +100,22 @@ class SemverExtendedVersioningApi extends GenericVersioningApi<SemverExtendedVer
     range: string,
   ): string | null {
     return this.sortMatching(versions, range).at(0) ?? null;
+  }
+
+  override getNewValue(config: NewValueConfig): string | null {
+    const { currentValue, rangeStrategy, newVersion } = config;
+    if (rangeStrategy === 'pin' || this.isVersion(currentValue)) {
+      return super.getNewValue(config);
+    }
+    const parsed = parseVersion(newVersion);
+    const alternatives = parseRangeAlternatives(currentValue);
+    if (!(parsed && alternatives)) {
+      return null;
+    }
+    return updateRange(alternatives, rangeStrategy, {
+      parsed,
+      text: newVersion.replace(prefixPattern, ''),
+    });
   }
 
   /**

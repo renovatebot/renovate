@@ -4,6 +4,12 @@ export interface ParsedVersion {
   prerelease?: string;
 }
 
+export interface NewVersion {
+  parsed: ParsedVersion;
+  /** The new version without a `v` prefix */
+  text: string;
+}
+
 /**
  * One comparator of a range, such as the `>=` and the `1.2.3.4` of `>=1.2.3.4`.
  * The operator is one of `<`, `<=`, `>`, `>=` and `=`.

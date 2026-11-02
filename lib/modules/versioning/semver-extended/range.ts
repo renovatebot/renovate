@@ -116,7 +116,7 @@ function xRange(partial: PartialVersion): Comparator[] {
 /**
  * Parses one term of a range, like `>=1.2.3.4` or `1.2.x`, or returns `null` for an invalid version.
  */
-function parseToken(
+export function parseToken(
   operator: string,
   space: string,
   version: string,
@@ -207,7 +207,9 @@ function parseAlternative(text: string): RangeAlternative | null {
 /**
  * Parses an npm-like range into its `||` alternatives, or returns `null` for an invalid range.
  */
-function parseRangeAlternatives(range: string): RangeAlternative[] | null {
+export function parseRangeAlternatives(
+  range: string,
+): RangeAlternative[] | null {
   const alternatives: RangeAlternative[] = [];
   for (const text of range.split('||')) {
     const alternative = parseAlternative(text);
@@ -222,7 +224,7 @@ function parseRangeAlternatives(range: string): RangeAlternative[] | null {
 /**
  * Returns the comparators of all tokens of an alternative.
  */
-function getComparators(alternative: RangeAlternative): Comparator[] {
+export function getComparators(alternative: RangeAlternative): Comparator[] {
   return alternative.tokens.flatMap((token) => token.comparators);
 }
 
@@ -236,7 +238,7 @@ export function parseRange(range: string): ComparatorSets | null {
 /**
  * Returns whether the version satisfies all comparators by version order alone.
  */
-function satisfiesOrder(
+export function satisfiesOrder(
   version: ParsedVersion,
   comparators: Comparator[],
 ): boolean {
@@ -252,7 +254,7 @@ function satisfiesOrder(
  * Returns whether the version satisfies all comparators, where a prerelease
  * version also needs a comparator with a prerelease of the same release.
  */
-function satisfiesComparators(
+export function satisfiesComparators(
   version: ParsedVersion,
   set: Comparator[],
 ): boolean {
