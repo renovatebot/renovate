@@ -2,6 +2,7 @@ import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { massageConfig } from '../../../config/massage.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
+import { formatValidationMessages } from '../../../config/validation-helpers/utils.ts';
 import { logger } from '../../../logger/index.ts';
 import { ensureComment } from '../../../modules/platform/comment.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
@@ -55,12 +56,14 @@ export async function validateReconfigureBranch(
 
     // add comment to reconfigure PR if it exists
     if (reconfigurePr) {
-      let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
-      body += `Location: \`${configFileName}\`\n`;
-      body += `Message: \`${res.errors
-        .map((e) => e.message)
-        .join(', ')
-        .replace(regEx(/`/g), "'")}\`\n`;
+      // each message is a code span, so any Markdown or HTML in it is shown as-is
+      const messages = res.errors.map(
+        (e) => `\`${e.message.replace(regEx(/`/g), "'")}\``,
+      );
+      const message = formatValidationMessages(messages);
+      // each detail is its own Markdown paragraph, and a list of errors starts on its own line, so it renders as a list
+      const separator = message.includes('\n') ? '\n\n' : ' ';
+      const body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\nLocation: \`${configFileName}\`\n\nMessage:${separator}${message}\n`;
 
       await ensureComment({
         number: reconfigurePr.number,

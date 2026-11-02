@@ -8,6 +8,7 @@ import jsonata from 'jsonata';
 import { logger } from '../../logger/index.ts';
 import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types.ts';
 import type { CustomManager } from '../../modules/manager/custom/types.ts';
+import { formatMarkdownList } from '../../util/markdown-list.ts';
 import { regEx } from '../../util/regex.ts';
 import type { ValidationMessage } from '../types.ts';
 import { ConfigValidationTopic } from './types.ts';
@@ -212,4 +213,15 @@ export function validateJSONataManagerFields(
       message: `JSONata Managers must contain depName or packageName in the query or their templates`,
     });
   }
+}
+
+/**
+ * Format validation messages for display to users, as a Markdown list when there are several.
+ */
+export function formatValidationMessages(messages: string[]): string {
+  // a single message reads better on its own, rather than as a one-item list
+  if (messages.length === 1) {
+    return messages[0];
+  }
+  return formatMarkdownList(messages);
 }

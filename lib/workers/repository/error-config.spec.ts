@@ -46,7 +46,9 @@ describe('workers/repository/error-config', () => {
       const expectedBody = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.
 
 Location: \`package.json\`
+
 Error type: some-error
+
 Message: some-message
 `;
       const error = new Error(CONFIG_VALIDATION);
@@ -66,6 +68,26 @@ Message: some-message
       expect(platform.ensureIssue).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ body: expectedBody }),
       );
+    });
+
+    it('starts a multi-line message on its own line, so a list of errors renders as a list', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'renovate.json';
+      error.validationError = 'some-error';
+      error.validationMessage = '- first error\n- second error';
+
+      await raiseConfigWarningIssue(config, error);
+
+      const { body } = platform.ensureIssue.mock.calls[0][0];
+      expect(body).toEndWith(`Location: \`renovate.json\`
+
+Error type: some-error
+
+Message:
+
+- first error
+- second error
+`);
     });
 
     it('creates an issue for an error carrying no validation details', async () => {

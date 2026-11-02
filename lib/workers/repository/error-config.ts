@@ -41,15 +41,22 @@ async function raiseWarningIssue(
     );
     return;
   }
-  let body = initialBody;
+  // each detail is its own Markdown paragraph, so they don't render as one run-on line
+  const details: string[] = [];
   if (error.validationSource) {
-    body += `Location: \`${error.validationSource}\`\n`;
+    details.push(`Location: \`${error.validationSource}\``);
   }
   if (error.validationError) {
-    body += `Error type: ${error.validationError}\n`;
+    details.push(`Error type: ${error.validationError}`);
   }
   if (error.validationMessage) {
-    body += `Message: ${error.validationMessage}\n`;
+    // a multi-line message, such as a list of validation errors, needs to start on its own line to render as Markdown
+    const separator = error.validationMessage.includes('\n') ? '\n\n' : ' ';
+    details.push(`Message:${separator}${error.validationMessage}`);
+  }
+  let body = initialBody;
+  if (details.length) {
+    body += `${details.join('\n\n')}\n`;
   }
 
   const pr = await platform.getBranchPr(
