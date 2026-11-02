@@ -201,7 +201,7 @@ export function getPnpmMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge` or, before pnpm v11, the repository `.npmrc` `minimum-release-age`.
+ * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the repository `.npmrc` `minimum-release-age`, or the pnpm v11 default.
  */
 export async function setPnpmMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
@@ -240,6 +240,7 @@ export async function setPnpmMinimumReleaseAge(
       workspace,
       root?.managerData?.repoNpmrc?.content,
       root?.extractedConstraints?.pnpm,
+      true,
     );
     if (!minutes) {
       continue;
