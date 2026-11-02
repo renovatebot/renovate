@@ -1,6 +1,6 @@
 // TODO: types (#22198)
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -23,7 +23,10 @@ import {
   renameLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
-import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
+import {
+  calculatePackageManagerMinimumReleaseAgeMs,
+  getMinimumReleaseAgeExemption,
+} from '../../../../util/minimum-release-age.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
@@ -67,6 +70,77 @@ async function getNpmConstraintFromPackageLock(
   return null;
 }
 
+function toHuman(durationMs: number): string {
+  return Duration.fromMillis(durationMs).rescale().toHuman();
+}
+
+interface BeforeFlag {
+  flag: string;
+  notice?: string;
+}
+
+/**
+ * Returns the `--before` flag for `minimumReleaseAgeMs`, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
+ */
+function getBeforeFlag(
+  minimumReleaseAgeMs: number,
+  npmrcContent: string | null,
+  upgrades: Upgrade<NpmManagerData>[],
+): BeforeFlag {
+  if (!minimumReleaseAgeMs) {
+    return { flag: '' };
+  }
+  const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
+
+  // npm rejects --before when min-release-age is set in .npmrc,
+  // so let the .npmrc handle cooldown natively in that case
+  if (npmrcCooldown?.source === 'min-release-age') {
+    logger.debug(
+      `Skipping --before flag because .npmrc already contains min-release-age=${npmrcCooldown.days}`,
+    );
+    return { flag: '' };
+  }
+
+  const exemption = getMinimumReleaseAgeExemption(
+    upgrades,
+    'npm',
+    minimumReleaseAgeMs,
+  );
+  let notice: string | undefined;
+  let ageMs = minimumReleaseAgeMs;
+  if (exemption) {
+    ageMs = exemption.ageMs;
+    const checked = ageMs
+      ? `a minimum release age of ${toHuman(ageMs)}`
+      : 'no minimum release age';
+    logger.debug(
+      `npm checks ${checked} instead of ${toHuman(minimumReleaseAgeMs)}, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
+    );
+    const packages = exemption.depNames.map((name) => `\`${name}\``).join(', ');
+    notice = `npm checked ${checked} instead of ${toHuman(minimumReleaseAgeMs)} for this update, because the \`minimumReleaseAge\` of ${packages} is smaller. npm has no per-package exclude for \`--before\`.`;
+  }
+  if (!ageMs) {
+    return { flag: '', notice };
+  }
+
+  let beforeDate = DateTime.now().minus(ageMs).toUTC();
+
+  if (npmrcCooldown && npmrcCooldown.date < beforeDate) {
+    logger.debug(
+      {
+        npmrcDate: npmrcCooldown.date.toISO(),
+        beforeDate: beforeDate.toISO(),
+      },
+      'Using stricter .npmrc cooldown date over minimumReleaseAge date',
+    );
+    beforeDate = npmrcCooldown.date;
+  }
+
+  const beforeISO = beforeDate.toISO();
+  logger.debug(`Setting npm --before=${beforeISO} based on minimumReleaseAge`);
+  return { flag: ` --before=${beforeISO}`, notice };
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -83,6 +157,7 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   let beforeFallback = false;
+  let minimumReleaseAgeNotice: string | undefined;
   try {
     const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
@@ -122,43 +197,18 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-scripts';
     }
 
-    let beforeFlag = '';
-    const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs({
-      config,
-      manager: 'npm',
-      packageFile: upath.join(lockFileDir, 'package.json'),
+    const before = getBeforeFlag(
+      calculatePackageManagerMinimumReleaseAgeMs({
+        config,
+        manager: 'npm',
+        packageFile: upath.join(lockFileDir, 'package.json'),
+        upgrades,
+      }),
+      npmrcContent,
       upgrades,
-    });
-    if (minimumReleaseAgeMs) {
-      const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
-
-      // npm rejects --before when min-release-age is set in .npmrc,
-      // so let the .npmrc handle cooldown natively in that case
-      if (npmrcCooldown?.source === 'min-release-age') {
-        logger.debug(
-          `Skipping --before flag because .npmrc already contains min-release-age=${npmrcCooldown.days}`,
-        );
-      } else {
-        let beforeDate = DateTime.now().minus(minimumReleaseAgeMs).toUTC();
-
-        if (npmrcCooldown && npmrcCooldown.date < beforeDate) {
-          logger.debug(
-            {
-              npmrcDate: npmrcCooldown.date.toISO(),
-              beforeDate: beforeDate.toISO(),
-            },
-            'Using stricter .npmrc cooldown date over minimumReleaseAge date',
-          );
-          beforeDate = npmrcCooldown.date;
-        }
-
-        const beforeISO = beforeDate.toISO();
-        logger.debug(
-          `Setting npm --before=${beforeISO} based on minimumReleaseAge`,
-        );
-        beforeFlag = ` --before=${beforeISO}`;
-      }
-    }
+    );
+    const beforeFlag = before.flag;
+    minimumReleaseAgeNotice = before.notice;
 
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -365,7 +415,12 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { error: !lockFile, lockFile, beforeFallback };
+  return {
+    error: !lockFile,
+    lockFile,
+    beforeFallback,
+    minimumReleaseAgeNotice,
+  };
 }
 
 export function divideWorkspaceAndRootDeps(

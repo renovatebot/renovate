@@ -4,6 +4,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as npmHelper from './npm.ts';
 
@@ -1111,6 +1112,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],
@@ -1261,6 +1263,93 @@ describe('modules/manager/npm/post-update/npm', () => {
       ]);
     });
 
+    it('lowers --before to the smaller minimumReleaseAge of a young update', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            manager: 'npm',
+            depName: 'some-dep',
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '3 days',
+            releaseTimestamp: '2026-06-13T12:00:00.000Z' as Timestamp,
+          },
+        ],
+      );
+
+      expect(res.minimumReleaseAgeNotice).toBe(
+        'npm checked a minimum release age of 1 day instead of 3 days for this update, because the `minimumReleaseAge` of `some-dep` is smaller. npm has no per-package exclude for `--before`.',
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-14T12:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('skips --before for a young update without minimumReleaseAge', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            manager: 'npm',
+            depName: 'mycorp-lib',
+            packageName: 'mycorp-lib',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+            minimumReleaseAge: null,
+            minimumReleaseAgePackageManager: '3 days',
+          },
+        ],
+      );
+
+      expect(res.minimumReleaseAgeNotice).toBe(
+        'npm checked no minimum release age instead of 3 days for this update, because the `minimumReleaseAge` of `mycorp-lib` is smaller. npm has no per-package exclude for `--before`.',
+      );
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        },
+      ]);
+    });
+
+    it('keeps --before for an update older than minimumReleaseAgeRepository', async () => {
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls: true },
+        [
+          {
+            manager: 'npm',
+            depName: 'some-dep',
+            packageName: 'some-dep',
+            newVersion: '1.0.1',
+            isLockfileUpdate: false,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '3 days',
+            releaseTimestamp: '2026-06-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
+      );
+
+      expect(res.minimumReleaseAgeNotice).toBeUndefined();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
     it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
       // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
       await npmHelper.generateLockFile(
@@ -1274,6 +1363,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],
@@ -1300,6 +1390,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],
@@ -1349,6 +1440,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],
@@ -1393,6 +1485,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],
@@ -1431,6 +1524,7 @@ describe('modules/manager/npm/post-update/npm', () => {
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
+            minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '3 days',
           },
         ],

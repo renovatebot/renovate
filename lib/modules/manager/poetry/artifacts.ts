@@ -11,7 +11,10 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
+import {
+  calculatePackageManagerMinimumReleaseAgeMs,
+  getMinimumReleaseAgeExemption,
+} from '../../../util/minimum-release-age.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import {
@@ -19,7 +22,12 @@ import {
   parse as parseToml,
 } from '../../../util/toml.ts';
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
 import {
   artifactErrorResult,
   resolveToolConstraint,
@@ -136,6 +144,48 @@ async function getSourceCredentialVars(
   return envVars;
 }
 
+interface MinReleaseAgeEnv {
+  env: NodeJS.ProcessEnv;
+  notice?: string;
+}
+
+/**
+ * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` for the lock file update, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
+ */
+function getMinReleaseAgeEnv(
+  config: UpdateArtifactsConfig,
+  packageFileName: string,
+  updatedDeps: Upgrade[],
+): MinReleaseAgeEnv {
+  const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
+    config,
+    manager: 'poetry',
+    packageFile: packageFileName,
+    upgrades: updatedDeps,
+  });
+  if (!ageMs) {
+    return { env: {} };
+  }
+  const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
+  const exemption = getMinimumReleaseAgeExemption(updatedDeps, 'poetry', ageMs);
+  if (!exemption) {
+    return { env: { POETRY_SOLVER_MIN_RELEASE_AGE: days.toString() } };
+  }
+  // rounds down, so that Poetry accepts the releases of the exempted updates
+  const loweredDays = Math.floor(
+    Duration.fromMillis(exemption.ageMs).as('days'),
+  );
+  logger.debug(
+    `Lowering the Poetry minimum release age from ${days} to ${loweredDays} days, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
+  );
+  const packages = exemption.depNames.map((name) => `\`${name}\``).join(', ');
+  return {
+    // `0` also overrides `solver.min-release-age` of the Poetry config
+    env: { POETRY_SOLVER_MIN_RELEASE_AGE: loweredDays.toString() },
+    notice: `Poetry checked a minimum release age of ${loweredDays} days instead of ${days} for this update, because the \`minimumReleaseAge\` of ${packages} is smaller. Poetry has no per-package exclude.`,
+  };
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -177,8 +227,14 @@ export async function updateArtifacts({
     );
   }
 
+  const { env: minReleaseAgeEnv, notice } = getMinReleaseAgeEnv(
+    config,
+    packageFileName,
+    updatedDeps,
+  );
+
   try {
-    return await updateLockFile({
+    const results = await updateLockFile({
       lockFileName,
       existingLockFileContent,
       packageFile: { path: packageFileName, contents: newPackageFileContent },
@@ -200,18 +256,8 @@ export async function updateArtifacts({
             packageFileName,
           )),
           PIP_CACHE_DIR: await ensureCacheDir('pip'),
+          ...minReleaseAgeEnv,
         };
-
-        const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
-          config,
-          manager: 'poetry',
-          packageFile: packageFileName,
-          upgrades: updatedDeps,
-        });
-        if (ageMs) {
-          const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-          extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
-        }
 
         const execOptions: ExecOptions = {
           cwdFile: packageFileName,
@@ -225,6 +271,13 @@ export async function updateArtifacts({
         await gitExec(cmd, execOptions);
       },
     });
+    if (!notice || !results) {
+      return results;
+    }
+    return results.map(({ file }) => ({
+      file,
+      notice: { file: lockFileName, message: notice },
+    }));
   } catch (err) {
     /* v8 ignore if -- defensive rethrow, not reproduced in the poetry specs */
     if (err.message === TEMPORARY_ERROR) {
