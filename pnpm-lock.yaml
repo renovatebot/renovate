@@ -132,8 +132,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@renovatebot/osv-offline':
-        specifier: 4.5.8
-        version: 4.5.8(supports-color@7.2.0)(zod@4.6.7)
+        specifier: 4.5.9
+        version: 4.5.9(supports-color@7.2.0)(zod@4.6.7)
       '@renovatebot/pep440':
         specifier: 6.0.0
         version: 6.0.0
@@ -2052,12 +2052,12 @@ packages:
     resolution: {integrity: sha512-dvFb9ST8WVo+YsrhK6vbWBib49Biu4/fPmZf1QRNIR1Ov5T04god/AA3rRJcyRrofzt/K96vPO9RPhEE3u+hfg==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@4.5.8':
-    resolution: {integrity: sha512-ndX4Dw/zRSnKDJw/7tJUQwqpHAIQDmMlEWLVJJNZ/HpCsQZCDmjPKBBaflEVDys5O3pVG4T9KYQN419A/um0Vw==}
+  '@renovatebot/osv-offline-db@4.5.9':
+    resolution: {integrity: sha512-I9Rvo9YTSuQsdgYwEUHLROpnHfRbOS4Iiajb8wXVtkSwe0T30baLm0FoLN07tfVvKVoWXHMOjvTldqtClUpCGw==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@4.5.8':
-    resolution: {integrity: sha512-xysaXLDbyMTdhb1L0wSrPy/k8ilvdBgHVEflQoL248w/RQYNfGY074ubaqIhVdUQ24kHqEd23wUi35W9IDoImw==}
+  '@renovatebot/osv-offline@4.5.9':
+    resolution: {integrity: sha512-8uHcjca9ZYYAkPW23vrfmxHHE6XGZhQZXBkTfxSqLA622Yhr7+RPtkTbAQtJN2gRHO9mk3oU+IAfNPSjnVZh+Q==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@6.0.0':
@@ -7437,7 +7437,7 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@4.5.8(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline-db@4.5.9(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
       '@containerbase/base': 14.61.0(zod@4.6.7)
       debug: 4.4.3(supports-color@7.2.0)
@@ -7445,9 +7445,9 @@ snapshots:
       - supports-color
       - zod
 
-  '@renovatebot/osv-offline@4.5.8(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline@4.5.9(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
-      '@renovatebot/osv-offline-db': 4.5.8(supports-color@7.2.0)(zod@4.6.7)
+      '@renovatebot/osv-offline-db': 4.5.9(supports-color@7.2.0)(zod@4.6.7)
       fs-extra: 11.4.1
       got: 15.1.0
       luxon: 3.7.2
