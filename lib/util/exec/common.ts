@@ -138,6 +138,7 @@ export function exec(
     const { redactOutput, ...execaOptions } = opts;
     const subprocess = execa(cmd, args, {
       ...execaOptions,
+      ...(redactOutput && { verbose: 'none' }),
       // force detached on non WIN platforms
       // https://github.com/nodejs/node/issues/21825#issuecomment-611328888
       detached: process.platform !== 'win32',

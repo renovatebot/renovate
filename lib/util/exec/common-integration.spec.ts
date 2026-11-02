@@ -10,6 +10,26 @@ import { ExecError } from './exec-error.ts';
 vi.unmock('./common.ts');
 
 describe('util/exec/common-integration', () => {
+  it('disables Execa verbose output when redacting command output', async () => {
+    const verbose = vi.fn();
+    const input = 'private input';
+
+    await expect(
+      rawExec(
+        {
+          command: [
+            process.execPath,
+            '-e',
+            'process.stdin.pipe(process.stdout);',
+          ],
+        },
+        { input, verbose, redactOutput: true },
+      ),
+    ).resolves.toEqual({ stdout: input, stderr: '' });
+
+    expect(verbose).not.toHaveBeenCalled();
+  });
+
   it.each(['private input', Buffer.from('private input'), ''])(
     'delivers input to a real process without discarding its output',
     async (input) => {
@@ -37,6 +57,19 @@ describe('util/exec/common-integration', () => {
     expect(error).toBeInstanceOf(ExecError);
     expect(error).toMatchObject({ message: expect.stringContaining('ENOENT') });
     expect(error).not.toHaveProperty('options.input');
+  });
+
+  it('settles when a process exits without reading a large input', async () => {
+    await expect(
+      rawExec(
+        { command: [process.execPath, '-e', ''] },
+        {
+          input: Buffer.alloc(128 * 1024, 'x'),
+          redactOutput: true,
+          timeout: 1000,
+        },
+      ),
+    ).resolves.toEqual({ stdout: '', stderr: '' });
   });
 
   it('terminates a hung process without retaining the input', async () => {

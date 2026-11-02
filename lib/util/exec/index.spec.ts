@@ -1252,6 +1252,58 @@ describe('util/exec/index', () => {
     );
   });
 
+  it('does not send final input to Hermit environment discovery', async () => {
+    process.env = processEnv;
+    getHermitEnvsMock.mockResolvedValue({});
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'hermit' });
+
+    await exec('foobar', { input: 'private input', redactOutput: true });
+
+    expect(getHermitEnvsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ stdin: 'ignore', redactOutput: true }),
+    );
+    expect(getHermitEnvsMock.mock.calls[0][0]).not.toHaveProperty('input');
+    expect(cpExec).toHaveBeenCalledWith(
+      'foobar',
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    );
+  });
+
+  it('keeps exit metadata in redacted failure logs', async () => {
+    const error = new ExecError('private error', {
+      cmd: 'foobar',
+      stdout: 'private output',
+      stderr: 'private warning',
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockRejectedValue(error);
+
+    await expect(exec('foobar', { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number), exitCode: 1, signal: undefined },
+      'rawExec err',
+    );
+  });
+
+  it('forwards input through the Docker invocation', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+
+    await exec('foobar', { docker, input: 'private input' });
+
+    const invocation = cpExec.mock.calls.find(([cmd]) =>
+      asRawCommand(cmd).startsWith('docker run'),
+    );
+    expect(invocation).toEqual([
+      expect.stringContaining('docker run --rm -i '),
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    ]);
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });
@@ -1389,6 +1441,37 @@ describe('util/exec/index', () => {
       'install-tool npm 1.0.0',
     ]);
   });
+
+  it.each`
+    preCommands    | failedCommand
+    ${[]}          | ${'foobar'}
+    ${['prepare']} | ${'prepare'}
+  `(
+    'keeps installed tools active after $failedCommand fails',
+    async ({ preCommands, failedCommand }) => {
+      process.env = processEnv;
+      memCache.init();
+      cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+      cpExec.mockRejectedValueOnce(new Error('command failed'));
+      cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+      GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+      process.env.CONTAINERBASE = 'true';
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'npm', constraint: '1.1.0' },
+      ];
+
+      await expect(
+        exec('foobar', { toolConstraints, preCommands }),
+      ).rejects.toThrow('command failed');
+      await exec('foobar', { toolConstraints });
+
+      expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+        'install-tool npm 1.1.0',
+        failedCommand,
+        'foobar',
+      ]);
+    },
+  );
 
   it('does not skip an uninstalled tool after another constraint fails to resolve', async () => {
     process.env = processEnv;
