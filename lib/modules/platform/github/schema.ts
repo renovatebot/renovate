@@ -139,6 +139,11 @@ export const GithubBranchProtection = z.object({
 });
 export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
 
+export const GithubPullRequestAutoMerge = z.object({
+  id: z.string().min(1),
+  autoMergeRequest: z.object({ enabledAt: z.string().nullable() }).nullable(),
+});
+
 const GithubRulesetRule = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('non_fast_forward'),

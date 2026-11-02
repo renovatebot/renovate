@@ -310,6 +310,8 @@ export interface Platform {
   reattemptPlatformAutomerge?(
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
+  /** Returns true only when platform automerge is confirmed disabled for the PR. */
+  cancelPlatformAutomerge?(number: number): Promise<boolean>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,
