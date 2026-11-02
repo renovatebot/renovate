@@ -13,6 +13,7 @@ import MarkdownIt from 'markdown-it';
 import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
+import { presets as globalPresets } from '../lib/config/presets/internal/global.preset.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
 import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
@@ -256,8 +257,9 @@ void (async () => {
   GlobalConfig.set({
     // any environment vars that any repository configuration in the documentation references
     allowedEnv: [
+      // In a real deployment, we'd use `globalExtends: ['global:safeEnv']`, but when validating like this, `GlobalConfig.set()` does not resolve presets, so we need to inline the `allowedEnv` values
+      ...globalPresets.safeEnv.allowedEnv!,
       'SOME_ENV_VARIABLE',
-      'GONOSUMDB',
       'SOME_ENV_*',
       'EXTRA_ENV_NAME',
     ],
