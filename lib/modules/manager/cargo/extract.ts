@@ -169,27 +169,43 @@ function resolveRegistryIndex(
 }
 
 /**
- * Returns the Rust version, like `1.100.0` or `1.100`, which the closest `rust-toolchain.toml`, or else the closest `rust-toolchain` file pins.
+ * Returns the toolchain file which rustup uses for `packageFile`: the closest `rust-toolchain` or `rust-toolchain.toml`, and `rust-toolchain` if both are in the same directory.
+ */
+async function findRustToolchainFile(
+  packageFile: string,
+): Promise<string | null> {
+  const [legacyFile, tomlFile] = await Promise.all([
+    findLocalSiblingOrParent(packageFile, 'rust-toolchain'),
+    findLocalSiblingOrParent(packageFile, 'rust-toolchain.toml'),
+  ]);
+  if (!legacyFile || !tomlFile) {
+    return legacyFile ?? tomlFile;
+  }
+  // both are in parent directories of `packageFile`, so the deeper one is closer
+  return tomlFile.split('/').length > legacyFile.split('/').length
+    ? tomlFile
+    : legacyFile;
+}
+
+/**
+ * Returns the Rust version, like `1.100.0` or `1.100`, which the toolchain file that rustup uses for `packageFile` pins.
  */
 async function extractRustConstraint(
   packageFile: string,
 ): Promise<string | null> {
-  for (const fileName of ['rust-toolchain.toml', 'rust-toolchain']) {
-    const toolchainFile = await findLocalSiblingOrParent(packageFile, fileName);
-    if (!toolchainFile) {
-      continue;
-    }
-    const content = await readLocalFile(toolchainFile, 'utf8');
-    const channel = content
-      ? extractRustToolchain(content, toolchainFile)?.deps[0]?.currentValue
-      : null;
-    // channel names like `stable` and nightlies are not a version constraint
-    if (channel && rustVersionRegex.test(channel)) {
-      return channel;
-    }
-    logger.debug(`${toolchainFile} does not pin a Rust version`);
+  const toolchainFile = await findRustToolchainFile(packageFile);
+  if (!toolchainFile) {
     return null;
   }
+  const content = await readLocalFile(toolchainFile, 'utf8');
+  const channel = content
+    ? extractRustToolchain(content, toolchainFile)?.deps[0]?.currentValue
+    : null;
+  // channel names like `stable` and nightlies are not a version constraint
+  if (channel && rustVersionRegex.test(channel)) {
+    return channel;
+  }
+  logger.debug(`${toolchainFile} does not pin a Rust version`);
   return null;
 }
 

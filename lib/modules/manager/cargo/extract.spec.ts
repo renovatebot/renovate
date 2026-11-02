@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -15,6 +16,17 @@ function mockReadLocalFile(files: Record<string, string | null>) {
     }
     return Promise.resolve(content);
   });
+}
+
+/** Mocks `files`, keyed by path, as the closest toolchain files with their contents */
+function mockToolchainFiles(files: Record<string, string>): void {
+  fs.findLocalSiblingOrParent.mockImplementation((_, fileName) =>
+    Promise.resolve(
+      Object.keys(files).find((path) => upath.basename(path) === fileName) ??
+        null,
+    ),
+  );
+  mockReadLocalFile(files);
 }
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
@@ -977,13 +989,6 @@ replace-with = "mcorbin"
         syn = "2.0"
       `;
 
-      function mockToolchainFile(fileName: string, content: string): void {
-        fs.findLocalSiblingOrParent.mockImplementation((_, other) =>
-          Promise.resolve(other === fileName ? fileName : null),
-        );
-        mockReadLocalFile({ [fileName]: content });
-      }
-
       it.each`
         channel
         ${'1.100.0'}
@@ -991,10 +996,9 @@ replace-with = "mcorbin"
       `(
         'extracts channel $channel from rust-toolchain.toml',
         async ({ channel }) => {
-          mockToolchainFile(
-            'rust-toolchain.toml',
-            `[toolchain]\nchannel = "${channel}"\n`,
-          );
+          mockToolchainFiles({
+            'rust-toolchain.toml': `[toolchain]\nchannel = "${channel}"\n`,
+          });
 
           const res = await extractPackageFile(
             cargotoml,
@@ -1007,12 +1011,47 @@ replace-with = "mcorbin"
       );
 
       it('extracts the channel from a legacy rust-toolchain file', async () => {
-        mockToolchainFile('rust-toolchain', '1.100.1\n');
+        mockToolchainFiles({ 'rust-toolchain': '1.100.1\n' });
 
         const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
 
         expect(res?.extractedConstraints).toEqual({ rust: '1.100.1' });
       });
+
+      it('prefers rust-toolchain over rust-toolchain.toml in the same directory', async () => {
+        mockToolchainFiles({
+          'rust-toolchain': '1.99.0\n',
+          'rust-toolchain.toml': '[toolchain]\nchannel = "1.100.0"\n',
+        });
+
+        const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+        expect(res?.extractedConstraints).toEqual({ rust: '1.99.0' });
+      });
+
+      it.each`
+        closer                              | further
+        ${'crates/rust-toolchain'}          | ${'rust-toolchain.toml'}
+        ${'crates/rust-toolchain.toml'}     | ${'rust-toolchain'}
+        ${'crates/foo/rust-toolchain'}      | ${'crates/rust-toolchain.toml'}
+        ${'crates/foo/rust-toolchain.toml'} | ${'crates/rust-toolchain'}
+      `(
+        'prefers the closer $closer over $further',
+        async ({ closer, further }) => {
+          mockToolchainFiles({
+            [closer]: '[toolchain]\nchannel = "1.100.0"\n',
+            [further]: '[toolchain]\nchannel = "1.99.0"\n',
+          });
+
+          const res = await extractPackageFile(
+            cargotoml,
+            'crates/foo/Cargo.toml',
+            config,
+          );
+
+          expect(res?.extractedConstraints).toEqual({ rust: '1.100.0' });
+        },
+      );
 
       it.each`
         content
@@ -1023,7 +1062,7 @@ replace-with = "mcorbin"
         ${'invalid'}
         ${''}
       `('does not extract a constraint from $content', async ({ content }) => {
-        mockToolchainFile('rust-toolchain.toml', content);
+        mockToolchainFiles({ 'rust-toolchain.toml': content });
 
         const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
 

@@ -9,8 +9,9 @@ The `update-lockfile` default means that most upgrades will update `Cargo.lock` 
 
 ### Rust version
 
-Renovate reads the Rust version from the closest `rust-toolchain.toml`, or else the closest `rust-toolchain` file.
-Renovate uses this version as the `rust` constraint, so it runs the `cargo` commands with that Rust version.
+Renovate reads the Rust version from the `rust-toolchain` or `rust-toolchain.toml` file closest to the `Cargo.toml`, like `rustup` does.
+If both files are in the same directory, Renovate uses `rust-toolchain`.
+Renovate uses this version as the `rust` constraint, so with `binarySource=install` it runs the `cargo` commands with that Rust version.
 This only applies if the file pins a version like `1.100.0` or `1.100`, not a channel like `stable`.
 A `rust` constraint in your Renovate config takes precedence.
 Renovate does not use `package.rust-version` from `Cargo.toml`, as it only sets the oldest Rust version which the crate supports.
