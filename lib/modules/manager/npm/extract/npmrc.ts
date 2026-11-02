@@ -2,6 +2,8 @@ import { isNonEmptyString, isNumber, isNumericString } from '@sindresorhus/is';
 import ini from 'ini';
 import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { NpmrcCooldown } from './types.ts';
@@ -83,7 +85,7 @@ export function getNpmrcMinimumReleaseAge(
 }
 
 /**
- * Sets `minimumReleaseAgeExtracted` from the repository `.npmrc` on the package files which are not managed by Yarn or pnpm.
+ * Adds a `packageRules` entry with the minimum release age of the repository `.npmrc` to the package files which are not managed by Yarn or pnpm.
  */
 export function setNpmrcMinimumReleaseAge(
   packageFiles: Partial<PackageFile<NpmManagerData>>[],
@@ -100,7 +102,13 @@ export function setNpmrcMinimumReleaseAge(
       logger.debug(
         `Found minimum release age ${minimumReleaseAge} in ${managerData!.repoNpmrc!.fileName} for ${packageFile.packageFile}`,
       );
-      packageFile.minimumReleaseAgeExtracted = minimumReleaseAge;
+      packageFile.packageRules = [
+        ...coerceArray(packageFile.packageRules),
+        {
+          matchDatasources: [NpmDatasource.id],
+          minimumReleaseAgeExtracted: minimumReleaseAge,
+        },
+      ];
     }
   }
 }
