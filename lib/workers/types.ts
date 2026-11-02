@@ -104,7 +104,8 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
-  minimumReleaseAgeExtracted?: string;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
+  minimumReleaseAgeExtracted?: string | null;
   /**
    * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
    *

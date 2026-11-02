@@ -70,6 +70,8 @@ We recommend specifying minimum release age in **both** your Renovate and packag
 Renovate's concept of `minimumReleaseAge` is set independently to your package manager's configuration, and is used by Renovate to decide whether to suggest dependency updates.
 A manager may read the minimum release age from the configuration of your package manager.
 If it does, Renovate uses the larger of that value and `minimumReleaseAge`.
+Renovate applies that value per dependency, like a `packageRules` entry, so it does not hold back packages which your package manager excludes, or dependencies of other datasources.
+Such an exclusion never lowers `minimumReleaseAge`.
 Setting `minimumReleaseAge` to `null` does not turn off the value from the configuration of your package manager.
 
 When Renovate performs a dependency update, it may delegate to your package manager to update artifacts, such as the lockfile.

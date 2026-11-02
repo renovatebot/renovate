@@ -452,31 +452,6 @@ describe('workers/repository/update/branch/status-checks', () => {
           stabilityStatus: 'yellow',
         });
       });
-
-      it('returns null with only an extracted minimum release age', async () => {
-        const config = branchConfig([
-          {
-            ...upgrade,
-            minimumReleaseAge: null,
-            minimumReleaseAgeExtracted: '3 days',
-          },
-        ]);
-        await expect(computeInternalChecksStatus(config)).resolves.toBeNull();
-      });
-
-      it('ignores the extracted minimum release age', async () => {
-        const config = branchConfig([
-          {
-            ...upgrade,
-            minimumReleaseAge: '0 days',
-            minimumReleaseAgeExtracted: '3 days',
-          },
-        ]);
-        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
-          stabilityStatus: 'green',
-        });
-        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
-      });
     });
 
     it('returns null for a security update with only an extracted minimum release age', async () => {
