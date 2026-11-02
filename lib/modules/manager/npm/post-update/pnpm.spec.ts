@@ -1098,16 +1098,16 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     });
 
     const notice =
-      "The `minimumReleaseAge` of `foo` is smaller than the 4320 minutes which Renovate passes to pnpm, so pnpm may reject versions younger than that. Renovate passes the `minimumReleaseAge` of the repository or `npm` manager config to pnpm, as a `minimumReleaseAge` from `packageRules` only applies to Renovate's own checks. To let pnpm install these packages earlier, add them to `minimumReleaseAgeExclude` in the `pnpm-workspace.yaml`.";
+      'pnpm checked a minimum release age of 1440 minutes instead of 4320 for this update, because the `minimumReleaseAge` of `foo` is smaller. pnpm supports exact versions in `minimumReleaseAgeExclude` only since v10.19.0.';
 
     it.each`
-      workspace                      | extracted         | expected
-      ${undefined}                   | ${undefined}      | ${notice}
-      ${'minimumReleaseAge: 4320\n'} | ${'4320 minutes'} | ${undefined}
+      workspace                      | extracted         | expected     | minutes
+      ${undefined}                   | ${undefined}      | ${notice}    | ${1440}
+      ${'minimumReleaseAge: 4320\n'} | ${'4320 minutes'} | ${undefined} | ${4320}
     `(
-      'warns about updates with a smaller minimumReleaseAge: workspace=$workspace',
-      async ({ workspace, extracted, expected }) => {
-        mockExecAll();
+      'lowers the minimum release age for updates with a smaller minimumReleaseAge: workspace=$workspace',
+      async ({ workspace, extracted, expected, minutes }) => {
+        const execSnapshots = mockExecAll();
         mockPnpmFiles(workspace);
 
         const res = await pnpmHelper.generateLockFile(
@@ -1128,6 +1128,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         );
 
         expect(res.minimumReleaseAgeNotice).toBe(expected);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: `${pnpmInstall} --config.minimum-release-age=${minutes} --no-frozen-lockfile`,
+          },
+        ]);
       },
     );
 
@@ -1135,7 +1140,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       name                                   | upgrade                                                                           | warns
       ${'a non-npm datasource'}              | ${{ datasource: 'node-version' }}                                                 | ${false}
       ${'a minimumReleaseAgeBuffer'}         | ${{ minimumReleaseAge: '2 days', minimumReleaseAgeBuffer: '1 day' }}              | ${false}
-      ${'the same sub-minute value'}         | ${{ minimumReleaseAge: '90 seconds', minimumReleaseAgeRepository: '90 seconds' }} | ${false}
+      ${'the same sub-minute value'}         | ${{ minimumReleaseAge: '90 seconds', minimumReleaseAgeRepository: '90 seconds' }} | ${true}
       ${'a version older than the cutoff'}   | ${{ releaseTimestamp: '2020-01-01T00:00:00.000Z' }}                               | ${false}
       ${'a version younger than the cutoff'} | ${{ releaseTimestamp: new Date().toISOString() }}                                 | ${true}
     `(
@@ -1248,7 +1253,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       );
 
       expect(res.minimumReleaseAgeNotice).toStartWith(
-        'The `minimumReleaseAge` of `foo` is smaller than the 1440 minutes',
+        'pnpm checked a minimum release age of 0 minutes instead of 1440',
       );
     });
 

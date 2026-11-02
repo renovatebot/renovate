@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { DateTime } from 'luxon';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
@@ -12,6 +13,7 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
@@ -46,6 +48,10 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 };
 
 const config: UpdateArtifactsConfig = {};
+
+function releasedDaysAgo(days: number): Timestamp {
+  return DateTime.now().minus({ days }).toISO() as Timestamp;
+}
 
 describe('modules/manager/poetry/artifacts', () => {
   describe('getPythonConstraint', () => {
@@ -795,6 +801,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep1',
             manager: 'poetry',
+            minimumReleaseAge: '7 days',
             minimumReleaseAgeRepository: '7 days',
           },
         ],
@@ -852,6 +859,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep1',
             manager: 'poetry',
+            minimumReleaseAge: '5 days',
             minimumReleaseAgePackageManager: '5 days',
             minimumReleaseAgeRepository: '3 days',
           },
@@ -881,6 +889,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep1',
             manager: 'poetry',
+            minimumReleaseAge: '12 hours',
             minimumReleaseAgeRepository: '12 hours',
           },
         ],
@@ -896,6 +905,170 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('passes 0 days if an update younger than minimumReleaseAgePackageManager has no minimumReleaseAge', async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+
+      const res = await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'mycorp-lib',
+            manager: 'poetry',
+            minimumReleaseAge: null,
+            minimumReleaseAgePackageManager: '3 days',
+            releaseTimestamp: releasedDaysAgo(1),
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'poetry.lock',
+            contents: 'New poetry.lock',
+          },
+          notice: {
+            file: 'poetry.lock',
+            message:
+              'Poetry checked a minimum release age of 0 days instead of 3 for this update, because the `minimumReleaseAge` of `mycorp-lib` is smaller. Poetry has no per-package exclude.',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '0',
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('lowers POETRY_SOLVER_MIN_RELEASE_AGE to the smallest minimumReleaseAge of the young updates', async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+
+      const res = await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAge: '2 days',
+            minimumReleaseAgeRepository: '7 days',
+            releaseTimestamp: releasedDaysAgo(3),
+          },
+          {
+            depName: 'dep2',
+            manager: 'poetry',
+            minimumReleaseAge: '36 hours',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'poetry.lock',
+            contents: 'New poetry.lock',
+          },
+          notice: {
+            file: 'poetry.lock',
+            message:
+              'Poetry checked a minimum release age of 1 days instead of 7 for this update, because the `minimumReleaseAge` of `dep1`, `dep2` is smaller. Poetry has no per-package exclude.',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '1',
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('does not lower POETRY_SOLVER_MIN_RELEASE_AGE for a release older than minimumReleaseAgeRepository', async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+
+      const res = await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+            releaseTimestamp: releasedDaysAgo(10),
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'poetry.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('returns no notice if the lowered lock file is unchanged', async () => {
+      mockExecAll();
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+
+      const res = await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(res).toBeNull();
     });
 
     it('uses the own minimumReleaseAge for lock file maintenance', async () => {
@@ -941,6 +1114,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep2',
             manager: 'poetry',
+            minimumReleaseAge: '5 days',
             minimumReleaseAgePackageManager: '5 days',
             minimumReleaseAgeRepository: '3 days',
           },

@@ -29,7 +29,7 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
-  /** Warns that pnpm got a larger minimum release age than some updates of the branch */
+  /** Tells about the minimum release age which Renovate passed to the package manager for some updates of the branch */
   minimumReleaseAgeNotice?: string;
 }
 
