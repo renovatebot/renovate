@@ -8,7 +8,7 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as _aeCvss from 'ae-cvss-calculator';
+import aeCvss from 'ae-cvss-calculator';
 import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
@@ -37,8 +37,7 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
-  .default;
+const { fromVector } = aeCvss;
 
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
@@ -269,6 +268,7 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
+            versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
@@ -578,6 +578,7 @@ export class Vulnerabilities {
       depVersion,
       fixedVersion,
       datasource,
+      versioning: depVersioning,
       packageFileConfig,
     } = vul;
     if (isNullOrUndefined(fixedVersion)) {
@@ -587,8 +588,8 @@ export class Vulnerabilities {
       return null;
     }
 
-    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
-    const versioning = getDefaultVersioning(datasource);
+    // Prefer the `versioning` already assigned to the dependency by its manager
+    const versioning = depVersioning ?? getDefaultVersioning(datasource);
 
     logger.debug(
       {
