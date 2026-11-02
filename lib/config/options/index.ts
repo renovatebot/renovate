@@ -4035,10 +4035,12 @@ export function getOptions(): Readonly<RenovateOptions>[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, defaultConfig] of Object.entries(managerDefaultConfigs)) {
+  for (const [name, { displayName, defaultConfig }] of Object.entries(
+    managerDefaultConfigs,
+  )) {
     const managerConfig: Readonly<RenovateOptions> = {
       name,
-      description: `Configuration object for the ${name} manager`,
+      description: `Configuration object for the ${displayName} manager`,
       stage: 'package',
       type: 'object',
       default: defaultConfig,

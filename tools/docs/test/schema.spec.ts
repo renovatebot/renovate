@@ -437,5 +437,16 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
     it('links every option to a heading which exists', async () => {
       await expect(getLinksToMissingHeadings()).resolves.toBeEmptyArray();
     });
+
+    it('describes a manager by its display name, and links to its page', async () => {
+      const { definitions } = await buildSchema();
+
+      expect(definitions.ant).toMatchObject({
+        description:
+          'Configuration object for the Apache Ant manager\nSee also: https://docs.renovatebot.com/modules/manager/ant/',
+        markdownDescription:
+          'Configuration object for the Apache Ant manager\n\nSee also: [ant](https://docs.renovatebot.com/modules/manager/ant/)',
+      });
+    });
   });
 });
