@@ -123,10 +123,12 @@ export async function generateLockFile(
     }
 
     let beforeFlag = '';
-    const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs(
+    const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs({
       config,
+      manager: 'npm',
+      packageFile: upath.join(lockFileDir, 'package.json'),
       upgrades,
-    );
+    });
     if (minimumReleaseAgeMs) {
       const npmrcCooldown = parseNpmrcCooldown(npmrcContent);
 

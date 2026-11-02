@@ -53,14 +53,28 @@ async function resolveConstraint(
   );
 }
 
+/**
+ * The minimum release age which Renovate passes to npm or pnpm for the update in `config`.
+ */
+function getPassedMinimumReleaseAgeMs(
+  config: NpmEnforcesMinimumReleaseAgeConfig,
+  lockFile: string,
+): number {
+  return calculatePackageManagerMinimumReleaseAgeMs({
+    config,
+    manager: 'npm',
+    packageFile: upath.join(upath.dirname(lockFile), 'package.json'),
+    upgrades: [config],
+  });
+}
+
 async function npmEnforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
   npmLock: string,
 ): Promise<boolean> {
   const npmrcCooldown = parseNpmrcCooldown(config.npmrc);
   // the value which Renovate passes as `--before` to npm
-  const minimumReleaseAgeMs =
-    calculatePackageManagerMinimumReleaseAgeMs(config);
+  const minimumReleaseAgeMs = getPassedMinimumReleaseAgeMs(config, npmLock);
 
   if (npmrcCooldown?.source !== 'min-release-age') {
     // npm applies a `before` from the `.npmrc` itself, and Renovate passes
@@ -110,7 +124,7 @@ async function pnpmEnforcesMinimumReleaseAge(
     getPnpmMinimumReleaseAgeMinutes(workspace, config.npmrc, constraint) ?? 0;
   return (
     Math.max(
-      calculatePackageManagerMinimumReleaseAgeMs(config),
+      getPassedMinimumReleaseAgeMs(config, pnpmLockFile),
       pnpmMinutes * minuteMs,
     ) > 0
   );

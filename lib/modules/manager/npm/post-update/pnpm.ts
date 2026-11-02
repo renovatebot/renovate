@@ -97,10 +97,12 @@ async function getMinimumReleaseAgeFlag(
   pnpmConstraint: string | null | undefined,
 ): Promise<MinimumReleaseAgeFlag | null> {
   // the pnpm value is added below, as it depends on the pnpm version
-  const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs(
+  const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs({
     config,
+    manager: 'npm',
+    packageFile: upath.join(upath.dirname(lockFileName), 'package.json'),
     upgrades,
-  );
+  });
   if (!minimumReleaseAgeMs) {
     return null;
   }

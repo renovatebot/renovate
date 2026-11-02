@@ -782,6 +782,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           config,
           [
             {
+              manager: 'npm',
               minimumReleaseAge,
               minimumReleaseAgeRepository: minimumReleaseAge,
             },
@@ -819,6 +820,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           { ...config, constraints: { pnpm } },
           [
             {
+              manager: 'npm',
               minimumReleaseAge,
               minimumReleaseAgeRepository: minimumReleaseAge,
             },
@@ -847,7 +849,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         mockPnpmFiles('minimumReleaseAge: 1440\n');
 
         await pnpmHelper.generateLockFile('some-folder', {}, config, [
-          { minimumReleaseAgeRepository: minimumReleaseAge, ...upgrade },
+          {
+            manager: 'npm',
+            minimumReleaseAgeRepository: minimumReleaseAge,
+            ...upgrade,
+          },
         ]);
 
         expect(execSnapshots).toMatchObject([
@@ -862,6 +868,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
       await pnpmHelper.generateLockFile('some-folder', {}, config, [
         {
+          manager: 'npm',
           isLockFileMaintenance: true,
           minimumReleaseAge: '7 days',
           minimumReleaseAgeRepository: '1 day',
@@ -880,7 +887,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       mockPnpmFiles();
 
       await pnpmHelper.generateLockFile('some-folder', {}, config, [
-        { isLockFileMaintenance: true, minimumReleaseAge: 'bananas' },
+        {
+          manager: 'npm',
+          isLockFileMaintenance: true,
+          minimumReleaseAge: 'bananas',
+        },
       ]);
 
       expect(execSnapshots).toMatchObject([
@@ -898,6 +909,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         { ...config, minimumReleaseAge: '14 days' },
         [
           {
+            manager: 'npm',
             depName: 'foo',
             datasource: 'npm',
             minimumReleaseAge: '14 days',
@@ -922,7 +934,13 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         'some-folder',
         {},
         { ...config, minimumReleaseAgeRepository: '7 days' },
-        [{ depName: 'foo', minimumReleaseAgeRepository: '3 days' }],
+        [
+          {
+            manager: 'npm',
+            depName: 'foo',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
       );
 
       expect(execSnapshots).toMatchObject([
@@ -976,6 +994,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
             { depName: 'bar', minimumReleaseAge: '3 days' },
           ].map((upgrade) => ({
             ...upgrade,
+            manager: 'npm',
             datasource: 'npm',
             minimumReleaseAgeExtracted: extracted,
             minimumReleaseAgeRepository: '3 days',
@@ -1005,6 +1024,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           { ...config, constraints: { pnpm: '^10.20.0' } },
           [
             {
+              manager: 'npm',
               depName: 'foo',
               datasource: 'npm',
               minimumReleaseAgeRepository: '3 days',
@@ -1027,6 +1047,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         { ...config, constraints: { pnpm: '^11.0.0' } },
         [
           {
+            manager: 'npm',
             depName: 'foo',
             datasource: 'npm',
             minimumReleaseAge: null,
@@ -1046,6 +1067,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
       const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
         {
+          manager: 'npm',
           depName: 'foo',
           datasource: 'npm',
           minimumReleaseAgeRepository: '3 days',
@@ -1065,7 +1087,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       mockPnpmFiles();
 
       const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
-        { minimumReleaseAge: '1 day', minimumReleaseAgeRepository: '1 day' },
+        {
+          manager: 'npm',
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeRepository: '1 day',
+        },
       ]);
 
       expect(res).toEqual({ error: true, stderr: '', stdout });
@@ -1079,7 +1105,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       mockPnpmFiles();
 
       const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
-        { minimumReleaseAge: '1 day', minimumReleaseAgeRepository: '1 day' },
+        {
+          manager: 'npm',
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeRepository: '1 day',
+        },
       ]);
 
       expect(res).toEqual({
@@ -1108,6 +1138,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           config,
           [
             {
+              manager: 'npm',
               minimumReleaseAge: '1 day',
               minimumReleaseAgeRepository: '1 day',
               ...upgrade,
