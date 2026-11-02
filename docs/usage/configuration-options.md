@@ -3062,7 +3062,7 @@ Security updates pass no minimum release age to the package manager.
 }
 ```
 
-A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch.
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch, but not over the minimum release age configured in the package manager itself.
 
 ## `minor`
 
