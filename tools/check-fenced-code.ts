@@ -13,11 +13,11 @@ import MarkdownIt from 'markdown-it';
 import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
-import { presets as globalPresets } from '../lib/config/presets/internal/global.preset.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
 import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
 import { parseJsonc } from '../lib/util/common.ts';
+import { resolveGlobalExtends } from '../lib/workers/global/config/parse/index.ts';
 import { getParsedContent } from '../lib/workers/global/config/parse/util.ts';
 
 await init();
@@ -254,10 +254,11 @@ void (async () => {
   addFormats(validator);
   validate = validator.compile(draft7MetaSchema);
 
+  const { allowedEnv = [] } = await resolveGlobalExtends(['global:safeEnv']);
   GlobalConfig.set({
     // any environment vars that any repository configuration in the documentation references
     allowedEnv: [
-      ...globalPresets.safeEnv.allowedEnv!,
+      ...allowedEnv,
       'SOME_ENV_VARIABLE',
       'SOME_ENV_*',
       'EXTRA_ENV_NAME',
