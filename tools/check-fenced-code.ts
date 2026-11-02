@@ -257,7 +257,7 @@ void (async () => {
   GlobalConfig.set({
     // any environment vars that any repository configuration in the documentation references
     allowedEnv: [
-      // `globalExtends: ['global:safeEnv']` cannot be used here, as `GlobalConfig.set()` does not resolve presets
+      // In a real deployment, we'd use `globalExtends: ['global:safeEnv']`, but when validating like this, `GlobalConfig.set()` does not resolve presets, so we need to inline the `allowedEnv` values
       ...globalPresets.safeEnv.allowedEnv!,
       'SOME_ENV_VARIABLE',
       'SOME_ENV_*',
