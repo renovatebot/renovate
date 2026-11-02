@@ -142,12 +142,14 @@ export async function getPreset(
       tag,
     });
   } else if (presetSource === 'custom') {
-    // baseConfig is only set during globalExtends
+    // Check baseConfig first, as callers (such as validatePresets, merge, inherited)
+    // pass a context-specific baseConfig. Fall back to GlobalConfig when baseConfig
+    // does not provide customPresets.
     presetConfig = clone(
       (baseConfig?.customPresets ?? GlobalConfig.get('customPresets'))?.[
         presetName
       ],
-    ) as Preset | undefined;
+    );
   } else {
     const cacheKey = buildCacheKey('preset', preset);
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');

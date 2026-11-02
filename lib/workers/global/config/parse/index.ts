@@ -7,8 +7,9 @@ import {
   setHttpGlobalConfig,
 } from '../../../../config/global.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
+import type { Preset } from '../../../../config/presets/types.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
-import type { AllConfig, RenovateConfig } from '../../../../config/types.ts';
+import type { AllConfig } from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
@@ -32,7 +33,7 @@ import * as fileParser from './file.ts';
 export async function resolveGlobalExtends(
   globalExtends: string[],
   ignorePresets?: string[],
-  customPresets?: Record<string, RenovateConfig>,
+  customPresets?: Record<string, Preset>,
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets

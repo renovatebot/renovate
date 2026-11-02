@@ -526,6 +526,9 @@ The above configuration approach will mean the values are redacted in logs like 
 
 Use `customPresets` to define presets directly in the global config, instead of hosting them in a repository or on an HTTP server.
 
+Options that only work in the global config cannot be used inside custom presets.
+Any `{{ secrets.X }}` template inside a custom preset is resolved when each repository is processed.
+
 For example, in your global config:
 
 ```json {configType=global}
@@ -543,7 +546,7 @@ Then in the `renovate.json` of a repository:
 
 ```json
 {
-  "extends": ["custom.myPreset"]
+  "extends": ["custom>myPreset"]
 }
 ```
 

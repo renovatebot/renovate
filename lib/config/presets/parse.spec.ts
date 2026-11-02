@@ -341,7 +341,7 @@ describe('config/presets/parse', () => {
     });
 
     it('parses custom', () => {
-      expect(parsePreset('custom.myPreset')).toEqual({
+      expect(parsePreset('custom>myPreset')).toEqual({
         repo: '',
         params: undefined,
         rawParams: undefined,
@@ -351,7 +351,7 @@ describe('config/presets/parse', () => {
     });
 
     it('parses custom with params', () => {
-      expect(parsePreset('custom.group(my-group)')).toEqual({
+      expect(parsePreset('custom>group(my-group)')).toEqual({
         repo: '',
         params: ['my-group'],
         rawParams: 'my-group',
@@ -361,7 +361,7 @@ describe('config/presets/parse', () => {
     });
 
     it('parses custom with colons in the preset name', () => {
-      expect(parsePreset('custom.group:my-group')).toEqual({
+      expect(parsePreset('custom>group:my-group')).toEqual({
         repo: '',
         params: undefined,
         rawParams: undefined,

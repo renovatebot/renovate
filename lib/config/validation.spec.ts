@@ -3,6 +3,7 @@ import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
+import type { Preset } from './presets/types.ts';
 import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
 import * as configValidation from './validation.ts';
 
@@ -3404,7 +3405,7 @@ describe('config/validation', () => {
       });
 
       it('customPresets', async () => {
-        const customPresets: Record<string, RenovateConfig> = {};
+        const customPresets: Record<string, Preset> = {};
         Object.assign(
           customPresets,
           {

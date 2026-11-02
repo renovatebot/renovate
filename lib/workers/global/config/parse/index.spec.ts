@@ -239,7 +239,7 @@ describe('workers/global/config/parse/index', () => {
             labels: ['custom-label'],
           },
         },
-        globalExtends: ['custom.myPreset'],
+        globalExtends: ['custom>myPreset'],
       });
 
       const parsedConfig = await configParser.parseConfigs(
