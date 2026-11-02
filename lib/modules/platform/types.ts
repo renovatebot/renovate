@@ -312,6 +312,12 @@ export interface Platform {
   reattemptPlatformAutomerge?(
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
+  /**
+   * Re-enables platform automerge which the platform disabled while pushing to the PR's branch in this run, does nothing otherwise.
+   */
+  restorePlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<void>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,

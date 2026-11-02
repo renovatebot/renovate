@@ -540,6 +540,12 @@ export async function processBranch(
       config.commitTrailers = compileCommitTrailers(config, config);
 
       commitSha = await commitFilesToBranch(config);
+      if (!commitSha && branchPr && platform.restorePlatformAutomerge) {
+        await platform.restorePlatformAutomerge({
+          number: branchPr.number,
+          platformPrOptions: getPlatformPrOptions(config),
+        });
+      }
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
       await scm.checkoutBranch(config.baseBranch);
@@ -676,12 +682,36 @@ export async function processBranch(
       }
     }
   } catch (err) {
-    return handleBranchError(err, {
+    // re-enable platform automerge which the platform disabled for the push
+    let restoreRateLimitErr: Error | undefined;
+    if (branchPr && platform.restorePlatformAutomerge) {
+      try {
+        await platform.restorePlatformAutomerge({
+          number: branchPr.number,
+          platformPrOptions: getPlatformPrOptions(config),
+        });
+      } catch (restoreErr) {
+        // keep handling the original error
+        logger.warn({ err: restoreErr }, 'Error restoring platform automerge');
+        if (
+          restoreErr instanceof Error &&
+          restoreErr.message === PLATFORM_RATE_LIMIT_EXCEEDED
+        ) {
+          restoreRateLimitErr = restoreErr;
+        }
+      }
+    }
+    const result = handleBranchError(err, {
       branchExists,
       prNo: branchPr?.number,
       commitSha,
       updatesVerified,
     });
+    // the original error was handled without being passed up, so pass up the rate limit hit while restoring
+    if (restoreRateLimitErr) {
+      throw restoreRateLimitErr;
+    }
+    return result;
   }
   try {
     logger.debug('Ensuring PR');

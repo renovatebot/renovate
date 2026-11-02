@@ -6,6 +6,7 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PR_ALREADY_IN_MERGE_QUEUE,
+  PR_AUTOMERGE_ENABLED_BY_OTHER,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -70,6 +71,17 @@ export function handleBranchError(
   }
   if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
     logger.debug('Branch PR is in the merge queue - skipping branch update');
+    return {
+      branchExists,
+      prNo,
+      result: 'done',
+      commitSha,
+    };
+  }
+  if (err.message === PR_AUTOMERGE_ENABLED_BY_OTHER) {
+    logger.debug(
+      'Branch PR has platform automerge enabled by someone else - skipping branch update',
+    );
     return {
       branchExists,
       prNo,
