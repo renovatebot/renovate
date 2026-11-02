@@ -12,9 +12,17 @@ export function raiseConfigWarningIssue(
 ): Promise<void> {
   logger.debug('raiseConfigWarningIssue()');
   const title = `Action Required: Fix Renovate Configuration`;
-  const body = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.\n\n`;
+  const body = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.`;
   const notificationName = 'configErrorIssue';
-  return raiseWarningIssue(config, notificationName, title, body, error);
+  const guidance = `If the error is in a Renovate configuration file, you can check your changes before committing them with [\`renovate-config-validator\`](${GlobalConfig.get('productLinks').documentation}config-validation/).`;
+  return raiseWarningIssue(
+    config,
+    notificationName,
+    title,
+    body,
+    error,
+    guidance,
+  );
 }
 
 export function raiseCredentialsWarningIssue(
@@ -23,7 +31,7 @@ export function raiseCredentialsWarningIssue(
 ): Promise<void> {
   logger.debug('raiseCredentialsWarningIssue()');
   const title = `Action Required: Add missing credentials`;
-  const body = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.\n\n`;
+  const body = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.`;
   const notificationName = 'missingCredentialsError';
   return raiseWarningIssue(config, notificationName, title, body, error);
 }
@@ -34,6 +42,7 @@ async function raiseWarningIssue(
   title: string,
   initialBody: string,
   error: Error,
+  guidance?: string,
 ): Promise<void> {
   if (config.mode === 'silent') {
     logger.debug(
@@ -42,22 +51,22 @@ async function raiseWarningIssue(
     return;
   }
   // each detail is its own Markdown paragraph, so they don't render as one run-on line
-  const details: string[] = [];
+  const paragraphs = [initialBody];
   if (error.validationSource) {
-    details.push(`Location: \`${error.validationSource}\``);
+    paragraphs.push(`Location: \`${error.validationSource}\``);
   }
   if (error.validationError) {
-    details.push(`Error type: ${error.validationError}`);
+    paragraphs.push(`Error type: ${error.validationError}`);
   }
   if (error.validationMessage) {
     // a multi-line message, such as a list of validation errors, needs to start on its own line to render as Markdown
     const separator = error.validationMessage.includes('\n') ? '\n\n' : ' ';
-    details.push(`Message:${separator}${error.validationMessage}`);
+    paragraphs.push(`Message:${separator}${error.validationMessage}`);
   }
-  let body = initialBody;
-  if (details.length) {
-    body += `${details.join('\n\n')}\n`;
+  if (guidance) {
+    paragraphs.push(guidance);
   }
+  const body = `${paragraphs.join('\n\n')}\n`;
 
   const pr = await platform.getBranchPr(
     getInheritedOrGlobal('onboardingBranch')!,
@@ -86,7 +95,8 @@ async function raiseWarningIssue(
 
   const res = await platform.ensureIssue({
     title,
-    body,
+    // the onboarding PR has its own instructions for once the problem is resolved, so this is only needed in the issue
+    body: `${body}\nOnce this is resolved, Renovate will close this issue automatically on its next successful run.\n`,
     once: false,
     shouldReOpen: config.configWarningReuseIssue,
     confidential: config.confidential,
