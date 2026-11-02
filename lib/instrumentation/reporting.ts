@@ -1,8 +1,9 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../config/types.ts';
-import { prettier } from '../expose.ts';
+import { pkg, prettier } from '../expose.ts';
 import { getProblems, logger } from '../logger/index.ts';
 import { sanitizeValue } from '../logger/utils.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
@@ -12,6 +13,7 @@ import type { ExtractResult } from '../workers/repository/process/extract-update
 import type { LibYearsWithStatus, Report } from './types.ts';
 
 const report: Report = {
+  renovateVersion: pkg.version,
   problems: [],
   repositories: {},
 };
@@ -21,8 +23,33 @@ const report: Report = {
  * Should only be used for testing
  */
 export function resetReport(): void {
+  delete report.startedAt;
+  delete report.finishedAt;
   report.problems = [];
   report.repositories = {};
+}
+
+export function startReport(): void {
+  report.startedAt = DateTime.utc().toISO();
+}
+
+export function addRepositoryStart(config: RenovateConfig): void {
+  if (isNullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  // keep the first start time when a repository is processed again after automerge
+  report.repositories[config.repository!].startedAt ??= DateTime.utc().toISO();
+}
+
+export function addRepositoryFinish(config: RenovateConfig): void {
+  if (isNullOrUndefined(config.reportType)) {
+    return;
+  }
+
+  coerceRepo(config.repository!);
+  report.repositories[config.repository!].finishedAt = DateTime.utc().toISO();
 }
 
 export function addBranchStats(
@@ -64,6 +91,7 @@ export function addLibYears(
 }
 
 export function finalizeReport(): void {
+  report.finishedAt = DateTime.utc().toISO();
   const allProblems = structuredClone(getProblems());
   for (const problem of allProblems) {
     const repository = problem.repository;

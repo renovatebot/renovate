@@ -3,6 +3,7 @@ import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '~test/s3.ts';
 import { fs, logger } from '~test/util.ts';
 import type { RenovateConfig } from '../config/types.ts';
+import { pkg } from '../expose.ts';
 import type {
   NpmrcPackageFile,
   PackageFile,
@@ -12,10 +13,13 @@ import {
   addBranchStats,
   addExtractionStats,
   addLibYears,
+  addRepositoryFinish,
+  addRepositoryStart,
   exportStats,
   finalizeReport,
   getReport,
   resetReport,
+  startReport,
 } from './reporting.ts';
 import type { Report } from './types.ts';
 
@@ -64,6 +68,7 @@ describe('instrumentation/reporting', () => {
   };
 
   const expectedReport: Report = {
+    renovateVersion: pkg.version,
     problems: [],
     repositories: {
       'myOrg/myRepo': {
@@ -87,9 +92,55 @@ describe('instrumentation/reporting', () => {
       dependencyStatus: { outdated: 0, total: 0 },
     });
 
+    addRepositoryStart(config);
+    addRepositoryFinish(config);
+
     expect(getReport()).toEqual({
+      renovateVersion: pkg.version,
       problems: [],
       repositories: {},
+    });
+  });
+
+  describe('timestamps', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('records run and repository start and finish times', () => {
+      const config: RenovateConfig = {
+        repository: 'myOrg/myRepo',
+        reportType: 'logging',
+      };
+
+      vi.useFakeTimers({ now: new Date('2026-01-01T00:00:00.000Z') });
+      startReport();
+      addRepositoryStart(config);
+
+      vi.setSystemTime(new Date('2026-01-01T00:01:00.000Z'));
+      // a second start, e.g. after an automerge retry, keeps the first time
+      addRepositoryStart(config);
+      addRepositoryFinish(config);
+
+      vi.setSystemTime(new Date('2026-01-01T00:02:00.000Z'));
+      logger.getProblems.mockReturnValue([]);
+      finalizeReport();
+
+      expect(getReport()).toEqual({
+        renovateVersion: pkg.version,
+        startedAt: '2026-01-01T00:00:00.000Z',
+        finishedAt: '2026-01-01T00:02:00.000Z',
+        problems: [],
+        repositories: {
+          'myOrg/myRepo': {
+            startedAt: '2026-01-01T00:00:00.000Z',
+            finishedAt: '2026-01-01T00:01:00.000Z',
+            problems: [],
+            branches: [],
+            packageFiles: {},
+          },
+        },
+      });
     });
   });
 
@@ -310,6 +361,8 @@ describe('instrumentation/reporting', () => {
       reportType: 'logging',
     };
     const expectedReport = {
+      renovateVersion: pkg.version,
+      finishedAt: expect.any(String),
       problems: [
         {
           level: 30,
@@ -363,6 +416,7 @@ describe('instrumentation/reporting', () => {
     });
 
     expect(getReport()).toEqual({
+      renovateVersion: pkg.version,
       problems: [],
       repositories: {
         'myOrg/myRepo': {
