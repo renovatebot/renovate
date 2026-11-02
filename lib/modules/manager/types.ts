@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  PackageRule,
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -128,12 +129,29 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
   /**
-   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days` or as an ISO 8601 date.
+   * Rules from the package manager's own configuration, applied after the `packageRules` of the repository.
+   *
+   * Managers use them to set `minimumReleaseAgeExtracted` per dependency.
+   */
+  packageRules?: ExtractedPackageRule[];
+}
+
+/**
+ * A `packageRules` entry which a manager builds from the package manager's own configuration.
+ *
+ * A rule which sets a duration must match on `matchDatasources`, so that it does not apply to lock file maintenance, which has no datasource unless the package file sets one.
+ */
+export interface ExtractedPackageRule extends Pick<
+  PackageRule,
+  Extract<keyof PackageRule, `match${string}`>
+> {
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days` or an ISO 8601 date, or `null` for packages it excludes.
    *
    * A date counts as the time elapsed since that date, so that the age stays correct when Renovate reuses a cached extract result.
    * Renovate uses the larger of this and `minimumReleaseAge`.
    */
-  minimumReleaseAgeExtracted?: string;
+  minimumReleaseAgeExtracted: string | null;
 }
 
 export interface PackageFile<T = unknown> extends PackageFileContent<T> {
