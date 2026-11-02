@@ -1,4 +1,4 @@
-Renovate's `semver-extended` versioning works like [Semantic Versioning 2.0](https://semver.org), but allows three to ten numeric release parts, for example `27.3.4.19` or `0.6.0.1`.
+Renovate's `semver-extended` versioning works like [Semantic Versioning 2.0](https://semver.org) and npm ranges, but allows three to ten numeric release parts, for example `27.3.4.19` or `0.6.0.1`.
 
 A version has this format:
 
@@ -18,4 +18,28 @@ Like `semver`, an update counts as breaking when either version has a prerelease
 
 Prereleases are ordered like in SemVer 2.0: a version with a prerelease is lower than the same version without one, and prerelease identifiers are compared one by one, numeric identifiers numerically and others in ASCII order.
 
-This versioning does not support ranges.
+Ranges use a subset of the npm syntax: comparators, exact and partial versions, hyphen ranges and `||`.
+There is no `=` or `==` operator, an exact version is written bare, like `1.2.3.4`.
+The `^`, `~` and `~>` operators aren't supported either: write `^26` as `26` and `^26.2.1` as `>=26.2.1 <27`.
+
+| Range                   | Meaning                                        |
+| ----------------------- | ---------------------------------------------- |
+| `1.2.3.4`               | exactly `1.2.3.4`                              |
+| `>1.2.3.4`, `<=1.2.3.4` | comparators `<`, `<=`, `>`, `>=`               |
+| `>=1.2.3.4 <1.3.0`      | comparators separated by spaces must all match |
+| `>= 1.2.3.4`            | spaces are allowed after an operator           |
+| `1.x \|\| 2.x`          | `\|\|` separates alternatives                  |
+| `1.2.3.4 - 2.3.4.5`     | `>=1.2.3.4 <=2.3.4.5`                          |
+| `1.2.3 - 2.3`           | `>=1.2.3 <2.4.0-0`                             |
+| `1.2`, `1.2.x`, `1.2.*` | `>=1.2.0 <1.3.0-0`                             |
+| `1`, `1.x`              | `>=1.0.0 <2.0.0-0`                             |
+| `1.2.3.x`               | `>=1.2.3 <1.2.4-0`                             |
+| `>1.2`                  | `>=1.3.0`                                      |
+| `<1.2`                  | `<1.2.0-0`                                     |
+| `<=1.2`                 | `<1.3.0-0`                                     |
+
+A value with fewer than three parts, or with a wildcard `x`, `X` or `*`, is a partial version: everything after the first wildcard is ignored, and it can't have a prerelease or build metadata.
+The first part must be a number, so wildcard-only ranges like `*`, `x`, `<*` or `* - 2.0.0` are not supported.
+Like in npm, the upper bounds generated for partial versions end in `-0`, so they also exclude the prereleases of the bound.
+
+A prerelease version only matches a range if a comparator of the same alternative has a prerelease with the same release parts, so `1.2.3.4-rc.2` matches `>=1.2.3.4-rc.1` but `1.2.4-rc.1` does not.
