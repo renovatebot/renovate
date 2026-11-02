@@ -82,11 +82,13 @@ To protect against this, it's recommended to ensure that your package manager co
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
-The package managers listed under [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) receive the `minimumReleaseAge` of your repository or manager config, but not a `minimumReleaseAge` from `packageRules`.
+The package managers listed under [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) receive the `minimumReleaseAge` of your repository or manager config, but not a larger `minimumReleaseAge` from `packageRules`.
 A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
 A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
+An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
+How Renovate does this depends on the package manager, for example Poetry gets the smaller value for that branch.
 
 The table below lists the managers with a known integration, per package manager.
 Managers that are not listed do not integrate with the minimum release age of their package manager.
@@ -128,6 +130,8 @@ Renovate rounds the value up to whole days.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
 Poetry added this setting in v2.4.0, and older versions ignore it.
+If an updated package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate passes that smaller value, rounded down to whole days, and adds a notice to the PR.
+Poetry has no per-package exclude, so the smaller value applies to all packages of the lock file.
 
 If both are set, Renovate passes the larger value.
 
