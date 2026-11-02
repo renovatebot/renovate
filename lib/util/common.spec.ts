@@ -154,9 +154,9 @@ describe('util/common', () => {
       });
     });
 
-    it('throws error for invalid json', () => {
+    it('throws the JSONC error for invalid json', () => {
       expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
-        "JSON5: invalid character '\\\"' at 7:3",
+        'Parse error: Expected comma on line 6 column 47',
       );
     });
 
