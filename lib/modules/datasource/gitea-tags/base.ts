@@ -60,11 +60,9 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
   }
 
   /**
-   * Only results from the public default instance may be written to the
-   * shared package cache; a self-hosted instance may serve private
-   * repositories.
+   * Self-hosted instances can serve private repositories.
    */
-  protected override isCacheable(registryUrl: string): boolean {
+  protected override isPublic(registryUrl: string): boolean {
     return (
       parseUrl(registryUrl)?.hostname ===
       parseUrl(this.getDefaultRegistryUrls('')[0])?.hostname

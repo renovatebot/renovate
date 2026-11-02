@@ -418,9 +418,11 @@ describe('config/presets/index', () => {
           '/\\btslint\\b/',
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
           'standard',
         ],
       });
@@ -432,7 +434,7 @@ describe('config/presets/index', () => {
       expect(res.packageRules).toHaveLength(1);
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(24);
+      expect(rule.matchPackageNames).toHaveLength(26);
     });
 
     it('migrates automerge in presets', async () => {
@@ -1570,9 +1572,11 @@ describe('config/presets/index', () => {
         matchPackageNames: [
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
+          'ruff',
           'standard',
         ],
       });

@@ -107,9 +107,11 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: [
       '@biomejs/**',
       '@oxlint/**',
+      'oxfmt',
       'oxlint',
       'prettier',
       'remark-lint',
+      'ruff',
       'standard',
     ],
   },
