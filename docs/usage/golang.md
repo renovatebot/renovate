@@ -195,12 +195,13 @@ Renovate uses the derived values to look up modules and to run `go`, so you don'
 - `GOPROXY`: one URL for each host rule with `hostType` set to `go-proxy`, followed by `https://proxy.golang.org,direct`.
   When Renovate runs `go`, the rule's `username` and `password` are added to the URL.
   Rules with only a `token` are skipped, because `go` can't send a token from a `GOPROXY` URL. Use `username` and `password` instead.
+  For a Buf Schema Registry, set `username` to your BSR username and `password` to your BSR token.
 - `GONOPROXY`: each host rule with `hostType` set to `go` whose `matchHost` includes a path, for example `https://github.com/my-org` becomes `github.com/my-org`.
   Rules for a host without a path are skipped, so public modules on that host still use the proxy.
 - `GONOSUMDB`: the `go-proxy` hosts, and the `GONOPROXY` values derived from `go` host rules.
 
 Renovate only derives a value if you have not set the environment variable yourself.
-If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY` or `GONOSUMDB`.
+If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY`, and derives `GONOSUMDB` as your `GOPRIVATE` value followed by the `go-proxy` hosts.
 
 For example, with a private proxy and a GitHub organization whose modules may be private:
 

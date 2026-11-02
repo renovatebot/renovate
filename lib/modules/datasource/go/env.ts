@@ -88,7 +88,7 @@ function joinNonEmpty(values: (string | null)[]): string | undefined {
  * - `GONOPROXY`: `hostType: go` rules whose `matchHost` includes a path
  * - `GONOSUMDB`: the `go-proxy` hosts and the derived `GONOPROXY` patterns
  *
- * `GONOPROXY` and `GONOSUMDB` aren't derived when `GOPRIVATE` is set, as they would override it.
+ * When `GOPRIVATE` is set, `GONOPROXY` isn't derived, as it would override it, and `GONOSUMDB` is `GOPRIVATE` followed by the `go-proxy` hosts.
  *
  * @param withCredentials embed `go-proxy` rule credentials in the derived `GOPROXY`, for running `go`
  */
@@ -113,7 +113,15 @@ export function getGoEnv(withCredentials = false): GoEnv {
     }
   }
 
+  const proxyHosts = proxyRules.map(
+    (rule) => toUrl(rule.matchHost)?.hostname ?? null,
+  );
+
   if (GOPRIVATE !== undefined) {
+    // `GONOSUMDB` replaces `GOPRIVATE` for the checksum database, so it has to keep the `GOPRIVATE` patterns
+    env.GONOSUMDB ??= proxyHosts.some(isNonEmptyString)
+      ? joinNonEmpty([GOPRIVATE, ...proxyHosts])
+      : undefined;
     return env;
   }
 
@@ -122,10 +130,7 @@ export function getGoEnv(withCredentials = false): GoEnv {
     .map(toPrivateModulePattern);
 
   env.GONOPROXY ??= joinNonEmpty(privatePatterns);
-  env.GONOSUMDB ??= joinNonEmpty([
-    ...proxyRules.map((rule) => toUrl(rule.matchHost)?.hostname ?? null),
-    ...privatePatterns,
-  ]);
+  env.GONOSUMDB ??= joinNonEmpty([...proxyHosts, ...privatePatterns]);
 
   return env;
 }

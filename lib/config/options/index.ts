@@ -960,6 +960,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    experimental: true,
   },
   {
     name: 'encryptedWarning',

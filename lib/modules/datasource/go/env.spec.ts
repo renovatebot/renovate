@@ -1,5 +1,7 @@
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import { setUserEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { getGoEnv } from './env.ts';
@@ -138,7 +140,7 @@ describe('modules/datasource/go/env', () => {
     });
   });
 
-  it('does not derive GONOPROXY or GONOSUMDB when GOPRIVATE is set', () => {
+  it('adds the go-proxy hosts to GOPRIVATE for GONOSUMDB when GOPRIVATE is set', () => {
     vi.stubEnv('GOPRIVATE', 'private.example.com');
     hostRules.add({ hostType: 'go-proxy', matchHost: 'bsr.example.com' });
     hostRules.add({
@@ -150,6 +152,32 @@ describe('modules/datasource/go/env', () => {
     expect(getGoEnv()).toEqual({
       GOPROXY: 'https://bsr.example.com,https://proxy.golang.org,direct',
       GOPRIVATE: 'private.example.com',
+      GONOSUMDB: 'private.example.com,bsr.example.com',
     });
+  });
+
+  it('does not derive GONOSUMDB from GOPRIVATE alone', () => {
+    vi.stubEnv('GOPRIVATE', 'private.example.com');
+    hostRules.add({
+      hostType: 'go',
+      matchHost: 'https://github.com/org',
+      token: 'token',
+    });
+
+    expect(getGoEnv()).toEqual({ GOPRIVATE: 'private.example.com' });
+  });
+
+  it('derives GOPROXY when GOPRIVATE is set in the repository env', () => {
+    memCache.init();
+    setUserEnv({ GOPRIVATE: 'github.com/org' });
+    hostRules.add({ hostType: 'go-proxy', matchHost: 'bsr.example.com' });
+
+    expect(getGoEnv()).toEqual({
+      GOPROXY: 'https://bsr.example.com,https://proxy.golang.org,direct',
+      GOPRIVATE: 'github.com/org',
+      GONOSUMDB: 'github.com/org,bsr.example.com',
+    });
+
+    memCache.reset();
   });
 });
