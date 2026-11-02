@@ -528,6 +528,7 @@ Use `customPresets` to define presets directly in the global config, instead of 
 
 Options that only work in the global config cannot be used inside custom presets.
 Any `{{ secrets.X }}` template inside a custom preset is resolved when each repository is processed.
+`customPresets` cannot be configured in inherited config ([`inheritConfig`](#inheritconfig)).
 
 For example, in your global config:
 

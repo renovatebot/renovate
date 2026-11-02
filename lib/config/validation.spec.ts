@@ -3441,6 +3441,28 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('warns when customPresets is configured in inherited config', async () => {
+        const config = {
+          customPresets: {
+            myPreset: {
+              labels: ['custom-label'],
+            },
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'inherit',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'The "customPresets" option is a global option reserved only for Renovate\'s global configuration and cannot be configured within a repository\'s config file.',
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
       it('does not warn about repo config options inside onboardingConfig in inherited config', async () => {
         const config = {
           onboardingConfig: {
