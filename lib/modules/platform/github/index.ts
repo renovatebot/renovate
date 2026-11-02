@@ -1884,15 +1884,55 @@ export async function ensureCommentRemoval(
 
 // Pull Request
 
-async function tryPrAutomerge(
+interface AutomergeCommit {
+  mergeMethod: string;
+  commitHeadline?: string;
+  commitBody?: string;
+}
+
+type AutomergeResult = 'enabled' | 'skipped' | 'failed';
+
+/**
+ * Returns the merge method and the commit headline and body to pass to GitHub-native automerge.
+ */
+function getAutomergeCommit(
   prNumber: number,
-  prNodeId: string,
-  platformPrOptions: PlatformPrOptions | undefined,
-): Promise<void> {
-  if (!platformPrOptions?.usePlatformAutomerge) {
-    return;
+  platformPrOptions: PlatformPrOptions,
+): AutomergeCommit {
+  const mergeMethod =
+    (
+      mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+      config.mergeMethod
+    )?.toUpperCase() || 'MERGE';
+
+  // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
+  // GitHub using the PR description as the commit body when "Use PR title and
+  // body as commit message" is enabled in repository settings.
+  const automergeCommitMessage = platformPrOptions.automergeCommitMessage;
+  if (mergeMethod === 'REBASE' || !automergeCommitMessage) {
+    return { mergeMethod };
   }
 
+  let commitHeadline: string;
+  let commitBody: string | undefined;
+  const newlineIndex = automergeCommitMessage.indexOf('\n');
+  if (newlineIndex === -1) {
+    commitHeadline = automergeCommitMessage;
+  } else {
+    commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
+    commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
+  }
+
+  // Add PR number to the commit headline to match the default GitHub behavior
+  commitHeadline = `${commitHeadline} (#${prNumber})`;
+
+  return { mergeMethod, commitHeadline, commitBody };
+}
+
+/**
+ * Returns true when GitHub-native automerge is supported by the host and enabled in the repository settings.
+ */
+function isAutomergeAvailable(prNumber: number): boolean {
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
   if (
@@ -1903,7 +1943,7 @@ async function tryPrAutomerge(
       { prNumber },
       'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
     );
-    return;
+    return false;
   }
 
   if (!config.autoMergeAllowed) {
@@ -1911,34 +1951,33 @@ async function tryPrAutomerge(
       { prNumber },
       'GitHub-native automerge: not enabled in repo settings',
     );
-    return;
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Enables GitHub-native automerge and returns whether it was enabled, skipped or failed.
+ */
+async function tryPrAutomerge(
+  prNumber: number,
+  prNodeId: string,
+  platformPrOptions: PlatformPrOptions | undefined,
+): Promise<AutomergeResult> {
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return 'skipped';
+  }
+
+  if (!isAutomergeAvailable(prNumber)) {
+    return 'skipped';
   }
 
   try {
-    const mergeMethod =
-      (
-        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
-        config.mergeMethod
-      )?.toUpperCase() || 'MERGE';
-
-    let commitHeadline: string | undefined;
-    let commitBody: string | undefined;
-    // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
-    // GitHub using the PR description as the commit body when "Use PR title and
-    // body as commit message" is enabled in repository settings.
-    const automergeCommitMessage = platformPrOptions?.automergeCommitMessage;
-    if (mergeMethod !== 'REBASE' && automergeCommitMessage) {
-      const newlineIndex = automergeCommitMessage.indexOf('\n');
-      if (newlineIndex === -1) {
-        commitHeadline = automergeCommitMessage;
-      } else {
-        commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
-        commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
-      }
-
-      // Add PR number to the commit headline to match the default GitHub behavior
-      commitHeadline = `${commitHeadline} (#${prNumber})`;
-    }
+    const { mergeMethod, commitHeadline, commitBody } = getAutomergeCommit(
+      prNumber,
+      platformPrOptions,
+    );
 
     const variables = {
       pullRequestId: prNodeId,
@@ -1959,15 +1998,17 @@ async function tryPrAutomerge(
         { prNumber, errors: res.errors },
         'GitHub-native automerge: fail',
       );
-      return;
+      return 'failed';
     }
 
     logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
+    return 'enabled';
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;
     }
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
+    return 'failed';
   }
 }
 
