@@ -53,8 +53,7 @@ function extractedAgeToMs(age: string | null | undefined): number {
  * `minimumReleaseAge` and `minimumReleaseAgeExtracted`, extended by the
  * `minimumReleaseAgeBuffer` duration if configured.
  *
- * Security updates ignore `minimumReleaseAgeExtracted`, so that Renovate
- * raises them and the package manager reports a fix which is too new.
+ * Security updates ignore `minimumReleaseAgeExtracted`.
  */
 export function calculateMinimumReleaseAgeMs(
   config: MinimumReleaseAgeConfig,
@@ -107,31 +106,14 @@ function findManagerUpdate(
 
 /**
  * Calculates the minimum release age in milliseconds which Renovate passes to
- * a package manager when it updates a lock file:
+ * a package manager when it updates the lock file of `packageFile`: `0` if any
+ * update of the lock file is a security update, the own `minimumReleaseAge` for
+ * lock file maintenance, else `minimumReleaseAgeRepository`, raised to
+ * `minimumReleaseAgePackageManager` if that is larger.
  *
- * - `0` if any update of the lock file is a security update, as these bypass
- *   the minimum release age
- * - the own `minimumReleaseAge` of lock file maintenance
- * - `minimumReleaseAgeRepository` for other updates, as the package manager
- *   applies the value to every package of the lock file, and a larger
- *   `minimumReleaseAge` from `packageRules` would fail on packages which other
- *   updates locked
- *
- * The result is raised to `minimumReleaseAgePackageManager` of the same update
- * if that is larger.
- *
- * The values are set per manager, so it reads them from an update of
- * `manager`, preferring lock file maintenance:
- *
- * 1. from `upgrades`, which can also hold updates of other managers that
- *    extract the same package file
- * 2. from the upgrades of the branch for `packageFile`, e.g. for lock file
- *    maintenance, which is called without upgrades
- * 3. from `config`, the branch config, which is the one of the first upgrade of
- *    the branch and can belong to another manager
- *
- * `minimumReleaseAgeExtracted` and `minimumReleaseAgeBuffer` are not included,
- * as the package manager applies its own value itself.
+ * It reads the values from an update of `manager`, preferring lock file
+ * maintenance, in `upgrades`, then in the upgrades of the branch for
+ * `packageFile`, then from `config`.
  */
 export function calculatePackageManagerMinimumReleaseAgeMs({
   config,

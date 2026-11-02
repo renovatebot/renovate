@@ -136,11 +136,7 @@ export async function generateLockFile(
       // so let the .npmrc handle cooldown natively in that case
       if (npmrcCooldown?.source === 'min-release-age') {
         logger.debug(
-          {
-            npmrcMinReleaseAge: npmrcCooldown.days,
-            minimumReleaseAgeMs,
-          },
-          'Skipping --before flag because .npmrc already contains min-release-age',
+          `Skipping --before flag because .npmrc already contains min-release-age=${npmrcCooldown.days}`,
         );
       } else {
         let beforeDate = DateTime.now().minus(minimumReleaseAgeMs).toUTC();
@@ -158,8 +154,7 @@ export async function generateLockFile(
 
         const beforeISO = beforeDate.toISO();
         logger.debug(
-          { beforeISO, minimumReleaseAgeMs },
-          'Setting npm --before based on minimumReleaseAge',
+          `Setting npm --before=${beforeISO} based on minimumReleaseAge`,
         );
         beforeFlag = ` --before=${beforeISO}`;
       }

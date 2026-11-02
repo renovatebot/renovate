@@ -90,11 +90,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         },
       );
 
-      it('derives the npm constraint from package.json', async () => {
-        fs.readLocalFile.mockResolvedValueOnce(
-          JSON.stringify({ packageManager: 'npm@11.12.0' }),
-        );
-
+      it('does not read the package.json in the working tree', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -103,16 +99,11 @@ describe('modules/manager/npm/minimum-release-age', () => {
             npmrc,
             extractedConstraints: { npm: '>=10' },
           }),
-        ).resolves.toBeTrue();
-        expect(fs.readLocalFile).toHaveBeenCalledWith(
-          'some-dir/package.json',
-          'utf8',
-        );
+        ).resolves.toBeFalse();
+        expect(fs.readLocalFile).not.toHaveBeenCalled();
       });
 
-      it('falls back to the extracted npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
+      it('uses the extracted npm constraint', async () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -124,8 +115,6 @@ describe('modules/manager/npm/minimum-release-age', () => {
       });
 
       it('returns false without an npm constraint', async () => {
-        fs.readLocalFile.mockResolvedValueOnce('{}');
-
         await expect(
           enforcesMinimumReleaseAge({
             managerData: npmLockManagerData,
@@ -246,7 +235,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       },
     );
 
-    it('derives the pnpm constraint from package.json', async () => {
+    it('does not derive the pnpm constraint from the package.json in the working tree', async () => {
       mockPnpmFiles(
         undefined,
         JSON.stringify({ packageManager: 'pnpm@11.28.7' }),
@@ -259,7 +248,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
           minimumReleaseAge: '1 day',
           extractedConstraints: { pnpm: '>=9' },
         }),
-      ).resolves.toBeTrue();
+      ).resolves.toBeFalse();
     });
 
     it('returns false without a pnpm constraint', async () => {
