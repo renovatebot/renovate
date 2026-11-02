@@ -44,25 +44,28 @@ Like in npm, the upper bounds generated for partial versions end in `-0`, so the
 
 A prerelease version only matches a range if a comparator of the same alternative has a prerelease with the same release parts, so `1.2.3.4-rc.2` matches `>=1.2.3.4-rc.1` but `1.2.4-rc.1` does not.
 
-This versioning supports the `bump`, `pin` and `replace` range strategies.
+This versioning supports the `bump`, `pin`, `replace` and `widen` range strategies.
 Updated ranges keep their operators and `v` prefixes.
-`replace` keeps the number of parts of partial versions.
+`replace` and `widen` keep the number of parts of partial versions.
 `bump` keeps it for bare values and x-ranges, but writes the full new version for `>=` and the lower bound of a hyphen range.
 An exact version is always written bare, like `1.2.3.4`:
 
-| Range               | Strategy  | New version | Result              |
-| ------------------- | --------- | ----------- | ------------------- |
-| `>=0.6.0.1 <0.7`    | `bump`    | `0.7.0.2`   | `>=0.7.0.2 <0.8`    |
-| `>=0.6.0.1 <0.7`    | `replace` | `0.7.0.2`   | `>=0.6.0.1 <0.8`    |
-| `>=27.3.4.19 <27.4` | `bump`    | `27.3.4.20` | `>=27.3.4.20 <27.4` |
-| `>=27.3.4.19 <27.4` | `replace` | `27.3.4.20` | `>=27.3.4.19 <27.4` |
-| `27.3`              | `replace` | `27.4.1.0`  | `27.4`              |
-| `1.x`               | `replace` | `2.1.0.0`   | `2.x`               |
-| `>=1.2.3.4`         | `bump`    | `1.2.3.5`   | `>=1.2.3.5`         |
-| `<2.0`              | `replace` | `2.1.0`     | `<2.2`              |
-| `<2.0.0`            | `replace` | `2.1.0`     | `<3.0.0`            |
-| `<2.1.0`            | `replace` | `2.3.5`     | `<2.4.0`            |
-| `<1.2.3.4.5`        | `replace` | `1.2.4`     | `<1.2.4.0.1`        |
+| Range               | Strategy  | New version  | Result                |
+| ------------------- | --------- | ------------ | --------------------- |
+| `>=0.6.0.1 <0.7`    | `bump`    | `0.7.0.2`    | `>=0.7.0.2 <0.8`      |
+| `>=0.6.0.1 <0.7`    | `replace` | `0.7.0.2`    | `>=0.6.0.1 <0.8`      |
+| `>=27.3.4.19 <27.4` | `bump`    | `27.3.4.20`  | `>=27.3.4.20 <27.4`   |
+| `>=27.3.4.19 <27.4` | `replace` | `27.3.4.20`  | `>=27.3.4.19 <27.4`   |
+| `27.3`              | `replace` | `27.4.1.0`   | `27.4`                |
+| `1.x`               | `replace` | `2.1.0.0`    | `2.x`                 |
+| `>=1.2.3.4`         | `bump`    | `1.2.3.5`    | `>=1.2.3.5`           |
+| `<2.0`              | `replace` | `2.1.0`      | `<2.2`                |
+| `<2.0.0`            | `replace` | `2.1.0`      | `<3.0.0`              |
+| `<2.1.0`            | `replace` | `2.3.5`      | `<2.4.0`              |
+| `<1.2.3.4.5`        | `replace` | `1.2.4`      | `<1.2.4.0.1`          |
+| `>=0.6.0.1 <0.7`    | `widen`   | `0.7.0.2`    | `>=0.6.0.1 <0.8`      |
+| `1 \|\| 2`          | `widen`   | `3.0.0.1`    | `1 \|\| 2 \|\| 3`     |
+| `1.x`               | `widen`   | `1.5.0-beta` | `1.x \|\| 1.5.0-beta` |
 
 `replace` keeps a range that already matches the new version, and otherwise replaces the comparators that don't match.
 Each comparator is checked against the new version by version order alone, so a comparator the version satisfies is kept even when the range as a whole doesn't match the prerelease: `replace` leaves `<2.0.0` unchanged for `1.5.0-rc.1`.
@@ -75,3 +78,10 @@ With `||`, `bump` updates the alternatives that match the new version, and when 
 Alternatives that aren't updated keep their original text, including the spacing around `||`.
 `replace` returns no update when a `>` comparator doesn't match the new version.
 `bump` returns no update when the alternative it updates has a `>` comparator, even if that comparator matches.
+`widen` keeps a range that already matches the new version.
+A prerelease or a new version below the range is appended as an exact version with `||`, so `>=1.2.3.4` with `1.2.3.3` becomes `>=1.2.3.4 || 1.2.3.3` and `1.0.0 - 2.0.0` with `2.1.0-beta` becomes `1.0.0 - 2.0.0 || 2.1.0-beta`.
+Otherwise, when the last alternative ends with a `<` or `<=` bound or is a hyphen range, it widens that alternative in place, and else it appends the replaced last alternative with `||`.
+These rules only look at the last alternative.
+Like `replace`, `widen` returns no update when a `>` comparator of the last alternative doesn't match the new version, and also when the last alternative has several comparators and ends with `>` or `>=`.
+Both exceptions don't apply when the new version is below the range or is a prerelease, because then it is appended as an exact version: `>=1.0.0 >1.5.0` with `2.0.0-rc.1` becomes `>=1.0.0 >1.5.0 || 2.0.0-rc.1`.
+A `>` comparator in an earlier alternative doesn't matter, so `>5 || 1.x` with `3.0.0` becomes `>5 || 1.x || 3.x`.

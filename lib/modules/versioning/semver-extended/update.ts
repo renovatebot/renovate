@@ -1,6 +1,7 @@
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import {
   getComparators,
+  isBelowRange,
   parseToken,
   satisfiesComparators,
   satisfiesOrder,
@@ -190,8 +191,42 @@ function replaceOrBumpAlternative(
 }
 
 /**
+ * Widens a range that doesn't match the new version: a prerelease or a new version below
+ * the range is appended as an exact version with `||`, an upper bound at the end is replaced
+ * in place, and otherwise the replaced last alternative is appended with `||`.
+ * Returns `null` for a multi-comparator alternative ending in a lower bound.
+ */
+function widenRange(
+  alternatives: RangeAlternative[],
+  newVersion: NewVersion,
+): string | null {
+  const range = alternatives.map(({ text }) => text).join('||');
+  const last = alternatives.at(-1)!;
+  const lastToken = last.tokens.at(-1)!;
+  if (
+    newVersion.parsed.prerelease !== undefined ||
+    isBelowRange(newVersion.parsed, alternatives.map(getComparators))
+  ) {
+    return `${range} || ${lastToken.partial.prefix}${newVersion.text}`;
+  }
+  const lastOperator = lastToken.operator;
+  if (last.tokens.length > 1 && lastOperator.startsWith('>')) {
+    return null;
+  }
+  const replaced = replaceAlternative(last, newVersion);
+  if (!replaced) {
+    return null;
+  }
+  if (lastOperator.startsWith('<')) {
+    const kept = alternatives.slice(0, -1).map(({ text }) => text);
+    return [...kept, renderInPlace(last, replaced)].join('||');
+  }
+  return `${range} || ${renderTokens(replaced)}`;
+}
+
+/**
  * Updates the alternatives of a valid range to include the new version, bumping them for
- * `rangeStrategy` `bump` and replacing them for any other strategy.
+ * `rangeStrategy` `bump`, widening them for `widen` and replacing them for any other strategy.
  * Alternatives that aren't updated keep their original text.
  */
 export function updateRange(
@@ -203,6 +238,9 @@ export function updateRange(
   const matching = alternatives.filter((alternative) =>
     satisfiesComparators(newVersion.parsed, getComparators(alternative)),
   );
+  if (!matching.length && rangeStrategy === 'widen') {
+    return widenRange(alternatives, newVersion);
+  }
   if (!matching.length) {
     const last = alternatives.at(-1)!;
     const updated = isBump
