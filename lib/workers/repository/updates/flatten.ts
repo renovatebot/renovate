@@ -89,7 +89,8 @@ function applyVulnerabilityConcurrentLimits(
   // `branchConcurrentLimit`, even though both are valid nested options
   // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   const vulnerabilityAlerts = updateConfig.vulnerabilityAlerts as
-    RenovateConfig | undefined;
+    | RenovateConfig
+    | undefined;
   if (!isUndefined(vulnerabilityAlerts?.prConcurrentLimit)) {
     updateConfig.prConcurrentLimit = vulnerabilityAlerts.prConcurrentLimit;
   }

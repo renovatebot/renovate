@@ -203,7 +203,8 @@ export interface EnsureCommentRemovalConfigByContent {
   content: string;
 }
 export type EnsureCommentRemovalConfig =
-  EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent;
+  | EnsureCommentRemovalConfigByTopic
+  | EnsureCommentRemovalConfigByContent;
 
 export type EnsureIssueResult = 'updated' | 'created';
 
@@ -301,7 +302,8 @@ export interface Platform {
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
-      EnsureCommentRemovalConfigByTopic | EnsureCommentRemovalConfigByContent,
+      | EnsureCommentRemovalConfigByTopic
+      | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   getPr(number: number, refreshCache?: boolean): Promise<Pr | null>;

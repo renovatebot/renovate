@@ -248,9 +248,10 @@ jobs:
 
       - name: Lint
         run: |
+          pnpm oxfmt-fix
           pnpm prettier-fix --cache-location .cache/prettier
           git diff --quiet || {
-            echo "[ERROR] Please apply the changes prettier suggests:"
+            echo "[ERROR] Please apply the changes oxfmt and prettier suggest:"
             git diff --color=always
             exit 1
           }

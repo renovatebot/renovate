@@ -36,7 +36,10 @@ function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
   depType:
-    NpmDepType | 'dependenciesMeta' | 'packageManager' | 'pnpm.overrides',
+    | NpmDepType
+    | 'dependenciesMeta'
+    | 'packageManager'
+    | 'pnpm.overrides',
   depName: string,
   oldValue: string,
   newValue: string,
@@ -118,7 +121,8 @@ function updateDevEnginesDependency({
   fileContent,
   upgrade,
 }: Pick<UpdateDependencyConfig<NpmManagerData>, 'fileContent' | 'upgrade'>):
-  string | null {
+  | string
+  | null {
   const { depType, depName, newValue, managerData } = upgrade;
   /* v8 ignore if -- defensive: dispatcher already filtered */
   if (

@@ -24,7 +24,8 @@ export interface DistroSchedule {
 }
 
 export type DistroDataFile =
-  'data/ubuntu-distro-info.json' | 'data/debian-distro-info.json';
+  | 'data/ubuntu-distro-info.json'
+  | 'data/debian-distro-info.json';
 
 export type DistroInfoRecord = Record<string, DistroSchedule>;
 

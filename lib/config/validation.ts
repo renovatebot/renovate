@@ -857,9 +857,9 @@ export async function validateConfig(
                         message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                       });
                     }
-                    if (!(
-                      isString(statusCheckValue) || null === statusCheckValue
-                    )) {
+                    if (
+                      !(isString(statusCheckValue) || null === statusCheckValue)
+                    ) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
                         message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,

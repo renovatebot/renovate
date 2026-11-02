@@ -14,7 +14,10 @@ import type { BranchConfig } from '../../../types.ts';
  * - `skip-update`: the branch must not be updated at all
  */
 export type BranchReuseAction =
-  'no-reuse' | 'unchanged' | 'check-reuse' | 'skip-update';
+  | 'no-reuse'
+  | 'unchanged'
+  | 'check-reuse'
+  | 'skip-update';
 
 export interface BranchReuseDecision {
   action: BranchReuseAction;

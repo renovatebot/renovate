@@ -105,7 +105,9 @@ export interface GithubEnterpriseServerHost extends GithubHostBase {
 }
 
 export type GithubHost =
-  GithubComHost | GithubEnterpriseCloudHost | GithubEnterpriseServerHost;
+  | GithubComHost
+  | GithubEnterpriseCloudHost
+  | GithubEnterpriseServerHost;
 
 export interface PlatformConfig {
   host: GithubHost;
