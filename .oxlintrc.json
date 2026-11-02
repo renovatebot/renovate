@@ -264,7 +264,7 @@
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
         "renovate/require-build-cache-key": "error",
-        "renovate/require-cacheable": "error"
+        "renovate/require-cache-privacy": "error"
       }
     },
     {
@@ -324,7 +324,7 @@
         "lib/modules/manager/terraform/lockfile/hash.ts"
       ],
       "rules": {
-        "renovate/require-cacheable": "warn"
+        "renovate/require-cache-privacy": "warn"
       }
     },
     {

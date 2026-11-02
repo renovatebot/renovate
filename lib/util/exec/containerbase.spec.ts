@@ -14,7 +14,15 @@ import {
 } from './containerbase.ts';
 import type { ToolConstraint, ToolName } from './types.ts';
 
+const containerbase = vi.hoisted(() => ({ version: '14.0.0' }));
+
 vi.mock('../../modules/datasource/index.ts');
+vi.mock('@renovatebot/base-image', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@renovatebot/base-image')>()),
+  get packageVersion() {
+    return containerbase.version;
+  },
+}));
 
 const datasource = vi.mocked(_datasource);
 
@@ -82,6 +90,8 @@ describe('util/exec/containerbase', () => {
       ${'node'}    | ${'node'}
       ${'php'}     | ${'composer'}
       ${'rust'}    | ${'rust-release-channel'}
+      ${'jb'}      | ${'loose'}
+      ${'paket'}   | ${'paket'}
     `(
       'uses the $versioning versioning for $toolName',
       ({ toolName, versioning }) => {
@@ -95,7 +105,6 @@ describe('util/exec/containerbase', () => {
 
     it.each`
       toolName    | versioning
-      ${'paket'}  | ${'nuget'}
       ${'kas'}    | ${'pep440'}
       ${'docker'} | ${'npm'}
     `(
@@ -358,10 +367,13 @@ describe('util/exec/containerbase', () => {
       await expect(
         resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
       ).resolves.toBe('12.0.0');
+      // the containerbase constraint is kept
       expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
         datasource: 'containerbase',
         packageName: 'npm',
         versioning: 'npm',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
       });
     });
 
@@ -423,6 +435,47 @@ describe('util/exec/containerbase', () => {
         resolveConstraint({ toolName: 'rust', constraint: 'nightly' }),
       ).resolves.toBe('nightly-2026-10-20');
     });
+
+    it('skips the releases which need a newer containerbase', async () => {
+      const { getPkgReleases } = await vi.importActual<typeof _datasource>(
+        '../../modules/datasource/index.ts',
+      );
+      datasource.getPkgReleases.mockImplementation(getPkgReleases);
+      httpMock
+        .scope('https://containerbase.github.io/tool-versions')
+        .get('/index.json')
+        .reply(404)
+        .get('/v1/jb.json')
+        .reply(200, {
+          $schema:
+            'https://containerbase.github.io/tool-versions/v1/tool.schema.json',
+          tool: 'jb',
+          updatedAt: '2026-10-20T03:00:00.000Z',
+          minCb: [{ version: '0.6.0.1', cb: '15.0.0' }],
+          versions: [{ version: '0.6.0.1' }, { version: '0.6.0' }],
+        });
+
+      await expect(resolveConstraint({ toolName: 'jb' })).resolves.toBe(
+        '0.6.0',
+      );
+    });
+
+    it('skips the containerbase constraint for a development build', async () => {
+      containerbase.version = '0.0.0-PLACEHOLDER';
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.1.0' }],
+      });
+
+      await expect(resolveConstraint({ toolName: 'composer' })).resolves.toBe(
+        '2.1.0',
+      );
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'containerbase',
+        packageName: 'composer',
+        versioning: 'composer',
+      });
+      containerbase.version = '14.0.0';
+    });
   });
 
   describe('generateInstallCommands()', () => {
@@ -462,6 +515,8 @@ describe('util/exec/containerbase', () => {
         datasource: 'containerbase',
         packageName: 'composer',
         versioning: 'composer',
+        constraintsFiltering: 'strict',
+        constraints: { containerbase: containerbase.version },
       });
     });
 
@@ -479,7 +534,7 @@ describe('util/exec/containerbase', () => {
         packageName: 'npm',
         versioning: 'npm',
         constraintsFiltering: 'strict',
-        constraints: { node: '20.17.0' },
+        constraints: { node: '20.17.0', containerbase: containerbase.version },
       });
     });
 

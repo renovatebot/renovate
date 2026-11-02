@@ -9,6 +9,8 @@ import type { VersioningName } from '../../versioning-list.generated.ts';
 export interface ConstraintDefinition {
   name: string;
   description?: string;
+  /** The versioning used for the constraint, unless `constraintsVersioning` overrides it. */
+  versioning?: VersioningName;
 }
 
 /**
@@ -68,6 +70,7 @@ export const supportedToolNames = [
   'nix',
   'node',
   'npm',
+  'paket',
   'pdm',
   'php',
   'pip-tools',
@@ -117,6 +120,12 @@ function constrainAdditionalConstraintDefinitions<
  */
 export const additionalConstraintDefinitions =
   constrainAdditionalConstraintDefinitions([
+    {
+      name: 'containerbase',
+      description:
+        'Used in the `containerbase` datasource to specify the Containerbase version that installs the tools, like `14.57.1`. Releases which need a newer Containerbase are filtered out. Uses the `npm` versioning.',
+      versioning: 'npm',
+    },
     {
       name: 'ghActionsLock',
       description: `Used in the \`github-actions\` manager to specify a release tag for the [\`github/gh-actions-lock\`](https://github.com/github/gh-actions-lock) \`gh\` CLI extension, which regenerates \`.github/workflows/actions.lock\`.
@@ -198,6 +207,17 @@ export type AdditionalConstraintName =
  */
 export const additionalConstraintNames: AdditionalConstraintName[] =
   additionalConstraintDefinitions.map((c) => c.name);
+
+/**
+ * The versioning of an additional constraint, unless `constraintsVersioning` overrides it.
+ */
+export function getAdditionalConstraintVersioning(
+  name: AdditionalConstraintName,
+): VersioningName | undefined {
+  const definition: ConstraintDefinition | undefined =
+    additionalConstraintDefinitions.find((c) => c.name === name);
+  return definition?.versioning;
+}
 
 export function isAdditionalConstraintName(
   value: unknown,

@@ -1,12 +1,26 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type {
+  MinimumReleaseAgeBehaviour,
+  RenovateConfig,
+  UpdateType,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
+import { enforcesMinimumReleaseAge } from '../../../../modules/manager/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
-import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
+import {
+  getMergeConfidenceLevel,
+  isActiveConfidenceLevel,
+  satisfiesConfidenceLevel,
+} from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
+import type { MinimumReleaseAgeCheckResult } from '../../../../util/minimum-release-age.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -169,4 +183,150 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     state: config.confidenceStatus,
     url: docsLink,
   });
+}
+
+/**
+ * Checks the minimum release age of `upgrade`, which is skipped for lock file
+ * maintenance if the package manager enforces it itself.
+ */
+async function checkUpgradeMinimumReleaseAge(
+  upgrade: BranchUpgradeConfig,
+): Promise<MinimumReleaseAgeCheckResult> {
+  const result = checkMinimumReleaseAge(
+    {
+      ...upgrade,
+      minimumReleaseAgeBehaviour:
+        upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required',
+    },
+    upgrade.releaseTimestamp,
+  );
+  if (!result.minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
+    return result;
+  }
+  if (!(await enforcesMinimumReleaseAge(upgrade.manager, upgrade))) {
+    return result;
+  }
+  logger.debug(
+    `Lock file maintenance of ${upgrade.packageFile}: the package manager enforces the minimum release age`,
+  );
+  return { ...result, isPending: false, minimumReleaseAgeMs: 0 };
+}
+
+export interface InternalChecksStatus {
+  stabilityStatus?: BranchStatus;
+  confidenceStatus?: BranchStatus;
+}
+
+/**
+ * Computes the internal checks status of a branch from its upgrades, i.e. their
+ * minimum release age and their merge confidence. Returns `null` if none of the
+ * upgrades has any internal check configured.
+ */
+export async function computeInternalChecksStatus(
+  config: BranchConfig,
+): Promise<InternalChecksStatus | null> {
+  const internalChecksConfigured = config.upgrades.some(
+    (upgrade) =>
+      isNonEmptyString(upgrade.minimumReleaseAge) ||
+      isNonEmptyString(upgrade.minimumReleaseAgeExtracted) ||
+      isActiveConfidenceLevel(upgrade.minimumConfidence!),
+  );
+  if (!internalChecksConfigured) {
+    return null;
+  }
+
+  const status: InternalChecksStatus = {};
+  const depNamesWithoutReleaseTimestamp: Record<
+    MinimumReleaseAgeBehaviour,
+    {
+      depName: string;
+      updateType: UpdateType;
+    }[]
+  > = {
+    'timestamp-required': [],
+    'timestamp-optional': [],
+  };
+
+  // Only set a stability status check if one or more of the updates contain
+  // both a minimumReleaseAge setting and a releaseTimestamp
+  status.stabilityStatus = 'green';
+  // Default to 'success' but set 'pending' if any update is pending
+  for (const upgrade of config.upgrades) {
+    const { isPending, minimumReleaseAgeMs, hasTimestamp } =
+      await checkUpgradeMinimumReleaseAge(upgrade);
+
+    if (isPending) {
+      if (hasTimestamp) {
+        // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
+        logger.debug(
+          {
+            depName: upgrade.depName,
+            timeElapsed: getElapsedMs(upgrade.releaseTimestamp!),
+            minimumReleaseAge: upgrade.minimumReleaseAge,
+          },
+          'Update has not passed minimum release age',
+        );
+      } else {
+        // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
+        depNamesWithoutReleaseTimestamp['timestamp-required'].push({
+          depName: upgrade.depName!,
+          updateType: upgrade.updateType!,
+        });
+      }
+      status.stabilityStatus = 'yellow';
+      continue;
+    }
+    if (minimumReleaseAgeMs && !hasTimestamp) {
+      // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
+      depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
+        depName: upgrade.depName!,
+        updateType: upgrade.updateType!,
+      });
+    }
+    const datasource = upgrade.datasource!;
+    const depName = upgrade.depName!;
+    const packageName = upgrade.packageName!;
+    const minimumConfidence = upgrade.minimumConfidence!;
+    const updateType = upgrade.updateType!;
+    const currentVersion = upgrade.currentVersion!;
+    const newVersion = upgrade.newVersion!;
+    if (isActiveConfidenceLevel(minimumConfidence)) {
+      const confidence =
+        (await getMergeConfidenceLevel(
+          datasource,
+          packageName,
+          currentVersion,
+          newVersion,
+          updateType,
+        )) ?? 'neutral';
+      if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+        status.confidenceStatus = 'green';
+      } else {
+        logger.debug(
+          { depName, confidence, minimumConfidence },
+          'Update does not meet minimum confidence scores',
+        );
+        status.confidenceStatus = 'yellow';
+        continue;
+      }
+    }
+  }
+
+  if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
+    logger.once.debug(
+      { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
+      `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
+    );
+  }
+  if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
+    logger.once.warn(
+      "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+    );
+    logger.once.debug(
+      { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
+      `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+    );
+  }
+
+  return status;
 }

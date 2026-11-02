@@ -116,6 +116,91 @@ describe('modules/datasource/containerbase/index', () => {
       },
     );
 
+    describe('minCb', () => {
+      const versions = [
+        { version: '12.0.0' },
+        { version: '11.0.0', constraints: { node: '>=20' } },
+        { version: '10.0.0' },
+      ];
+
+      it.each`
+        containerbase | cb          | versions
+        ${'14.0.0'}   | ${'15.0.0'} | ${['10.0.0']}
+        ${'15.0.0'}   | ${'15.0.0'} | ${['10.0.0', '11.0.0', '12.0.0']}
+        ${'99.0.0'}   | ${'foo'}    | ${['10.0.0']}
+        ${'99.0.0'}   | ${'15'}     | ${['10.0.0']}
+      `(
+        'filters by the containerbase constraint $containerbase for minCb $cb',
+        async ({ containerbase, cb, versions: expected }) => {
+          httpMock
+            .scope(baseUrl)
+            .get('/tool-versions/index.json')
+            .reply(200, rootIndex)
+            .get('/tool-versions/v1/pnpm.json')
+            .reply(200, {
+              ...pnpm,
+              minCb: [{ version: '11.0.0', cb }],
+              versions,
+            });
+
+          const res = await getPkgReleases({
+            datasource,
+            packageName: 'pnpm',
+            constraintsFiltering: 'strict',
+            constraints: { containerbase, node: '20.0.0' },
+          });
+
+          expect(res?.releases.map(({ version }) => version)).toEqual(expected);
+        },
+      );
+
+      it('keeps every version without a containerbase constraint', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            minCb: [{ version: '11.0.0', cb: '99.0.0' }],
+            versions,
+          });
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'pnpm',
+          constraintsFiltering: 'strict',
+          constraints: { node: '20.0.0' },
+        });
+
+        expect(res?.releases).toHaveLength(3);
+      });
+
+      it('adds the containerbase constraint to the releases', async () => {
+        httpMock
+          .scope(baseUrl)
+          .get('/tool-versions/index.json')
+          .reply(200, rootIndex)
+          .get('/tool-versions/v1/pnpm.json')
+          .reply(200, {
+            ...pnpm,
+            minCb: [{ version: '11.0.0', cb: '15.0.0' }],
+            versions,
+          });
+
+        const res = await new ContainerbaseDatasource().getReleases({
+          packageName: 'pnpm',
+          registryUrl: defaultRegistryUrl,
+        });
+
+        expect(res?.releases.map(({ constraints }) => constraints)).toEqual([
+          { containerbase: ['>=15.0.0'] },
+          { node: ['>=20'], containerbase: ['>=15.0.0'] },
+          undefined,
+        ]);
+      });
+    });
+
     it('uses a custom registry', async () => {
       httpMock
         .scope('https://mirror.example.com')

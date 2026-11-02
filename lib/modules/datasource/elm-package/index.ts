@@ -68,7 +68,7 @@ export class ElmPackageDatasource extends Datasource {
         namespace: `datasource-${ElmPackageDatasource.id}`,
         key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
-        cacheable: true,
+        public: true,
       },
       () => this._getReleases(config),
     );

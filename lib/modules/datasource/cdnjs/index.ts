@@ -73,7 +73,7 @@ export class CdnjsDatasource extends Datasource {
       {
         namespace: `datasource-${CdnjsDatasource.id}`,
         key: buildCacheKey('getReleases', library),
-        cacheable: true,
+        public: true,
         fallback: true,
       },
       () => this._getReleases(config),
@@ -113,7 +113,7 @@ export class CdnjsDatasource extends Datasource {
           config.packageName,
           newValue,
         ),
-        cacheable: true,
+        public: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),

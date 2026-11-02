@@ -190,6 +190,29 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
+    it('ignores the dashboard issue but applies checkedBranches when mode=silent', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1'] });
+      const conf: RenovateConfig = {
+        dependencyDashboard: true,
+        mode: 'silent',
+      };
+
+      await dependencyDashboard.readDashboardBody(conf);
+
+      expect(platform.findIssue).not.toHaveBeenCalled();
+      expect(conf).toEqual({
+        dependencyDashboard: true,
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+        },
+        dependencyDashboardRebaseAllOpen: false,
+        mode: 'silent',
+      });
+    });
+
     it('reads dashboard body all pending approval', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -480,6 +503,111 @@ describe('workers/repository/dependency-dashboard', () => {
 
       // same with dry run
       await dryRun(branches, platform, 1, 0);
+    });
+
+    describe('dependencyDashboardIssue', () => {
+      it.each(['created', 'updated'] as const)(
+        'records the issue number after the dashboard is %s',
+        async (result) => {
+          config.dependencyDashboard = true;
+          platform.ensureIssue.mockResolvedValueOnce(result);
+          platform.findIssue.mockResolvedValueOnce({
+            number: 42,
+            title: config.dependencyDashboardTitle,
+          });
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            [],
+            {},
+            { result: 'no-migration' },
+          );
+          expect(platform.findIssue).toHaveBeenCalledExactlyOnceWith(
+            config.dependencyDashboardTitle,
+          );
+          expect(config.dependencyDashboardIssue).toBe(42);
+        },
+      );
+
+      it('does not look up the issue when its number is already known', async () => {
+        config.dependencyDashboard = true;
+        config.dependencyDashboardIssue = 1;
+        platform.ensureIssue.mockResolvedValueOnce('updated');
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.findIssue).not.toHaveBeenCalled();
+        expect(config.dependencyDashboardIssue).toBe(1);
+      });
+
+      it('is not set when the dashboard could not be ensured', async () => {
+        config.dependencyDashboard = true;
+        platform.ensureIssue.mockResolvedValueOnce(null);
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.findIssue).not.toHaveBeenCalled();
+        expect(config.dependencyDashboardIssue).toBeUndefined();
+      });
+
+      it('is not set when the ensured dashboard cannot be found', async () => {
+        config.dependencyDashboard = true;
+        platform.ensureIssue.mockResolvedValueOnce('created');
+        platform.findIssue.mockResolvedValueOnce(null);
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(config.dependencyDashboardIssue).toBeUndefined();
+      });
+
+      it('is cleared when the dashboard is disabled and closed', async () => {
+        config.dependencyDashboardIssue = 1;
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
+        expect(config.dependencyDashboardIssue).toBeUndefined();
+      });
+
+      it('is cleared when the dashboard is auto-closed', async () => {
+        config.dependencyDashboard = true;
+        config.dependencyDashboardAutoclose = true;
+        config.dependencyDashboardIssue = 1;
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
+        expect(config.dependencyDashboardIssue).toBeUndefined();
+      });
+
+      it('is kept in dry run, since nothing is closed', async () => {
+        GlobalConfig.set({ dryRun: 'full' });
+        config.dependencyDashboard = true;
+        config.dependencyDashboardAutoclose = true;
+        config.dependencyDashboardIssue = 1;
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          [],
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.ensureIssueClosing).not.toHaveBeenCalled();
+        expect(config.dependencyDashboardIssue).toBe(1);
+      });
     });
 
     it('renders no header and no abandonment section when both are off', async () => {

@@ -1456,6 +1456,87 @@ describe('modules/manager/github-actions/extract', () => {
       ).resolves.toBeNull();
     });
 
+    it('extracts the image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString: 'ghcr.io/ossf/scorecard-action:v2.5.0',
+        },
+      ]);
+    });
+
+    it('extracts the digest-pinned image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: 'v2.5.0',
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('extracts the digest-only image of a docker container action', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: "docker"
+          image: "DOCKER://ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627"
+        `;
+      const res = await extractPackageFile(yamlContent, 'action.yaml');
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'ghcr.io/ossf/scorecard-action',
+          depType: 'docker',
+          packageName: 'ghcr.io/ossf/scorecard-action',
+          replaceString:
+            'ghcr.io/ossf/scorecard-action@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627',
+        },
+      ]);
+    });
+
+    it('ignores a docker container action which builds a Dockerfile', async () => {
+      const yamlContent = codeBlock`
+        runs:
+          using: docker
+          image: Dockerfile
+        `;
+      await expect(
+        extractPackageFile(yamlContent, 'action.yml'),
+      ).resolves.toBeNull();
+    });
+
     it('extracts actions and with-version inputs nested in a parallel block', async () => {
       const yamlContent = codeBlock`
         jobs:

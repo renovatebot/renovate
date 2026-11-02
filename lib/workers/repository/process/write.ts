@@ -11,8 +11,10 @@ import { hashMap } from '../../../modules/manager/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BranchCache } from '../../../util/cache/repository/types.ts';
+import { isToolName } from '../../../util/exec/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { incCountValue, setCount } from '../../global/limits.ts';
 import type {
   BranchConfig,
@@ -39,10 +41,18 @@ export function generateCommitFingerprintConfig(
       // TS cannot narrow the type here
       filteredUpgrade[field] = upgrade[field]!;
     }
+    // only tools' constraints, as others (i.e. the default `ghActionsLock`) are set for every upgrade
+    const toolConstraints = Object.entries(
+      coerceObject(upgrade.constraints),
+    ).filter(([name]) => isToolName(name));
+    if (toolConstraints.length) {
+      filteredUpgrade.constraints = Object.fromEntries(toolConstraints);
+    }
     if (upgrade.postUpgradeTasks) {
       filteredUpgrade.postUpgradeTasks = {
         commands: upgrade.postUpgradeTasks.commands,
         fileFilters: upgrade.postUpgradeTasks.fileFilters,
+        installTools: upgrade.postUpgradeTasks.installTools,
       };
     }
     return filteredUpgrade;

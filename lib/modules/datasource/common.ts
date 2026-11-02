@@ -5,6 +5,7 @@ import {
 import { logger } from '../../logger/index.ts';
 import {
   type ConstraintName,
+  getAdditionalConstraintVersioning,
   isAdditionalConstraintName,
 } from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
@@ -204,7 +205,6 @@ export function applyConstraintsFiltering<
 
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
-  const versioning = allVersioning.get(versioningName);
 
   const configConstraints = config.constraints;
   const filteredReleases: string[] = [];
@@ -236,11 +236,11 @@ export function applyConstraintsFiltering<
     for (const [name, configConstraint] of Object.entries(
       configConstraints,
     ) as [ConstraintName, string][]) {
-      let constraintVersioningName = versioningName;
-      if (
-        isAdditionalConstraintName(name) &&
-        config.constraintsVersioning?.[name]
-      ) {
+      const isAdditional = isAdditionalConstraintName(name);
+      let constraintVersioningName =
+        (isAdditional ? getAdditionalConstraintVersioning(name) : undefined) ??
+        versioningName;
+      if (isAdditional && config.constraintsVersioning?.[name]) {
         const val = config.constraintsVersioning[name];
         logger.once.debug(
           { packageName: config.packageName, release },
@@ -330,16 +330,7 @@ export function applyConstraintsFiltering<
           },
           `applyConstraintsFiltering(${release.version}): constraintVersioning.isValid(${releaseConstraint})=${isValidConstraintVersion}`,
         );
-        const isValidVersion = versioning.isValid(releaseConstraint);
-        logger.trace(
-          {
-            release,
-            versioning: constraintVersioningName,
-            releaseConstraint,
-          },
-          `applyConstraintsFiltering(${release.version}): versioning.isValid(${releaseConstraint})=${isValidVersion}`,
-        );
-        if (!isValidVersion || !isValidConstraintVersion) {
+        if (!isValidConstraintVersion) {
           logger.once.debug(
             {
               packageName: config.packageName,

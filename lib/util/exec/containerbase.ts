@@ -2,6 +2,8 @@ import {
   type ToolMetadata,
   type ToolType,
   isContainerbase,
+  isReleaseVersion,
+  packageVersion,
   tools,
 } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
@@ -45,8 +47,10 @@ const toolVersioning: Partial<Record<ToolName, VersioningName>> = {
   deno: 'deno',
   erlang: 'semver-coerced',
   gradle: 'gradle',
+  jb: 'loose',
   maven: 'maven',
   node: 'node',
+  paket: 'paket',
   php: 'composer',
   pixi: 'conda',
   python: 'python',
@@ -99,12 +103,16 @@ async function getPkgReleases(
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
+  // drop releases which need a newer containerbase, a development build has no
+  // release version and skips it like the containerbase cli
+  const containerbase: Partial<Record<ConstraintName, string>> =
+    isReleaseVersion(packageVersion) ? { containerbase: packageVersion } : {};
   if (Object.keys(resolvedTools).length) {
     // drop releases whose runtime constraints (e.g. `engines.node`) exclude the runtime versions we install
     const compatible = await getPkgReleases({
       ...toolConfig,
       constraintsFiltering: 'strict',
-      constraints: { ...resolvedTools },
+      constraints: { ...resolvedTools, ...containerbase },
     });
     if (compatible?.releases.length) {
       return compatible;
@@ -114,7 +122,14 @@ async function getPkgReleases(
       'No tool releases compatible with resolved tools - ignoring their constraints',
     );
   }
-  return getPkgReleases(toolConfig);
+  if (!Object.keys(containerbase).length) {
+    return getPkgReleases(toolConfig);
+  }
+  return getPkgReleases({
+    ...toolConfig,
+    constraintsFiltering: 'strict',
+    constraints: containerbase,
+  });
 }
 
 export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
