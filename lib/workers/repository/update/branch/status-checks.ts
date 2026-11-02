@@ -187,21 +187,19 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
 
 /**
  * Whether Renovate checks the minimum release age of `upgrade`, ignoring
- * `minimumReleaseAgeExtracted` for lock file maintenance and security updates.
+ * `minimumReleaseAgeExtracted` for security updates.
  */
 function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
   return (
     isNonEmptyString(upgrade.minimumReleaseAge) ||
-    (!upgrade.isLockFileMaintenance &&
-      !upgrade.isVulnerabilityAlert &&
+    (!upgrade.isVulnerabilityAlert &&
       isNonEmptyString(upgrade.minimumReleaseAgeExtracted))
   );
 }
 
 /**
- * Checks the minimum release age of `upgrade`. Lock file maintenance ignores
- * `minimumReleaseAgeExtracted`, and skips the check if the package manager
- * enforces the minimum release age itself.
+ * Checks the minimum release age of `upgrade`, which is skipped for lock file
+ * maintenance if the package manager enforces it itself.
  */
 async function checkUpgradeMinimumReleaseAge(
   upgrade: BranchUpgradeConfig,
@@ -211,10 +209,6 @@ async function checkUpgradeMinimumReleaseAge(
       ...upgrade,
       minimumReleaseAgeBehaviour:
         upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required',
-      // the package manager applies its own minimum release age to lock file maintenance
-      ...(upgrade.isLockFileMaintenance && {
-        minimumReleaseAgeExtracted: undefined,
-      }),
     },
     upgrade.releaseTimestamp,
   );
