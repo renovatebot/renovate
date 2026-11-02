@@ -132,12 +132,22 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
-      expect(e!.validationError).toBe(
-        "Cannot find preset's package (notfound)." +
-          ' Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
+      expect(e!.validationSource).toBe('notfound');
+      expect(e!.validationError).toBe("Cannot find preset's package");
+      expect(e!.validationMessage).toBe(
+        'This is a *nested* preset, included via `local>some/repo` → `notfound`, so please contact the author of `local>some/repo` if you are unable to fix it yourself.',
       );
-      expect(e!.validationMessage).toBeUndefined();
+    });
+
+    it('redacts credentials from presets included via a URL', async () => {
+      config.extends = ['https://user:secret@example.com/preset.json'];
+      http.getPreset.mockResolvedValueOnce({ extends: ['notfound'] });
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationSource: 'notfound',
+        validationMessage:
+          'This is a *nested* preset, included via `https://**redacted**@example.com/preset.json` → `notfound`, so please contact the author of `https://**redacted**@example.com/preset.json` if you are unable to fix it yourself.',
+      });
     });
 
     it('throws if the preset host is blocked', async () => {
@@ -150,8 +160,12 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
+      expect(e!.validationSource).toBe('http://10.1.2.3/preset.json');
       expect(e!.validationError).toBe(
-        'Preset host is blocked by this Renovate instance (http://10.1.2.3/preset.json). If this is intended, ask your Renovate administrator to permit it with a `hostRules` entry setting `allowInternal=true`, scoped either by `hostType` (for example `preset` or `npm`) or by a URL-prefix `matchHost`',
+        'Preset host is blocked by this Renovate instance',
+      );
+      expect(e!.validationMessage).toBe(
+        'If this is intended, ask your Renovate administrator to permit it with a `hostRules` entry setting `allowInternal=true`, scoped either by `hostType` (for example `preset` or `npm`) or by a URL-prefix `matchHost`.',
       );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         {
@@ -175,9 +189,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationSource).toBe('wrongpreset:invalid-preset');
       expect(e!.validationError).toBe(
-        'Preset name not found within published preset config (wrongpreset:invalid-preset)',
+        'Preset name not found within published preset config',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -193,8 +207,8 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
-      expect(e!.validationError).toBe('Preset is invalid (github>user/repo//)');
+      expect(e!.validationSource).toBe('github>user/repo//');
+      expect(e!.validationError).toBe('Preset is invalid');
       expect(e!.validationMessage).toBeUndefined();
     });
 
@@ -209,9 +223,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationSource).toBe('github>user/repo//path:subpreset');
       expect(e!.validationError).toBe(
-        'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)',
+        'Sub-presets cannot be combined with a custom path',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -228,8 +242,8 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
-      expect(e!.validationError).toBe('Preset is invalid JSON (org/repo)');
+      expect(e!.validationSource).toBe('org/repo');
+      expect(e!.validationError).toBe('Preset is invalid JSON');
       expect(e!.validationMessage).toBeUndefined();
     });
 
@@ -244,9 +258,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationSource).toBe('noconfig:recommended');
       expect(e!.validationError).toBe(
-        'Preset package is missing a renovate-config entry (noconfig:recommended)',
+        'Preset package is missing a renovate-config entry',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -262,10 +276,8 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
-      expect(e!.validationError).toBe(
-        'Preset caused unexpected error (throw:base)',
-      );
+      expect(e!.validationSource).toBe('throw:base');
+      expect(e!.validationError).toBe('Preset caused unexpected error');
       expect(e!.validationMessage).toBeUndefined();
     });
 
@@ -317,9 +329,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toBeUndefined();
+      expect(e!.validationSource).toBe('wrongpreset:invalid-preset');
       expect(e!.validationError).toBe(
-        'Preset name not found within published preset config (wrongpreset:invalid-preset)',
+        'Preset name not found within published preset config',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -796,8 +808,10 @@ describe('config/presets/index', () => {
         await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
           expect.objectContaining({
             message: CONFIG_VALIDATION,
-            validationError:
-              'Relative preset reference cannot be resolved (./x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends)',
+            validationSource: './x',
+            validationError: 'Relative preset reference cannot be resolved',
+            validationMessage:
+              'Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends).',
           }),
         );
       });
@@ -812,8 +826,10 @@ describe('config/presets/index', () => {
         await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
           expect.objectContaining({
             message: CONFIG_VALIDATION,
-            validationError:
-              'Relative preset reference cannot be resolved (../x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends). Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
+            validationSource: '../x',
+            validationError: 'Relative preset reference cannot be resolved',
+            validationMessage:
+              'Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends).\n\nThis is a *nested* preset, included via `github>some/repo#v1.0.0` → `github>other/repo#v2.0.0` → `../x`, so please contact the author of `github>other/repo#v2.0.0` if you are unable to fix it yourself.',
           }),
         );
       });
@@ -828,8 +844,10 @@ describe('config/presets/index', () => {
         await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
           expect.objectContaining({
             message: CONFIG_VALIDATION,
-            validationError:
-              'Relative preset reference cannot be resolved (./x). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends). Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.',
+            validationSource: './x',
+            validationError: 'Relative preset reference cannot be resolved',
+            validationMessage:
+              'Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends).\n\nThis is a *nested* preset, included via `github>some/repo#v1.0.0` → `somepackage:webapp` → `./x`, so please contact the author of `somepackage:webapp` if you are unable to fix it yourself.',
           }),
         );
       });
