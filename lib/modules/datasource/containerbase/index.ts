@@ -1,7 +1,6 @@
 import {
-  filterByMinCb,
   isContainerbase,
-  packageVersion,
+  minCbByVersion,
   toolVersionsFormat,
   toolVersionsFormatPath,
   toolVersionsPath,
@@ -29,16 +28,21 @@ export const defaultRegistryUrl =
 
 /**
  * Converts the runtime constraints of a version, keyed by the parent tool (like
- * `node`), to release constraints. Unknown constraint names are dropped.
+ * `node`), to release constraints. Unknown constraint names are dropped. The
+ * containerbase version the release needs becomes a `containerbase` constraint.
  */
 function toConstraints(
   constraints: Record<string, string> | undefined,
+  minCb: string | undefined,
 ): Partial<Record<ConstraintName, string[]>> | undefined {
   const result: Partial<Record<ConstraintName, string[]>> = {};
   for (const [name, constraint] of Object.entries(coerceObject(constraints))) {
     if (isConstraintName(name)) {
       result[name] = [constraint];
     }
+  }
+  if (minCb) {
+    result.containerbase = [`>=${minCb}`];
   }
   return Object.keys(result).length ? result : undefined;
 }
@@ -86,7 +90,7 @@ export class ContainerbaseDatasource extends Datasource {
     registryUrl: string,
   ): Promise<ContainerbaseFormats | null | undefined> {
     return this.cached(
-      { key: buildCacheKey('formats', registryUrl) },
+      { key: buildCacheKey('formats', registryUrl), public: true },
       async () => {
         try {
           return await this.fetchJsonOrNull(
@@ -151,32 +155,28 @@ export class ContainerbaseDatasource extends Datasource {
 
   /**
    * Converts a tool file to the release result, or `null` without versions.
-   * Versions which need a newer containerbase than the one Renovate runs with
-   * are skipped.
+   * Versions which need a newer containerbase get a `containerbase` constraint.
    */
   private toReleaseResult(
     body: ContainerbaseToolVersions,
     registryUrl: string | undefined,
   ): ReleaseResult | null {
-    const { versions, needed } = filterByMinCb(body, packageVersion);
-    if (needed.length) {
-      logger.trace(
-        { datasource: this.id, tool: body.tool, needed, packageVersion },
-        'Skipped the versions which need a newer containerbase',
-      );
-    }
+    const minCb = minCbByVersion(body);
     const result: ReleaseResult = {
       registryUrl,
       sourceUrl: body.sourceUrl,
       homepage: body.homepage,
-      releases: versions.map(
+      releases: body.versions.map(
         ({ version, prerelease, releaseTimestamp, constraints }) => {
           const release: Release = {
             version,
             isStable: prerelease !== true,
             releaseTimestamp: asTimestamp(releaseTimestamp),
           };
-          const releaseConstraints = toConstraints(constraints);
+          const releaseConstraints = toConstraints(
+            constraints,
+            minCb.get(version),
+          );
           if (releaseConstraints) {
             release.constraints = releaseConstraints;
           }
@@ -227,6 +227,7 @@ export class ContainerbaseDatasource extends Datasource {
       return await this.cached(
         {
           key: buildCacheKey(registryUrl, packageName),
+          public: true,
           fallback: true,
         },
         () => this.fetchReleases(config),
