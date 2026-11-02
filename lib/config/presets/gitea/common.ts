@@ -59,7 +59,7 @@ export function createPresetSource(
       logger.debug(
         `Preset file ${fileName} not found in ${repo}: ${err.message}`,
       );
-      throw new Error(PRESET_DEP_NOT_FOUND);
+      throw new Error(PRESET_DEP_NOT_FOUND, { cause: err });
     }
 
     let contentString: string;

@@ -1,5 +1,9 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import {
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { toBase64 } from '../../../util/string.ts';
 import {
@@ -74,6 +78,25 @@ describe('config/presets/github/index', () => {
   });
 
   describe('getPreset()', () => {
+    it.each`
+      statusCode | body                                                     | cause
+      ${404}     | ${{}}                                                    | ${expect.objectContaining({ response: expect.objectContaining({ statusCode: 404 }) })}
+      ${403}     | ${{ message: 'Resource not accessible by integration' }} | ${expect.objectContaining({ message: PLATFORM_INTEGRATION_UNAUTHORIZED })}
+      ${403}     | ${{ message: 'API rate limit exceeded' }}                | ${expect.objectContaining({ message: PLATFORM_RATE_LIMIT_EXCEEDED })}
+    `(
+      'retains why the preset could not be fetched, for HTTP $statusCode',
+      async ({ statusCode, body, cause }) => {
+        httpMock
+          .scope(githubApiHost)
+          .get(`${basePath}/default.json`)
+          .reply(statusCode, body);
+
+        await expect(
+          github.fetchJSONFile('some/repo', 'default.json', githubApiHost),
+        ).rejects.toMatchObject({ message: PRESET_DEP_NOT_FOUND, cause });
+      },
+    );
+
     it('tries default then renovate', async () => {
       httpMock
         .scope(githubApiHost)

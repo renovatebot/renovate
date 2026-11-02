@@ -31,7 +31,7 @@ export async function fetchJSONFile(
     logger.debug(
       `Preset file ${fileName} not found in ${repo}: ${err.message}`,
     );
-    throw new Error(PRESET_DEP_NOT_FOUND);
+    throw new Error(PRESET_DEP_NOT_FOUND, { cause: err });
   }
 
   return parsePreset(content, fileName);

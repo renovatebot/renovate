@@ -23,12 +23,13 @@ describe('config/presets/local/common', () => {
       );
     });
 
-    it('throws for Error', async () => {
-      platform.getRawFile.mockRejectedValueOnce(new Error());
+    it('throws for Error, retaining the cause', async () => {
+      const cause = new Error('some error');
+      platform.getRawFile.mockRejectedValueOnce(cause);
 
-      await expect(fetchJSONFile('some/repo', 'default.json')).rejects.toThrow(
-        PRESET_DEP_NOT_FOUND,
-      );
+      await expect(
+        fetchJSONFile('some/repo', 'default.json'),
+      ).rejects.toMatchObject({ message: PRESET_DEP_NOT_FOUND, cause });
     });
   });
 
