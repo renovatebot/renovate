@@ -139,7 +139,7 @@ describe('modules/manager/npm/extract/npmrc', () => {
       detectedLineEnding: '\n',
     } as const;
 
-    it('sets minimumReleaseAgeExtracted from the repository .npmrc', () => {
+    it('adds a packageRules entry from the repository .npmrc', () => {
       const packageFiles = [
         packageFile({ npmLock: 'package-lock.json', repoNpmrc }),
         packageFile({ repoNpmrc }),
@@ -147,9 +147,37 @@ describe('modules/manager/npm/extract/npmrc', () => {
 
       setNpmrcMinimumReleaseAge(packageFiles);
 
-      expect(packageFiles).toMatchObject([
-        { minimumReleaseAgeExtracted: '3 days' },
-        { minimumReleaseAgeExtracted: '3 days' },
+      const packageRules = [
+        { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
+      ];
+      expect(packageFiles).toMatchObject([{ packageRules }, { packageRules }]);
+    });
+
+    it('keeps existing packageRules', () => {
+      const existing = {
+        matchPackageNames: ['foo'],
+        minimumReleaseAgeExtracted: null,
+      };
+      const packageFiles = [
+        {
+          ...packageFile({
+            repoNpmrc: {
+              ...repoNpmrc,
+              content: 'before=2026-06-12T12:00:00.000Z\n',
+            },
+          }),
+          packageRules: [existing],
+        },
+      ];
+
+      setNpmrcMinimumReleaseAge(packageFiles);
+
+      expect(packageFiles[0].packageRules).toEqual([
+        existing,
+        {
+          matchDatasources: ['npm'],
+          minimumReleaseAgeExtracted: '2026-06-12T12:00:00.000Z',
+        },
       ]);
     });
 
@@ -166,7 +194,7 @@ describe('modules/manager/npm/extract/npmrc', () => {
       setNpmrcMinimumReleaseAge(packageFiles);
 
       for (const file of packageFiles) {
-        expect(file.minimumReleaseAgeExtracted).toBeUndefined();
+        expect(file.packageRules).toBeUndefined();
       }
     });
 
@@ -179,7 +207,7 @@ describe('modules/manager/npm/extract/npmrc', () => {
       setNpmrcMinimumReleaseAge(packageFiles);
 
       for (const file of packageFiles) {
-        expect(file.minimumReleaseAgeExtracted).toBeUndefined();
+        expect(file.packageRules).toBeUndefined();
       }
     });
   });

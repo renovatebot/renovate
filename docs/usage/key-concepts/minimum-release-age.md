@@ -107,7 +107,7 @@ If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does 
 
 Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
 A `before=<date>` setting counts as the time elapsed since that date.
-This applies to every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
+This applies to the npm dependencies of every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
 
 If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
 In this case, Renovate automatically retries without `--before` and logs a warning.
