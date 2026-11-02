@@ -9,6 +9,7 @@ import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
+import { getPlatformPrOptions } from '../pr/index.ts';
 
 export function commitFilesToBranch(
   config: BranchConfig,
@@ -61,6 +62,8 @@ export function commitFilesToBranch(
     prTitle: config.prTitle,
     // Only needed by Gerrit platform
     autoApprove: config.autoApprove,
+    // Only needed by GitHub platform
+    platformPrOptions: getPlatformPrOptions(config),
   };
 
   // istanbul ignore if
