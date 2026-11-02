@@ -7,6 +7,7 @@ import {
   clearRepoSanitizedSecretsList,
 } from '../../../../util/sanitize.ts';
 import type { BranchConfig } from '../../../types.ts';
+import { getPlatformPrOptions } from '../pr/index.ts';
 import {
   commitFilesToBranch,
   prepareBranchCommit,
@@ -67,6 +68,7 @@ describe('workers/repository/update/branch/commit', () => {
         force: false,
         message: 'some commit message',
         platformCommit: 'auto',
+        platformPrOptions: getPlatformPrOptions(config),
       });
     });
 
@@ -163,6 +165,7 @@ describe('workers/repository/update/branch/commit', () => {
             force: false,
             message: 'some commit message',
             platformCommit: 'auto',
+            platformPrOptions: getPlatformPrOptions(config),
           },
         ],
       ]);
