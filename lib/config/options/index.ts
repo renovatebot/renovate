@@ -2447,6 +2447,14 @@ const options: Readonly<RenovateOptions>[] = [
     nullable: true,
   },
   {
+    name: 'minimumReleaseAgePackageManager',
+    scopes: ['repo', 'manager'],
+    description:
+      'Lower bound for the minimum release age which Renovate passes to package managers.',
+    type: 'string',
+    default: null,
+  },
+  {
     name: 'abandonmentThreshold',
     scopes: lookupScopes,
     description:

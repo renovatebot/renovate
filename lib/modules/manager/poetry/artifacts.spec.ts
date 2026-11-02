@@ -856,6 +856,38 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
+    it('raises POETRY_SOLVER_MIN_RELEASE_AGE to minimumReleaseAgePackageManager', async () => {
+      const execSnapshots = mockExecAll();
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      // poetry.toml
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAge: '5 days',
+            minimumReleaseAgePackageManager: '5 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+            }),
+          },
+        },
+      ]);
+    });
+
     it('rounds up sub-day durations to 1 day for POETRY_SOLVER_MIN_RELEASE_AGE', async () => {
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -887,7 +919,7 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
-    it('passes no age if a young update has no minimumReleaseAge', async () => {
+    it('passes no age if an update younger than minimumReleaseAgePackageManager has no minimumReleaseAge', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
       fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -903,7 +935,7 @@ describe('modules/manager/poetry/artifacts', () => {
             depName: 'mycorp-lib',
             manager: 'poetry',
             minimumReleaseAge: null,
-            minimumReleaseAgeRepository: '3 days',
+            minimumReleaseAgePackageManager: '3 days',
             releaseTimestamp: releasedDaysAgo(1),
           },
         ],
@@ -1253,7 +1285,8 @@ describe('modules/manager/poetry/artifacts', () => {
             depName: 'dep2',
             manager: 'poetry',
             minimumReleaseAge: '5 days',
-            minimumReleaseAgeRepository: '5 days',
+            minimumReleaseAgePackageManager: '5 days',
+            minimumReleaseAgeRepository: '3 days',
           },
         ],
         newPackageFileContent: '',
@@ -1284,19 +1317,19 @@ describe('modules/manager/poetry/artifacts', () => {
         config: {
           ...config,
           isLockFileMaintenance: true,
-          minimumReleaseAge: '3 days',
+          minimumReleaseAgePackageManager: '3 days',
           upgrades: [
             {
               isLockFileMaintenance: true,
               manager: 'npm',
               packageFile: 'package.json',
-              minimumReleaseAge: '3 days',
+              minimumReleaseAgePackageManager: '3 days',
             },
             {
               isLockFileMaintenance: true,
               manager: 'poetry',
               packageFile: 'pyproject.toml',
-              minimumReleaseAge: '5 days',
+              minimumReleaseAgePackageManager: '5 days',
             },
           ],
         },
