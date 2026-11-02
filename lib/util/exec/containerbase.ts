@@ -179,6 +179,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     packageName: 'npm',
     versioning: 'npm',
   },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: 'paket',
+  },
   pdm: {
     datasource: 'github-releases',
     packageName: 'pdm-project/pdm',

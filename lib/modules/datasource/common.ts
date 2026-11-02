@@ -204,7 +204,6 @@ export function applyConstraintsFiltering<
 
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
-  const versioning = allVersioning.get(versioningName);
 
   const configConstraints = config.constraints;
   const filteredReleases: string[] = [];
@@ -330,16 +329,7 @@ export function applyConstraintsFiltering<
           },
           `applyConstraintsFiltering(${release.version}): constraintVersioning.isValid(${releaseConstraint})=${isValidConstraintVersion}`,
         );
-        const isValidVersion = versioning.isValid(releaseConstraint);
-        logger.trace(
-          {
-            release,
-            versioning: constraintVersioningName,
-            releaseConstraint,
-          },
-          `applyConstraintsFiltering(${release.version}): versioning.isValid(${releaseConstraint})=${isValidVersion}`,
-        );
-        if (!isValidVersion || !isValidConstraintVersion) {
+        if (!isValidConstraintVersion) {
           logger.once.debug(
             {
               packageName: config.packageName,

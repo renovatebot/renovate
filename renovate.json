@@ -172,8 +172,13 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["lib/config/options/index.ts"],
-      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "managerFilePatterns": [
+        "lib/config/options/index.ts",
+        "lib/modules/manager/github-actions/readme.md"
+      ],
+      "matchStrings": [
+        "['\"]?ghActionsLock['\"]?: ['\"](?<currentValue>v[^'\"]+)['\"]"
+      ],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
     },
@@ -185,6 +190,15 @@
       "matchStrings": ["actionsLockVersion = '(?<currentValue>.*)'"],
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "github/gh-actions-lock"
+    },
+    {
+      "description": "Update pinned `gh` CLI extensions",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": [
+        "gh extension install (?<depName>[\\w.-]+/[\\w.-]+) --pin (?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "github-releases"
     }
   ]
 }

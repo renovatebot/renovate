@@ -77,13 +77,19 @@ Renovate installs the [`gh-actions-lock`](https://github.com/github/gh-actions-l
 
 ```sh
 gh extension install github/gh-actions-lock --pin <version> --force
-gh actions-lock --no-interactive --relock --no-narrow --no-migrate-local-actions
+gh actions-lock --no-interactive --no-onboard --no-narrow --ignore-local-actions --json=findings
 ```
 
-Renovate opts out of two rewrites that `gh actions-lock` performs by default, as both would change more than the dependency being updated: narrowing a ref like `@v4` to `@v4.2.1`, which would contradict the version in the pull request and defeat a deliberately floating major tag, and migrating same-repo `uses: ./…` references to the `uses: $/…` form.
+Renovate invokes `gh actions-lock` in a way that keeps the diff to the dependency being updated, by re-resolving only the refs which have changed, along with anything new they pull in transitively.
+Every other pin stays as locked, including floating refs (like `@v4`) which have since moved upstream.
+For a `ghActionsLock` constraint below v0.3.0, Renovate passes `--relock` (which also advances moved floating refs) and `--no-migrate-local-actions` instead of `--ignore-local-actions`.
+With `binarySource=global`, Renovate assumes the installed extension is v0.3.0 or later.
 
-Since `gh-actions-lock` v0.2.0, locked pins are sticky, so a plain run fails with `Ref changed` once a workflow's ref no longer matches the lockfile.
-Renovate passes `--relock` so that the lockfile is rebuilt for the updated refs, which also advances any floating refs (like `@v4`) in the lockfile to their current commit.
+- `--no-interactive`: don't hang, expecting an interactive terminal to answer prompts
+- `--no-onboard`: only update workflows and actions which the lockfile already tracks, so an update pull request does not add unrelated workflows. Onboard them yourself by running `gh actions-lock`. Renovate omits this flag when an update replaces an action with a different one, as the lockfile has to learn about the new action
+- `--no-narrow`: don't narrow a floating ref like `@v4` to `@v4.2.1`, which would contradict the version in the pull request
+- `--ignore-local-actions`: don't migrate same-repo `uses: ./…` references to the `uses: $/…` form, and only warn when such a local action uses remote actions, which the lockfile cannot record
+- `--json=findings`: print the findings as JSON, so that when `gh actions-lock` fails, Renovate reports each error finding on its own line, with the affected workflow and action, instead of the raw output
 
 You do not need to configure anything: if there's no `actions.lock` file, then there's nothing to update.
 Workflows which are not onboarded to the lockfile are skipped.
@@ -111,12 +117,12 @@ To use a different version, set the `ghActionsLock` constraint:
 ```json
 {
   "constraints": {
-    "ghActionsLock": "v0.1.7"
+    "ghActionsLock": "v0.4.0"
   }
 }
 ```
 
-The version must be a full release tag, like `v0.1.7`.
+The version must be a full release tag, as in the example above.
 
 Because [`constraints`](../../../configuration-options.md#constraints) is mergeable, setting `"constraints": {}` does _not_ remove the pin: set the value to an empty string to always install the latest extension.
 
@@ -188,6 +194,26 @@ jobs:
             with:
               go-version: '1.23'
 ```
+
+### Docker container actions
+
+For a [Docker container action](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runs-for-docker-container-actions), Renovate extracts the image from `runs.image`:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0'
+```
+
+Renovate can also pin and update the image's digest:
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'docker://ghcr.io/ossf/scorecard-action:v2.5.0@sha256:1e1481c65fc2407d3fd6ab18a23c741eb4d1c0d9359ebafc4b3ab13aa61d8627'
+```
+
+Renovate ignores a `runs.image` which points at a local `Dockerfile`.
 
 ### Non-support of Variables
 

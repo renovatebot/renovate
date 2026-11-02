@@ -25,6 +25,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ubuntuDockerVersioning',
       'workarounds:groupings',
       'workarounds:helmDocs',
+      'workarounds:guavaVariants',
     ],
     overrideDescription: [
       'Apply crowd-sourced workarounds for known problems with packages.',
@@ -147,6 +148,27 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['@commander-js/extra-typings', 'commander'],
         matchUpdateTypes: ['major'],
+      },
+      {
+        description:
+          'Group SimpleWebAuthn major updates to keep browser and server compatible.',
+        groupName: 'SimpleWebAuthn',
+        matchDatasources: ['npm'],
+        matchPackageNames: [
+          '@simplewebauthn/browser',
+          '@simplewebauthn/server',
+        ],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
+  guavaVariants: {
+    description: 'Keep Guava on its `-jre` or `-android` variant.',
+    packageRules: [
+      {
+        matchDatasources: ['maven', 'sbt-package'],
+        matchPackageNames: ['com.google.guava:guava'],
+        versionCompatibility: '^(?<version>.+)-(?<compatibility>jre|android)$',
       },
     ],
   },

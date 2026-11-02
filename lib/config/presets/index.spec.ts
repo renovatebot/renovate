@@ -418,6 +418,7 @@ describe('config/presets/index', () => {
           '/\\btslint\\b/',
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
@@ -1571,6 +1572,7 @@ describe('config/presets/index', () => {
         matchPackageNames: [
           '@biomejs/**',
           '@oxlint/**',
+          'oxfmt',
           'oxlint',
           'prettier',
           'remark-lint',
