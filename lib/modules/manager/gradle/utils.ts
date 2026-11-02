@@ -60,6 +60,24 @@ export function isDependencyString(input: string): boolean {
   );
 }
 
+// Matches the `group:artifact` notation used by dependencies whose version is
+// declared separately, e.g. inside a rich version constraint block
+export function isGroupArtifactString(input: string): boolean {
+  const parts = input.split(':');
+  if (parts.length !== 2) {
+    return false;
+  }
+
+  const [groupId, artifactId] = parts;
+
+  return !!(
+    groupId &&
+    artifactId &&
+    artifactRegex.test(groupId) &&
+    artifactRegex.test(artifactId)
+  );
+}
+
 export function parseDependencyString(
   input: string,
 ): PackageDependency<GradleManagerData> | null {

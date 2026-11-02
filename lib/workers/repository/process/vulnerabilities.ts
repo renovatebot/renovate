@@ -8,7 +8,7 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as _aeCvss from 'ae-cvss-calculator';
+import aeCvss from 'ae-cvss-calculator';
 import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
@@ -37,8 +37,7 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
-  .default;
+const { fromVector } = aeCvss;
 
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
@@ -63,6 +62,15 @@ export class Vulnerabilities {
 
     const instance = new Vulnerabilities(osvOffline);
     return instance;
+  }
+
+  /**
+   * Closes the shared OSV databases, if they were opened.
+   */
+  static async cleanup(): Promise<void> {
+    const osvOffline = await Vulnerabilities.osvOffline?.catch(() => undefined);
+    Vulnerabilities.osvOffline = undefined;
+    osvOffline?.[Symbol.dispose]();
   }
 
   async appendVulnerabilityPackageRules(
@@ -169,7 +177,7 @@ export class Vulnerabilities {
       return null;
     }
 
-    const packageName = dep.packageName ?? dep.depName!;
+    const packageName = dep.packageName!;
     let osvPackageName = packageName;
     let depType: string | undefined;
     if (ecosystem === 'PyPI') {
@@ -269,6 +277,7 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
+            versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
@@ -578,6 +587,7 @@ export class Vulnerabilities {
       depVersion,
       fixedVersion,
       datasource,
+      versioning: depVersioning,
       packageFileConfig,
     } = vul;
     if (isNullOrUndefined(fixedVersion)) {
@@ -587,8 +597,8 @@ export class Vulnerabilities {
       return null;
     }
 
-    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
-    const versioning = getDefaultVersioning(datasource);
+    // Prefer the `versioning` already assigned to the dependency by its manager
+    const versioning = depVersioning ?? getDefaultVersioning(datasource);
 
     logger.debug(
       {

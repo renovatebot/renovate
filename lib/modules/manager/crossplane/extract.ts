@@ -30,7 +30,9 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   for (const xpkg of list) {
-    const dep = getDep(xpkg.spec.package, true, extractConfig?.registryAliases);
+    const dep = getDep(xpkg.spec.package, {
+      registryAliases: extractConfig?.registryAliases,
+    });
     dep.depType = xpkg.kind.toLowerCase();
     deps.push(dep);
   }

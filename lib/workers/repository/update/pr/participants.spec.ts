@@ -54,6 +54,14 @@ describe('workers/repository/update/pr/participants', () => {
       ]);
     });
 
+    it('adds nothing when filtering leaves no assignee', async () => {
+      platform.filterUnavailableUsers = vi.fn().mockResolvedValueOnce([]);
+
+      await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
+
+      expect(platform.addAssignees).not.toHaveBeenCalled();
+    });
+
     it('expands group code owners assignees', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce([
         'user',

@@ -28,6 +28,7 @@ function findVersionIndex(
     `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`,
   );
   const match = re.exec(content);
+  // v8 ignore else -- the fallback below is already marked unreachable
   if (match) {
     return match.index + content.slice(match.index).indexOf(version);
   }
@@ -134,6 +135,7 @@ function extractLiteralVersion({
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
     return { currentValue: version, fileReplacePosition };
   }
+  // v8 ignore else -- a version is either a string, handled above, or a table
   if (isPlainObject(version)) {
     // https://github.com/gradle/gradle/blob/d9adf33a57925582988fc512002dcc0e8ce4db95/subprojects/core/src/main/java/org/gradle/api/internal/catalog/parser/TomlCatalogFileParser.java#L368
     // https://docs.gradle.org/current/userguide/rich_versions.html

@@ -10,7 +10,9 @@ export class PuppetForgeDatasource extends Datasource {
     super(PuppetForgeDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [PUPPET_FORGE];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [PUPPET_FORGE];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -24,14 +26,7 @@ export class PuppetForgeDatasource extends Datasource {
     const moduleSlug = packageName.replace('/', '-');
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
-    let result: ReleaseResult;
-
-    try {
-      const response = await this.http.getJson(url, PuppetModule);
-      result = response.body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    const result = await this.fetchJson(url, PuppetModule);
 
     if (!result.releases.length) {
       return null;

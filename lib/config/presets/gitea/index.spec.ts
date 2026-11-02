@@ -237,7 +237,7 @@ describe('config/presets/gitea/index', () => {
     it('should query custom paths', async () => {
       httpMock
         .scope(giteaApiHost)
-        .get(`${basePath}/path%2Fcustom.json`)
+        .get(`${basePath}/path/custom.json`)
         .reply(200, {
           type: 'file',
           name: 'custom.json',

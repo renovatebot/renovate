@@ -1,10 +1,11 @@
 import { logger } from '../../../logger/index.ts';
+import type { GiteaHttp } from '../../../util/http/gitea.ts';
 import * as helper from './gitea-helper.ts';
 import type { Label } from './schema.ts';
-import type { GiteaLikeHttp, LabelListRepo } from './types.ts';
+import type { LabelListRepo } from './types.ts';
 
 async function fetchRepoLabels(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repository: string,
 ): Promise<Label[]> {
   const labels = await helper.getRepoLabels(http, repository, {
@@ -15,7 +16,7 @@ async function fetchRepoLabels(
 }
 
 async function fetchOrgLabels(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   { isOrgRepo, orgName }: LabelListRepo,
 ): Promise<Label[]> {
   if (!isOrgRepo) {
@@ -38,7 +39,7 @@ async function fetchOrgLabels(
  * Labels of the repository followed by the labels of its organization, if any.
  */
 async function fetchLabelList(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repo: LabelListRepo,
 ): Promise<Label[]> {
   const [repoLabels, orgLabels] = await Promise.all([
@@ -53,7 +54,7 @@ async function fetchLabelList(
  * so resetting `labelList` to `null` refetches the labels on next use.
  */
 export function getLabelList(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repo: LabelListRepo,
 ): Promise<Label[]> {
   repo.labelList ??= fetchLabelList(http, repo);
@@ -62,7 +63,7 @@ export function getLabelList(
 }
 
 export async function lookupLabelByName(
-  http: GiteaLikeHttp,
+  http: GiteaHttp,
   repo: LabelListRepo,
   name: string,
 ): Promise<number | null> {

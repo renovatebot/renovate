@@ -144,6 +144,7 @@ const DevEngine = z.object({
   packageManager: DevEngineDependency.or(
     z.array(DevEngineDependency),
   ).optional(),
+  runtime: DevEngineDependency.or(z.array(DevEngineDependency)).optional(),
 });
 
 export const PackageJson = Json.pipe(

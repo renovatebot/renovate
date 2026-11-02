@@ -37,7 +37,7 @@ async function cleanUpBranches(
         // single base branch: branch name doesn't encode it, use the configured one
         baseBranch = config.baseBranches?.[0] ?? config.defaultBranch!;
       }
-      const pr = await platform.findPr({
+      let pr = await platform.findPr({
         branchName,
         state: 'open',
         targetBranch: baseBranch,
@@ -46,6 +46,25 @@ async function cleanUpBranches(
         branchName,
         baseBranch,
       );
+      if (pr && !GlobalConfig.get('dryRun')) {
+        const freshPr = await platform.getPr(pr.number, true);
+        if (!freshPr) {
+          logger.debug(
+            { branchName, prNo: pr.number },
+            'Could not refresh PR - skipping branch pruning',
+          );
+          continue;
+        }
+        if (freshPr.state === 'open') {
+          pr = freshPr;
+        } else {
+          logger.debug(
+            { branchName, prNo: pr.number, prState: freshPr.state },
+            'PR is no longer open - skipping PR update',
+          );
+          pr = null;
+        }
+      }
       if (pr) {
         if (branchIsModified) {
           logger.debug(

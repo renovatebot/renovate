@@ -89,10 +89,6 @@ const addonInfo: AddonInfo = {
 };
 
 describe('modules/datasource/aws-eks-addon/index', () => {
-  beforeEach(() => {
-    hostRules.clear();
-  });
-
   describe('getPkgReleases()', () => {
     it.each`
       des               | req

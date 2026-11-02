@@ -97,6 +97,19 @@ describe('modules/datasource/github-release-attachments/index', () => {
       expect(digest).toBeNull();
     });
 
+    it('returns null when newValue is not provided', async () => {
+      const digest = await getDigest(
+        {
+          datasource: GithubReleaseAttachmentsDatasource.id,
+          packageName,
+          currentValue,
+          currentDigest,
+        },
+        undefined,
+      );
+      expect(digest).toBeNull();
+    });
+
     it('defaults to currentDigest when currentVersion is missing', async () => {
       const digest = await getDigest(
         {

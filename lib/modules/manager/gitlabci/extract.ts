@@ -161,6 +161,7 @@ export async function extractAllPackageFiles(
     }
 
     const result = extractPackageFile(content, file, config);
+    // v8 ignore else -- needs a listed file that yields no deps
     if (result !== null) {
       results.push({
         packageFile: file,

@@ -41,6 +41,7 @@ async function getRubyConstraintFromFiles(
     }
   }
   const lockFile = await getLockFilePath(packageFileName);
+  // v8 ignore else -- `getLockFilePath()` always returns a path
   if (lockFile) {
     const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
       regEx(/^ {3}ruby (?<version>\d[\d.]*)(?:[a-z]|\s|$)/m),

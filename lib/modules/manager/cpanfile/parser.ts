@@ -30,6 +30,7 @@ const perlVersionMatch = q
   )
   .op(';')
   .handler((ctx) => {
+    // v8 ignore else -- the matched alternatives above always set it
     if (ctx.perlVersion) {
       ctx.deps.push({
         depName: 'perl',
@@ -90,6 +91,7 @@ const moduleMatch = q
     delete ctx.depName;
     delete ctx.currentValue;
 
+    // v8 ignore else -- the handler only runs once a module name matched
     if (depName) {
       const dep: PackageDependency = {
         depName,

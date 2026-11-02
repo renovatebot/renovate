@@ -12,6 +12,7 @@ import * as hostRules from '../../../../util/host-rules.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
+import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
 import { PdmProcessor } from './pdm.ts';
 
@@ -35,7 +36,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);

@@ -105,7 +105,7 @@ jobs:
           show-progress: false
 
       - name: Calculate matrix for `node_modules` prefetch
-        uses: ./.github/actions/calculate-prefetch-matrix
+        uses: $/.github/actions/calculate-prefetch-matrix
         id: os-matrix-prefetch
         with:
           repo: ${{ github.event.repository.full_name }}
@@ -114,7 +114,7 @@ jobs:
 
       - name: Prefetch test modules for `ubuntu-latest`
         id: setup-node
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -150,7 +150,7 @@ jobs:
           echo "node-version=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
 
       - name: Prefetch build modules for `ubuntu-latest`
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -191,7 +191,7 @@ jobs:
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -211,7 +211,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -236,7 +236,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -279,7 +279,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -310,7 +310,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -336,6 +336,9 @@ jobs:
 
       - name: Lint project file structure
         run: pnpm ls-lint
+
+      - name: Check unused dependencies
+        run: pnpm knip
 
       - name: Check git version
         run: pnpm git-check
@@ -363,14 +366,14 @@ jobs:
           sparse-checkout: .github/
 
       - name: Check workflow files
-        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        uses: jdx/jactionlint@baa8d685e2b27ff5821558c9eeabb2051c1da61b # v2.4.0
         with:
-          args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
+          args: --color --profile correctness
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
-          version: 1.30.1
+          version: 1.31.1
 
   test:
     needs: [setup, prefetch]
@@ -399,7 +402,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
@@ -430,6 +433,15 @@ jobs:
               matrix.cache-key
             }}-
 
+      # git-ignored canary, tests must not read a `config.js` from the working directory
+      - name: Create canary config.js
+        shell: bash
+        run: |
+          cat > config.js <<'EOF'
+          globalThis.__RENOVATE_CONFIG_JS_CANARY__ = true;
+          export default { token: 'canary-config-js-must-not-be-read-by-tests' };
+          EOF
+
       - name: Unit tests
         shell: bash
         run: |
@@ -442,7 +454,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           report_type: test_results
@@ -464,7 +476,7 @@ jobs:
 
       - name: Save coverage artifacts
         if: success() && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.upload-artifact-name }}
           path: |
@@ -488,7 +500,7 @@ jobs:
           show-progress: false
 
       - name: Download coverage reports
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
@@ -496,7 +508,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7.1.0
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -520,13 +532,13 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: coverage-*
           path: coverage
@@ -542,7 +554,7 @@ jobs:
         run: |
           pnpm nyc check-coverage -t ./coverage/nyc \
             --statements 100 \
-            --branches 98.71 \
+            --branches 100 \
             --functions 100 \
             --lines 100 \
 
@@ -676,7 +688,7 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -685,7 +697,7 @@ jobs:
         run: pnpm build
 
       - name: Upload dist
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: renovate-dist
           path: dist/
@@ -705,16 +717,16 @@ jobs:
           show-progress: false
 
       - name: Setup Docker
-        uses: ./.github/actions/setup-docker
+        uses: $/.github/actions/setup-docker
 
       - name: Download dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -731,7 +743,7 @@ jobs:
         if: github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && env.DO_RELEASE != 'true')
         run: docker run -e LOG_LEVEL=debug -e RENOVATE_TOKEN --rm renovate/renovate --dry-run=lookup ${{ github.repository }}
         env:
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_TOKEN: ${{ github.token }}
 
       - run: df -h
         if: ${{ !cancelled() }}
@@ -750,15 +762,15 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.12.13
+          version: 0.13.6
           enable-cache: true
           cache-python: true
 
@@ -768,20 +780,41 @@ jobs:
       - name: Build
         run: pnpm build:docs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           SKIP_GITHUB_ISSUES: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event.repository.has_issues == false) && 'true' || '' }}
 
       - name: Test docs
         run: pnpm test:docs
 
       - name: Upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: docs
           path: tmp/docs/
 
+      - name: Get month
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      # The privacy plugin downloads external assets (fonts, mermaid, emojis) with a fixed 5s timeout.
+      # No restore keys: a new month starts empty, so floating versions like `mermaid@11` are refreshed.
+      # Saved on `main` pushes only, like the other caches.
+      - name: Restore mkdocs assets cache
+        id: mkdocs-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
+
       - name: Build mkdocs
         run: pnpm mkdocs build --no-build
+
+      - name: Save mkdocs assets cache
+        if: github.event_name == 'push' && steps.mkdocs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
 
   test-e2e:
     needs:
@@ -800,19 +833,22 @@ jobs:
           show-progress: false
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
       - name: Download dist
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: renovate-dist
           path: dist/
 
       - name: Pack
         run: pnpm test-e2e:pack
+
+      - name: Check npm install
+        run: pnpm test-e2e:npm
 
       - name: Install dependencies
         run: pnpm test-e2e:install
@@ -853,7 +889,7 @@ jobs:
       # right at the start of the job, make sure we're not seeing another commit that's landed
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: renovatebot/renovate
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
@@ -874,10 +910,10 @@ jobs:
           show-progress: false
 
       - name: Setup Docker
-        uses: ./.github/actions/setup-docker
+        uses: $/.github/actions/setup-docker
 
       - name: Setup Node.js
-        uses: ./.github/actions/setup-node
+        uses: $/.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
@@ -893,16 +929,16 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$REPOSITORY_OWNER" --password-stdin
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.12.13
+          version: 0.13.6
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true
@@ -924,7 +960,7 @@ jobs:
       # and one final check, in case preparing the environment has taken long enough for new commits
       - name: Check for newer commits
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           REF_NAME: ${{ github.ref_name }}
           EXPECTED_SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
@@ -940,8 +976,20 @@ jobs:
         run: |
           pnpm semantic-release --dry-run "$DRY_RUN"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           LOG_LEVEL: debug
+
+      - name: Get month
+        if: github.ref_name == 'main'
+        id: month
+        run: echo "month=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore mkdocs assets cache
+        if: github.ref_name == 'main'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/mkdocs/.cache/plugin/privacy
+          key: mkdocs-privacy-${{ steps.month.outputs.month }}-${{ hashFiles('uv.lock', 'tools/mkdocs/mkdocs.yml') }}
 
       - name: Build mkdocs site for deployment
         if: github.ref_name == 'main'
@@ -952,12 +1000,12 @@ jobs:
           mkdir -p tmp
           tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mkdocs-site
           path: tmp/mkdocs-site.tgz
@@ -983,7 +1031,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download mkdocs site from release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: mkdocs-site
           path: tmp

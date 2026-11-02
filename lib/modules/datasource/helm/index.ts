@@ -6,6 +6,7 @@ import type {
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
@@ -25,7 +26,9 @@ export class HelmDatasource extends Datasource {
     super(HelmDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://charts.helm.sh/stable'];
+  }
 
   override readonly defaultConfig = {
     commitMessageTopic: 'Helm release {{depName}}',
@@ -66,7 +69,7 @@ export class HelmDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${HelmDatasource.id}`,
-        key: `repository-data:${helmRepository}`,
+        key: buildCacheKey('repository-data', helmRepository),
       },
       () => this._getRepositoryData(helmRepository),
     );

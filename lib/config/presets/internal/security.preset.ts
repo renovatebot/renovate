@@ -3,6 +3,43 @@ import type { PackageRule } from '../../types.ts';
 import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
+const php2shellPatchedVersions = JSON.stringify({
+  '8.2': 35,
+  '8.3': 36,
+  '8.4': 27,
+  '8.5': 12,
+});
+
+const php2shellVulnerableVersion = `(
+  $value := (manager = "mise" and isLockfileOnly) ? lockedVersion : currentValue;
+  $version := datasource = "docker" ? $split($value, "-")[0] : $value;
+  $parts := $match($version, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+
+  $not(vulnerabilityAlerts.enabled = false) and $exists($parts)
+    and $number($parts[1]) < $lookup(${php2shellPatchedVersions}, $parts[0])
+)`;
+
+const php2shellRule = {
+  isVulnerabilityAlert: true,
+  matchJsonata: [
+    `${php2shellVulnerableVersion} and (
+      $version := datasource = "docker" ? $split(newVersion, "-")[0] : newVersion;
+      $parts := $match($version, /^(8\\.[2-5])\\.(\\d+)$/).groups;
+
+      $exists($parts) and $number($parts[1]) >= $lookup(${php2shellPatchedVersions}, $parts[0])
+    )`,
+  ],
+  matchUpdateTypes: ['patch', 'minor', 'major'],
+  prBodyNotes: [
+    [
+      '> ⚠️ PHP2Shell vulnerabilities can allow remote code execution. This PR updates affected PHP versions to patched releases. Rebuild affected images, deploy the updates, and restart PHP workers.',
+      '>',
+      '> Details: [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) and [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp).',
+    ].join('\n'),
+  ],
+  schedule: [],
+} satisfies PackageRule;
+
 interface MinimumReleaseAgeDatasource {
   description: string;
   minimumReleaseAge: string;
@@ -171,6 +208,63 @@ export const presets: Record<string, Preset> = {
           OpenSSF:
             '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri=github.com/{{sourceRepo}})',
         },
+      },
+    ],
+  },
+  php2shell: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate: 'github-tags',
+        depNameTemplate: 'php',
+        depTypeTemplate: 'php2shell-runtime',
+        extractVersionTemplate: '^php-(?<version>\\S+)',
+        managerFilePatterns: ['/(^|/)\\.php-version$/'],
+        matchStrings: ['^\\s*(?<currentValue>8\\.[2-5]\\.\\d+)\\s*$'],
+        packageNameTemplate: 'php/php-src',
+      },
+      {
+        customType: 'jsonata',
+        datasourceTemplate: 'github-tags',
+        depNameTemplate: 'php',
+        depTypeTemplate: 'php2shell-runtime',
+        extractVersionTemplate: '^php-(?<version>\\S+)',
+        fileFormat: 'yaml',
+        managerFilePatterns: [
+          '/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/',
+          '/(^|/)action\\.ya?ml$/',
+        ],
+        matchStrings: [
+          '**[uses and $exists($match(uses, /^shivammathur\\/setup-php@/))].with."php-version"[$type($) = "string" and $exists($match($, /^8\\.[2-5]\\.\\d+$/))].{"currentValue": $}',
+        ],
+        packageNameTemplate: 'php/php-src',
+      },
+    ],
+    description:
+      'Update vulnerable PHP runtime pins for CVE-2026-109618 and CVE-2026-109619.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDepTypes: ['php2shell-runtime'],
+        matchManagers: ['custom.regex', 'custom.jsonata'],
+      },
+      {
+        enabled: true,
+        matchDepTypes: ['php2shell-runtime'],
+        matchJsonata: [php2shellVulnerableVersion],
+        matchManagers: ['custom.regex', 'custom.jsonata'],
+      },
+      {
+        ...php2shellRule,
+        matchDatasources: ['github-tags'],
+        matchPackageNames: ['containerbase/php-prebuild', 'php/php-src'],
+      },
+      {
+        ...php2shellRule,
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          '/^(?:(?:docker\\.io|index\\.docker\\.io)\\/)?(?:library\\/)?php$/',
+        ],
       },
     ],
   },

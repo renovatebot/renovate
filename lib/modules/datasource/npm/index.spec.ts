@@ -13,7 +13,6 @@ let npmResponse: any;
 describe('modules/datasource/npm/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    hostRules.clear();
     setNpmrc();
     npmResponse = {
       name: 'foobar',

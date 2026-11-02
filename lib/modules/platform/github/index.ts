@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
+import type { MergeStrategy } from '../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -51,7 +52,7 @@ import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
-import { fromBase64, looseEquals } from '../../../util/string.ts';
+import { looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -78,6 +79,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
+import { getRepoFile } from './files.ts';
 import {
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
@@ -129,6 +131,11 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
+
+const noteAlertRegex = regEx(/> ℹ️? \*\*Note\*\*\n> ?\n/g);
+const warningAlertRegex = regEx(/> ⚠️? \*\*Warning\*\*\n> ?\n/g);
+const cautionAlertRegex = regEx(/> 🛑 \*\*Caution\*\*\n> ?\n/g);
+const importantAlertRegex = regEx(/> ❗ \*\*Important\*\*\n> ?\n/g);
 
 export function resetConfigs(): void {
   config = {} as never;
@@ -423,17 +430,14 @@ export async function getRawFile(
     httpOptions.cacheProvider = repoCacheProvider;
   }
 
-  let url = `repos/${repo}/contents/${fileName}`;
-  if (branchOrTag) {
-    url += `?ref=${branchOrTag}`;
-  }
-  const res = await githubApi.getJsonUnchecked<{ content: string }>(
-    url,
+  return await getRepoFile(
+    githubApi,
+    // TODO #22198
+    repo!,
+    fileName,
+    branchOrTag,
     httpOptions,
   );
-  const buf = res.body.content;
-  const str = fromBase64(buf);
-  return str;
 }
 
 export async function getJsonFile(
@@ -961,9 +965,15 @@ async function fetchPr(prNo: number): Promise<GhPr | null> {
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<GhPr | null> {
+export async function getPr(
+  prNo: number,
+  refreshCache = false,
+): Promise<GhPr | null> {
   if (!prNo) {
     return null;
+  }
+  if (refreshCache) {
+    return fetchPr(prNo);
   }
   const prList = await getPrList();
   let pr = prList.find(({ number }) => number === prNo) ?? null;
@@ -2219,12 +2229,21 @@ export async function mergePr({
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   const pr = await getPr(prNo);
+  if (await directMergePr(prNo, strategy)) {
+    return true;
+  }
   if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The PR is not merged directly but through the merge queue, so it must
-    // not be cached as merged nor may its branch be deleted yet
+    // The direct merge was refused - fall back to adding the PR to the merge
+    // queue, so it must not be cached as merged nor may its branch be deleted
     return tryEnqueuePr(pr);
   }
+  return false;
+}
 
+async function directMergePr(
+  prNo: number,
+  strategy?: MergeStrategy,
+): Promise<boolean> {
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
@@ -2329,7 +2348,7 @@ export function massageMarkdown(input: string): string {
   if (platformConfig.host.type !== 'github') {
     return smartTruncate(input, maxBodyLength());
   }
-  const massagedInput = massageMarkdownLinks(input)
+  const linkifiedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with redirect.github.com
     .replace(
       regEx(/href="https?:\/\/github.com\//g),
@@ -2342,14 +2361,13 @@ export function massageMarkdown(input: string): string {
     .replace(
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
-    )
-    .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ℹ️ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ❗ **Caution**\n> \n', '> [!CAUTION]\n')
-    .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, maxBodyLength());
+    );
+  // Run after truncation so any Note added by smartTruncate() is also converted
+  return smartTruncate(linkifiedInput, maxBodyLength())
+    .replaceAll(noteAlertRegex, '> [!NOTE]\n')
+    .replaceAll(warningAlertRegex, '> [!WARNING]\n')
+    .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
+    .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
 }
 
 export function maxBodyLength(): number {

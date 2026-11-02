@@ -37,6 +37,7 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
+  // v8 ignore else -- needs a builder definition whose dist omits the version
   if (definition.dist.otelcol_version) {
     deps.push({
       datasource: GoDatasource.id,

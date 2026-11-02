@@ -15,12 +15,6 @@ import type {
  */
 export type GiteaPlatformKey = 'gitea' | 'forgejo';
 
-/**
- * Http client of a platform which speaks the Gitea API. `ForgejoHttp` extends
- * `GiteaHttp`, so both are accepted.
- */
-export type GiteaLikeHttp = GiteaHttp;
-
 export interface GiteaPlatformOptions {
   /** Platform id, also used as `hostType` and as cache key. */
   id: GiteaPlatformKey;
@@ -29,7 +23,7 @@ export interface GiteaPlatformOptions {
   defaultEndpoint: string;
 
   /** Http client bound to this platform's `hostType`. */
-  http: GiteaLikeHttp;
+  http: GiteaHttp;
 
   /** Sets the base url of the module-level http client. */
   setBaseUrl: (baseUrl: string) => void;
@@ -145,3 +139,11 @@ export interface PrCacheData {
   updated_at: string | null;
   author: string | null;
 }
+
+/**
+ * The Gitea/Forgejo merge styles allowed by a repository, as determined by
+ * `isAllowed()`. Passed to `getMergeMethod()` so it can pick the best
+ * matching merge style for a given `MergeStrategy` when more than one style
+ * could apply.
+ */
+export type AllowedMergeMethods = ReadonlySet<PRMergeMethod>;

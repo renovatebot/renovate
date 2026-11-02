@@ -69,7 +69,7 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): boolean {
     dep.skipReason = 'no-source-match';
     return false;
   }
-  if (dep.managerData.name !== null) {
+  if (dep.managerData.name !== undefined) {
     dep.depName = dep.managerData.name;
   }
 
@@ -85,7 +85,6 @@ export function extractRoles(lines: string[]): PackageDependency[] {
       const dep: AnsibleGalaxyPackageDependency = {
         depType: 'role',
         managerData: {
-          name: null,
           version: null,
           scm: null,
           src: null,

@@ -221,6 +221,25 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('handles an update that reports no files', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '22.0.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({ status: 'updated' });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toBeEmptyArray();
+    });
+
     it('passes mise lockfile updates to the artifact refresh', async () => {
       config.upgrades.push({
         packageFile: 'mise.toml',
@@ -485,6 +504,63 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
+    it('keeps only the latest artifact when several package files return the same path', async () => {
+      config.upgrades.push(
+        {
+          packageFile: 'app/go.mod',
+          manager: 'gomod',
+          branchName: 'foo/bar',
+        },
+        {
+          packageFile: 'lib/go.mod',
+          manager: 'gomod',
+          branchName: 'foo/bar',
+        },
+      );
+      gomod.updateDependency.mockReturnValue('some new content');
+      gomod.updateArtifacts
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'go.work.sum',
+              contents: 'first contents',
+            },
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            file: {
+              type: 'addition',
+              path: 'lib/go.sum',
+              contents: 'lib contents',
+            },
+          },
+          {
+            file: {
+              type: 'addition',
+              path: 'go.work.sum',
+              contents: 'second contents',
+            },
+          },
+        ]);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'go.work.sum',
+          contents: 'second contents',
+        },
+        {
+          type: 'addition',
+          path: 'lib/go.sum',
+          contents: 'lib contents',
+        },
+      ]);
+    });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
@@ -741,7 +817,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         datasource: GitRefsDatasource.id,
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
@@ -752,6 +831,20 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('drops unchanged package file if not updated out of band', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({ updatedPackageFiles: [] });
     });
 
     /*
@@ -1200,6 +1293,40 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('keeps a package file another upgrade already wrote', async () => {
+      config.upgrades.push(
+        {
+          packageFile: 'Chart.yaml',
+          branchName: '',
+          bumpVersion: 'patch',
+          manager: 'helmv3',
+          packageFileVersion: '0.0.1',
+        },
+        {
+          packageFile: 'Chart.yaml',
+          branchName: '',
+          manager: 'helmv3',
+          isLockfileUpdate: true,
+        },
+      );
+      autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
+      helmv3.bumpPackageVersion.mockReturnValue({
+        bumpedContent: 'version: 0.0.2',
+      });
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res).toMatchObject({
+        updatedPackageFiles: [
+          { type: 'addition', path: 'Chart.yaml', contents: 'version: 0.0.2' },
+        ],
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { manager: 'helmv3' },
+        'isLockFileUpdate without updateLockedDependency',
+      );
     });
 
     it('handles replacement', async () => {

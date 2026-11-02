@@ -60,6 +60,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
@@ -254,15 +255,10 @@ export async function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
+  return await getRepoFile(gitlabApi, repo, fileName, branchOrTag, {
     cacheProvider: memCacheProvider,
   });
-  const buf = res.body.content;
-  const str = Buffer.from(buf, 'base64').toString();
-  return str;
 }
 
 export async function getJsonFile(
@@ -447,13 +443,13 @@ interface GitlabBranchStatus {
 async function getStatus(
   branchName: string,
   useCache = true,
+  sha: string | null = git.getBranchCommit(branchName),
 ): Promise<GitlabBranchStatus[]> {
-  const branchSha = git.getBranchCommit(branchName);
   try {
     // TODO: types (#22198)
     const url = `projects/${
       config.repository
-    }/repository/commits/${branchSha!}/statuses`;
+    }/repository/commits/${sha!}/statuses`;
 
     const opts: GitlabHttpOptions = { paginate: true };
     if (useCache) {
@@ -1025,12 +1021,42 @@ export async function getBranchPr(
   return existingPr ? getPr(existingPr.number) : null;
 }
 
+interface MergedResultsPipeline {
+  id: number;
+  sha: string;
+}
+
+// A merged results pipeline runs on the merge ref commit, not on the branch head,
+// so status checks for it have to be set on that commit instead.
+async function getMergedResultsPipeline(
+  branchName: string,
+): Promise<MergedResultsPipeline | null> {
+  const branchSha = git.getBranchCommit(branchName);
+  const mr = await getBranchPr(branchName);
+  if (
+    mr?.sha !== branchSha ||
+    mr.headPipelineSource !== 'merge_request_event' ||
+    !mr.headPipelineId ||
+    !mr.headPipelineSha ||
+    mr.headPipelineSha === branchSha
+  ) {
+    return null;
+  }
+  return { id: mr.headPipelineId, sha: mr.headPipelineSha };
+}
+
 export async function getBranchStatusCheck(
   branchName: string,
   context: string,
 ): Promise<BranchStatus | null> {
   // cache-bust in case we have rebased
-  const res = await getStatus(branchName, false);
+  let res = await getStatus(branchName, false);
+  if (!res.some((check) => check.name === context)) {
+    const mergedResultsPipeline = await getMergedResultsPipeline(branchName);
+    if (mergedResultsPipeline) {
+      res = await getStatus(branchName, false, mergedResultsPipeline.sha);
+    }
+  }
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
@@ -1053,8 +1079,7 @@ export async function setBranchStatus({
     logger.warn('Failed to get the branch commit SHA');
     return;
   }
-  // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/statuses/${branchSha}`;
+  let statusSha: string = branchSha;
   let state = 'success';
   if (renovateState === 'yellow') {
     state = 'pending';
@@ -1099,6 +1124,16 @@ export async function setBranchStatus({
         parseInteger(env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
       );
     }
+    if (options.pipeline_id === undefined) {
+      const mergedResultsPipeline = await getMergedResultsPipeline(branchName);
+      if (mergedResultsPipeline) {
+        logger.debug(
+          `Setting branch status on merged results pipeline ${mergedResultsPipeline.id}`,
+        );
+        options.pipeline_id = mergedResultsPipeline.id;
+        statusSha = mergedResultsPipeline.sha;
+      }
+    }
   } catch (err) {
     logger.debug({ err });
     logger.warn('Failed to retrieve commit pipeline');
@@ -1113,6 +1148,7 @@ export async function setBranchStatus({
   }
 
   try {
+    const url = `projects/${config.repository}/statuses/${statusSha}`;
     await gitlabApi.postJson(url, { body: options });
 
     // update status cache

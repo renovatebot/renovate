@@ -1,4 +1,7 @@
+import { isString } from '@sindresorhus/is';
+import type { Release } from '../../../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { classifyRelease } from './update-type.ts';
 
 export interface BucketConfig {
   separateMajorMinor?: boolean;
@@ -22,7 +25,6 @@ export function getBucket(
   if (!separateMajorMinor) {
     return 'latest';
   }
-  const fromMajor = versioningApi.getMajor(currentVersion);
   const toMajor = versioningApi.getMajor(newVersion);
 
   // istanbul ignore if: error case
@@ -30,8 +32,10 @@ export function getBucket(
     return null;
   }
 
+  const updateType = classifyRelease(versioningApi, currentVersion, newVersion);
+
   // Check for major update type first
-  if (fromMajor !== toMajor) {
+  if (updateType === 'major') {
     if (separateMultipleMajor) {
       return `v${toMajor}`;
     }
@@ -41,6 +45,7 @@ export function getBucket(
 
   // If we reach here then we know it's non-major
 
+  // A versioning which cannot name the minor of either version cannot name a minor bucket either, so fall back to the shared non-major bucket
   const fromMinor = versioningApi.getMinor(currentVersion);
   const toMinor = versioningApi.getMinor(newVersion);
 
@@ -50,7 +55,7 @@ export function getBucket(
   }
 
   // Check the minor update type first
-  if (fromMinor !== toMinor) {
+  if (updateType === 'minor') {
     if (separateMultipleMinor) {
       return `v${toMajor}.${toMinor}`;
     }
@@ -78,4 +83,36 @@ export function getBucket(
   }
   // default path for patch updates is not to separate them from minor
   return 'non-major';
+}
+
+/**
+ * Group candidate releases by the bucket their update would land in.
+ *
+ * Releases which have no bucket are dropped.
+ */
+export function groupReleasesIntoBuckets(
+  config: BucketConfig,
+  currentVersion: string,
+  releases: Release[],
+  versioningApi: VersioningApi,
+): Record<string, Release[]> {
+  const buckets: Record<string, Release[]> = {};
+  for (const release of releases) {
+    const bucket = getBucket(
+      config,
+      currentVersion,
+      release.version,
+      versioningApi,
+    );
+    // `getBucket()` only returns null when the versioning api cannot
+    // determine a major, but every release reaching it has already passed
+    // `isVersion()`, so a null major contradicts that and the else looks
+    // unreachable rather than merely untested
+    // v8 ignore else -- see #40625
+    if (isString(bucket)) {
+      buckets[bucket] ??= [];
+      buckets[bucket].push(release);
+    }
+  }
+  return buckets;
 }

@@ -57,6 +57,10 @@ function isGreaterThan(a: string, b: string): boolean {
 }
 
 function isLessThanRange(version: string, range: string): boolean {
+  if (!isPoetryRange(range)) {
+    return pep440.isLessThanRange!(version, range);
+  }
+
   const semverVersion = poetry2semver(version);
   return !!(
     isVersion(version) &&
@@ -65,11 +69,10 @@ function isLessThanRange(version: string, range: string): boolean {
   );
 }
 
-export function isValid(input: string): boolean {
-  if (!input) {
-    return false;
-  }
-
+/**
+ * Whether the input is a range poetry's own syntax can express, which is what the npm-based implementation here understands.
+ */
+function isPoetryRange(input: string): boolean {
   try {
     return npm.isValid(poetry2npm(input, true));
   } catch {
@@ -81,12 +84,25 @@ export function isValid(input: string): boolean {
   }
 }
 
+export function isValid(input: string): boolean {
+  if (!input) {
+    return false;
+  }
+
+  // Poetry accepts every PEP 440 specifier, including the ones its own syntax cannot express, such as the exclusions in `>=2.6, !=3.0.*, <4`
+  return isPoetryRange(input) || pep440.isValid(input);
+}
+
 function isStable(version: string): boolean {
   const semverVersion = poetry2semver(version);
   return !!(semverVersion && npm.isStable(semverVersion));
 }
 
 function matches(version: string, range: string): boolean {
+  if (!isPoetryRange(range)) {
+    return pep440.matches(version, range);
+  }
+
   const semverVersion = poetry2semver(version);
   return !!(
     isVersion(version) &&
@@ -99,6 +115,10 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (!isPoetryRange(range)) {
+    return pep440.getSatisfyingVersion(versions, range);
+  }
+
   const semverVersions: string[] = [];
   versions.forEach((version) => {
     const semverVersion = poetry2semver(version);
@@ -115,6 +135,10 @@ function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
+  if (!isPoetryRange(range)) {
+    return pep440.minSatisfyingVersion(versions, range);
+  }
+
   const semverVersions: string[] = [];
   versions.forEach((version) => {
     const semverVersion = poetry2semver(version);
@@ -158,12 +182,12 @@ function handleShort(
   return null;
 }
 
-function getNewValue({
-  currentValue,
-  rangeStrategy,
-  currentVersion,
-  newVersion,
-}: NewValueConfig): string {
+function getNewValue(config: NewValueConfig): string | null {
+  const { currentValue, rangeStrategy, currentVersion, newVersion } = config;
+  if (!isPoetryRange(currentValue)) {
+    return pep440.getNewValue(config);
+  }
+
   if (rangeStrategy === 'replace') {
     const npmCurrentValue = poetry2npm(currentValue);
     try {
@@ -243,6 +267,10 @@ function sortVersions(a: string, b: string): number {
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
+  if (!isPoetryRange(subRange) || !isPoetryRange(superRange)) {
+    return undefined;
+  }
+
   return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
 }
 

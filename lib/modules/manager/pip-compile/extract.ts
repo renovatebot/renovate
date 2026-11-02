@@ -5,6 +5,7 @@ import { readLocalFile } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { extractPackageFile as extractPep621File } from '../pep621/extract.ts';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract.ts';
+import type { PipRequirementsManagerData } from '../pip_requirements/types.ts';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup/index.ts';
 import type {
   ExtractConfig,
@@ -19,6 +20,15 @@ import {
   inferCommandExecDir,
   sortPackageFiles,
 } from './utils.ts';
+
+/**
+ * The manager data of a source file, which only the pip_requirements extractor sets.
+ */
+function getRequirementsManagerData(
+  packageFile: PackageFileContent,
+): PipRequirementsManagerData | undefined {
+  return packageFile.managerData as PipRequirementsManagerData | undefined;
+}
 
 export async function extractPackageFile(
   content: string,
@@ -150,13 +160,13 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
-        if (packageFileContent.managerData?.requirementsFiles) {
-          packageFileContent.managerData.requirementsFiles =
-            packageFileContent.managerData.requirementsFiles.map(
-              (file: string) =>
-                upath.normalize(upath.join(upath.dirname(packageFile), file)),
-            );
-          for (const file of packageFileContent.managerData.requirementsFiles) {
+        const managerData = getRequirementsManagerData(packageFileContent);
+        if (managerData?.requirementsFiles) {
+          managerData.requirementsFiles = managerData.requirementsFiles.map(
+            (file) =>
+              upath.normalize(upath.join(upath.dirname(packageFile), file)),
+          );
+          for (const file of managerData.requirementsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
               outputFile: packageFile,
@@ -164,12 +174,11 @@ export async function extractAllPackageFiles(
             });
           }
         }
-        if (packageFileContent.managerData?.constraintsFiles) {
-          packageFileContent.managerData.constraintsFiles =
-            packageFileContent.managerData.constraintsFiles.map(
-              (file: string) => upath.normalize(upath.join(compileDir, file)),
-            );
-          for (const file of packageFileContent.managerData.constraintsFiles) {
+        if (managerData?.constraintsFiles) {
+          managerData.constraintsFiles = managerData.constraintsFiles.map(
+            (file) => upath.normalize(upath.join(compileDir, file)),
+          );
+          for (const file of managerData.constraintsFiles) {
             depsBetweenFiles.push({
               sourceFile: file,
               outputFile: packageFile,
@@ -218,8 +227,8 @@ export async function extractAllPackageFiles(
 
   // This needs to go in reverse order to handle transitive dependencies
   for (const packageFile of [...result].reverse()) {
-    for (const reqFile of coerceArray<string>(
-      packageFile.managerData?.requirementsFiles,
+    for (const reqFile of coerceArray(
+      getRequirementsManagerData(packageFile)?.requirementsFiles,
     )) {
       let sourceFiles: PackageFile[] | undefined = undefined;
       if (matchedFiles.includes(reqFile)) {

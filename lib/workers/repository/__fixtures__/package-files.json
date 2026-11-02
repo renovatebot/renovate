@@ -5,6 +5,7 @@
       "deps": [
         {
           "depName": "ubuntu",
+          "packageName": "ubuntu",
           "currentValue": "20.04",
           "replaceString": "ubuntu:20.04",
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -38,6 +39,7 @@
         {
           "depType": "dependencies",
           "depName": "cookie-parser",
+          "packageName": "cookie-parser",
           "currentValue": "^1.4.5",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -51,6 +53,7 @@
         {
           "depType": "dependencies",
           "depName": "express",
+          "packageName": "express",
           "currentValue": "~4.17.1",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -78,6 +81,7 @@
         {
           "depType": "dependencies",
           "depName": "express-handlebars",
+          "packageName": "express-handlebars",
           "currentValue": ">=5.3.4",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -91,6 +95,7 @@
         {
           "depType": "dependencies",
           "depName": "geoip-lite",
+          "packageName": "geoip-lite",
           "currentValue": "1.4.*",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -104,6 +109,7 @@
         {
           "depType": "dependencies",
           "depName": "nodemailer",
+          "packageName": "nodemailer",
           "currentValue": "6.7.0",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -131,6 +137,7 @@
         {
           "depType": "dependencies",
           "depName": "redis",
+          "packageName": "redis",
           "currentValue": "3.1.2-3.4.0",
           "datasource": "npm",
           "prettyDepType": "dependency",
@@ -175,6 +182,7 @@
         {
           "depType": "devDependencies",
           "depName": "dotenv",
+          "packageName": "dotenv",
           "currentValue": "10.0.0",
           "datasource": "npm",
           "prettyDepType": "devDependency",
@@ -201,6 +209,7 @@
         {
           "depType": "devDependencies",
           "depName": "nodemon",
+          "packageName": "nodemon",
           "currentValue": "2.0.14",
           "datasource": "npm",
           "prettyDepType": "devDependency",
@@ -239,6 +248,7 @@
       "deps": [
         {
           "depName": "six",
+          "packageName": "six",
           "depType": "dependencies",
           "currentValue": "<=1.3.0",
           "managerData": {
