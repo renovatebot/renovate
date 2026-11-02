@@ -256,6 +256,20 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
       ).toEqual(['must be equal to one of the allowed values']);
     });
 
+    it('rejects unknown keys in an option which only has its own children', () => {
+      expect(
+        schemaErrors(repoSchema, { toolSettings: { jvmMemory: 256 } }),
+      ).toBeUndefined();
+
+      expect(
+        schemaErrors(repoSchema, { toolSettings: { foo: 'bar' } }),
+      ).toEqual(['must NOT have additional properties']);
+
+      expect(
+        schemaErrors(repoSchema, { postUpgradeTasks: { foo: 'bar' } }),
+      ).toEqual(['must NOT have additional properties']);
+    });
+
     it('validates the children of a map of configs', () => {
       expect(
         schemaErrors(repoSchema, {

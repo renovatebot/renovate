@@ -358,9 +358,14 @@ function createSchemaForChildConfigs(
     for (const parent of getNestedParents(option)) {
       {
         const children = getChildrenSchema(definitions[parent]);
-        children.allOf[0].properties[option.name] = {
-          $ref: `#/definitions/${option.name}`,
-        };
+        const ref = { $ref: `#/definitions/${option.name}` };
+        if (children.additionalProperties === false) {
+          /* a closed object rejects anything which it doesn't declare itself, so the children can't live in a nested `allOf` */
+          children.properties ??= {};
+          children.properties[option.name] = ref;
+        } else {
+          children.allOf[0].properties[option.name] = ref;
+        }
 
         for (const prop of option.requiredIf ?? []) {
           children.allOf.push(toRequiredPropertiesRule(prop, option));
