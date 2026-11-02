@@ -1350,6 +1350,47 @@ describe('modules/manager/npm/post-update/npm', () => {
       ]);
     });
 
+    it.each`
+      npmrcBefore                   | minimumReleaseAge | notice                                                          | before
+      ${'2026-06-10T00:00:00.000Z'} | ${'1 day'}        | ${undefined}                                                    | ${'2026-06-10T00:00:00.000Z'}
+      ${'2026-06-13T00:00:00.000Z'} | ${'1 day'}        | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${'2026-06-13T00:00:00.000Z'}
+      ${'2026-06-14T18:00:00.000Z'} | ${'1 day'}        | ${'a minimum release age of 1 day'}                             | ${'2026-06-14T12:00:00.000Z'}
+      ${'2026-06-13T00:00:00.000Z'} | ${null}           | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${null}
+    `(
+      'lowers --before no further than the npmrc before date $npmrcBefore for minimumReleaseAge $minimumReleaseAge',
+      async ({ npmrcBefore, minimumReleaseAge, notice, before }) => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              depName: 'some-dep',
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge,
+              minimumReleaseAgeRepository: '3 days',
+              releaseTimestamp: '2026-06-14T00:00:00.000Z' as Timestamp,
+            },
+          ],
+          `before=${npmrcBefore}\n`,
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBe(
+          notice &&
+            `npm checked ${notice} instead of 3 days for this update, because the \`minimumReleaseAge\` of \`some-dep\` is smaller. npm has no per-package exclude for \`--before\`.`,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: `npm install --package-lock-only --no-audit --ignore-scripts${before ? ` --before=${before}` : ''}`,
+          },
+        ]);
+      },
+    );
+
     it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
       // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
       await npmHelper.generateLockFile(

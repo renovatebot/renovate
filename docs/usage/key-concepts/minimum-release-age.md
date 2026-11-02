@@ -107,7 +107,7 @@ Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config,
 A larger `minimumReleaseAgePackageManager` raises it.
 If an updated package has a smaller `minimumReleaseAge` and its release is younger than that value or has no timestamp, Renovate uses the smaller value for `--before`, or passes no `--before` for `0`, and adds a notice to the PR.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not pass `--before`.
-If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates, also for a lowered `--before`, and the notice names the `.npmrc` date if it applies.
 If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
 
 Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.

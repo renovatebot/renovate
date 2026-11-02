@@ -80,6 +80,31 @@ interface BeforeFlag {
 }
 
 /**
+ * Whether the `before` date of the `.npmrc` is older than a minimum release age of `ageMs`, where `0` means none.
+ */
+function isNpmrcBeforeOlder(
+  npmrcDate: DateTime | undefined,
+  ageMs: number,
+): npmrcDate is DateTime {
+  return !!npmrcDate && (!ageMs || npmrcDate < DateTime.now().minus(ageMs));
+}
+
+/**
+ * Describes the minimum release age which npm checks with a lowered age of `ageMs` and the `before` date of the `.npmrc`.
+ */
+function getCheckedMinimumReleaseAge(
+  npmrcDate: DateTime | undefined,
+  ageMs: number,
+): string {
+  if (isNpmrcBeforeOlder(npmrcDate, ageMs)) {
+    return `the \`before\` date ${npmrcDate.toISO()} of the \`.npmrc\``;
+  }
+  return ageMs
+    ? `a minimum release age of ${toHuman(ageMs)}`
+    : 'no minimum release age';
+}
+
+/**
  * Returns the `--before` flag for `minimumReleaseAgeMs`, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
  */
 function getBeforeFlag(
@@ -106,13 +131,13 @@ function getBeforeFlag(
     'npm',
     minimumReleaseAgeMs,
   );
+  const npmrcDate = npmrcCooldown?.date;
   let notice: string | undefined;
   let ageMs = minimumReleaseAgeMs;
-  if (exemption) {
+  // npm applies an older `before` of the `.npmrc` anyway, so lowering would change nothing
+  if (exemption && !isNpmrcBeforeOlder(npmrcDate, minimumReleaseAgeMs)) {
     ageMs = exemption.ageMs;
-    const checked = ageMs
-      ? `a minimum release age of ${toHuman(ageMs)}`
-      : 'no minimum release age';
+    const checked = getCheckedMinimumReleaseAge(npmrcDate, ageMs);
     logger.debug(
       `npm checks ${checked} instead of ${toHuman(minimumReleaseAgeMs)}, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
     );
