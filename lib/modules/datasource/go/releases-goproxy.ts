@@ -291,7 +291,7 @@ export class GoProxyDatasource extends Datasource {
       {
         namespace: `datasource-${GoProxyDatasource.id}`,
         key: GoProxyDatasource.getCacheKey(config),
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -373,7 +373,7 @@ export class GoProxyDatasource extends Datasource {
         key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
         // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
         ttlMinutes: 100 * 24 * 60,
-        cacheable: isPublicGoPackage(packageName),
+        public: isPublicGoPackage(packageName),
       },
       () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
     );

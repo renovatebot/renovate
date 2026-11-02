@@ -22,7 +22,7 @@ import type { DataSource, GoproxyItem } from './types.ts';
  *
  * An unset `GOPROXY` is the default, so it is public too.
  *
- * A `hostType: go` host rule with credentials for the module's host is also a declaration that the module is private, as it can't be read without them.
+ * A `hostType: go` (or `go-proxy`) host rule with credentials for the module's host is also a declaration that the module is private, as it can't be read without them.
  *
  * @see https://go.dev/ref/mod#private-modules
  */
@@ -32,15 +32,14 @@ function isPublicProxy({ url }: GoproxyItem): boolean {
 
 function hasGoHostRuleCredentials(packageName: string): boolean {
   const url = `https://${packageName}`;
-  return hostRules
-    .findAll({ hostType: 'go' })
-    .some(
-      (rule) =>
-        (!rule.matchHost || hostRules.matchesHost(url, rule.matchHost)) &&
-        [rule.token, rule.password, rule.httpsPrivateKey].some(
-          isNonEmptyString,
-        ),
-    );
+  return [
+    ...hostRules.findAll({ hostType: 'go' }),
+    ...hostRules.findAll({ hostType: 'go-proxy' }),
+  ].some(
+    (rule) =>
+      (!rule.matchHost || hostRules.matchesHost(url, rule.matchHost)) &&
+      [rule.token, rule.password, rule.httpsPrivateKey].some(isNonEmptyString),
+  );
 }
 
 export function isPublicGoPackage(packageName: string): boolean {

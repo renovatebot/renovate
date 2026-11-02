@@ -1,8 +1,15 @@
-import { partial, platform } from '~test/util.ts';
+import { fakeSha, partial, platform, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { Pr } from '../../../../modules/platform/index.ts';
+import type { Pr, PrDebugData } from '../../../../modules/platform/index.ts';
 import type { BranchConfig } from '../../../types.ts';
-import { prAlreadyExisted } from './check-existing.ts';
+import {
+  findClosedPrForModifiedBranch,
+  prAlreadyExisted,
+  rebaseCheck,
+  userChangedTargetBranch,
+} from './check-existing.ts';
 
 describe('workers/repository/update/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
@@ -70,6 +77,132 @@ describe('workers/repository/update/branch/check-existing', () => {
       expect(logger.debug).not.toHaveBeenCalledWith(
         'Found closed PR with branchPrefixOld',
       );
+    });
+  });
+
+  describe('findClosedPrForModifiedBranch', () => {
+    const config: BranchConfig = {
+      baseBranch: 'base-branch',
+      manager: 'some-manager',
+      upgrades: [],
+      branchName: 'some-branch',
+    };
+    const branchSha = fakeSha('some-branch');
+
+    it('returns null if no closed PR matches the branch', async () => {
+      platform.findPr.mockResolvedValueOnce(null);
+
+      await expect(findClosedPrForModifiedBranch(config)).resolves.toBeNull();
+
+      expect(platform.findPr).toHaveBeenCalledExactlyOnceWith({
+        branchName: 'some-branch',
+        state: '!open',
+        targetBranch: 'base-branch',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Branch has been edited but found no PR - skipping',
+      );
+    });
+
+    it('returns the PR if it has no SHA', async () => {
+      const pr = partial<Pr>({ number: 12 });
+      platform.findPr.mockResolvedValueOnce(pr);
+
+      await expect(findClosedPrForModifiedBranch(config)).resolves.toBe(pr);
+    });
+
+    it('returns the PR if its SHA matches the branch', async () => {
+      const pr = partial<Pr>({ number: 12, sha: branchSha });
+      platform.findPr.mockResolvedValueOnce(pr);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+
+      await expect(findClosedPrForModifiedBranch(config)).resolves.toBe(pr);
+    });
+
+    it('returns null if the PR points at another commit', async () => {
+      const oldPrSha = fakeSha('other');
+      const pr = partial<Pr>({ number: 12, sha: oldPrSha });
+      platform.findPr.mockResolvedValueOnce(pr);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+
+      await expect(findClosedPrForModifiedBranch(config)).resolves.toBeNull();
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        { oldPrNumber: 12, oldPrSha, branchSha },
+        'Found old PR but the SHA is different',
+      );
+    });
+  });
+
+  describe('rebaseCheck', () => {
+    const config: RenovateConfig = { rebaseLabel: 'rebase' };
+
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('returns true if requested via PR title', async () => {
+      const pr = partial<Pr>({ number: 12, title: 'rebase!some title' });
+      await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
+      expect(platform.deleteLabel).not.toHaveBeenCalled();
+    });
+
+    it('returns true and removes the label if requested via PR label', async () => {
+      const pr = partial<Pr>({ number: 12, labels: ['rebase'] });
+      await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
+      expect(platform.deleteLabel).toHaveBeenCalledWith(12, 'rebase');
+    });
+
+    it('keeps the label during a dry run', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      const pr = partial<Pr>({ number: 12, labels: ['rebase'] });
+      await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
+      expect(platform.deleteLabel).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would delete label rebase from #12',
+      );
+    });
+
+    it('returns true if requested via PR checkbox', async () => {
+      const pr = partial<Pr>({
+        number: 12,
+        bodyStruct: { hash: 'abc', rebaseRequested: true },
+      });
+      await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
+    });
+
+    it('returns false if not requested', async () => {
+      const pr = partial<Pr>({ number: 12, title: 'some title', labels: [] });
+      await expect(rebaseCheck(config, pr)).resolves.toBeFalse();
+    });
+  });
+
+  describe('userChangedTargetBranch', () => {
+    it('returns false if the old target branch is unknown', () => {
+      const pr = partial<Pr>({ targetBranch: 'main' });
+      expect(userChangedTargetBranch(pr)).toBeFalse();
+    });
+
+    it('returns false if the target branch is unchanged', () => {
+      const pr = partial<Pr>({
+        targetBranch: 'main',
+        bodyStruct: {
+          hash: 'abc',
+          debugData: partial<PrDebugData>({ targetBranch: 'main' }),
+        },
+      });
+      expect(userChangedTargetBranch(pr)).toBeFalse();
+    });
+
+    it('returns true if the target branch was changed', () => {
+      const pr = partial<Pr>({
+        targetBranch: 'dev',
+        bodyStruct: {
+          hash: 'abc',
+          debugData: partial<PrDebugData>({ targetBranch: 'main' }),
+        },
+      });
+      expect(userChangedTargetBranch(pr)).toBeTrue();
     });
   });
 });
