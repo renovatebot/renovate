@@ -1,8 +1,10 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { MinimumReleaseAgeBehaviour } from '../config/types.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
+import { regEx } from './regex.ts';
 import type { Timestamp } from './timestamp.ts';
 
 export interface MinimumReleaseAgeCheckResult {
@@ -16,12 +18,33 @@ export interface MinimumReleaseAgeConfig {
   isVulnerabilityAlert?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
-  /** The minimum release age which a manager extracted from the package manager's own configuration. */
+  /**
+   * The minimum release age which a manager extracted from the package
+   * manager's own configuration, as a duration or an ISO 8601 date. A date
+   * counts as the time elapsed since that date.
+   */
   minimumReleaseAgeExtracted?: string | null;
 }
 
+const isoDateRegex = regEx(/^\d{4}-\d{2}-\d{2}/);
+
 function durationToMs(duration: string | null | undefined): number {
   return isNonEmptyString(duration) ? coerceNumber(toMs(duration), 0) : 0;
+}
+
+/**
+ * Converts a duration, or an ISO 8601 date as the time elapsed since that
+ * date, to milliseconds.
+ */
+function extractedAgeToMs(age: string | null | undefined): number {
+  if (!isNonEmptyString(age) || !isoDateRegex.test(age)) {
+    return durationToMs(age);
+  }
+  const date = DateTime.fromISO(age, { zone: 'utc' });
+  if (!date.isValid) {
+    return 0;
+  }
+  return Math.max(Date.now() - date.toMillis(), 0);
 }
 
 /**
@@ -39,7 +62,7 @@ export function calculateMinimumReleaseAgeMs(
     durationToMs(config.minimumReleaseAge),
     config.isVulnerabilityAlert
       ? 0
-      : durationToMs(config.minimumReleaseAgeExtracted),
+      : extractedAgeToMs(config.minimumReleaseAgeExtracted),
   );
 
   if (!minimumReleaseAgeMs) {

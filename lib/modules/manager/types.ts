@@ -88,6 +88,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  /** @see PackageFile.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: Nullish<string>;
   /**
    * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
@@ -125,8 +126,9 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
   /**
-   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days` or as an ISO 8601 date.
    *
+   * A date counts as the time elapsed since that date, so that the age stays correct when Renovate reuses a cached extract result.
    * Renovate uses the larger of this and `minimumReleaseAge`.
    */
   minimumReleaseAgeExtracted?: string;
@@ -320,6 +322,7 @@ export interface Upgrade<
   isLockFileMaintenance?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
+  /** @see PackageFile.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: string | null;
   /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
   minimumReleaseAgeRepository?: string | null;
