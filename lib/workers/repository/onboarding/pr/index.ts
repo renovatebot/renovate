@@ -7,6 +7,10 @@ import type { PackageFile } from '../../../../modules/manager/types.ts';
 import { ensureComment } from '../../../../modules/platform/comment.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
+import {
+  fitSections,
+  getBodyLength,
+} from '../../../../modules/platform/utils/pr-body.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
@@ -281,9 +285,16 @@ export async function ensureOnboardingPr(
     );
   }
 
-  let prBody = render(sections);
+  const maxLength = platform.maxBodyLength();
+  function measure(prSections: OnboardingPrSections): number {
+    return getBodyLength(
+      render(prSections),
+      (body) => platform.massageMarkdown(body, config.rebaseLabel),
+      maxLength,
+    );
+  }
 
-  if (prBody.length > platform.maxBodyLength()) {
+  if (measure(sections) >= maxLength) {
     logger.debug(
       'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
     );
@@ -297,8 +308,20 @@ export async function ensureOnboardingPr(
       sectionOrder = SUMMARY_SECTION_ORDER;
       sections.packageFiles = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
     }
-    prBody = render(sections);
   }
+
+  const fittedSections = fitSections(
+    sections,
+    ['warnings', 'prList'],
+    measure,
+    maxLength,
+  );
+  if (fittedSections !== sections) {
+    logger.debug(
+      'Onboarding PR body still exceeds platform limit, truncating "What to Expect" and warnings',
+    );
+  }
+  const prBody = render(fittedSections);
 
   await ensureConfigPr({
     branchName: onboardingBranch,
