@@ -955,6 +955,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'goEnvFromHostRules',
+    description:
+      'Derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from host rules when they are not set in the environment.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+  },
+  {
     name: 'encryptedWarning',
     description: 'Warning text to use if encrypted config is found.',
     type: 'string',

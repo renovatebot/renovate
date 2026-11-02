@@ -9,7 +9,6 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
-import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
   queryReleases,
@@ -33,7 +32,8 @@ import { Datasource } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import { getSourceUrl, isPublicGoPackage, publicGoproxyUrl } from './common.ts';
+import { getSourceUrl, isPublicGoPackage } from './common.ts';
+import { getGoEnv, publicGoproxyUrl } from './env.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 import { VersionInfo } from './schema.ts';
@@ -114,7 +114,7 @@ export class GoProxyDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-    const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
+    const goproxy = getGoEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
     if (goproxy === 'direct') {
       return this.getDirectReleases(config);
     }
@@ -580,7 +580,7 @@ export class GoProxyDatasource extends Datasource {
     packageName,
     constraintsFiltering,
   }: GetReleasesConfig): string {
-    const goproxy = getEnv().GOPROXY;
+    const goproxy = getGoEnv().GOPROXY;
     const noproxy = parseNoproxy();
     const constraintsFilteringKey =
       constraintsFiltering === 'none' ? '' : constraintsFiltering;
@@ -594,7 +594,7 @@ export class GoProxyDatasource extends Datasource {
   }
 
   static getVersionedCacheKey(packageName: string, version: string): string {
-    const goproxy = getEnv().GOPROXY;
+    const goproxy = getGoEnv().GOPROXY;
     const noproxy = parseNoproxy();
     return buildCacheKey(
       'goDirective',
