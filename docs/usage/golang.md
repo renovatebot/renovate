@@ -202,7 +202,7 @@ Renovate uses the derived values to look up modules and to run `go`, so you don'
 Renovate only derives a value if you have not set the environment variable yourself.
 If you set `GOPRIVATE`, Renovate does not derive `GONOPROXY` or `GONOSUMDB`.
 
-For example, with this config:
+For example, with a private proxy and a GitHub organization whose modules may be private:
 
 ```js
 module.exports = {
@@ -214,6 +214,11 @@ module.exports = {
       username: process.env.BSR_USERNAME,
       password: process.env.BSR_TOKEN,
     },
+    {
+      matchHost: 'https://github.com/my-org',
+      hostType: 'go',
+      token: process.env.GITHUB_TOKEN,
+    },
   ],
 };
 ```
@@ -222,7 +227,11 @@ Renovate uses:
 
 ```sh
 GOPROXY=https://bsr.example.com,https://proxy.golang.org,direct
-GONOSUMDB=bsr.example.com
+GONOPROXY=github.com/my-org
+GONOSUMDB=bsr.example.com,github.com/my-org
 ```
+
+Modules under `github.com/my-org` are fetched directly from GitHub with the token, and skip both proxies and the public checksum database.
+Other modules go through `bsr.example.com`, then the public proxy.
 
 If you only want to use your own proxy, without the public proxy, set `GOPROXY` yourself.
