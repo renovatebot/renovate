@@ -4,10 +4,10 @@ import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import {
-  assertPrNotInMergeQueue,
   commitFiles,
   isGHApp,
   massageCommitMessage,
+  preparePrPush,
 } from './index.ts';
 
 export class GithubScm extends DefaultGitScm {
@@ -19,11 +19,9 @@ export class GithubScm extends DefaultGitScm {
       platformCommit = 'enabled';
     }
 
-    // a queued PR could otherwise merge before the pushed changes take effect
-    await assertPrNotInMergeQueue(
-      commitConfig.branchName,
-      commitConfig.baseBranch,
-    );
+    // a queued PR could otherwise merge before the pushed changes take effect,
+    // and automerge keeps the commit message it was enabled with
+    await preparePrPush(commitConfig);
 
     // a `commitBody` can contain release notes, whose links would otherwise add a reference to every linked issue and PR
     const message = isString(commitConfig.message)
