@@ -3,6 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import { compile } from '../../../util/template/index.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -1100,6 +1101,45 @@ describe('modules/manager/github-actions/extract', () => {
             'blacksmith-8vcpu-ubuntu-{{replace "[.]" "" newValue}}',
         },
       ]);
+    });
+
+    it.each`
+      runner                                | newValue       | expected
+      ${'blacksmith-2vcpu-ubuntu-2204'}     | ${'26.04'}     | ${'blacksmith-2vcpu-ubuntu-2604'}
+      ${'blacksmith-4vcpu-ubuntu-2404-arm'} | ${'26.04-arm'} | ${'blacksmith-4vcpu-ubuntu-2604-arm'}
+    `(
+      'renders the replacement for $runner',
+      async ({ runner, newValue, expected }) => {
+        const res = await extractPackageFile(
+          codeBlock`
+          jobs:
+            test:
+              runs-on: ${runner}
+        `,
+          'workflow.yml',
+        );
+        const dependency = res!.deps[0];
+
+        const replacement = compile(dependency.autoReplaceStringTemplate!, {
+          ...dependency,
+          newValue,
+        });
+
+        expect(replacement).toBe(expected);
+      },
+    );
+
+    it('ignores Blacksmith runners with unknown Ubuntu versions', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          jobs:
+            test:
+              runs-on: blacksmith-2vcpu-ubuntu-9999
+        `,
+        'workflow.yml',
+      );
+
+      expect(res).toBeNull();
     });
 
     it('extracts multiple windows action runners from yaml configuration file', async () => {
