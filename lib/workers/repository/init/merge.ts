@@ -892,7 +892,7 @@ async function logShallowConfig(
     await presets.resolveConfigPresets(
       clone(decryptedConfig),
       clone(config),
-      [],
+      config.ignorePresets,
       [],
       false,
     );
