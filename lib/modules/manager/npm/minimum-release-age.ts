@@ -48,8 +48,12 @@ export async function enforcesMinimumReleaseAge(
 
   const npmrcCooldown = parseNpmrcCooldown(config.npmrc);
   // the value which Renovate passes as `--before` to npm
-  const minimumReleaseAgeMs =
-    calculatePackageManagerMinimumReleaseAgeMs(config);
+  const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs({
+    config,
+    manager: 'npm',
+    packageFile: upath.join(upath.dirname(npmLock), 'package.json'),
+    upgrades: [config],
+  });
 
   if (npmrcCooldown?.source !== 'min-release-age') {
     // npm applies a `before` from the `.npmrc` itself, and Renovate passes
