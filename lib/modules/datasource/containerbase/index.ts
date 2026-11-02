@@ -5,6 +5,7 @@ import {
   toolVersionsFormatPath,
   toolVersionsPath,
 } from '@renovatebot/base-image';
+import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
@@ -42,7 +43,8 @@ function toConstraints(
     }
   }
   if (minCb) {
-    result.containerbase = [`>=${minCb}`];
+    // like containerbase, a `cb` which is not valid semver is never met
+    result.containerbase = [semver.valid(minCb) ? `>=${minCb}` : '<0.0.0-0'];
   }
   return Object.keys(result).length ? result : undefined;
 }

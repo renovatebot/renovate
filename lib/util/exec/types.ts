@@ -10,7 +10,7 @@ export interface ConstraintDefinition {
   name: string;
   description?: string;
   /** The versioning used for the constraint, unless `constraintsVersioning` overrides it. */
-  versioning?: string;
+  versioning?: VersioningName;
 }
 
 /**
@@ -57,7 +57,7 @@ export const additionalConstraintDefinitions =
     {
       name: 'containerbase',
       description:
-        'Used in the `containerbase` datasource to specify the Containerbase version that a release needs. Defaults to the `npm` versioning.',
+        'Used in the `containerbase` datasource to specify the Containerbase version that installs the tools, like `14.57.1`. Releases which need a newer Containerbase are filtered out. Uses the `npm` versioning.',
       versioning: 'npm',
     },
     {
@@ -147,7 +147,7 @@ export const additionalConstraintNames: AdditionalConstraintName[] =
  */
 export function getAdditionalConstraintVersioning(
   name: AdditionalConstraintName,
-): string | undefined {
+): VersioningName | undefined {
   const definition: ConstraintDefinition | undefined =
     additionalConstraintDefinitions.find((c) => c.name === name);
   return definition?.versioning;

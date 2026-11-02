@@ -128,6 +128,7 @@ describe('modules/datasource/containerbase/index', () => {
         ${'14.0.0'}   | ${'15.0.0'} | ${['10.0.0']}
         ${'15.0.0'}   | ${'15.0.0'} | ${['10.0.0', '11.0.0', '12.0.0']}
         ${'99.0.0'}   | ${'foo'}    | ${['10.0.0']}
+        ${'99.0.0'}   | ${'15'}     | ${['10.0.0']}
       `(
         'filters by the containerbase constraint $containerbase for minCb $cb',
         async ({ containerbase, cb, versions: expected }) => {
