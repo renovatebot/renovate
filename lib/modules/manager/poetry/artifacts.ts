@@ -202,10 +202,12 @@ export async function updateArtifacts({
           PIP_CACHE_DIR: await ensureCacheDir('pip'),
         };
 
-        const ageMs = calculatePackageManagerMinimumReleaseAgeMs(
+        const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
           config,
-          updatedDeps,
-        );
+          manager: 'poetry',
+          packageFile: packageFileName,
+          upgrades: updatedDeps,
+        });
         if (ageMs) {
           const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
           extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
