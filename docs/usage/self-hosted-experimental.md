@@ -100,8 +100,8 @@ If the merge request has a merged results pipeline, Renovate sets the status che
 
 ## `RENOVATE_X_GLOBAL_AGENT`
 
-If set to `true` value, Renovate will use the `global-agent` package to apply HTTP proxy settings globally for all outgoing requests.
-By default renovate will use Node.js's built-in proxy.
+If set to `true` value, Renovate will use the `global-agent` package instead of the built-in proxy support of Node.js to apply HTTP proxy settings globally for all outgoing requests.
+By default, Renovate uses the built-in proxy support of Node.js where it's available (Node.js v24.14.0 and newer), and falls back to `global-agent` on older Node.js versions.
 
 ## `RENOVATE_X_HARD_EXIT`
 
