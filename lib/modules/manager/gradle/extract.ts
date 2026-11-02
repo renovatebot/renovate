@@ -19,8 +19,8 @@ import {
   parseGcv,
   usesGcv,
 } from './extract/consistent-versions-plugin.ts';
-import { REGISTRY_URLS } from './parser/common.ts';
 import { parseGradle, parseKotlinSource, parseProps } from './parser.ts';
+import { REGISTRY_URLS } from './parser/common.ts';
 import type {
   ContentDescriptorSpec,
   GradleManagerData,

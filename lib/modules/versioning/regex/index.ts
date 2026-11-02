@@ -1,8 +1,8 @@
 import { isUndefined } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
-import { GenericVersioningApi } from '../generic.ts';
 import { parseRange, satisfiesComparator } from '../generic-range.ts';
+import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApiConstructor } from '../types.ts';
 import type { RegExpVersion } from './types.ts';
 

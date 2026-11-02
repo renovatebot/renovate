@@ -38,8 +38,8 @@ import {
   couldApplyMinimumReleaseAgeToDigest,
   resolveUpdateDigests,
 } from './digest.ts';
-import { filterVersions } from './filter.ts';
 import { filterInternalChecks } from './filter-checks.ts';
+import { filterVersions } from './filter.ts';
 import { generateUpdate } from './generate.ts';
 import { resolveRangeStrategy } from './range-strategy.ts';
 import { getRollbackUpdate } from './rollback.ts';

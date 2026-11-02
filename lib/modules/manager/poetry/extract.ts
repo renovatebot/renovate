@@ -13,9 +13,9 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type { PackageFileContent } from '../types.ts';
 import {
+  getRegistryUrls,
   Lockfile,
   PoetryPyProject,
-  getRegistryUrls,
   withImplicitPypi,
 } from './schema.ts';
 import { getLockfilePoetryVersion } from './utils.ts';

@@ -16,10 +16,10 @@ import {
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import {
-  CustomDatasourceFormats,
-  type RenovateOptions,
   allowedStatusCheckStrings,
   allowedStatusCheckWhenValues,
+  CustomDatasourceFormats,
+  type RenovateOptions,
 } from '../types.ts';
 import { lookupScopes, sharedScopes } from './scopes.ts';
 

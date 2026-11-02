@@ -6,8 +6,8 @@ import type {
   GerritRevisionInfo,
 } from './schema.ts';
 import {
-  GerritScm,
   configureScm,
+  GerritScm,
   nextPatchSetRef,
   pushForReview,
 } from './scm.ts';

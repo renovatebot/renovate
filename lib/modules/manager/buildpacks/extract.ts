@@ -10,10 +10,10 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import {
-  type ProjectDescriptor,
-  ProjectDescriptorToml,
   isBuildpackByName,
   isBuildpackByURI,
+  type ProjectDescriptor,
+  ProjectDescriptorToml,
 } from './schema.ts';
 
 export const DOCKER_PREFIX = regEx(/^docker:\/?\//);

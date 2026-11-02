@@ -1,6 +1,6 @@
 import cacache from 'cacache';
 import { DateTime } from 'luxon';
-import { type DirectoryResult, dir } from 'tmp-promise';
+import { dir, type DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
 import { logger as _logger } from '~test/util.ts';
 import { compressToBase64, compressToBuffer } from '../../../compress.ts';

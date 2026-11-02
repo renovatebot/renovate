@@ -8,7 +8,7 @@ import {
   TracerProvider as SdkTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace';
-import { type DirectoryResult, dir } from 'tmp-promise';
+import { dir, type DirectoryResult } from 'tmp-promise';
 import upath from 'upath';
 import { bunyan } from '../expose.ts';
 import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';

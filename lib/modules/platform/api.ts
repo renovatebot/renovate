@@ -1,7 +1,7 @@
 import type { PlatformId } from '../../constants/index.ts';
 import * as azure from './azure/index.ts';
-import * as bitbucket from './bitbucket/index.ts';
 import * as bitbucketServer from './bitbucket-server/index.ts';
+import * as bitbucket from './bitbucket/index.ts';
 import * as codecommit from './codecommit/index.ts';
 import * as forgejo from './forgejo/index.ts';
 import * as gerrit from './gerrit/index.ts';

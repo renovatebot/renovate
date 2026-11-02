@@ -1,5 +1,5 @@
 import { dir as tmpDir } from 'tmp-promise';
-import { type MockInstance, expectTypeOf } from 'vitest';
+import { expectTypeOf, type MockInstance } from 'vitest';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../memory/index.ts';
 import * as packageCache from './index.ts';

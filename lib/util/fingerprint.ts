@@ -1,4 +1,4 @@
-import { type Hash, createHash } from 'node:crypto';
+import { createHash, type Hash } from 'node:crypto';
 import { isFunction, isSymbol } from '@sindresorhus/is';
 
 // Returns true when `value` would appear in the canonical JSON produced by

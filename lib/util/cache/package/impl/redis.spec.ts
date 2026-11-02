@@ -1,9 +1,9 @@
-import { RESP_TYPES, createClient, createCluster } from '@redis/client';
+import { createClient, createCluster, RESP_TYPES } from '@redis/client';
 import { DateTime } from 'luxon';
 import { logger as _logger } from '~test/util.ts';
 import { compressToBase64 } from '../../../compress.ts';
 import { decodeEntry, encodeEntry } from '../codec.ts';
-import { PackageCacheRedis, normalizeRedisUrl } from './redis.ts';
+import { normalizeRedisUrl, PackageCacheRedis } from './redis.ts';
 
 const { logger } = _logger;
 

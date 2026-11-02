@@ -21,8 +21,8 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../config/types.ts';
-import * as configValidation from '../../../config/validation.ts';
 import { ConfigValidationTopic } from '../../../config/validation-helpers/types.ts';
+import * as configValidation from '../../../config/validation.ts';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -56,8 +56,8 @@ import {
   setOnboardingConfigDetails,
 } from '../onboarding/branch/onboarding-branch-cache.ts';
 import {
-  OnboardingState,
   getDefaultConfigFileName,
+  OnboardingState,
 } from '../onboarding/common.ts';
 import { filterAllowedEnv } from './filter-allowed-env.ts';
 import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';

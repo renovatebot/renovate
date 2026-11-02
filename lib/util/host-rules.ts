@@ -18,8 +18,8 @@ import { clone } from './clone.ts';
 import { toSha256 } from './hash.ts';
 import { regEx } from './regex.ts';
 import * as sanitize from './sanitize.ts';
-import { toBase64 } from './string.ts';
 import { matchRegexOrGlobList } from './string-match.ts';
+import { toBase64 } from './string.ts';
 import {
   decodeUserinfo,
   ensureTrailingSlash,

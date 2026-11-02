@@ -4,7 +4,7 @@ import { mergeChildConfig } from '../../../../config/index.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { type Pr, platform } from '../../../../modules/platform/index.ts';
+import { platform, type Pr } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';

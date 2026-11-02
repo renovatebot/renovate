@@ -4,7 +4,6 @@ import { coerceString } from '../../../util/string.ts';
 import { api as npm } from '../npm/index.ts';
 import { api as pep440 } from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
-
 import {
   ascendingRange,
   descendingRange,

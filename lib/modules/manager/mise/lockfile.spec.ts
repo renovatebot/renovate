@@ -1,7 +1,7 @@
 import {
   getConfigType,
-  getLockFileName,
   getLockedVersion,
+  getLockFileName,
   getSidecarDir,
 } from './lockfile.ts';
 import type { MiseLockFile } from './schema.ts';

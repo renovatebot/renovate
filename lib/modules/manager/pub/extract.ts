@@ -1,8 +1,8 @@
 import { isObject, isString } from '@sindresorhus/is';
 import type { SkipReason } from '../../../types/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
-import { DartDatasource } from '../../datasource/dart/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { DartDatasource } from '../../datasource/dart/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';

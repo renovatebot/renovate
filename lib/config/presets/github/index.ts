@@ -5,7 +5,7 @@ import type { Nullish } from '../../../types/index.ts';
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { Preset, PresetConfig } from '../types.ts';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
+import { fetchPreset, parsePreset, PRESET_DEP_NOT_FOUND } from '../util.ts';
 
 export const Endpoint = 'https://api.github.com/';
 

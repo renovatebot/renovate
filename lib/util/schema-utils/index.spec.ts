@@ -4,22 +4,22 @@ import { logger } from '~test/util.ts';
 import {
   DeepNullish,
   Ini,
+  isEmailAdress,
   Json,
   Json5,
   Jsonc,
   LooseArray,
   LooseRecord,
   MultidocYaml,
+  multidocYaml,
   NotCircular,
   Nullish,
   Toml,
   UtcDate,
-  Yaml,
-  isEmailAdress,
-  multidocYaml,
   withDebugMessage,
   withDepType,
   withTraceMessage,
+  Yaml,
 } from './index.ts';
 
 describe('util/schema-utils/index', () => {

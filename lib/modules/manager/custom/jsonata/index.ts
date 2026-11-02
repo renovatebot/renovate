@@ -6,7 +6,7 @@ import { parse as parseToml } from '../../../../util/toml.ts';
 import { parseYaml } from '../../../../util/yaml.ts';
 import type { PackageFileContent } from '../../types.ts';
 import { validMatchFields } from '../utils.ts';
-import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
+import type { JsonataExtractConfig, JSONataManagerTemplates } from './types.ts';
 import { handleMatching } from './utils.ts';
 
 export const categories: Category[] = ['custom'];

@@ -17,7 +17,7 @@ import type { HttpOptions } from '../../../util/http/types.ts';
 import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { matchRegexOrGlobList, UUIDRegex } from '../../../util/string-match.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,

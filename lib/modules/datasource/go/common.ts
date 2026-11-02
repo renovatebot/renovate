@@ -8,7 +8,6 @@ import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
-
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
 

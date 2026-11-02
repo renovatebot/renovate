@@ -1,5 +1,5 @@
 import type { FetchPresetConfig, Preset } from './types.ts';
-import { PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND, fetchPreset } from './util.ts';
+import { fetchPreset, PRESET_DEP_NOT_FOUND, PRESET_NOT_FOUND } from './util.ts';
 
 const config: FetchPresetConfig = {
   repo: 'some/repo',

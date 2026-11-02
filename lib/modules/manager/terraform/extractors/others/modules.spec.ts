@@ -1,10 +1,10 @@
 import {
-  ModuleExtractor,
   azureDevOpsSshRefMatchRegex,
   bitbucketRefMatchRegex,
-  gitTagsRefMatchRegex,
   githubRefMatchRegex,
+  gitTagsRefMatchRegex,
   hostnameMatchRegex,
+  ModuleExtractor,
 } from './modules.ts';
 
 describe('modules/manager/terraform/extractors/others/modules', () => {

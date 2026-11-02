@@ -82,9 +82,9 @@ import type {
   RepoResponse,
 } from './types.ts';
 import {
+  defaults,
   DRAFT_PREFIX,
   DRAFT_PREFIX_DEPRECATED,
-  defaults,
   getRepoUrl,
   prInfo,
 } from './utils.ts';

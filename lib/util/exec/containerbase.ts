@@ -1,6 +1,6 @@
 import {
-  type ToolMetadata,
   isContainerbase,
+  type ToolMetadata,
   tools,
 } from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
@@ -15,11 +15,11 @@ import { buildCacheKey } from '../cache/package/key.ts';
 import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
+  isToolName,
   type Opt,
   type ToolConfig,
   type ToolConstraint,
   type ToolName,
-  isToolName,
 } from './types.ts';
 
 /**

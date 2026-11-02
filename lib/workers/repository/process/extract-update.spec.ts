@@ -20,8 +20,8 @@ import { generateFingerprintConfig } from '../extract/extract-fingerprint-config
 import * as _extractAll from '../extract/index.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
-  EXTRACT_CACHE_REVISION,
   extract,
+  EXTRACT_CACHE_REVISION,
   isCacheExtractValid,
   lookup,
   update,

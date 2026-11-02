@@ -8,7 +8,6 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../../../test/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
-
 import { AwsEKSAddonDataSource } from './index.ts';
 
 const datasource = AwsEKSAddonDataSource.id;

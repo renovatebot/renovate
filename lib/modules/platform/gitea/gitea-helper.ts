@@ -29,8 +29,8 @@ import type {
   IssueUpdateParams,
   PRCreateParams,
   PRMergeParams,
-  PRUpdateParams,
   PrReviewersParams,
+  PRUpdateParams,
   RepoSearchParams,
 } from './types.ts';
 import { API_PATH } from './utils.ts';

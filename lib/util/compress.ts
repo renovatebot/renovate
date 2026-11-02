@@ -1,4 +1,4 @@
-import { type Readable, type Transform, finished, pipeline } from 'node:stream';
+import { finished, pipeline, type Readable, type Transform } from 'node:stream';
 import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 

@@ -1,12 +1,12 @@
 import { isString } from '@sindresorhus/is';
 import {
   type Document,
-  type Scalar,
-  type YAMLMap,
   isMap,
   isPair,
   isScalar,
   parseAllDocuments,
+  type Scalar,
+  type YAMLMap,
 } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';

@@ -1,4 +1,4 @@
-import { Graph, depthFirstSearch, topologicalSort } from 'graph-data-structure';
+import { depthFirstSearch, Graph, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import {

@@ -4,7 +4,7 @@ import {
 } from '../../manager-list.generated.ts';
 import { coerceArray } from '../../util/array.ts';
 import type { AllowedParents, ConfigScope, RenovateOptions } from '../types.ts';
-import { UpdateTypesOptions, configScopes, namedParents } from '../types.ts';
+import { configScopes, namedParents, UpdateTypesOptions } from '../types.ts';
 
 const scopeDescriptions: Record<ConfigScope, string> = {
   repo: 'at the top level of a config',

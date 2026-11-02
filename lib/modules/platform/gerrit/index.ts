@@ -36,13 +36,13 @@ import { client } from './client.ts';
 import type { GerritLabels, GerritProjectInfo } from './schema.ts';
 import { configureScm, pushForReview } from './scm.ts';
 import {
-  MAX_GERRIT_COMMENT_SIZE,
-  REQUEST_DETAILS_FOR_PRS,
-  TAG_PULL_REQUEST_BODY,
   extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
+  MAX_GERRIT_COMMENT_SIZE,
+  REQUEST_DETAILS_FOR_PRS,
+  TAG_PULL_REQUEST_BODY,
 } from './utils.ts';
 
 export const id = 'gerrit';

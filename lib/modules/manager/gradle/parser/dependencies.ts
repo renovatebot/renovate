@@ -3,9 +3,9 @@ import { query as q } from '@renovatebot/good-enough-parser';
 import { regEx } from '../../../../util/regex.ts';
 import type { Ctx } from '../types.ts';
 import {
+  cleanupTempVars,
   GRADLE_PLUGINS,
   GRADLE_TEST_SUITES,
-  cleanupTempVars,
   qArtifactId,
   qDotOrBraceExpr,
   qGroupId,

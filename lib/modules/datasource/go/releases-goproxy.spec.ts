@@ -13,7 +13,7 @@ import { HttpError } from '../../../util/http/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
-import { GoProxyDatasource, getTagPrefix } from './releases-goproxy.ts';
+import { getTagPrefix, GoProxyDatasource } from './releases-goproxy.ts';
 
 const datasource = new GoProxyDatasource();
 

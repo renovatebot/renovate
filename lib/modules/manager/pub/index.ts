@@ -1,6 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
-import { DartDatasource } from '../../datasource/dart/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { DartDatasource } from '../../datasource/dart/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';

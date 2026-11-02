@@ -11,7 +11,6 @@ import {
   readLocalFile,
 } from '../../../../util/fs/index.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-
 import type {
   ExtractConfig,
   NpmrcPackageFile,

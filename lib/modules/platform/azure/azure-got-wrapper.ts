@@ -6,8 +6,8 @@ import {
 } from 'azure-devops-node-api';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
-import { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
+import { DeploymentFlags } from 'azure-devops-node-api/interfaces/common/VSSInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import { logger } from '../../../logger/index.ts';

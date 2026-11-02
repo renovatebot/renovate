@@ -1,4 +1,4 @@
-import { type RenovateConfig, logger } from '~test/util.ts';
+import { logger, type RenovateConfig } from '~test/util.ts';
 import { getConfig } from './defaults.ts';
 import { migrateAndValidate } from './migrate-validate.ts';
 import * as configMigration from './migration.ts';

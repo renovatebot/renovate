@@ -1,5 +1,5 @@
 import type { MockInstance } from 'vitest';
-import { ZodError, z } from 'zod/v4';
+import { z, ZodError } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';

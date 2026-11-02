@@ -25,9 +25,9 @@ import { getPrHeader } from '../../update/pr/body/header.ts';
 import { ensureConfigPr } from '../../update/pr/ensure-config-pr.ts';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache.ts';
 import {
-  OnboardingState,
   getDefaultConfigFileName,
   getOnboardingPrTitle,
+  OnboardingState,
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';

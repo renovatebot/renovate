@@ -9,8 +9,8 @@ import { getMigrationBranchName } from '../common.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 import type { MigratedData } from './migrated-data.ts';
 import {
-  MigratedDataFactory,
   applyPrettierFormatting,
+  MigratedDataFactory,
 } from './migrated-data.ts';
 
 export async function createConfigMigrationBranch(

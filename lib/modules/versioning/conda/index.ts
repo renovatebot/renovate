@@ -1,6 +1,5 @@
 import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
-
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as pep440 from '../pep440/index.ts';

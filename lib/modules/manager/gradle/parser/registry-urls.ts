@@ -5,12 +5,12 @@ import type { Ctx } from '../types.ts';
 import { qApplyFrom } from './apply-from.ts';
 import { qAssignments } from './assignments.ts';
 import {
-  REGISTRY_URLS,
   cleanupTempVars,
   qArtifactId,
   qGroupId,
   qValueMatcher,
   qVersion,
+  REGISTRY_URLS,
   storeInTokenMap,
   storeVarToken,
 } from './common.ts';

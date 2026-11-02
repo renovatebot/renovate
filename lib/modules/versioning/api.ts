@@ -46,14 +46,14 @@ import * as rpm from './rpm/index.ts';
 import * as ruby from './ruby/index.ts';
 import * as rustReleaseChannel from './rust-release-channel/index.ts';
 import * as sameMajor from './same-major/index.ts';
-import * as semver from './semver/index.ts';
 import * as semverCoerced from './semver-coerced/index.ts';
 import * as semverPartial from './semver-partial/index.ts';
+import * as semver from './semver/index.ts';
 import * as swift from './swift/index.ts';
 import type { VersioningApi, VersioningApiConstructor } from './types.ts';
 import * as ubuntu from './ubuntu/index.ts';
-import * as unity3d from './unity3d/index.ts';
 import * as unity3dPackages from './unity3d-packages/index.ts';
+import * as unity3d from './unity3d/index.ts';
 
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;

@@ -1,4 +1,4 @@
-import { LongCommitSha, isLongCommitSha, toLongCommitSha } from './git.ts';
+import { isLongCommitSha, LongCommitSha, toLongCommitSha } from './git.ts';
 
 describe('util/schema-utils/git', () => {
   const sha40 = '0123456789abcdef0123456789abcdef01234567';

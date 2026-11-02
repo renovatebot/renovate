@@ -1,6 +1,5 @@
 import type { HostRule } from '../../../types/index.ts';
 import { add, clear } from '../../../util/host-rules.ts';
-
 import {
   findAllAuthenticatable,
   getAuthenticationHeaderValue,

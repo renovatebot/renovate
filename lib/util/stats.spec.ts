@@ -8,8 +8,8 @@ import {
   HttpCacheStats,
   HttpStats,
   LookupStats,
-  PackageCacheStats,
   makeTimingReport,
+  PackageCacheStats,
 } from './stats.ts';
 
 describe('util/stats', () => {

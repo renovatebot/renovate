@@ -5,7 +5,6 @@ import {
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs/index.ts';
-
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';

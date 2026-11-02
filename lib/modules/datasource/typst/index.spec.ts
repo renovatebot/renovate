@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { type DirectoryResult, dir } from 'tmp-promise';
+import { dir, type DirectoryResult } from 'tmp-promise';
 import * as httpMock from '~test/http-mock.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';

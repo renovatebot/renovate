@@ -1,4 +1,4 @@
-import { type RenovateConfig, git, partial } from '~test/util.ts';
+import { git, partial, type RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { extractPackageJson } from '../../../modules/manager/npm/extract/common/package-file.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';

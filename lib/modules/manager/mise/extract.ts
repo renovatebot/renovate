@@ -31,7 +31,7 @@ import {
 } from './backends.ts';
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
-import { getLockFileName, getLockedVersion } from './lockfile.ts';
+import { getLockedVersion, getLockFileName } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
 import type { BackendToolingConfig, ToolingDefinition } from './types.ts';

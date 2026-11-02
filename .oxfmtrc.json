@@ -2,6 +2,10 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 80,
   "singleQuote": true,
+  "sortImports": {
+    "internalPattern": ["~test/"],
+    "newlinesBetween": false
+  },
   "ignorePatterns": [
     "**/*.md",
     "/node_modules",

@@ -12,10 +12,10 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type {
+  PipenvManagerData,
   PipFile,
   PipRequirement,
   PipSource,
-  PipenvManagerData,
 } from './types.ts';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
