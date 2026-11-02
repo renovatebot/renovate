@@ -98,7 +98,7 @@ export function parsePreset(
 ): Nullish<Preset> {
   try {
     return parseJson(content, fileName) as Nullish<Preset>;
-  } catch {
-    throw new Error(PRESET_INVALID_JSON);
+  } catch (err) {
+    throw new Error(PRESET_INVALID_JSON, { cause: err });
   }
 }

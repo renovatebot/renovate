@@ -431,6 +431,12 @@ async function fetchPreset(
       error.validationError = `Sub-presets cannot be combined with a custom path`;
     } else if (err.message === PRESET_INVALID_JSON) {
       error.validationError = `Preset is invalid JSON`;
+      // unlike fetch errors, the parser's message is shared, as it only refers to the preset's own content
+      if (err.cause instanceof Error) {
+        details.push(
+          `Parsing failed with: \`${err.cause.message.replaceAll('`', "'")}\``,
+        );
+      }
     } else if (err.message === PRESET_RELATIVE_NO_PARENT) {
       error.validationError = `Relative preset reference cannot be resolved`;
       details.push(
