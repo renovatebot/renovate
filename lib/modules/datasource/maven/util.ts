@@ -68,7 +68,7 @@ function isUnsupportedHostError(err: HttpError): boolean {
 
 const cacheProvider = new PackageHttpCacheProvider({
   namespace: 'datasource-maven:cache-provider',
-  softTtlMinutes: 15,
+  softTtlMinutes: 2 * 60, // fewer metadata requests to avoid registry rate limits
   checkAuthorizationHeader: true,
   checkCacheControlHeader: false, // Maven doesn't respond with `cache-control` headers
   writeSchema: CachedMavenXml,
