@@ -98,6 +98,8 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   minimumReleaseAgeRepository?: Nullish<string>;
   /** The lower bound for the minimum release age which Renovate passes to the package manager. */
   minimumReleaseAgePackageManager?: Nullish<string>;
+  /** All upgrades of the branch, including those of other managers and package files. */
+  upgrades?: Upgrade[];
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -458,7 +460,7 @@ export interface DepTypeMetadata {
 export type MinimumReleaseAgeToolCapability = boolean | string;
 
 export interface MinimumReleaseAgeToolSupport {
-  /** Renovate passes the repository or manager `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
   passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
   /** Renovate reads the package manager's own minimum release age setting */
   readsConfiguredAge?: MinimumReleaseAgeToolCapability;

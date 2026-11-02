@@ -792,7 +792,11 @@ describe('modules/manager/poetry/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps: [
-          { depName: 'dep1', minimumReleaseAgeRepository: '7 days' },
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAgeRepository: '7 days',
+          },
         ],
         newPackageFileContent: '',
         config,
@@ -818,6 +822,7 @@ describe('modules/manager/poetry/artifacts', () => {
         updatedDeps: [
           {
             depName: 'dep1',
+            manager: 'poetry',
             minimumReleaseAge: '14 days',
             minimumReleaseAgeRepository: '3 days',
           },
@@ -846,6 +851,7 @@ describe('modules/manager/poetry/artifacts', () => {
         updatedDeps: [
           {
             depName: 'dep1',
+            manager: 'poetry',
             minimumReleaseAgePackageManager: '5 days',
             minimumReleaseAgeRepository: '3 days',
           },
@@ -872,7 +878,11 @@ describe('modules/manager/poetry/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'pyproject.toml',
         updatedDeps: [
-          { depName: 'dep1', minimumReleaseAgeRepository: '12 hours' },
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            minimumReleaseAgeRepository: '12 hours',
+          },
         ],
         newPackageFileContent: '',
         config,
@@ -902,6 +912,80 @@ describe('modules/manager/poetry/artifacts', () => {
           isLockFileMaintenance: true,
           minimumReleaseAge: '5 days',
           minimumReleaseAgeRepository: '3 days',
+        },
+      });
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('reads the poetry update if a pep621 update of pyproject.toml comes first', async () => {
+      const execSnapshots = mockExecAll();
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [
+          {
+            depName: 'dep1',
+            manager: 'pep621',
+            minimumReleaseAgeRepository: '3 days',
+          },
+          {
+            depName: 'dep2',
+            manager: 'poetry',
+            minimumReleaseAgePackageManager: '5 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+      expect(execSnapshots).toMatchObject([
+        {
+          options: {
+            env: expect.objectContaining({
+              POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('reads the poetry lock file maintenance in a branch whose first upgrade is npm', async () => {
+      const execSnapshots = mockExecAll();
+      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          minimumReleaseAgePackageManager: '3 days',
+          upgrades: [
+            {
+              isLockFileMaintenance: true,
+              manager: 'npm',
+              packageFile: 'package.json',
+              minimumReleaseAgePackageManager: '3 days',
+            },
+            {
+              isLockFileMaintenance: true,
+              manager: 'poetry',
+              packageFile: 'pyproject.toml',
+              minimumReleaseAgePackageManager: '5 days',
+            },
+          ],
         },
       });
       expect(execSnapshots).toMatchObject([
