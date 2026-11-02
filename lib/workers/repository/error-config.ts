@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { Pr } from '../../modules/platform/index.ts';
 import { platform } from '../../modules/platform/index.ts';
 import { getInheritedOrGlobal } from '../../util/common.ts';
+import { withIssueDebugData } from './common.ts';
 
 export function raiseConfigWarningIssue(
   config: RenovateConfig,
@@ -97,10 +98,14 @@ async function raiseWarningIssue(
     return;
   }
 
+  const existingIssue = await platform.findIssue(title);
   const res = await platform.ensureIssue({
     title,
     // the onboarding PR has its own instructions for once the problem is resolved, so this is only needed in the issue
-    body: `${body}\nOnce this is resolved, Renovate will close this issue automatically on its next successful run.\n`,
+    body: withIssueDebugData(
+      `${body}\nOnce this is resolved, Renovate will close this issue automatically on its next successful run.\n`,
+      existingIssue?.body,
+    ),
     once: false,
     shouldReOpen: config.configWarningReuseIssue,
     confidential: config.confidential,

@@ -1,7 +1,10 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
+import { pkg } from '../../expose.ts';
 import { getProblems } from '../../logger/index.ts';
 import type { PackageDependency } from '../../modules/manager/types.ts';
+import { prDebugDataRe } from '../../modules/platform/pr-body.ts';
 import { emojify } from '../../util/emoji.ts';
+import { toBase64 } from '../../util/string.ts';
 
 /**
  * Checks whether a replacement target already exists as a sibling dependency
@@ -48,4 +51,19 @@ export function formatProblemLevel(level: number): string {
   const emojiName = logLevelEmojis[level];
 
   return `${emojify(emojiName)} ${name}`;
+}
+
+/**
+ * Add debug data to an issue's body, in the same format as a PR's, recording which Renovate version last changed it.
+ */
+export function withIssueDebugData(
+  body: string,
+  existingBody?: string | null,
+): string {
+  // an issue which is otherwise unchanged keeps its existing body, so it isn't updated by every Renovate release
+  if (existingBody?.replace(prDebugDataRe, '') === body) {
+    return existingBody;
+  }
+  const debugData = toBase64(JSON.stringify({ updatedInVer: pkg.version }));
+  return `${body}\n<!--renovate-debug:${debugData}-->\n`;
 }

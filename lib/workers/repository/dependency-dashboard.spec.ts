@@ -17,6 +17,7 @@ import { massageMarkdown } from '../../modules/platform/github/index.ts';
 import type { Platform } from '../../modules/platform/index.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
+import { toBase64 } from '../../util/string.ts';
 import { asTimestamp } from '../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
@@ -24,6 +25,11 @@ import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
 import { PackageFiles } from './package-files.ts';
 
 const createVulnerabilitiesMock = vi.fn();
+
+const debugData = `\n<!--renovate-debug:${toBase64(
+  JSON.stringify({ updatedInVer: pkg.version }),
+)}-->\n`;
+
 vi.mock('./process/vulnerabilities.ts', () => {
   return {
     __esModule: true,
@@ -653,7 +659,7 @@ describe('workers/repository/dependency-dashboard', () => {
         'This repository currently has no open or pending branches.',
       );
       expect(body).toContain('## Detected Dependencies\n\nNone detected');
-      expect(body).toEndWith('---\nAnd this is a footer\n');
+      expect(body).toEndWith(`---\nAnd this is a footer\n${debugData}`);
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -689,7 +695,9 @@ describe('workers/repository/dependency-dashboard', () => {
         'This repository currently has no open or pending branches.',
       );
       expect(body).toContain('## Detected Dependencies\n\nNone detected');
-      expect(body).toEndWith('---\nAnd this is a footer for repository:test\n');
+      expect(body).toEndWith(
+        `---\nAnd this is a footer for repository:test\n${debugData}`,
+      );
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -801,7 +809,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-10-PR.txt'),
+        `${Fixtures.get('dependency-dashboard-with-10-PR.txt')}${debugData}`,
       );
 
       // same with dry run
@@ -997,7 +1005,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt'),
+        `${Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')}${debugData}`,
       );
 
       // same with dry run
@@ -1047,7 +1055,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt'),
+        `${Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')}${debugData}`,
       );
 
       // same with dry run
@@ -1087,7 +1095,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
+        `${Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')}${debugData}`,
       );
 
       // same with dry run
@@ -1176,7 +1184,7 @@ describe('workers/repository/dependency-dashboard', () => {
         config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt'),
+        `${Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')}${debugData}`,
       );
 
       // same with dry run
@@ -1590,14 +1598,21 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(body).not.toContain('rebase-all-open-prs');
     });
 
-    it('skips fetching issue if content unchanged', async () => {
-      const branches: BranchConfig[] = [];
-      config.dependencyDashboard = true;
-      config.dependencyDashboardChecks = {};
-      config.dependencyDashboardIssue = 1;
-      vi.mocked(platform.getIssue).mockResolvedValueOnce({
-        title: 'Dependency Dashboard',
-        body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+    it.each`
+      existingDebugData                                                                     | description
+      ${''}                                                                                 | ${'no debug data'}
+      ${debugData}                                                                          | ${'the current version'}
+      ${`\n<!--renovate-debug:${toBase64(JSON.stringify({ updatedInVer: '1.0.0' }))}-->\n`} | ${'an older version'}
+    `(
+      'skips fetching issue if content unchanged, with $description',
+      async ({ existingDebugData }) => {
+        const branches: BranchConfig[] = [];
+        config.dependencyDashboard = true;
+        config.dependencyDashboardChecks = {};
+        config.dependencyDashboardIssue = 1;
+        vi.mocked(platform.getIssue).mockResolvedValueOnce({
+          title: 'Dependency Dashboard',
+          body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
 
 This repository currently has no open or pending branches.
 
@@ -1605,20 +1620,21 @@ This repository currently has no open or pending branches.
 
 None detected
 
-`,
-      });
-      vi.mocked(platform.getIssue).mockResolvedValueOnce({
-        title: 'Dependency Dashboard',
-        body: '',
-      });
-      await dependencyDashboard.ensureDependencyDashboard(
-        config,
-        branches,
-        {},
-        { result: 'no-migration' },
-      );
-      expect(platform.ensureIssue).not.toHaveBeenCalled();
-    });
+`.concat(existingDebugData),
+        });
+        vi.mocked(platform.getIssue).mockResolvedValueOnce({
+          title: 'Dependency Dashboard',
+          body: '',
+        });
+        await dependencyDashboard.ensureDependencyDashboard(
+          config,
+          branches,
+          {},
+          { result: 'no-migration' },
+        );
+        expect(platform.ensureIssue).not.toHaveBeenCalled();
+      },
+    );
 
     it('forwards configured labels to the ensure issue call', async () => {
       const branches: BranchConfig[] = [];

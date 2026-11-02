@@ -3,14 +3,20 @@ import type { RenovateConfig } from '~test/util.ts';
 import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
+import { pkg } from '../../expose.ts';
 import { logger } from '../../logger/index.ts';
 import type { Pr } from '../../modules/platform/index.ts';
+import { toBase64 } from '../../util/string.ts';
 import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config.ts';
 
 let config: RenovateConfig;
+
+const debugData = `\n<!--renovate-debug:${toBase64(
+  JSON.stringify({ updatedInVer: pkg.version }),
+)}-->\n`;
 
 beforeEach(() => {
   // default values
@@ -52,6 +58,25 @@ describe('workers/repository/error-config', () => {
       expect(body).toContain('Location: `./foo`, `github>org/repo`\n');
     });
 
+    it('keeps the body of an otherwise unchanged issue, rather than updating its debug data', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationMessage = 'some-message';
+      platform.ensureIssue.mockResolvedValueOnce(null);
+      await raiseConfigWarningIssue(config, error);
+      const { body } = platform.ensureIssue.mock.calls[0][0];
+      const existingBody = body.replace(
+        debugData,
+        `\n<!--renovate-debug:${toBase64(JSON.stringify({ updatedInVer: '1.0.0' }))}-->\n`,
+      );
+      platform.findIssue.mockResolvedValueOnce({ body: existingBody });
+
+      await raiseConfigWarningIssue(config, error);
+
+      expect(platform.ensureIssue).toHaveBeenLastCalledWith(
+        expect.objectContaining({ body: existingBody }),
+      );
+    });
+
     it('creates issues', async () => {
       const expectedBody = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.
 
@@ -78,7 +103,7 @@ Once this is resolved, Renovate will close this issue automatically on its next 
         'Configuration Warning',
       );
       expect(platform.ensureIssue).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({ body: expectedBody }),
+        expect.objectContaining({ body: `${expectedBody}${debugData}` }),
       );
     });
 
@@ -91,8 +116,7 @@ Once this is resolved, Renovate will close this issue automatically on its next 
       await raiseConfigWarningIssue(config, error);
 
       const { body } = platform.ensureIssue.mock.calls[0][0];
-      expect(body)
-        .toBe(`There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.
+      const expected = `There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.
 
 Location: \`renovate.json\`
 
@@ -106,7 +130,8 @@ Message:
 If the error is in a Renovate configuration file, you can check your changes before committing them with [\`renovate-config-validator\`](https://docs.renovatebot.com/config-validation/).
 
 Once this is resolved, Renovate will close this issue automatically on its next successful run.
-`);
+`;
+      expect(body).toBe(`${expected}${debugData}`);
     });
 
     it('creates an issue for an error carrying no validation details', async () => {
@@ -160,6 +185,7 @@ Once this is resolved, Renovate will close this issue automatically on its next 
       const { prBody } = platform.updatePr.mock.calls[0][0];
       expect(prBody).toContain('renovate-config-validator');
       expect(prBody).not.toContain('close this issue automatically');
+      expect(prBody).not.toContain('renovate-debug');
     });
 
     it('handles onboarding (dryRun)', async () => {
