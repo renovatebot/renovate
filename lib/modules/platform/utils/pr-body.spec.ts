@@ -1,6 +1,13 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
-import { smartTruncate } from './pr-body.ts';
+import {
+  fitSections,
+  getBodyLength,
+  smartTruncate,
+  truncateSection,
+  withoutSmartTruncate,
+} from './pr-body.ts';
 
 const prBody = Fixtures.get('pr-body.txt');
 
@@ -87,6 +94,252 @@ describe('modules/platform/utils/pr-body', () => {
 
     it('does not truncate', () => {
       expect(smartTruncate(prBody, 60000)).toEqual(prBody);
+    });
+  });
+
+  describe('.withoutSmartTruncate', () => {
+    it('turns smartTruncate off while running the function', () => {
+      const res = withoutSmartTruncate(() =>
+        smartTruncate('x'.repeat(500), 10),
+      );
+
+      expect(res).toBe('x'.repeat(500));
+      expect(smartTruncate('x'.repeat(500), 10)).toHaveLength(10);
+    });
+
+    it('turns smartTruncate on again when the function throws', () => {
+      expect(() =>
+        withoutSmartTruncate(() => {
+          throw new Error('fail');
+        }),
+      ).toThrow('fail');
+
+      expect(smartTruncate('x'.repeat(500), 10)).toHaveLength(10);
+    });
+  });
+
+  describe('.getBodyLength', () => {
+    it('returns the length of the massaged body when it grows', () => {
+      function massage(body: string): string {
+        return smartTruncate(body.replaceAll('a', 'aa'), 5);
+      }
+
+      expect(getBodyLength('aaaa', massage, 5)).toBe(8);
+    });
+
+    it('returns the longest input smartTruncate receives when massaging shortens it again', () => {
+      function massage(body: string): string {
+        return smartTruncate(body.replaceAll('a', 'aa'), 5).substring(0, 2);
+      }
+
+      expect(getBodyLength('aaaa', massage, 5)).toBe(8);
+    });
+
+    it('returns the length of the body when massaging shortens it', () => {
+      expect(getBodyLength('aaaa', () => 'a', 5)).toBe(4);
+    });
+
+    it('does not massage a body shorter than half of the limit', () => {
+      const massage = vi.fn((body: string) => body);
+
+      expect(getBodyLength('aaaa', massage, 9)).toBe(4);
+      expect(massage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('.fitSections', () => {
+    const removedNotice = '\n\n> ✂ Section removed due to length limit.\n';
+    const fixed = 'f'.repeat(100);
+    const sections = {
+      primary: 'p'.repeat(300),
+      secondary: 's'.repeat(300),
+      fixed,
+    };
+
+    function measure(s: typeof sections): number {
+      return s.primary.length + s.secondary.length + s.fixed.length;
+    }
+
+    it('returns sections which fit', () => {
+      expect(
+        fitSections(sections, ['primary', 'secondary'], measure, 701),
+      ).toBe(sections);
+    });
+
+    it('cuts the secondary section first', () => {
+      const res = fitSections(sections, ['primary', 'secondary'], measure, 600);
+
+      expect(res.primary).toBe(sections.primary);
+      expect(res.secondary).toStartWith('s');
+      expect(res.secondary.length).toBeLessThan(300);
+      expect(res.secondary).toContain('Section was truncated to here');
+      expect(res.fixed).toBe(fixed);
+      expect(measure(res)).toBeLessThan(600);
+    });
+
+    it('replaces the secondary section with a removal notice', () => {
+      const res = fitSections(sections, ['primary', 'secondary'], measure, 450);
+
+      expect(res.primary).toBe(sections.primary);
+      expect(res.secondary).toBe(removedNotice);
+      expect(measure(res)).toBeLessThan(450);
+    });
+
+    it('keeps room for the removal notice when the primary section is cut', () => {
+      const res = fitSections(sections, ['primary', 'secondary'], measure, 400);
+
+      expect(res.primary).toStartWith('p');
+      expect(res.primary).toContain('Section was truncated to here');
+      expect(res.secondary).toBe(removedNotice);
+      expect(measure(res)).toBeLessThan(400);
+    });
+
+    it('cuts further when the measured length is longer than the sections', () => {
+      const res = fitSections(
+        sections,
+        ['primary', 'secondary'],
+        (s) => measure(s) + (s.secondary.length > 100 ? 50 : 0),
+        600,
+      );
+
+      expect(res.secondary.length).toBeLessThan(250);
+      expect(res.secondary).toContain('Section was truncated to here');
+    });
+
+    it('stops when the other sections are too long on their own', () => {
+      const res = fitSections(sections, ['primary', 'secondary'], measure, 100);
+
+      expect(res).toEqual({ primary: '', secondary: '', fixed });
+    });
+
+    it('stops when the measured length is not a number', () => {
+      const res = fitSections(
+        sections,
+        ['primary', 'secondary'],
+        (s) => (s.primary.length === 300 ? 1000 : Number.NaN),
+        600,
+      );
+
+      expect(res.fixed).toBe(fixed);
+    });
+
+    it('returns the sections when the limit is not a number', () => {
+      expect(
+        fitSections(
+          sections,
+          ['primary', 'secondary'],
+          measure,
+          undefined as unknown as number,
+        ),
+      ).toBe(sections);
+    });
+  });
+
+  describe('.truncateSection', () => {
+    const notice =
+      '\n\n> ❗ **Important**\n> \n> ✂ Section was truncated to here.\n';
+    const removedNotice = '\n\n> ✂ Section removed due to length limit.\n';
+
+    it('returns a section which fits', () => {
+      expect(truncateSection('some text', 9)).toBe('some text');
+    });
+
+    it('returns the removal notice when only that fits', () => {
+      expect(truncateSection('x'.repeat(500), notice.length)).toBe(
+        removedNotice,
+      );
+    });
+
+    it('returns nothing when not even the removal notice fits', () => {
+      expect(truncateSection('x'.repeat(500), 10)).toBe('');
+    });
+
+    it('cuts at a block boundary', () => {
+      const text = `first block\n\nsecond block\n\n${'third block '.repeat(20)}`;
+
+      const res = truncateSection(text, notice.length + 43);
+
+      expect(res).toBe(`first block\n\nsecond block${notice}`);
+    });
+
+    it('cuts at a line boundary when a block boundary would drop most of the text', () => {
+      const text = `intro\n\n${'- list item\n'.repeat(20)}`;
+
+      const res = truncateSection(text, notice.length + 60);
+
+      expect(res).toBe(
+        `intro\n\n- list item\n- list item\n- list item\n- list item${notice}`,
+      );
+    });
+
+    it('cuts inside a line without a boundary', () => {
+      const res = truncateSection('x'.repeat(200), notice.length + 50);
+
+      expect(res).toBe(`${'x'.repeat(50)}${notice}`);
+    });
+
+    it('returns the removal notice instead of a tiny fragment', () => {
+      expect(truncateSection('x'.repeat(500), notice.length + 10)).toBe(
+        removedNotice,
+      );
+    });
+
+    it('returns nothing when the room is not a number', () => {
+      expect(truncateSection('x'.repeat(500), Number.NaN)).toBe('');
+    });
+
+    it('closes an open HTML comment before the other blocks', () => {
+      const text = `intro\n\n<details>\n\n<!-- ${'comment line\n\n'.repeat(20)}-->`;
+
+      const res = truncateSection(text, notice.length + 100);
+
+      expect(res).toStartWith('intro\n\n<details>\n\n<!-- comment line');
+      expect(res).toEndWith(` -->\n\n</details>${notice}`);
+    });
+
+    it('keeps a closed HTML comment as it is', () => {
+      const text = `<!-- hidden -->\n\n${'text\n\n'.repeat(30)}`;
+
+      const res = truncateSection(text, notice.length + 60);
+
+      expect(res).toStartWith('<!-- hidden -->');
+      expect(res).toEndWith(`text${notice}`);
+    });
+
+    it('keeps an HTML comment closed with --!> as it is', () => {
+      const text = `<!-- hidden --!>\n\n${'text\n\n'.repeat(30)}`;
+
+      const res = truncateSection(text, notice.length + 60);
+
+      expect(res).toStartWith('<!-- hidden --!>');
+      expect(res).toEndWith(`text${notice}`);
+    });
+
+    it('closes the open details blocks and code fence', () => {
+      const text = codeBlock`
+        <details>
+        <summary>More information</summary>
+
+        <details>
+
+        \`\`\`
+        ${'code\n\n'.repeat(100)}
+        \`\`\`
+      `;
+
+      const res = truncateSection(text, notice.length + 120);
+
+      expect(res.length).toBeLessThanOrEqual(notice.length + 120);
+      expect(res).toEndWith(`\n\`\`\`\n\n</details>\n\n</details>${notice}`);
+    });
+
+    it('cuts further when closing the blocks needs the room', () => {
+      const text = `<details>\n\nfirst</details>\n\n<details>\n\n${'x'.repeat(100)}`;
+
+      const res = truncateSection(text, notice.length + 45);
+
+      expect(res.length).toBeLessThanOrEqual(notice.length + 45);
+      expect(res).toBe(`<details>\n\nfirst</details>${notice}`);
     });
   });
 });
