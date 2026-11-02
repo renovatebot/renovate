@@ -89,7 +89,7 @@ export class AzureChangeLogSource extends ChangeLogSource {
       {
         namespace: 'datasource-azure-tags',
         key,
-        cacheable: false,
+        public: false,
         fallback: true,
       },
       async () => {
