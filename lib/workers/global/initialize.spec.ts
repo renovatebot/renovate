@@ -10,7 +10,8 @@ import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import { setCustomEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
-import { globalInitialize } from './initialize.ts';
+import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
+import { globalFinalize, globalInitialize } from './initialize.ts';
 
 vi.mock('@renovatebot/base-image', { spy: true });
 vi.mock('node:fs/promises', async () => {
@@ -210,6 +211,14 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();
       expect(process.env.METADATA_SERVER_DETECTION).toBeUndefined();
+    });
+  });
+
+  describe('globalFinalize()', () => {
+    it('disposes the OSV databases', async () => {
+      const dispose = vi.spyOn(Vulnerabilities, 'dispose');
+      await expect(globalFinalize({})).toResolve();
+      expect(dispose).toHaveBeenCalledOnce();
     });
   });
 });

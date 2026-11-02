@@ -54,6 +54,35 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
+  describe('dispose()', () => {
+    beforeEach(resetOsv);
+
+    it('disposes the shared databases once', async () => {
+      const dispose = vi.fn();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+        [Symbol.dispose]: dispose,
+      });
+      await Vulnerabilities.create();
+
+      await Vulnerabilities.dispose();
+      await Vulnerabilities.dispose();
+
+      expect(dispose).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing when the databases were never opened', async () => {
+      await expect(Vulnerabilities.dispose()).toResolve();
+    });
+
+    it('ignores a failed initialization', async () => {
+      createMock.mockRejectedValue(new Error());
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+
+      await expect(Vulnerabilities.dispose()).toResolve();
+    });
+  });
+
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
