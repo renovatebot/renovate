@@ -1,4 +1,4 @@
-import { isNonEmptyString, isNumber } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isNumericString } from '@sindresorhus/is';
 import ini from 'ini';
 import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
@@ -29,8 +29,11 @@ export function parseNpmrcCooldown(
 
   const minReleaseAge = parsed['min-release-age'];
   if (isNonEmptyString(minReleaseAge)) {
-    const days = parseInt(minReleaseAge, 10);
-    if (isNumber(days) && days >= 0) {
+    // npm reads the setting as a number, and ignores values like `7d`
+    const days = isNumericString(minReleaseAge)
+      ? parseFloat(minReleaseAge)
+      : Number.NaN;
+    if (Number.isFinite(days) && days >= 0) {
       return { source: 'min-release-age', days };
     }
     logger.debug(
@@ -65,9 +68,7 @@ export function parseNpmrcPnpmMinimumReleaseAge(
 }
 
 /**
- * The minimum release age set by the `before` or `min-release-age` setting of an `.npmrc`, as a duration.
- *
- * A `before` date counts as the time elapsed since that date.
+ * The minimum release age set by the `before` or `min-release-age` setting of an `.npmrc`, as a duration or as the ISO 8601 date of `before`.
  */
 export function getNpmrcMinimumReleaseAge(
   npmrcContent: string | null | undefined,
@@ -76,12 +77,9 @@ export function getNpmrcMinimumReleaseAge(
   if (cooldown?.source === 'min-release-age') {
     return `${cooldown.days} days`;
   }
-  if (cooldown?.source !== 'before') {
-    return undefined;
-  }
-
-  const ageMs = Math.floor(-cooldown.date.diffNow().as('milliseconds'));
-  return ageMs > 0 ? `${ageMs} milliseconds` : undefined;
+  // the date is kept as is, as the extract result is cached and the age grows
+  // over time
+  return cooldown?.date.toISO();
 }
 
 /**

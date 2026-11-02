@@ -1107,6 +1107,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1132,6 +1133,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true, minimumReleaseAge: '14 days' },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '2.0.0',
             isLockfileUpdate: false,
@@ -1156,6 +1158,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true, minimumReleaseAge: '3 days' },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1179,6 +1182,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1204,6 +1208,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             isLockFileMaintenance: true,
             minimumReleaseAge: '3 days',
             minimumReleaseAgeRepository: '1 day',
@@ -1222,6 +1227,40 @@ describe('modules/manager/npm/post-update/npm', () => {
       ]);
     });
 
+    it('falls back to lock file maintenance of the package file in the branch upgrades', async () => {
+      await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        {
+          skipInstalls: true,
+          manager: 'pip_requirements',
+          minimumReleaseAgeRepository: '14 days',
+          upgrades: [
+            {
+              manager: 'npm',
+              packageFile: 'other-dir/package.json',
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '1 day',
+            },
+            {
+              manager: 'npm',
+              packageFile: 'some-dir/package.json',
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+          ],
+        },
+        [{ packageName: 'some-dep', newVersion: '1.0.1' }],
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+        },
+      ]);
+    });
+
     it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
       // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
       await npmHelper.generateLockFile(
@@ -1231,6 +1270,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1256,6 +1296,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1280,6 +1321,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1303,6 +1345,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1346,6 +1389,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1383,6 +1427,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls: true },
         [
           {
+            manager: 'npm',
             packageName: 'some-dep',
             newVersion: '1.0.1',
             isLockfileUpdate: false,
@@ -1415,7 +1460,13 @@ describe('modules/manager/npm/post-update/npm', () => {
         {},
         'package-lock.json',
         { skipInstalls: true },
-        [{ isLockFileMaintenance: true, minimumReleaseAge: '3 days' }],
+        [
+          {
+            manager: 'npm',
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+          },
+        ],
       );
 
       expect(res).toEqual({

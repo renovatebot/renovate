@@ -47,6 +47,8 @@ describe('modules/manager/npm/extract/npmrc', () => {
       ${'before=2026-13-99T00:00:00.000Z\n'}
       ${'min-release-age=not-a-number\n'}
       ${'min-release-age=-1\n'}
+      ${'min-release-age=7d\n'}
+      ${'min-release-age=Infinity\n'}
     `('returns null for: $content', ({ content }) => {
       expect(parseNpmrcCooldown(content)).toBeNull();
     });
@@ -79,6 +81,17 @@ describe('modules/manager/npm/extract/npmrc', () => {
         days: 30,
       });
     });
+
+    it.each`
+      input                      | days
+      ${'min-release-age=0\n'}   | ${0}
+      ${'min-release-age=1.5\n'} | ${1.5}
+    `('parses min-release-age $days from $input', ({ input, days }) => {
+      expect(parseNpmrcCooldown(input)).toEqual({
+        source: 'min-release-age',
+        days,
+      });
+    });
   });
 
   describe('getNpmrcMinimumReleaseAge()', () => {
@@ -86,12 +99,13 @@ describe('modules/manager/npm/extract/npmrc', () => {
       content                                | expected
       ${null}                                | ${undefined}
       ${'min-release-age=bananas\n'}         | ${undefined}
+      ${'min-release-age=7d\n'}              | ${undefined}
       ${'before=bananas\n'}                  | ${undefined}
       ${'min-release-age=3\n'}               | ${'3 days'}
       ${'min-release-age=0\n'}               | ${'0 days'}
-      ${'before=2026-06-12T12:00:00.000Z\n'} | ${'259200000 milliseconds'}
-      ${'before=2026-06-15T12:00:00.000Z\n'} | ${undefined}
-      ${'before=2026-06-20T00:00:00.000Z\n'} | ${undefined}
+      ${'min-release-age=1.5\n'}             | ${'1.5 days'}
+      ${'before=2026-06-12T12:00:00.000Z\n'} | ${'2026-06-12T12:00:00.000Z'}
+      ${'before=2026-06-20T00:00:00.000Z\n'} | ${'2026-06-20T00:00:00.000Z'}
     `('returns $expected for $content', ({ content, expected }) => {
       expect(getNpmrcMinimumReleaseAge(content)).toBe(expected);
     });
@@ -101,6 +115,8 @@ describe('modules/manager/npm/extract/npmrc', () => {
       ${'min-release-age=3\n'}               | ${'1 day'}        | ${'3 days'}
       ${'min-release-age=3\n'}               | ${'5 days'}       | ${'5 days'}
       ${'min-release-age=3\n'}               | ${null}           | ${'3 days'}
+      ${'min-release-age=1.5\n'}             | ${'1 day'}        | ${'36 hours'}
+      ${'min-release-age=7d\n'}              | ${'1 day'}        | ${'1 day'}
       ${'before=2026-06-12T12:00:00.000Z\n'} | ${'1 day'}        | ${'3 days'}
       ${'before=2026-06-12T12:00:00.000Z\n'} | ${'5 days'}       | ${'5 days'}
     `(
@@ -114,6 +130,18 @@ describe('modules/manager/npm/extract/npmrc', () => {
         ).toBe(toMs(expected));
       },
     );
+
+    it('counts a before date as the time elapsed since that date when the age is used', () => {
+      const minimumReleaseAgeExtracted = getNpmrcMinimumReleaseAge(
+        'before=2026-06-12T12:00:00.000Z\n',
+      );
+
+      vi.setSystemTime(new Date('2026-06-22T12:00:00.000Z'));
+
+      expect(calculateMinimumReleaseAgeMs({ minimumReleaseAgeExtracted })).toBe(
+        toMs('10 days'),
+      );
+    });
   });
 
   describe('setNpmrcMinimumReleaseAge()', () => {
