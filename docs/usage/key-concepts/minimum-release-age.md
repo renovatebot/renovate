@@ -166,9 +166,9 @@ pnpm enforces the minimum release age during lock file maintenance of a `pnpm-lo
 
 - `minimumReleaseAge` or the project's pnpm setting is set, and
 - the project's `pnpm-workspace.yaml` does not set `minimumReleaseAgeStrict: false`, and
-- the pnpm version used is v10.17.0 to v10.x, or v11.0.4 or later
+- the pnpm version used is v10.17.0 to v10.x, v11.0.4 to v11.x, or v12.3.0 or later
 
-pnpm v10.16.0 skips the check for an exact version from its metadata cache, and pnpm v11.0.0 to v11.0.3 install a version which is too new if no other version matches.
+pnpm v10.16.0 skips the check for an exact version from its metadata cache, and pnpm v11.0.0 to v11.0.3 and v12.0.0 to v12.2.x install a version which is too new if no other version matches.
 Renovate reads the pnpm version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), or the extracted constraints of tool managers.
 
 #### Poetry

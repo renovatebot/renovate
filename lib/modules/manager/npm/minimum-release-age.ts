@@ -29,8 +29,10 @@ export const minimumReleaseAgePnpmRange = '>=10.16.0';
 // `minimumReleaseAgeStrict` is set. Since v11.0.4, an explicit
 // `minimumReleaseAge` turns on `minimumReleaseAgeStrict`.
 // https://github.com/pnpm/pnpm/releases/tag/v11.0.4
+// pnpm v12.0.0 to v12.2.x treat an explicit `minimumReleaseAge` as not strict
+// again, fixed in v12.3.0.
 export const minimumReleaseAgeEnforcedPnpmRange =
-  '>=10.17.0 <11.0.0 || >=11.0.4';
+  '>=10.17.0 <11.0.0 || >=11.0.4 <12.0.0 || >=12.3.0';
 
 const dayMs = 24 * 60 * 60 * 1000;
 const minuteMs = 60 * 1000;
