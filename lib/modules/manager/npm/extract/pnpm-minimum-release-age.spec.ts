@@ -160,17 +160,20 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
     });
 
     it.each`
-      content
-      ${null}
-      ${'minimumReleaseAge: 0\n'}
+      pnpm          | content
+      ${'^10.20.0'} | ${null}
+      ${'^11.0.0'}  | ${'minimumReleaseAge: 0\n'}
     `(
-      'skips package files without a minimum release age: $content',
-      async ({ content }) => {
+      'skips package files without a minimum release age for pnpm $pnpm: $content',
+      async ({ pnpm, content }) => {
         mockWorkspace(content);
-        const packageFiles = [
-          packageFile('some-dir/package.json', {
-            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
-          }),
+        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+          {
+            ...packageFile('some-dir/package.json', {
+              pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+            }),
+            extractedConstraints: { pnpm },
+          },
         ];
 
         await setPnpmMinimumReleaseAge(packageFiles);
@@ -180,11 +183,37 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
     );
 
     it.each`
+      pnpm          | expected
+      ${'^11.0.0'}  | ${[rule('1440 minutes')]}
+      ${'>=9'}      | ${[rule('1440 minutes')]}
+      ${undefined}  | ${[rule('1440 minutes')]}
+      ${'latest'}   | ${[rule('1440 minutes')]}
+      ${'^10.20.0'} | ${undefined}
+    `(
+      'adds the pnpm v11 default without a setting for pnpm $pnpm',
+      async ({ pnpm, expected }) => {
+        mockWorkspace('packages:\n  - pkgs/*\n');
+        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+          {
+            ...packageFile('some-dir/package.json', {
+              pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+            }),
+            extractedConstraints: { pnpm },
+          },
+        ];
+
+        await setPnpmMinimumReleaseAge(packageFiles);
+
+        expect(packageFiles[0].packageRules).toEqual(expected);
+      },
+    );
+
+    it.each`
       pnpm          | workspace                    | expected
       ${'^10.20.0'} | ${null}                      | ${'2880 minutes'}
       ${'^10.20.0'} | ${'minimumReleaseAge: 60\n'} | ${'60 minutes'}
-      ${'^11.0.0'}  | ${null}                      | ${undefined}
-      ${undefined}  | ${null}                      | ${undefined}
+      ${'^11.0.0'}  | ${null}                      | ${'1440 minutes'}
+      ${undefined}  | ${null}                      | ${'1440 minutes'}
     `(
       'reads the repository .npmrc for pnpm $pnpm and workspace=$workspace',
       async ({ pnpm, workspace, expected }) => {
