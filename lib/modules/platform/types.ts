@@ -310,7 +310,11 @@ export interface Platform {
   reattemptPlatformAutomerge?(
     prConfig: ReattemptPlatformAutomergeConfig,
   ): Promise<void>;
-  /** Returns true only when platform automerge is confirmed disabled for the PR. */
+  /**
+   * Confirms platform-native auto-merge is disabled at the time of the response.
+   * Does not confirm the PR is open or prevent queued merges or re-enablement.
+   * Returns false for unconfirmed state and propagates request failures.
+   */
   cancelPlatformAutomerge?(number: number): Promise<boolean>;
   getBranchStatus(
     branchName: string,
