@@ -376,11 +376,11 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`:
 
-  ```json
-  {
-    "baseBranchPatterns": ["dev"]
-  }
-  ```
+```json
+{
+  "baseBranchPatterns": ["dev"]
+}
+```
 
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
 
