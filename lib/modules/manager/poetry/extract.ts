@@ -13,6 +13,11 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type { PackageFileContent } from '../types.ts';
 import {
+  getPoetryMinReleaseAgeRules,
+  poetryMinReleaseAgeVersion,
+  readPoetryMinReleaseAgeConfig,
+} from './minimum-release-age.ts';
+import {
   Lockfile,
   PoetryPyProject,
   getRegistryUrls,
@@ -21,19 +26,22 @@ import {
 import { getLockfilePoetryVersion } from './utils.ts';
 
 /**
- * Before Poetry 1.8, PyPI was implicitly added as a secondary source
- * even when a primary source was configured.
+ * Whether the Poetry version which wrote the lock file is older than `version`, or `false` if it is unknown.
  */
-function isLegacyPoetry(lockContents: string | undefined): boolean {
-  const version = lockContents && getLockfilePoetryVersion(lockContents);
-  if (!version) {
+function isLockfilePoetryOlderThan(
+  lockContents: string | undefined,
+  version: string,
+): boolean {
+  const lockfileVersion =
+    lockContents && getLockfilePoetryVersion(lockContents);
+  if (!lockfileVersion) {
     return false;
   }
 
   // a non-exact value is a constraint inferred from lock-version, i.e. < 1.4
   return (
-    !poetryVersioning.api.isVersion(version) ||
-    poetryVersioning.api.isGreaterThan('1.8.0', version)
+    !poetryVersioning.api.isVersion(lockfileVersion) ||
+    poetryVersioning.api.isGreaterThan(version, lockfileVersion)
   );
 }
 
@@ -59,7 +67,11 @@ export async function extractPackageFile(
     Lockfile.transform(({ lock }) => lock),
   ).unwrapOr({});
 
-  if (poetrySources?.length && isLegacyPoetry(lockContents)) {
+  // before Poetry 1.8, PyPI was implicitly added as a secondary source even when a primary source was configured
+  if (
+    poetrySources?.length &&
+    isLockfilePoetryOlderThan(lockContents, '1.8.0')
+  ) {
     res.registryUrls = getRegistryUrls(withImplicitPypi(poetrySources, true));
   }
 
@@ -99,6 +111,15 @@ export async function extractPackageFile(
     extractedConstraints.python = pythonVersion;
   }
   res.extractedConstraints = extractedConstraints;
+
+  if (!isLockfilePoetryOlderThan(lockContents, poetryMinReleaseAgeVersion)) {
+    const rules = getPoetryMinReleaseAgeRules(
+      await readPoetryMinReleaseAgeConfig(packageFile),
+    );
+    if (rules.length) {
+      res.packageRules = rules;
+    }
+  }
 
   // Try poetry.lock first
   let lockFile = getSiblingFileName(packageFile, 'poetry.lock');

@@ -1,5 +1,4 @@
-import { isNonEmptyArray, isNumber, isString } from '@sindresorhus/is';
-import { Duration } from 'luxon';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -11,7 +10,6 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
-import { toMs } from '../../../util/pretty-time.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import {
@@ -25,6 +23,7 @@ import {
   resolveToolConstraint,
   updateLockFile,
 } from '../util.ts';
+import { getMinReleaseAgeEnv } from './minimum-release-age.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
 import { getLockfilePoetryVersion } from './utils.ts';
@@ -177,8 +176,14 @@ export async function updateArtifacts({
     );
   }
 
+  const { env: minReleaseAgeEnv, notice } = await getMinReleaseAgeEnv(
+    config,
+    packageFileName,
+    updatedDeps,
+  );
+
   try {
-    return await updateLockFile({
+    const results = await updateLockFile({
       lockFileName,
       existingLockFileContent,
       packageFile: { path: packageFileName, contents: newPackageFileContent },
@@ -200,20 +205,8 @@ export async function updateArtifacts({
             packageFileName,
           )),
           PIP_CACHE_DIR: await ensureCacheDir('pip'),
+          ...minReleaseAgeEnv,
         };
-
-        if (config.minimumReleaseAge) {
-          const ageMs = toMs(config.minimumReleaseAge);
-          if (isNumber(ageMs)) {
-            const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
-            extraEnv.POETRY_SOLVER_MIN_RELEASE_AGE = days.toString();
-          } else {
-            logger.debug(
-              { minimumReleaseAge: config.minimumReleaseAge },
-              'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
-            );
-          }
-        }
 
         const execOptions: ExecOptions = {
           cwdFile: packageFileName,
@@ -227,6 +220,13 @@ export async function updateArtifacts({
         await gitExec(cmd, execOptions);
       },
     });
+    if (!notice || !results) {
+      return results;
+    }
+    return results.map(({ file }) => ({
+      file,
+      notice: { file: lockFileName, message: notice },
+    }));
   } catch (err) {
     /* v8 ignore if -- defensive rethrow, not reproduced in the poetry specs */
     if (err.message === TEMPORARY_ERROR) {
