@@ -128,6 +128,23 @@ query($owner: String!, $name: String!, $number: Int!) {
 }
 `;
 
+export const prAutoMergeStateQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      id
+      autoMergeRequest {
+        commitHeadline
+        commitBody
+        enabledBy {
+          login
+        }
+      }
+    }
+  }
+}
+`;
+
 export const enqueuePullRequestMutation = `
 mutation EnqueuePullRequest(
   $pullRequestId: ID!,
@@ -193,6 +210,22 @@ mutation UnpinIssue(
     }
   ) {
     issue {
+      number
+    }
+  }
+}
+`;
+
+export const disableAutoMergeMutation = `
+mutation DisablePullRequestAutoMerge(
+  $pullRequestId: ID!,
+) {
+  disablePullRequestAutoMerge(
+    input: {
+      pullRequestId: $pullRequestId,
+    }
+  ) {
+    pullRequest {
       number
     }
   }
