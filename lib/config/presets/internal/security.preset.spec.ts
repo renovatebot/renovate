@@ -49,6 +49,20 @@ describe('config/presets/internal/security.preset', () => {
     },
   );
 
+  it.each`
+    preset                      | manager
+    ${'minimumReleaseAgeCrate'} | ${'cargo'}
+    ${'minimumReleaseAgeNpm'}   | ${'npm'}
+    ${'minimumReleaseAgePypi'}  | ${'poetry'}
+  `(
+    'sets minimumReleaseAgePackageManager for manager $manager in $preset',
+    ({ preset, manager }) => {
+      expect(presets[preset][manager]).toEqual({
+        minimumReleaseAgePackageManager: '3 days',
+      });
+    },
+  );
+
   it.each(minimumReleaseAgeDatasourceNames)(
     'only exposes datasource %s because it supports release timestamps',
     (datasource) => {

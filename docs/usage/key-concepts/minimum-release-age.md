@@ -86,6 +86,7 @@ The package managers listed under [`minimumReleaseAgePackageManager`](../configu
 A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
 A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
+The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
 How Renovate does this depends on the package manager, for example Poetry gets the smaller value for that branch.
 It never wins over the minimum release age which your repository configures in the package manager itself.
