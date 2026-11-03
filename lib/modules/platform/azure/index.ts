@@ -219,7 +219,7 @@ export async function getRawFile(
     if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
       throw new ExternalHostError(err, id);
     }
-    if (isServerError(err.statusCode)) {
+    if (isServerError(err)) {
       throw new ExternalHostError(err, id);
     }
     throw err;

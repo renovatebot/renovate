@@ -674,7 +674,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         // the most recent versions of the platform, the PR gets automatically closed when that happens, but older versions
         // do not handle this properly and keep the PR open. As pushing a branch with the same name resurrects the PR, this
         // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
-        if (isConflict(err.statusCode)) {
+        if (isConflict(err)) {
           logger.warn(
             { prTitle: title, sourceBranch },
             'Attempting to gracefully recover from 409 Conflict response in createPr()',

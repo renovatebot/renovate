@@ -105,7 +105,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
         throw err;
       }
       logger.debug({ err }, 'Gitlab API error');
-      if (isRateLimitedOrServerError(err.response.statusCode)) {
+      if (isRateLimitedOrServerError(err)) {
         throw new ExternalHostError(err, 'gitlab');
       }
     }

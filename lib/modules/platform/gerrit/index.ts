@@ -450,7 +450,7 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
       return false;
     }
   } catch (err) {
-    if (isConflict(err.statusCode)) {
+    if (isConflict(err)) {
       logger.warn(
         { err },
         "Can't submit the change, because the submit rule doesn't allow it.",

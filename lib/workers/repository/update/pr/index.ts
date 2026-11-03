@@ -586,7 +586,7 @@ export async function ensurePr(
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
-        if (isBadGateway(err.statusCode)) {
+        if (isBadGateway(err)) {
           logger.warn(
             { branch: branchName },
             'Deleting branch due to server error',

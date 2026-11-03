@@ -119,7 +119,7 @@ export async function initPlatform({
     renovateUserUuid = uuid;
   } catch (err) {
     if (
-      isForbidden(err.statusCode) &&
+      isForbidden(err) &&
       err.body?.error?.detail?.required?.includes('account')
     ) {
       logger.warn(`Bitbucket: missing 'account' scope for password`);
@@ -807,7 +807,7 @@ async function sanitizeReviewers(
   reviewers: Account[],
   err: any,
 ): Promise<Account[] | undefined> {
-  if (isBadRequest(err.statusCode) && err.body?.error?.fields?.reviewers) {
+  if (isBadRequest(err) && err.body?.error?.fields?.reviewers) {
     const sanitizedReviewers: Account[] = [];
 
     const MSG_AUTHOR_AND_REVIEWER =

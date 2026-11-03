@@ -363,7 +363,7 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (isForbidden(err.statusCode)) {
+    if (isForbidden(err)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (isNotFound(err)) {
@@ -926,11 +926,11 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     );
     return true;
   } catch (err) /* v8 ignore next -- merge rejection statuses (401/406) are mapped to false, not mocked in specs */ {
-    if (isUnauthorized(err.statusCode)) {
+    if (isUnauthorized(err)) {
       logger.debug('No permissions to merge PR');
       return false;
     }
-    if (isNotAcceptable(err.statusCode)) {
+    if (isNotAcceptable(err)) {
       logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }

@@ -32,7 +32,7 @@ export function handleBranchError(
   err: any,
   { branchExists, prNo, commitSha, updatesVerified }: BranchErrorContext,
 ): ProcessBranchResult {
-  if (isNotFound(err.statusCode)) {
+  if (isNotFound(err)) {
     logger.debug({ err }, 'Received a 404 error - aborting run');
     throw new Error(REPOSITORY_CHANGED);
   }

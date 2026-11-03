@@ -114,8 +114,8 @@ const GithubErrors = z
  */
 export function isPrAlreadyExistsError(err: any): boolean {
   return (
-    isUnprocessableContent(err?.response?.statusCode) &&
-    GithubErrors.parse(err.response.body?.errors).some((e) =>
+    isUnprocessableContent(err) &&
+    GithubErrors.parse(err.response?.body?.errors).some((e) =>
       e.message?.startsWith('A pull request already exists'),
     )
   );
@@ -146,32 +146,29 @@ function handleGotError(
     logger.debug({ err }, '');
     return new ExternalHostError(err, 'github');
   }
-  if (isServerError(err.statusCode)) {
+  if (isServerError(err)) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     return new ExternalHostError(err, 'github');
   }
   if (
-    isForbidden(err.statusCode) &&
+    isForbidden(err) &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    isForbidden(err.statusCode) &&
+    isForbidden(err) &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
     logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
-  if (
-    isForbidden(err.statusCode) &&
-    message.includes('Upgrade to GitHub Pro')
-  ) {
+  if (isForbidden(err) && message.includes('Upgrade to GitHub Pro')) {
     logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
-  if (isForbidden(err.statusCode) && message.includes('rate limit exceeded')) {
+  if (isForbidden(err) && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
 
     const parsed = parseUrl(baseUrl);
@@ -200,7 +197,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    isForbidden(err.statusCode) &&
+    isForbidden(err) &&
     message.startsWith('Resource not accessible by integration')
   ) {
     logger.debug(
@@ -209,7 +206,7 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (isUnauthorized(err.statusCode)) {
+  if (isUnauthorized(err)) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
     // v8 ignore else -- TODO: add test #40625
@@ -231,7 +228,7 @@ function handleGotError(
       return new Error(PLATFORM_BAD_CREDENTIALS);
     }
   }
-  if (isUnprocessableContent(err.statusCode)) {
+  if (isUnprocessableContent(err)) {
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
@@ -253,7 +250,7 @@ function handleGotError(
     return new ExternalHostError(err, 'github');
   }
   if (
-    isGone(err.statusCode) &&
+    isGone(err) &&
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;

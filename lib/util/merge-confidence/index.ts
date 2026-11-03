@@ -287,12 +287,12 @@ function apiErrorHandler(err: any): void {
     throw new ExternalHostError(err, hostType);
   }
 
-  if (isForbidden(err.statusCode)) {
+  if (isForbidden(err)) {
     logger.error({ err }, 'merge confidence API token rejected - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 
-  if (isServerError(err.statusCode)) {
+  if (isServerError(err)) {
     logger.error({ err }, 'merge confidence API failure: 5xx - aborting run');
     throw new ExternalHostError(err, hostType);
   }

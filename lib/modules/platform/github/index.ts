@@ -694,7 +694,7 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (isForbidden(err.statusCode)) {
+    if (isForbidden(err)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (isNotFound(err)) {
@@ -932,8 +932,7 @@ function handleBranchProtectionError(
   }
 
   const isUnauthorized =
-    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
-    isForbidden(err.statusCode);
+    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED || isForbidden(err);
 
   if (isUnauthorized) {
     logger.once.debug(
@@ -1099,7 +1098,7 @@ async function ensureBranchSha(
       await githubApi.patchJson(refUrl, { body: { sha, force: true } });
       return;
     } catch (err) {
-      if (isUnprocessableContent(err.err?.response?.statusCode)) {
+      if (isUnprocessableContent(err.err)) {
         logger.debug(
           { err },
           'Branch update failed due to reference not existing - will try to create',
@@ -1265,10 +1264,7 @@ export async function getBranchStatus(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    if (
-      isForbidden(err.statusCode) ||
-      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-    ) {
+    if (isForbidden(err) || err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
       logger.debug('No permission to view check runs');
     } else {
       logger.warn({ err }, 'Error retrieving check runs');
@@ -1444,7 +1440,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
     return issue;
   } catch (err) {
     logger.debug({ err, number }, 'Error getting issue');
-    if (isGone(err.response?.statusCode)) {
+    if (isGone(err)) {
       logger.debug(`Issue #${number} has been deleted`);
       GithubIssueCache.deleteIssue(number);
     }
@@ -1475,8 +1471,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
     );
     GithubIssueCache.updateIssue(closedIssue);
   } catch (err) {
-    const statusCode = err.response?.statusCode;
-    if (isNotFound(statusCode) || isGone(statusCode)) {
+    if (isNotFound(err) || isGone(err)) {
       logger.debug(
         `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
       );
@@ -2275,7 +2270,7 @@ async function directMergePr(
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
-      if (isNotFound(err) || isMethodNotAllowed(err.statusCode)) {
+      if (isNotFound(err) || isMethodNotAllowed(err)) {
         const body = err.response?.body;
         if (
           isNonEmptyString(body?.message) &&

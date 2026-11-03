@@ -794,7 +794,7 @@ async function updatePRAndAddReviewers(
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (isConflict(err.statusCode)) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err)) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1211,9 +1211,9 @@ export async function updatePr({
     );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (isConflict(err.statusCode)) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1253,9 +1253,9 @@ export async function mergePr({
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (isConflict(err.statusCode)) {
+    } else if (isConflict(err)) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
     } else {

@@ -75,7 +75,7 @@ export function getRetryAfter(err: unknown): number | null {
     return null;
   }
 
-  if (!isClientError(err.response.statusCode)) {
+  if (!isClientError(err)) {
     logger.debug(
       { url: err.response.url },
       `Retry-After: unexpected status code ${err.response.statusCode}`,
