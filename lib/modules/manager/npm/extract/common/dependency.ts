@@ -16,6 +16,7 @@ import {
   id as npmVersioningId,
 } from '../../../../versioning/npm/index.ts';
 import type { PackageDependency } from '../../../types.ts';
+import { isToolDepType } from '../../dep-types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
   /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
@@ -65,12 +66,7 @@ export function extractDependency(
     return dep;
   }
   dep.currentValue = input.trim();
-  if (
-    depType === 'engines' ||
-    depType === 'packageManager' ||
-    depType === 'devEngines.runtime' ||
-    depType === 'devEngines.packageManager'
-  ) {
+  if (isToolDepType(depType)) {
     if (depName === 'node') {
       dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
@@ -257,10 +253,7 @@ export function getExtractedConstraints(
   for (const dep of deps) {
     if (
       !dep.skipReason &&
-      (dep.depType === 'engines' ||
-        dep.depType === 'packageManager' ||
-        dep.depType === 'devEngines.runtime' ||
-        dep.depType === 'devEngines.packageManager') &&
+      isToolDepType(dep.depType) &&
       dep.depName &&
       isConstraintName(dep.depName) &&
       constraints.includes(dep.depName) &&
