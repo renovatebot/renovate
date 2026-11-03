@@ -15,6 +15,8 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { VcpkgPortVersions } from './schema.ts';
 
+const defaultRegistryUrl = 'https://github.com/microsoft/vcpkg';
+
 type CloneResult =
   | {
       err: Error;
@@ -33,7 +35,7 @@ export class VcpkgDatasource extends Datasource {
   }
 
   override getDefaultRegistryUrls(_packageName: string): string[] {
-    return ['https://github.com/microsoft/vcpkg'];
+    return [defaultRegistryUrl];
   }
 
   override readonly defaultVersioning = 'vcpkg';
@@ -115,7 +117,8 @@ export class VcpkgDatasource extends Datasource {
           config.registryUrl,
           config.packageName,
         ),
-        cacheable: true,
+        // A custom registry may be private.
+        public: config.registryUrl === defaultRegistryUrl,
       },
       () => this._getReleases(config),
     );
