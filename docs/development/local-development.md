@@ -155,7 +155,7 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs lint checks (`oxlint`, `biome`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
+`pnpm test` runs lint checks (`oxlint`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
