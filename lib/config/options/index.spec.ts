@@ -1,6 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
@@ -9,15 +10,10 @@ import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform/index.ts');
 
-function isStringOrStringArray(option?: {
-  type?: string;
-  subType?: string;
-}): boolean {
-  if (option?.type === 'string') {
-    return true;
-  }
-  return option?.type === 'array' && option.subType === 'string';
-}
+const StringOrStringArrayOption = z.union([
+  z.object({ type: z.literal('string') }),
+  z.object({ type: z.literal('array'), subType: z.literal('string') }),
+]);
 
 async function collectTsFiles(dir: string): Promise<string[]> {
   const results: string[] = [];
@@ -118,7 +114,7 @@ describe('config/options/index', () => {
 
     for (const option of opts) {
       it(`${option.name} should be of type string or array of strings`, () => {
-        expect(isStringOrStringArray(option)).toBeTrue();
+        expect(StringOrStringArrayOption.safeParse(option).success).toBeTrue();
       });
     }
   });
@@ -151,7 +147,7 @@ describe('config/options/index', () => {
         const name = match.groups!.name;
         const option = allOptions.find((o) => o.name === name);
         // Only include string or array-of-string options (not objects like userStrings)
-        if (isStringOrStringArray(option)) {
+        if (StringOrStringArrayOption.safeParse(option).success) {
           detectedOptions.add(name);
         }
       }
