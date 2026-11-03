@@ -3068,7 +3068,8 @@ A smaller `minimumReleaseAge` of an update, for example from `packageRules`, win
 
 ## `minimumReleaseAgePackageManagerSync`
 
-Set this option to `true` to align the minimum release age of Renovate with the minimum release age of your package managers.
+This is a feature flag to opt early into the new `minimumReleaseAge` behaviour, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
+The behaviour is experimental and may change while the integration with each package manager is completed.
 You can set it at the top level of a config or in a manager's config, not in `packageRules`.
 
 With `minimumReleaseAgePackageManagerSync=true`, Renovate:
