@@ -6,15 +6,15 @@ import * as _googleAuth from 'google-auth-library';
 import { dir as tmpDir } from 'tmp-promise';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { logger, partial } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DOCKER_HUB } from './common.ts';
-import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
+import type { DockerHubCacheData } from './types.ts';
 
 const googleAuth = vi.mocked(_googleAuth, true);
 
@@ -371,6 +371,53 @@ describe('modules/datasource/docker/index', () => {
       await expect(
         getDigest({ datasource: 'docker', packageName }, 'some-tag'),
       ).resolves.toBe('sha256:some-digest');
+    });
+
+    it('uses a fresh digest cache entry', async () => {
+      vi.spyOn(packageCache, 'get').mockImplementation((namespace) =>
+        Promise.resolve(
+          namespace === 'datasource-docker-digest'
+            ? {
+                cachedAt: new Date().toISOString(),
+                value: 'sha256:cached-digest',
+              }
+            : undefined,
+        ),
+      );
+
+      const res = await getDigest(
+        { datasource: 'docker', packageName: 'some-dep' },
+        'next',
+      );
+
+      expect(res).toBe('sha256:cached-digest');
+    });
+
+    it('falls back to the digest cache when the registry fails', async () => {
+      GlobalConfig.set({ cacheHardTtlMinutes: 60 });
+      vi.spyOn(packageCache, 'get').mockImplementation((namespace) =>
+        Promise.resolve(
+          namespace === 'datasource-docker-digest'
+            ? {
+                cachedAt: new Date(Date.now() - 31 * 60 * 1000).toISOString(),
+                value: 'sha256:cached-digest',
+              }
+            : undefined,
+        ),
+      );
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(200)
+        .head('/library/some-dep/manifests/next')
+        .reply(503);
+
+      const res = await getDigest(
+        { datasource: 'docker', packageName: 'some-dep' },
+        'next',
+      );
+
+      expect(res).toBe('sha256:cached-digest');
     });
 
     it.each(amazonHosts)(
@@ -1647,37 +1694,73 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe(newDigest);
     });
 
-    it('uses Docker Hub tag cache digest without HEAD request', async () => {
-      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
-        partial<DockerHubCache>({
-          getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
-          getArchDigestForTag: vi.fn().mockReturnValue(null),
-        }),
+    it('gets the current digest when the Docker Hub tag cache is stale', async () => {
+      const cachedTags: DockerHubCacheData = {
+        items: {
+          1: {
+            id: 1,
+            name: 'next',
+            last_updated: '2026-01-01T00:00:00Z',
+            tag_last_pushed: '2026-01-01T00:00:00Z',
+            digest: 'sha256:old-digest',
+            images: [],
+          },
+        },
+        updatedAt: '2026-01-01T00:00:00Z',
+      };
+      vi.spyOn(packageCache, 'get').mockImplementation((namespace) =>
+        Promise.resolve(
+          namespace === 'datasource-docker-hub-cache' ? cachedTags : undefined,
+        ),
       );
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(200)
+        .head('/library/some-dep/manifests/next')
+        .reply(200, '', { 'docker-content-digest': 'sha256:new-digest' });
 
       const res = await getDigest(
         { datasource: 'docker', packageName: 'some-dep' },
-        'some-tag',
+        'next',
       );
 
-      expect(res).toBe('sha256:cached-digest');
+      expect(res).toBe('sha256:new-digest');
     });
 
-    it('uses Docker Hub tag cache arch digest when currentDigest is arch-specific', async () => {
+    it('gets the current architecture digest when the Docker Hub tag cache is stale', async () => {
       const currentDigest =
         'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+      const cachedTags: DockerHubCacheData = {
+        items: {
+          1: {
+            id: 1,
+            name: 'next',
+            last_updated: '2026-01-01T00:00:00Z',
+            tag_last_pushed: '2026-01-01T00:00:00Z',
+            digest: 'sha256:old-list',
+            images: [{ architecture: 'amd64', digest: 'sha256:old-amd64' }],
+          },
+        },
+        updatedAt: '2026-01-01T00:00:00Z',
+      };
+      vi.spyOn(packageCache, 'get').mockImplementation((namespace) =>
+        Promise.resolve(
+          namespace === 'datasource-docker-hub-cache' ? cachedTags : undefined,
+        ),
+      );
 
       httpMock
         .scope(authUrl)
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
         )
-        .times(3)
+        .times(4)
         .reply(200, { token: 'some-token' });
       httpMock
         .scope(baseUrl)
         .get('/')
-        .times(3)
+        .times(4)
         .reply(401, '', {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
@@ -1697,14 +1780,19 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/blobs/some-config-digest')
         .reply(200, {
           architecture: 'amd64',
+        })
+        .get('/library/some-dep/manifests/next')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              digest: 'sha256:new-amd64',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: { architecture: 'amd64', os: 'linux' },
+            },
+          ],
         });
-
-      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
-        partial<DockerHubCache>({
-          getDigestForTag: vi.fn().mockReturnValue(null),
-          getArchDigestForTag: vi.fn().mockReturnValue('sha256:cached-amd64'),
-        }),
-      );
 
       const res = await getDigest(
         {
@@ -1712,10 +1800,10 @@ describe('modules/datasource/docker/index', () => {
           packageName: 'some-dep',
           currentDigest,
         },
-        'some-tag',
+        'next',
       );
 
-      expect(res).toBe('sha256:cached-amd64');
+      expect(res).toBe('sha256:new-amd64');
     });
 
     it('falls back to library/ prefix on non-namespaced images without existing digest', async () => {
