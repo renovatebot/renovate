@@ -1,10 +1,11 @@
+import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as juliaVersioning from '../../versioning/julia/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { JuliaPackageMetadata } from './schema.ts';
+import { JuliaPackageInfo, JuliaPackageMetadata } from './schema.ts';
 
 export class JuliaGeneralMetadataDatasource extends Datasource {
   static readonly id = 'julia-general-metadata';
@@ -36,8 +37,25 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
       return null;
     }
 
-    const url = joinUrlParts(registryUrl, 'api', packageName, 'versions.json');
+    // `Example=7876af07-990d-54b4-ab0e-23690620f79a` names a package and its
+    // UUID, as Pkg's REPL does. A name is unique only within a registry, so a
+    // package from another registry can have the name of a General package.
+    const [name, uuid] = packageName.split('=');
+    if (uuid) {
+      const info = await this.fetchJsonOrNull(
+        joinUrlParts(registryUrl, 'api', name, 'info.json'),
+        JuliaPackageInfo,
+      );
+      if (info?.uuid.toLowerCase() !== uuid.toLowerCase()) {
+        logger.debug(
+          { packageName, generalUuid: info?.uuid },
+          'Package is not the General package of that name',
+        );
+        return null;
+      }
+    }
 
+    const url = joinUrlParts(registryUrl, 'api', name, 'versions.json');
     return this.fetchJsonOrNull(url, JuliaPackageMetadata);
   }
 
