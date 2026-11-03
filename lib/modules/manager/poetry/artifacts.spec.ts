@@ -1364,6 +1364,26 @@ describe('modules/manager/poetry/artifacts', () => {
           expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
         });
 
+        it('does not pass less than a non-integer Poetry value', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2.5
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '1 day',
+              },
+            ],
+          );
+          expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
+        });
+
         it('passes no age if the Poetry value is not smaller', async () => {
           const { env } = await runWithPoetryToml(
             codeBlock`
