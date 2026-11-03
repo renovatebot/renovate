@@ -149,6 +149,7 @@ For example, with this config:
 ```
 
 - Without a `poetry.toml`, Renovate runs `poetry update --lock` with `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
+- With the `security:minimumReleaseAgePypi` preset instead of the `poetry` config, Renovate also passes `POETRY_SOLVER_MIN_RELEASE_AGE=3`, as the preset sets `minimumReleaseAgePackageManager` to 3 days for `poetry`.
 - An update of `boto3` to a release which is 1 day old sets no variable, and the PR notes that Poetry checked a minimum release age of 0 days instead of 3.
 - With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
 - Without `minimumReleaseAgePackageManagerSync`, the `boto3` update sets no variable, and all other updates set `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
