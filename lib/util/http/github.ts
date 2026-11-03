@@ -33,6 +33,13 @@ import {
   type InternalJsonUnsafeOptions,
 } from './http.ts';
 import type { GotLegacyError } from './legacy.ts';
+import {
+  isForbidden,
+  isGone,
+  isServerError,
+  isUnauthorized,
+  isUnprocessableContent,
+} from './status.ts';
 import type {
   GraphqlOptions,
   HttpMethod,
@@ -107,7 +114,7 @@ const GithubErrors = z
  */
 export function isPrAlreadyExistsError(err: any): boolean {
   return (
-    err?.response?.statusCode === 422 &&
+    isUnprocessableContent(err?.response?.statusCode) &&
     GithubErrors.parse(err.response.body?.errors).some((e) =>
       e.message?.startsWith('A pull request already exists'),
     )
@@ -139,29 +146,32 @@ function handleGotError(
     logger.debug({ err }, '');
     return new ExternalHostError(err, 'github');
   }
-  if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+  if (isServerError(err.statusCode)) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err.statusCode) &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err.statusCode) &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
     logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
-  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+  if (
+    isForbidden(err.statusCode) &&
+    message.includes('Upgrade to GitHub Pro')
+  ) {
     logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
-  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
+  if (isForbidden(err.statusCode) && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
 
     const parsed = parseUrl(baseUrl);
@@ -190,7 +200,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err.statusCode) &&
     message.startsWith('Resource not accessible by integration')
   ) {
     logger.debug(
@@ -199,7 +209,7 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (err.statusCode === 401) {
+  if (isUnauthorized(err.statusCode)) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
     // v8 ignore else -- TODO: add test #40625
@@ -221,7 +231,7 @@ function handleGotError(
       return new Error(PLATFORM_BAD_CREDENTIALS);
     }
   }
-  if (err.statusCode === 422) {
+  if (isUnprocessableContent(err.statusCode)) {
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
@@ -243,7 +253,7 @@ function handleGotError(
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 410 &&
+    isGone(err.statusCode) &&
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;

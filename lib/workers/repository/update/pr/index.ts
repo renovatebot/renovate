@@ -33,6 +33,7 @@ import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
 import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
+import { isBadGateway } from '../../../../util/http/status.ts';
 import { memoize } from '../../../../util/memoize.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -585,7 +586,7 @@ export async function ensurePr(
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
-        if (err.statusCode === 502) {
+        if (isBadGateway(err.statusCode)) {
           logger.warn(
             { branch: branchName },
             'Deleting branch due to server error',
