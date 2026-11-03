@@ -103,6 +103,24 @@ describe('workers/repository/init/inherited', () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
+  it('should drop urlReplacements from inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      codeBlock`
+        {
+          "urlReplacements": [
+            {
+              "matchUrlPrefix": "https://repo.example.com/",
+              "replaceUrlPrefix": "https://mirror.example.com/"
+            }
+          ]
+        }
+      `,
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res).not.toContainKey('urlReplacements');
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
   it('should merge inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
       '{"onboarding":false,"labels":["test"]}',
@@ -350,6 +368,27 @@ describe('workers/repository/init/inherited', () => {
     const res = await mergeInheritedConfig(config);
     expect(res.description).toBe('shared');
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('should drop urlReplacements from a preset of inherited config', async () => {
+    platform.getRawFile.mockResolvedValue('{"extends":[":automergeAll"]}');
+    presets.resolveConfigPresets.mockResolvedValue({
+      config: {
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/',
+          },
+        ],
+      },
+      visitedPresets: {
+        merged: [],
+        unmerged: [],
+      },
+    });
+    const res = await mergeInheritedConfig(config);
+    expect(res).not.toContainKey('urlReplacements');
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('should warn if presets fails validation with warnings', async () => {

@@ -1665,6 +1665,85 @@ Secret names must start with an upper or lower case character and can have only 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
 
+## `urlReplacements`
+
+Use `urlReplacements` to send Renovate's own HTTP requests to a mirror, for example of a public registry.
+Each rule replaces the `matchUrlPrefix` at the start of a request URL with the `replaceUrlPrefix`.
+Renovate ignores rules whose prefixes don't meet the requirements listed below.
+The rules apply in order, and each rule is checked against the result of the previous one.
+`urlReplacements` applies to all repositories, and can't be set in a [`repositories`](#repositories) object entry.
+
+```json {configType=global}
+{
+  "urlReplacements": [
+    {
+      "matchUrlPrefix": "https://repo.maven.apache.org/maven2/",
+      "replaceUrlPrefix": "https://mirror.example.com/maven-public/",
+      "matchHostTypes": ["maven", "clojure"]
+    }
+  ]
+}
+```
+
+Each datasource requests with its own host type, so a rule for Maven Central lists the host types of all datasources which use it.
+
+The `sbt-package` and `sbt-plugin` datasources look up versions through HTML directory listings.
+Many mirrors don't serve complete listings: Nexus 3 group repositories don't serve listings at the repository URL, and proxy repositories only list cached content.
+Leave `sbt` out of `matchHostTypes` unless your mirror lists the remote content.
+
+A mirror caches metadata such as `maven-metadata.xml`, so new releases can show up later than on the original registry.
+Set the mirror's metadata cache time to the delay you accept, for example "Maximum metadata age" in Nexus (24 hours by default) or "Metadata Retrieval Cache Period" in Artifactory.
+
+The rewrite only applies to the HTTP requests Renovate makes itself, not to package manager commands.
+Registry URLs, lookup results and cache keys keep the original URL.
+
+It is not applied to Docker registries, use [`registryAliases`](./configuration-options.md#registryaliases) for those.
+It also doesn't apply to these features, as they use their own clients:
+
+- Git operations, like clone, fetch and push
+- the Azure DevOps platform API and the `azure-tags` datasource
+- AWS: the CodeCommit platform, ECR authentication, the `aws-eks-addon`, `aws-machine-image` and `aws-rds` datasources, and S3 (the repository cache, `reportType=s3`, and `s3://` Maven and Helm registries)
+- the access token for Google Artifact Registry and Google Container Registry
+- the Redis package cache
+- the OSV vulnerability database download
+- OpenTelemetry trace exports
+
+Renovate does not rewrite a request when:
+
+- the request itself has credentials
+- the host rule for the original URL has a `token`, a `password`, a client certificate or key, a certificate authority, or any `headers`
+- the host rule for the original URL has `enabled=false`
+
+So credentials meant for the original host are never sent to the mirror.
+
+Host rules, authentication and [`internalHostAccess`](#internalhostaccess) apply to the mirror URL.
+Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain.
+Other settings of the original host's host rules don't apply to rewritten requests.
+If the mirror is on an internal host, it needs its own host rule in your global config with [`allowInternal=true`](#hostrulesallowinternal).
+
+!!! warning
+  `urlReplacements` is not a security or egress control.
+  Requests with credentials, requests to Docker registries, and URLs which don't match a `matchUrlPrefix` still go to the original host.
+
+### `urlReplacements.matchHostTypes`
+
+If set, the rule only applies to requests with one of these host types, for example `maven` or `npm`.
+It must not be empty or contain `docker`, as such a rule would never apply.
+
+### `urlReplacements.matchUrlPrefix`
+
+The URL prefix to replace, for example `https://repo.example.com/`.
+It must be an absolute `http://` or `https://` URL which:
+
+- ends with `/`, so the replacement can't change the host
+- is already normalized, for example a lowercase host, no default port, and no `..` segments
+- has no username, password, query or fragment
+
+### `urlReplacements.replaceUrlPrefix`
+
+The URL prefix to use instead of `matchUrlPrefix`.
+It has the same requirements as `matchUrlPrefix`.
+
 ## `useCloudMetadataServices`
 
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).

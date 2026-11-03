@@ -33,7 +33,7 @@ import {
   matchRegexOrGlobList,
 } from '../util/string-match.ts';
 import * as template from '../util/template/index.ts';
-import { parseUrl } from '../util/url.ts';
+import { isHttpUrlPrefix, parseUrl } from '../util/url.ts';
 import {
   AllVersioningsListLiteral,
   type VersioningName,
@@ -1200,6 +1200,17 @@ async function validateGlobalConfig(
             message: `reportType '${val}' requires a configured reportPath`,
           });
         }
+
+        const isUrlPrefixOption = [
+          'matchUrlPrefix',
+          'replaceUrlPrefix',
+        ].includes(key);
+        if (isUrlPrefixOption && !isHttpUrlPrefix(val)) {
+          errors.push({
+            topic: ConfigValidationTopic.Error,
+            message: `Configuration option \`${currentPath}\` must be an absolute http or https URL ending with \`/\`.`,
+          });
+        }
       } else {
         warnings.push({
           topic: ConfigValidationTopic.Error,
@@ -1222,6 +1233,11 @@ async function validateGlobalConfig(
       if (isArray(val) && key !== 'repositories') {
         validateStringArray(key, val, currentPath, errors);
         for (const [subIndex, subval] of val.entries()) {
+          if (key === 'urlReplacements') {
+            errors.push(
+              ...validateUrlReplacement(subval, `${currentPath}[${subIndex}]`),
+            );
+          }
           if (isObject(subval)) {
             const subValidation = await validateConfig(
               'global',
@@ -1250,6 +1266,14 @@ async function validateGlobalConfig(
                 topic: ConfigValidationTopic.Error,
                 message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
               });
+            }
+            for (const option of GlobalConfig.NON_REPOSITORY_OPTIONS) {
+              if (option in subval) {
+                errors.push({
+                  topic: ConfigValidationTopic.Error,
+                  message: `${currentPath}[${subIndex}]: \`${option}\` can't be set in a repository object entry, only in the global config`,
+                });
+              }
             }
             const { repository: _, ...repoEntryConfig } = subval;
             // Each repository object entry is validated as its own global config, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
@@ -1372,6 +1396,52 @@ function getPossibleConfigFileNames({
   }
 
   return filenames;
+}
+
+/**
+ * Checks that a `urlReplacements` entry is an object with both `matchUrlPrefix` and `replaceUrlPrefix`.
+ */
+function validateUrlReplacement(
+  val: unknown,
+  currentPath: string,
+): ValidationMessage[] {
+  if (!isPlainObject(val)) {
+    return [
+      {
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}\` should be a JSON object.`,
+      },
+    ];
+  }
+  const messages: ValidationMessage[] = ['matchUrlPrefix', 'replaceUrlPrefix']
+    .filter((name) => isUndefined(val[name]))
+    .map((name) => ({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}\` requires \`${name}\`.`,
+    }));
+
+  const { matchHostTypes } = val;
+  if (!isUndefined(matchHostTypes) && !isArray(matchHostTypes, isString)) {
+    messages.push({
+      topic: ConfigValidationTopic.Error,
+      message: `Configuration option \`${currentPath}.matchHostTypes\` must be a list of strings.`,
+    });
+  }
+  if (isArray(matchHostTypes)) {
+    if (!matchHostTypes.length) {
+      messages.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}.matchHostTypes\` must not be empty.`,
+      });
+    }
+    if (matchHostTypes.includes('docker')) {
+      messages.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Configuration option \`${currentPath}.matchHostTypes\` must not contain \`docker\`, as \`urlReplacements\` is not applied to Docker registries.`,
+      });
+    }
+  }
+  return messages;
 }
 
 function validateStringArray(

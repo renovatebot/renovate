@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import type { AllConfig } from '../../config/types.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
@@ -115,6 +116,32 @@ describe('workers/global/index', () => {
         extends: [':automergeAll'],
         packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
       });
+    });
+
+    it('ignores urlReplacements in a repositories[] entry', async () => {
+      const urlReplacements = [
+        {
+          matchUrlPrefix: 'https://repo.example.com/',
+          replaceUrlPrefix: 'https://mirror.example.com/',
+        },
+      ];
+      const config: AllConfig = { ...globalConfig, urlReplacements };
+      const repoConfig = await globalWorker.getRepositoryConfig(config, {
+        repository: 'test/repo',
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/',
+            replaceUrlPrefix: 'https://other.example.com/',
+          },
+        ],
+      });
+
+      expect(repoConfig.urlReplacements).toEqual(urlReplacements);
+      expect(repoConfig.repositoryEntryConfig).toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { repository: 'test/repo', option: 'urlReplacements' },
+        'Ignoring a global option which a repositories[] entry cannot override',
+      );
     });
 
     it('does not set repositoryEntryConfig when only admin-level options are present', async () => {
