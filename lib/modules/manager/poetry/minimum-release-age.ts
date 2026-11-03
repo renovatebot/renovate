@@ -7,12 +7,13 @@ import {
   getMinimumReleaseAgeExemption,
   isPackageManagerSyncEnabled,
 } from '../../../util/minimum-release-age.ts';
-import { coerceNumber } from '../../../util/number.ts';
 import { toMs } from '../../../util/pretty-time.ts';
 import { Result } from '../../../util/result.ts';
 import { coerceString } from '../../../util/string.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { get } from '../../versioning/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type {
   ExtractedPackageRule,
   UpdateArtifactsConfig,
@@ -97,7 +98,7 @@ function getConfigMinReleaseAgeEnv(
 }
 
 /**
- * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` which raises `solver.min-release-age` of the `poetry.toml` to the minimum release age of Renovate, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
+ * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` which raises `solver.min-release-age` of the `poetry.toml` to the minimum release age of Renovate, and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE` for updated packages with a smaller `minimumReleaseAge` than the age which Poetry checks.
  *
  * Without `minimumReleaseAgePackageManagerSync`, it returns `POETRY_SOLVER_MIN_RELEASE_AGE` for the `minimumReleaseAge` of `config`.
  */
@@ -126,33 +127,56 @@ export async function getMinReleaseAgeEnv(
     Math.ceil(Duration.fromMillis(ageMs).as('days')),
     poetryConfig.days,
   );
+  const minReleaseAgeEnv = toMinReleaseAgeEnv(days, poetryConfig.days);
   // Poetry checks no age for the packages of `solver.min-release-age-exclude`
   const exemption = getMinimumReleaseAgeExemption(
     updatedDeps.filter(
-      (dep) =>
-        !poetryConfig.exclude.includes(
-          normalizePythonDepName(coerceString(dep.packageName ?? dep.depName)),
-        ),
+      (dep) => !poetryConfig.exclude.includes(getNormalizedName(dep)),
     ),
     'poetry',
-    ageMs,
+    // the age which Poetry checks
+    Duration.fromObject({ days }).as('milliseconds'),
   );
-  // rounds down, so that Poetry accepts the releases of the exempted updates
-  const loweredDays = Math.max(
-    Math.floor(Duration.fromMillis(coerceNumber(exemption?.ageMs)).as('days')),
-    poetryConfig.days,
-  );
-  if (!exemption || loweredDays >= days) {
-    return { env: toMinReleaseAgeEnv(days, poetryConfig.days) };
+  if (!exemption) {
+    return { env: minReleaseAgeEnv };
   }
-  logger.debug(
-    `Lowering the Poetry minimum release age from ${days} to ${loweredDays} days, as the minimumReleaseAge of ${exemption.depNames.join(', ')} is smaller and their release is younger or has no timestamp`,
+  const exemptedDeps = updatedDeps.filter((dep) =>
+    exemption.depNames.includes(coerceString(dep.depName)),
   );
-  const packages = exemption.depNames.map((name) => `\`${name}\``).join(', ');
+  // Poetry excludes all versions of a package, so only a pinned version is one which Renovate checked
+  const pinned = exemptedDeps.filter(isPinned);
+  const ranges = exemptedDeps.filter((dep) => !isPinned(dep));
+  if (ranges.length) {
+    logger.debug(
+      `Not excluding ${ranges.map(getNormalizedName).join(', ')} from the Poetry minimum release age, as the constraint is not a single version`,
+    );
+  }
+  if (!pinned.length) {
+    return { env: minReleaseAgeEnv };
+  }
+  const excluded = pinned.map(getNormalizedName);
+  // the variable replaces `solver.min-release-age-exclude`, so it starts with the entries of the `poetry.toml`
+  const exclude = [...new Set([...poetryConfig.exclude, ...excluded])];
+  logger.debug(
+    `Excluding ${excluded.join(', ')} from the Poetry minimum release age, as their minimumReleaseAge is smaller and their release is younger or has no timestamp`,
+  );
   return {
-    env: toMinReleaseAgeEnv(loweredDays, poetryConfig.days),
-    notice: `Poetry checked a minimum release age of ${loweredDays} days instead of ${days} for this update, because the \`minimumReleaseAge\` of ${packages} is smaller.`,
+    env: {
+      ...minReleaseAgeEnv,
+      POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: exclude.join(','),
+    },
   };
+}
+
+function isPinned(dep: Upgrade): boolean {
+  return (
+    !!dep.newValue &&
+    get(dep.versioning ?? poetryVersioning.id).isSingleVersion(dep.newValue)
+  );
+}
+
+function getNormalizedName(dep: Upgrade): string {
+  return normalizePythonDepName(coerceString(dep.packageName ?? dep.depName));
 }
 
 /**

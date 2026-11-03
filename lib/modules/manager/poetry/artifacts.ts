@@ -176,14 +176,14 @@ export async function updateArtifacts({
     );
   }
 
-  const { env: minReleaseAgeEnv, notice } = await getMinReleaseAgeEnv(
+  const { env: minReleaseAgeEnv } = await getMinReleaseAgeEnv(
     config,
     packageFileName,
     updatedDeps,
   );
 
   try {
-    const results = await updateLockFile({
+    return await updateLockFile({
       lockFileName,
       existingLockFileContent,
       packageFile: { path: packageFileName, contents: newPackageFileContent },
@@ -220,13 +220,6 @@ export async function updateArtifacts({
         await gitExec(cmd, execOptions);
       },
     });
-    if (!notice || !results) {
-      return results;
-    }
-    return results.map(({ file }) => ({
-      file,
-      notice: { file: lockFileName, message: notice },
-    }));
   } catch (err) {
     /* v8 ignore if -- defensive rethrow, not reproduced in the poetry specs */
     if (err.message === TEMPORARY_ERROR) {
