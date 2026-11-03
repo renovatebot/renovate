@@ -713,6 +713,21 @@ describe('modules/manager/poetry/extract', () => {
         ]);
       });
 
+      it('rounds a non-integer solver.min-release-age up', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          [solver]
+          min-release-age = 2.5
+        `);
+        const res = await extractPackageFile(pyproject1toml, filename);
+        expect(res?.packageRules).toEqual([
+          {
+            matchDatasources: [PypiDatasource.id],
+            minimumReleaseAgeExtracted: '3 days',
+          },
+        ]);
+      });
+
       it.each`
         poetryToml
         ${''}
