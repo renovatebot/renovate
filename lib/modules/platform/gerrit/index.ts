@@ -8,6 +8,7 @@ import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
+import { isConflict, isNotFound } from '../../../util/http/status.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
@@ -274,7 +275,7 @@ export async function getPr(number: number): Promise<Pr | null> {
         await GerritPrCache.setPr(config.repository!, pr);
       }
     } catch (err) {
-      if (err.statusCode === 404) {
+      if (isNotFound(err.statusCode)) {
         logger.debug({ number }, 'Change not found in Gerrit');
         return null;
       }
@@ -449,7 +450,7 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
       return false;
     }
   } catch (err) {
-    if (err.statusCode === 409) {
+    if (isConflict(err.statusCode)) {
       logger.warn(
         { err },
         "Can't submit the change, because the submit rule doesn't allow it.",

@@ -5,6 +5,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isRateLimitedOrServerError } from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import * as p from '../../../util/promises.ts';
 import { parseUrl, replaceUrlPath, resolveBaseUrl } from '../../../util/url.ts';
@@ -47,8 +48,7 @@ function isTransientPackagistError(err: PackagistLookupError): boolean {
     return false;
   }
 
-  const isServerError = statusCode >= 500 && statusCode < 600;
-  if (statusCode === 429 || isServerError) {
+  if (isRateLimitedOrServerError(statusCode)) {
     return true;
   }
 

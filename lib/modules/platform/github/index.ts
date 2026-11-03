@@ -46,6 +46,13 @@ import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-pro
 import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider.ts';
 import type { GithubHttpOptions } from '../../../util/http/github.ts';
 import * as githubHttp from '../../../util/http/github.ts';
+import {
+  isForbidden,
+  isGone,
+  isMethodNotAllowed,
+  isNotFound,
+  isUnprocessableContent,
+} from '../../../util/http/status.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -420,7 +427,7 @@ async function getBranchRulesets(
     );
     return res.body;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       logger.debug(`No branch rulesets found for ${branchName}`);
       return [];
     }
@@ -479,7 +486,7 @@ export async function listForks(
     logger.debug(`Found ${repos.length} forked repo(s)`);
     return repos;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       logger.debug('Cannot list repo forks - it is likely private');
     } else {
       logger.debug({ err }, 'Unknown error listing repository forks');
@@ -687,10 +694,10 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (err.statusCode === 403) {
+    if (isForbidden(err.statusCode)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message.startsWith('Repository access blocked')) {
@@ -919,13 +926,14 @@ function handleBranchProtectionError(
   err: any,
   branchName: string,
 ): void {
-  if (err.statusCode === 404) {
+  if (isNotFound(err.statusCode)) {
     logger.debug(`No ${protection} found for ${branchName}`);
     return;
   }
 
   const isUnauthorized =
-    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED || err.statusCode === 403;
+    err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
+    isForbidden(err.statusCode);
 
   if (isUnauthorized) {
     logger.once.debug(
@@ -1091,7 +1099,7 @@ async function ensureBranchSha(
       await githubApi.patchJson(refUrl, { body: { sha, force: true } });
       return;
     } catch (err) {
-      if (err.err?.response?.statusCode === 422) {
+      if (isUnprocessableContent(err.err?.response?.statusCode)) {
         logger.debug(
           { err },
           'Branch update failed due to reference not existing - will try to create',
@@ -1198,7 +1206,7 @@ export async function getBranchStatus(
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
       );
@@ -1258,7 +1266,7 @@ export async function getBranchStatus(
       throw err;
     }
     if (
-      err.statusCode === 403 ||
+      isForbidden(err.statusCode) ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('No permission to view check runs');
@@ -1330,7 +1338,7 @@ export async function getBranchStatusCheck(
     }
     return null;
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -1436,7 +1444,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
     return issue;
   } catch (err) {
     logger.debug({ err, number }, 'Error getting issue');
-    if (err.response?.statusCode === 410) {
+    if (isGone(err.response?.statusCode)) {
       logger.debug(`Issue #${number} has been deleted`);
       GithubIssueCache.deleteIssue(number);
     }
@@ -1468,7 +1476,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
     GithubIssueCache.updateIssue(closedIssue);
   } catch (err) {
     const statusCode = err.response?.statusCode;
-    if (statusCode === 404 || statusCode === 410) {
+    if (isNotFound(statusCode) || isGone(statusCode)) {
       logger.debug(
         `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
       );
@@ -1655,7 +1663,7 @@ export async function addAssignees(
       GithubIssueCache.updateIssue(updatedIssue);
       return;
     } catch (err) {
-      if (err.statusCode !== 404) {
+      if (!isNotFound(err.statusCode)) {
         throw err;
       }
       lastErr = err;
@@ -1780,7 +1788,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err.statusCode)) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
     }
@@ -2267,7 +2275,7 @@ async function directMergePr(
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
-      if (err.statusCode === 404 || err.statusCode === 405) {
+      if (isNotFound(err.statusCode) || isMethodNotAllowed(err.statusCode)) {
         const body = err.response?.body;
         if (
           isNonEmptyString(body?.message) &&

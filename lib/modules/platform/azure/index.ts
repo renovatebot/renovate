@@ -30,6 +30,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isServerError } from '../../../util/http/status.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -218,7 +219,7 @@ export async function getRawFile(
     if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
       throw new ExternalHostError(err, id);
     }
-    if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+    if (isServerError(err.statusCode)) {
       throw new ExternalHostError(err, id);
     }
     throw err;

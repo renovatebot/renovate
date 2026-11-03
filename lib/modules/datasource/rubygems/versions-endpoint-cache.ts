@@ -5,6 +5,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound, isOk } from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -217,7 +218,7 @@ export class VersionsEndpointCache {
       const { body } = await this.http.getText(url, opts);
       return parseFullBody(body);
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (err instanceof HttpError && isNotFound(err.response?.statusCode)) {
         return Result.err('unsupported-api');
       }
 
@@ -244,7 +245,7 @@ export class VersionsEndpointCache {
        * Rubygems will return the full body instead of `416 Range Not Satisfiable`.
        * In this case, status code will be 200 instead of 206.
        */
-      if (statusCode === 200) {
+      if (isOk(statusCode)) {
         return parseFullBody(body);
       }
 
@@ -294,7 +295,7 @@ export class VersionsEndpointCache {
          * If the endpoint is not supported, we stop trying.
          * This is unlikely to happen in real life, but still.
          */
-        if (responseStatus === 404) {
+        if (isNotFound(responseStatus)) {
           return Result.err('unsupported-api');
         }
       }

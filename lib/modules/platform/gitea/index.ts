@@ -16,6 +16,7 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
+import { isConflict, isNotFound } from '../../../util/http/status.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -487,7 +488,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           branchName,
         );
       } catch (err) {
-        if (err.statusCode === 404) {
+        if (isNotFound(err.statusCode)) {
           logger.debug(
             'Received 404 when checking branch status, assuming branch deletion',
           );
@@ -673,7 +674,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         // the most recent versions of the platform, the PR gets automatically closed when that happens, but older versions
         // do not handle this properly and keep the PR open. As pushing a branch with the same name resurrects the PR, this
         // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
-        if (err.statusCode === 409) {
+        if (isConflict(err.statusCode)) {
           logger.warn(
             { prTitle: title, sourceBranch },
             'Attempting to gracefully recover from 409 Conflict response in createPr()',
