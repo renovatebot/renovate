@@ -1,3 +1,4 @@
+import { RequestError } from 'got';
 import {
   isBadGateway,
   isBadRequest,
@@ -67,4 +68,26 @@ describe('util/http/status', () => {
       );
     },
   );
+
+  describe('isNotFound()', () => {
+    function httpError(statusCode?: number): RequestError {
+      const err = new RequestError('request error', {}, null as never);
+      if (statusCode) {
+        Object.assign(err, { response: { statusCode } });
+      }
+      return err;
+    }
+
+    it.each`
+      statusCode   | expected
+      ${404}       | ${true}
+      ${500}       | ${false}
+      ${undefined} | ${false}
+    `(
+      'returns $expected for an error with status $statusCode',
+      ({ statusCode, expected }) => {
+        expect(isNotFound(httpError(statusCode))).toBe(expected);
+      },
+    );
+  });
 });

@@ -1,4 +1,5 @@
 import { isNumber } from '@sindresorhus/is';
+import type { RequestError as HttpError } from './got.ts';
 
 /** 200 OK */
 export function isOk(statusCode?: number): boolean {
@@ -35,8 +36,11 @@ export function isForbidden(statusCode?: number): boolean {
   return statusCode === 403;
 }
 
-/** 404 Not Found */
-export function isNotFound(statusCode?: number): boolean {
+/** 404 Not Found, for a status code or the response of an {@link HttpError} */
+export function isNotFound(statusCodeOrError?: number | HttpError): boolean {
+  const statusCode = isNumber(statusCodeOrError)
+    ? statusCodeOrError
+    : statusCodeOrError?.response?.statusCode;
   return statusCode === 404;
 }
 
