@@ -104,7 +104,7 @@ export class RpmDatasource extends Datasource {
           ),
           ttlMinutes: 1440,
           fallback: true,
-          cacheable: true,
+          public: true,
         },
         () => this.fetchReleases(parsedRegistryUrl, packageName),
       );
@@ -206,7 +206,7 @@ export class RpmDatasource extends Datasource {
       {
         key: buildCacheKey('repomd', registryUrl, metadataSource),
         ttlMinutes: 1440,
-        cacheable: true,
+        public: true,
       },
       () => fetchRepositoryMetadata(this.http, registryUrl, metadataSource),
     );
