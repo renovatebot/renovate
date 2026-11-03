@@ -10,6 +10,7 @@ import type {
 import { withCache } from '../../util/cache/package/with-cache.ts';
 import type { HttpBase } from '../../util/http/http.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
+import { isRateLimitedOrServerError } from '../../util/http/status.ts';
 import type { HttpOptions } from '../../util/http/types.ts';
 import { coerceObject } from '../../util/object.ts';
 import type {
@@ -178,9 +179,7 @@ export abstract class Datasource<
       this.handleHttpErrors(err);
 
       const statusCode = err.response?.statusCode;
-      const isServerError =
-        !!statusCode && statusCode >= 500 && statusCode < 600;
-      if (statusCode === 429 || isServerError) {
+      if (isRateLimitedOrServerError(statusCode)) {
         throw new ExternalHostError(err);
       }
     }

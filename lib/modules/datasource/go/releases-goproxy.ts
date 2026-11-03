@@ -16,6 +16,7 @@ import {
 } from '../../../util/github/graphql/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isForbidden, isGone, isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -154,7 +155,9 @@ export class GoProxyDatasource extends Datasource {
           err instanceof ExternalHostError ? err.err : err;
         const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
-          fallback === '|' ? true : statusCode === 404 || statusCode === 410;
+          fallback === '|'
+            ? true
+            : isNotFound(statusCode) || isGone(statusCode);
         if (!canFallback) {
           logger.debug(
             { err },
@@ -540,7 +543,7 @@ export class GoProxyDatasource extends Datasource {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
         const status = potentialHttpError.response?.statusCode;
-        const isNotFoundOrForbidden = status === 404 || status === 403;
+        const isNotFoundOrForbidden = isNotFound(status) || isForbidden(status);
         if (
           potentialHttpError instanceof HttpError &&
           isNotFoundOrForbidden &&

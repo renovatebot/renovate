@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { pageSize } from './common.ts';
 import { AdoptiumJavaResponse } from './schema.ts';
@@ -25,7 +26,7 @@ async function getPageReleases(
     if (
       page !== 0 &&
       err instanceof HttpError &&
-      err.response?.statusCode === 404
+      isNotFound(err.response?.statusCode)
     ) {
       // No more pages
       return null;
@@ -68,7 +69,7 @@ export async function getAdoptiumReleases(
     }
   } catch (err) {
     if (err instanceof HttpError) {
-      if (err.response?.statusCode !== 404) {
+      if (!isNotFound(err.response?.statusCode)) {
         throw new ExternalHostError(err);
       }
       // 404 is handled by getPageReleases, so if we get here it's an unexpected 404

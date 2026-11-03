@@ -7,6 +7,7 @@ import {
 } from '../../../util/gitlab/url.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
@@ -103,7 +104,7 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
     try {
       return await super.fetchDigest(config, newValue);
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (err instanceof HttpError && isNotFound(err.response?.statusCode)) {
         logger.debug(
           {
             gitlabRepo: config.packageName,
