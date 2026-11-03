@@ -362,10 +362,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         );
         return body;
       } catch (err) {
-        if (
-          !(err instanceof HttpError) ||
-          !isNotFound(err.response?.statusCode)
-        ) {
+        if (!(err instanceof HttpError) || !isNotFound(err)) {
           throw err;
         }
       }

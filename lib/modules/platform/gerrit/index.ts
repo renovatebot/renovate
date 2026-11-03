@@ -275,7 +275,7 @@ export async function getPr(number: number): Promise<Pr | null> {
         await GerritPrCache.setPr(config.repository!, pr);
       }
     } catch (err) {
-      if (isNotFound(err.statusCode)) {
+      if (isNotFound(err)) {
         logger.debug({ number }, 'Change not found in Gerrit');
         return null;
       }

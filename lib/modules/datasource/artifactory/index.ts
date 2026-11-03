@@ -92,7 +92,7 @@ export class ArtifactoryDatasource extends Datasource {
         );
       }
     } catch (err) {
-      if (err instanceof HttpError && isNotFound(err.response?.statusCode)) {
+      if (err instanceof HttpError && isNotFound(err)) {
         logger.warn(
           { registryUrl, packageName },
           'artifactory: `Not Found` error',

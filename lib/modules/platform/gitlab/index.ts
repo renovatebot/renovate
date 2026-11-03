@@ -366,7 +366,7 @@ export async function initRepo({
     if (isForbidden(err.statusCode)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_DISABLED) {
@@ -421,7 +421,7 @@ export async function isPrInMergeQueue(id: number): Promise<boolean> {
     );
     return status !== 'merged';
   } catch (err) {
-    if (!isNotFound(err.statusCode)) {
+    if (!isNotFound(err)) {
       logger.debug({ err }, 'Failed to fetch merge train status');
     }
     return false;
@@ -468,7 +468,7 @@ async function getStatus(
       .body;
   } catch (err) /* v8 ignore next -- commit status fetch failures map 404 to REPOSITORY_CHANGED, not mocked in specs */ {
     logger.debug({ err }, 'Error getting commit status');
-    if (isNotFound(err.response?.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
@@ -1635,7 +1635,7 @@ export async function expandGroupMembers(
       const members = await getMemberUsernames(reviewerOrAssignee);
       expandedReviewersOrAssignees.push(...members);
     } catch (err) {
-      if (!isNotFound(err.statusCode)) {
+      if (!isNotFound(err)) {
         logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
       }
       expandedReviewersOrAssignees.push(reviewerOrAssignee);

@@ -321,7 +321,7 @@ export async function initRepo({
 
     return repoConfig;
   } catch (err) /* v8 ignore next -- initRepo error mapping (404, empty repo) is not mocked in specs */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_EMPTY) {
@@ -792,7 +792,7 @@ async function updatePRAndAddReviewers(
     await getPr(prNo, true);
   } catch (err) {
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (isConflict(err.statusCode)) {
       if (utils.isInvalidReviewersResponse(err)) {

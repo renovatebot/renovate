@@ -99,7 +99,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     err: Error,
   ): never {
     if (err instanceof RequestError && err.response?.statusCode) {
-      if (isNotFound(err.response.statusCode)) {
+      if (isNotFound(err)) {
         logger.trace({ err }, 'GitLab 404');
         logger.debug({ url }, 'GitLab API 404');
         throw err;

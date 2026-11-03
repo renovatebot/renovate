@@ -104,7 +104,7 @@ export class GitlabTagsDatasource extends GitHostTagsDigestDatasource<GitlabHttp
     try {
       return await super.fetchDigest(config, newValue);
     } catch (err) {
-      if (err instanceof HttpError && isNotFound(err.response?.statusCode)) {
+      if (err instanceof HttpError && isNotFound(err)) {
         logger.debug(
           {
             gitlabRepo: config.packageName,

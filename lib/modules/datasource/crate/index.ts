@@ -230,7 +230,7 @@ export class CrateDatasource extends Datasource {
   }
 
   private static isNotFound(err: unknown): boolean {
-    return err instanceof HttpError && isNotFound(err.response?.statusCode);
+    return err instanceof HttpError && isNotFound(err);
   }
 
   /**

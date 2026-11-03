@@ -488,7 +488,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           branchName,
         );
       } catch (err) {
-        if (isNotFound(err.statusCode)) {
+        if (isNotFound(err)) {
           logger.debug(
             'Received 404 when checking branch status, assuming branch deletion',
           );

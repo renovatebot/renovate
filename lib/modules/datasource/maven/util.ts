@@ -53,7 +53,7 @@ function isHostError(err: HttpError): boolean {
 }
 
 function isNotFoundError(err: HttpError): boolean {
-  return err.code === 'ENOTFOUND' || isNotFound(err.response?.statusCode);
+  return err.code === 'ENOTFOUND' || isNotFound(err);
 }
 
 function isPermissionsIssue(err: HttpError): boolean {

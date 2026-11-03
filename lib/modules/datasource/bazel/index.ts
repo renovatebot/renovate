@@ -75,7 +75,7 @@ export class BazelDatasource extends Datasource {
       }
     } catch (err) {
       if (err instanceof HttpError) {
-        if (isNotFound(err.response?.statusCode)) {
+        if (isNotFound(err)) {
           return null;
         }
         throw new ExternalHostError(err);

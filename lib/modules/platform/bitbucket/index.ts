@@ -282,7 +282,7 @@ export async function initRepo({
 
     logger.debug(`${repository} owner = ${config.owner}`);
   } catch (err) /* v8 ignore next -- initRepo error mapping (404 to not-found) is not mocked in specs */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
@@ -891,7 +891,7 @@ async function isAccountMemberOfWorkspace(
     return true;
   } catch (err) {
     // HTTP 404: User cannot be found, or the user is not a member of this workspace.
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug(
         { err },
         `User ${reviewer.display_name} is not a member of the workspace ${workspace}. Will be removed from the PR`,

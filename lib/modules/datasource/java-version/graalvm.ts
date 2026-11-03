@@ -62,7 +62,7 @@ export async function getGraalvmReleases(
     result.releases.push(...filteredReleases);
   } catch (err) {
     if (err instanceof HttpError) {
-      if (isNotFound(err.response?.statusCode)) {
+      if (isNotFound(err)) {
         logger.debug({ url }, 'GraalVM releases not found (404)');
         return null;
       }

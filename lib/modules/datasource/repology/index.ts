@@ -72,7 +72,7 @@ export class RepologyDatasource extends Datasource {
       const res = await this.http.getJson(url, RepologyPackages);
       return res.body;
     } catch (err) {
-      if (isNotFound(err.statusCode)) {
+      if (isNotFound(err)) {
         // Return an array here because the api does not return proper http codes
         // and instead of an 404 error an empty array with code 200 is returned
         // When querying the resolver 404 is thrown if package could not be resolved

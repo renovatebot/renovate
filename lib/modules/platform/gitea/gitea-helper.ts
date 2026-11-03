@@ -85,7 +85,7 @@ export async function isOrg(
     platformCache.orgs[organization] = isOk(res.statusCode);
     return isOk(res.statusCode);
   } catch (err) {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       return false;
     }
     // throw other errors
@@ -235,7 +235,7 @@ export async function getPRByBranch(
     return res.body;
   } catch (err) {
     logger.trace({ err }, 'Error while fetching PR');
-    if (!isNotFound(err.statusCode)) {
+    if (!isNotFound(err)) {
       logger.debug({ err }, 'Error while fetching PR');
     }
     return null;

@@ -160,7 +160,7 @@ export class DockerDatasource extends Datasource {
         logger.debug({ err });
         return null;
       }
-      if (isNotFound(err.statusCode)) {
+      if (isNotFound(err)) {
         logger.debug(
           {
             err,
@@ -472,7 +472,7 @@ export class DockerDatasource extends Datasource {
         return architecture;
       }
     } catch (err) /* istanbul ignore next */ {
-      if (!isNotFound(err.statusCode) || err.message === PAGE_NOT_FOUND_ERROR) {
+      if (!isNotFound(err) || err.message === PAGE_NOT_FOUND_ERROR) {
         throw err;
       }
       logger.debug(
@@ -656,7 +656,7 @@ export class DockerDatasource extends Datasource {
           { registryHost, dockerRepository, err },
           'Unauthorized docker lookup',
         );
-      } else if (isNotFound(err.statusCode)) {
+      } else if (isNotFound(err)) {
         logger.warn(
           {
             err,
@@ -874,8 +874,7 @@ export class DockerDatasource extends Datasource {
     } catch (_err) /* istanbul ignore next */ {
       const err = _err instanceof ExternalHostError ? _err.err : _err;
 
-      const notFound =
-        isNotFound(err.statusCode) || err.message === PAGE_NOT_FOUND_ERROR;
+      const notFound = isNotFound(err) || err.message === PAGE_NOT_FOUND_ERROR;
 
       if (notFound && !dockerRepository.includes('/')) {
         logger.debug(

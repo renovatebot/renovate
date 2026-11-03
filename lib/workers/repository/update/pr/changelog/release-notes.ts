@@ -53,7 +53,7 @@ export async function getReleaseList(
   try {
     return await source.getReleaseList(project, release);
   } catch (err) /* istanbul ignore next */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
     } else {
       logger.debug(
@@ -314,7 +314,7 @@ export async function getReleaseNotesMdFileInner(
       sourceDirectory,
     );
   } catch (err) /* istanbul ignore next */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug(
         { repository, type, apiBaseUrl },
         'Error 404 getting changelog md',

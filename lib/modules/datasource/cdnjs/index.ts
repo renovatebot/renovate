@@ -122,7 +122,7 @@ export class CdnjsDatasource extends Datasource {
   }
 
   override handleHttpErrors(err: HttpError): void {
-    if (!isNotFound(err.response?.statusCode)) {
+    if (!isNotFound(err)) {
       throw new ExternalHostError(err);
     }
   }

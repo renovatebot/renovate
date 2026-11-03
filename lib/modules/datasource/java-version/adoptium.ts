@@ -23,11 +23,7 @@ async function getPageReleases(
       })) ?? null
     );
   } catch (err) {
-    if (
-      page !== 0 &&
-      err instanceof HttpError &&
-      isNotFound(err.response?.statusCode)
-    ) {
+    if (page !== 0 && err instanceof HttpError && isNotFound(err)) {
       // No more pages
       return null;
     }
@@ -69,7 +65,7 @@ export async function getAdoptiumReleases(
     }
   } catch (err) {
     if (err instanceof HttpError) {
-      if (!isNotFound(err.response?.statusCode)) {
+      if (!isNotFound(err)) {
         throw new ExternalHostError(err);
       }
       // 404 is handled by getPageReleases, so if we get here it's an unexpected 404

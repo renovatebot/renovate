@@ -222,7 +222,7 @@ export class VersionsEndpointCache {
       const { body } = await this.http.getText(url, opts);
       return parseFullBody(body);
     } catch (err) {
-      if (err instanceof HttpError && isNotFound(err.response?.statusCode)) {
+      if (err instanceof HttpError && isNotFound(err)) {
         return Result.err('unsupported-api');
       }
 

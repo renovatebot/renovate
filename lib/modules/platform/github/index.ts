@@ -427,7 +427,7 @@ async function getBranchRulesets(
     );
     return res.body;
   } catch (err) {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug(`No branch rulesets found for ${branchName}`);
       return [];
     }
@@ -486,7 +486,7 @@ export async function listForks(
     logger.debug(`Found ${repos.length} forked repo(s)`);
     return repos;
   } catch (err) {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug('Cannot list repo forks - it is likely private');
     } else {
       logger.debug({ err }, 'Unknown error listing repository forks');
@@ -697,7 +697,7 @@ export async function initRepo({
     if (isForbidden(err.statusCode)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message.startsWith('Repository access blocked')) {
@@ -926,7 +926,7 @@ function handleBranchProtectionError(
   err: any,
   branchName: string,
 ): void {
-  if (isNotFound(err.statusCode)) {
+  if (isNotFound(err)) {
     logger.debug(`No ${protection} found for ${branchName}`);
     return;
   }
@@ -1206,7 +1206,7 @@ export async function getBranchStatus(
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
       );
@@ -1338,7 +1338,7 @@ export async function getBranchStatusCheck(
     }
     return null;
   } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
     }
@@ -1663,7 +1663,7 @@ export async function addAssignees(
       GithubIssueCache.updateIssue(updatedIssue);
       return;
     } catch (err) {
-      if (!isNotFound(err.statusCode)) {
+      if (!isNotFound(err)) {
         throw err;
       }
       lastErr = err;
@@ -1788,7 +1788,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
-    if (isNotFound(err.statusCode)) {
+    if (isNotFound(err)) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
     }
@@ -2275,7 +2275,7 @@ async function directMergePr(
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
-      if (isNotFound(err.statusCode) || isMethodNotAllowed(err.statusCode)) {
+      if (isNotFound(err) || isMethodNotAllowed(err.statusCode)) {
         const body = err.response?.body;
         if (
           isNonEmptyString(body?.message) &&

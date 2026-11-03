@@ -81,7 +81,7 @@ export class CondaDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
     } catch (err) {
-      if (err instanceof HttpError && !isNotFound(err.response?.statusCode)) {
+      if (err instanceof HttpError && !isNotFound(err)) {
         throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
