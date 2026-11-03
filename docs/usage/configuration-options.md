@@ -3076,11 +3076,10 @@ With `minimumReleaseAgePackageManagerSync=true`, Renovate:
 - applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
 - does not hold back lock file maintenance if the package manager enforces the minimum release age itself
 - applies [`minimumReleaseAgePackageManager`](#minimumreleaseagepackagemanager)
-- reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` of Poetry, and passes the `minimumReleaseAge` of the repository or manager config to Poetry as `POETRY_SOLVER_MIN_RELEASE_AGE`, instead of the `minimumReleaseAge` of the update
 
 Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
 
-Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+The [table of package managers](./key-concepts/minimum-release-age.md#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both) lists which managers integrate with the minimum release age of their package manager, and what they read and pass with this option.
 
 ```json
 {
