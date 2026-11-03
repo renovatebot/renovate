@@ -22,6 +22,7 @@ import {
 import {
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
+  isPackageManagerSyncEnabled,
 } from '../../../../util/minimum-release-age.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -310,6 +311,12 @@ export async function generateLockFile(
   const commands: string[] = [];
   let minimumReleaseAgeNotice: string | undefined;
   let minimumReleaseAgeMinutes: number | undefined;
+  const isSyncEnabled = isPackageManagerSyncEnabled({
+    config,
+    manager: 'npm',
+    packageFile: upath.join(lockFileDir, 'package.json'),
+    upgrades,
+  });
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const pnpmToolConstraint: ToolConstraint = {
@@ -390,13 +397,16 @@ export async function generateLockFile(
       args += ' --ignore-scripts';
     }
 
-    const minimumReleaseAgeArgs = await getMinimumReleaseAgeArgs(
-      lockFileName,
-      config,
-      upgrades,
-      npmrcContent,
-      pnpmToolConstraint.constraint,
-    );
+    // without minimumReleaseAgePackageManagerSync, pnpm applies its own config
+    const minimumReleaseAgeArgs = isSyncEnabled
+      ? await getMinimumReleaseAgeArgs(
+          lockFileName,
+          config,
+          upgrades,
+          npmrcContent,
+          pnpmToolConstraint.constraint,
+        )
+      : null;
     if (minimumReleaseAgeArgs) {
       args += ` ${minimumReleaseAgeArgs.args}`;
       minimumReleaseAgeMinutes = minimumReleaseAgeArgs.minutes;
@@ -466,7 +476,7 @@ export async function generateLockFile(
       'lock file error',
     );
     const output = `${err.stdout ?? ''}\n${err.stderr ?? ''}`;
-    const immaturePackages = getImmaturePackages(output);
+    const immaturePackages = isSyncEnabled ? getImmaturePackages(output) : [];
     if (immaturePackages.length) {
       const packages = immaturePackages.map((pkg) => `\`${pkg}\``).join(', ');
       return withNotice(

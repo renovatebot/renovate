@@ -174,6 +174,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: pnpmLockManagerData,
+            minimumReleaseAgePackageManagerSync: true,
             isLockFileMaintenance: true,
             minimumReleaseAge: '3 days',
             constraints: { pnpm: constraint },
@@ -200,6 +201,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
               ...pnpmLockManagerData,
               pnpmWorkspaceMinimumReleaseAge: workspace,
             },
+            minimumReleaseAgePackageManagerSync: true,
             isLockFileMaintenance: true,
             minimumReleaseAge,
             constraints: { pnpm: '10.17.0' },
@@ -214,6 +216,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       await expect(
         enforcesMinimumReleaseAge({
           managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
           isLockFileMaintenance: true,
           minimumReleaseAge: '3 days',
           constraints: { pnpm: '10.17.0' },
@@ -234,6 +237,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
         await expect(
           enforcesMinimumReleaseAge({
             managerData: pnpmLockManagerData,
+            minimumReleaseAgePackageManagerSync: true,
             isLockFileMaintenance: true,
             npmrc,
             constraints: { pnpm },
@@ -250,6 +254,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       await expect(
         enforcesMinimumReleaseAge({
           managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
           isLockFileMaintenance: true,
           minimumReleaseAge: '1 day',
           extractedConstraints: { pnpm: '>=9' },
@@ -262,6 +267,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       await expect(
         enforcesMinimumReleaseAge({
           managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
           isLockFileMaintenance: true,
           minimumReleaseAge: '1 day',
         }),
