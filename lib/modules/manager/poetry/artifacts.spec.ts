@@ -1131,6 +1131,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'mycorp-lib',
             manager: 'poetry',
+            newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: null,
             minimumReleaseAgeRepository: '3 days',
@@ -1148,6 +1149,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep1',
             manager: 'poetry',
+            newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '2 days',
             minimumReleaseAgeRepository: '7 days',
@@ -1156,6 +1158,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'Dep_2',
             manager: 'poetry',
+            newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '36 hours',
             minimumReleaseAgeRepository: '7 days',
@@ -1163,6 +1166,7 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'dep3',
             manager: 'poetry',
+            newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '7 days',
             minimumReleaseAgeRepository: '7 days',
@@ -1175,11 +1179,67 @@ describe('modules/manager/poetry/artifacts', () => {
         });
       });
 
+      it('excludes only updates which pin a single version', async () => {
+        const env = await runYoung([
+          {
+            depName: 'pinned',
+            manager: 'poetry',
+            newValue: '1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'equals',
+            manager: 'poetry',
+            newValue: '==1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'caret',
+            manager: 'poetry',
+            newValue: '^1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'no-value',
+            manager: 'poetry',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ]);
+        expect(env).toMatchObject({
+          POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'pinned',
+        });
+      });
+
+      it('sets no exclude if the constraint of an exempted update is a range', async () => {
+        const env = await runYoung([
+          {
+            depName: 'boto3',
+            manager: 'poetry',
+            newValue: '^1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]);
+        expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '3' });
+        expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
+      });
+
       it('does not exclude a release older than minimumReleaseAgeRepository', async () => {
         const env = await runYoung([
           {
             depName: 'dep1',
             manager: 'poetry',
+            newValue: '1.2.3',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '1 day',
             minimumReleaseAgeRepository: '7 days',
@@ -1224,6 +1284,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '7 days',
                 minimumReleaseAgeRepository: '7 days',
@@ -1243,6 +1304,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '7 days',
                 minimumReleaseAgeRepository: '7 days',
@@ -1262,6 +1324,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '4 days',
                 minimumReleaseAgeRepository: '7 days',
@@ -1285,6 +1348,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep2',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '1 day',
                 minimumReleaseAgeRepository: '7 days',
@@ -1293,6 +1357,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '1 day',
                 minimumReleaseAgeRepository: '7 days',
@@ -1315,6 +1380,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '1 day',
                 minimumReleaseAgeRepository: '3 days',
@@ -1338,6 +1404,7 @@ describe('modules/manager/poetry/artifacts', () => {
               {
                 depName: 'dep1',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '1 day',
                 minimumReleaseAgeRepository: '2 days',
@@ -1362,6 +1429,7 @@ describe('modules/manager/poetry/artifacts', () => {
                 depName: 'My.Package',
                 packageName: 'my-package',
                 manager: 'poetry',
+                newValue: '1.2.3',
                 minimumReleaseAgePackageManagerSync: true,
                 minimumReleaseAge: '1 day',
                 minimumReleaseAgeRepository: '7 days',
