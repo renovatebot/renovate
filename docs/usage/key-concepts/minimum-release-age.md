@@ -105,23 +105,27 @@ When `minimumReleaseAge` is configured, Renovate passes `--before=<date>` to npm
 This ensures that npm only resolves package versions that were available before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
 
 The `--before` date is calculated as `now - minimumReleaseAge`.
-Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
+If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
+
+Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate passes `--before` for the `minimumReleaseAge` of the update, including a value from `packageRules`, and does not read the `.npmrc` when it looks up updates.
+
+With `minimumReleaseAgePackageManagerSync`, Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
 A larger `minimumReleaseAgePackageManager` raises it.
 If an updated package has a smaller `minimumReleaseAge` and its release is younger than that value or has no timestamp, Renovate uses the smaller value for `--before`, or passes no `--before` for `0`, and adds a notice to the PR.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not pass `--before`.
-If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates, also for a lowered `--before`, and the notice names the `.npmrc` date if it applies.
-If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
+A lowered `--before` also uses the older `before=<date>` of the `.npmrc`, and the notice names the `.npmrc` date if it applies.
 
-Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
+With `minimumReleaseAgePackageManagerSync`, Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
 A `before=<date>` setting counts as the time elapsed since that date.
 This applies to the npm dependencies of every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
 
 If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
 In this case, Renovate automatically retries without `--before` and logs a warning.
 This ensures existing lock files are never broken by the `--before` flag.
-Lock file maintenance does not retry, and reports the `ETARGET` error as an artifact error instead.
+With `minimumReleaseAgePackageManagerSync`, lock file maintenance does not retry, and reports the `ETARGET` error as an artifact error instead.
 
-npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
+With `minimumReleaseAgePackageManagerSync`, npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
 
 - Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
 - the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the `constraints` config or the `packageManager`, `devEngines` or `engines` field of the `package.json` only allow npm v11.10.0 or later, which added `min-release-age`
