@@ -47,7 +47,7 @@ export default defineRule({
   meta: {
     type: 'suggestion',
     messages: {
-      preferJsonPipe:
+      preferParserPipe:
         'Use `{{helper}}.pipe(Schema)` from schema-utils instead of `Schema.{{method}}({{parser}}.parse(...))` — it folds the parse and validation into a single schema.',
     },
   },
@@ -63,7 +63,7 @@ export default defineRule({
         if (parser) {
           context.report({
             node,
-            messageId: 'preferJsonPipe',
+            messageId: 'preferParserPipe',
             data: { method, parser, helper: parserHelpers[parser] },
           });
         }

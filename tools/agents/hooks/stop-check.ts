@@ -124,7 +124,7 @@ async function check(
 }
 
 const raw = await readStdin();
-// oxlint-disable-next-line renovate/prefer-json-pipe -- hook scripts must stay dependency-light and fast to start; `Json` lives in lib/util/schema-utils, which drags in the full lib import graph (logger, yaml, toml)
+// oxlint-disable-next-line renovate/prefer-parser-pipe -- hook scripts must stay dependency-light and fast to start; `Json` lives in lib/util/schema-utils, which drags in the full lib import graph (logger, yaml, toml)
 const input = StopHookInput.safeParse(JSON.parse(raw));
 
 // stop_hook_active is true when Claude is already continuing because this hook blocked a

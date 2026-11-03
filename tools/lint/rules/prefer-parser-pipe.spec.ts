@@ -1,5 +1,5 @@
 import { RuleTester } from 'oxlint/plugins-dev';
-import rule from './prefer-json-pipe.ts';
+import rule from './prefer-parser-pipe.ts';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -8,7 +8,7 @@ const ruleTester = new RuleTester({
   languageOptions: { parserOptions: { lang: 'ts' } },
 });
 
-ruleTester.run('prefer-json-pipe', rule, {
+ruleTester.run('prefer-parser-pipe', rule, {
   valid: [
     // already using the pipe helper
     `Json.pipe(Schema).parse(input);`,
@@ -38,24 +38,24 @@ ruleTester.run('prefer-json-pipe', rule, {
   invalid: [
     {
       code: `Schema.parse(JSON.parse(input));`,
-      errors: [{ messageId: 'preferJsonPipe' }],
+      errors: [{ messageId: 'preferParserPipe' }],
     },
     {
       code: `Schema.safeParse(JSON.parse(input));`,
-      errors: [{ messageId: 'preferJsonPipe' }],
+      errors: [{ messageId: 'preferParserPipe' }],
     },
     // extra arguments after the parsed value still match
     {
       code: `Schema.parse(JSON.parse(input), opts);`,
-      errors: [{ messageId: 'preferJsonPipe' }],
+      errors: [{ messageId: 'preferParserPipe' }],
     },
     {
       code: `Schema.parse(ini.parse(input));`,
-      errors: [{ messageId: 'preferJsonPipe' }],
+      errors: [{ messageId: 'preferParserPipe' }],
     },
     {
       code: `Schema.safeParse(ini.parse(input));`,
-      errors: [{ messageId: 'preferJsonPipe' }],
+      errors: [{ messageId: 'preferParserPipe' }],
     },
   ],
 });
