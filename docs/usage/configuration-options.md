@@ -1607,6 +1607,8 @@ The Dependency Dashboard categories are only used to visually organize updates w
 
 ## `dependencyDashboardLabels`
 
+The labels support templating, in the same way as `dependencyDashboardHeader` and `dependencyDashboardFooter`.
+
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
 It is pointless to edit the labels, as Renovate restores the labels on each run.
 
