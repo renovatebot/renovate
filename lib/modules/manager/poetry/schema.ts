@@ -538,10 +538,11 @@ export const PoetryMinReleaseAgeConfig = Toml.pipe(
   z.object({
     solver: z
       .object({
+        // Poetry applies a non-integer value of the file, which it does not validate
         'min-release-age': z
           .number()
-          .int()
           .nonnegative()
+          .transform((days) => Math.ceil(days))
           .optional()
           .catch(undefined),
         'min-release-age-exclude': LooseArray(z.string())
