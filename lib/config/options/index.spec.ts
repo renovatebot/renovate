@@ -145,9 +145,8 @@ describe('config/options/index', () => {
         const option = allOptions.find((o) => o.name === name);
         // Only include string or array-of-string options (not objects like userStrings)
         if (
-          option &&
-          (option.type === 'string' ||
-            (option.type === 'array' && option.subType === 'string'))
+          option?.type === 'string' ||
+          (option?.type === 'array' && option.subType === 'string')
         ) {
           detectedOptions.add(name);
         }
