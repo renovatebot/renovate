@@ -3052,7 +3052,7 @@ With `minimumReleaseAgePackageManagerSync=true`, Renovate:
 
 Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
 
-Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+The [table of package managers](./key-concepts/minimum-release-age.md#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both) lists which managers integrate with the minimum release age of their package manager, and what they read and pass with this option.
 
 ```json
 {
