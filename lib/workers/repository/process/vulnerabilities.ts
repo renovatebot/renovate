@@ -601,9 +601,18 @@ export class Vulnerabilities {
     other: string,
     versioningApi: VersioningApi,
   ): boolean {
-    if (!versioningApi.isVersion(version) || !versioningApi.isVersion(other)) {
-      return false;
-    }
+    return (
+      versioningApi.isVersion(version) &&
+      versioningApi.isVersion(other) &&
+      this.isEqualOrGreater(version, other, versioningApi)
+    );
+  }
+
+  private isEqualOrGreater(
+    version: string,
+    other: string,
+    versioningApi: VersioningApi,
+  ): boolean {
     return (
       versioningApi.equals(version, other) ||
       versioningApi.isGreaterThan(version, other)
