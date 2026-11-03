@@ -136,8 +136,7 @@ export class ApkDatasource extends Datasource {
       return groupPackagesByName(packages);
     } catch (err) {
       if (err instanceof HttpError) {
-        const statusCode = err.response?.statusCode;
-        if (isRateLimitedOrServerError(statusCode)) {
+        if (isRateLimitedOrServerError(err)) {
           throw new ExternalHostError(err);
         }
         // The caller logs the failure once for the component it was skipping

@@ -80,7 +80,7 @@ export class PythonVersionDatasource extends Datasource {
           .filter((release) => pythonPrebuildVersions.has(release.version)),
       );
     } catch (err) {
-      if (err instanceof HttpError && isRateLimited(err.response?.statusCode)) {
+      if (err instanceof HttpError && isRateLimited(err)) {
         logger.debug(
           { err },
           'Rate limited by python.org, using prebuild releases',

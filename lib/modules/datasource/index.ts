@@ -93,10 +93,10 @@ function toGetReleasesConfig(
 
 // TODO: fix error Type
 function logError(datasource: string, packageName: string, err: any): void {
-  const { statusCode, code: errCode, url } = err;
-  if (isNotFound(statusCode)) {
+  const { code: errCode, url } = err;
+  if (isNotFound(err)) {
     logger.debug({ datasource, packageName, url }, 'Datasource 404');
-  } else if (isUnauthorized(statusCode) || isForbidden(statusCode)) {
+  } else if (isUnauthorized(err) || isForbidden(err)) {
     logger.debug({ datasource, packageName, url }, 'Datasource unauthorized');
   } else if (errCode) {
     logger.debug(

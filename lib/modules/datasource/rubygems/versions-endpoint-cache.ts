@@ -4,7 +4,6 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import {
   isNotFound,
   isOk,
@@ -222,7 +221,7 @@ export class VersionsEndpointCache {
       const { body } = await this.http.getText(url, opts);
       return parseFullBody(body);
     } catch (err) {
-      if (err instanceof HttpError && isNotFound(err)) {
+      if (isNotFound(err)) {
         return Result.err('unsupported-api');
       }
 
@@ -283,25 +282,20 @@ export class VersionsEndpointCache {
         contentTail,
       });
     } catch (err) {
-      // v8 ignore else -- needs a non-http failure during the sync
-      if (err instanceof HttpError) {
-        const responseStatus = err.response?.statusCode;
+      /**
+       * In case of `416 Range Not Satisfiable` we do a full sync.
+       * This is unlikely to happen in real life, but anyway.
+       */
+      if (isRangeNotSatisfiable(err)) {
+        return this.fullSync(registryUrl);
+      }
 
-        /**
-         * In case of `416 Range Not Satisfiable` we do a full sync.
-         * This is unlikely to happen in real life, but anyway.
-         */
-        if (isRangeNotSatisfiable(responseStatus)) {
-          return this.fullSync(registryUrl);
-        }
-
-        /**
-         * If the endpoint is not supported, we stop trying.
-         * This is unlikely to happen in real life, but still.
-         */
-        if (isNotFound(responseStatus)) {
-          return Result.err('unsupported-api');
-        }
+      /**
+       * If the endpoint is not supported, we stop trying.
+       * This is unlikely to happen in real life, but still.
+       */
+      if (isNotFound(err)) {
+        return Result.err('unsupported-api');
       }
 
       throw err;

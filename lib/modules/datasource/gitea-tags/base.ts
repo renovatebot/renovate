@@ -1,7 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import type { PackageCacheNamespace } from '../../../util/cache/package/types.ts';
 import { GiteaHttp } from '../../../util/http/gitea.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import { isNotFound } from '../../../util/http/status.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitHostTagsDigestDatasource } from '../git-host-tags.ts';
@@ -107,7 +106,7 @@ export abstract class GiteaDatasource extends GitHostTagsDigestDatasource<GiteaH
     try {
       return await super.fetchDigest(config, newValue);
     } catch (err) {
-      if (err instanceof HttpError && isNotFound(err)) {
+      if (isNotFound(err)) {
         logger.debug(
           {
             giteaRepo: config.packageName,

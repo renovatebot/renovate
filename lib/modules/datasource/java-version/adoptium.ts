@@ -23,7 +23,7 @@ async function getPageReleases(
       })) ?? null
     );
   } catch (err) {
-    if (page !== 0 && err instanceof HttpError && isNotFound(err)) {
+    if (page !== 0 && isNotFound(err)) {
       // No more pages
       return null;
     }

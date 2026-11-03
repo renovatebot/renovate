@@ -67,15 +67,14 @@ function releasesGithubUrl(
 function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
-  const statusCode = err.response?.statusCode ?? 0;
-  if (isRateLimitedOrServerError(statusCode)) {
+  if (isRateLimitedOrServerError(err)) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (isUnauthorized(statusCode)) {
+  if (isUnauthorized(err)) {
     logger.debug(errorData, 'Authorization error');
-  } else if (isNotFound(statusCode)) {
+  } else if (isNotFound(err)) {
     logger.debug(errorData, 'Package lookup error');
   } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
     logger.trace(errorData, refusedHostMessage(err));

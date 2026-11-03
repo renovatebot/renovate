@@ -248,7 +248,7 @@ export async function getAuthHeaders(
       return undefined;
     }
     /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
-    if (isUnauthorized(err.statusCode)) {
+    if (isUnauthorized(err)) {
       logger.debug(
         { registryHost, dockerRepository },
         'Unauthorized docker lookup',
@@ -257,7 +257,7 @@ export async function getAuthHeaders(
       return undefined;
     }
     /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
-    if (isForbidden(err.statusCode)) {
+    if (isForbidden(err)) {
       logger.debug(
         { registryHost, dockerRepository },
         'Not allowed to access docker registry',
@@ -269,11 +269,11 @@ export async function getAuthHeaders(
       throw new ExternalHostError(err);
     }
     /* v8 ignore if -- Docker Hub rate limiting maps to ExternalHostError, not mocked in specs */
-    if (isRateLimited(err.statusCode) && isDockerHost(registryHost)) {
+    if (isRateLimited(err) && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
     /* v8 ignore if -- registry server errors map to ExternalHostError, not mocked in specs */
-    if (isServerError(err.statusCode)) {
+    if (isServerError(err)) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {

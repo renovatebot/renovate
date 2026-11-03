@@ -178,8 +178,7 @@ export abstract class Datasource<
     if (err instanceof HttpError) {
       this.handleHttpErrors(err);
 
-      const statusCode = err.response?.statusCode;
-      if (isRateLimitedOrServerError(statusCode)) {
+      if (isRateLimitedOrServerError(err)) {
         throw new ExternalHostError(err);
       }
     }

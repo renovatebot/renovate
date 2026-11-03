@@ -1,4 +1,4 @@
-import { isNumber, isObject } from '@sindresorhus/is';
+import { isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -38,21 +38,13 @@ function isDefaultPackagistHost(registryUrl: string): boolean {
 }
 
 function isTransientPackagistError(err: PackagistLookupError): boolean {
-  const { code: errCode, statusCode } = err;
+  const { code: errCode } = err;
 
   if (errCode && ['ECONNRESET', 'ETIMEDOUT'].includes(errCode)) {
     return true;
   }
 
-  if (!isNumber(statusCode)) {
-    return false;
-  }
-
-  if (isRateLimitedOrServerError(statusCode)) {
-    return true;
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 export class PackagistDatasource extends Datasource {

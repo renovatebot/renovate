@@ -40,12 +40,7 @@ function isTemporaryError(err: HttpError): boolean {
     return true;
   }
 
-  if (err.response) {
-    const status = err.response.statusCode;
-    return isRateLimitedOrServerError(status);
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 function isHostError(err: HttpError): boolean {
@@ -57,8 +52,7 @@ function isNotFoundError(err: HttpError): boolean {
 }
 
 function isPermissionsIssue(err: HttpError): boolean {
-  const status = err.response?.statusCode;
-  return isUnauthorized(status) || isForbidden(status);
+  return isUnauthorized(err) || isForbidden(err);
 }
 
 function isConnectionError(err: HttpError): boolean {
@@ -191,8 +185,7 @@ export async function downloadHttpProtocol(
         logger.debug({ failedUrl, err }, 'Temporary error');
 
         if (isMavenCentral(url)) {
-          const statusCode = err?.response?.statusCode;
-          if (isRateLimited(statusCode)) {
+          if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },

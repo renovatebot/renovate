@@ -153,7 +153,7 @@ export class RepologyDatasource extends Datasource {
         }
       }
     } catch (err) {
-      if (isForbidden(err.statusCode)) {
+      if (isForbidden(err)) {
         logger.debug(
           { repoName, pkgName },
           'Repology does not support tools/project-by lookups for repository. Will try direct API access now',
@@ -174,7 +174,7 @@ export class RepologyDatasource extends Datasource {
           // exit immediately if package found
           return pkg;
         }
-      } else if (isMultipleChoices(err.statusCode)) {
+      } else if (isMultipleChoices(err)) {
         logger.warn(
           { repoName, pkgName },
           'Ambiguous redirection from package name to project name in Repology. Skipping this package',

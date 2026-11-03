@@ -18,11 +18,8 @@ function unlessServerSide<
   T extends NonNullable<unknown>,
   E extends NonNullable<unknown>,
 >(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
-  if (err instanceof HttpError && err.response?.statusCode) {
-    const code = err.response.statusCode;
-    if (isServerError(code)) {
-      return AsyncResult.err(err);
-    }
+  if (err instanceof HttpError && isServerError(err)) {
+    return AsyncResult.err(err);
   }
   return cb();
 }

@@ -49,7 +49,7 @@ export abstract class TerraformDatasource extends Datasource {
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    if (isServiceUnavailable(err.response?.statusCode)) {
+    if (isServiceUnavailable(err)) {
       throw new ExternalHostError(err);
     }
   }

@@ -152,7 +152,7 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (isUnauthorized(err.statusCode)) {
+      if (isUnauthorized(err)) {
         logger.debug(
           { registryHost, dockerRepository },
           'Unauthorized docker lookup',
@@ -172,10 +172,10 @@ export class DockerDatasource extends Datasource {
         );
         return null;
       }
-      if (isRateLimited(err.statusCode) && isDockerHost(registryHost)) {
+      if (isRateLimited(err) && isDockerHost(registryHost)) {
         throw new ExternalHostError(err);
       }
-      if (isServerError(err.statusCode)) {
+      if (isServerError(err)) {
         throw new ExternalHostError(err);
       }
       if (err.code === 'ETIMEDOUT') {
@@ -423,7 +423,7 @@ export class DockerDatasource extends Datasource {
             : /* istanbul ignore next: can never happen */ _err;
 
         // v8 ignore else -- needs a non-5xx failure from the manifest request
-        if (isServerError(err.statusCode)) {
+        if (isServerError(err)) {
           // querying the digest manifest for a non existent image leads to a 500 statusCode
           return null;
         }
@@ -651,7 +651,7 @@ export class DockerDatasource extends Datasource {
       if (err instanceof ExternalHostError) {
         throw err;
       }
-      if (isBadRequest(err.statusCode) || isUnauthorized(err.statusCode)) {
+      if (isBadRequest(err) || isUnauthorized(err)) {
         logger.debug(
           { registryHost, dockerRepository, err },
           'Unauthorized docker lookup',
@@ -666,9 +666,9 @@ export class DockerDatasource extends Datasource {
           },
           'Config Manifest is unknown',
         );
-      } else if (isRateLimited(err.statusCode) && isDockerHost(registryHost)) {
+      } else if (isRateLimited(err) && isDockerHost(registryHost)) {
         logger.warn({ err }, 'docker registry failure: too many requests');
-      } else if (isServerError(err.statusCode)) {
+      } else if (isServerError(err)) {
         logger.debug(
           {
             err,
@@ -857,7 +857,7 @@ export class DockerDatasource extends Datasource {
           tags = await this.getTagsQuayRegistry(registryHost, dockerRepository);
         } catch (err) {
           // If we get a 401 Unauthorized error (v1 API requires separate auth for private images), fall back to Docker v2 API
-          if (isUnauthorized(err.statusCode)) {
+          if (isUnauthorized(err)) {
             logger.debug(
               { registryHost, dockerRepository },
               'Quay v1 API unauthorized, falling back to Docker v2 API',
@@ -902,14 +902,14 @@ export class DockerDatasource extends Datasource {
           `${jfrogRepository}/library/${dockerImage}`,
         );
       }
-      if (isRateLimited(err.statusCode) && isDockerHost(registryHost)) {
+      if (isRateLimited(err) && isDockerHost(registryHost)) {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: too many requests',
         );
         throw new ExternalHostError(err);
       }
-      if (isServerError(err.statusCode)) {
+      if (isServerError(err)) {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: internal error',

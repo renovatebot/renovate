@@ -153,11 +153,10 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
-        const statusCode = potentialHttpError?.response?.statusCode;
         const canFallback =
           fallback === '|'
             ? true
-            : isNotFound(statusCode) || isGone(statusCode);
+            : isNotFound(potentialHttpError) || isGone(potentialHttpError);
         if (!canFallback) {
           logger.debug(
             { err },
@@ -542,8 +541,8 @@ export class GoProxyDatasource extends Datasource {
       } catch (err) {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
-        const status = potentialHttpError.response?.statusCode;
-        const isNotFoundOrForbidden = isNotFound(status) || isForbidden(status);
+        const isNotFoundOrForbidden =
+          isNotFound(potentialHttpError) || isForbidden(potentialHttpError);
         if (
           potentialHttpError instanceof HttpError &&
           isNotFoundOrForbidden &&

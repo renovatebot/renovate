@@ -1,7 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import { isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -362,7 +361,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         );
         return body;
       } catch (err) {
-        if (!(err instanceof HttpError) || !isNotFound(err)) {
+        if (!isNotFound(err)) {
           throw err;
         }
       }
