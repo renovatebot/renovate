@@ -238,7 +238,7 @@ describe('util/cache/package/with-cache', () => {
       withCache(options, callback),
     ]);
 
-    expect(results.toSorted()).toEqual([1, 2, 2]);
+    expect(results.toSorted((a, b) => a - b)).toEqual([1, 2, 2]);
     expect(callCount).toBe(2);
   });
 
