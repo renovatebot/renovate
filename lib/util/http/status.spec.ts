@@ -88,6 +88,8 @@ describe('util/http/status', () => {
       ${'an error with a 5xx'}       | ${httpError(500)}      | ${false} | ${true}
       ${'an error without response'} | ${httpError()}         | ${false} | ${false}
       ${'nothing'}                   | ${undefined}           | ${false} | ${false}
+      ${'null'}                      | ${null}                | ${false} | ${false}
+      ${'a thrown string'}           | ${'error'}             | ${false} | ${false}
     `('reads the status of $name', ({ source, notFound, serverError }) => {
       expect(isNotFound(source)).toBe(notFound);
       expect(isServerError(source)).toBe(serverError);

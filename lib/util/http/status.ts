@@ -1,20 +1,27 @@
-import { isNumber, isUndefined } from '@sindresorhus/is';
-import type { RequestError as HttpError } from './got.ts';
+import { isNumber, isObject } from '@sindresorhus/is';
 
-/** A status code, a response which may carry one, or an {@link HttpError} whose response may carry one */
-export type StatusSource = number | { statusCode?: number } | HttpError;
+interface WithResponse {
+  response?: { statusCode?: number };
+}
 
-function isHttpError(
+/** A status code, a response which may carry one, or an error such as `HttpError` whose response may carry one */
+export type StatusSource = number | { statusCode?: number } | WithResponse;
+
+function hasResponse(
   source: Exclude<StatusSource, number>,
-): source is HttpError {
+): source is WithResponse {
   return 'response' in source;
 }
 
 function getStatusCode(source?: StatusSource): number | undefined {
-  if (isNumber(source) || isUndefined(source)) {
+  if (isNumber(source)) {
     return source;
   }
-  return isHttpError(source) ? source.response?.statusCode : source.statusCode;
+  // callers pass caught errors, which may be any thrown value
+  if (!isObject(source)) {
+    return undefined;
+  }
+  return hasResponse(source) ? source.response?.statusCode : source.statusCode;
 }
 
 /** 200 OK */
