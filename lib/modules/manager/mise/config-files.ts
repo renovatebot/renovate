@@ -1,4 +1,9 @@
 /**
+ * Location of the config file fragments, which mise loads whatever their names are.
+ */
+export const confDLocation = '.config/mise/conf.d/*.toml';
+
+/**
  * Locations of mise config files relative to the directory they apply to, highest precedence first.
  *
  * @see https://mise.jdx.dev/configuration.html
@@ -11,7 +16,7 @@ export const configFileLocations = [
   '.config/mise{,.*}.toml',
   '.config/mise/mise{,.*}.toml',
   '.config/mise/config{,.*}.toml',
-  '.config/mise/conf.d/*.toml',
+  confDLocation,
   '.rtx{,.*}.toml',
 ];
 

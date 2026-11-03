@@ -54,25 +54,27 @@ describe('modules/manager/mise/constraints', () => {
 
   describe('getConstraintValue()', () => {
     it.each`
-      constraintName | version         | expected
-      ${'node'}      | ${'20'}         | ${'20'}
-      ${'node'}      | ${'20.11.0'}    | ${'20.11.0'}
-      ${'node'}      | ${'v20.11.0'}   | ${'20.11.0'}
-      ${'pnpm'}      | ${'10.16'}      | ${'10.16'}
-      ${'rust'}      | ${'1.100'}      | ${'1.100'}
-      ${'java'}      | ${'21.0.2+13'}  | ${'21.0.2+13'}
-      ${'python'}    | ${'3.12.4'}     | ${'3.12.4'}
-      ${'python'}    | ${'3.12'}       | ${null}
-      ${'ruby'}      | ${'3.3'}        | ${null}
-      ${'helm'}      | ${'3'}          | ${null}
-      ${'node'}      | ${'latest'}     | ${null}
-      ${'node'}      | ${'lts'}        | ${null}
-      ${'node'}      | ${'ref:main'}   | ${null}
-      ${'node'}      | ${'path:./x'}   | ${null}
-      ${'node'}      | ${'prefix:20'}  | ${null}
-      ${'node'}      | ${'sub-1:lts'}  | ${null}
-      ${'java'}      | ${'temurin-21'} | ${null}
-      ${'node'}      | ${null}         | ${null}
+      constraintName | version            | expected
+      ${'node'}      | ${'20'}            | ${'20'}
+      ${'node'}      | ${'20.11.0'}       | ${'20.11.0'}
+      ${'node'}      | ${'v20.11.0'}      | ${'20.11.0'}
+      ${'pnpm'}      | ${'10.16'}         | ${'10.16'}
+      ${'rust'}      | ${'1.100'}         | ${'1.100'}
+      ${'java'}      | ${'21.0.2+13'}     | ${'21.0.2+13'}
+      ${'elixir'}    | ${'1.17.3-otp-27'} | ${null}
+      ${'node'}      | ${'22.0.0-rc.1'}   | ${null}
+      ${'python'}    | ${'3.12.4'}        | ${'3.12.4'}
+      ${'python'}    | ${'3.12'}          | ${null}
+      ${'ruby'}      | ${'3.3'}           | ${null}
+      ${'helm'}      | ${'3'}             | ${null}
+      ${'node'}      | ${'latest'}        | ${null}
+      ${'node'}      | ${'lts'}           | ${null}
+      ${'node'}      | ${'ref:main'}      | ${null}
+      ${'node'}      | ${'path:./x'}      | ${null}
+      ${'node'}      | ${'prefix:20'}     | ${null}
+      ${'node'}      | ${'sub-1:lts'}     | ${null}
+      ${'java'}      | ${'temurin-21'}    | ${null}
+      ${'node'}      | ${null}            | ${null}
     `(
       'returns $expected for $constraintName $version',
       ({ constraintName, version, expected }) => {
@@ -97,11 +99,13 @@ describe('modules/manager/mise/constraints', () => {
       ${'.config/mise/config.toml'}                  | ${''}         | ${2}
       ${'.config/mise/config.local.toml'}            | ${''}         | ${11}
       ${'.config/mise/conf.d/node.toml'}             | ${''}         | ${1}
+      ${'.config/mise/conf.d/config.base.toml'}      | ${''}         | ${1}
+      ${'.config/mise/conf.d/mise.production.toml'}  | ${''}         | ${1}
       ${'.rtx.toml'}                                 | ${''}         | ${0}
       ${'apps/web/mise.toml'}                        | ${'apps/web'} | ${7}
       ${'apps/web/.config/mise/config.toml'}         | ${'apps/web'} | ${2}
       ${'apps/mise/config.toml'}                     | ${'apps'}     | ${6}
-      ${'apps/.config/mise/conf.d/tools.local.toml'} | ${'apps'}     | ${10}
+      ${'apps/.config/mise/conf.d/tools.local.toml'} | ${'apps'}     | ${1}
     `(
       'returns $directory for $packageFile',
       ({ packageFile, directory, precedence }) => {

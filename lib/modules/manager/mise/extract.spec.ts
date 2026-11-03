@@ -1337,14 +1337,47 @@ describe('modules/manager/mise/extract', () => {
 
       const result = await extractPackageFile(content, 'mise.toml');
 
-      expect(result?.extractedConstraints).toEqual({
-        node: '20.11.0',
-        python: '3.10.17',
-        pnpm: '10.16.1',
-      });
       expect(result?.sharedConstraintsScope).toEqual({
         directory: '',
         precedence: expect.any(Number),
+        constraints: {
+          node: '20.11.0',
+          python: '3.10.17',
+          pnpm: '10.16.1',
+        },
+      });
+      expect(result).not.toHaveProperty('extractedConstraints');
+    });
+
+    it('shares the locked version of a tool alias, a selector and a tool without a version', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        nodejs = "lts"
+        python = { virtualenv = ".venv" }
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.sharedConstraintsScope?.constraints).toEqual({
+        node: '20.11.0',
+        python: '3.10.17',
+      });
+    });
+
+    it('shares the configured version if the locked version does not start with it', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "22.1.0"
+        python = "3"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.sharedConstraintsScope?.constraints).toEqual({
+        node: '22.1.0',
+        python: '3.10.17',
       });
     });
 
@@ -1356,11 +1389,11 @@ describe('modules/manager/mise/extract', () => {
 
       const result = await extractPackageFile(content, 'mise.production.toml');
 
-      expect(result?.extractedConstraints).toEqual({ node: '20' });
       expect(result).not.toHaveProperty('sharedConstraintsScope');
+      expect(result).not.toHaveProperty('extractedConstraints');
     });
 
-    it('omits extractedConstraints without usable tool versions', async () => {
+    it('does not share constraints without usable tool versions', async () => {
       const content = codeBlock`
         [tools]
         python = "3.10"
@@ -1369,7 +1402,7 @@ describe('modules/manager/mise/extract', () => {
 
       const result = await extractPackageFile(content, 'mise.toml');
 
-      expect(result).not.toHaveProperty('extractedConstraints');
+      expect(result).not.toHaveProperty('sharedConstraintsScope');
     });
 
     it('sets lockFiles array when lock file present', async () => {

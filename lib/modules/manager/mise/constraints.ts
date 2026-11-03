@@ -7,7 +7,11 @@ import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import { get as getVersioning } from '../../versioning/index.ts';
 import type { SharedConstraintsScope } from '../types.ts';
-import { configFileLocations, getConfigFilePattern } from './config-files.ts';
+import {
+  confDLocation,
+  configFileLocations,
+  getConfigFilePattern,
+} from './config-files.ts';
 import { getConfigType } from './lockfile.ts';
 import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 
@@ -46,10 +50,24 @@ for (const [shortName, toolName] of toolNames) {
   }
 }
 
+// a suffix like `-otp-27` names a build which Containerbase does not install, only build metadata like `+13` is kept
 const versionRegex = regEx(
-  /^v?(?<version>\d+(?:\.\d+)*(?:[-+][0-9A-Za-z.+-]+)?)$/,
+  /^v?(?<version>\d+(?:\.\d+)*(?:\+[0-9A-Za-z.+-]+)?)$/,
 );
 const fullVersionRegex = regEx(/^\d+\.\d+\.\d+/);
+
+/**
+ * The config file locations, those with most path segments first, as a file can match several, like `.config/mise.toml` and `mise.toml` in `.config`, and the longest one is meant.
+ */
+const configFiles = configFileLocations
+  .map((location, index) => ({
+    location,
+    pattern: getConfigFilePattern(location),
+    length: location.split('/').length,
+    // the list is ordered by precedence, highest first
+    precedence: configFileLocations.length - 1 - index,
+  }))
+  .sort((a, b) => b.length - a.length);
 
 /**
  * Returns the constraint name of a mise tool, such as `pnpm` for `npm:pnpm`.
@@ -65,9 +83,7 @@ export function getConstraintName(depName: string): ToolName | undefined {
 }
 
 /**
- * Returns the mise version of a tool as a constraint, or `null` if the tool versioning cannot read it.
- *
- * mise matches partial versions like `20` as a prefix, so they are only used where the tool versioning reads them as a range.
+ * Returns the mise version of a tool as a constraint, or `null` unless the tool versioning reads it as a full version or a range.
  */
 export function getConstraintValue(
   constraintName: ToolName,
@@ -81,6 +97,7 @@ export function getConstraintValue(
   if (!versioning.isValid(constraint)) {
     return null;
   }
+  // mise matches a partial version like `20` as a prefix, unlike a versioning which reads it as a single version
   if (
     versioning.isSingleVersion(constraint) &&
     !fullVersionRegex.test(constraint)
@@ -91,37 +108,30 @@ export function getConstraintValue(
 }
 
 /**
- * Returns the directory a mise config file applies to, and its precedence within that directory.
- *
- * Config files of an environment, like `mise.production.toml`, are only used when that environment is selected, so they return `null`.
+ * Returns the directory a mise config file applies to and its precedence within that directory, or `null` for a config file of an environment like `mise.production.toml`.
  */
 export function getSharedConstraintsScope(
   packageFile: string,
-): SharedConstraintsScope | null {
+): Omit<SharedConstraintsScope, 'constraints'> | null {
+  const configFile = configFiles.find(({ pattern }) =>
+    matchRegexOrGlob(packageFile, pattern),
+  );
+  if (!configFile) {
+    return null;
+  }
+  const { location, length, precedence } = configFile;
+  // the part matched by the leading `**/`
+  const directory = packageFile.split('/').slice(0, -length).join('/');
+  // mise loads every `conf.d` file, whatever its name, with the precedence of `conf.d`
+  if (location === confDLocation) {
+    return { directory, precedence };
+  }
   const { isLocal, env } = getConfigType(packageFile);
   if (env) {
     return null;
   }
-  // a file can match several locations, like `.config/mise.toml` and `mise.toml` in `.config`, the one with most path segments is meant
-  const segments = packageFile.split('/');
-  const matches = configFileLocations
-    .map((location, index) => ({
-      location,
-      length: location.split('/').length,
-      // the list is ordered by precedence, highest first
-      precedence: configFileLocations.length - 1 - index,
-    }))
-    .filter(({ location }) =>
-      matchRegexOrGlob(packageFile, getConfigFilePattern(location)),
-    )
-    .sort((a, b) => b.length - a.length);
-  if (!matches.length) {
-    return null;
-  }
-  const [{ length, precedence }] = matches;
   return {
-    // the part matched by the leading `**/`
-    directory: segments.slice(0, -length).join('/'),
+    directory,
     // a local config file overrides every shared one of the same directory
     precedence: isLocal ? precedence + configFileLocations.length : precedence,
   };

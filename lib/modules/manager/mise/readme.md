@@ -133,16 +133,16 @@ In particular:
 ### Tool versions as constraints
 
 Renovate uses the versions of tools which it can install, like `node`, `pnpm`, `python` or `rust`, as [`constraints`](../../../configuration-options.md#constraints) for artifact updates of other managers in the directory tree of the mise config file.
-They apply to the directory of the mise config file and its subdirectories, so a `mise.toml` with `pnpm = "10.16.1"` makes Renovate use pnpm `10.16.1` when it updates the `pnpm-lock.yaml` of the `package.json` next to it.
+They apply to the directory of the mise config file and its subdirectories, so a `mise.toml` with `rust = "1.90.0"` makes Renovate use Rust `1.90.0` when it updates the `Cargo.lock` of the `Cargo.toml` next to it.
 The lookup of new versions does not use them.
 For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory which holds the `.config` or `mise` directory.
 
-- The locked version from `mise.lock` is used, otherwise the version in the config file
-- Versions like `latest`, `lts`, `ref:` or `path:` without a locked version are ignored, as are partial versions like `3.12` for tools whose versioning reads them as a single version
+- The locked version from `mise.lock` is used, otherwise the version in the config file, which is also used if the locked version does not start with it, like mise does
+- Versions like `latest`, `lts`, `ref:` or `path:` without a locked version are ignored, as are partial versions like `3.12` for tools whose versioning reads them as a single version, and versions with a suffix like `1.17.3-otp-27`
 - Only the top level `tools` are used, not `tasks.*.tools`
-- Environment-specific config files like `mise.production.toml` are ignored
+- Environment-specific config files like `mise.production.toml` are ignored, while all files in `.config/mise/conf.d` are used, like mise does
 - A mise config file in a deeper directory takes precedence over one in a parent directory, like mise does
-- `constraints` from the Renovate config and constraints which the manager detects itself, like `packageManager` in a `package.json`, take precedence
+- `constraints` from the Renovate config and constraints which the manager detects itself, like `packageManager` in a `package.json` or the `lockfileVersion` of a `pnpm-lock.yaml`, take precedence
 
 ### Renovate only updates primary versions
 
