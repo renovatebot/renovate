@@ -2463,6 +2463,10 @@ const options: Readonly<RenovateOptions>[] = [
       'Lower bound for the minimum release age which Renovate passes to package managers if `minimumReleaseAgePackageManagerSync` is enabled.',
     type: 'string',
     default: null,
+    experimental: true,
+    experimentalDescription:
+      'The behaviour may change while the integration with each package manager is completed.',
+    experimentalIssues: [41652],
   },
   {
     name: 'minimumReleaseAgePackageManagerSync',
