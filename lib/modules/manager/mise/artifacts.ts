@@ -32,15 +32,13 @@ import {
 import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
 
 /**
- * First mise release that supports the features this manager relies on:
- * `MISE_SAFE=1` safe mode (a hard boundary against project config executing
- * code during `mise lock`) and `mise lock --bump` (advancing fuzzy selectors).
+ * First mise release that supports `MISE_SAFE=1` safe mode (a hard boundary
+ * against project config executing code during `mise lock`).
  *
- * Safe mode (jdx/mise#11146) and lockfile bumping (jdx/mise#11145) merged after
- * v2026.7.11 and first shipped in v2026.7.12.
+ * Safe mode (jdx/mise#11146) merged after v2026.7.11 and first shipped in
+ * v2026.7.12.
  *
  * @see https://github.com/jdx/mise/pull/11146
- * @see https://github.com/jdx/mise/pull/11145
  * @see https://mise.jdx.dev/configuration/settings.html#safe
  */
 const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
@@ -71,8 +69,8 @@ async function detectMiseVersion(
   }
 }
 
-/** True when `version` is at or above the safe-mode / `--bump` release. */
-function versionSupportsSafeFeatures(version: string | null): boolean {
+/** True when `version` is at or above the safe-mode release. */
+function versionSupportsSafeMode(version: string | null): boolean {
   return (
     !!version &&
     (miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
@@ -168,23 +166,22 @@ export async function updateArtifacts({
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
 
-  // The mise version is needed to decide safe mode (untrusted path) and
-  // `mise lock --bump` (lock file maintenance). Detect it at runtime rather
-  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
-  // change the outcome: an allowlisted, non-maintenance run behaves the same
-  // regardless of version.
+  // The mise version is needed to decide safe mode (untrusted path). Detect it
+  // at runtime rather than requiring a pinned `constraints.mise`. For lock
+  // file maintenance, the version also determines whether `--bump` is
+  // supported.
   const miseConstraint = await resolveToolConstraint(config, 'mise');
-  let miseSupportsSafeFeatures = false;
+  let miseSupportsSafeMode = false;
   if (!miseAllowlisted || config.isLockFileMaintenance) {
     const miseVersion = await detectMiseVersion({
       cwdFile: packageFileName,
       toolConstraints: [{ toolName: 'mise', constraint: miseConstraint }],
       docker: {},
     });
-    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
+    miseSupportsSafeMode = versionSupportsSafeMode(miseVersion);
   }
 
-  const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
+  const safeMode = !miseAllowlisted && miseSupportsSafeMode;
   if (!miseAllowlisted && !safeMode) {
     logger.once.warn(
       { safeModeMinVersion: MISE_SAFE_MODE_MIN_VERSION },
@@ -198,12 +195,9 @@ export async function updateArtifacts({
 
   let lockCmd: string;
   if (config.isLockFileMaintenance) {
-    // Lock file maintenance means "update to the latest versions". Plain
-    // `mise lock` only refreshes metadata for already-locked versions, so use
-    // `mise lock --bump` to also advance fuzzy selectors (e.g. `node = "22"`)
-    // to the latest matching version. `--bump` requires a new enough mise, so
-    // fall back to a plain refresh when the version cannot be guaranteed.
-    const bumpFlag = miseSupportsSafeFeatures ? ' --bump' : '';
+    // Lock file maintenance also bumps fuzzy selectors when the installed
+    // mise version supports it.
+    const bumpFlag = miseSupportsSafeMode ? ' --bump' : '';
     lockCmd = `mise lock${localFlag}${bumpFlag}`;
   } else {
     const tools = updatedDeps

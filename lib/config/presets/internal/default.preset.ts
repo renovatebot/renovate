@@ -312,6 +312,8 @@ export const presets: Record<string, Preset> = {
       '**/test/**',
       '**/tests/**',
       '**/__fixtures__/**',
+      '**/.mise/locks/**',
+      '**/.config/mise/locks/**',
     ],
     nuget: {
       ignorePaths: [
@@ -320,6 +322,8 @@ export const presets: Record<string, Preset> = {
         '**/vendor/**',
         '**/examples/**',
         '**/__fixtures__/**',
+        '**/.mise/locks/**',
+        '**/.config/mise/locks/**',
       ],
     },
   },
