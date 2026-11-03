@@ -455,3 +455,11 @@ export type EmailAddress = z.infer<typeof EmailAddress>;
 export function isEmailAdress(value: string): boolean {
   return EmailAddress.safeParse(value).success;
 }
+
+/**
+ * A config option definition whose value is a string or an array of strings.
+ */
+export const StringOrStringArrayOption = z.union([
+  z.object({ type: z.literal('string') }),
+  z.object({ type: z.literal('array'), subType: z.literal('string') }),
+]);

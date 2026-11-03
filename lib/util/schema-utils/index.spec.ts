@@ -12,6 +12,7 @@ import {
   MultidocYaml,
   NotCircular,
   Nullish,
+  StringOrStringArrayOption,
   Toml,
   UtcDate,
   Yaml,
@@ -922,6 +923,22 @@ describe('util/schema-utils/index', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('StringOrStringArrayOption', () => {
+    it.each`
+      option                                   | expected
+      ${{ type: 'string' }}                    | ${true}
+      ${{ type: 'array', subType: 'string' }}  | ${true}
+      ${{ type: 'array', subType: 'object' }}  | ${false}
+      ${{ type: 'array' }}                     | ${false}
+      ${{ type: 'object', subType: 'string' }} | ${false}
+      ${undefined}                             | ${false}
+    `('returns $expected for $option', ({ option, expected }) => {
+      expect(StringOrStringArrayOption.safeParse(option).success).toBe(
+        expected,
+      );
     });
   });
 });

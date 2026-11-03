@@ -1,19 +1,14 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { z } from 'zod/v4';
 import { fetchers } from '../../modules/datasource/custom/formats/index.ts';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
+import { StringOrStringArrayOption } from '../../util/schema-utils/index.ts';
 import { migrateConfig } from '../migration.ts';
 import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform/index.ts');
-
-const StringOrStringArrayOption = z.union([
-  z.object({ type: z.literal('string') }),
-  z.object({ type: z.literal('array'), subType: z.literal('string') }),
-]);
 
 async function collectTsFiles(dir: string): Promise<string[]> {
   const results: string[] = [];
