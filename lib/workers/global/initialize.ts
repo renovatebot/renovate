@@ -16,6 +16,7 @@ import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -136,6 +137,7 @@ export async function globalInitialize(
 }
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await Vulnerabilities.cleanup();
   await packageCache.cleanup(config);
   resetGlobalLogLevelRemaps();
 }
