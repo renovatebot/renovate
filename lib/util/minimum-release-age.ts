@@ -83,6 +83,44 @@ function findManagerUpdate(
 }
 
 /**
+ * Returns the update of `manager`, preferring lock file maintenance, in
+ * `upgrades`, then in the upgrades of the branch for `packageFile`, else
+ * `config`.
+ */
+function findPackageManagerUpdate({
+  config,
+  manager,
+  packageFile,
+  upgrades,
+}: PackageManagerMinimumReleaseAgeOptions): PackageManagerMinimumReleaseAgeConfig {
+  return (
+    findManagerUpdate(
+      upgrades.filter((upgrade) => upgrade.manager === manager),
+    ) ??
+    findManagerUpdate(
+      coerceArray(config.upgrades).filter(
+        (upgrade) =>
+          upgrade.manager === manager && upgrade.packageFile === packageFile,
+      ),
+    ) ??
+    config
+  );
+}
+
+/**
+ * Whether the update which `calculatePackageManagerMinimumReleaseAgeMs()` reads
+ * enables `minimumReleaseAgePackageManagerSync`.
+ */
+export function isPackageManagerSyncEnabled(
+  options: PackageManagerMinimumReleaseAgeOptions,
+): boolean {
+  return (
+    findPackageManagerUpdate(options).minimumReleaseAgePackageManagerSync ===
+    true
+  );
+}
+
+/**
  * Calculates the minimum release age in milliseconds which Renovate passes to
  * a package manager when it updates the lock file of `packageFile`: `0` if any
  * update of the lock file is a security update, the own `minimumReleaseAge` for
@@ -94,23 +132,11 @@ function findManagerUpdate(
  * `minimumReleaseAgePackageManagerSync`, it returns the `minimumReleaseAge` of
  * `config`.
  */
-export function calculatePackageManagerMinimumReleaseAgeMs({
-  config,
-  manager,
-  packageFile,
-  upgrades,
-}: PackageManagerMinimumReleaseAgeOptions): number {
-  const update =
-    findManagerUpdate(
-      upgrades.filter((upgrade) => upgrade.manager === manager),
-    ) ??
-    findManagerUpdate(
-      coerceArray(config.upgrades).filter(
-        (upgrade) =>
-          upgrade.manager === manager && upgrade.packageFile === packageFile,
-      ),
-    ) ??
-    config;
+export function calculatePackageManagerMinimumReleaseAgeMs(
+  options: PackageManagerMinimumReleaseAgeOptions,
+): number {
+  const { config, upgrades } = options;
+  const update = findPackageManagerUpdate(options);
   if (!update.minimumReleaseAgePackageManagerSync) {
     return durationToMs(config.minimumReleaseAge);
   }
