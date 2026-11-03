@@ -89,7 +89,7 @@ A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an 
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
-How Renovate does this depends on the package manager, for example Poetry gets the smaller value for that branch.
+How Renovate does this depends on the package manager, for example Poetry excludes the updated packages from its check.
 It never wins over the minimum release age which your repository configures in the package manager itself.
 The package manager still applies that age, like for security updates, and refuses a younger release.
 Without `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of the update, including a value from `packageRules`, and `minimumReleaseAgePackageManager` has no effect.
@@ -117,7 +117,7 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
-Poetry added this setting in v2.4.0, and older versions ignore it.
+Poetry added this setting and `solver.min-release-age-exclude` in v2.4.0, and older versions ignore them.
 Renovate rounds the value up to whole days.
 
 Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate sets the variable when the update has a `minimumReleaseAge`, including a value from `packageRules`, and does not read `poetry.toml`.
@@ -127,9 +127,10 @@ If both are set, Renovate passes the larger value.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 Renovate reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`.
 It never passes less than `solver.min-release-age`, and sets no variable if the value equals it, so Poetry applies its own config.
-If an updated package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate passes that smaller value, rounded down to whole days, and adds a notice to the PR.
-Renovate does not pass `solver.min-release-age-exclude` for this, as it excludes every version of a package, so the smaller value applies to all packages of the lock file.
-Renovate does not lower the value for packages which `solver.min-release-age-exclude` lists.
+If an updated package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate adds it to `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, as it already applied its own `minimumReleaseAge` to it.
+The variable replaces `solver.min-release-age-exclude`, so Renovate passes those entries first.
+Poetry still checks the passed value for all other packages, including new transitive dependencies.
+Poetry excludes a package by name, so it may lock a newer version of it than Renovate proposed, if the version constraint allows it.
 
 For example, with this config:
 
@@ -150,7 +151,7 @@ For example, with this config:
 
 - Without a `poetry.toml`, Renovate runs `poetry update --lock` with `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
 - With the `security:minimumReleaseAgePypi` preset instead of the `poetry` config, Renovate also passes `POETRY_SOLVER_MIN_RELEASE_AGE=3`, as the preset sets `minimumReleaseAgePackageManager` to 3 days for `poetry`.
-- An update of `boto3` to a release which is 1 day old sets no variable, and the PR notes that Poetry checked a minimum release age of 0 days instead of 3.
+- An update of `boto3` to a release which is 1 day old runs Poetry with `POETRY_SOLVER_MIN_RELEASE_AGE=3` and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE=boto3`.
 - With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
 - Without `minimumReleaseAgePackageManagerSync`, the `boto3` update sets no variable, and all other updates set `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
 
