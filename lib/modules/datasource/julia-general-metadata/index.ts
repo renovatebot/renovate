@@ -43,8 +43,8 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
       {
         namespace: `datasource-${JuliaGeneralMetadataDatasource.id}`,
         key: buildCacheKey('getReleases', config.packageName),
+        public: true,
         fallback: true,
-        cacheable: true,
       },
       () => this._getReleases(config),
     );
