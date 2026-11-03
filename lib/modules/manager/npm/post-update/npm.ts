@@ -1,5 +1,6 @@
 // TODO: types (#22198)
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
+import ini from 'ini';
 import { DateTime, Duration } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -26,7 +27,9 @@ import { minimatch } from '../../../../util/minimatch.ts';
 import {
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
+  isPackageManagerSyncEnabled,
 } from '../../../../util/minimum-release-age.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
@@ -37,12 +40,47 @@ import { PackageLock } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
-import type { GenerateLockFileResult } from './types.ts';
+import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
 import {
   getNodeOptions,
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
+
+export function parseNpmrcCooldownDate(
+  npmrcContent: string | null,
+): NpmrcCooldownResult | null {
+  if (!npmrcContent) {
+    return null;
+  }
+
+  const parsed = ini.parse(npmrcContent);
+
+  const before = parsed.before;
+  if (isNonEmptyString(before)) {
+    const dt = DateTime.fromISO(before, { zone: 'utc' });
+    if (dt.isValid) {
+      return { date: dt, source: 'before' };
+    }
+    logger.debug(`Invalid before date in .npmrc: ${before}, ignoring`);
+  }
+
+  const minReleaseAge = parsed['min-release-age'];
+  if (isNonEmptyString(minReleaseAge)) {
+    const days = parseInt(minReleaseAge, 10);
+    if (isNumber(days) && days >= 0) {
+      return {
+        date: DateTime.now().minus({ days }).toUTC(),
+        source: 'min-release-age',
+      };
+    }
+    logger.debug(
+      `Invalid min-release-age in .npmrc: ${minReleaseAge}, ignoring`,
+    );
+  }
+
+  return null;
+}
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
@@ -166,6 +204,65 @@ function getBeforeFlag(
   return { flag: ` --before=${beforeISO}`, notice };
 }
 
+/**
+ * Returns the `--before` flag for the `minimumReleaseAge` of `config`.
+ */
+function getConfigBeforeFlag(
+  config: Partial<PostUpdateConfig>,
+  npmrcContent: string | null,
+): string {
+  if (!config.minimumReleaseAge) {
+    return '';
+  }
+  const ms = toMs(config.minimumReleaseAge);
+  if (ms === null) {
+    logger.debug(
+      {
+        minimumReleaseAge: config.minimumReleaseAge,
+      },
+      'Invalid minimumReleaseAge, skipping --before for npm install',
+    );
+    return '';
+  }
+  const npmrcCooldown = parseNpmrcCooldownDate(npmrcContent);
+
+  // npm rejects --before when min-release-age is set in .npmrc,
+  // so let the .npmrc handle cooldown natively in that case
+  if (npmrcCooldown?.source === 'min-release-age') {
+    logger.debug(
+      {
+        npmrcMinReleaseAge: npmrcCooldown.date.toISO(),
+        minimumReleaseAge: config.minimumReleaseAge,
+      },
+      'Skipping --before flag because .npmrc already contains min-release-age',
+    );
+    return '';
+  }
+
+  let beforeDate = DateTime.now().minus(ms).toUTC();
+
+  if (npmrcCooldown && npmrcCooldown.date < beforeDate) {
+    logger.debug(
+      {
+        npmrcDate: npmrcCooldown.date.toISO(),
+        beforeDate: beforeDate.toISO(),
+      },
+      'Using stricter .npmrc cooldown date over minimumReleaseAge date',
+    );
+    beforeDate = npmrcCooldown.date;
+  }
+
+  const beforeISO = beforeDate.toISO();
+  logger.debug(
+    {
+      beforeISO,
+      minimumReleaseAge: config.minimumReleaseAge,
+    },
+    'Setting npm --before based on minimumReleaseAge',
+  );
+  return ` --before=${beforeISO}`;
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -222,18 +319,25 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-scripts';
     }
 
-    const before = getBeforeFlag(
-      calculatePackageManagerMinimumReleaseAgeMs({
-        config,
-        manager: 'npm',
-        packageFile: upath.join(lockFileDir, 'package.json'),
-        upgrades,
-      }),
-      npmrcContent,
+    const minimumReleaseAgeOptions = {
+      config,
+      manager: 'npm',
+      packageFile: upath.join(lockFileDir, 'package.json'),
       upgrades,
-    );
-    const beforeFlag = before.flag;
-    minimumReleaseAgeNotice = before.notice;
+    };
+    const isSyncEnabled = isPackageManagerSyncEnabled(minimumReleaseAgeOptions);
+    let beforeFlag: string;
+    if (isSyncEnabled) {
+      const before = getBeforeFlag(
+        calculatePackageManagerMinimumReleaseAgeMs(minimumReleaseAgeOptions),
+        npmrcContent,
+        upgrades,
+      );
+      beforeFlag = before.flag;
+      minimumReleaseAgeNotice = before.notice;
+    } else {
+      beforeFlag = getConfigBeforeFlag(config, npmrcContent);
+    }
 
     const extraEnv: ExtraEnv = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
@@ -359,15 +463,15 @@ export async function generateLockFile(
     }
 
     // Run the commands, retrying without --before on ETARGET if needed.
-    // Lock file maintenance does not retry, as it relies on --before to
-    // enforce the minimum release age.
-    const isLockFileMaintenance = upgrades.some(
-      (upgrade) => upgrade.isLockFileMaintenance,
-    );
+    // With minimumReleaseAgePackageManagerSync, lock file maintenance does not
+    // retry, as it relies on --before to enforce the minimum release age.
+    const skipsBeforeRetry =
+      isSyncEnabled &&
+      upgrades.some((upgrade) => upgrade.isLockFileMaintenance);
     await exec(commands, execOptions).catch(async (err) => {
       if (
         beforeFlag &&
-        !isLockFileMaintenance &&
+        !skipsBeforeRetry &&
         err.stderr?.includes('with a date before')
       ) {
         logger.debug('npm --before caused ETARGET, retrying without --before');
