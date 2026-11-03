@@ -44,5 +44,4 @@ export interface PoetryGroup {
 
 export interface MinReleaseAgeEnv {
   env: NodeJS.ProcessEnv;
-  notice?: string;
 }
