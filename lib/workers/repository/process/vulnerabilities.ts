@@ -1,6 +1,5 @@
 // TODO #22198
-import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
-import { OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import {
   isEmptyArray,
   isNonEmptyString,
@@ -8,8 +7,10 @@ import {
   isTruthy,
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
-import * as _aeCvss from 'ae-cvss-calculator';
+import aeCvss from 'ae-cvss-calculator';
+import upath from 'upath';
 import { z } from 'zod/v4';
+import { GlobalConfig } from '../../../config/global.ts';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -37,8 +38,7 @@ import type {
   Vulnerability,
 } from './types.ts';
 
-const { fromVector } = (_aeCvss as unknown as { default: typeof _aeCvss })
-  .default;
+const { fromVector } = aeCvss;
 
 export class Vulnerabilities {
   private static osvOffline: Promise<OsvOffline> | undefined;
@@ -53,8 +53,26 @@ export class Vulnerabilities {
 
   private static initialize(): Promise<OsvOffline> {
     // no async here, so osv promise will only be created once
-    Vulnerabilities.osvOffline ??= OsvOffline.create();
+    Vulnerabilities.osvOffline ??= Vulnerabilities.load();
     return Vulnerabilities.osvOffline;
+  }
+
+  private static async load(): Promise<OsvOffline> {
+    // osv-offline reads its root directory once, when the module is loaded
+    if (!isNonEmptyString(process.env.OSV_OFFLINE_ROOT_DIR)) {
+      if (process.env.OSV_OFFLINE_DISABLE_DOWNLOAD?.toLowerCase() === 'true') {
+        // keep the old default, offline setups may have put the database there
+        logger.debug(
+          'OSV_OFFLINE_DISABLE_DOWNLOAD is set, using the osv-offline default directory',
+        );
+      } else {
+        const rootDir = upath.join(GlobalConfig.get('cacheDir'), 'osv-offline');
+        logger.debug(`Using osv-offline directory ${rootDir}`);
+        process.env.OSV_OFFLINE_ROOT_DIR = rootDir;
+      }
+    }
+    const { OsvOffline } = await import('@renovatebot/osv-offline');
+    return OsvOffline.create();
   }
 
   static async create(): Promise<Vulnerabilities> {
@@ -63,6 +81,15 @@ export class Vulnerabilities {
 
     const instance = new Vulnerabilities(osvOffline);
     return instance;
+  }
+
+  /**
+   * Closes the shared OSV databases, if they were opened.
+   */
+  static async cleanup(): Promise<void> {
+    const osvOffline = await Vulnerabilities.osvOffline?.catch(() => undefined);
+    Vulnerabilities.osvOffline = undefined;
+    osvOffline?.[Symbol.dispose]();
   }
 
   async appendVulnerabilityPackageRules(
@@ -269,6 +296,7 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
+            versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
@@ -578,6 +606,7 @@ export class Vulnerabilities {
       depVersion,
       fixedVersion,
       datasource,
+      versioning: depVersioning,
       packageFileConfig,
     } = vul;
     if (isNullOrUndefined(fixedVersion)) {
@@ -587,8 +616,8 @@ export class Vulnerabilities {
       return null;
     }
 
-    // we don't know if the dependency has a `versioning` applied to it already, so we have to use the default for the datasource
-    const versioning = getDefaultVersioning(datasource);
+    // Prefer the `versioning` already assigned to the dependency by its manager
+    const versioning = depVersioning ?? getDefaultVersioning(datasource);
 
     logger.debug(
       {
