@@ -132,6 +132,33 @@ With `minimumReleaseAgePackageManagerSync`, npm enforces the minimum release age
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
+For example, with this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "npm": {
+    "minimumReleaseAge": "7 days"
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "matchPackageNames": ["@types/node"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+- Without an `.npmrc`, Renovate waits 30 days before it raises a major update, and runs npm with `--before` set to 7 days ago.
+- An update of `@types/node` to a release which is 2 days old runs npm without `--before`, and the PR notes that npm checked no minimum release age instead of 7 days.
+- With `before=2024-06-01` in the `.npmrc`, Renovate only raises updates to versions released before that date, also for `@types/node`, and runs npm with `--before=2024-06-01T00:00:00.000Z`.
+- With `min-release-age=10` in the `.npmrc`, Renovate waits 10 days before it raises an update and passes no `--before`. If the `packageManager` field of the `package.json` is `npm@11.10.0` or later, lock file maintenance does not wait for release timestamps.
+- Without `minimumReleaseAgePackageManagerSync`, Renovate runs npm with `--before` set to 30 days ago for a major update, and without `--before` for the `@types/node` update.
+
 #### Poetry
 
 Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
