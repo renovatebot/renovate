@@ -7,6 +7,10 @@ import { parseLinkHeader, parseUrl } from '../url.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
+function isServerError(statusCode: number): boolean {
+  return statusCode >= 500 && statusCode < 600;
+}
+
 let baseUrl = 'https://gitlab.com/api/v4/';
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -101,7 +105,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
       logger.debug({ err }, 'Gitlab API error');
       if (
         err.response.statusCode === 429 ||
-        (err.response.statusCode >= 500 && err.response.statusCode < 600)
+        isServerError(err.response.statusCode)
       ) {
         throw new ExternalHostError(err, 'gitlab');
       }

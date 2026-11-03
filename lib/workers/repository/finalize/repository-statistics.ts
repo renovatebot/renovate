@@ -22,6 +22,10 @@ import type {
   UpdateSummary,
 } from '../../types.ts';
 
+function isLaterThan(date: string, previous: string | undefined): boolean {
+  return !previous || date > previous;
+}
+
 export function runRenovateRepoStats(
   config: RenovateConfig,
   prList: Pr[],
@@ -40,7 +44,7 @@ export function runRenovateRepoStats(
     switch (pr.state) {
       case 'merged':
         prStats.merged += 1;
-        if (pr.closedAt && (!lastPRMergedAt || pr.closedAt > lastPRMergedAt)) {
+        if (pr.closedAt && isLaterThan(pr.closedAt, lastPRMergedAt)) {
           lastPRMergedAt = pr.closedAt;
         }
         break;

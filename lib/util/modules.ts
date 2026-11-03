@@ -5,6 +5,17 @@ import upath from 'upath';
 
 // TODO: move to `test/util.ts` or `test/modules.ts`
 
+function isInvalidModule<T>(
+  module: T,
+  moduleName: string,
+  validate?: (module: T, moduleName: string) => boolean,
+): boolean {
+  if (!module) {
+    return true;
+  }
+  return !!validate && !validate(module, moduleName);
+}
+
 export async function loadModules<T>(
   dirname: string,
   validate?: (module: T, moduleName: string) => boolean,
@@ -25,7 +36,7 @@ export async function loadModules<T>(
     const moduleUrl = pathToFileURL(modulePath).href;
     const module = await import(moduleUrl);
     // istanbul ignore if
-    if (!module || (validate && !validate(module, moduleName))) {
+    if (isInvalidModule(module, moduleName, validate)) {
       throw new Error(`Invalid module: ${modulePath}`);
     }
     result[moduleName] = module as T;

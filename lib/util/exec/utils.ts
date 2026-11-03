@@ -45,6 +45,10 @@ export function getChildEnv({
   return result;
 }
 
+function isValidShell(shell: unknown): boolean {
+  return isBoolean(shell) || isNonEmptyStringAndNotWhitespace(shell);
+}
+
 export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
   if (!(isObject(cmd) && 'command' in cmd)) {
     return false;
@@ -66,10 +70,7 @@ export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
     return false;
   }
 
-  if (
-    'shell' in cmd &&
-    !(isBoolean(cmd.shell) || isNonEmptyStringAndNotWhitespace(cmd.shell))
-  ) {
+  if ('shell' in cmd && !isValidShell(cmd.shell)) {
     return false;
   }
 

@@ -257,6 +257,13 @@ interface GraphqlPaginatedContent<T = unknown> {
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
+function hasVendorAccept(acceptStrings: string[]): boolean {
+  return (
+    acceptStrings.some((x) => x.startsWith('application/vnd.github.')) &&
+    acceptStrings.length >= 2
+  );
+}
+
 function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings = isString(input) ? input.split(regEx(/\s*,\s*/)) : [];
@@ -265,8 +272,7 @@ function constructAcceptString(input?: unknown): string {
   // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
-    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-      acceptStrings.length < 2)
+    !hasVendorAccept(acceptStrings)
   ) {
     acceptStrings.push(defaultAccept);
   }

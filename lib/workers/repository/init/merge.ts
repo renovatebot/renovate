@@ -315,6 +315,13 @@ function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
   return hostRules.matchesHost(url, adminMatchHost, { prefixOnly: true });
 }
 
+function isWithinAdminHost(
+  matchHost: string,
+  adminHost: string | null,
+): boolean {
+  return adminHost !== null && isWithinHost(matchHost, adminHost);
+}
+
 /**
  * Whether the admin granted `allowInternal` for every host `matchHost` can reach. A `null` entry is a grant without host restriction.
  */
@@ -330,9 +337,7 @@ function isCoveredByAdminHosts(
   }
   return (
     !!matchHost &&
-    [...adminHosts].some(
-      (adminHost) => adminHost !== null && isWithinHost(matchHost, adminHost),
-    )
+    [...adminHosts].some((adminHost) => isWithinAdminHost(matchHost, adminHost))
   );
 }
 
@@ -455,10 +460,8 @@ function withoutAdminSuppliedValues(
             // a host-less rule reaches every host, so only a host-less admin header (above) can exempt it
             return !(
               rule.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(rule.matchHost!, adminHost),
+              [...adminHosts].some((adminHost) =>
+                isWithinAdminHost(rule.matchHost!, adminHost),
               )
             );
           }),

@@ -341,11 +341,13 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       return compare(version, interval.version) === 0;
     case 'minimum': {
       const cmp = compare(version, interval.version);
-      return (
-        cmp === 0 ||
-        (cmp > 0 && isPrereleaseAllowed(version, status)) ||
-        isPrereleaseOfBound(version, interval.version, status)
-      );
+      if (cmp === 0) {
+        return true;
+      }
+      if (cmp > 0 && isPrereleaseAllowed(version, status)) {
+        return true;
+      }
+      return isPrereleaseOfBound(version, interval.version, status);
     }
     case 'greater-than':
       return (
@@ -354,7 +356,10 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       );
     case 'maximum': {
       const cmp = compare(version, interval.version);
-      return cmp === 0 || (cmp < 0 && isPrereleaseAllowed(version, status));
+      if (cmp === 0) {
+        return true;
+      }
+      return cmp < 0 && isPrereleaseAllowed(version, status);
     }
     case 'less-than':
       return (
@@ -370,10 +375,10 @@ export function matches(version: NugetVersion, range: PaketRange): boolean {
       const inUpper = toInclusive
         ? upperCmp <= 0
         : upperCmp < 0 && !isPrereleaseOfBound(version, to, status);
-      return (
-        (inLower && inUpper && isPrereleaseAllowed(version, status)) ||
-        isPrereleaseOfBound(version, from, status)
-      );
+      if (inLower && inUpper && isPrereleaseAllowed(version, status)) {
+        return true;
+      }
+      return isPrereleaseOfBound(version, from, status);
     }
   }
 }
