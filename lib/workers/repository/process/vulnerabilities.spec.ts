@@ -78,10 +78,12 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe('/custom/osv');
     });
 
-    it('keeps the osv-offline default when downloads are disabled', async () => {
-      vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', 'TRUE');
+    it('uses a directory in cacheDir when downloads are disabled', async () => {
+      vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', 'true');
       await Vulnerabilities.create();
-      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBeUndefined();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe(
+        '/tmp/renovate/cache/osv-offline',
+      );
     });
 
     it('uses a directory in cacheDir by default', async () => {
