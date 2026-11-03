@@ -54,6 +54,35 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
+  describe('cleanup()', () => {
+    beforeEach(resetOsv);
+
+    it('disposes the shared databases once', async () => {
+      const dispose = vi.fn();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+        [Symbol.dispose]: dispose,
+      });
+      await Vulnerabilities.create();
+
+      await Vulnerabilities.cleanup();
+      await Vulnerabilities.cleanup();
+
+      expect(dispose).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing when the databases were never opened', async () => {
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+
+    it('ignores a failed initialization', async () => {
+      createMock.mockRejectedValue(new Error());
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+  });
+
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
@@ -1571,6 +1600,78 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchCurrentVersion: '3.4.0',
           allowedVersions: '[4.0.0,)',
           versioning: 'maven',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('preserves poetry versioning when generating vulnerability package rules', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              {
+                depName: 'weasyprint',
+                packageName: 'weasyprint',
+                currentValue: '^69.0',
+                currentVersion: '69.0',
+                lockedVersion: '69.0',
+                versioning: 'poetry',
+                datasource: 'pypi',
+              },
+            ],
+            packageFile: 'pyproject.toml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jf6q-chmf-3h3v',
+          modified: '',
+          aliases: ['CVE-2026-1234'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'PyPI',
+                name: 'weasyprint',
+                purl: 'pkg:pypi/weasyprint',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '70.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-jf6q-chmf-3h3v affects weasyprint 69.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'pypi',
+          versioning: 'poetry',
+        },
+        'Setting allowed version >= 70.0 to fix vulnerability GHSA-jf6q-chmf-3h3v in weasyprint 69.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['weasyprint'],
+          matchCurrentVersion: '69.0',
+          allowedVersions: '>= 70.0',
+          versioning: 'poetry',
           isVulnerabilityAlert: true,
         },
       ]);
