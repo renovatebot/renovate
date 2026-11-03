@@ -1,4 +1,5 @@
 import { isNonEmptyString } from '@sindresorhus/is';
+import type { HostRule } from '../../../types/index.ts';
 import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
 import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -30,6 +31,10 @@ function isPublicProxy({ url }: GoproxyItem): boolean {
   return trimTrailingSlash(url) === publicGoproxyUrl;
 }
 
+function matchesRuleHost(rule: HostRule, url: string): boolean {
+  return !rule.matchHost || hostRules.matchesHost(url, rule.matchHost);
+}
+
 function hasGoHostRuleCredentials(packageName: string): boolean {
   const url = `https://${packageName}`;
   return [
@@ -37,7 +42,7 @@ function hasGoHostRuleCredentials(packageName: string): boolean {
     ...hostRules.findAll({ hostType: 'go-proxy' }),
   ].some(
     (rule) =>
-      (!rule.matchHost || hostRules.matchesHost(url, rule.matchHost)) &&
+      matchesRuleHost(rule, url) &&
       [rule.token, rule.password, rule.httpsPrivateKey].some(isNonEmptyString),
   );
 }
@@ -53,12 +58,12 @@ export function isPublicGoPackage(packageName: string): boolean {
 
   const proxies = parseGoproxy();
 
-  return proxies.every(
-    (proxy) =>
-      proxy.url === 'off' ||
-      isPublicProxy(proxy) ||
-      (proxy.url === 'direct' && proxies.some(isPublicProxy)),
-  );
+  return proxies.every((proxy) => {
+    if (proxy.url === 'off' || isPublicProxy(proxy)) {
+      return true;
+    }
+    return proxy.url === 'direct' && proxies.some(isPublicProxy);
+  });
 }
 
 export function getSourceUrl(

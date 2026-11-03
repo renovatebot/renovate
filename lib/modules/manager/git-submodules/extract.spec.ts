@@ -25,10 +25,8 @@ describe('modules/manager/git-submodules/extract', () => {
       );
 
       gitMock.raw.mockImplementation((options) => {
-        if (
-          (isString(options) || isArray(options, isString)) &&
-          options.includes('remote.origin.url')
-        ) {
+        const isTextOption = isString(options) || isArray(options, isString);
+        if (isTextOption && options.includes('remote.origin.url')) {
           return Promise.resolve(
             'https://github.com/renovatebot/renovate.git',
           ) as Response<string>;

@@ -2,7 +2,8 @@ import type { HostRule } from '../../../types/index.ts';
 import { findAll } from '../../../util/host-rules.ts';
 
 function hasCredentials(rule: HostRule): boolean {
-  return (!!rule.username && !!rule.password) || !!rule.token;
+  const hasBasicAuth = !!rule.username && !!rule.password;
+  return hasBasicAuth || !!rule.token;
 }
 
 function isAuthenticatable(rule: HostRule): boolean {

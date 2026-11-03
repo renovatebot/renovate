@@ -457,8 +457,7 @@ export class DockerDatasource extends Datasource {
       // v8 ignore else -- needs a config blob with neither key
       if (
         configResponse &&
-        ('config' in configResponse.body ||
-          'architecture' in configResponse.body)
+        ['config', 'architecture'].some((key) => key in configResponse.body)
       ) {
         const architecture = configResponse.body.architecture ?? null;
         logger.debug(
@@ -872,10 +871,10 @@ export class DockerDatasource extends Datasource {
     } catch (_err) /* istanbul ignore next */ {
       const err = _err instanceof ExternalHostError ? _err.err : _err;
 
-      if (
-        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
-        !dockerRepository.includes('/')
-      ) {
+      const isNotFound =
+        err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR;
+
+      if (isNotFound && !dockerRepository.includes('/')) {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
@@ -884,7 +883,7 @@ export class DockerDatasource extends Datasource {
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
       if (
-        (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
+        isNotFound &&
         isArtifactoryServer(err.response) &&
         dockerRepository.split('/').length === 2
       ) {
@@ -1014,11 +1013,10 @@ export class DockerDatasource extends Datasource {
         }
       }
 
-      if (
-        isNonEmptyString(architecture) ||
-        (manifestResponse &&
-          !hasKey('docker-content-digest', manifestResponse.headers))
-      ) {
+      const lacksContentDigest =
+        manifestResponse &&
+        !hasKey('docker-content-digest', manifestResponse.headers);
+      if (isNonEmptyString(architecture) || lacksContentDigest) {
         // Reuse the per-arch digest cached from the Docker Hub tag API
         if (isNonEmptyString(architecture) && registryHost === DOCKER_HUB) {
           const cache = await DockerHubCache.init(dockerRepository);

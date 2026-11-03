@@ -35,7 +35,8 @@ function isTemporaryError(err: HttpError): boolean {
 
   if (err.response) {
     const status = err.response.statusCode;
-    return status === 429 || (status >= 500 && status < 600);
+    const isServerError = status >= 500 && status < 600;
+    return status === 429 || isServerError;
   }
 
   return false;
@@ -569,11 +570,8 @@ export async function getDependencyInfo(
       }
 
       const parent = pomContent.childNamed('parent');
-      if (
-        recursionLimit > 0 &&
-        parent &&
-        (!result.sourceUrl || !result.homepage)
-      ) {
+      const isMissingInfo = !result.sourceUrl || !result.homepage;
+      if (recursionLimit > 0 && parent && isMissingInfo) {
         // if we found a parent and are missing some information
         // trying to get the scm/homepage information from it
         const [parentGroupId, parentArtifactId, parentVersion] = [
