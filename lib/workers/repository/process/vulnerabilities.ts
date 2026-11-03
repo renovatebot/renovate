@@ -1,6 +1,5 @@
 // TODO #22198
-import type { Ecosystem, Osv } from '@renovatebot/osv-offline';
-import { OsvOffline } from '@renovatebot/osv-offline';
+import type { Ecosystem, Osv, OsvOffline } from '@renovatebot/osv-offline';
 import {
   isEmptyArray,
   isNonEmptyString,
@@ -9,7 +8,9 @@ import {
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
 import aeCvss from 'ae-cvss-calculator';
+import upath from 'upath';
 import { z } from 'zod/v4';
+import { GlobalConfig } from '../../../config/global.ts';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -52,8 +53,26 @@ export class Vulnerabilities {
 
   private static initialize(): Promise<OsvOffline> {
     // no async here, so osv promise will only be created once
-    Vulnerabilities.osvOffline ??= OsvOffline.create();
+    Vulnerabilities.osvOffline ??= Vulnerabilities.load();
     return Vulnerabilities.osvOffline;
+  }
+
+  private static async load(): Promise<OsvOffline> {
+    // osv-offline reads its root directory once, when the module is loaded
+    if (!isNonEmptyString(process.env.OSV_OFFLINE_ROOT_DIR)) {
+      if (process.env.OSV_OFFLINE_DISABLE_DOWNLOAD?.toLowerCase() === 'true') {
+        // keep the old default, offline setups may have put the database there
+        logger.debug(
+          'OSV_OFFLINE_DISABLE_DOWNLOAD is set, using the osv-offline default directory',
+        );
+      } else {
+        const rootDir = upath.join(GlobalConfig.get('cacheDir'), 'osv-offline');
+        logger.debug(`Using osv-offline directory ${rootDir}`);
+        process.env.OSV_OFFLINE_ROOT_DIR = rootDir;
+      }
+    }
+    const { OsvOffline } = await import('@renovatebot/osv-offline');
+    return OsvOffline.create();
   }
 
   static async create(): Promise<Vulnerabilities> {
