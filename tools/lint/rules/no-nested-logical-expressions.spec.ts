@@ -24,10 +24,10 @@ ruleTester.run('no-nested-logical-expressions', rule, {
     `foo(a || (b && c));`,
     `x = a && foo(bar).baz;`,
     `x = a && foo(b || c).x;`,
-    `x = a && foo(b.x || (c && d).y);`,
     `x = a && (() => b || c)();`,
     `x = a && (b || c)(d);`,
     `x = a && foo(...(b || c));`,
+    `x = a && foo[b || (c && d)];`,
     `x = !a && b;`,
     `x = a && (b as boolean);`,
     { code: deep, options: [{ max: 3 }] },
@@ -35,8 +35,28 @@ ruleTester.run('no-nested-logical-expressions', rule, {
   ],
   invalid: [
     {
-      code: `x = a && foo(b && (c || (d && e))).x;`,
+      code: `x = a && foo(b.x || (c && d).y);`,
       errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+    },
+    {
+      code: `x = a && (() => b || (c && d))();`,
+      errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+    },
+    {
+      code: `x = a && (b || (c && d))(e);`,
+      errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+    },
+    {
+      code: `x = a && foo(...(b || (c && d)));`,
+      errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+    },
+    {
+      code: `x = a && (b || (c && d)).y;`,
+      errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+    },
+    {
+      code: `x = a && foo(b && (c || (d && e))).x;`,
+      errors: [{ messageId: 'tooDeep', data: { depth: '4', max: '2' } }],
     },
     {
       code: `x = a && foo(() => { return b && (c || (d && e)); });`,
@@ -44,7 +64,7 @@ ruleTester.run('no-nested-logical-expressions', rule, {
     },
     {
       code: `x = a && (b && (c || (d && e)))(f);`,
-      errors: [{ messageId: 'tooDeep', data: { depth: '3', max: '2' } }],
+      errors: [{ messageId: 'tooDeep', data: { depth: '4', max: '2' } }],
     },
     {
       code: `x = a ?? (b && (c || d));`,

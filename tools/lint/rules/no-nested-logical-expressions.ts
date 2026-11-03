@@ -29,28 +29,10 @@ function unwrap(node: ESTree.Node): ESTree.Node {
   return current;
 }
 
-function isCallLike(
-  node: ESTree.Node,
-): node is
-  ESTree.CallExpression | ESTree.NewExpression | ESTree.ChainExpression {
-  return (
-    node.type === 'CallExpression' ||
-    node.type === 'NewExpression' ||
-    node.type === 'ChainExpression'
-  );
-}
-
-function calleeDepth(callee: ESTree.Node): number {
-  let current = unwrap(callee);
-  while (current.type === 'MemberExpression') {
-    current = unwrap(current.object);
-  }
-  return isCallLike(current) ? valueDepth(current) : 0;
-}
-
 /**
- * Logical depth of a value, looking through calls, `new` and concise arrow
- * bodies. Block bodies and function expressions are opaque.
+ * Logical depth of a value, looking through member access, calls (callee and
+ * arguments), `new`, spread and concise arrow bodies. Block bodies, function
+ * expressions and computed properties are opaque.
  */
 function valueDepth(node: ESTree.Node): number {
   const inner = unwrap(node);
@@ -59,12 +41,16 @@ function valueDepth(node: ESTree.Node): number {
       return getDepth(inner);
     case 'ChainExpression':
       return valueDepth(inner.expression);
+    case 'MemberExpression':
+      return valueDepth(inner.object);
     case 'CallExpression':
     case 'NewExpression':
       return Math.max(
-        calleeDepth(inner.callee),
+        valueDepth(inner.callee),
         ...inner.arguments.map(valueDepth),
       );
+    case 'SpreadElement':
+      return valueDepth(inner.argument);
     case 'ArrowFunctionExpression':
       return inner.expression ? valueDepth(inner.body) : 0;
     default:
@@ -96,64 +82,28 @@ function getDepth(node: ESTree.LogicalExpression): number {
 
 /**
  * Walks up through exactly the constructs `valueDepth` looks through.
- * `state` tracks whether the current node is a plain value, a call, or a
- * member access on a call (only valid when it ends up as a callee).
  */
 function isRoot(node: ESTree.LogicalExpression): boolean {
   let child: ESTree.Node = node;
-  let state: 'value' | 'call' | 'member' = 'value';
   for (;;) {
     const parent: ESTree.Node = child.parent;
-    if (isWrapper(parent) || parent.type === 'ChainExpression') {
-      child = parent;
-      continue;
-    }
-    if (state === 'member') {
-      if (parent.type === 'MemberExpression' && parent.object === child) {
-        child = parent;
-        continue;
-      }
-      if (parent.type === 'CallExpression' || parent.type === 'NewExpression') {
-        if (parent.callee !== child) {
-          return true;
-        }
-        state = 'call';
-        child = parent;
-        continue;
-      }
-      return true;
-    }
     if (parent.type === 'LogicalExpression') {
       return false;
     }
-    if (parent.type === 'CallExpression' || parent.type === 'NewExpression') {
-      if (parent.arguments.includes(child)) {
-        state = 'call';
-      } else if (state !== 'call' || parent.callee !== child) {
-        return true;
-      }
-      child = parent;
-      continue;
+    const transparent =
+      isWrapper(parent) ||
+      parent.type === 'ChainExpression' ||
+      parent.type === 'CallExpression' ||
+      parent.type === 'NewExpression' ||
+      parent.type === 'SpreadElement' ||
+      (parent.type === 'MemberExpression' && parent.object === child) ||
+      (parent.type === 'ArrowFunctionExpression' &&
+        parent.expression &&
+        parent.body === child);
+    if (!transparent) {
+      return true;
     }
-    if (
-      state === 'call' &&
-      parent.type === 'MemberExpression' &&
-      parent.object === child
-    ) {
-      state = 'member';
-      child = parent;
-      continue;
-    }
-    if (
-      parent.type === 'ArrowFunctionExpression' &&
-      parent.expression &&
-      parent.body === child
-    ) {
-      state = 'value';
-      child = parent;
-      continue;
-    }
-    return true;
+    child = parent;
   }
 }
 
