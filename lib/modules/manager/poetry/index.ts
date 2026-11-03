@@ -25,7 +25,7 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   poetry: {
     passesMinimumReleaseAge: `>=${poetryMinReleaseAgeVersion}`,
     readsConfiguredAge: `>=${poetryMinReleaseAgeVersion}`,
-    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`. With `minimumReleaseAgePackageManagerSync`, also reads `poetry.toml`, see [Poetry](#poetry).',
+    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`. If `minimumReleaseAgePackageManagerSync` is enabled, also reads `poetry.toml`, see [Poetry](#poetry).',
   },
 };
 
