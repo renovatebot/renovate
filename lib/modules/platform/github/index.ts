@@ -172,14 +172,14 @@ async function detectGithubHost(
     return { type: 'ghec', apiUrl };
   }
 
-  const gheHeaderKey = 'x-github-enterprise-version';
-  const gheQueryRes = await githubApi.headJson('/', { token });
-  const gheHeaders = coerceObject(gheQueryRes?.headers);
-  const gheVersionHeader = Object.entries(gheHeaders).find(
-    ([k]) => k.toLowerCase() === gheHeaderKey,
+  const ghesHeaderKey = 'x-github-enterprise-version';
+  const ghesQueryRes = await githubApi.headJson('/', { token });
+  const ghesHeaders = coerceObject(ghesQueryRes?.headers);
+  const ghesVersionHeader = Object.entries(ghesHeaders).find(
+    ([k]) => k.toLowerCase() === ghesHeaderKey,
   );
 
-  const version = semver.valid(gheVersionHeader?.[1] as string) ?? null;
+  const version = semver.valid(ghesVersionHeader?.[1] as string) ?? null;
   logger.debug(`Detected GitHub Enterprise Server, version: ${version}`);
   return { type: 'ghes', apiUrl, version };
 }
@@ -211,7 +211,7 @@ export async function initPlatform({
 
   platformConfig.host = await detectGithubHost(githubApiUrl, token);
   /**
-   * GHE requires version >=3.10 to support fine-grained access tokens
+   * GHES requires version >=3.10 to support fine-grained access tokens
    * https://docs.github.com/en/enterprise-server@3.10/admin/release-notes#authentication
    */
   if (
@@ -569,7 +569,7 @@ export async function initRepo({
   try {
     let infoQuery = repoInfoQuery;
 
-    // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
+    // GHES <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
     if (
       isGithubEnterpriseServer(platformConfig.host) &&
@@ -579,7 +579,7 @@ export async function initRepo({
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
-    // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
+    // GHES <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
     if (
       isGithubEnterpriseServer(platformConfig.host) &&
       semver.satisfies(platformConfig.host.version ?? '', '<3.9.0')
@@ -590,7 +590,7 @@ export async function initRepo({
       );
     }
 
-    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    // GHES <3.12.0 doesn't support merge queues
     if (
       isGithubEnterpriseServer(platformConfig.host) &&
       semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
@@ -1221,7 +1221,7 @@ export async function getBranchStatus(
     }
   }
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  // API is supported in oldest available GHE version 2.19
+  // API is supported in oldest available GHES version 2.19
   try {
     const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
       branchName,
@@ -1893,7 +1893,7 @@ async function tryPrAutomerge(
     return;
   }
 
-  // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
+  // If GHES <3.3.0 it doesn't support automerge
   // TODO #22198
   if (
     isGithubEnterpriseServer(platformConfig.host) &&
@@ -1901,7 +1901,7 @@ async function tryPrAutomerge(
   ) {
     logger.debug(
       { prNumber },
-      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+      'GitHub-native automerge: not supported by this GitHub Enterprise Server version. Use 3.3.0 or newer.',
     );
     return;
   }

@@ -7,9 +7,9 @@ import type { GithubEnterpriseServerHost, GithubHost } from './types.ts';
 
 export function warnIfDefaultGitAuthorEmail(
   gitAuthor: string | undefined,
-  isGHE: boolean | undefined,
+  isGhecOrGhes: boolean | undefined,
 ): void {
-  if (isGHE === true) {
+  if (isGhecOrGhes === true) {
     return;
   }
   const parsed = parseGitAuthor(

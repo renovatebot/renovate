@@ -268,7 +268,7 @@ describe('modules/manager/bazel/extract', () => {
       );
       expect(badStory?.deps[0].skipReason).toBe('unsupported-remote');
 
-      const gheStory = extractPackageFile(
+      const ghesStory = extractPackageFile(
         codeBlock`
           go_repository(
             name = "test_repository",
@@ -278,7 +278,7 @@ describe('modules/manager/bazel/extract', () => {
           )
         `,
       );
-      expect(gheStory?.deps[0].skipReason).toBe('unsupported-remote');
+      expect(ghesStory?.deps[0].skipReason).toBe('unsupported-remote');
 
       const gitlabRemote = extractPackageFile(
         codeBlock`
