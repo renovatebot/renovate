@@ -1,6 +1,18 @@
-import gomod, { isPseudoVersion } from './index.ts';
+import gomod, { isPseudoVersion, parseVersionCommit } from './index.ts';
 
 describe('modules/versioning/gomod/index', () => {
+  it.each`
+    version                                                | expected
+    ${'v0.0.0-20191109021931-daa7c04131f5'}                | ${{ timestamp: '20191109021931', revision: 'daa7c04131f5' }}
+    ${'v1.2.3-pre.0.20191109021931-daa7c04131f5'}          | ${{ timestamp: '20191109021931', revision: 'daa7c04131f5' }}
+    ${'v2.0.1-0.20191109021931-daa7c04131f5+incompatible'} | ${{ timestamp: '20191109021931', revision: 'daa7c04131f5' }}
+    ${'v1.32.0-20231115204500-e097f827e652.1'}             | ${{ timestamp: '20231115204500', revision: 'e097f827e652' }}
+    ${'v1.2.3'}                                            | ${null}
+    ${'v0.0.0-2019110902193-daa7c04131f5'}                 | ${null}
+  `('parseVersionCommit("$version")', ({ version, expected }) => {
+    expect(parseVersionCommit(version)).toEqual(expected);
+  });
+
   it.each`
     version                                                | expected
     ${'v0.0.0-20191109021931-daa7c04131f5'}                | ${true}

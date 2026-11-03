@@ -187,7 +187,10 @@ export async function readDashboardBody(
     dependencyDashboardAllRateLimited: false,
   };
   const stringifiedConfig = JSON.stringify(config);
-  if (
+  // mode=silent never updates the dashboard, so checkboxes left on an existing one would never be cleared
+  if (config.mode === 'silent') {
+    logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
+  } else if (
     config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
@@ -383,6 +386,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -449,6 +453,7 @@ export async function ensureDependencyDashboard(
     } else {
       logger.debug('Closing Dependency Dashboard');
       await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      delete config.dependencyDashboardIssue;
     }
     return;
   }
@@ -472,7 +477,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'The following dependencies are either deprecated or have replacements available.\n\n';
+      '> The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
@@ -679,13 +684,19 @@ export async function ensureDependencyDashboard(
       'DRY-RUN: Would ensure Dependency Dashboard',
     );
   } else {
-    await platform.ensureIssue({
+    const result = await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
+    // ensureIssue doesn't return the issue, so a newly created (or renamed)
+    // dashboard needs a lookup to record its number
+    if (result && !config.dependencyDashboardIssue) {
+      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      config.dependencyDashboardIssue = issue?.number;
+    }
   }
 }
 
@@ -728,7 +739,7 @@ export function getAbandonedPackagesMd(
   // Keep the note outside the `<details>` block: GitHub only renders alert
   // callouts at the top level of a body, not inside collapsible sections.
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 

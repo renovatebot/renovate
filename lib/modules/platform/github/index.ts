@@ -132,6 +132,11 @@ const defaultGithubApiUrl = 'https://api.github.com/';
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
 const GitHubMaxPrBodyLen = 58000;
 
+const noteAlertRegex = regEx(/> ℹ️? \*\*Note\*\*\n> ?\n/g);
+const warningAlertRegex = regEx(/> ⚠️? \*\*Warning\*\*\n> ?\n/g);
+const cautionAlertRegex = regEx(/> 🛑 \*\*Caution\*\*\n> ?\n/g);
+const importantAlertRegex = regEx(/> ❗ \*\*Important\*\*\n> ?\n/g);
+
 export function resetConfigs(): void {
   config = {} as never;
   platformConfig = {
@@ -960,9 +965,15 @@ async function fetchPr(prNo: number): Promise<GhPr | null> {
 }
 
 // Gets details for a PR
-export async function getPr(prNo: number): Promise<GhPr | null> {
+export async function getPr(
+  prNo: number,
+  refreshCache = false,
+): Promise<GhPr | null> {
   if (!prNo) {
     return null;
+  }
+  if (refreshCache) {
+    return fetchPr(prNo);
   }
   const prList = await getPrList();
   let pr = prList.find(({ number }) => number === prNo) ?? null;
@@ -2337,7 +2348,7 @@ export function massageMarkdown(input: string): string {
   if (platformConfig.host.type !== 'github') {
     return smartTruncate(input, maxBodyLength());
   }
-  const massagedInput = massageMarkdownLinks(input)
+  const linkifiedInput = massageMarkdownLinks(input)
     // to be safe, replace all github.com links with redirect.github.com
     .replace(
       regEx(/href="https?:\/\/github.com\//g),
@@ -2350,14 +2361,13 @@ export function massageMarkdown(input: string): string {
     .replace(
       regEx(/]: https:\/\/github\.com\//g),
       ']: https://redirect.github.com/',
-    )
-    .replaceAll('> ℹ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ℹ️ **Note**\n> \n', '> [!NOTE]\n')
-    .replaceAll('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ⚠️ **Warning**\n> \n', '> [!WARNING]\n')
-    .replaceAll('> ❗ **Caution**\n> \n', '> [!CAUTION]\n')
-    .replaceAll('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
-  return smartTruncate(massagedInput, maxBodyLength());
+    );
+  // Run after truncation so any Note added by smartTruncate() is also converted
+  return smartTruncate(linkifiedInput, maxBodyLength())
+    .replaceAll(noteAlertRegex, '> [!NOTE]\n')
+    .replaceAll(warningAlertRegex, '> [!WARNING]\n')
+    .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
+    .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
 }
 
 export function maxBodyLength(): number {
