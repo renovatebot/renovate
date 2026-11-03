@@ -29,11 +29,47 @@ function unwrap(node: ESTree.Node): ESTree.Node {
   return current;
 }
 
-function isAndOr(node: ESTree.Node): node is ESTree.LogicalExpression {
+function isCallLike(
+  node: ESTree.Node,
+): node is
+  ESTree.CallExpression | ESTree.NewExpression | ESTree.ChainExpression {
   return (
-    node.type === 'LogicalExpression' &&
-    (node.operator === '&&' || node.operator === '||')
+    node.type === 'CallExpression' ||
+    node.type === 'NewExpression' ||
+    node.type === 'ChainExpression'
   );
+}
+
+function calleeDepth(callee: ESTree.Node): number {
+  let current = unwrap(callee);
+  while (current.type === 'MemberExpression') {
+    current = unwrap(current.object);
+  }
+  return isCallLike(current) ? valueDepth(current) : 0;
+}
+
+/**
+ * Logical depth of a value, looking through calls, `new` and concise arrow
+ * bodies. Block bodies and function expressions are opaque.
+ */
+function valueDepth(node: ESTree.Node): number {
+  const inner = unwrap(node);
+  switch (inner.type) {
+    case 'LogicalExpression':
+      return getDepth(inner);
+    case 'ChainExpression':
+      return valueDepth(inner.expression);
+    case 'CallExpression':
+    case 'NewExpression':
+      return Math.max(
+        calleeDepth(inner.callee),
+        ...inner.arguments.map(valueDepth),
+      );
+    case 'ArrowFunctionExpression':
+      return inner.expression ? valueDepth(inner.body) : 0;
+    default:
+      return 0;
+  }
 }
 
 function operandDepth(
@@ -41,8 +77,8 @@ function operandDepth(
   operator: ESTree.LogicalExpression['operator'],
 ): number {
   const inner = unwrap(operand);
-  if (!isAndOr(inner)) {
-    return 0;
+  if (inner.type !== 'LogicalExpression') {
+    return valueDepth(inner);
   }
   const depth = getDepth(inner);
   return inner.operator === operator ? depth - 1 : depth;
@@ -58,12 +94,67 @@ function getDepth(node: ESTree.LogicalExpression): number {
   );
 }
 
+/**
+ * Walks up through exactly the constructs `valueDepth` looks through.
+ * `state` tracks whether the current node is a plain value, a call, or a
+ * member access on a call (only valid when it ends up as a callee).
+ */
 function isRoot(node: ESTree.LogicalExpression): boolean {
-  let parent = node.parent;
-  while (isWrapper(parent)) {
-    parent = parent.parent;
+  let child: ESTree.Node = node;
+  let state: 'value' | 'call' | 'member' = 'value';
+  for (;;) {
+    const parent: ESTree.Node = child.parent;
+    if (isWrapper(parent) || parent.type === 'ChainExpression') {
+      child = parent;
+      continue;
+    }
+    if (state === 'member') {
+      if (parent.type === 'MemberExpression' && parent.object === child) {
+        child = parent;
+        continue;
+      }
+      if (parent.type === 'CallExpression' || parent.type === 'NewExpression') {
+        if (parent.callee !== child) {
+          return true;
+        }
+        state = 'call';
+        child = parent;
+        continue;
+      }
+      return true;
+    }
+    if (parent.type === 'LogicalExpression') {
+      return false;
+    }
+    if (parent.type === 'CallExpression' || parent.type === 'NewExpression') {
+      if (parent.arguments.includes(child)) {
+        state = 'call';
+      } else if (state !== 'call' || parent.callee !== child) {
+        return true;
+      }
+      child = parent;
+      continue;
+    }
+    if (
+      state === 'call' &&
+      parent.type === 'MemberExpression' &&
+      parent.object === child
+    ) {
+      state = 'member';
+      child = parent;
+      continue;
+    }
+    if (
+      parent.type === 'ArrowFunctionExpression' &&
+      parent.expression &&
+      parent.body === child
+    ) {
+      state = 'value';
+      child = parent;
+      continue;
+    }
+    return true;
   }
-  return !isAndOr(parent);
 }
 
 export default defineRule({
@@ -71,7 +162,7 @@ export default defineRule({
     type: 'suggestion',
     messages: {
       tooDeep:
-        'Logical expression nests `&&`/`||` {{depth}} levels deep (max {{max}}). Extract part of it into a named variable or function.',
+        'Logical expression nests logical operators (`&&`, `||`, `??`) {{depth}} levels deep (max {{max}}). Extract part of it into a named variable or function.',
     },
     schema: [
       {
@@ -85,7 +176,7 @@ export default defineRule({
   createOnce(context) {
     return {
       LogicalExpression(node) {
-        if (!isAndOr(node) || !isRoot(node)) {
+        if (!isRoot(node)) {
           return;
         }
         const options = context.options[0] as Options | undefined;
