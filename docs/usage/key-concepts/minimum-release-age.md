@@ -213,6 +213,34 @@ With `minimumReleaseAgePackageManagerSync`, pnpm enforces the minimum release ag
 pnpm v10.16.0 skips the check for an exact version from its metadata cache, and pnpm v11.0.0 to v11.0.3 and v12.0.0 to v12.2.x install a version which is too new if no other version matches.
 Renovate reads the pnpm version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), or the extracted constraints of tool managers.
 
+For example, with pnpm v11 and this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "npm": {
+    "minimumReleaseAge": "7 days"
+  }
+}
+```
+
+- Without a pnpm setting, Renovate waits 7 days before it raises an update, and runs pnpm with `--config.minimum-release-age=10080`.
+  A package with `minimumReleaseAge: null` in `packageRules` still waits 1 day, the pnpm v11 default.
+- Without `minimumReleaseAgePackageManagerSync`, Renovate passes no minimum release age to pnpm.
+
+With this `pnpm-workspace.yaml` in addition:
+
+```yaml
+minimumReleaseAge: 14400
+minimumReleaseAgeExclude:
+  - '@types/node'
+```
+
+- Renovate waits 10 days before it raises an update, and 7 days for `@types/node`.
+- An update of `semver` to `7.7.3` runs pnpm with `--config.minimum-release-age=14400 --config.minimum-release-age-exclude=@types/node --config.minimum-release-age-exclude=semver@7.7.3`.
+- An update of `@types/node` runs pnpm with `--config.minimum-release-age=14400` only, as the `pnpm-workspace.yaml` already excludes it.
+- Lock file maintenance runs pnpm with `--config.minimum-release-age=14400`, and Renovate creates the branch without waiting for release timestamps, unless the `pnpm-workspace.yaml` sets `minimumReleaseAgeStrict: false`.
+
 #### Poetry
 
 Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
