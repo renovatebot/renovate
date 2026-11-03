@@ -1,11 +1,14 @@
+import { isNumber } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import {
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
+  isPackageManagerSyncEnabled,
 } from '../../../util/minimum-release-age.ts';
 import { coerceNumber } from '../../../util/number.ts';
+import { toMs } from '../../../util/pretty-time.ts';
 import { Result } from '../../../util/result.ts';
 import { coerceString } from '../../../util/string.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
@@ -73,19 +76,46 @@ export function getPoetryMinReleaseAgeRules({
 }
 
 /**
+ * Returns `POETRY_SOLVER_MIN_RELEASE_AGE` for the `minimumReleaseAge` of `config`, rounded up to whole days.
+ */
+function getConfigMinReleaseAgeEnv(
+  config: UpdateArtifactsConfig,
+): NodeJS.ProcessEnv {
+  if (!config.minimumReleaseAge) {
+    return {};
+  }
+  const ageMs = toMs(config.minimumReleaseAge);
+  if (!isNumber(ageMs)) {
+    logger.debug(
+      { minimumReleaseAge: config.minimumReleaseAge },
+      'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+    );
+    return {};
+  }
+  const days = Math.ceil(Duration.fromMillis(ageMs).as('days'));
+  return { POETRY_SOLVER_MIN_RELEASE_AGE: days.toString() };
+}
+
+/**
  * Returns the `POETRY_SOLVER_MIN_RELEASE_AGE` which raises `solver.min-release-age` of the `poetry.toml` to the minimum release age of Renovate, lowered to the smaller `minimumReleaseAge` of exempted updates, and the notice for such a lowering.
+ *
+ * Without `minimumReleaseAgePackageManagerSync`, it returns `POETRY_SOLVER_MIN_RELEASE_AGE` for the `minimumReleaseAge` of `config`.
  */
 export async function getMinReleaseAgeEnv(
   config: UpdateArtifactsConfig,
   packageFileName: string,
   updatedDeps: Upgrade[],
 ): Promise<MinReleaseAgeEnv> {
-  const ageMs = calculatePackageManagerMinimumReleaseAgeMs({
+  const options = {
     config,
     manager: 'poetry',
     packageFile: packageFileName,
     upgrades: updatedDeps,
-  });
+  };
+  if (!isPackageManagerSyncEnabled(options)) {
+    return { env: getConfigMinReleaseAgeEnv(config) };
+  }
+  const ageMs = calculatePackageManagerMinimumReleaseAgeMs(options);
   // without an age, e.g. for security updates, Poetry applies its own config
   if (!ageMs) {
     return { env: {} };
