@@ -448,10 +448,19 @@ export async function generateInstallCommands(
       resolvedTools[toolName] = toolVersion;
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
-        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+        // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
+        const parentActive = isToolName(parent)
+          ? memCache.get<string | undefined>(
+              buildCacheKey('containerbase-active', parent),
+            )
+          : undefined;
+        const active = parentActive
+          ? `${toolVersion}@${parent}:${parentActive}`
+          : toolVersion;
+        if (memCache.get<string | undefined>(cacheKey) === active) {
           continue;
         }
-        memCache.set(cacheKey, toolVersion);
+        memCache.set(cacheKey, active);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);
