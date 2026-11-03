@@ -120,7 +120,7 @@ export async function checkIfModified(
 
   try {
     const response = await http.head(packageUrl, options);
-    return !isNotModified(response.statusCode);
+    return !isNotModified(response);
   } catch (error) {
     logger.warn(
       { packageUrl, lastDownloadTimestamp, errorMessage: error.message },

@@ -69,7 +69,7 @@ describe('util/http/status', () => {
     },
   );
 
-  describe('isNotFound()', () => {
+  describe('status sources', () => {
     function httpError(statusCode?: number): RequestError {
       const err = new RequestError('request error', {}, null as never);
       if (statusCode) {
@@ -79,15 +79,18 @@ describe('util/http/status', () => {
     }
 
     it.each`
-      statusCode   | expected
-      ${404}       | ${true}
-      ${500}       | ${false}
-      ${undefined} | ${false}
-    `(
-      'returns $expected for an error with status $statusCode',
-      ({ statusCode, expected }) => {
-        expect(isNotFound(httpError(statusCode))).toBe(expected);
-      },
-    );
+      name                           | source                 | notFound | serverError
+      ${'a status code'}             | ${404}                 | ${true}  | ${false}
+      ${'a response'}                | ${{ statusCode: 404 }} | ${true}  | ${false}
+      ${'a response without status'} | ${{}}                  | ${false} | ${false}
+      ${'a server error response'}   | ${{ statusCode: 503 }} | ${false} | ${true}
+      ${'an error with a response'}  | ${httpError(404)}      | ${true}  | ${false}
+      ${'an error with a 5xx'}       | ${httpError(500)}      | ${false} | ${true}
+      ${'an error without response'} | ${httpError()}         | ${false} | ${false}
+      ${'nothing'}                   | ${undefined}           | ${false} | ${false}
+    `('reads the status of $name', ({ source, notFound, serverError }) => {
+      expect(isNotFound(source)).toBe(notFound);
+      expect(isServerError(source)).toBe(serverError);
+    });
   });
 });

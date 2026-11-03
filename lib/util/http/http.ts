@@ -343,7 +343,7 @@ export abstract class HttpBase<
         return resCopy;
       }
 
-      const deepCopyNeeded = !!memCacheKey && !isNotModified(res.statusCode);
+      const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
 

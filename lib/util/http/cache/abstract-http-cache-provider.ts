@@ -88,7 +88,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (!resp.cached && isOk(resp.statusCode)) {
+    if (!resp.cached && isOk(resp)) {
       const etag = resp.headers?.etag;
       const lastModified = resp.headers?.['last-modified'];
 
@@ -118,7 +118,7 @@ export abstract class AbstractHttpCacheProvider implements HttpCacheProvider {
       return resp;
     }
 
-    if (isNotModified(resp.statusCode)) {
+    if (isNotModified(resp)) {
       const httpCache = await this.get(method, url);
       if (!httpCache) {
         return resp;

@@ -85,11 +85,11 @@ export async function getAuthHeaders(
       apiCheckResponse = await http.getJsonUnchecked(apiCheckUrl, options);
     }
 
-    if (isOk(apiCheckResponse.statusCode)) {
+    if (isOk(apiCheckResponse)) {
       logger.debug(`No registry auth required for ${apiCheckUrl}`);
       return {};
     }
-    if (isNotFound(apiCheckResponse.statusCode)) {
+    if (isNotFound(apiCheckResponse)) {
       logger.debug(`Page Not Found ${apiCheckUrl}`);
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
@@ -106,7 +106,7 @@ export async function getAuthHeaders(
       return getAuthHeaders(http, registryHost, dockerRepository);
     }
     if (
-      !isUnauthorized(apiCheckResponse.statusCode) ||
+      !isUnauthorized(apiCheckResponse) ||
       !isNonEmptyString(apiCheckResponse.headers['www-authenticate'])
     ) {
       logger.warn(

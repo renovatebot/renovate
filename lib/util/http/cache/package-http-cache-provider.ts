@@ -170,7 +170,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (isOk(resp.statusCode) && !this.cacheAllowed(resp)) {
+    if (isOk(resp) && !this.cacheAllowed(resp)) {
       return resp;
     }
 

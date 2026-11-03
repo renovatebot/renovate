@@ -58,7 +58,7 @@ export async function getECRAuthToken(
 export function isECRMaxResultsResponse(resp: HttpResponse<unknown>): boolean {
   const body = resp.body as { errors?: { message?: string }[] } | undefined;
   return !!(
-    isMethodNotAllowed(resp.statusCode) &&
+    isMethodNotAllowed(resp) &&
     resp.headers?.['docker-distribution-api-version'] &&
     body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',

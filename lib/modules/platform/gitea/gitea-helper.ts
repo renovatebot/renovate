@@ -82,8 +82,8 @@ export async function isOrg(
   try {
     const url = `${API_PATH}/orgs/${organization}`;
     const res = await http.getJsonUnchecked(url);
-    platformCache.orgs[organization] = isOk(res.statusCode);
-    return isOk(res.statusCode);
+    platformCache.orgs[organization] = isOk(res);
+    return isOk(res);
   } catch (err) {
     if (isNotFound(err)) {
       return false;

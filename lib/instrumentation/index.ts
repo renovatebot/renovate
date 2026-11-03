@@ -151,7 +151,7 @@ export function init(): void {
           request instanceof ClientRequest &&
           request.host === `api.github.com` &&
           request.path.endsWith(`/protection`) &&
-          isNotFound(response.statusCode)
+          isNotFound(response)
         ) {
           span.setStatus({ code: SpanStatusCode.OK });
         } else if (
@@ -162,7 +162,7 @@ export function init(): void {
           response instanceof ServerResponse &&
           response.getHeader('www-authenticate') &&
           response.getHeader('docker-distribution-api-version') &&
-          isUnauthorized(response.statusCode)
+          isUnauthorized(response)
         ) {
           // Docker API test expects 401 with `www-authenticate` header when registry requires authentication, so ignore this error
           span.setStatus({ code: SpanStatusCode.OK });

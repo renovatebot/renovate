@@ -290,7 +290,7 @@ export async function initRepo({
     );
 
     // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
-    if (isNoContent(branchRes.statusCode) || isNotFound(branchRes.statusCode)) {
+    if (isNoContent(branchRes) || isNotFound(branchRes)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 

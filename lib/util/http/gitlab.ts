@@ -155,11 +155,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
  */
 function isRetryablePostError(error: RequestError): boolean {
   const { response } = error;
-  if (isConflict(response?.statusCode)) {
+  if (isConflict(response)) {
     return Buffer.from(response!.rawBody).toString().includes('Resource lock');
   }
 
-  if (isBadRequest(response?.statusCode)) {
+  if (isBadRequest(response)) {
     const rawBody = Buffer.from(response!.rawBody).toString();
     return (
       rawBody.includes('source_branch') && rawBody.includes('does not exist')

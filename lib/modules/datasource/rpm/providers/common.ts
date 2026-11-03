@@ -66,7 +66,7 @@ async function checkIfModified(
 
   try {
     const response = await http.head(url, options);
-    return !isNotModified(response.statusCode);
+    return !isNotModified(response);
   } catch (err) {
     logger.warn(
       {
