@@ -30,9 +30,10 @@ ruleTester.run('prefer-parser-pipe', rule, {
     `Schema.parse(JSON['parse'](input));`,
     `Schema.parse(foo.JSON.parse(input));`,
     `Schema.parse(parse(input));`,
-    `Schema.parse(ini['parse'](input));`,
-    `Schema.parse(foo.ini.parse(input));`,
-    `Schema.parse(ini.stringify(input));`,
+    `ini['parse'](input);`,
+    `foo.ini.parse(input);`,
+    `parse(input);`,
+    `ini.stringify(input);`,
     `Schema.parse(toString.parse(input));`,
   ],
   invalid: [
@@ -49,13 +50,22 @@ ruleTester.run('prefer-parser-pipe', rule, {
       code: `Schema.parse(JSON.parse(input), opts);`,
       errors: [{ messageId: 'preferParserPipe' }],
     },
+    // every direct ini.parse call is reported once
+    {
+      code: `ini.parse(input);`,
+      errors: [{ messageId: 'preferIni' }],
+    },
+    {
+      code: `const value = ini.parse(input)['key'];`,
+      errors: [{ messageId: 'preferIni' }],
+    },
     {
       code: `Schema.parse(ini.parse(input));`,
-      errors: [{ messageId: 'preferParserPipe' }],
+      errors: [{ messageId: 'preferIni' }],
     },
     {
       code: `Schema.safeParse(ini.parse(input));`,
-      errors: [{ messageId: 'preferParserPipe' }],
+      errors: [{ messageId: 'preferIni' }],
     },
   ],
 });

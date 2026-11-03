@@ -18,29 +18,29 @@ function getCalleeName(node: ESTree.Node): string | null {
 }
 
 /**
- * Parser objects whose `.parse()` result should be validated through a
- * `<Helper>.pipe(Schema)` helper from schema-utils.
+ * For a `JSON.parse(...)` call expression return true.
  */
-const parserHelpers: Record<string, string> = {
-  JSON: 'Json',
-  ini: 'Ini',
-};
-
-/**
- * For a `JSON.parse(...)` or `ini.parse(...)` call expression return the
- * parser object name, otherwise null.
- */
-function getParserName(node: ESTree.Node): string | null {
-  if (
+function isJsonParse(node: ESTree.Node): boolean {
+  return (
     getCalleeName(node) === 'parse' &&
     node.type === 'CallExpression' &&
     node.callee.type === 'MemberExpression' &&
     node.callee.object.type === 'Identifier' &&
-    Object.hasOwn(parserHelpers, node.callee.object.name)
-  ) {
-    return node.callee.object.name;
-  }
-  return null;
+    node.callee.object.name === 'JSON'
+  );
+}
+
+/**
+ * Return true for a direct `ini.parse(...)` call.
+ */
+function isIniParse(node: ESTree.Node): boolean {
+  return (
+    getCalleeName(node) === 'parse' &&
+    node.type === 'CallExpression' &&
+    node.callee.type === 'MemberExpression' &&
+    node.callee.object.type === 'Identifier' &&
+    node.callee.object.name === 'ini'
+  );
 }
 
 export default defineRule({
@@ -48,23 +48,28 @@ export default defineRule({
     type: 'suggestion',
     messages: {
       preferParserPipe:
-        'Use `{{helper}}.pipe(Schema)` from schema-utils instead of `Schema.{{method}}({{parser}}.parse(...))` — it folds the parse and validation into a single schema.',
+        'Use `Json.pipe(Schema)` from schema-utils instead of `Schema.{{method}}(JSON.parse(...))` — it folds the parse and validation into a single schema.',
+      preferIni:
+        'Use `Ini.pipe(Schema)` (or `Ini`) from schema-utils instead of `ini.parse(...)` — it folds the parse and validation into a single schema.',
     },
   },
   createOnce(context) {
     return {
       CallExpression(node) {
+        if (isIniParse(node)) {
+          context.report({ node, messageId: 'preferIni' });
+          return;
+        }
         const method = getCalleeName(node);
         if (method !== 'parse' && method !== 'safeParse') {
           return;
         }
         const [arg] = node.arguments;
-        const parser = arg ? getParserName(arg) : null;
-        if (parser) {
+        if (arg && isJsonParse(arg)) {
           context.report({
             node,
             messageId: 'preferParserPipe',
-            data: { method, parser, helper: parserHelpers[parser] },
+            data: { method },
           });
         }
       },

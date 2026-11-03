@@ -1,6 +1,5 @@
 // TODO: types (#22198)
 import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
-import ini from 'ini';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -30,7 +29,7 @@ import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
-import { PackageLock } from '../schema.ts';
+import { NpmrcCooldown, PackageLock } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -48,7 +47,7 @@ export function parseNpmrcCooldownDate(
     return null;
   }
 
-  const parsed = ini.parse(npmrcContent);
+  const parsed = NpmrcCooldown.parse(npmrcContent);
 
   const before = parsed.before;
   if (isNonEmptyString(before)) {
