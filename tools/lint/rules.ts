@@ -10,6 +10,7 @@ import noDevDependencyImport from './rules/no-dev-dependency-import.ts';
 import noExecShellOption from './rules/no-exec-shell-option.ts';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.ts';
 import noHostRulesMock from './rules/no-host-rules-mock.ts';
+import noNestedLogicalExpressions from './rules/no-nested-logical-expressions.ts';
 import noNewUrl from './rules/no-new-url.ts';
 import noNumberConstructor from './rules/no-number-constructor.ts';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.ts';
@@ -56,6 +57,7 @@ export default definePlugin({
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
+    'no-nested-logical-expressions': noNestedLogicalExpressions,
     'no-new-url': noNewUrl,
     'no-number-constructor': noNumberConstructor,
     'no-redundant-mock-reset': noRedundantMockReset,
