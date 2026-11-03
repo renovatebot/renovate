@@ -27,17 +27,19 @@ To turn on the Dashboard manually, add the `:dependencyDashboard` preset to your
 }
 ```
 
-Or set `dependencyDashboard` to `true`:
+Or set `dependencyDashboard.enabled` to `true`:
 
 ```json
 {
-  "dependencyDashboard": true
+  "dependencyDashboard": {
+    "enabled": true
+  }
 }
 ```
 
 ## How to disable the dashboard
 
-To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard` to `false`.
+To disable the Dependency Dashboard, add the preset `:disableDependencyDashboard` or set `dependencyDashboard.enabled` to `false`.
 
 ```json
 {

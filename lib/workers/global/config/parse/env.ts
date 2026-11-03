@@ -61,6 +61,18 @@ const migratedKeysWithValues = [
     from: 'false',
     to: 'auto',
   },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'true',
+    to: '{"enabled":true}',
+  },
+  {
+    oldName: 'dependencyDashboard',
+    newName: 'dependencyDashboard',
+    from: 'false',
+    to: '{"enabled":false}',
+  },
 ];
 
 function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {

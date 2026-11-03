@@ -427,16 +427,9 @@ export interface RenovateConfig
 
   fileList?: string[];
   configWarningReuseIssue?: boolean;
-  dependencyDashboard?: boolean;
-  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboard?: DependencyDashboardConfig;
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardIssue?: number;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardHeader?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
-  dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
   packageFile?: string;
   packageRules?: PackageRule[];
@@ -487,8 +480,6 @@ export interface RenovateConfig
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
-
-  customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
@@ -664,6 +655,7 @@ export const namedParents = [
   'bumpVersions',
   'customDatasources',
   'customManagers',
+  'dependencyDashboard',
   'group',
   'hostRules',
   'logLevelRemap',
@@ -939,6 +931,18 @@ export interface ManagerConfig extends RenovateConfig {
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+export interface DependencyDashboardConfig {
+  enabled?: boolean;
+  autoclose?: boolean;
+  title?: string;
+  header?: string;
+  footer?: string;
+  labels?: string[];
+  osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  reportAbandonment?: boolean;
+  customize?: Record<string, string>;
 }
 
 export interface BumpVersionConfig {
