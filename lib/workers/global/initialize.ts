@@ -11,11 +11,13 @@ import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
+import { coerceArray } from '../../util/array.ts';
 import * as packageCache from '../../util/cache/package/index.ts';
 import { setEmojiConfig } from '../../util/emoji.ts';
 import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
+import { isValidUrlReplacement } from '../../util/http/url-replacements.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
 import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
@@ -108,6 +110,21 @@ function setGlobalHostRules(config: AllConfig): void {
   }
 }
 
+/**
+ * Logs the active global `urlReplacements`.
+ */
+function logUrlReplacements(config: AllConfig): void {
+  const replacements = coerceArray(config.urlReplacements)
+    .filter(isValidUrlReplacement)
+    .map(
+      ({ matchUrlPrefix, replaceUrlPrefix }) =>
+        `${matchUrlPrefix} → ${replaceUrlPrefix}`,
+    );
+  if (replacements.length) {
+    logger.info(`Using urlReplacements: ${replacements.join(', ')}`);
+  }
+}
+
 function configureThirdPartyLibraries(config: AllConfig): void {
   // Not using early return style to make clear what's the criterion to set the variables,
   // especially when there is more stuff added here in the future.
@@ -125,6 +142,7 @@ export async function globalInitialize(
   // containerbase and osv-offline log to Renovate's logger instead of `debug`
   configureContainerbase({ logger });
   setHttpRateLimits();
+  logUrlReplacements(config);
   await checkVersions();
   setGlobalHostRules(config);
   config = await initPlatform(config);

@@ -201,6 +201,45 @@ describe('workers/global/initialize', () => {
     });
   });
 
+  describe('logUrlReplacements()', () => {
+    it('logs the active urlReplacements', async () => {
+      const config: AllConfig = {
+        urlReplacements: [
+          {
+            matchUrlPrefix: 'https://repo.example.com/maven2/',
+            replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+          },
+          {
+            matchUrlPrefix: 'https://registry.example.com/',
+            replaceUrlPrefix: 'https://mirror.example.com/npm/',
+            matchHostTypes: ['npm'],
+          },
+          {
+            matchUrlPrefix: 'https://invalid.example.com',
+            replaceUrlPrefix: 'https://mirror.example.com/invalid/',
+          },
+        ],
+      };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+
+      await expect(globalInitialize(config)).toResolve();
+
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'Using urlReplacements: https://repo.example.com/maven2/ → https://mirror.example.com/maven-public/, https://registry.example.com/ → https://mirror.example.com/npm/',
+      );
+    });
+
+    it('does not log without urlReplacements', async () => {
+      git.validateGitVersion.mockResolvedValueOnce(true);
+
+      await expect(globalInitialize({})).toResolve();
+
+      expect(logger.logger.info).not.toHaveBeenCalledWith(
+        expect.stringContaining('urlReplacements'),
+      );
+    });
+  });
+
   describe('configureThirdPartyLibraries()', () => {
     beforeEach(() => {
       vi.stubEnv('AWS_EC2_METADATA_DISABLED', undefined);
