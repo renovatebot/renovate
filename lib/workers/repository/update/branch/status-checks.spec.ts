@@ -427,6 +427,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         isLockFileMaintenance: true,
         updateType: 'lockFileMaintenance',
         minimumReleaseAge: '1 day',
+        minimumReleaseAgePackageManagerSync: true,
         releaseTimestamp: undefined,
       };
 
@@ -451,6 +452,16 @@ describe('workers/repository/update/branch/status-checks', () => {
         await expect(computeInternalChecksStatus(config)).resolves.toEqual({
           stabilityStatus: 'yellow',
         });
+      });
+
+      it('returns yellow without asking the package manager without minimumReleaseAgePackageManagerSync', async () => {
+        const config = branchConfig([
+          { ...upgrade, minimumReleaseAgePackageManagerSync: false },
+        ]);
+        await expect(computeInternalChecksStatus(config)).resolves.toEqual({
+          stabilityStatus: 'yellow',
+        });
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
       });
     });
 

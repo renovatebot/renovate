@@ -81,6 +81,7 @@ export interface PackageManagerMinimumReleaseAgeConfig {
   manager?: string | null;
   minimumReleaseAge?: string | null;
   minimumReleaseAgePackageManager?: string | null;
+  minimumReleaseAgePackageManagerSync?: boolean;
   minimumReleaseAgeRepository?: string | null;
   packageFile?: string | null;
 }
@@ -106,23 +107,17 @@ function findManagerUpdate(
 }
 
 /**
- * Calculates the minimum release age in milliseconds which Renovate passes to
- * a package manager when it updates the lock file of `packageFile`: `0` if any
- * update of the lock file is a security update, the own `minimumReleaseAge` for
- * lock file maintenance, else `minimumReleaseAgeRepository`, raised to
- * `minimumReleaseAgePackageManager` if that is larger.
- *
- * It reads the values from an update of `manager`, preferring lock file
- * maintenance, in `upgrades`, then in the upgrades of the branch for
- * `packageFile`, then from `config`.
+ * Returns the update of `manager`, preferring lock file maintenance, in
+ * `upgrades`, then in the upgrades of the branch for `packageFile`, else
+ * `config`.
  */
-export function calculatePackageManagerMinimumReleaseAgeMs({
+function findPackageManagerUpdate({
   config,
   manager,
   packageFile,
   upgrades,
-}: PackageManagerMinimumReleaseAgeOptions): number {
-  const update =
+}: PackageManagerMinimumReleaseAgeOptions): PackageManagerMinimumReleaseAgeConfig {
+  return (
     findManagerUpdate(
       upgrades.filter((upgrade) => upgrade.manager === manager),
     ) ??
@@ -132,7 +127,44 @@ export function calculatePackageManagerMinimumReleaseAgeMs({
           upgrade.manager === manager && upgrade.packageFile === packageFile,
       ),
     ) ??
-    config;
+    config
+  );
+}
+
+/**
+ * Whether the update which `calculatePackageManagerMinimumReleaseAgeMs()` reads
+ * enables `minimumReleaseAgePackageManagerSync`.
+ */
+export function isPackageManagerSyncEnabled(
+  options: PackageManagerMinimumReleaseAgeOptions,
+): boolean {
+  return (
+    findPackageManagerUpdate(options).minimumReleaseAgePackageManagerSync ===
+    true
+  );
+}
+
+/**
+ * Calculates the minimum release age in milliseconds which Renovate passes to
+ * a package manager when it updates the lock file of `packageFile`: `0` if any
+ * update of the lock file is a security update, the own `minimumReleaseAge` for
+ * lock file maintenance, else `minimumReleaseAgeRepository`, raised to
+ * `minimumReleaseAgePackageManager` if that is larger.
+ *
+ * It reads the values from an update of `manager`, preferring lock file
+ * maintenance, in `upgrades`, then in the upgrades of the branch for
+ * `packageFile`, then from `config`. If that update does not enable
+ * `minimumReleaseAgePackageManagerSync`, it returns the `minimumReleaseAge` of
+ * `config`.
+ */
+export function calculatePackageManagerMinimumReleaseAgeMs(
+  options: PackageManagerMinimumReleaseAgeOptions,
+): number {
+  const { config, upgrades } = options;
+  const update = findPackageManagerUpdate(options);
+  if (!update.minimumReleaseAgePackageManagerSync) {
+    return durationToMs(config.minimumReleaseAge);
+  }
   if ([...upgrades, update].some((upgrade) => upgrade.isVulnerabilityAlert)) {
     return 0;
   }
@@ -158,7 +190,7 @@ export interface MinimumReleaseAgeExemption {
 }
 
 /**
- * Returns the updates of `manager` in `upgrades`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
+ * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
  */
 export function getMinimumReleaseAgeExemption(
   upgrades: MinimumReleaseAgeExemptionConfig[],
@@ -168,6 +200,7 @@ export function getMinimumReleaseAgeExemption(
   const exempted = upgrades.filter(
     (upgrade) =>
       upgrade.manager === manager &&
+      upgrade.minimumReleaseAgePackageManagerSync === true &&
       !upgrade.isLockFileMaintenance &&
       !upgrade.isVulnerabilityAlert &&
       calculateMinimumReleaseAgeMs(upgrade) < ageMs &&

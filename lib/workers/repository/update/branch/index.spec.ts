@@ -368,6 +368,7 @@ describe('workers/repository/update/branch/index', () => {
           updateType: 'lockFileMaintenance',
           minimumReleaseAge: '3 days',
           minimumReleaseAgeBehaviour: 'timestamp-required',
+          minimumReleaseAgePackageManagerSync: true,
         });
         config.upgrades = [upgrade];
         managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(true);
@@ -392,6 +393,7 @@ describe('workers/repository/update/branch/index', () => {
             updateType: 'lockFileMaintenance',
             minimumReleaseAge: '3 days',
             minimumReleaseAgeBehaviour: 'timestamp-required',
+            minimumReleaseAgePackageManagerSync: true,
           },
         ]);
         managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(false);
