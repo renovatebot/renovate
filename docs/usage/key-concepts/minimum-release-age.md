@@ -123,6 +123,7 @@ Renovate rounds the value up to whole days.
 Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate sets the variable when the update has a `minimumReleaseAge`, including a value from `packageRules`, and does not read `poetry.toml`.
 
 With `minimumReleaseAgePackageManagerSync`, Renovate sets the variable when the repository or manager config sets `minimumReleaseAge` or `minimumReleaseAgePackageManager`.
+If both are set, Renovate passes the larger value.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 Renovate reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`.
 It never passes less than `solver.min-release-age`, and sets no variable if the value equals it, so Poetry applies its own config.
@@ -130,7 +131,27 @@ If an updated package has a smaller `minimumReleaseAge` and its release is young
 Renovate does not pass `solver.min-release-age-exclude` for this, as it excludes every version of a package, so the smaller value applies to all packages of the lock file.
 Renovate does not lower the value for packages which `solver.min-release-age-exclude` lists.
 
-If both are set, Renovate passes the larger value.
+For example, with this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAge": "3 days"
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": ["boto3"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+- Without a `poetry.toml`, Renovate runs `poetry update --lock` with `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
+- An update of `boto3` to a release which is 1 day old sets no variable, and the PR notes that Poetry checked a minimum release age of 0 days instead of 3.
+- With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
+- Without `minimumReleaseAgePackageManagerSync`, the `boto3` update sets no variable, and all other updates set `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
