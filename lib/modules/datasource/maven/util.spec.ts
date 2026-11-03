@@ -1,8 +1,11 @@
 import { vi } from 'vitest';
+import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { HOST_DISABLED } from '../../../constants/error-messages.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { MAVEN_CENTRAL_MIRROR, MAVEN_REPO } from './common.ts';
@@ -165,6 +168,48 @@ describe('modules/datasource/maven/util', () => {
   });
 
   describe('downloadHttpProtocol', () => {
+    describe('with urlReplacements', () => {
+      const pomUrl =
+        'https://repo.maven.apache.org/maven2/org/example/foo/1.0.0/foo-1.0.0.pom';
+
+      afterEach(() => {
+        GlobalConfig.reset();
+      });
+
+      it.each`
+        mirrorToken  | isCacheable
+        ${undefined} | ${true}
+        ${'secret'}  | ${undefined}
+      `(
+        'returns isCacheable=$isCacheable for a mirror token $mirrorToken',
+        async ({ mirrorToken, isCacheable }) => {
+          GlobalConfig.set({
+            urlReplacements: [
+              {
+                matchUrlPrefix: 'https://repo.maven.apache.org/maven2/',
+                replaceUrlPrefix: 'https://mirror.example.com/maven-public/',
+              },
+            ],
+          });
+          hostRules.add({
+            matchHost: 'mirror.example.com',
+            token: mirrorToken,
+          });
+          httpMock
+            .scope('https://mirror.example.com')
+            .get('/maven-public/org/example/foo/1.0.0/foo-1.0.0.pom')
+            .reply(200, '<project/>');
+
+          const res = await downloadHttpProtocol(new Http('maven'), pomUrl);
+
+          expect(res.unwrap()).toEqual({
+            ok: true,
+            val: { data: '<project/>', isCacheable },
+          });
+        },
+      );
+    });
+
     it('returns empty for HOST_DISABLED error', async () => {
       const http = partial<Http>({
         getText: () => Promise.reject(httpError({ message: HOST_DISABLED })),

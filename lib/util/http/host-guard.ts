@@ -421,6 +421,15 @@ function makeBeforeRequest(
 }
 
 /**
+ * The lower case names of the headers which carry credentials.
+ */
+export const credentialHeaders: readonly string[] = [
+  'authorization',
+  'cookie',
+  'private-token',
+];
+
+/**
  * Removes the credentials belonging to the host a request is being redirected away from, so that a redirect cannot hand them to another origin.
  *
  * got strips the credentials it knows about itself - `authorization`, `cookie` and any URL userinfo - before this hook runs, and treats a scheme downgrade as a different origin, so an `https:` to `http:` redirect is covered. What it does not know about survives: the `Private-token` header GitLab personal access tokens are sent in (see `applyAuthorization`), and any credential an administrator configured through a `hostRules` `headers` entry.
@@ -451,9 +460,9 @@ function stripCrossOriginCredentials(
   }
 
   // defence in depth: got has removed these already, but they must never reach another origin
-  delete options.headers.authorization;
-  delete options.headers.cookie;
-  delete options.headers['private-token'];
+  for (const name of credentialHeaders) {
+    delete options.headers[name];
+  }
 }
 
 function makeBeforeRedirect(
