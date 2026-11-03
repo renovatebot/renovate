@@ -1100,265 +1100,272 @@ describe('modules/manager/npm/post-update/npm', () => {
       vi.useRealTimers();
     });
 
-    it('sets --before from minimumReleaseAge', async () => {
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
-          },
-        ],
-      );
-
-      expect(res.error).toBeFalse();
-      expect(res.beforeFallback).toBeFalse();
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
-    });
-
-    it('uses the repository minimumReleaseAge over a larger packageRules one', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '14 days' },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '2.0.0',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '14 days',
-            minimumReleaseAgeRepository: '3 days',
-          },
-        ],
-      );
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
-    });
-
-    it('skips --before without a repository minimumReleaseAge', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-          },
-        ],
-      );
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
-
-    it('skips --before for security updates', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            isVulnerabilityAlert: true,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
-          },
-        ],
-      );
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
-
-    it('uses the own minimumReleaseAge of lock file maintenance', async () => {
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            isLockFileMaintenance: true,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '1 day',
-          },
-        ],
-      );
-
-      expect(res.error).toBeFalse();
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
-    });
-
-    it('falls back to lock file maintenance of the package file in the branch upgrades', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        {
-          skipInstalls: true,
-          manager: 'pip_requirements',
-          minimumReleaseAgeRepository: '14 days',
-          upgrades: [
+    describe('without minimumReleaseAgePackageManagerSync', () => {
+      it('sets --before from minimumReleaseAge', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
             {
-              manager: 'npm',
-              packageFile: 'other-dir/package.json',
-              isLockFileMaintenance: true,
-              minimumReleaseAge: '1 day',
-            },
-            {
-              manager: 'npm',
-              packageFile: 'some-dir/package.json',
-              isLockFileMaintenance: true,
-              minimumReleaseAge: '3 days',
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
             },
           ],
-        },
-        [{ packageName: 'some-dep', newVersion: '1.0.1' }],
-      );
+        );
 
-      expect(execSnapshots).toMatchObject([
-        {
+        expect(res.error).toBeFalse();
+        expect(res.beforeFallback).toBeFalse();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('skips --before on unparseable minimumReleaseAge', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: 'invalid garbage' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
+        // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-01T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('uses minimumReleaseAge date when stricter than npmrc before date', async () => {
+        // minimumReleaseAge (3 days = June 12) is earlier than npmrc (June 14)
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'before=2026-06-14T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('skips --before when minimumReleaseAge is absent even if npmrc has before', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'before=2026-06-01T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'min-release-age=30\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('retries without --before on ETARGET with "with a date before"', async () => {
+        const etargetError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
-    });
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+          options: {},
+        });
+        const packageLockContents = JSON.stringify({
+          packages: {},
+          lockfileVersion: 3,
+        });
+        execSnapshots = mockExecSequence([
+          etargetError,
+          { stdout: '', stderr: '' },
+        ]);
+        fs.readLocalFile
+          .mockResolvedValueOnce(packageLockContents)
+          .mockResolvedValueOnce(packageLockContents);
 
-    it('lowers --before to the smaller minimumReleaseAge of a young update', async () => {
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+        );
+
+        expect(res.error).toBeFalse();
+        expect(res.beforeFallback).toBeTrue();
+        expect(execSnapshots).toMatchObject([
           {
-            manager: 'npm',
-            depName: 'some-dep',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '1 day',
-            minimumReleaseAgeRepository: '3 days',
-            releaseTimestamp: '2026-06-13T12:00:00.000Z' as Timestamp,
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
           },
-        ],
-      );
-
-      expect(res.minimumReleaseAgeNotice).toBe(
-        'npm checked a minimum release age of 1 day instead of 3 days for this update, because the `minimumReleaseAge` of `some-dep` is smaller. npm has no per-package exclude for `--before`.',
-      );
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-14T12:00:00.000Z',
-        },
-      ]);
-    });
-
-    it('skips --before for a young update without minimumReleaseAge', async () => {
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
           {
-            manager: 'npm',
-            depName: 'mycorp-lib',
-            packageName: 'mycorp-lib',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: null,
-            minimumReleaseAgePackageManager: '3 days',
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
           },
-        ],
-      );
+        ]);
+      });
 
-      expect(res.minimumReleaseAgeNotice).toBe(
-        'npm checked no minimum release age instead of 3 days for this update, because the `minimumReleaseAge` of `mycorp-lib` is smaller. npm has no per-package exclude for `--before`.',
-      );
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
-
-    it('keeps --before for an update older than minimumReleaseAgeRepository', async () => {
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            depName: 'some-dep',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '1 day',
-            minimumReleaseAgeRepository: '3 days',
-            releaseTimestamp: '2026-06-01T00:00:00.000Z' as Timestamp,
-          },
-        ],
-      );
-
-      expect(res.minimumReleaseAgeNotice).toBeUndefined();
-      expect(execSnapshots).toMatchObject([
-        {
+      it('does not retry on non-before ETARGET errors', async () => {
+        const otherError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@999.999.999.',
+          options: {},
+        });
+        execSnapshots = mockExecSequence([otherError]);
+
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+        );
+
+        expect(res.error).toBeTrue();
+        expect(res.beforeFallback).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('ignores the minimumReleaseAge of the updates and retries lock file maintenance without --before on ETARGET', async () => {
+        const etargetError = new ExecError('npm error code ETARGET', {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+          options: {},
+        });
+        execSnapshots = mockExecSequence([
+          etargetError,
+          { stdout: '', stderr: '' },
+        ]);
+
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              manager: 'npm',
+              depName: 'some-dep',
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '1 day',
+              minimumReleaseAgeRepository: '14 days',
+              minimumReleaseAgePackageManagerSync: false,
+            },
+          ],
+        );
+
+        expect(res.error).toBeFalse();
+        expect(res.beforeFallback).toBeTrue();
+        expect(res.minimumReleaseAgeNotice).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
     });
 
-    it.each`
-      npmrcBefore                   | minimumReleaseAge | notice                                                          | before
-      ${'2026-06-10T00:00:00.000Z'} | ${'1 day'}        | ${undefined}                                                    | ${'2026-06-10T00:00:00.000Z'}
-      ${'2026-06-13T00:00:00.000Z'} | ${'1 day'}        | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${'2026-06-13T00:00:00.000Z'}
-      ${'2026-06-14T18:00:00.000Z'} | ${'1 day'}        | ${'a minimum release age of 1 day'}                             | ${'2026-06-14T12:00:00.000Z'}
-      ${'2026-06-13T00:00:00.000Z'} | ${null}           | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${null}
-    `(
-      'lowers --before no further than the npmrc before date $npmrcBefore for minimumReleaseAge $minimumReleaseAge',
-      async ({ npmrcBefore, minimumReleaseAge, notice, before }) => {
+    describe('with minimumReleaseAgePackageManagerSync', () => {
+      it('sets --before from minimumReleaseAge', async () => {
         const res = await npmHelper.generateLockFile(
           'some-dir',
           {},
@@ -1367,248 +1374,577 @@ describe('modules/manager/npm/post-update/npm', () => {
           [
             {
               manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(res.error).toBeFalse();
+        expect(res.beforeFallback).toBeFalse();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('uses the repository minimumReleaseAge over a larger packageRules one', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '14 days' },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '2.0.0',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '14 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('skips --before without a repository minimumReleaseAge', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true, minimumReleaseAge: '3 days' },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('skips --before for security updates', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              isVulnerabilityAlert: true,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('uses the own minimumReleaseAge of lock file maintenance', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '1 day',
+            },
+          ],
+        );
+
+        expect(res.error).toBeFalse();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('falls back to lock file maintenance of the package file in the branch upgrades', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          {
+            skipInstalls: true,
+            manager: 'pip_requirements',
+            minimumReleaseAgeRepository: '14 days',
+            upgrades: [
+              {
+                manager: 'npm',
+                minimumReleaseAgePackageManagerSync: true,
+                packageFile: 'other-dir/package.json',
+                isLockFileMaintenance: true,
+                minimumReleaseAge: '1 day',
+              },
+              {
+                manager: 'npm',
+                minimumReleaseAgePackageManagerSync: true,
+                packageFile: 'some-dir/package.json',
+                isLockFileMaintenance: true,
+                minimumReleaseAge: '3 days',
+              },
+            ],
+          },
+          [{ packageName: 'some-dep', newVersion: '1.0.1' }],
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('lowers --before to the smaller minimumReleaseAge of a young update', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
               depName: 'some-dep',
               packageName: 'some-dep',
               newVersion: '1.0.1',
               isLockfileUpdate: false,
-              minimumReleaseAge,
+              minimumReleaseAge: '1 day',
               minimumReleaseAgeRepository: '3 days',
-              releaseTimestamp: '2026-06-14T00:00:00.000Z' as Timestamp,
+              releaseTimestamp: '2026-06-13T12:00:00.000Z' as Timestamp,
             },
           ],
-          `before=${npmrcBefore}\n`,
         );
 
         expect(res.minimumReleaseAgeNotice).toBe(
-          notice &&
-            `npm checked ${notice} instead of 3 days for this update, because the \`minimumReleaseAge\` of \`some-dep\` is smaller. npm has no per-package exclude for \`--before\`.`,
+          'npm checked a minimum release age of 1 day instead of 3 days for this update, because the `minimumReleaseAge` of `some-dep` is smaller. npm has no per-package exclude for `--before`.',
         );
         expect(execSnapshots).toMatchObject([
           {
-            cmd: `npm install --package-lock-only --no-audit --ignore-scripts${before ? ` --before=${before}` : ''}`,
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-14T12:00:00.000Z',
           },
         ]);
-      },
-    );
+      });
 
-    it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
-      // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
+      it('skips --before for a young update without minimumReleaseAge', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              depName: 'mycorp-lib',
+              packageName: 'mycorp-lib',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: null,
+              minimumReleaseAgePackageManager: '3 days',
+            },
+          ],
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBe(
+          'npm checked no minimum release age instead of 3 days for this update, because the `minimumReleaseAge` of `mycorp-lib` is smaller. npm has no per-package exclude for `--before`.',
+        );
+        expect(execSnapshots).toMatchObject([
           {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
           },
-        ],
-        'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
-      );
+        ]);
+      });
 
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-01T00:00:00.000Z',
+      it('keeps --before for an update older than minimumReleaseAgeRepository', async () => {
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              depName: 'some-dep',
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '1 day',
+              minimumReleaseAgeRepository: '3 days',
+              releaseTimestamp: '2026-06-01T00:00:00.000Z' as Timestamp,
+            },
+          ],
+        );
+
+        expect(res.minimumReleaseAgeNotice).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it.each`
+        npmrcBefore                   | minimumReleaseAge | notice                                                          | before
+        ${'2026-06-10T00:00:00.000Z'} | ${'1 day'}        | ${undefined}                                                    | ${'2026-06-10T00:00:00.000Z'}
+        ${'2026-06-13T00:00:00.000Z'} | ${'1 day'}        | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${'2026-06-13T00:00:00.000Z'}
+        ${'2026-06-14T18:00:00.000Z'} | ${'1 day'}        | ${'a minimum release age of 1 day'}                             | ${'2026-06-14T12:00:00.000Z'}
+        ${'2026-06-13T00:00:00.000Z'} | ${null}           | ${'the `before` date 2026-06-13T00:00:00.000Z of the `.npmrc`'} | ${null}
+      `(
+        'lowers --before no further than the npmrc before date $npmrcBefore for minimumReleaseAge $minimumReleaseAge',
+        async ({ npmrcBefore, minimumReleaseAge, notice, before }) => {
+          const res = await npmHelper.generateLockFile(
+            'some-dir',
+            {},
+            'package-lock.json',
+            { skipInstalls: true },
+            [
+              {
+                manager: 'npm',
+                minimumReleaseAgePackageManagerSync: true,
+                depName: 'some-dep',
+                packageName: 'some-dep',
+                newVersion: '1.0.1',
+                isLockfileUpdate: false,
+                minimumReleaseAge,
+                minimumReleaseAgeRepository: '3 days',
+                releaseTimestamp: '2026-06-14T00:00:00.000Z' as Timestamp,
+              },
+            ],
+            `before=${npmrcBefore}\n`,
+          );
+
+          expect(res.minimumReleaseAgeNotice).toBe(
+            notice &&
+              `npm checked ${notice} instead of 3 days for this update, because the \`minimumReleaseAge\` of \`some-dep\` is smaller. npm has no per-package exclude for \`--before\`.`,
+          );
+          expect(execSnapshots).toMatchObject([
+            {
+              cmd: `npm install --package-lock-only --no-audit --ignore-scripts${before ? ` --before=${before}` : ''}`,
+            },
+          ]);
         },
-      ]);
-    });
-
-    it('uses minimumReleaseAge date when stricter than npmrc before date', async () => {
-      // minimumReleaseAge (3 days = June 12) is earlier than npmrc (June 14)
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
-          },
-        ],
-        'before=2026-06-14T00:00:00.000Z\n',
       );
 
-      expect(execSnapshots).toMatchObject([
-        {
+      it('uses stricter npmrc before date when older than minimumReleaseAge', async () => {
+        // npmrc (June 1) is earlier than minimumReleaseAge (3 days = June 12)
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-01T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('uses minimumReleaseAge date when stricter than npmrc before date', async () => {
+        // minimumReleaseAge (3 days = June 12) is earlier than npmrc (June 14)
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          'before=2026-06-14T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('skips --before when minimumReleaseAge is absent even if npmrc has before', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+            },
+          ],
+          'before=2026-06-01T00:00:00.000Z\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
+        await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          'min-release-age=30\n',
+        );
+
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+          },
+        ]);
+      });
+
+      it('retries without --before on ETARGET with "with a date before"', async () => {
+        const etargetError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
-    });
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+          options: {},
+        });
+        const packageLockContents = JSON.stringify({
+          packages: {},
+          lockfileVersion: 3,
+        });
+        execSnapshots = mockExecSequence([
+          etargetError,
+          { stdout: '', stderr: '' },
+        ]);
+        fs.readLocalFile
+          .mockResolvedValueOnce(packageLockContents)
+          .mockResolvedValueOnce(packageLockContents);
 
-    it('skips --before when minimumReleaseAge is absent even if npmrc has before', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
+
+        expect(res.error).toBeFalse();
+        expect(res.beforeFallback).toBeTrue();
+        expect(execSnapshots).toMatchObject([
           {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
           },
-        ],
-        'before=2026-06-01T00:00:00.000Z\n',
-      );
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
-
-    it('skips --before when .npmrc has min-release-age to avoid npm conflict', async () => {
-      await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
           {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
           },
-        ],
-        'min-release-age=30\n',
-      );
-
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
-
-    it('retries without --before on ETARGET with "with a date before"', async () => {
-      const etargetError = new ExecError('npm error code ETARGET', {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        stdout: '',
-        stderr:
-          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
-        options: {},
+        ]);
       });
-      const packageLockContents = JSON.stringify({
-        packages: {},
-        lockfileVersion: 3,
-      });
-      execSnapshots = mockExecSequence([
-        etargetError,
-        { stdout: '', stderr: '' },
-      ]);
-      fs.readLocalFile
-        .mockResolvedValueOnce(packageLockContents)
-        .mockResolvedValueOnce(packageLockContents);
 
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
-          },
-        ],
-      );
-
-      expect(res.error).toBeFalse();
-      expect(res.beforeFallback).toBeTrue();
-      expect(execSnapshots).toMatchObject([
-        {
+      it('does not retry on non-before ETARGET errors', async () => {
+        const otherError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-        {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
-        },
-      ]);
-    });
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@999.999.999.',
+          options: {},
+        });
+        execSnapshots = mockExecSequence([otherError]);
 
-    it('does not retry on non-before ETARGET errors', async () => {
-      const otherError = new ExecError('npm error code ETARGET', {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        stdout: '',
-        stderr:
-          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@999.999.999.',
-        options: {},
-      });
-      execSnapshots = mockExecSequence([otherError]);
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              packageName: 'some-dep',
+              newVersion: '1.0.1',
+              isLockfileUpdate: false,
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+        );
 
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
+        expect(res.error).toBeTrue();
+        expect(res.beforeFallback).toBeUndefined();
+        expect(execSnapshots).toMatchObject([
           {
-            manager: 'npm',
-            packageName: 'some-dep',
-            newVersion: '1.0.1',
-            isLockfileUpdate: false,
-            minimumReleaseAge: '3 days',
-            minimumReleaseAgeRepository: '3 days',
+            cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
           },
-        ],
-      );
+        ]);
+      });
 
-      expect(res.error).toBeTrue();
-      expect(res.beforeFallback).toBeUndefined();
-      expect(execSnapshots).toMatchObject([
-        {
+      it('returns an error on ETARGET from --before for lock file maintenance', async () => {
+        const etargetError = new ExecError('npm error code ETARGET', {
           cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        },
-      ]);
+          stdout: '',
+          stderr:
+            'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
+          options: {},
+        });
+        execSnapshots = mockExecSequence([etargetError]);
+
+        const res = await npmHelper.generateLockFile(
+          'some-dir',
+          {},
+          'package-lock.json',
+          { skipInstalls: true },
+          [
+            {
+              manager: 'npm',
+              minimumReleaseAgePackageManagerSync: true,
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '3 days',
+            },
+          ],
+        );
+
+        expect(res).toEqual({
+          error: true,
+          stderr: etargetError.stderr,
+        });
+        expect(execSnapshots).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('parseNpmrcCooldownDate', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
     });
 
-    it('returns an error on ETARGET from --before for lock file maintenance', async () => {
-      const etargetError = new ExecError('npm error code ETARGET', {
-        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --before=2026-06-12T12:00:00.000Z',
-        stdout: '',
-        stderr:
-          'npm error code ETARGET\nnpm error notarget No matching version found for @scope/pkg@1.2.3 with a date before 6/12/2026, 12:00:00 PM.',
-        options: {},
-      });
-      execSnapshots = mockExecSequence([etargetError]);
+    afterEach(() => {
+      vi.useRealTimers();
+    });
 
-      const res = await npmHelper.generateLockFile(
-        'some-dir',
-        {},
-        'package-lock.json',
-        { skipInstalls: true },
-        [
-          {
-            manager: 'npm',
-            isLockFileMaintenance: true,
-            minimumReleaseAge: '3 days',
-          },
-        ],
-      );
-
-      expect(res).toEqual({
-        error: true,
-        stderr: etargetError.stderr,
+    describe('returns null', () => {
+      it.each`
+        content
+        ${null}
+        ${''}
+        ${'registry=https://registry.npmjs.org\n'}
+        ${'before=not-a-date\n'}
+        ${'before=2026-13-99T00:00:00.000Z\n'}
+        ${'min-release-age=not-a-number\n'}
+      `('for: $content', ({ content }: { content: string | null }) => {
+        expect(npmHelper.parseNpmrcCooldownDate(content)).toBeNull();
       });
-      expect(execSnapshots).toHaveLength(1);
+    });
+
+    describe('parses before= key', () => {
+      it.each`
+        input
+        ${'before=2026-06-01T00:00:00.000Z\n'}
+        ${'before="2026-06-01T00:00:00.000Z"\n'}
+        ${'registry=https://registry.npmjs.org\nbefore=2026-06-01T00:00:00.000Z # some comment\naudit=false\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-06-01T00:00:00.000Z');
+        expect(result?.source).toBe('before');
+      });
+    });
+
+    describe('parses min-release-age= key', () => {
+      it.each`
+        input
+        ${'min-release-age=30\n'}
+        ${'min-release-age="30"\n'}
+        ${'min-release-age=30 # 30 days\n'}
+        ${'registry=https://registry.npmjs.org\nmin-release-age=30 # 30 days\n'}
+      `('$input', ({ input }: { input: string }) => {
+        const result = npmHelper.parseNpmrcCooldownDate(input);
+        expect(result?.date.toISO()).toBe('2026-05-16T12:00:00.000Z');
+        expect(result?.source).toBe('min-release-age');
+      });
     });
   });
 });

@@ -199,7 +199,8 @@ function hasMinimumReleaseAge(upgrade: BranchUpgradeConfig): boolean {
 
 /**
  * Checks the minimum release age of `upgrade`, which is skipped for lock file
- * maintenance if the package manager enforces it itself.
+ * maintenance if `minimumReleaseAgePackageManagerSync` is enabled and the
+ * package manager enforces it itself.
  */
 async function checkUpgradeMinimumReleaseAge(
   upgrade: BranchUpgradeConfig,
@@ -212,7 +213,11 @@ async function checkUpgradeMinimumReleaseAge(
     },
     upgrade.releaseTimestamp,
   );
-  if (!result.minimumReleaseAgeMs || !upgrade.isLockFileMaintenance) {
+  if (
+    !result.minimumReleaseAgeMs ||
+    !upgrade.isLockFileMaintenance ||
+    !upgrade.minimumReleaseAgePackageManagerSync
+  ) {
     return result;
   }
   if (!(await enforcesMinimumReleaseAge(upgrade.manager, upgrade))) {
