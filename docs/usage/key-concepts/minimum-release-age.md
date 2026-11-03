@@ -129,6 +129,7 @@ The variable replaces `solver.min-release-age-exclude`, so Renovate passes those
 Poetry still checks the passed value for all other packages, including new transitive dependencies.
 Renovate only excludes a package whose constraint pins a single version, as Poetry excludes all versions of a package and could otherwise lock a newer version which Renovate did not check.
 For a range, Renovate keeps the passed value, and Poetry refuses a release younger than it.
+If the `poetry.toml` sets `solver.min-release-age`, Renovate only excludes a release which has a timestamp and is at least that old, as the exclusion also skips that age.
 
 For example, with this config:
 
