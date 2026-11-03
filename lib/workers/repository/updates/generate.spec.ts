@@ -424,6 +424,14 @@ describe('workers/repository/updates/generate', () => {
 
       expect(res.extractedConstraints).toEqual({ node: '22', pnpm: '10' });
       expect(res).not.toHaveProperty('sharedConstraints');
+      expect(res.upgrades[0].extractedConstraints).toEqual({
+        node: '22',
+        pnpm: '10',
+      });
+      expect(res.upgrades[1]).not.toHaveProperty('extractedConstraints');
+      expect(res.upgrades).toSatisfyAll(
+        (upgrade) => !('sharedConstraints' in upgrade),
+      );
     });
 
     it('uses the new value of a tool constraint which the branch updates', () => {

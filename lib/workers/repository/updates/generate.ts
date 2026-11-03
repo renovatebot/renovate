@@ -531,14 +531,21 @@ export function generateBranchConfig(
     if (upgrade.constraints) {
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
-    // the constraints which other managers share for the directory of the package file come below its own
+    // the constraints which other managers share for the directory of the package file come below its own, also on the upgrade, which the branch worker reads on its own
+    const sharedConstraints = getSharedConstraints(
+      upgrade.sharedConstraints,
+      upgrade.manager,
+      upgrade.packageFile,
+    );
+    delete upgrade.sharedConstraints;
+    if (Object.keys(sharedConstraints).length) {
+      upgrade.extractedConstraints = {
+        ...sharedConstraints,
+        ...upgrade.extractedConstraints,
+      };
+    }
     config.extractedConstraints = {
       ...config.extractedConstraints,
-      ...getSharedConstraints(
-        upgrade.sharedConstraints,
-        upgrade.manager,
-        upgrade.packageFile,
-      ),
       ...upgrade.extractedConstraints,
     };
   }
