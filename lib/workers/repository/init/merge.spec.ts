@@ -1958,10 +1958,10 @@ describe('workers/repository/init/merge', () => {
         },
         {
           name: 'it merges static config with the current config',
-          staticConfig: { dependencyDashboard: true },
+          staticConfig: { dependencyDashboard: { enabled: true } },
           currentConfig: { repositories: ['some/repo'] },
           want: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             repositories: ['some/repo'],
           },
         },
@@ -2130,7 +2130,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             packageRules: [
               {
                 groupName: 'my-custom-socketio-override',
@@ -2139,7 +2139,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: ['Group socket.io packages.'],
             packageRules: [
               {
@@ -2166,7 +2166,7 @@ describe('workers/repository/init/merge', () => {
             extends: ['group:springAndroid'],
           },
           staticConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             extends: ['group:springAmqp'],
             packageRules: [
               {
@@ -2176,7 +2176,7 @@ describe('workers/repository/init/merge', () => {
             ],
           },
           wantConfig: {
-            dependencyDashboard: true,
+            dependencyDashboard: { enabled: true },
             description: [
               'Group Java Spring AMQP packages.',
               'Group Java Spring Android packages.',

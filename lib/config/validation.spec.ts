@@ -3207,7 +3207,7 @@ describe('config/validation', () => {
         minimumReleaseAge: null,
         groupName: null,
         groupSlug: null,
-        dependencyDashboardLabels: null,
+        dependencyDashboardCategory: null,
         defaultRegistryUrls: null,
         registryUrls: null,
         hostRules: [
@@ -4379,7 +4379,7 @@ describe('config/validation', () => {
             {
               repository: 'valid/name',
               // @ts-expect-error -- invalid config
-              dependencyDashboardHeader: true,
+              dependencyDashboardCategory: true,
             },
           ],
         };
@@ -4393,7 +4393,7 @@ describe('config/validation', () => {
         expect(errors).toMatchObject([
           {
             message:
-              'Configuration option `repositories[0].dependencyDashboardHeader` should be a string',
+              'Configuration option `repositories[0].dependencyDashboardCategory` should be a string',
           },
         ]);
       });
