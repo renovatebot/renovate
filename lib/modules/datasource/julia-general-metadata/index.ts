@@ -1,6 +1,7 @@
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
+import * as juliaVersioning from '../../versioning/julia/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { JuliaPackageMetadata } from './schema.ts';
@@ -19,6 +20,8 @@ export class JuliaGeneralMetadataDatasource extends Datasource {
   override getDefaultRegistryUrls(_packageName: string): string[] {
     return ['https://juliaregistries.github.io/GeneralMetadata.jl/'];
   }
+
+  override readonly defaultVersioning = juliaVersioning.id;
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
