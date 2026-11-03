@@ -72,6 +72,36 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches).toBeEmptyArray();
     });
 
+    it('applies the constraints which package files share to the upgrades in their directory', async () => {
+      flattenUpdates.mockResolvedValueOnce(
+        partial<BranchUpgradeConfig>([
+          {
+            manager: 'npm',
+            depName: 'foo',
+            branchName: 'foo',
+            prTitle: 'some-title',
+            packageFile: 'apps/web/package.json',
+          },
+        ]),
+      );
+
+      const res = await branchifyUpgrades(config, {
+        mise: [
+          {
+            packageFile: 'apps/web/mise.toml',
+            deps: [],
+            sharedConstraintsScope: {
+              directory: 'apps/web',
+              precedence: 7,
+              constraints: { pnpm: '10.16.1' },
+            },
+          },
+        ],
+      });
+
+      expect(res.branches[0].extractedConstraints).toEqual({ pnpm: '10.16.1' });
+    });
+
     it('returns one branch if one input', async () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([

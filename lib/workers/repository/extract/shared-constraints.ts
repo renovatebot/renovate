@@ -4,14 +4,11 @@ import type {
   SharedConstraints,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
-import { coerceArray } from '../../../util/array.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
-import { coerceObject } from '../../../util/object.ts';
 
 interface SharedConstraintsSource extends SharedConstraintsScope {
   manager: string;
   packageFile: string;
-  constraints: Partial<Record<ConstraintName, string>>;
 }
 
 function getDepth(directory: string): number {
@@ -22,23 +19,28 @@ function isInScope(directory: string, packageFile: string): boolean {
   return directory === '' || packageFile.startsWith(`${directory}/`);
 }
 
+/**
+ * Orders the sources by depth, then by precedence, then by path in byte order, the order in which mise loads the `conf.d` files of a directory.
+ */
+function compareSources(
+  a: SharedConstraintsSource,
+  b: SharedConstraintsSource,
+): number {
+  return (
+    getDepth(a.directory) - getDepth(b.directory) ||
+    a.precedence - b.precedence ||
+    Buffer.compare(Buffer.from(a.packageFile), Buffer.from(b.packageFile))
+  );
+}
+
 function getSources(
   packageFiles: Record<string, PackageFile[]>,
 ): SharedConstraintsSource[] {
   const sources: SharedConstraintsSource[] = [];
   for (const [manager, files] of Object.entries(packageFiles)) {
-    for (const {
-      packageFile,
-      extractedConstraints,
-      sharedConstraintsScope: scope,
-    } of files) {
-      if (scope && isNonEmptyObject(extractedConstraints)) {
-        sources.push({
-          ...scope,
-          manager,
-          packageFile,
-          constraints: extractedConstraints,
-        });
+    for (const { packageFile, sharedConstraintsScope: scope } of files) {
+      if (scope && isNonEmptyObject(scope.constraints)) {
+        sources.push({ ...scope, manager, packageFile });
       }
     }
   }
@@ -46,45 +48,37 @@ function getSources(
 }
 
 /**
- * Collects the `extractedConstraints` which managers like `mise` share, merged per manager and directory by their precedence, shallower directories first.
+ * Collects the constraints which managers like `mise` share, merged per manager and directory by their precedence, shallower directories first.
  */
 export function collectSharedConstraints(
-  packageFiles: Record<string, PackageFile[]> | undefined,
+  packageFiles: Record<string, PackageFile[]>,
 ): SharedConstraints[] {
-  // `extractAllDependencies` may have yielded nothing
-  const sources = getSources(coerceObject(packageFiles)).sort(
-    (a, b) =>
-      a.precedence - b.precedence || a.packageFile.localeCompare(b.packageFile),
-  );
-
   const shared = new Map<string, SharedConstraints>();
-  for (const { manager, directory, constraints } of sources) {
+  for (const { manager, directory, constraints } of getSources(
+    packageFiles,
+  ).sort(compareSources)) {
     const key = `${manager}:${directory}`;
     const entry = shared.get(key) ?? { manager, directory, constraints: {} };
     // the lower precedence comes first, so the higher one wins
     entry.constraints = { ...entry.constraints, ...constraints };
     shared.set(key, entry);
   }
-  return [...shared.values()].sort(
-    (a, b) => getDepth(a.directory) - getDepth(b.directory),
-  );
+  return [...shared.values()];
 }
 
 /**
- * Returns the shared constraints which apply to a package file of `manager`, the nearest directory winning.
- *
- * The constraints which a manager shares do not apply to its own package files.
+ * Returns the shared constraints which apply to a package file of `manager`, the nearest directory winning, leaving out those which `manager` shares itself.
  */
 export function getSharedConstraints(
-  sharedConstraints: SharedConstraints[] | undefined,
-  manager: string | undefined,
-  packageFile: string | undefined,
+  sharedConstraints: SharedConstraints[],
+  manager: string,
+  packageFile: string,
 ): Partial<Record<ConstraintName, string>> {
   const constraints: Partial<Record<ConstraintName, string>> = {};
-  for (const shared of coerceArray(sharedConstraints)) {
+  for (const shared of sharedConstraints) {
     if (
       shared.manager !== manager &&
-      isInScope(shared.directory, packageFile ?? '')
+      isInScope(shared.directory, packageFile)
     ) {
       Object.assign(constraints, shared.constraints);
     }

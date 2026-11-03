@@ -9,39 +9,30 @@ import {
 
 function packageFile(
   path: string,
-  extractedConstraints?: PackageFile['extractedConstraints'],
   sharedConstraintsScope?: SharedConstraintsScope,
 ): PackageFile {
-  return {
-    packageFile: path,
-    deps: [],
-    extractedConstraints,
-    sharedConstraintsScope,
-  };
+  return { packageFile: path, deps: [], sharedConstraintsScope };
 }
 
-const root = { directory: '', precedence: 0 };
+function scope(
+  constraints: SharedConstraintsScope['constraints'],
+  directory = '',
+  precedence = 0,
+): SharedConstraintsScope {
+  return { directory, precedence, constraints };
+}
 
 describe('workers/repository/extract/shared-constraints', () => {
   describe('collectSharedConstraints()', () => {
-    it('handles missing package files', () => {
-      expect(collectSharedConstraints(undefined)).toEqual([]);
-    });
-
-    it('ignores managers without shared constraints', () => {
+    it('ignores package files without shared constraints', () => {
       const packageFiles = {
-        npm: [packageFile('package.json', { node: '20' })],
-      };
-
-      expect(collectSharedConstraints(packageFiles)).toEqual([]);
-    });
-
-    it('ignores package files without a scope or constraints', () => {
-      const packageFiles = {
-        tools: [
-          packageFile('tools.production.toml', { node: '22.0.0' }),
-          packageFile('tools.toml', undefined, root),
+        npm: [
+          {
+            ...packageFile('package.json'),
+            extractedConstraints: { node: '20' },
+          },
         ],
+        tools: [packageFile('tools.toml', scope({}))],
       };
 
       expect(collectSharedConstraints(packageFiles)).toEqual([]);
@@ -49,15 +40,16 @@ describe('workers/repository/extract/shared-constraints', () => {
 
     it('merges the package files of a directory by precedence, shallower directories first', () => {
       const shared = { node: '20.11.0', pnpm: '10.16.1' };
-      const web = { directory: 'apps/web', precedence: 0 };
-      const local = { directory: '', precedence: 1 };
       const packageFiles = {
         tools: [
-          packageFile('apps/web/tools.toml', { pnpm: '9.15.0' }, web),
-          packageFile('tools.local.toml', { node: '22.0.0' }, local),
-          packageFile('b.toml', { rust: '1.80.0' }, root),
-          packageFile('a.toml', { rust: '1.79.0' }, root),
-          packageFile('tools.toml', shared, root),
+          packageFile(
+            'apps/web/tools.toml',
+            scope({ pnpm: '9.15.0' }, 'apps/web'),
+          ),
+          packageFile('tools.local.toml', scope({ node: '22.0.0' }, '', 1)),
+          packageFile('b.toml', scope({ rust: '1.80.0' })),
+          packageFile('a.toml', scope({ rust: '1.79.0' })),
+          packageFile('tools.toml', scope(shared)),
         ],
       };
 
@@ -76,6 +68,19 @@ describe('workers/repository/extract/shared-constraints', () => {
         },
       ]);
       expect(shared).toEqual({ node: '20.11.0', pnpm: '10.16.1' });
+    });
+
+    it('lets the later path in byte order win between package files of the same precedence', () => {
+      const packageFiles = {
+        tools: [
+          packageFile('conf.d/a.toml', scope({ node: '20.11.0' })),
+          packageFile('conf.d/B.toml', scope({ node: '22.0.0' })),
+        ],
+      };
+
+      expect(collectSharedConstraints(packageFiles)).toEqual([
+        { manager: 'tools', directory: '', constraints: { node: '20.11.0' } },
+      ]);
     });
   });
 
@@ -99,7 +104,6 @@ describe('workers/repository/extract/shared-constraints', () => {
       ${'apps/web/package.json'}        | ${{ node: '20.11.0', pnpm: '10.16.1' }}
       ${'apps/web/nested/package.json'} | ${{ node: '20.11.0', pnpm: '10.16.1' }}
       ${'apps/web-client/package.json'} | ${{ node: '20.11.0', pnpm: '9.15.0' }}
-      ${undefined}                      | ${{ node: '20.11.0', pnpm: '9.15.0' }}
     `('returns $expected for $packageFile', ({ packageFile, expected }) => {
       expect(
         getSharedConstraints(sharedConstraints, 'npm', packageFile),
@@ -126,12 +130,6 @@ describe('workers/repository/extract/shared-constraints', () => {
       expect(
         getSharedConstraints(sharedConstraints, 'tools', 'apps/web/tools.toml'),
       ).toEqual({});
-    });
-
-    it('handles missing shared constraints', () => {
-      expect(getSharedConstraints(undefined, 'npm', 'package.json')).toEqual(
-        {},
-      );
     });
   });
 });

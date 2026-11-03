@@ -5,6 +5,7 @@ import semver from 'semver';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import type { SharedConstraints } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -204,6 +205,7 @@ const semanticCommitTypeByPriority = ['chore', 'ci', 'build', 'fix', 'feat'];
 
 export function generateBranchConfig(
   upgrades: BranchUpgradeConfig[],
+  sharedConstraints: SharedConstraints[] = [],
 ): BranchConfig {
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
@@ -532,15 +534,14 @@ export function generateBranchConfig(
       config.constraints = { ...config.constraints, ...upgrade.constraints };
     }
     // the constraints which other managers share for the directory of the package file come below its own, also on the upgrade, which the branch worker reads on its own
-    const sharedConstraints = getSharedConstraints(
-      upgrade.sharedConstraints,
+    const shared = getSharedConstraints(
+      sharedConstraints,
       upgrade.manager,
-      upgrade.packageFile,
+      upgrade.packageFile ?? '',
     );
-    delete upgrade.sharedConstraints;
-    if (Object.keys(sharedConstraints).length) {
+    if (Object.keys(shared).length) {
       upgrade.extractedConstraints = {
-        ...sharedConstraints,
+        ...shared,
         ...upgrade.extractedConstraints,
       };
     }
@@ -549,7 +550,6 @@ export function generateBranchConfig(
       ...upgrade.extractedConstraints,
     };
   }
-  delete config.sharedConstraints;
 
   config.minimumGroupSize = getMinimumGroupSize(config.upgrades);
   // Set skipInstalls to false if any upgrade in the branch has it false

@@ -407,7 +407,6 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           extractedConstraints: { node: '22' },
-          sharedConstraints,
         },
         {
           manager: 'tools',
@@ -416,22 +415,17 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          sharedConstraints,
         },
       ];
 
-      const res = generateBranchConfig(branch);
+      const res = generateBranchConfig(branch, sharedConstraints);
 
       expect(res.extractedConstraints).toEqual({ node: '22', pnpm: '10' });
-      expect(res).not.toHaveProperty('sharedConstraints');
       expect(res.upgrades[0].extractedConstraints).toEqual({
         node: '22',
         pnpm: '10',
       });
       expect(res.upgrades[1]).not.toHaveProperty('extractedConstraints');
-      expect(res.upgrades).toSatisfyAll(
-        (upgrade) => !('sharedConstraints' in upgrade),
-      );
     });
 
     it('uses the new value of a tool constraint which the branch updates', () => {
