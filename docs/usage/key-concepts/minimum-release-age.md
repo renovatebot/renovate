@@ -113,11 +113,15 @@ After the next lock file maintenance run (which regenerates the lock file from s
 
 #### Poetry
 
-When the repository or manager config sets `minimumReleaseAge`, Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
-Renovate rounds the value up to whole days.
-Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
+Renovate sets the `POETRY_SOLVER_MIN_RELEASE_AGE` environment variable when running `poetry update --lock`.
 This ensures that Poetry only resolves package versions that are at least as old as the cooldown threshold.
 Poetry added this setting in v2.4.0, and older versions ignore it.
+Renovate rounds the value up to whole days.
+
+Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate sets the variable when the update has a `minimumReleaseAge`, including a value from `packageRules`, and does not read `poetry.toml`.
+
+With `minimumReleaseAgePackageManagerSync`, Renovate sets the variable when the repository or manager config sets `minimumReleaseAge`.
+Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not set the variable.
 Renovate reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`.
 It never passes less than `solver.min-release-age`, and sets no variable if the value equals it, so Poetry applies its own config.
 If an updated package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate passes that smaller value, rounded down to whole days, and adds a notice to the PR.
