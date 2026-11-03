@@ -73,7 +73,10 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd:
-    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions,
   sideCarImage: string,
 ): Promise<RawExecArguments> {
@@ -156,7 +159,10 @@ async function prepareRawExec(
 
 export async function exec(
   cmd:
-    string | string[] | CommandWithOptions[] | (string | CommandWithOptions)[],
+    | string
+    | string[]
+    | CommandWithOptions[]
+    | (string | CommandWithOptions)[],
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;

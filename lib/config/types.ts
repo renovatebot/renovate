@@ -29,10 +29,19 @@ import type { Timestamp } from '../util/timestamp.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
-  'global' | 'inherit' | 'repository' | 'package' | 'branch' | 'pr';
+  | 'global'
+  | 'inherit'
+  | 'repository'
+  | 'package'
+  | 'branch'
+  | 'pr';
 
 export type RenovateSplit =
-  'init' | 'onboarding' | 'extract' | 'lookup' | 'update';
+  | 'init'
+  | 'onboarding'
+  | 'extract'
+  | 'lookup'
+  | 'update';
 
 export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
 export type RepositoryCacheType = 'local' | (string & {});
@@ -349,7 +358,8 @@ export type RenovateRepository = string | RenovateRepositoryEntry;
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
-  'timestamp-required' | 'timestamp-optional';
+  | 'timestamp-required'
+  | 'timestamp-optional';
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -589,7 +599,11 @@ export type MergeStrategy =
 
 // This list should be added to as any new unsafe execution commands should be permitted
 export type AllowedUnsafeExecution =
-  'bazelModDeps' | 'goGenerate' | 'gradleWrapper' | 'mise' | 'pixi';
+  | 'bazelModDeps'
+  | 'goGenerate'
+  | 'gradleWrapper'
+  | 'mise'
+  | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule

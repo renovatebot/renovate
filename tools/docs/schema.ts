@@ -21,7 +21,13 @@ import { updateFile } from '../utils/index.ts';
 import { readDocsHeadings } from './utils.ts';
 
 type JsonSchemaBasicType =
-  'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
+  | 'string'
+  | 'number'
+  | 'integer'
+  | 'boolean'
+  | 'object'
+  | 'array'
+  | 'null';
 type JsonSchemaType = JsonSchemaBasicType | JsonSchemaBasicType[];
 
 const docsPages = {

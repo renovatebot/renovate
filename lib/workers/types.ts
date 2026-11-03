@@ -159,7 +159,9 @@ export type BranchResult =
   | 'minimum-group-size-not-met';
 
 export type CacheFingerprintMatchResult =
-  'matched' | 'no-match' | 'no-fingerprint';
+  | 'matched'
+  | 'no-match'
+  | 'no-fingerprint';
 
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {

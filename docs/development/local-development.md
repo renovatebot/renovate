@@ -155,7 +155,7 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs lint checks (`oxlint`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
+`pnpm test` runs lint checks (`oxlint`, `oxfmt`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
@@ -191,9 +191,9 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 ## Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) to format our code.
-If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
-You usually don't need to fix any Prettier errors by hand.
+We use [oxfmt](https://oxc.rs/docs/guide/usage/formatter) to format our code, JSON and YAML files, and [Prettier](https://github.com/prettier/prettier) to format our Markdown files.
+If your code fails `pnpm test` due to a formatting error then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
+You usually don't need to fix any formatting errors by hand.
 
 We use [knip](https://knip.dev) to detect unused, unlisted or unresolved dependencies.
 Run `pnpm knip` to check, and remove packages from `package.json` that nothing uses anymore.

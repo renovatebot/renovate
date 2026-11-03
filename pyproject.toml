@@ -1,10 +1,7 @@
 [project]
 name = "renovate-docs"
 version = "0.0.0"
-dependencies = [
-  "mkdocs-material==9.8.0",
-  "mkdocs-awesome-pages-plugin==2.10.1",
-]
+dependencies = ["mkdocs-material==9.8.0", "mkdocs-awesome-pages-plugin==2.10.1"]
 requires-python = ">=3.11"
 
 

@@ -1,7 +1,8 @@
 {
   "*.{js,cjs,mjs,mts,ts}": [
     "oxlint --import-plugin --fix -c .oxlintrc.json",
-    "prettier --write"
+    "oxfmt --no-error-on-unmatched-pattern"
   ],
-  "(*.{md,yml,json})": "prettier --ignore-unknown --write"
+  "*.{json,jsonc,yml,yaml,toml}": "oxfmt --no-error-on-unmatched-pattern",
+  "*.md": "prettier --write"
 }

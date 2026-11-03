@@ -108,7 +108,8 @@ export class PackageCacheSqlite extends PackageCacheBase {
     key: string,
   ): Buffer | undefined {
     const row = this.getStatement.get({ namespace, key }) as
-      { data: Uint8Array } | undefined;
+      | { data: Uint8Array }
+      | undefined;
 
     if (!row) {
       return undefined;

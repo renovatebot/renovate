@@ -61,7 +61,9 @@ export interface RepositoryReference {
 }
 
 export type ActionReference =
-  DockerReference | LocalReference | RepositoryReference;
+  | DockerReference
+  | LocalReference
+  | RepositoryReference;
 
 export interface CommentData {
   pinnedVersion?: string;
