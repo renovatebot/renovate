@@ -35,7 +35,7 @@ const checksumManifestName = regEx(
   /(?:^|[^a-z0-9])(?:sha(?:256|384|512)?[-_]?sums?(?:256|384|512)?|sha(?:256|384|512)|checksums?|sums?)(?:\.txt)?$/i,
 );
 
-export function isChecksumManifestCandidate(asset: GithubRestAsset): boolean {
+function isChecksumManifestCandidate(asset: GithubRestAsset): boolean {
   if (asset.size < smallAssetLimit) {
     return true;
   }
