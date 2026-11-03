@@ -141,6 +141,12 @@ export const githubReleasesActions: Record<string, KnownActionConfig> = {
     packageName: 'casey/just',
     withSchema: valSchema('just-version'),
   },
+  // https://github.com/fluxcd/flux-mirror/tree/main/actions/setup
+  'fluxcd/flux-mirror/actions/setup': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'flux-mirror',
+    packageName: 'fluxcd/flux-mirror',
+  },
   // https://github.com/foundry-rs/foundry-toolchain
   'foundry-rs/foundry-toolchain': {
     datasource: GithubReleasesDatasource.id,

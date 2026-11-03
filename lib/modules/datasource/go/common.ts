@@ -9,15 +9,9 @@ import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 
+import { publicGoproxyUrl } from './env.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
-
-/**
- * The Go module proxy which serves public modules only, and which the Go toolchain uses by default.
- *
- * @see https://go.dev/ref/mod#module-proxy
- */
-export const publicGoproxyUrl = 'https://proxy.golang.org';
 
 /**
  * Whether a module's data may be written to a package cache which is shared with others.
