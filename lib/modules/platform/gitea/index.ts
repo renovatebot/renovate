@@ -99,6 +99,16 @@ function toRenovateIssue(data: Issue): Issue {
   };
 }
 
+function haveLabelsChanged(
+  labels: number[],
+  existingLabelIds: number[],
+): boolean {
+  return (
+    labels.length !== existingLabelIds.length ||
+    labels.some((labelId) => !existingLabelIds.includes(labelId))
+  );
+}
+
 function matchesState(actual: string, expected: string): boolean {
   if (expected === 'all') {
     return true;
@@ -571,13 +581,16 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         return toRenovatePR(pr, null);
       }
       const prList = await platform.getPrList();
-      const pr = prList.find(
-        (p) =>
-          p.sourceRepo === config.repository &&
-          p.sourceBranch === branchName &&
-          matchesState(p.state, state) &&
-          (!title || p.title === title),
-      );
+      const pr = prList.find((p) => {
+        if (
+          p.sourceRepo !== config.repository ||
+          p.sourceBranch !== branchName ||
+          !matchesState(p.state, state)
+        ) {
+          return false;
+        }
+        return !title || p.title === title;
+      });
 
       if (pr) {
         logger.debug(`Found PR #${pr.number}`);
@@ -906,12 +919,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             const existingLabelIds = coerceArray(existingIssue.labels).map(
               (label) => label.id,
             );
-            if (
-              labels &&
-              (labels.length !== existingLabelIds.length ||
-                labels.filter((labelId) => !existingLabelIds.includes(labelId))
-                  .length !== 0)
-            ) {
+            if (labels && haveLabelsChanged(labels, existingLabelIds)) {
               await helper.updateIssueLabels(
                 http,
                 config.repository,

@@ -723,6 +723,26 @@ describe('modules/platform/gerrit/client', () => {
         client.checkForExistingMessage(123456, 'the message'),
       ).resolves.toBeTrue();
     });
+
+    it('msg found but with another tag', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(
+          200,
+          gerritRestResponse([
+            partial<GerritChangeMessageInfo>({
+              id: '1',
+              message: 'the message',
+              tag: 'other-tag',
+            }),
+          ]),
+          jsonResultHeader,
+        );
+      await expect(
+        client.checkForExistingMessage(123456, 'the message', 'TAG'),
+      ).resolves.toBeFalse();
+    });
   });
 
   describe('addMessageIfNotAlreadyExists()', () => {

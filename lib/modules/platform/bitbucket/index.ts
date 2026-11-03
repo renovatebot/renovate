@@ -374,12 +374,12 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
-  );
+  const pr = prList.find((p) => {
+    if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+      return false;
+    }
+    return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+  });
 
   if (!pr) {
     return null;
@@ -523,10 +523,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    statuses.every(
-      (status) =>
-        status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/'),
-    )
+    statuses.every((status) => {
+      const isInternal = status.key?.startsWith('renovate/');
+      return status.state === 'SUCCESSFUL' && isInternal;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',

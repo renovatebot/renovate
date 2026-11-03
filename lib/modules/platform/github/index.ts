@@ -127,6 +127,21 @@ export const id = 'github';
 let config: LocalRepoConfig;
 let platformConfig: PlatformConfig;
 
+function isGhesVersionSatisfying(range: string): boolean {
+  if (!isGithubEnterpriseServer(platformConfig.host)) {
+    return false;
+  }
+  return semver.satisfies(platformConfig.host.version ?? '', range);
+}
+
+function isGhesVersionUnknownOrBelow(minVersion: string): boolean {
+  if (!isGithubEnterpriseServer(platformConfig.host)) {
+    return false;
+  }
+  const { version } = platformConfig.host;
+  return !version || semver.lt(version, minVersion);
+}
+
 const defaultGithubApiUrl = 'https://api.github.com/';
 
 // GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
@@ -216,9 +231,7 @@ export async function initPlatform({
    */
   if (
     isGithubFineGrainedPersonalAccessToken(token) &&
-    isGithubEnterpriseServer(platformConfig.host) &&
-    (!platformConfig.host.version ||
-      semver.lt(platformConfig.host.version, '3.10.0'))
+    isGhesVersionUnknownOrBelow('3.10.0')
   ) {
     throw new Error(
       'Init: Fine-grained Personal Access Tokens do not support GitHub Enterprise Server API version <3.10 and cannot be used with Renovate.',
@@ -571,19 +584,13 @@ export async function initRepo({
 
     // GitHub Enterprise Server <3.3.0 doesn't support autoMergeAllowed and hasIssuesEnabled objects
     // TODO #22198
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.3.0')) {
       infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
       infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.9.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.9.0')) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
         '\n',
@@ -591,10 +598,7 @@ export async function initRepo({
     }
 
     // GitHub Enterprise Server <3.12.0 doesn't support merge queues
-    if (
-      isGithubEnterpriseServer(platformConfig.host) &&
-      semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
-    ) {
+    if (isGhesVersionSatisfying('<3.12.0')) {
       infoQuery = infoQuery.replace(
         regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
@@ -1277,8 +1281,10 @@ export async function getBranchStatus(
   ) {
     return 'red';
   }
+  const isCommitStatusOk =
+    commitStatus.state === 'success' || commitStatus.statuses.length === 0;
   if (
-    (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
+    isCommitStatusOk &&
     checkRuns.every((run) =>
       ['skipped', 'neutral', 'success'].includes(run.conclusion),
     )
@@ -1895,10 +1901,7 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  if (
-    isGithubEnterpriseServer(platformConfig.host) &&
-    semver.satisfies(platformConfig.host.version ?? '', '<3.3.0')
-  ) {
+  if (isGhesVersionSatisfying('<3.3.0')) {
     logger.debug(
       { prNumber },
       'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
@@ -1915,11 +1918,10 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod =
-      (
-        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
-        config.mergeMethod
-      )?.toUpperCase() || 'MERGE';
+    const configuredMergeMethod =
+      mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+      config.mergeMethod;
+    const mergeMethod = configuredMergeMethod?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
@@ -2036,10 +2038,7 @@ export async function isBranchMergeQueueEnabled(
   }
 
   // TODO #22198
-  if (
-    isGithubEnterpriseServer(platformConfig.host) &&
-    semver.satisfies(platformConfig.host.version ?? '', '<3.12.0')
-  ) {
+  if (isGhesVersionSatisfying('<3.12.0')) {
     // Merge queues are only supported on GHES >=3.12.0
     config.mergeQueueEnabled[baseBranch] = false;
     return false;
@@ -2282,11 +2281,11 @@ async function directMergePr(
         }
         if (
           isNonEmptyString(body?.message) &&
-          (body.message.includes('approving review') ||
-            body.message.includes('code owner review') ||
-            body.message.includes(
-              'New changes require approval from someone other than the last pusher',
-            ))
+          [
+            'approving review',
+            'code owner review',
+            'New changes require approval from someone other than the last pusher',
+          ].some((text) => body.message.includes(text))
         ) {
           logger.debug(
             { response: body },
