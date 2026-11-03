@@ -1,9 +1,9 @@
-import { isArray, isString } from '@sindresorhus/is';
 import type { Response, SimpleGit } from 'simple-git';
 import { mock } from 'vitest-mock-extended';
 import { clearEnv } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as git from '../../../util/git/index.ts';
+import { StringOrStringArray } from '../../../util/schema-utils/index.ts';
 import { extractPackageFile } from './index.ts';
 
 const createSimpleGit = vi.mocked(git.createSimpleGit);
@@ -25,8 +25,11 @@ describe('modules/manager/git-submodules/extract', () => {
       );
 
       gitMock.raw.mockImplementation((options) => {
-        const isTextOption = isString(options) || isArray(options, isString);
-        if (isTextOption && options.includes('remote.origin.url')) {
+        const textOptions = StringOrStringArray.safeParse(options);
+        if (
+          textOptions.success &&
+          textOptions.data.includes('remote.origin.url')
+        ) {
           return Promise.resolve(
             'https://github.com/renovatebot/renovate.git',
           ) as Response<string>;

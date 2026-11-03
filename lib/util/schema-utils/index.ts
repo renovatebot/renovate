@@ -456,6 +456,8 @@ export function isEmailAdress(value: string): boolean {
   return EmailAddress.safeParse(value).success;
 }
 
+export const StringOrStringArray = z.union([z.string(), z.array(z.string())]);
+
 /**
  * A config option definition whose value is a string or an array of strings.
  */
