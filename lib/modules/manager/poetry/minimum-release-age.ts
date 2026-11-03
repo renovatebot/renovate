@@ -1,6 +1,7 @@
 import { isNumber } from '@sindresorhus/is';
 import { Duration } from 'luxon';
 import { logger } from '../../../logger/index.ts';
+import { getElapsedMs } from '../../../util/date.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import {
   calculatePackageManagerMinimumReleaseAgeMs,
@@ -143,12 +144,15 @@ export async function getMinReleaseAgeEnv(
   const exemptedDeps = updatedDeps.filter((dep) =>
     exemption.depNames.includes(coerceString(dep.depName)),
   );
-  // Poetry excludes all versions of a package, so only a pinned version is one which Renovate checked
-  const pinned = exemptedDeps.filter(isPinned);
-  const ranges = exemptedDeps.filter((dep) => !isPinned(dep));
-  if (ranges.length) {
+  const pinned = exemptedDeps.filter((dep) =>
+    isExcludable(dep, poetryConfig.days),
+  );
+  const notExcluded = exemptedDeps.filter(
+    (dep) => !isExcludable(dep, poetryConfig.days),
+  );
+  if (notExcluded.length) {
     logger.debug(
-      `Not excluding ${ranges.map(getNormalizedName).join(', ')} from the Poetry minimum release age, as the constraint is not a single version`,
+      `Not excluding ${notExcluded.map(getNormalizedName).join(', ')} from the Poetry minimum release age, as the constraint is not a single version or the release is younger than solver.min-release-age`,
     );
   }
   if (!pinned.length) {
@@ -166,6 +170,19 @@ export async function getMinReleaseAgeEnv(
       POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: exclude.join(','),
     },
   };
+}
+
+/**
+ * Whether Poetry may skip the minimum release age for `dep`: Poetry excludes all versions of a package, so the constraint must pin the single version which Renovate checked, and the release must be at least as old as `solver.min-release-age` of `configDays`, as the exclusion also skips that age. A release without a timestamp only passes `0`.
+ */
+function isExcludable(dep: Upgrade, configDays: number): boolean {
+  return (
+    isPinned(dep) &&
+    (!configDays ||
+      (!!dep.releaseTimestamp &&
+        getElapsedMs(dep.releaseTimestamp) >=
+          Duration.fromObject({ days: configDays }).as('milliseconds')))
+  );
 }
 
 function isPinned(dep: Upgrade): boolean {

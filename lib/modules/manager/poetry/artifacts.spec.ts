@@ -1440,7 +1440,7 @@ describe('modules/manager/poetry/artifacts', () => {
           });
         });
 
-        it('checks the exemption against the Poetry value and sets only the exclude if no age is passed', async () => {
+        it('does not exclude a release younger than solver.min-release-age', async () => {
           const { env } = await runWithPoetryToml(
             codeBlock`
             [solver]
@@ -1459,9 +1459,32 @@ describe('modules/manager/poetry/artifacts', () => {
             ],
           );
           expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
-          expect(env).toMatchObject({
-            POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'dep1',
-          });
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
+        });
+
+        it('does not exclude a release without timestamp if solver.min-release-age is set', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '7 days',
+              },
+            ],
+          );
+          expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
         });
 
         it('does not exclude a release which Poetry accepts', async () => {
