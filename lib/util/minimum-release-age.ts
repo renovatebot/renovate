@@ -1,11 +1,10 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import type { MinimumReleaseAgeBehaviour } from '../config/types.ts';
 import { coerceArray } from './array.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
-import { regEx } from './regex.ts';
+import { UtcDate } from './schema-utils/index.ts';
 import { uniqueStrings } from './string.ts';
 import type { Timestamp } from './timestamp.ts';
 
@@ -28,8 +27,6 @@ export interface MinimumReleaseAgeConfig {
   minimumReleaseAgeExtracted?: string | null;
 }
 
-const isoDateRegex = regEx(/^\d{4}-\d{2}-\d{2}/);
-
 function durationToMs(duration: string | null | undefined): number {
   return isNonEmptyString(duration) ? coerceNumber(toMs(duration), 0) : 0;
 }
@@ -39,14 +36,11 @@ function durationToMs(duration: string | null | undefined): number {
  * date, to milliseconds.
  */
 function extractedAgeToMs(age: string | null | undefined): number {
-  if (!isNonEmptyString(age) || !isoDateRegex.test(age)) {
+  const date = UtcDate.safeParse(age);
+  if (!date.success) {
     return durationToMs(age);
   }
-  const date = DateTime.fromISO(age, { zone: 'utc' });
-  if (!date.isValid) {
-    return 0;
-  }
-  return Math.max(Date.now() - date.toMillis(), 0);
+  return Math.max(Date.now() - date.data.toMillis(), 0);
 }
 
 /**

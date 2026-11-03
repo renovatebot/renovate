@@ -302,7 +302,7 @@ export const Jsonc = z.string().transform((str, ctx): unknown => {
 export const UtcDate = z
   .string()
   .describe('ISO 8601 string')
-  .transform((str, ctx): DateTime => {
+  .transform((str, ctx): DateTime<true> => {
     const date = DateTime.fromISO(str, { zone: 'utc' });
     if (!date.isValid) {
       ctx.addIssue({ code: 'custom', message: 'Invalid date' });

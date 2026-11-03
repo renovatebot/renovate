@@ -1,8 +1,8 @@
 import { isNonEmptyString, isNumericString } from '@sindresorhus/is';
 import ini from 'ini';
-import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
+import { UtcDate } from '../../../../util/schema-utils/index.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import type { PackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
@@ -22,9 +22,9 @@ export function parseNpmrcCooldown(
 
   const before = parsed.before;
   if (isNonEmptyString(before)) {
-    const date = DateTime.fromISO(before, { zone: 'utc' });
-    if (date.isValid) {
-      return { source: 'before', date };
+    const date = UtcDate.safeParse(before);
+    if (date.success) {
+      return { source: 'before', date: date.data };
     }
     logger.debug(`Invalid before date in .npmrc: ${before}, ignoring`);
   }
