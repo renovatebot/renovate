@@ -12,6 +12,7 @@ ruleTester.run('prefer-json-pipe', rule, {
   valid: [
     // already using the pipe helper
     `Json.pipe(Schema).parse(input);`,
+    `Ini.pipe(Schema).parse(input);`,
     // plain parse of a non-JSON.parse argument
     `Schema.parse(input);`,
     `Schema.safeParse(input);`,
@@ -29,6 +30,10 @@ ruleTester.run('prefer-json-pipe', rule, {
     `Schema.parse(JSON['parse'](input));`,
     `Schema.parse(foo.JSON.parse(input));`,
     `Schema.parse(parse(input));`,
+    `Schema.parse(ini['parse'](input));`,
+    `Schema.parse(foo.ini.parse(input));`,
+    `Schema.parse(ini.stringify(input));`,
+    `Schema.parse(toString.parse(input));`,
   ],
   invalid: [
     {
@@ -42,6 +47,14 @@ ruleTester.run('prefer-json-pipe', rule, {
     // extra arguments after the parsed value still match
     {
       code: `Schema.parse(JSON.parse(input), opts);`,
+      errors: [{ messageId: 'preferJsonPipe' }],
+    },
+    {
+      code: `Schema.parse(ini.parse(input));`,
+      errors: [{ messageId: 'preferJsonPipe' }],
+    },
+    {
+      code: `Schema.safeParse(ini.parse(input));`,
       errors: [{ messageId: 'preferJsonPipe' }],
     },
   ],

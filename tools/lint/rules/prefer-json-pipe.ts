@@ -18,16 +18,29 @@ function getCalleeName(node: ESTree.Node): string | null {
 }
 
 /**
- * True for a `JSON.parse(...)` call expression.
+ * Parser objects whose `.parse()` result should be validated through a
+ * `<Helper>.pipe(Schema)` helper from schema-utils.
  */
-function isJsonParseCall(node: ESTree.Node): boolean {
-  return (
+const parserHelpers: Record<string, string> = {
+  JSON: 'Json',
+  ini: 'Ini',
+};
+
+/**
+ * For a `JSON.parse(...)` or `ini.parse(...)` call expression return the
+ * parser object name, otherwise null.
+ */
+function getParserName(node: ESTree.Node): string | null {
+  if (
     getCalleeName(node) === 'parse' &&
     node.type === 'CallExpression' &&
     node.callee.type === 'MemberExpression' &&
     node.callee.object.type === 'Identifier' &&
-    node.callee.object.name === 'JSON'
-  );
+    Object.hasOwn(parserHelpers, node.callee.object.name)
+  ) {
+    return node.callee.object.name;
+  }
+  return null;
 }
 
 export default defineRule({
@@ -35,7 +48,7 @@ export default defineRule({
     type: 'suggestion',
     messages: {
       preferJsonPipe:
-        'Use `Json.pipe(Schema)` from schema-utils instead of `Schema.{{method}}(JSON.parse(...))` — it folds the parse and validation into a single schema.',
+        'Use `{{helper}}.pipe(Schema)` from schema-utils instead of `Schema.{{method}}({{parser}}.parse(...))` — it folds the parse and validation into a single schema.',
     },
   },
   createOnce(context) {
@@ -46,11 +59,12 @@ export default defineRule({
           return;
         }
         const [arg] = node.arguments;
-        if (arg && isJsonParseCall(arg)) {
+        const parser = arg ? getParserName(arg) : null;
+        if (parser) {
           context.report({
             node,
             messageId: 'preferJsonPipe',
-            data: { method },
+            data: { method, parser, helper: parserHelpers[parser] },
           });
         }
       },
