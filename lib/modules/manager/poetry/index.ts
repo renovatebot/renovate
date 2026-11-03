@@ -25,7 +25,7 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
   poetry: {
     passesMinimumReleaseAge: `>=${poetryMinReleaseAgeVersion}`,
     readsConfiguredAge: `>=${poetryMinReleaseAgeVersion}`,
-    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days. With `minimumReleaseAgePackageManagerSync`, reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`, sets no age variable if the value equals the Poetry value, and sets `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE` for updated packages with a smaller `minimumReleaseAge`. Older Poetry versions ignore them.',
+    note: 'Sets `POETRY_SOLVER_MIN_RELEASE_AGE`, rounded up to whole days. With `minimumReleaseAgePackageManagerSync`, passes the `minimumReleaseAge` of the repository or manager config instead of the one of the update, reads `solver.min-release-age` and `solver.min-release-age-exclude` from the `poetry.toml` next to `pyproject.toml`, sets no age variable if the value equals the Poetry value, and sets `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE` for updated packages with a smaller `minimumReleaseAge` which pin a single version. Older Poetry versions ignore them.',
   },
 };
 
