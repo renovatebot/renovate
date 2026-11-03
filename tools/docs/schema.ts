@@ -182,8 +182,9 @@ function createSingleConfig(
   if (option.default === null || option.nullable) {
     temp.type = [option.type, 'null'];
   }
+  const isObjectType = temp.type === 'object' || temp.type?.includes('object');
   if (
-    (temp.type === 'object' || temp.type?.includes('object')) &&
+    isObjectType &&
     !option.freeChoice &&
     /* an option which describes the shape of its own values, like a map of strings, doesn't nest a Renovate config */
     temp.additionalProperties === undefined
@@ -310,7 +311,8 @@ function getChildrenSchema(
   definition: Record<string, any>,
 ): Record<string, any> {
   const type: JsonSchemaType | undefined = definition.type;
-  if (type === 'array' || (Array.isArray(type) && type.includes('array'))) {
+  const isArrayInUnion = Array.isArray(type) && type.includes('array');
+  if (type === 'array' || isArrayInUnion) {
     definition.items ??= {};
     return definition.items;
   }

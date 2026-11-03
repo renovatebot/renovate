@@ -470,8 +470,7 @@ export class Vulnerabilities {
       for (const event of this.sortEvents(range.events, versioningApi)) {
         if (
           isNonEmptyString(event.introduced) &&
-          (event.introduced === '0' ||
-            this.isVersionGtOrEq(depVersion, event.introduced, versioningApi))
+          this.isIntroducedIn(depVersion, event.introduced, versioningApi)
         ) {
           vulnerable = true;
         } else if (
@@ -495,6 +494,17 @@ export class Vulnerabilities {
     return false;
   }
 
+  private isIntroducedIn(
+    depVersion: string,
+    introduced: string,
+    versioningApi: VersioningApi,
+  ): boolean {
+    return (
+      introduced === '0' ||
+      this.isVersionGtOrEq(depVersion, introduced, versioningApi)
+    );
+  }
+
   // https://ossf.github.io/osv-schema/#evaluation
   private isPackageVulnerable(
     ecosystem: Ecosystem,
@@ -503,10 +513,12 @@ export class Vulnerabilities {
     affected: Osv.Affected,
     versioningApi: VersioningApi,
   ): boolean {
+    if (!this.isPackageAffected(ecosystem, osvPackageName, affected)) {
+      return false;
+    }
     return (
-      this.isPackageAffected(ecosystem, osvPackageName, affected) &&
-      (this.includedInVersions(depVersion, affected) ||
-        this.includedInRanges(depVersion, affected, versioningApi))
+      this.includedInVersions(depVersion, affected) ||
+      this.includedInRanges(depVersion, affected, versioningApi)
     );
   }
 
@@ -589,11 +601,12 @@ export class Vulnerabilities {
     other: string,
     versioningApi: VersioningApi,
   ): boolean {
+    if (!versioningApi.isVersion(version) || !versioningApi.isVersion(other)) {
+      return false;
+    }
     return (
-      versioningApi.isVersion(version) &&
-      versioningApi.isVersion(other) &&
-      (versioningApi.equals(version, other) ||
-        versioningApi.isGreaterThan(version, other))
+      versioningApi.equals(version, other) ||
+      versioningApi.isGreaterThan(version, other)
     );
   }
 

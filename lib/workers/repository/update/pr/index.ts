@@ -59,10 +59,10 @@ import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
+  const isPrOrBranchAutomerge =
+    config.automergeType === 'pr' || config.automergeType === 'branch';
   const usePlatformAutomerge = Boolean(
-    config.automerge &&
-    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-    config.platformAutomerge,
+    config.automerge && isPrOrBranchAutomerge && config.platformAutomerge,
   );
 
   return {
@@ -263,10 +263,12 @@ export async function ensurePr(
         logger.debug(`Branch status is yellow - checking timeout`);
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const elapsedHours = getElapsedHours(lastCommitTime);
-        const isAwaitingTests =
-          (!!config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-          (isNumber(config.prNotPendingHours) &&
-            elapsedHours < config.prNotPendingHours);
+        const isStabilityPending =
+          !!config.stabilityStatus && config.stabilityStatus !== 'yellow';
+        const isWithinNotPendingHours =
+          isNumber(config.prNotPendingHours) &&
+          elapsedHours < config.prNotPendingHours;
+        const isAwaitingTests = isStabilityPending || isWithinNotPendingHours;
         if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,

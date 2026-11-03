@@ -11,11 +11,10 @@ function isWrapper(
   node: ESTree.Node,
 ): node is
   ESTree.UnaryExpression | ESTree.TSNonNullExpression | ESTree.TSAsExpression {
-  return (
-    (node.type === 'UnaryExpression' && node.operator === '!') ||
-    node.type === 'TSNonNullExpression' ||
-    node.type === 'TSAsExpression'
-  );
+  if (node.type === 'UnaryExpression') {
+    return node.operator === '!';
+  }
+  return node.type === 'TSNonNullExpression' || node.type === 'TSAsExpression';
 }
 
 function unwrap(node: ESTree.Node): ESTree.Node {
@@ -80,27 +79,34 @@ function getDepth(node: ESTree.LogicalExpression): number {
   );
 }
 
+function isTransparent(parent: ESTree.Node, child: ESTree.Node): boolean {
+  switch (parent.type) {
+    case 'ChainExpression':
+    case 'CallExpression':
+    case 'NewExpression':
+    case 'SpreadElement':
+      return true;
+    case 'MemberExpression':
+      return parent.object === child;
+    case 'ArrowFunctionExpression':
+      return parent.expression && parent.body === child;
+    default:
+      return isWrapper(parent);
+  }
+}
+
 /**
  * Walks up through exactly the constructs `valueDepth` looks through.
  */
 function isRoot(node: ESTree.LogicalExpression): boolean {
   let child: ESTree.Node = node;
   for (;;) {
-    const parent: ESTree.Node = child.parent;
+    // a logical expression is never the program root, so its ancestors exist
+    const parent: ESTree.Node = child.parent!;
     if (parent.type === 'LogicalExpression') {
       return false;
     }
-    const transparent =
-      isWrapper(parent) ||
-      parent.type === 'ChainExpression' ||
-      parent.type === 'CallExpression' ||
-      parent.type === 'NewExpression' ||
-      parent.type === 'SpreadElement' ||
-      (parent.type === 'MemberExpression' && parent.object === child) ||
-      (parent.type === 'ArrowFunctionExpression' &&
-        parent.expression &&
-        parent.body === child);
-    if (!transparent) {
+    if (!isTransparent(parent, child)) {
       return true;
     }
     child = parent;
