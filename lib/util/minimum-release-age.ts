@@ -57,6 +57,7 @@ export interface PackageManagerMinimumReleaseAgeConfig {
   isVulnerabilityAlert?: boolean;
   manager?: string | null;
   minimumReleaseAge?: string | null;
+  minimumReleaseAgePackageManagerSync?: boolean;
   minimumReleaseAgeRepository?: string | null;
   packageFile?: string | null;
 }
@@ -89,7 +90,9 @@ function findManagerUpdate(
  *
  * It reads the values from an update of `manager`, preferring lock file
  * maintenance, in `upgrades`, then in the upgrades of the branch for
- * `packageFile`, then from `config`.
+ * `packageFile`, then from `config`. If that update does not enable
+ * `minimumReleaseAgePackageManagerSync`, it returns the `minimumReleaseAge` of
+ * `config`.
  */
 export function calculatePackageManagerMinimumReleaseAgeMs({
   config,
@@ -108,6 +111,9 @@ export function calculatePackageManagerMinimumReleaseAgeMs({
       ),
     ) ??
     config;
+  if (!update.minimumReleaseAgePackageManagerSync) {
+    return durationToMs(config.minimumReleaseAge);
+  }
   if ([...upgrades, update].some((upgrade) => upgrade.isVulnerabilityAlert)) {
     return 0;
   }
@@ -132,7 +138,7 @@ export interface MinimumReleaseAgeExemption {
 }
 
 /**
- * Returns the updates of `manager` in `upgrades`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
+ * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
  */
 export function getMinimumReleaseAgeExemption(
   upgrades: MinimumReleaseAgeExemptionConfig[],
@@ -142,6 +148,7 @@ export function getMinimumReleaseAgeExemption(
   const exempted = upgrades.filter(
     (upgrade) =>
       upgrade.manager === manager &&
+      upgrade.minimumReleaseAgePackageManagerSync === true &&
       !upgrade.isLockFileMaintenance &&
       !upgrade.isVulnerabilityAlert &&
       calculateMinimumReleaseAgeMs(upgrade) < ageMs &&

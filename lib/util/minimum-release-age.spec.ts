@@ -101,6 +101,7 @@ describe('util/minimum-release-age', () => {
       manager,
       packageFile,
       minimumReleaseAge: '2 weeks',
+      minimumReleaseAgePackageManagerSync: true,
       minimumReleaseAgeRepository: '3 days',
     };
 
@@ -117,7 +118,38 @@ describe('util/minimum-release-age', () => {
     }
 
     it('returns 0 without minimumReleaseAgeRepository', () => {
-      expect(calculate([], { minimumReleaseAge: '3 days' })).toBe(0);
+      expect(
+        calculate([], {
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgePackageManagerSync: true,
+        }),
+      ).toBe(0);
+    });
+
+    describe('without minimumReleaseAgePackageManagerSync', () => {
+      const offUpdate = {
+        ...update,
+        minimumReleaseAgePackageManagerSync: false,
+      };
+
+      it('returns minimumReleaseAge of the config', () => {
+        expect(
+          calculate([offUpdate], { ...update, minimumReleaseAge: '1 week' }),
+        ).toBe(toMs('1 week'));
+      });
+
+      it('returns minimumReleaseAge of the config for security updates', () => {
+        expect(
+          calculate([{ ...offUpdate, isVulnerabilityAlert: true }], {
+            isVulnerabilityAlert: true,
+            minimumReleaseAge: '1 week',
+          }),
+        ).toBe(toMs('1 week'));
+      });
+
+      it('returns 0 without minimumReleaseAge of the config', () => {
+        expect(calculate([], {})).toBe(0);
+      });
     });
 
     it('returns minimumReleaseAgeRepository of the config without upgrades', () => {
@@ -184,7 +216,11 @@ describe('util/minimum-release-age', () => {
               minimumReleaseAgeRepository: '1 week',
             },
           ],
-          { minimumReleaseAgeRepository: '5 days', upgrades: [] },
+          {
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAgeRepository: '5 days',
+            upgrades: [],
+          },
         ),
       ).toBe(toMs('5 days'));
     });
@@ -234,6 +270,7 @@ describe('util/minimum-release-age', () => {
       depName: 'dep1',
       manager: 'poetry',
       minimumReleaseAge: '1 day',
+      minimumReleaseAgePackageManagerSync: true,
       releaseTimestamp,
     };
 
@@ -272,12 +309,13 @@ describe('util/minimum-release-age', () => {
     });
 
     it.each`
-      name                             | upgrade
-      ${'of another manager'}          | ${{ ...update, manager: 'pep621' }}
-      ${'for lock file maintenance'}   | ${{ ...update, isLockFileMaintenance: true }}
-      ${'for security updates'}        | ${{ ...update, isVulnerabilityAlert: true }}
-      ${'with an own age of the age'}  | ${{ ...update, minimumReleaseAge: '3 days' }}
-      ${'with a larger extracted age'} | ${{ ...update, minimumReleaseAgeExtracted: '1 week' }}
+      name                                             | upgrade
+      ${'of another manager'}                          | ${{ ...update, manager: 'pep621' }}
+      ${'for lock file maintenance'}                   | ${{ ...update, isLockFileMaintenance: true }}
+      ${'for security updates'}                        | ${{ ...update, isVulnerabilityAlert: true }}
+      ${'with an own age of the age'}                  | ${{ ...update, minimumReleaseAge: '3 days' }}
+      ${'with a larger extracted age'}                 | ${{ ...update, minimumReleaseAgeExtracted: '1 week' }}
+      ${'without minimumReleaseAgePackageManagerSync'} | ${{ ...update, minimumReleaseAgePackageManagerSync: false }}
     `('returns null for updates $name', ({ upgrade }) => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
 
