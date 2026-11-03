@@ -5,7 +5,11 @@ import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
-import { isNotFound, isOk } from '../../../util/http/status.ts';
+import {
+  isNotFound,
+  isOk,
+  isRangeNotSatisfiable,
+} from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -287,7 +291,7 @@ export class VersionsEndpointCache {
          * In case of `416 Range Not Satisfiable` we do a full sync.
          * This is unlikely to happen in real life, but anyway.
          */
-        if (responseStatus === 416) {
+        if (isRangeNotSatisfiable(responseStatus)) {
           return this.fullSync(registryUrl);
         }
 

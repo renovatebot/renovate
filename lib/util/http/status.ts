@@ -60,6 +60,11 @@ export function isGone(statusCode?: number): boolean {
   return statusCode === 410;
 }
 
+/** 416 Range Not Satisfiable */
+export function isRangeNotSatisfiable(statusCode?: number): boolean {
+  return statusCode === 416;
+}
+
 /** 422 Unprocessable Content */
 export function isUnprocessableContent(statusCode?: number): boolean {
   return statusCode === 422;

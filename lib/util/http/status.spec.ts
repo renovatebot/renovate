@@ -12,6 +12,7 @@ import {
   isNotFound,
   isNotModified,
   isOk,
+  isRangeNotSatisfiable,
   isRateLimited,
   isRateLimitedOrServerError,
   isServerError,
@@ -35,6 +36,7 @@ describe('util/http/status', () => {
     ${isNotAcceptable}        | ${406}
     ${isConflict}             | ${409}
     ${isGone}                 | ${410}
+    ${isRangeNotSatisfiable}  | ${416}
     ${isUnprocessableContent} | ${422}
     ${isRateLimited}          | ${429}
     ${isBadGateway}           | ${502}
