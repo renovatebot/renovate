@@ -292,6 +292,8 @@ export interface UrlReplacement {
   matchUrlPrefix: string;
   replaceUrlPrefix: string;
   matchHostTypes?: string[];
+  public?: boolean;
+  fallback?: boolean;
 }
 
 /**

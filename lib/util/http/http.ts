@@ -37,7 +37,13 @@ import type {
   HttpResponse,
   SafeJsonError,
 } from './types.ts';
-import { applyUrlReplacements } from './url-replacements.ts';
+import {
+  type UrlReplacementResult,
+  applyUrlReplacements,
+  hostRuleHasCredentials,
+  isFallbackError,
+  removeCredentials,
+} from './url-replacements.ts';
 import { copyResponse } from './util.ts';
 
 export interface InternalJsonUnsafeOptions<
@@ -64,6 +70,12 @@ export interface InternalHttpOptions extends HttpOptions {
 
   parseJson?: Options['parseJson'];
 }
+
+// the options of the fallback request which raised an error
+const fallbackErrorOptions = new WeakMap<
+  object,
+  InternalGotOptions & InternalHttpOptions
+>();
 
 const inFlightRequests = new WeakMap<
   HttpCacheProvider,
@@ -142,10 +154,12 @@ export abstract class HttpBase<
   private prepareOptions(
     resolvedUrl: URL,
     httpOptions: InternalHttpOptions,
+    useUrlReplacements = true,
   ): {
     options: InternalGotOptions & InternalHttpOptions;
     hostRule: CombinedHostRule;
     fetchUrl: URL;
+    replacement: UrlReplacementResult;
   } {
     let options = merge<InternalGotOptions, InternalHttpOptions>(
       {
@@ -166,7 +180,18 @@ export abstract class HttpBase<
     }
 
     // everything below acts on the URL which is actually requested
-    const fetchUrl = applyUrlReplacements(resolvedUrl, options);
+    const replacement = useUrlReplacements
+      ? applyUrlReplacements(resolvedUrl, options)
+      : {
+          url: resolvedUrl,
+          public: false,
+          fallback: false,
+          hadCredentials: false,
+        };
+    if (replacement.public) {
+      options = removeCredentials(options);
+    }
+    const fetchUrl = replacement.url;
     const url = fetchUrl.toString();
 
     const hostRule = findMatchingRule(url, options);
@@ -199,7 +224,83 @@ export abstract class HttpBase<
       ];
     }
 
-    return { options, hostRule, fetchUrl };
+    return { options, hostRule, fetchUrl, replacement };
+  }
+
+  /**
+   * Returns a task which requests `fetchHref` with `options`, through its throttle, queue and retry, and marks the response with `authorization`.
+   */
+  private createHttpTask(
+    fetchHref: string,
+    options: InternalGotOptions & InternalHttpOptions,
+    hostRule: CombinedHostRule,
+    authorization: boolean,
+  ): () => Promise<HttpResponse<unknown>> {
+    options.timeout ??= 60000;
+    const startTime = Date.now();
+    const fetchTask: GotTask = () => {
+      const queueMs = Date.now() - startTime;
+      return fetch(fetchHref, this._normalizeOptions(options), { queueMs });
+    };
+
+    const throttle = getThrottle(fetchHref);
+    const throttledTask = throttle ? () => throttle.add(fetchTask) : fetchTask;
+
+    const queue = getQueue(fetchHref);
+    const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
+
+    const { maxRetryAfter = 60 } = hostRule;
+    return async () => {
+      const res = await wrapWithRetry(
+        queuedTask,
+        fetchHref,
+        getRetryAfter,
+        maxRetryAfter,
+      );
+      res.authorization = authorization;
+      return res;
+    };
+  }
+
+  /**
+   * Returns a task which runs `mirrorTask`, and when it fails with a fallback error, requests the original `resolvedUrl` again as a new request.
+   */
+  private withFallback(
+    mirrorTask: () => Promise<HttpResponse<unknown>>,
+    resolvedUrl: URL,
+    httpOptions: InternalHttpOptions,
+  ): () => Promise<HttpResponse<unknown>> {
+    return async () => {
+      try {
+        return await mirrorTask();
+      } catch (err) {
+        if (!isFallbackError(err)) {
+          throw err;
+        }
+        const url = resolvedUrl.toString();
+        logger.debug(
+          `urlReplacements: replacement for ${url} failed (${err.message}), falling back to the original URL`,
+        );
+        const { options, hostRule } = this.prepareOptions(
+          resolvedUrl,
+          httpOptions,
+          false,
+        );
+        const hostRuleCredentials = hostRuleHasCredentials(hostRule);
+        const fallbackTask = this.createHttpTask(
+          url,
+          options,
+          hostRule,
+          !!options.headers?.authorization || hostRuleCredentials,
+        );
+        try {
+          return await fallbackTask();
+        } catch (fallbackErr) {
+          fallbackErrorOptions.set(fallbackErr, options);
+          throw fallbackErr;
+        }
+      }
+    };
   }
 
   private async request(
@@ -228,7 +329,7 @@ export abstract class HttpBase<
 
     this.processOptions(resolvedUrl, httpOptions);
 
-    const { options, hostRule, fetchUrl } = this.prepareOptions(
+    const { options, hostRule, fetchUrl, replacement } = this.prepareOptions(
       resolvedUrl,
       httpOptions,
     );
@@ -240,8 +341,13 @@ export abstract class HttpBase<
 
     logger.trace(`HTTP request: ${method.toUpperCase()} ${url}`);
 
-    const timeout = options.timeout ?? 60000;
-    options.timeout = timeout;
+    // a fallback response is marked by its own request
+    const mirrorHasCredentials =
+      fetchHref !== url && hostRuleHasCredentials(hostRule);
+    const authorization =
+      !!options.headers?.authorization ||
+      mirrorHasCredentials ||
+      replacement.hadCredentials;
 
     let cacheProvider: HttpCacheProvider | undefined;
     if (isReadMethod && options.cacheProvider) {
@@ -291,28 +397,15 @@ export abstract class HttpBase<
 
     // v8 ignore else -- TODO: add test #40625
     if (!resPromise) {
-      const startTime = Date.now();
-      const fetchTask: GotTask = () => {
-        const queueMs = Date.now() - startTime;
-        return fetch(fetchHref, this._normalizeOptions(options), { queueMs });
-      };
-
-      const throttle = getThrottle(fetchHref);
-      const throttledTask = throttle
-        ? () => throttle.add(fetchTask)
-        : fetchTask;
-
-      const queue = getQueue(fetchHref);
-      const queuedTask = queue ? () => queue.add(throttledTask) : throttledTask;
-
-      const { maxRetryAfter = 60 } = hostRule;
-      function httpTask(): Promise<HttpResponse<unknown>> {
-        return wrapWithRetry(
-          queuedTask,
-          fetchHref,
-          getRetryAfter,
-          maxRetryAfter,
-        );
+      let httpTask = this.createHttpTask(
+        fetchHref,
+        options,
+        hostRule,
+        authorization,
+      );
+      // a mirror may already have processed a write before failing, so only reads fall back
+      if (replacement.fallback && isReadMethod) {
+        httpTask = this.withFallback(httpTask, resolvedUrl, httpOptions);
       }
 
       // cached responses don't hit the server, so they skip the throttle and queue
@@ -320,12 +413,14 @@ export abstract class HttpBase<
         provider: HttpCacheProvider,
       ): Promise<HttpResponse<unknown>> => {
         let res = await provider.bypassServer<unknown>(options.method, url);
+        let resAuthorization = authorization;
         if (!res) {
           await provider.setCacheHeaders(method, url, options);
           res = await httpTask();
+          resAuthorization = !!res.authorization;
         }
         const resCopy = copyResponse(res, false);
-        resCopy.authorization = !!options?.headers?.authorization;
+        resCopy.authorization = resAuthorization;
         this.handleResponse(resolvedUrl, resCopy);
         return await provider.wrapServerResponse(method, url, resCopy);
       };
@@ -360,13 +455,15 @@ export abstract class HttpBase<
 
       const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
-      resCopy.authorization = !!options?.headers?.authorization;
+      resCopy.authorization = !!res.authorization;
 
       this.handleResponse(resolvedUrl, resCopy);
 
       return resCopy;
     } catch (err) {
-      const { abortOnError, abortIgnoreStatusCodes } = options;
+      // an error of a fallback request is judged by the original host's rules
+      const { abortOnError, abortIgnoreStatusCodes } =
+        fallbackErrorOptions.get(err) ?? options;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
         throw new ExternalHostError(err);
       }

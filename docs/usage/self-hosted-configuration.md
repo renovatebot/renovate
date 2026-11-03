@@ -1710,20 +1710,27 @@ It also doesn't apply to these features, as they use their own clients:
 
 Renovate does not rewrite a request when:
 
-- the request itself has credentials
-- the host rule for the original URL has a `token`, a `password`, a client certificate or key, a certificate authority, or any `headers`
+- the request itself has credentials, unless the rule is [`public`](#urlreplacementspublic)
+- the host rule for the original URL has a `token`, a `password`, a client certificate or key, a certificate authority, or any `headers`, unless the rule is `public`
 - the host rule for the original URL has `enabled=false`
 
-So credentials meant for the original host are never sent to the mirror.
-
-Host rules, authentication and [`internalHostAccess`](#internalhostaccess) apply to the mirror URL.
-Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain.
+Credentials meant for the original host are not carried over to a rewritten request.
+Host rules, authentication and [`internalHostAccess`](#internalhostaccess) apply to the mirror URL instead.
+Any host rule which matches the mirror URL applies to rewritten requests, including rules with a broad `matchHost` domain, so their credentials are sent to the mirror.
 Other settings of the original host's host rules don't apply to rewritten requests.
 If the mirror is on an internal host, it needs its own host rule in your global config with [`allowInternal=true`](#hostrulesallowinternal).
 
 !!! warning
   `urlReplacements` is not a security or egress control.
-  Requests with credentials, requests to Docker registries, and URLs which don't match a `matchUrlPrefix` still go to the original host.
+  Requests with credentials for rules which aren't `public`, requests to Docker registries, requests whose host type isn't in `matchHostTypes`, URLs which don't match a `matchUrlPrefix`, redirects to other hosts, and [`fallback`](#urlreplacementsfallback) requests still go to the original or redirected host.
+
+### `urlReplacements.fallback`
+
+If `true`, Renovate requests the original URL once more when a `GET` or `HEAD` request to the mirror fails with a connection error, a timeout or a 5xx response.
+There is no fallback for other methods, TLS certificate errors, blocked or disabled hosts, or 4xx responses.
+The retry is a new request to the original URL, with the host rules, authentication and `internalHostAccess` of the original URL.
+It only applies to regular requests, not to streamed downloads.
+With chained rules, all applied rules must set `fallback`.
 
 ### `urlReplacements.matchHostTypes`
 
@@ -1738,6 +1745,20 @@ It must be an absolute `http://` or `https://` URL which:
 - ends with `/`, so the replacement can't change the host
 - is already normalized, for example a lowercase host, no default port, and no `..` segments
 - has no username, password, query or fragment
+
+### `urlReplacements.public`
+
+Set `public=true` when the source only serves public content.
+Renovate then rewrites requests with credentials too, and doesn't send those credentials: neither the credentials the request itself has, nor those of the host rules for the original URL.
+Only the host rules for the mirror URL apply, so the mirror can still require its own credentials.
+Responses don't count as public when:
+
+- the request to the mirror sent an `Authorization` header
+- the host rule for the mirror URL has a token, a password, a client certificate or key, a certificate authority, or any `headers`
+- the original request had credentials, from the request itself or from the host rule for the original URL, even though they weren't sent
+
+So such responses are cached like those of any private registry.
+With chained rules, all applied rules must be `public`.
 
 ### `urlReplacements.replaceUrlPrefix`
 

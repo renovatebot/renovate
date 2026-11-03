@@ -250,6 +250,26 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'public',
+    description:
+      'If `true`, the source is public: requests with credentials are replaced too, and their credentials are not sent.',
+    type: 'boolean',
+    parents: ['urlReplacements'],
+    globalOnly: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fallback',
+    description:
+      'If `true`, a request to the replacement which fails with a connection error or a 5xx response is retried once against the original URL.',
+    type: 'boolean',
+    parents: ['urlReplacements'],
+    globalOnly: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'allowedCommands',
     description:
       'A list of regular expressions that decide which commands are allowed in post-upgrade tasks.',

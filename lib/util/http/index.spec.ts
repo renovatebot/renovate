@@ -1237,6 +1237,291 @@ describe('util/http/index', () => {
       expect(httpMock.allUsed()).toBeTrue();
     });
 
+    describe('with public', () => {
+      const publicReplacements = [{ ...urlReplacements[0], public: true }];
+
+      it('drops the credentials and uses the hostRules of the mirror', async () => {
+        GlobalConfig.set({ urlReplacements: publicReplacements });
+        hostRules.add({ matchHost: 'repo.example.com', token: 'repo-token' });
+        hostRules.add({
+          matchHost: 'mirror.example.com',
+          token: 'mirror-token',
+        });
+        httpMock
+          .scope('https://mirror.example.com', {
+            reqheaders: { authorization: 'Bearer mirror-token' },
+          })
+          .get('/maven-public/foo')
+          .reply(200, 'mirrored');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo', {
+          headers: { authorization: 'Basic caller' },
+        });
+
+        expect(res.body).toBe('mirrored');
+        expect(res.authorization).toBeTrue();
+      });
+
+      it('sends no credentials to a mirror without hostRule', async () => {
+        GlobalConfig.set({ urlReplacements: publicReplacements });
+        hostRules.add({ matchHost: 'repo.example.com', token: 'repo-token' });
+        httpMock
+          .scope('https://mirror.example.com', {
+            badheaders: ['authorization'],
+          })
+          .get('/maven-public/foo')
+          .reply(200, 'mirrored');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo', {
+          token: 'caller-token',
+        });
+
+        expect(res.body).toBe('mirrored');
+        // the original request had credentials, so the response isn't public
+        expect(res.authorization).toBeTrue();
+      });
+
+      it('marks responses of requests without any credentials as public', async () => {
+        GlobalConfig.set({ urlReplacements: publicReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(200, 'mirrored');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo');
+
+        expect(res.authorization).toBeFalse();
+      });
+    });
+
+    it('marks responses of a mirror with a token as authorized', async () => {
+      GlobalConfig.set({ urlReplacements });
+      hostRules.add({
+        matchHost: 'mirror.example.com',
+        token: 'mirror-token',
+      });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.authorization).toBeTrue();
+    });
+
+    it('marks responses of a mirror with credential headers as authorized', async () => {
+      GlobalConfig.set({
+        urlReplacements: [{ ...urlReplacements[0], public: true }],
+      });
+      hostRules.add(
+        { matchHost: 'mirror.example.com', headers: { 'X-Api-Key': 'key' } },
+        { trusted: true },
+      );
+      httpMock
+        .scope('https://mirror.example.com', {
+          reqheaders: { 'x-api-key': 'key' },
+        })
+        .get('/maven-public/foo')
+        .reply(200, 'mirrored');
+
+      const res = await http.getText('https://repo.example.com/maven2/foo');
+
+      expect(res.authorization).toBeTrue();
+    });
+
+    describe('with fallback', () => {
+      const fallbackReplacements = [{ ...urlReplacements[0], fallback: true }];
+
+      it('retries the original url after a connection error', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .replyWithError(
+            httpMock.error({ code: 'ECONNREFUSED', message: 'refused' }),
+          );
+        httpMock
+          .scope('https://repo.example.com')
+          .get('/maven2/foo')
+          .reply(200, 'original');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo');
+
+        expect(res.body).toBe('original');
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'urlReplacements: replacement for https://repo.example.com/maven2/foo failed (refused), falling back to the original URL',
+        );
+        expect(HttpStats.getDataPoints()).toMatchObject([
+          { url: 'https://mirror.example.com/maven-public/foo', status: -1 },
+          { url: 'https://repo.example.com/maven2/foo', status: 200 },
+        ]);
+      });
+
+      it('retries the original url with its own hostRules after a 503', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        hostRules.add({
+          matchHost: 'mirror.example.com',
+          token: 'mirror-token',
+        });
+        hostRules.add({ matchHost: 'repo.example.com', timeout: 1000 });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(503);
+        httpMock
+          .scope('https://repo.example.com', { badheaders: ['authorization'] })
+          .get('/maven2/foo')
+          .reply(200, 'original');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo', {
+          cacheProvider: memCacheProvider,
+        });
+
+        expect(res.body).toBe('original');
+        expect(res.authorization).toBeFalse();
+      });
+
+      it('marks a fallback response of a public rule by the request to the original url', async () => {
+        GlobalConfig.set({
+          urlReplacements: [
+            { ...urlReplacements[0], public: true, fallback: true },
+          ],
+        });
+        hostRules.add({ matchHost: 'repo.example.com', token: 'repo-token' });
+        httpMock
+          .scope('https://mirror.example.com', {
+            badheaders: ['authorization'],
+          })
+          .get('/maven-public/foo')
+          .reply(503);
+        httpMock
+          .scope('https://repo.example.com', {
+            reqheaders: { authorization: 'Bearer repo-token' },
+          })
+          .get('/maven2/foo')
+          .reply(200, 'original');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo');
+
+        expect(res.body).toBe('original');
+        expect(res.authorization).toBeTrue();
+      });
+
+      it('applies abortOnError of the original host to a failed fallback request', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        hostRules.add({ matchHost: 'repo.example.com', abortOnError: true });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(503);
+        httpMock
+          .scope('https://repo.example.com')
+          .get('/maven2/foo')
+          .reply(500);
+
+        await expect(
+          http.getText('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('does not apply abortOnError of the mirror to a failed fallback request', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        hostRules.add({ matchHost: 'mirror.example.com', abortOnError: true });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(503);
+        httpMock
+          .scope('https://repo.example.com')
+          .get('/maven2/foo')
+          .reply(500);
+
+        await expect(
+          http.getText('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow('Request failed with status code 500');
+      });
+
+      it('marks a fallback response by the credentials of the original host rule', async () => {
+        GlobalConfig.set({
+          urlReplacements: [
+            { ...urlReplacements[0], public: true, fallback: true },
+          ],
+        });
+        hostRules.add(
+          {
+            matchHost: 'repo.example.com',
+            httpsCertificateAuthority: 'ca',
+          },
+          { trusted: true },
+        );
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(503);
+        httpMock
+          .scope('https://repo.example.com')
+          .get('/maven2/foo')
+          .reply(200, 'original');
+
+        const res = await http.getText('https://repo.example.com/maven2/foo');
+
+        expect(res.authorization).toBeTrue();
+      });
+
+      it('does not retry the original url after a 404', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(404);
+
+        await expect(
+          http.getText('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow('Request failed with status code 404');
+      });
+
+      it('does not retry the original url without fallback', async () => {
+        GlobalConfig.set({ urlReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .reply(503);
+
+        await expect(
+          http.getText('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow('Request failed with status code 503');
+      });
+
+      it('does not retry the original url for a post', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .post('/maven-public/foo')
+          .reply(503);
+
+        await expect(
+          http.postJson('https://repo.example.com/maven2/foo', {
+            body: { a: 1 },
+          }),
+        ).rejects.toThrow('Request failed with status code 503');
+      });
+
+      it('does not retry the original url after a certificate error', async () => {
+        GlobalConfig.set({ urlReplacements: fallbackReplacements });
+        httpMock
+          .scope('https://mirror.example.com')
+          .get('/maven-public/foo')
+          .replyWithError(
+            httpMock.error({ code: 'CERT_HAS_EXPIRED', message: 'expired' }),
+          );
+
+        await expect(
+          http.getText('https://repo.example.com/maven2/foo'),
+        ).rejects.toThrow('expired');
+      });
+    });
+
     describe('when internalHostAccess=block', () => {
       const internalReplacements = [
         {
