@@ -12,6 +12,8 @@ import { Result } from '../../../util/result.ts';
 import { coerceString } from '../../../util/string.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { get } from '../../versioning/index.ts';
+import * as poetryVersioning from '../../versioning/poetry/index.ts';
 import type {
   ExtractedPackageRule,
   UpdateArtifactsConfig,
@@ -138,13 +140,25 @@ export async function getMinReleaseAgeEnv(
   if (!exemption) {
     return { env: minReleaseAgeEnv };
   }
+  const exemptedDeps = updatedDeps.filter((dep) =>
+    exemption.depNames.includes(coerceString(dep.depName)),
+  );
+  // Poetry excludes all versions of a package, so only a pinned version is one which Renovate checked
+  const pinned = exemptedDeps.filter(isPinned);
+  const ranges = exemptedDeps.filter((dep) => !isPinned(dep));
+  if (ranges.length) {
+    logger.debug(
+      `Not excluding ${ranges.map(getNormalizedName).join(', ')} from the Poetry minimum release age, as the constraint is not a single version`,
+    );
+  }
+  if (!pinned.length) {
+    return { env: minReleaseAgeEnv };
+  }
+  const excluded = pinned.map(getNormalizedName);
   // the variable replaces `solver.min-release-age-exclude`, so it starts with the entries of the `poetry.toml`
-  const exempted = updatedDeps
-    .filter((dep) => exemption.depNames.includes(coerceString(dep.depName)))
-    .map(getNormalizedName);
-  const exclude = [...new Set([...poetryConfig.exclude, ...exempted])];
+  const exclude = [...new Set([...poetryConfig.exclude, ...excluded])];
   logger.debug(
-    `Excluding ${exempted.join(', ')} from the Poetry minimum release age, as their minimumReleaseAge is smaller and their release is younger or has no timestamp`,
+    `Excluding ${excluded.join(', ')} from the Poetry minimum release age, as their minimumReleaseAge is smaller and their release is younger or has no timestamp`,
   );
   return {
     env: {
@@ -152,6 +166,13 @@ export async function getMinReleaseAgeEnv(
       POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: exclude.join(','),
     },
   };
+}
+
+function isPinned(dep: Upgrade): boolean {
+  return (
+    !!dep.newValue &&
+    get(dep.versioning ?? poetryVersioning.id).isSingleVersion(dep.newValue)
+  );
 }
 
 function getNormalizedName(dep: Upgrade): string {

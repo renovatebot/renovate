@@ -130,7 +130,8 @@ It never passes less than `solver.min-release-age`, and sets no variable if the 
 If an updated package has a smaller `minimumReleaseAge` and its release is younger than the passed value or has no timestamp, Renovate adds it to `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, as it already applied its own `minimumReleaseAge` to it.
 The variable replaces `solver.min-release-age-exclude`, so Renovate passes those entries first.
 Poetry still checks the passed value for all other packages, including new transitive dependencies.
-Poetry excludes a package by name, so it may lock a newer version of it than Renovate proposed, if the version constraint allows it.
+Renovate only excludes a package whose constraint pins a single version, as Poetry excludes all versions of a package and could otherwise lock a newer version which Renovate did not check.
+For a range, Renovate keeps the passed value, and Poetry refuses a release younger than it.
 
 For example, with this config:
 
@@ -151,7 +152,8 @@ For example, with this config:
 
 - Without a `poetry.toml`, Renovate runs `poetry update --lock` with `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
 - With the `security:minimumReleaseAgePypi` preset instead of the `poetry` config, Renovate also passes `POETRY_SOLVER_MIN_RELEASE_AGE=3`, as the preset sets `minimumReleaseAgePackageManager` to 3 days for `poetry`.
-- An update of `boto3` to a release which is 1 day old runs Poetry with `POETRY_SOLVER_MIN_RELEASE_AGE=3` and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE=boto3`.
+- With `boto3 = "1.35.50"` in the `pyproject.toml`, an update of `boto3` to a release which is 1 day old runs Poetry with `POETRY_SOLVER_MIN_RELEASE_AGE=3` and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE=boto3`.
+- With `boto3 = "^1.35.50"`, Renovate sets no `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, and Poetry refuses a release younger than 3 days.
 - With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
 - Without `minimumReleaseAgePackageManagerSync`, the `boto3` update sets no variable, and all other updates set `POETRY_SOLVER_MIN_RELEASE_AGE=3`.
 
