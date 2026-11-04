@@ -1,8 +1,9 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { join } from 'shlex';
+import { isNonEmptyString, isString, isTruthy } from '@sindresorhus/is';
+import { join, quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../array.ts';
 import { newlineRegex, regEx } from '../../regex.ts';
 import { uniq } from '../../uniq.ts';
 import { rawExec } from '../common.ts';
@@ -124,7 +125,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .trim()
         .split(newlineRegex)
         .map((container) => container.trim())
-        .filter(Boolean);
+        .filter(isTruthy);
       logger.debug({ containerIds }, 'Removing dangling child containers');
       await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
     } else {
@@ -149,7 +150,7 @@ export async function generateDockerCommand(
   sideCarImage: string,
 ): Promise<string> {
   const { envVars, cwd } = options;
-  const volumes = options.volumes ?? [];
+  const volumes = coerceArray(options.volumes);
   const {
     localDir,
     cacheDir,
@@ -232,7 +233,20 @@ export async function generateDockerCommand(
   }
 
   const bashCommand = bashCommandParts.join(' && ');
-  result.push(`bash -l -c "${bashCommand.replace(regEx(/"/g), '\\"')}"`); // lgtm [js/incomplete-sanitization]
+  // Single-quote the whole `-c` argument rather than hand-escaping `"`. Escaping
+  // only `"` left `\` unhandled, so a value containing `\"` produced a string that
+  // `shlex.split` rejects outright ("Got EOF while in a quoted string"), failing
+  // the update.
+  //
+  // It also left `$` and backticks live in the outer context, which silently
+  // defeats the `quote()` calls the managers apply: their single quotes are not
+  // special inside double quotes. That is inert while nothing pairs
+  // `ExecOptions.shell` with `docker` — `rawExec` otherwise splits argv without a
+  // shell — but it made the wrapper one `shell: true` away from turning a quoted
+  // dep name into host-side command substitution, which is how the flux manager
+  // was configured until it moved to `CommandWithOptions`. Being correct here
+  // means that pairing is no longer load-bearing.
+  result.push(`bash -l -c ${quote(bashCommand)}`);
 
   return result.join(' ');
 }

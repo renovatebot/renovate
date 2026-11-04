@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { findPackages } from 'find-packages';
-import { fs } from '../../../../test/util.ts';
+import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageDependency } from '../types.ts';
 import * as compat from './compat.ts';
@@ -481,11 +481,11 @@ describe('modules/manager/deno/post', () => {
       const packageFiles = [
         {
           deps: [
-            {
+            partial<PackageDependency<DenoManagerData>>({
               datasource: 'jsr',
               currentRawValue: 'jsr:@scope/name@1.2.3',
               depName: '@scope/name',
-            } as PackageDependency<DenoManagerData>,
+            }),
           ],
           lockFiles: ['deno.lock'],
           packageFile: 'deno.json',
@@ -507,11 +507,11 @@ describe('modules/manager/deno/post', () => {
       const packageFiles = [
         {
           deps: [
-            {
+            partial<PackageDependency<DenoManagerData>>({
               datasource: 'jsr',
               currentRawValue: 'jsr:@scope/name@1.2.3',
               depName: '@scope/name',
-            } as PackageDependency<DenoManagerData>,
+            }),
           ],
           lockFiles: [],
           packageFile: 'deno.json',
@@ -541,22 +541,22 @@ describe('modules/manager/deno/post', () => {
       const packageFiles = [
         {
           deps: [
-            {
+            partial<PackageDependency<DenoManagerData>>({
               datasource: 'jsr',
               currentRawValue: 'jsr:@scope/name@1.2.3',
               depName: '@scope/name',
-            } as PackageDependency<DenoManagerData>,
+            }),
           ],
           lockFiles: ['deno.lock'],
           packageFile: 'deno.json',
         },
         {
           deps: [
-            {
+            partial<PackageDependency<DenoManagerData>>({
               datasource: 'jsr',
               currentRawValue: 'jsr:@scope/name@1.2.3',
               depName: '@scope/name',
-            } as PackageDependency<DenoManagerData>,
+            }),
           ],
           lockFiles: ['deno.lock'],
           packageFile: 'sub/deno.json',
@@ -625,11 +625,11 @@ describe('modules/manager/deno/post', () => {
       const packageFiles = [
         {
           deps: [
-            {
+            partial<PackageDependency<DenoManagerData>>({
               datasource: 'jsr',
               currentRawValue: 'jsr:@scope/name@1.2.3',
               depName: '@scope/name',
-            } as PackageDependency<DenoManagerData>,
+            }),
           ],
           lockFiles: ['deno.lock'],
           packageFile: 'deno.json',

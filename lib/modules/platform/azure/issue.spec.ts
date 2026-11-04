@@ -24,12 +24,12 @@ describe('modules/platform/azure/issue', () => {
   let issueService: IssueService;
 
   beforeEach(() => {
-    config = {
+    config = partial<Config>({
       repository: 'test/repo',
       project: 'testProject',
       repoId: '123',
       workItemType: 'Issue',
-    } as Config;
+    });
 
     issueService = new IssueService(config);
   });
@@ -435,6 +435,82 @@ describe('modules/platform/azure/issue', () => {
         'testProject',
       );
       expect(result).toEqual('updated');
+    });
+
+    const markdownOp = {
+      op: 'add',
+      path: '/multilineFieldsFormat/System.Description',
+      value: 'Markdown',
+    };
+
+    it('sends Markdown format op on hosted (cloud) when creating', async () => {
+      azureApi.isHosted.mockResolvedValue(true);
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
+        }),
+      );
+
+      await issueService.ensureIssue({ title: 'Test Issue', body: 'body' });
+
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([markdownOp]),
+        'testProject',
+        'Issue',
+      );
+    });
+
+    it('omits Markdown format op on-premises when creating', async () => {
+      azureApi.isHosted.mockResolvedValue(false);
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
+        }),
+      );
+
+      await issueService.ensureIssue({ title: 'Test Issue', body: 'body' });
+
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.not.arrayContaining([markdownOp]),
+        'testProject',
+        'Issue',
+      );
+    });
+
+    it('omits Markdown format op on-premises when updating', async () => {
+      azureApi.isHosted.mockResolvedValue(false);
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'open',
+          body: 'Old description',
+        },
+      ]);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({ updateWorkItem: updateWorkItemMock }),
+      );
+
+      await issueService.ensureIssue({ title: 'Test Issue', body: 'new body' });
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.not.arrayContaining([{ ...markdownOp, op: 'replace' }]),
+        1,
+        'testProject',
+      );
     });
 
     it('should not reopen closed issue when once is true', async () => {

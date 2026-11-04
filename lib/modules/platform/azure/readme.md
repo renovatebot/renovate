@@ -4,7 +4,7 @@
 
 ### Personal Access Token (PAT)
 
-First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the bot account.
+First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the Renovate account.
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
@@ -117,7 +117,7 @@ steps:
 
   - bash: |
       git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name 'Renovate Bot'
+      git config --global user.name 'Renovate'
       npx --userconfig .npmrc renovate
     env:
       RENOVATE_PLATFORM: azure
@@ -263,6 +263,9 @@ Renovate resolves the correct open and closed state names from the process for t
 
 When creating the work item, Renovate does not set a state, so Azure DevOps applies the default initial state of the work item type.
 If the states cannot be read (for example on older Azure DevOps Server versions), Renovate falls back to the `New` and `Closed` state names.
+
+The work item description is rendered as Markdown only on Azure DevOps Services (cloud), which is the only product that supports the work item Markdown format field.
+On Azure DevOps Server (on-premises) Renovate omits that field, so the description is stored as plain text.
 
 ### Adding tags to Pull Requests
 

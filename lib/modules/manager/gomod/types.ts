@@ -1,8 +1,6 @@
-import type { PackageDependency } from '../types.ts';
-
-export interface MultiLineParseResult {
-  reachedLine: number;
-  detectedDeps: PackageDependency[];
+export interface GoModManagerData {
+  lineNumber?: number;
+  multiLine?: boolean;
 }
 
 export interface ExtraDep {

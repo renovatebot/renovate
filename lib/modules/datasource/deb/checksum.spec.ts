@@ -50,7 +50,7 @@ describe('modules/datasource/deb/checksum', () => {
       const expectedHash =
         'fcde2b2edba56bf408601fb721fe9b5c338d10ee429ea04fae5511b68fbf8fb9';
 
-      expect(await computeFileChecksum('file.txt')).toBe(expectedHash);
+      await expect(computeFileChecksum('file.txt')).resolves.toBe(expectedHash);
     });
 
     it('should fail if there is an error in the stream', async () => {

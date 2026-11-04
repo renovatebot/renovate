@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
@@ -10,10 +11,10 @@ import type {
 } from '../types.ts';
 import * as bazelrc from './bazelrc.ts';
 import { RuleToCratePackageDep } from './parser/crate.ts';
-import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
 import { RuleToDockerPackageDep } from './parser/oci.ts';
+import type { ResultFragment } from './parser/types.ts';
 import * as rules from './rules.ts';
 import {
   GitRepositoryToPackageDep,
@@ -37,7 +38,10 @@ export async function extractPackageFile(
           // Reconstruct the image reference from parsed data
           const imageRef = `${dep.packageName}${dep.currentValue ? `:${dep.currentValue}` : ''}${dep.currentDigest ? `@${dep.currentDigest}` : ''}`;
           // Use getDep to handle registry aliases properly
-          const processedDep = getDep(imageRef, false, config?.registryAliases);
+          const processedDep = getDep(imageRef, {
+            specifyReplaceString: false,
+            registryAliases: config?.registryAliases,
+          });
           return {
             ...processedDep,
             depType: 'oci_pull',
@@ -90,7 +94,7 @@ async function extractBazelPfc(
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
-    .map((url) => url?.replace(/^["']|["']$/g, ''))
+    .map((url) => url?.replace(regEx(/^["']|["']$/g), ''))
     .filter(isNotNullOrUndefined);
   if (registryUrls.length) {
     pfc.registryUrls = registryUrls;

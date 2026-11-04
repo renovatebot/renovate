@@ -16,23 +16,23 @@ const baseUrl =
 describe('modules/datasource/dotnet-version/index', () => {
   describe('getReleases', () => {
     it('returns null for non-dotnet package', async () => {
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DotnetVersionDatasource.id,
           packageName: 'non-dotnet',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404 for index', async () => {
       httpMock.scope(baseUrl).get('/releases-index.json').reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DotnetVersionDatasource.id,
           packageName: 'dotnet-sdk',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for 404 for version', async () => {
@@ -43,12 +43,12 @@ describe('modules/datasource/dotnet-version/index', () => {
         .get('/7.0/releases.json')
         .reply(404);
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DotnetVersionDatasource.id,
           packageName: 'dotnet-sdk',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('throws for 5xx for index', async () => {
@@ -81,12 +81,12 @@ describe('modules/datasource/dotnet-version/index', () => {
     it('returns null for unknown error for index', async () => {
       httpMock.scope(baseUrl).get('/releases-index.json').replyWithError('');
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DotnetVersionDatasource.id,
           packageName: 'dotnet-sdk',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for unknown error for version', async () => {
@@ -97,12 +97,12 @@ describe('modules/datasource/dotnet-version/index', () => {
         .get('/7.0/releases.json')
         .replyWithError('');
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: DotnetVersionDatasource.id,
           packageName: 'dotnet-sdk',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns real data for sdk', async () => {

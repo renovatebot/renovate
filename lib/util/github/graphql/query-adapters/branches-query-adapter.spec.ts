@@ -22,6 +22,7 @@ describe('util/github/graphql/query-adapters/branches-query-adapter', () => {
 
   it('returns null for invalid input', () => {
     expect(
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid target.type
       adapter.transform({
         target: { type: 'Blob' },
       } as never),

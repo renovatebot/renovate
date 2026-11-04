@@ -4,12 +4,14 @@ import {
   isUndefined,
   isUrlString,
 } from '@sindresorhus/is';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -17,14 +19,8 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
-import type { PackageDependency } from '../types.ts';
 import type { MiseToolOptions } from './schema.ts';
-
-export type BackendToolingConfig = Omit<PackageDependency, 'depName'> &
-  Required<
-    | Pick<PackageDependency, 'packageName' | 'datasource'>
-    | Pick<PackageDependency, 'packageName' | 'skipReason'>
-  >;
+import type { BackendToolingConfig } from './types.ts';
 
 /**
  * Create a tooling config for aqua backend
@@ -98,6 +94,17 @@ export function createCargoToolConfig(
 }
 
 /**
+ * Create a tooling config for conda backend
+ * @link https://mise.jdx.dev/dev-tools/backends/conda.html
+ */
+export function createCondaToolConfig(name: string): BackendToolingConfig {
+  return {
+    packageName: name,
+    datasource: CondaDatasource.id,
+  };
+}
+
+/**
  * Create a tooling config for dotnet backend
  * @link https://mise.jdx.dev/dev-tools/backends/dotnet.html
  */
@@ -132,12 +139,36 @@ export function createGithubToolConfig(
   const prefix = toolOptions.version_prefix;
 
   if (isNonEmptyString(prefix)) {
-    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
   }
 
   return {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
+  };
+}
+
+/**
+ * Create a tooling config for gitlab backend
+ * @link https://mise.jdx.dev/dev-tools/backends/gitlab.html
+ */
+export function createGitlabToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${RegExp.escape(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GitlabReleasesDatasource.id,
     currentValue: version,
     ...(extractVersion && { extractVersion }),
   };
@@ -165,13 +196,16 @@ export function createNpmToolConfig(name: string): BackendToolingConfig {
   };
 }
 
-const pipxGitHubRegex = regEx(/^git\+https:\/\/github\.com\/(?<repo>.+)\.git$/);
+const pythonPackageGitHubRegex = regEx(
+  /^git\+https:\/\/github\.com\/(?<repo>.+)\.git$/,
+);
 
 /**
- * Create a tooling config for pipx backend
+ * Create a tooling config for the pipx and pypi backends, which share the same tool name syntax
  * @link https://mise.jdx.dev/dev-tools/backends/pipx.html
+ * @link https://mise.jdx.dev/dev-tools/backends/pypi.html
  */
-export function createPipxToolConfig(name: string): BackendToolingConfig {
+function createPythonPackageToolConfig(name: string): BackendToolingConfig {
   const isGitSyntax = name.startsWith('git+');
   // Does not support zip file url
   // Avoid type narrowing to prevent type error
@@ -184,11 +218,13 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
   if (isGitSyntax || name.includes('/')) {
     let repoName: string | undefined;
     if (isGitSyntax) {
-      repoName = pipxGitHubRegex.exec(name)?.groups?.repo;
+      repoName = pythonPackageGitHubRegex.exec(name)?.groups?.repo;
       // If the url is not a github repo, treat the version as a git ref
       if (isUndefined(repoName)) {
         return {
-          packageName: name.replace(/^git\+/g, '').replaceAll(/\.git$/g, ''),
+          packageName: name
+            .replace(regEx(/^git\+/g), '')
+            .replaceAll(regEx(/\.git$/g), ''),
           datasource: GitRefsDatasource.id,
         };
       }
@@ -204,6 +240,22 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
     packageName: normalizePythonDepName(name),
     datasource: PypiDatasource.id,
   };
+}
+
+/**
+ * Create a tooling config for pipx backend
+ * @link https://mise.jdx.dev/dev-tools/backends/pipx.html
+ */
+export function createPipxToolConfig(name: string): BackendToolingConfig {
+  return createPythonPackageToolConfig(name);
+}
+
+/**
+ * Create a tooling config for pypi backend
+ * @link https://mise.jdx.dev/dev-tools/backends/pypi.html
+ */
+export function createPypiToolConfig(name: string): BackendToolingConfig {
+  return createPythonPackageToolConfig(name);
 }
 
 const spmGitHubRegex = regEx(/^https:\/\/github.com\/(?<repo>.+).git$/);
@@ -252,10 +304,10 @@ export function createUbiToolConfig(
     // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
     if (isString(toolOptions.tag_regex)) {
       // Remove the leading '^' if it exists to avoid duplication
-      tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
+      tagRegex = toolOptions.tag_regex.replace(regEx(/^\^/), '');
       if (!hasVPrefix) {
         // Remove the leading 'v?' if it exists to avoid duplication
-        tagRegex = tagRegex.replace(/^v\??/, '');
+        tagRegex = tagRegex.replace(regEx(/^v\??/), '');
       }
     }
 

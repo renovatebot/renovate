@@ -15,7 +15,7 @@ export const QuadletFile = Ini.pipe(
       .optional(),
     Volume: z
       .object({
-        Image: z.string(),
+        Image: z.string().optional(),
       })
       .optional(),
   }),

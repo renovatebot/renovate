@@ -11,7 +11,10 @@ export function getCliName(option: ParseConfigOptions): string {
   if (option.cli === false) {
     return '';
   }
-  const nameWithHyphens = option.name.replace(regEx(/([A-Z])/g), '-$1');
+  const nameWithHyphens = option.name.replace(
+    regEx(/(?<upper>[A-Z])/g),
+    '-$<upper>',
+  );
   return `--${nameWithHyphens.toLowerCase()}`;
 }
 
@@ -77,8 +80,8 @@ function migrateArgs(input: string[]): string[] {
         .replace('"host":"', '"matchHost":"')
         .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
         .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
-        .replace(/^--dry-run$/, '--dry-run=true')
-        .replace(/^--require-config$/, '--require-config=true')
+        .replace(regEx(/^--dry-run$/), '--dry-run=true')
+        .replace(regEx(/^--require-config$/), '--require-config=true')
         .replace('--aliases', '--registry-aliases')
         .replace('--include-forks=true', '--fork-processing=enabled')
         .replace('--include-forks', '--fork-processing=enabled')

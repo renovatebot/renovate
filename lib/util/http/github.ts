@@ -3,6 +3,7 @@ import {
   isNonEmptyObject,
   isNullOrUndefined,
   isPlainObject,
+  isString,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
@@ -19,6 +20,7 @@ import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import * as hostRules from '../host-rules.ts';
 import { maskToken } from '../mask.ts';
+import { coerceObject } from '../object.ts';
 import * as p from '../promises.ts';
 import { range } from '../range.ts';
 import { regEx } from '../regex.ts';
@@ -31,6 +33,13 @@ import {
   type InternalJsonUnsafeOptions,
 } from './http.ts';
 import type { GotLegacyError } from './legacy.ts';
+import {
+  isForbidden,
+  isGone,
+  isServerError,
+  isUnauthorized,
+  isUnprocessableContent,
+} from './status.ts';
 import type {
   GraphqlOptions,
   HttpMethod,
@@ -39,6 +48,7 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const MAX_PAGINATION_PAGES = 100;
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -67,9 +77,23 @@ export type GithubGraphqlResponse<T = unknown> =
       data?: never;
       errors: {
         type?: string;
+        code?: string;
         message: string;
       }[];
     };
+
+/**
+ * GitHub reports a spent GraphQL budget in two shapes: `RATE_LIMITED` from the
+ * GraphQL API itself, and `graphql_rate_limit` when an app installation has
+ * exhausted its allowance. Both mean "come back later", not "unknown error".
+ */
+function isGraphqlRateLimited(
+  errors: { type?: string; code?: string }[] | undefined,
+): boolean {
+  return !!errors?.some(
+    (err) => err.type === 'RATE_LIMITED' || err.code === 'graphql_rate_limit',
+  );
+}
 
 const GithubError = z.object({
   field: z.string().optional(),
@@ -84,6 +108,18 @@ const GithubError = z.object({
 const GithubErrors = z
   .union([LooseArray(GithubError), GithubError.transform((error) => [error])])
   .catch([]);
+
+/**
+ * Whether `err` is GitHub's response to creating a PR for a branch which already has one, usually because a different user created it so Renovate could not find it.
+ */
+export function isPrAlreadyExistsError(err: any): boolean {
+  return (
+    isUnprocessableContent(err) &&
+    GithubErrors.parse(err.response?.body?.errors).some((e) =>
+      e.message?.startsWith('A pull request already exists'),
+    )
+  );
+}
 
 function handleGotError(
   err: GotLegacyError,
@@ -110,29 +146,29 @@ function handleGotError(
     logger.debug({ err }, '');
     return new ExternalHostError(err, 'github');
   }
-  if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+  if (isServerError(err)) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
     logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
-  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+  if (isForbidden(err) && message.includes('Upgrade to GitHub Pro')) {
     logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
-  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
+  if (isForbidden(err) && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
 
     const parsed = parseUrl(baseUrl);
@@ -161,7 +197,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    err.statusCode === 403 &&
+    isForbidden(err) &&
     message.startsWith('Resource not accessible by integration')
   ) {
     logger.debug(
@@ -170,7 +206,7 @@ function handleGotError(
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (err.statusCode === 401) {
+  if (isUnauthorized(err)) {
     // Warn once for github.com token if unauthorized
     const hostname = parseUrl(url)?.hostname;
     // v8 ignore else -- TODO: add test #40625
@@ -192,7 +228,7 @@ function handleGotError(
       return new Error(PLATFORM_BAD_CREDENTIALS);
     }
   }
-  if (err.statusCode === 422) {
+  if (isUnprocessableContent(err)) {
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
@@ -207,16 +243,14 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     }
-    if (
-      errors.some((e) => e.message?.startsWith('A pull request already exists'))
-    ) {
+    if (isPrAlreadyExistsError(err)) {
       return err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     return new ExternalHostError(err, 'github');
   }
   if (
-    err.statusCode === 410 &&
+    isGone(err) &&
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;
@@ -230,17 +264,22 @@ interface GraphqlPaginatedContent<T = unknown> {
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
+function hasVendorAccept(acceptStrings: string[]): boolean {
+  return (
+    acceptStrings.some((x) => x.startsWith('application/vnd.github.')) &&
+    acceptStrings.length >= 2
+  );
+}
+
 function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings =
-    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
+  const acceptStrings = isString(input) ? input.split(regEx(/\s*,\s*/)) : [];
 
   // TODO: regression of #6736
   // v8 ignore else -- TODO: add test #40625
   if (
     !acceptStrings.some((x) => x === defaultAccept) &&
-    (!acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
-      acceptStrings.length < 2)
+    !hasVendorAccept(acceptStrings)
   ) {
     acceptStrings.push(defaultAccept);
   }
@@ -333,6 +372,20 @@ function replaceUrlBase(url: URL, baseUrl: string): URL {
   return new URL(relativeUrl, baseUrl);
 }
 
+function resolvePaginationUrl(
+  url: string,
+  baseUrl: string | undefined,
+  rebasePaginationLinks: boolean,
+): URL {
+  const parsedUrl = new URL(url, baseUrl);
+  const rebasePagination =
+    !!baseUrl &&
+    rebasePaginationLinks &&
+    // Preserve github.com URLs for use cases like release notes
+    parsedUrl.origin !== 'https://api.github.com';
+  return rebasePagination ? replaceUrlBase(parsedUrl, baseUrl) : parsedUrl;
+}
+
 export class GithubHttp extends HttpBase<GithubHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
@@ -407,7 +460,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GithubHttpOptions>,
   ): Promise<HttpResponse<T>> {
-    const httpOptions = options.httpOptions ?? {};
+    const httpOptions = coerceObject(options.httpOptions);
     const resolvedUrl = this.resolveUrl(options.url, httpOptions);
     const opts = {
       ...options,
@@ -423,58 +476,113 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const linkHeader = parseLinkHeader(result?.headers?.link);
       const next = linkHeader?.next;
       const env = getEnv();
-      if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page, 10);
-        // v8 ignore else -- TODO: add test #40625
-        if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
-          lastPage = Math.min(pageLimit, lastPage);
-        }
+      if (next?.url) {
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
-        const parsedUrl = new URL(next.url, baseUrl);
-        const rebasePagination =
-          !!baseUrl &&
-          !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
-          // Preserve github.com URLs for use cases like release notes
-          parsedUrl.origin !== 'https://api.github.com';
-        const firstPageUrl = rebasePagination
-          ? replaceUrlBase(parsedUrl, baseUrl)
-          : parsedUrl;
-        const queue = [...range(2, lastPage)].map(
-          (pageNumber) => (): Promise<HttpResponse<T>> => {
-            // copy before modifying searchParams
-            const nextUrl = parseUrl(firstPageUrl.toString())!;
-            nextUrl.searchParams.set('page', String(pageNumber));
-            return super.requestJsonUnsafe<T>(method, {
-              ...opts,
-              url: nextUrl,
-            });
-          },
+        const rebasePaginationLinks = !!env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+        const firstPageUrl = resolvePaginationUrl(
+          next.url,
+          baseUrl,
+          rebasePaginationLinks,
         );
-        const pages = await p.all(queue);
-        // v8 ignore else -- TODO: add test #40625
-        if (httpOptions.paginationField && isPlainObject(result.body)) {
-          const paginatedResult = result.body[httpOptions.paginationField];
+        // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+        if (firstPageUrl.origin === resolvedUrl.origin) {
+          let pages: HttpResponse<T>[];
+          if (linkHeader?.last?.page) {
+            logger.debug('Using GitHub offset-based pagination');
+            let lastPage = parseInt(linkHeader.last.page, 10);
+            // v8 ignore else -- TODO: add test #40625
+            if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
+              lastPage = Math.min(pageLimit, lastPage);
+            }
+            const queue = [...range(2, lastPage)].map(
+              (pageNumber) => (): Promise<HttpResponse<T>> => {
+                // copy before modifying searchParams
+                const nextUrl = parseUrl(firstPageUrl.toString())!;
+                nextUrl.searchParams.set('page', String(pageNumber));
+                return super.requestJsonUnsafe<T>(method, {
+                  ...opts,
+                  url: nextUrl,
+                });
+              },
+            );
+            pages = await p.all(queue);
+          } else {
+            logger.debug('Using GitHub cursor-based pagination');
+            pages = [];
+            const paginateAll =
+              !!env.RENOVATE_PAGINATE_ALL || httpOptions.paginate === 'all';
+            const cursorPageLimit = paginateAll
+              ? MAX_PAGINATION_PAGES
+              : pageLimit;
+            let nextUrl: URL | null = firstPageUrl;
+            let pageNumber = 2;
+            for (; nextUrl && pageNumber <= cursorPageLimit; pageNumber += 1) {
+              if (nextUrl.origin !== resolvedUrl.origin) {
+                logger.once.warn(
+                  {
+                    requestOrigin: resolvedUrl.origin,
+                    paginationOrigin: nextUrl.origin,
+                  },
+                  'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+                );
+                break;
+              }
+              const nextPage: HttpResponse<T> =
+                await super.requestJsonUnsafe<T>(method, {
+                  ...opts,
+                  url: nextUrl,
+                });
+              pages.push(nextPage);
+              const nextLink = parseLinkHeader(nextPage.headers.link)?.next;
+              nextUrl = nextLink?.url
+                ? resolvePaginationUrl(
+                    nextLink.url,
+                    baseUrl,
+                    rebasePaginationLinks,
+                  )
+                : null;
+            }
+            if (paginateAll && nextUrl && pageNumber > cursorPageLimit) {
+              logger.warn(
+                { maxPages: MAX_PAGINATION_PAGES },
+                'GitHub cursor pagination limit reached',
+              );
+            }
+          }
           // v8 ignore else -- TODO: add test #40625
-          if (isArray<T>(paginatedResult)) {
-            for (const nextPage of pages) {
-              // v8 ignore else -- TODO: add test #40625
-              if (isPlainObject(nextPage.body)) {
-                const nextPageResults =
-                  nextPage.body[httpOptions.paginationField];
+          if (httpOptions.paginationField && isPlainObject(result.body)) {
+            const paginatedResult = result.body[httpOptions.paginationField];
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray<T>(paginatedResult)) {
+              for (const nextPage of pages) {
                 // v8 ignore else -- TODO: add test #40625
-                if (isArray<T>(nextPageResults)) {
-                  paginatedResult.push(...nextPageResults);
+                if (isPlainObject(nextPage.body)) {
+                  const nextPageResults =
+                    nextPage.body[httpOptions.paginationField];
+                  // v8 ignore else -- TODO: add test #40625
+                  if (isArray<T>(nextPageResults)) {
+                    paginatedResult.push(...nextPageResults);
+                  }
                 }
               }
             }
-          }
-        } else if (isArray<T>(result.body)) {
-          for (const nextPage of pages) {
-            // v8 ignore else -- TODO: add test #40625
-            if (isArray<T>(nextPage.body)) {
-              result.body.push(...nextPage.body);
+          } else if (isArray<T>(result.body)) {
+            for (const nextPage of pages) {
+              // v8 ignore else -- TODO: add test #40625
+              if (isArray<T>(nextPage.body)) {
+                result.body.push(...nextPage.body);
+              }
             }
           }
+        } else {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            {
+              requestOrigin: resolvedUrl.origin,
+              paginationOrigin: firstPageUrl.origin,
+            },
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different origin in pagination links.',
+          );
         }
       }
     }
@@ -509,9 +617,10 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     }
     logger.trace(`Performing Github GraphQL request`);
 
+    let response: GithubGraphqlResponse<T> | null;
     try {
       const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
-      return res?.body;
+      response = res.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError && count && count > 10) {
@@ -520,6 +629,12 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       }
       throw handleGotError(err, path, opts);
     }
+
+    if (isGraphqlRateLimited(response?.errors)) {
+      throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+    }
+
+    return response;
   }
 
   async queryRepoField<T = Record<string, unknown>>(

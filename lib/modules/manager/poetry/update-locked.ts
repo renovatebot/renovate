@@ -14,11 +14,10 @@ export function updateLockedDependency(
 
   const LockedVersion = Lockfile.transform(({ lock }) => lock[depName]);
   return Result.parse(lockFileContent, LockedVersion)
-    .transform(
-      (lockedVersion): UpdateLockedResult =>
-        lockedVersion === newVersion
-          ? { status: 'already-updated' }
-          : { status: 'unsupported' },
+    .transform((lockedVersion): UpdateLockedResult =>
+      lockedVersion === newVersion
+        ? { status: 'already-updated' }
+        : { status: 'unsupported' },
     )
     .unwrapOr({ status: 'unsupported' });
 }

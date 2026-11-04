@@ -1,22 +1,21 @@
 import { isEmptyArray } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import {
-  deleteLocalFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
-import {
-  getNpmrcContent,
-  resetNpmrcContent,
-  updateNpmrcContent,
-} from '../npm/utils.ts';
+import { withNpmrcHostRules } from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactError,
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 import type { DenoManagerData } from './types.ts';
 
 export async function updateArtifacts(
@@ -25,7 +24,7 @@ export async function updateArtifacts(
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
   logger.debug(`deno.updateArtifacts(${packageFileName})`);
-  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+  const { isLockFileMaintenance } = config;
 
   if (isEmptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated deno deps - returning null');
@@ -43,14 +42,7 @@ export async function updateArtifacts(
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
     logger.debug(`Failed to read ${lockFileName}. Skipping artifact update.`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: `Failed to read "${lockFileName}"`,
-        },
-      },
-    ];
+    return [artifactError(lockFileName, `Failed to read "${lockFileName}"`)];
   }
 
   for (const updateDep of updatedDeps) {
@@ -67,109 +59,89 @@ export async function updateArtifacts(
         "Dependency can't be updated with a lock file",
       );
       return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
-          },
-        },
+        artifactError(
+          lockFileName,
+          `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+        ),
       ];
     }
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
   const { additionalNpmrcContent } = processHostRules();
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
+    return await withNpmrcHostRules(
+      pkgFileDir,
+      additionalNpmrcContent,
+      async () => {
+        // run from its referred deno.json/deno.jsonc location if import map is used
+        const importMapReferrerDep = updatedDeps.find(
+          (dep) => dep.managerData?.importMapReferrer,
+        );
+        const cwdFile =
+          importMapReferrerDep?.managerData?.importMapReferrer ??
+          packageFileName;
 
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
+        const execOptions: ExecOptions = {
+          cwdFile,
+          docker: {},
+          toolConstraints: [
+            {
+              toolName: 'deno',
+              constraint: await resolveToolConstraint(config, 'deno'),
+            },
+          ],
+        };
 
-    // run from its referred deno.json/deno.jsonc location if import map is used
-    const importMapReferrerDep = updatedDeps.find(
-      (dep) => dep.managerData?.importMapReferrer,
-    );
-    const cwdFile =
-      importMapReferrerDep?.managerData?.importMapReferrer ?? packageFileName;
+        // "deno install" don't execute lifecycle scripts of package.json by default
+        // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+        // deno.json(c) could have the `lock.frozen` field
+        // we should always override the `frozen` flag due to if it would be specified true
+        let command = 'deno install --frozen=false';
 
-    const execOptions: ExecOptions = {
-      cwdFile,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'deno',
-          constraint: config.constraints?.deno,
-        },
-      ],
-    };
+        // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
+        const defaultImportHosts = [
+          'deno.land:443',
+          'esm.sh:443',
+          'jsr.io:443',
+          'cdn.jsdelivr.net:443',
+          'raw.githubusercontent.com:443',
+          'gist.githubusercontent.com:443',
+        ];
+        const additionalImportHosts = hostRules
+          .findAll({ hostType: 'npm' })
+          .filter((rule) => rule.resolvedHost)
+          .map((rule) => rule.resolvedHost);
 
-    // "deno install" don't execute lifecycle scripts of package.json by default
-    // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
-    // deno.json(c) could have the `lock.frozen` field
-    // we should always override the `frozen` flag due to if it would be specified true
-    let command = 'deno install --frozen=false';
+        if (additionalImportHosts.length > 0) {
+          // combine default and additional import hosts, removing duplicates
+          const importHosts = [
+            ...new Set([...defaultImportHosts, ...additionalImportHosts]),
+          ].join(',');
 
-    // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
-    const defaultImportHosts = [
-      'deno.land:443',
-      'esm.sh:443',
-      'jsr.io:443',
-      'cdn.jsdelivr.net:443',
-      'raw.githubusercontent.com:443',
-      'gist.githubusercontent.com:443',
-    ];
-    const additionalImportHosts = hostRules
-      .findAll({ hostType: 'npm' })
-      .filter((rule) => rule.resolvedHost)
-      .map((rule) => rule.resolvedHost);
+          command += ` --allow-import=${quote(importHosts)}`;
+        }
 
-    if (additionalImportHosts.length > 0) {
-      // combine default and additional import hosts, removing duplicates
-      const importHosts = [
-        ...new Set([...defaultImportHosts, ...additionalImportHosts]),
-      ].join(',');
-
-      command += ` --allow-import=${importHosts}`;
-    }
-
-    // TODO: appending `--lockfile-only` is better to reduce disk usage
-    // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-    await exec(command, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
-
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
+        // TODO: appending `--lockfile-only` is better to reduce disk usage
+        // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
+        return await updateLockFile({
+          lockFileName,
+          existingLockFileContent: oldLockFileContent,
+          packageFile: {
+            path: packageFileName,
+            contents: newPackageFileContent,
+          },
+          deleteLockFile: isLockFileMaintenance,
+          run: () => exec(command, execOptions),
+        });
       },
-    ];
+    );
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

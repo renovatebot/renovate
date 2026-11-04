@@ -2,6 +2,6 @@
   "1": {"title": "Configure Renovate", "state": "open"},
   "2": {"title": "Update dependency debian to v12 - autoclosed", "state": "closed"},
   "3": {"title": "Update dependency debian to v11", "state": "open"},
-  "4": {"title": "Update dependency ubuntu to v22", "state": "merged"},
+  "4": {"title": "Update dependency ubuntu to v22", "state": "merged", "closedAt": "2024-01-15T10:00:00Z"},
   "5": {"title": "Update dependency ubuntu to v20", "state": "update"}
 }
