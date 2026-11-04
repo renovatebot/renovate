@@ -20,8 +20,10 @@ export interface GitLabUser {
 }
 
 export interface GitlabPr extends Pr {
+  headPipelineId?: number;
   headPipelineStatus?: string;
   headPipelineSha?: string;
+  headPipelineSource?: string;
 }
 
 export interface UpdateMergeRequest {
@@ -37,6 +39,7 @@ export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 export interface RepoResponse {
   id: number;
   archived: boolean;
+  marked_for_deletion_at?: string | null;
   mirror: boolean;
   default_branch: string;
   empty_repo: boolean;

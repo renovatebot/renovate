@@ -60,6 +60,13 @@ const adapter: GithubGraphqlDatasourceAdapter<
       : null,
 };
 
+function graphqlRequestBody(count: number, cursor: string | null) {
+  return {
+    query: adapter.query,
+    variables: { owner: 'foo', name: 'bar', count, cursor },
+  };
+}
+
 function resp(
   isRepoPrivate: boolean | undefined,
   nodes: TestAdapterInput[],
@@ -297,9 +304,11 @@ describe('util/github/graphql/datasource-fetcher', () => {
     });
 
     /**
-     * See: #16343
+     * See: #16343, discussion #45248
      */
     describe('Page shrinking', () => {
+      const pageSizes = [100, 50, 25, 10, 5];
+
       function generateItems(count: number): TestAdapterInput[] {
         const indices = [...range(1, count)].map((x) => `${x}`);
         return indices.map((idx) => ({
@@ -330,16 +339,67 @@ describe('util/github/graphql/datasource-fetcher', () => {
         return pages;
       }
 
-      it('shrinks page from 100 to 50', async () => {
-        const items = generateItems(150);
-        const pages = generatePages(items, 50);
-        const scope = httpMock
+      it.each`
+        attempts | pageSize | itemCount
+        ${1}     | ${50}    | ${150}
+        ${2}     | ${25}    | ${100}
+        ${3}     | ${10}    | ${30}
+        ${4}     | ${5}     | ${15}
+      `(
+        'shrinks page size to $pageSize after $attempts failed attempt(s)',
+        async ({
+          attempts,
+          pageSize,
+          itemCount,
+        }: {
+          attempts: number;
+          pageSize: number;
+          itemCount: number;
+        }) => {
+          const items = generateItems(itemCount);
+          const pages = generatePages(items, pageSize);
+          const scope = httpMock.scope('https://api.github.com/');
+          pageSizes.slice(0, attempts).forEach((failedPageSize) => {
+            scope
+              .post('/graphql', graphqlRequestBody(failedPageSize, null))
+              .reply(
+                200,
+                err('Something went wrong while executing your query.'),
+              );
+          });
+          pages.forEach((page, idx) => {
+            scope
+              .post(
+                '/graphql',
+                graphqlRequestBody(
+                  pageSize,
+                  idx === 0 ? null : `page-${idx + 1}`,
+                ),
+              )
+              .reply(200, page);
+          });
+
+          const res = await Datasource.query(
+            { packageName: 'foo/bar' },
+            http,
+            adapter,
+          );
+
+          expect(res).toHaveLength(itemCount);
+          expect(res).toEqual(items.map(adapter.transform));
+        },
+      );
+
+      it('shrinks page size when a later page fails', async () => {
+        const items = generateItems(30);
+        httpMock
           .scope('https://api.github.com/')
-          .post('/graphql')
-          .reply(200, err('Something went wrong while executing your query.'));
-        pages.forEach((page) => {
-          scope.post('/graphql').reply(200, page);
-        });
+          .post('/graphql', graphqlRequestBody(100, null))
+          .reply(200, resp(false, items.slice(0, 20), 'page-2'))
+          .post('/graphql', graphqlRequestBody(100, 'page-2'))
+          .reply(200, err('Something went wrong while executing your query.'))
+          .post('/graphql', graphqlRequestBody(50, 'page-2'))
+          .reply(200, resp(false, items.slice(20)));
 
         const res = await Datasource.query(
           { packageName: 'foo/bar' },
@@ -347,62 +407,23 @@ describe('util/github/graphql/datasource-fetcher', () => {
           adapter,
         );
 
-        expect(res).toHaveLength(150);
         expect(res).toEqual(items.map(adapter.transform));
-        expect(httpMock.getTrace()).toMatchObject([
-          { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
-          { body: { variables: { count: 50, cursor: 'page-2' } } },
-          { body: { variables: { count: 50, cursor: 'page-3' } } },
-        ]);
-      });
-
-      it('shrinks page from 50 to 25', async () => {
-        const items = generateItems(100);
-        const pages = generatePages(items, 25);
-        const scope = httpMock
-          .scope('https://api.github.com/')
-          .post('/graphql')
-          .twice()
-          .reply(200, err('Something went wrong while executing your query.'));
-        pages.forEach((page) => {
-          scope.post('/graphql').reply(200, page);
-        });
-
-        const res = await Datasource.query(
-          { packageName: 'foo/bar' },
-          http,
-          adapter,
-        );
-
-        expect(res).toHaveLength(100);
-        expect(res).toEqual(items.map(adapter.transform));
-        expect(httpMock.getTrace()).toMatchObject([
-          { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
-          { body: { variables: { count: 25, cursor: null } } },
-          { body: { variables: { count: 25, cursor: 'page-2' } } },
-          { body: { variables: { count: 25, cursor: 'page-3' } } },
-          { body: { variables: { count: 25, cursor: 'page-4' } } },
-        ]);
       });
 
       it('re-throws if shrinking did not help', async () => {
-        httpMock
-          .scope('https://api.github.com/')
-          .post('/graphql')
-          .thrice()
-          .reply(200, err('Something went wrong while executing your query.'));
+        const scope = httpMock.scope('https://api.github.com/');
+        pageSizes.forEach((pageSize) => {
+          scope
+            .post('/graphql', graphqlRequestBody(pageSize, null))
+            .reply(
+              200,
+              err('Something went wrong while executing your query.'),
+            );
+        });
 
         await expect(
           Datasource.query({ packageName: 'foo/bar' }, http, adapter),
         ).rejects.toThrow('Something went wrong while executing your query.');
-
-        expect(httpMock.getTrace()).toMatchObject([
-          { body: { variables: { count: 100, cursor: null } } },
-          { body: { variables: { count: 50, cursor: null } } },
-          { body: { variables: { count: 25, cursor: null } } },
-        ]);
       });
     });
 
@@ -451,7 +472,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         // Set up 3 pages but only 2 items should be fetched due to maxItems: 2
         httpMock
           .scope('https://api.github.com/')
-          .post('/graphql')
+          .post('/graphql', graphqlRequestBody(100, null))
           .reply(
             200,
             resp(
@@ -460,7 +481,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
               'page-2',
             ),
           )
-          .post('/graphql')
+          .post('/graphql', graphqlRequestBody(100, 'page-2'))
           .reply(
             200,
             resp(
@@ -478,7 +499,6 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
         // Should only have 2 items due to maxItems: 2
         expect(res).toHaveLength(2);
-        expect(httpMock.getTrace()).toHaveLength(2);
       });
     });
   });

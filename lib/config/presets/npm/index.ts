@@ -1,3 +1,4 @@
+import { HOST_BLOCKED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import {
   resolvePackageUrl,
@@ -16,7 +17,8 @@ import {
 
 const id = 'npm';
 
-const http = new Http(id);
+// the registry URL comes from `npmrc`, which a repository can set for itself, and the `renovate-config` fetched from it becomes Renovate configuration - so an internal host needs a deliberately-scoped `allowInternal` grant, as for any other preset source
+const http = new Http(id, { responseBecomesConfig: true });
 
 export async function getPreset({
   repo: pkg,
@@ -39,7 +41,12 @@ export async function getPreset({
     ).body;
     // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
-  } catch {
+  } catch (err) {
+    // keep the block distinguishable from a missing package, so it surfaces as its own config validation error
+    if (err.message === HOST_BLOCKED) {
+      throw err;
+    }
+
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (!dep?.['renovate-config']) {

@@ -23,7 +23,6 @@ import { getGitlabDep } from './utils.ts';
 const componentReferenceRegex = regEx(
   /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
-const componentReferenceLatestVersion = '~latest';
 
 function extractDepFromIncludeComponent(
   component: string,
@@ -60,13 +59,6 @@ function extractDepFromIncludeComponent(
     registryUrls: [`https://${componentReference.fqdn}`],
     versioning: semverPartialId,
   };
-  if (dep.currentValue === componentReferenceLatestVersion) {
-    logger.debug(
-      { componentVersion: dep.currentValue },
-      'Ignoring component version',
-    );
-    dep.skipReason = 'unsupported-version';
-  }
   return dep;
 }
 
@@ -169,6 +161,7 @@ export async function extractAllPackageFiles(
     }
 
     const result = extractPackageFile(content, file, config);
+    // v8 ignore else -- needs a listed file that yields no deps
     if (result !== null) {
       results.push({
         packageFile: file,

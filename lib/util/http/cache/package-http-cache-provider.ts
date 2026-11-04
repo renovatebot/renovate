@@ -4,10 +4,12 @@ import type { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
+import { buildCacheKey } from '../../cache/package/key.ts';
 import { resolveTtlValues } from '../../cache/package/ttl.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import { regEx } from '../../regex.ts';
 import { HttpCacheStats } from '../../stats.ts';
+import { isOk } from '../status.ts';
 import type { HttpResponse } from '../types.ts';
 import { copyResponse } from '../util.ts';
 import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
@@ -62,7 +64,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
 
   private cacheKey(method: string, url: string): string {
     if (method !== 'get') {
-      return `${method}:${url}`;
+      return buildCacheKey(method, url);
     }
     return url;
   }
@@ -86,10 +88,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
       return;
     }
 
-    const httpResponse = copyResponse(
-      data.httpResponse as HttpResponse<unknown>,
-      false,
-    );
+    const httpResponse = copyResponse(data.httpResponse, false);
 
     const { data: body, error: err } = this.writeSchema.safeParse(
       httpResponse.body,
@@ -171,7 +170,7 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
     url: string,
     resp: HttpResponse<T>,
   ): Promise<HttpResponse<T>> {
-    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
+    if (isOk(resp) && !this.cacheAllowed(resp)) {
       return resp;
     }
 

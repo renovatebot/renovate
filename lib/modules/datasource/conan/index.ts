@@ -1,6 +1,6 @@
 import { isString, isUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
@@ -25,9 +25,9 @@ import {
 export class ConanDatasource extends Datasource {
   static readonly id = datasource;
 
-  override readonly defaultRegistryUrls = [defaultRegistryUrl];
-
-  override readonly caching = true;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return [defaultRegistryUrl];
+  }
 
   override readonly registryStrategy = 'merge';
 
@@ -62,7 +62,7 @@ export class ConanDatasource extends Datasource {
     return result;
   }
 
-  private async _getDigest(
+  private async fetchDigest(
     { registryUrl, packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
@@ -90,18 +90,21 @@ export class ConanDatasource extends Datasource {
     config: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
-        // TODO: types (#22198)
-        key: `getDigest:${config.registryUrl!}:${config.packageName}:${newValue!}`,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
         fallback: true,
       },
-      () => this._getDigest(config, newValue),
+      () => this.fetchDigest(config, newValue),
     );
   }
 
-  private async _getReleases({
+  private async fetchReleases({
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -122,6 +125,7 @@ export class ConanDatasource extends Datasource {
       'Looking up conan api dependency',
     );
 
+    // v8 ignore else -- the datasource layer always supplies a registry url
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
@@ -183,6 +187,7 @@ export class ConanDatasource extends Datasource {
                 ConanProperties,
               );
               const { sourceUrl } = conanProperties;
+              // v8 ignore else -- needs a full artifactory properties fixture
               if (sourceUrl) {
                 dep.sourceUrl = sourceUrl;
               }
@@ -201,14 +206,16 @@ export class ConanDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${datasource}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
-      () => this._getReleases(config),
+      () => this.fetchReleases(config),
     );
   }
 }
