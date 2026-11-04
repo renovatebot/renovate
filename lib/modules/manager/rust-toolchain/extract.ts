@@ -5,7 +5,11 @@ import { getParentDir } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as rustVersioning from '../../versioning/rust-release-channel/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  PackageDependency,
+  PackageFileContent,
+  SharedConstraintsScope,
+} from '../types.ts';
 import { RustToolchain } from './schema.ts';
 
 export function extractPackageFile(
@@ -27,6 +31,7 @@ export function extractPackageFile(
       );
       return {
         deps: [{ ...baseDependency(), skipReason: 'path-dependency' }],
+        sharedConstraintsScope: getSharedConstraintsScope(null, packageFile),
       };
     }
     logger.debug(
@@ -34,6 +39,7 @@ export function extractPackageFile(
     );
     return {
       deps: [{ ...baseDependency(), skipReason: 'unspecified-version' }],
+      sharedConstraintsScope: getSharedConstraintsScope(null, packageFile),
     };
   }
 
@@ -71,17 +77,29 @@ function createPackageFileContent(
   channel: string,
   packageFile: string,
 ): PackageFileContent {
-  const content: PackageFileContent = { deps: [createDependency(channel)] };
-  // other managers can only use an exact Rust version, not a channel like `stable`
-  if (plainVersionRegex.test(channel)) {
-    content.sharedConstraintsScope = {
-      directory: getParentDir(packageFile),
-      // rustup prefers the legacy file over the TOML one in the same directory
-      precedence: upath.basename(packageFile) === 'rust-toolchain' ? 1 : 0,
-      constraints: { rust: channel },
-    };
-  }
-  return content;
+  return {
+    deps: [createDependency(channel)],
+    // other managers can only use an exact Rust version, not a channel like `stable`
+    sharedConstraintsScope: getSharedConstraintsScope(
+      plainVersionRegex.test(channel) ? channel : null,
+      packageFile,
+    ),
+  };
+}
+
+/**
+ * Shares the Rust version of a toolchain file, or `null` for a toolchain which is no Rust version, so that the toolchain file of a parent directory does not apply, like with `rustup`.
+ */
+function getSharedConstraintsScope(
+  version: string | null,
+  packageFile: string,
+): SharedConstraintsScope {
+  return {
+    directory: getParentDir(packageFile),
+    // rustup prefers the legacy file over the TOML one in the same directory
+    precedence: upath.basename(packageFile) === 'rust-toolchain' ? 1 : 0,
+    constraints: { rust: { depName: 'rust', value: version } },
+  };
 }
 
 function baseDependency(): PackageDependency {
