@@ -1,4 +1,4 @@
-Renovate's `semver-extended` versioning works like [Semantic Versioning 2.0](https://semver.org) and npm ranges, but allows three to ten numeric release parts, for example `27.3.4.19` or `0.6.0.1`.
+Renovate's `semver-extended` versioning works like [Semantic Versioning 2.0](https://semver.org) and a subset of npm ranges, but allows three to ten numeric release parts, for example `27.3.4.19` or `0.6.0.1`.
 
 A version has this format:
 
