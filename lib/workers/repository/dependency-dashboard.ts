@@ -17,7 +17,11 @@ import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
-import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
+import {
+  extractRepoProblems,
+  replacementAlreadyExists,
+  withIssueDebugData,
+} from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
@@ -642,17 +646,22 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    platform.maxBodyLength() - issueBody.length - footer.length,
+    platform.maxBodyLength() -
+      issueBody.length -
+      footer.length -
+      withIssueDebugData('').length,
   );
 
   issueBody += footer;
 
+  // The cached issue we get back here will reflect its state at the _start_ of our run
+  const cachedIssue = config.dependencyDashboardIssue
+    ? await platform.getIssue?.(config.dependencyDashboardIssue)
+    : undefined;
+  issueBody = withIssueDebugData(issueBody, cachedIssue?.body);
+
   if (config.dependencyDashboardIssue) {
     // If we're not changing the dashboard issue, then we can skip checking if the user changed it.
-    // The cached issue we get back here will reflect its state at the _start_ of our run
-    const cachedIssue = await platform.getIssue?.(
-      config.dependencyDashboardIssue,
-    );
     if (cachedIssue?.body === issueBody) {
       logger.debug('No changes to dependency dashboard issue needed');
       return;
