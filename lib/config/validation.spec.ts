@@ -3542,6 +3542,31 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('allows preset arguments for any option with allowedValues', async () => {
+      const config: Record<string, unknown> = {
+        enabledManagers: ['{{arg0}}'],
+        postUpdateOptions: ['{{arg1}}'],
+        rangeStrategy: '{{arg2}}',
+        packageRules: [
+          { matchUpdateTypes: ['{{arg3}}'], enabled: false },
+          { matchUpdateTypes: ['{{depName}}'], enabled: false },
+          { matchUpdateTypes: ['{{args}}'], enabled: false },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid packageRules[1].matchUpdateTypes: matchUpdateTypes had invalid values `["{{depName}}"]`',
+          ),
+        },
+      ]);
+    });
+
     it('allows negation, globs and regexes for pattern matching options with allowedValues', async () => {
       const config: Record<string, unknown> = {
         packageRules: [
