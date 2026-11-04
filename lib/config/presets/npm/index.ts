@@ -47,7 +47,7 @@ export async function getPreset({
       throw err;
     }
 
-    throw new Error(PRESET_DEP_NOT_FOUND);
+    throw new Error(PRESET_DEP_NOT_FOUND, { cause: err });
   }
   if (!dep?.['renovate-config']) {
     throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);

@@ -7,6 +7,8 @@ import {
 import {
   CONFIG_VALIDATION,
   HOST_BLOCKED,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
@@ -400,12 +402,17 @@ async function fetchPreset(
     if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err;
     }
+    // preset sources report a preset they couldn't fetch as not found, even when they were rate limited
+    if (err.cause?.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err.cause;
+    }
     const error = new Error(CONFIG_VALIDATION);
     // presets may be URLs, which could include credentials
     error.validationSource = sanitizeUrls(preset);
     // further detail, shown below the error type when the error is reported to users
     const details: string[] = [];
-    if (err.message === HOST_BLOCKED) {
+    // most preset sources report a blocked host as the preset not being found
+    if (err.message === HOST_BLOCKED || err.cause?.message === HOST_BLOCKED) {
       logger.warn(
         {
           preset,
@@ -421,6 +428,28 @@ async function fetchPreset(
       );
     } else if (err.message === PRESET_DEP_NOT_FOUND) {
       error.validationError = `Cannot find preset's package`;
+      // only the status code is reported, as the underlying error may include details about the host that shouldn't be shared
+      // read from the HTTP error directly, rather than importing the HTTP client to check its type
+      const statusCode: number | undefined = err.cause?.response?.statusCode;
+      if (statusCode === 401 || statusCode === 403) {
+        details.push(
+          `Renovate is not authorized to fetch this preset (HTTP ${statusCode}). Check that Renovate has access to it.`,
+        );
+      } else if (
+        // the GitHub HTTP client replaces some 401s and 403s with its own errors, which aren't `HttpError`s
+        err.cause?.message === PLATFORM_BAD_CREDENTIALS ||
+        err.cause?.message === PLATFORM_INTEGRATION_UNAUTHORIZED
+      ) {
+        details.push(
+          `Renovate is not authorized to fetch this preset. Check that Renovate has access to it.`,
+        );
+      } else if (statusCode === 404) {
+        details.push(
+          `The preset could not be found (HTTP 404). Check that the preset exists, and that Renovate has access to it, as some hosts report a preset as not found when Renovate cannot access it.`,
+        );
+      } else if (statusCode) {
+        details.push(`Fetching the preset failed (HTTP ${statusCode}).`);
+      }
     } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
       error.validationError = `Preset package is missing a renovate-config entry`;
     } else if (err.message === PRESET_NOT_FOUND) {

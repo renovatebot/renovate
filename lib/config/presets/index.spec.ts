@@ -1,9 +1,12 @@
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import {
   CONFIG_VALIDATION,
   HOST_BLOCKED,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
@@ -264,6 +267,77 @@ describe('config/presets/index', () => {
       });
       expect(err.validationMessage).toBeUndefined();
     });
+
+    it.each`
+      statusCode | expected
+      ${401}     | ${'Renovate is not authorized to fetch this preset (HTTP 401). Check that Renovate has access to it.'}
+      ${403}     | ${'Renovate is not authorized to fetch this preset (HTTP 403). Check that Renovate has access to it.'}
+      ${404}     | ${'The preset could not be found (HTTP 404). Check that the preset exists, and that Renovate has access to it, as some hosts report a preset as not found when Renovate cannot access it.'}
+      ${500}     | ${'Fetching the preset failed (HTTP 500).'}
+    `(
+      'explains why the preset could not be fetched, for HTTP $statusCode',
+      async ({ statusCode, expected }) => {
+        const url = 'https://example.com/preset.json';
+        config.extends = [url];
+        const actualHttp =
+          await vi.importActual<typeof _http>('./http/index.ts');
+        http.getPreset.mockImplementationOnce(actualHttp.getPreset);
+        httpMock
+          .scope('https://example.com')
+          .get('/preset.json')
+          .reply(statusCode);
+
+        await expect(
+          presets.resolveConfigPresets(config),
+        ).rejects.toMatchObject({
+          validationSource: url,
+          validationError: "Cannot find preset's package",
+          validationMessage: expected,
+        });
+      },
+    );
+
+    it('reports a blocked host, when the preset source reports it as not found', async () => {
+      config.extends = ['github>some/repo'];
+      gitHub.getPreset.mockRejectedValueOnce(
+        new Error(PRESET_DEP_NOT_FOUND, { cause: new Error(HOST_BLOCKED) }),
+      );
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationError: 'Preset host is blocked by this Renovate instance',
+      });
+    });
+
+    it('rethrows a rate limit, rather than reporting the preset as not found', async () => {
+      config.extends = ['github>some/repo'];
+      gitHub.getPreset.mockRejectedValueOnce(
+        new Error(PRESET_DEP_NOT_FOUND, {
+          cause: new Error(PLATFORM_RATE_LIMIT_EXCEEDED),
+        }),
+      );
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        PLATFORM_RATE_LIMIT_EXCEEDED,
+      );
+    });
+
+    it.each([PLATFORM_BAD_CREDENTIALS, PLATFORM_INTEGRATION_UNAUTHORIZED])(
+      'explains that Renovate is not authorized to fetch the preset, for %s',
+      async (cause) => {
+        config.extends = ['github>some/repo'];
+        gitHub.getPreset.mockRejectedValueOnce(
+          new Error(PRESET_DEP_NOT_FOUND, { cause: new Error(cause) }),
+        );
+
+        await expect(
+          presets.resolveConfigPresets(config),
+        ).rejects.toMatchObject({
+          validationError: "Cannot find preset's package",
+          validationMessage:
+            'Renovate is not authorized to fetch this preset. Check that Renovate has access to it.',
+        });
+      },
+    );
 
     it('throws noconfig', async () => {
       // @ts-expect-error -- invalid config

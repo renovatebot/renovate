@@ -35,7 +35,7 @@ export async function getPreset({
     }
 
     logger.debug(`Preset file ${url} not found: ${err.message}`);
-    throw new Error(PRESET_DEP_NOT_FOUND);
+    throw new Error(PRESET_DEP_NOT_FOUND, { cause: err });
   }
 
   return parsePreset(response.body, parsedUrl.pathname);
