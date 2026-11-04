@@ -25,6 +25,7 @@ import {
   PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
+  parsePreset,
 } from './util.ts';
 
 vi.mock('./forgejo/index.ts');
@@ -235,7 +236,9 @@ describe('config/presets/index', () => {
       config.foo = 1;
       config.extends = ['org/repo'];
       let e: Error | undefined;
-      local.getPreset.mockRejectedValueOnce(new Error(PRESET_INVALID_JSON));
+      local.getPreset.mockImplementationOnce(() =>
+        Promise.resolve(parsePreset('{ "a": ` }', 'default.json')),
+      );
       try {
         await presets.resolveConfigPresets(config);
       } catch (err) {
@@ -244,7 +247,22 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBe('org/repo');
       expect(e!.validationError).toBe('Preset is invalid JSON');
-      expect(e!.validationMessage).toBeUndefined();
+      expect(e!.validationMessage).toBe(
+        'Parsing failed with: `Parse error: Unexpected token on line 1 column 8`',
+      );
+    });
+
+    it('reports invalid preset JSON without a parse error', async () => {
+      config.extends = ['org/repo'];
+      local.getPreset.mockRejectedValueOnce(new Error(PRESET_INVALID_JSON));
+
+      const err = await presets.resolveConfigPresets(config).catch((e) => e);
+
+      expect(err).toMatchObject({
+        validationSource: 'org/repo',
+        validationError: 'Preset is invalid JSON',
+      });
+      expect(err.validationMessage).toBeUndefined();
     });
 
     it('throws noconfig', async () => {
