@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
-import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
 import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
@@ -36,7 +36,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('rebases if the deps list has changed', async () => {
-      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
+      fs.readLocalFile.mockResolvedValueOnce(sampleHtml);
       reuseExistingBranch = true;
       const res = await doAutoReplace(
         upgrade,
@@ -47,41 +47,159 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('rebases if the deps to update has changed', async () => {
-      upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
-      upgrade.baseDeps![0].currentValue = '1.0.0';
+      fs.readLocalFile.mockResolvedValueOnce(sampleHtml);
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();
     });
 
-    // for coverage
-    it('uses depName or packageName', async () => {
-      upgrade.baseDeps = [
-        {
-          datasource: 'cdnjs',
-          packageName: 'react-router/react-router-test.min.js',
-          currentValue: '4.2.1',
-          replaceString:
-            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
-        },
-        {
-          datasource: 'cdnjs',
-          depName: 'react-router-test',
-          currentValue: '4.1.1',
-          replaceString:
-            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
-        },
-      ];
+    it('rebases if the base package file cannot be read', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
       reuseExistingBranch = true;
+
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
+
       expect(res).toBeNull();
+    });
+
+    it('rebases if the base package file has no deps', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('<html></html>');
+      reuseExistingBranch = true;
+
+      const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
+
+      expect(res).toBeNull();
+    });
+
+    it('rebases if a packageName has changed', async () => {
+      const cdnjs = 'https://cdnjs.cloudflare.com/ajax/libs/reactstrap';
+      const base = `<script src="${cdnjs}/7.1.0/reactstrap.min.js">`;
+      const branch = `<script src="${cdnjs}/7.1.1/reactstrap.js">`;
+      fs.readLocalFile.mockResolvedValueOnce(base);
+      upgrade.depName = 'reactstrap';
+      upgrade.depIndex = 0;
+      upgrade.currentValue = '7.1.0';
+      upgrade.newValue = '7.1.1';
+      reuseExistingBranch = true;
+
+      const res = await doAutoReplace(upgrade, branch, reuseExistingBranch);
+
+      expect(res).toBeNull();
+    });
+
+    describe('managers extracting all package files', () => {
+      function helmRelease(chart: string, version: string): string {
+        return codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2
+          kind: HelmRelease
+          metadata:
+            name: ${chart}
+          spec:
+            chart:
+              spec:
+                chart: ${chart}
+                version: ${version}
+                sourceRef:
+                  kind: HelmRepository
+                  name: ${chart}
+        `;
+      }
+
+      function gitRepository(url: string, tag: string): string {
+        return codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1
+          kind: GitRepository
+          metadata:
+            name: podinfo
+          spec:
+            url: ${url}
+            ref:
+              tag: ${tag}
+        `;
+      }
+
+      beforeEach(() => {
+        upgrade.manager = 'flux';
+        upgrade.packageFile = 'flux.yaml';
+        upgrade.depName = 'podinfo';
+        upgrade.depIndex = 0;
+        reuseExistingBranch = true;
+      });
+
+      it('reuses the branch if a dep source is defined in another file', async () => {
+        const branch = helmRelease('podinfo', '6.9.0');
+        fs.readLocalFile.mockResolvedValueOnce(helmRelease('podinfo', '6.8.0'));
+        upgrade.currentValue = '6.8.0';
+        upgrade.newValue = '6.9.0';
+
+        const res = await doAutoReplace(upgrade, branch, reuseExistingBranch);
+
+        expect(res).toBe(branch);
+      });
+
+      it('rebases if a packageName has changed in the same file', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(
+          gitRepository('https://github.com/org/podinfo', 'v1.0.0'),
+        );
+        upgrade.currentValue = 'v1.0.0';
+        upgrade.newValue = 'v1.1.0';
+
+        const res = await doAutoReplace(
+          upgrade,
+          gitRepository('https://github.com/other/podinfo', 'v1.1.0'),
+          reuseExistingBranch,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it.each`
+        change       | base                                                                           | branch
+        ${'added'}   | ${helmRelease('podinfo', '6.8.0')}                                             | ${`${helmRelease('podinfo', '6.9.0')}\n---\n${helmRelease('other', '1.0.0')}`}
+        ${'removed'} | ${`${helmRelease('podinfo', '6.8.0')}\n---\n${helmRelease('other', '1.0.0')}`} | ${helmRelease('podinfo', '6.9.0')}
+        ${'renamed'} | ${helmRelease('podinfo', '6.8.0')}                                             | ${helmRelease('renamed', '6.9.0')}
+      `(
+        'rebases if a depName was $change',
+        async ({ base, branch }: { base: string; branch: string }) => {
+          fs.readLocalFile.mockResolvedValueOnce(base);
+          upgrade.currentValue = '6.8.0';
+          upgrade.newValue = '6.9.0';
+
+          const res = await doAutoReplace(upgrade, branch, reuseExistingBranch);
+
+          expect(res).toBeNull();
+        },
+      );
+
+      it('rebases if the scala version has changed', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          scalaVersion := "3.3.4"
+          libraryDependencies += "org.example" %% "bar" % "0.0.5"
+        `);
+        upgrade.manager = 'sbt';
+        upgrade.packageFile = 'build.sbt';
+        upgrade.depName = 'org.example:bar';
+        upgrade.depIndex = 1;
+        upgrade.currentValue = '0.0.5';
+        upgrade.newValue = '0.0.6';
+
+        const res = await doAutoReplace(
+          upgrade,
+          codeBlock`
+            scalaVersion := "2.13.12"
+            libraryDependencies += "org.example" %% "bar" % "0.0.6"
+          `,
+          reuseExistingBranch,
+        );
+
+        expect(res).toBeNull();
+      });
     });
 
     it('updates version only', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -96,7 +214,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}  ${script} `;
-      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -110,7 +227,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -118,6 +234,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
       reuseExistingBranch = true;
+      fs.readLocalFile.mockResolvedValueOnce(src);
       const srcAlreadyUpdated = src.replace('7.1.0', '7.1.1');
       const res = await doAutoReplace(
         upgrade,
@@ -131,7 +248,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
       const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.0.9';
@@ -146,8 +262,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('returns existing content if replaceString mismatch', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
-      const src = `     ${script}   `;
-      upgrade.baseDeps = extractPackageFile(src)?.deps;
       upgrade.depName = 'reactstrap';
       upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
@@ -165,7 +279,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('updates version and integrity', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous">';
-      upgrade.baseDeps = extractPackageFile(script)?.deps;
       upgrade.depName = 'KaTeX';
       upgrade.packageName = 'KaTeX/0.10.0/katex.min.js';
       upgrade.currentValue = '0.10.0';
@@ -1583,7 +1696,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
       const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
       upgrade.manager = 'jsonata';
-      upgrade.baseDeps = [{ depName: 'foo', packageName: 'foo' }];
+      fs.readLocalFile.mockResolvedValueOnce(source);
       upgrade.depName = 'foo';
       upgrade.currentValue = '26.0.0.1';
       upgrade.newValue = '27.0.0';
