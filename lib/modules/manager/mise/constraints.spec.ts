@@ -4,6 +4,7 @@ import {
   getConstraintName,
   getConstraintValue,
   getSharedConstraintsScope,
+  isLockedVersionOf,
 } from './constraints.ts';
 import { getOrderedMiseRegistryBackends } from './upgradeable-tooling.ts';
 
@@ -74,6 +75,11 @@ describe('modules/manager/mise/constraints', () => {
       ${'node'}      | ${'prefix:20'}     | ${null}
       ${'node'}      | ${'sub-1:lts'}     | ${null}
       ${'java'}      | ${'temurin-21'}    | ${null}
+      ${'erlang'}    | ${'27'}            | ${null}
+      ${'erlang'}    | ${'prefix:27'}     | ${null}
+      ${'erlang'}    | ${'sub-1:latest'}  | ${null}
+      ${'rust'}      | ${'stable'}        | ${null}
+      ${'node'}      | ${'>=20'}          | ${'>=20'}
       ${'node'}      | ${null}            | ${null}
     `(
       'returns $expected for $constraintName $version',
@@ -81,6 +87,26 @@ describe('modules/manager/mise/constraints', () => {
         expect(getConstraintValue(constraintName as ToolName, version)).toBe(
           expected,
         );
+      },
+    );
+  });
+
+  describe('isLockedVersionOf()', () => {
+    it.each`
+      lockedVersion  | version           | expected
+      ${'20.11.0'}   | ${'20'}           | ${true}
+      ${'20.11.0'}   | ${'20.11'}        | ${true}
+      ${'20.11.0'}   | ${'v20.11.0'}     | ${true}
+      ${'21.0.2+13'} | ${'21.0.2+13'}    | ${true}
+      ${'20.1.0'}    | ${'2'}            | ${false}
+      ${'22.1.0'}    | ${'20.11.0'}      | ${false}
+      ${'20.11.0'}   | ${'lts'}          | ${true}
+      ${'20.11.0'}   | ${'sub-1:latest'} | ${true}
+      ${'20.11.0'}   | ${null}           | ${true}
+    `(
+      'returns $expected for $lockedVersion and $version',
+      ({ lockedVersion, version, expected }) => {
+        expect(isLockedVersionOf(lockedVersion, version)).toBe(expected);
       },
     );
   });

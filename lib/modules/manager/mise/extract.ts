@@ -39,6 +39,7 @@ import {
   getConstraintName,
   getConstraintValue,
   getSharedConstraintsScope,
+  isLockedVersionOf,
 } from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
@@ -61,8 +62,6 @@ const partialSelectorRegex = regEx(
   /^(?<prefix>[^\d]*)(?<major>\d+)(?:\.(?<minor>\d+))?$/,
 );
 const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
-const versionNumberRegex = regEx(/^v?(?<number>\d.*)$/);
-const leadingVRegex = regEx(/^v/);
 
 type MiseDependency = PackageDependency & { depName: string };
 
@@ -195,7 +194,7 @@ function extractToolConstraints(
 }
 
 /**
- * Returns the version of a tool which mise installs, which is the locked version unless it does not start with the configured version number.
+ * Returns the version of a tool which mise installs, which is the locked version unless it does not match the configured version number.
  */
 function getInstalledVersion(
   lockFileData: MiseLockFile | undefined,
@@ -212,20 +211,6 @@ function getInstalledVersion(
   return lockedVersion && isLockedVersionOf(lockedVersion, version)
     ? lockedVersion
     : version;
-}
-
-/**
- * Returns whether mise uses the locked version for the configured version, which for a version number it only does if the locked version starts with it.
- */
-function isLockedVersionOf(
-  lockedVersion: string,
-  version: string | null,
-): boolean {
-  const versionNumber = versionNumberRegex.exec(version ?? '')?.groups?.number;
-  return (
-    !versionNumber ||
-    lockedVersion.replace(leadingVRegex, '').startsWith(versionNumber)
-  );
 }
 
 /**

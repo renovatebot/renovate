@@ -6,6 +6,7 @@ import type { ToolName } from '../../../util/exec/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { matchRegexOrGlob } from '../../../util/string-match.ts';
 import { get as getVersioning } from '../../versioning/index.ts';
+import type { VersioningApi } from '../../versioning/types.ts';
 import type { SharedConstraintsScope } from '../types.ts';
 import {
   confDLocation,
@@ -50,11 +51,10 @@ for (const [shortName, toolName] of toolNames) {
   }
 }
 
-// a suffix like `-otp-27` names a build which Containerbase does not install, only build metadata like `+13` is kept
-const versionRegex = regEx(
-  /^v?(?<version>\d+(?:\.\d+)*(?:\+[0-9A-Za-z.+-]+)?)$/,
-);
-const fullVersionRegex = regEx(/^\d+\.\d+\.\d+/);
+const npmVersioning = getVersioning('npm');
+const semverPartialVersioning = getVersioning('semver-partial');
+// mise accepts a leading `v`, which Containerbase does not
+const leadingVRegex = regEx(/^v/);
 
 /**
  * The config file locations, those with most path segments first, as a file can match several, like `.config/mise.toml` and `mise.toml` in `.config`, and the longest one is meant.
@@ -89,22 +89,53 @@ export function getConstraintValue(
   constraintName: ToolName,
   version: string | null | undefined,
 ): string | null {
-  const constraint = versionRegex.exec(version ?? '')?.groups?.version;
-  if (!constraint) {
+  if (!version) {
     return null;
   }
+  const constraint = version.replace(leadingVRegex, '');
   const versioning = getVersioning(getToolConfig(constraintName)?.versioning);
-  if (!versioning.isValid(constraint)) {
-    return null;
+  if (isFullVersion(constraint)) {
+    return versioning.isVersion(constraint) ? constraint : null;
   }
-  // mise matches a partial version like `20` as a prefix, unlike a versioning which reads it as a single version
-  if (
-    versioning.isSingleVersion(constraint) &&
-    !fullVersionRegex.test(constraint)
-  ) {
-    return null;
-  }
-  return constraint;
+  // mise matches a partial version like `20` as a prefix, unlike a versioning which reads it as a single version, like python `3.12`
+  return isPartialVersion(constraint) && isRange(versioning, constraint)
+    ? constraint
+    : null;
+}
+
+/**
+ * Whether `version` is a full version like `20.11.0`, without a build like `-otp-27`, which Containerbase does not install.
+ */
+function isFullVersion(version: string): boolean {
+  return (
+    semverPartialVersioning.isVersion(version) &&
+    semverPartialVersioning.isStable(version)
+  );
+}
+
+/**
+ * Whether `version` is a partial version like `20` or `20.11`, which mise matches as a prefix.
+ */
+function isPartialVersion(version: string): boolean {
+  return isRange(npmVersioning, version);
+}
+
+/**
+ * Whether mise uses `lockedVersion` for the configured `version`, which for a version number it only does if the locked version matches it, as a prefix for a partial version.
+ */
+export function isLockedVersionOf(
+  lockedVersion: string,
+  version: string | null,
+): boolean {
+  return (
+    !version ||
+    !npmVersioning.isValid(version) ||
+    semverPartialVersioning.matches(lockedVersion, version)
+  );
+}
+
+function isRange(versioning: VersioningApi, version: string): boolean {
+  return versioning.isValid(version) && !versioning.isSingleVersion(version);
 }
 
 /**
