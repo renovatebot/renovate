@@ -25,11 +25,12 @@ export function updateLockedDependency({
 
   const packageName = depName.toUpperCase();
   const groupName = managerData?.group?.toUpperCase();
-  const lockedEntries = parseLockFile(lockFileContent).filter(
-    (dep) =>
-      dep.packageName.toUpperCase() === packageName &&
-      (!groupName || dep.groupName.toUpperCase() === groupName),
-  );
+  const lockedEntries = parseLockFile(lockFileContent).filter((dep) => {
+    if (dep.packageName.toUpperCase() !== packageName) {
+      return false;
+    }
+    return !groupName || dep.groupName.toUpperCase() === groupName;
+  });
   if (
     lockedEntries.length &&
     lockedEntries.every((dep) => dep.version === newVersion)

@@ -371,9 +371,9 @@ jobs:
           args: --color --profile correctness
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
-          version: 1.31.1
+          version: 1.32.0
 
   test:
     needs: [setup, prefetch]
@@ -770,7 +770,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.13.6
+          version: 0.13.7
           enable-cache: true
           cache-python: true
 
@@ -938,7 +938,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: 0.13.6
+          version: 0.13.7
           # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
           enable-cache: false
           cache-python: true

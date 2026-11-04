@@ -145,11 +145,12 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     return;
   }
 
+  if (!config.branchName || !config.confidenceStatus) {
+    return;
+  }
   if (
-    !config.branchName ||
-    !config.confidenceStatus ||
-    (config.minimumConfidence &&
-      !isActiveConfidenceLevel(config.minimumConfidence))
+    config.minimumConfidence &&
+    !isActiveConfidenceLevel(config.minimumConfidence)
   ) {
     return;
   }

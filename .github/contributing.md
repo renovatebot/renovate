@@ -126,6 +126,10 @@ Force pushing a PR is OK when you:
 
 - make large changes on a PR which require a full review anyway
 - bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+- rebase or reorder the branches of a GitHub stack of pull requests (`gh stack`)
+
+Stacks need all their branches in the `renovatebot/renovate` repository, so only contributors with write access to it can use them.
+Pull requests from forks cannot be stacked and follow the rules above.
 
 The maintainers recommend not periodically updating your PR branch with changes from `main`.
 As we use a Merge Queue, once we've approved and set your PR to merge, it'll apply on top of `main` (and any other pending changes) and tested accordingly.

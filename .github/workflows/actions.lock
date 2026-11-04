@@ -24,7 +24,7 @@ workflows:
         - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
         - 'sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6'
         - 'slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
-        - 'zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e'
+        - 'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd'
     '.github/workflows/cancel-stale-merge-queue-workflows.yml':
         - 'pierreraffa/cancel-previous-runs-action@133ec2d94c3dfeb83959ffc3c73640633044bd89'
     '.github/workflows/check-commit-messages.yml':
@@ -40,7 +40,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294'
@@ -66,14 +66,14 @@ workflows:
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
         - 'ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e'
     '.github/workflows/undesirable-test-additions.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/update-data.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d'
+        - 'jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c'
         - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -167,6 +167,11 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
+    'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26':
+        ref: 'v4.39.2'
+        commit: 'sha1-1fc58d04a4d4374f921bdac573c3811c240f9c26'
+        owner_id: 9919
+        repo_id: 259445878
     'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2':
         ref: 'v4.38.2'
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
@@ -189,9 +194,9 @@ dependencies:
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d':
-        ref: 'v5.2.4'
-        commit: 'sha1-6be3c7ed4c21d4f76b208d351d95aac273ebb76d'
+    'jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c':
+        ref: 'v5.2.6'
+        commit: 'sha1-f5be966e4a917d54244728e6a5fdcd1d93a35e6c'
         owner_id: 216188
         repo_id: 738284564
     'jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6':
@@ -229,10 +234,10 @@ dependencies:
         commit: 'sha1-dcb1066f776dd043e64d0e8ba94ca15cc7e1875d'
         owner_id: 6962987
         repo_id: 306439799
-    'zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e':
-        ref: 'v0.7.1'
-        commit: 'sha1-85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e'
+    'zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd':
+        ref: 'v0.8.1'
+        commit: 'sha1-45d7276c9ca790aabd705e31ca99c6185c3e76dd'
         owner_id: 210636713
         repo_id: 985558803
         uses:
-            - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
+            - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'

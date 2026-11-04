@@ -13,6 +13,7 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { isNotFound } from '../../../../util/http/status.ts';
 import type { ProcessBranchResult } from './types.ts';
 
 export interface BranchErrorContext {
@@ -31,7 +32,7 @@ export function handleBranchError(
   err: any,
   { branchExists, prNo, commitSha, updatesVerified }: BranchErrorContext,
 ): ProcessBranchResult {
-  if (err.statusCode === 404) {
+  if (isNotFound(err)) {
     logger.debug({ err }, 'Received a 404 error - aborting run');
     throw new Error(REPOSITORY_CHANGED);
   }

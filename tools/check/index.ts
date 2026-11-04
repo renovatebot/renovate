@@ -204,7 +204,8 @@ function parseCliArgs(): CliArgs {
 }
 
 async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
-  if (args.noTest || (args.fix && !args.all)) {
+  const isFixWithoutAll = args.fix && !args.all;
+  if (args.noTest || isFixWithoutAll) {
     return [];
   }
 

@@ -21,9 +21,8 @@ export function isProbablyJwt(token: string | undefined): boolean {
   const result = Json.safeParse(
     Buffer.from(parts[0], 'base64url').toString('utf8'),
   );
-  return (
-    result.success &&
-    isPlainObject(result.data) &&
-    ('typ' in result.data || 'alg' in result.data)
-  );
+  if (!result.success || !isPlainObject(result.data)) {
+    return false;
+  }
+  return 'typ' in result.data || 'alg' in result.data;
 }

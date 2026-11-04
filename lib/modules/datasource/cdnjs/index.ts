@@ -3,6 +3,7 @@ import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
@@ -121,7 +122,7 @@ export class CdnjsDatasource extends Datasource {
   }
 
   override handleHttpErrors(err: HttpError): void {
-    if (err.response?.statusCode !== 404) {
+    if (!isNotFound(err)) {
       throw new ExternalHostError(err);
     }
   }
