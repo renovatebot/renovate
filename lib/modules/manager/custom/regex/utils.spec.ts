@@ -91,6 +91,7 @@ describe('modules/manager/custom/regex/utils', () => {
           ...baseConfig,
         },
         baseFileInfo,
+        {},
       );
       expect(dep?.packageName).toBe('baz/bar');
     });
@@ -106,6 +107,7 @@ describe('modules/manager/custom/regex/utils', () => {
           ...baseConfig,
         },
         baseFileInfo,
+        {},
       );
       expect(dep?.packageName).toBe('baz/pkg');
     });
@@ -124,6 +126,7 @@ describe('modules/manager/custom/regex/utils', () => {
           ...baseConfig,
         },
         baseFileInfo,
+        {},
       );
       expect(dep?.registryUrls).toEqual(['https://baz/']);
     });
