@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex.ts';
-import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
+import { LooseRecord, Toml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -213,11 +213,5 @@ export const PixiPyProject = Toml.pipe(
       .object({ pixi: PixiConfig.optional().catch(undefined) })
       .optional()
       .catch(undefined),
-  }),
-);
-
-export const Lockfile = Yaml.pipe(
-  z.object({
-    version: z.number(),
   }),
 );

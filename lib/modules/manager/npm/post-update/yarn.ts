@@ -99,11 +99,10 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return (
-    (upgrade.depType === 'packageManager' ||
-      upgrade.depType === 'devEngines.packageManager') &&
-    upgrade.depName === 'yarn'
-  );
+  const isPackageManagerDepType =
+    upgrade.depType === 'packageManager' ||
+    upgrade.depType === 'devEngines.packageManager';
+  return isPackageManagerDepType && upgrade.depName === 'yarn';
 }
 
 export async function generateLockFile(
@@ -196,7 +195,11 @@ export async function generateLockFile(
       extraEnv.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false';
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
       extraEnv.YARN_GLOBAL_FOLDER = env.YARN_GLOBAL_FOLDER;
-      if (!config.managerData?.yarnZeroInstall) {
+      // check upgrades too, see #17786
+      const yarnZeroInstall =
+        !!config.managerData?.yarnZeroInstall ||
+        upgrades.some((upgrade) => !!upgrade.managerData?.yarnZeroInstall);
+      if (!yarnZeroInstall) {
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }

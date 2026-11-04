@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
+import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
+import { hash } from '../../../util/hash.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -403,6 +405,88 @@ describe('modules/manager/npm/artifacts', () => {
         },
       },
     ]);
+  });
+
+  describe('yarn berry', () => {
+    const yarnJs = 'console.log("yarn");';
+    const yarnBerryUpdate = {
+      depName: 'yarn',
+      packageName: '@yarnpkg/cli-dist',
+      depType: 'packageManager',
+      currentValue: `4.18.0+sha512.${sha512HexDigest}`,
+      newVersion: '4.18.1',
+      newDigest: sriDigest('sha512', sha512HexDigest),
+    } satisfies Upgrade<Record<string, unknown>>;
+    const newPackageFileContent = `{"packageManager": "yarn@4.18.0+sha512.${sha512HexDigest}"}`;
+
+    it('hashes yarn.js instead of using the registry integrity', async () => {
+      httpMock
+        .scope('https://repo.yarnpkg.com')
+        .get('/4.18.1/packages/yarnpkg-cli/bin/yarn.js')
+        .reply(200, yarnJs);
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [yarnBerryUpdate],
+        newPackageFileContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'package.json',
+            contents: `{"packageManager": "yarn@4.18.1+sha512.${hash(yarnJs)}"}`,
+          },
+        },
+      ]);
+    });
+
+    it('returns an artifactError if yarn.js cannot be downloaded', async () => {
+      httpMock
+        .scope('https://repo.yarnpkg.com')
+        .get('/4.18.1/packages/yarnpkg-cli/bin/yarn.js')
+        .reply(404);
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [yarnBerryUpdate],
+        newPackageFileContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          artifactError: {
+            fileName: 'package.json',
+            stderr:
+              'Cannot update packageManager hash for yarn@4.18.1: failed to download yarn.js',
+          },
+        },
+      ]);
+    });
+
+    it('returns an artifactError if newVersion is missing', async () => {
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          { ...yarnBerryUpdate, newVersion: undefined, newDigest: undefined },
+        ],
+        newPackageFileContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          artifactError: {
+            fileName: 'package.json',
+            stderr:
+              'Cannot update packageManager hash for yarn@undefined: no valid digest available',
+          },
+        },
+      ]);
+    });
   });
 
   it('returns null if the packageManager field cannot be found in the content', async () => {

@@ -31,11 +31,15 @@ function isLetter(char: string): boolean {
   return regEx(/^[a-z_+]$/i).test(char);
 }
 
+function isVPrefix(char: string): boolean {
+  return char === 'v' || char === 'V';
+}
+
 function isTransition(prevChar: string, nextChar: string): boolean {
-  return (
-    (isDigit(prevChar) && isLetter(nextChar)) ||
-    (isLetter(prevChar) && isDigit(nextChar))
-  );
+  if (isDigit(prevChar) && isLetter(nextChar)) {
+    return true;
+  }
+  return isLetter(prevChar) && isDigit(nextChar);
 }
 
 function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
@@ -72,7 +76,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       yieldToken();
       currentPrefix = PREFIX_DOT;
       currentVal = '';
-    } else if (prevChar === null && (nextChar === 'v' || nextChar === 'V')) {
+    } else if (prevChar === null && isVPrefix(nextChar)) {
       currentPrefix = nextChar;
     } else {
       if (currentVal !== '' && isTransition(prevChar!, nextChar)) {
@@ -81,7 +85,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
         currentVal = nextChar;
       } else if (
         currentVal === '' &&
-        (currentPrefix === 'v' || currentPrefix === 'V') &&
+        isVPrefix(currentPrefix) &&
         !isDigit(nextChar)
       ) {
         currentVal = currentVal.concat(currentPrefix, nextChar);
@@ -161,15 +165,22 @@ export const QualifierTypes = {
   SP: 7,
 } as const;
 
+function isQualifier(token: Token, name: string, shortName: string): boolean {
+  if (token.val === name) {
+    return true;
+  }
+  return !!token.isTransition && token.val === shortName;
+}
+
 export function qualifierType(token: Token): number | null {
   const val = token.val;
-  if (val === 'alpha' || (token.isTransition && val === 'a')) {
+  if (isQualifier(token, 'alpha', 'a')) {
     return QualifierTypes.Alpha;
   }
-  if (val === 'beta' || (token.isTransition && val === 'b')) {
+  if (isQualifier(token, 'beta', 'b')) {
     return QualifierTypes.Beta;
   }
-  if (val === 'milestone' || (token.isTransition && val === 'm')) {
+  if (isQualifier(token, 'milestone', 'm')) {
     return QualifierTypes.Milestone;
   }
   if (val === 'rc' || val === 'cr' || val === 'preview') {
@@ -498,11 +509,13 @@ function autoExtendMavenRange(
 
   const interval = [...range].reverse().find((elem) => {
     const { rightType, rightValue } = elem;
-    return (
-      rightValue === null ||
-      (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) ||
-      (rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1)
-    );
+    if (rightValue === null) {
+      return true;
+    }
+    if (rightType === INCLUDING_POINT && compare(rightValue, newValue) === -1) {
+      return true;
+    }
+    return rightType === EXCLUDING_POINT && compare(rightValue, newValue) !== 1;
   });
 
   if (!interval) {

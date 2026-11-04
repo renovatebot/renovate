@@ -38,8 +38,7 @@ describe('modules/versioning/node/index', () => {
 
   const t1 = DateTime.fromISO('2020-09-01');
   const t2 = DateTime.fromISO('2021-06-01');
-  // Node 27 schedule (new shape): alpha 2026-10-28, Current from 2027-04-22,
-  // LTS (maintenance) from 2027-10-20.
+  // Node 27 schedule: alpha 2026-10-28, Current from 2027-04-22, LTS from 2027-10-20.
   const t3 = DateTime.fromISO('2027-06-01'); // Current phase, not yet LTS
   const t4 = DateTime.fromISO('2027-11-01'); // LTS phase
 

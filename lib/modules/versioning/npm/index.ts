@@ -84,9 +84,11 @@ function intersects(range1: string, range2: string): boolean {
 }
 
 function isSingleVersion(constraint: string): boolean {
+  if (isVersion(constraint)) {
+    return true;
+  }
   return (
-    isVersion(constraint) ||
-    (constraint?.startsWith('=') && isVersion(constraint.substring(1).trim()))
+    constraint?.startsWith('=') && isVersion(constraint.substring(1).trim())
   );
 }
 

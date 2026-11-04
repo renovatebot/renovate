@@ -12,11 +12,12 @@ export function replacementAlreadyExists(
   currentDep: PackageDependency,
   newName: string,
 ): boolean {
-  return deps.some(
-    (sibling) =>
-      sibling !== currentDep &&
-      (sibling.depName === newName || sibling.packageName === newName),
-  );
+  return deps.some((sibling) => {
+    if (sibling === currentDep) {
+      return false;
+    }
+    return sibling.depName === newName || sibling.packageName === newName;
+  });
 }
 
 export function extractRepoProblems(
