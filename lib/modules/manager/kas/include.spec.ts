@@ -101,7 +101,7 @@ describe('modules/manager/kas/include', () => {
           content: '',
           config: {
             header: { version: 1 },
-            repos: { x: { url: 'u', branch: 'b' }, y: undefined },
+            repos: { x: { url: 'u', branch: 'b', type: 'git' }, y: undefined },
             overrides: { repos: { x: { commit: '1' } } },
           },
         },
@@ -111,7 +111,10 @@ describe('modules/manager/kas/include', () => {
           content: '',
           config: {
             header: { version: 2 },
-            repos: { x: { branch: 'c' }, z: { url: 'z' } },
+            repos: {
+              x: { branch: 'c', type: 'git' },
+              z: { url: 'z', type: 'git' },
+            },
           },
         },
       ]);

@@ -74,7 +74,7 @@ export function extractPackageFile(
   logger.trace(`kas.extractPackageFile ${packageFile}`);
   logger.trace({ content });
   const isYamlFile = isYamlFilePath(packageFile);
-  const repos: Record<string, KasRepo | null | undefined> | undefined =
+  const repos: Record<string, Partial<KasRepo> | null | undefined> | undefined =
     isLockFile ? config.overrides?.repos : config.repos;
   if (!repos) {
     logger.debug({ packageFile }, 'no repos found in KAS file');
