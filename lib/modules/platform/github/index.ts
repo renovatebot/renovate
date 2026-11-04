@@ -151,8 +151,8 @@ function isGhesVersionUnknownOrBelow(minVersion: string): boolean {
 
 const defaultGithubApiUrl = 'https://api.github.com/';
 
-// GitHub's max is 60k but in the hosted app we've observed that content-length is ~1k longer
-const GitHubMaxPrBodyLen = 58000;
+// GitHub's max is 60k, but the hosted app can encounter connection resets near the limit
+const GitHubMaxPrBodyLen = 50000;
 
 const noteAlertRegex = regEx(/> ℹ️? \*\*Note\*\*\n> ?\n/g);
 const warningAlertRegex = regEx(/> ⚠️? \*\*Warning\*\*\n> ?\n/g);
