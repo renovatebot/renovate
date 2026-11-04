@@ -922,8 +922,7 @@ The downside of this is that you may end up with a very old issue getting "recyc
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
 
-Tool versions in [mise](modules/manager/mise/index.md#tool-versions-as-constraints) config files are also used for artifact updates of other managers in the same directory and below.
-The Rust version pinned in a [`rust-toolchain`](modules/manager/rust-toolchain/index.md) file is used the same way for the artifact updates of the `cargo` manager.
+Tool versions in [mise](modules/manager/mise/index.md#tool-versions-as-constraints) config files or [`rust-toolchain`](modules/manager/rust-toolchain/index.md) files are also used for artifact updates of other managers in the same directory and below.
 A constraint which the manager detects itself, like `engines` in a `package.json` or the `lockfileVersion` of a `pnpm-lock.yaml`, takes precedence over these versions, unless they are within it.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
