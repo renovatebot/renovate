@@ -751,20 +751,38 @@ export async function updatePr({
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
-  if (platformPrOptions?.autoApprove) {
+  if (
+    platformPrOptions?.autoApprove ||
+    platformPrOptions?.usePlatformAutomerge
+  ) {
     const pr = await azureApiGit.getPullRequestById(prNo, config.project);
-    await azureApiGit.createPullRequestReviewer(
-      {
-        reviewerUrl: pr.createdBy!.url,
-        vote: AzurePrVote.Approved,
-        isFlagged: false,
-        isRequired: false,
-      },
-      config.repoId,
-      // TODO #22198
-      pr.pullRequestId!,
-      pr.createdBy!.id!,
-    );
+    if (platformPrOptions.autoApprove) {
+      await azureApiGit.createPullRequestReviewer(
+        {
+          reviewerUrl: pr.createdBy!.url,
+          vote: AzurePrVote.Approved,
+          isFlagged: false,
+          isRequired: false,
+        },
+        config.repoId,
+        // TODO #22198
+        pr.pullRequestId!,
+        pr.createdBy!.id!,
+      );
+    }
+    // auto-complete keeps the merge commit message it was set with, so keep it in sync with the title
+    // only when Renovate set auto-complete, which it does with the PR creator's id
+    if (
+      platformPrOptions.usePlatformAutomerge &&
+      pr.autoCompleteSetBy?.id &&
+      pr.autoCompleteSetBy.id === pr.createdBy?.id &&
+      pr.completionOptions?.mergeCommitMessage !== title
+    ) {
+      objToUpdate.completionOptions = {
+        ...pr.completionOptions,
+        mergeCommitMessage: title,
+      };
+    }
   }
 
   const updatedPr = await azureApiGit.updatePullRequest(
