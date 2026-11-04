@@ -20,6 +20,7 @@ export const packageCacheNamespaces = [
   'changelog-gitlab-notes@v2',
   'changelog-gitlab-release',
   'datasource-apk',
+  'datasource-apm',
   'datasource-artifactory',
   'datasource-aws-machine-image',
   'datasource-aws-rds',

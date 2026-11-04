@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it } from 'vitest';
 import { regEx } from '../../../util/regex.ts';
+import { ApmDatasource } from '../../datasource/apm/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -453,6 +454,245 @@ describe('modules/manager/apm/extract', () => {
           currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
           versionCompatibility: expect.any(String),
         },
+      ]);
+    });
+  });
+
+  describe('registries', () => {
+    const registryUrl =
+      'https://artifactory.example.com/artifactory/api/agentpackages/apm-local';
+
+    it('routes shorthand entries to the default registry', () => {
+      const content = codeBlock`
+        registries:
+          corp-main:
+            url: ${registryUrl}
+          default: corp-main
+        dependencies:
+          apm:
+            - acme/code-review-prompts#^2.0.0
+            - gitlab.com/acme/web-skills#1.4.0
+            - acme/prompt-library/prompts/code-review.prompt.md#stable
+        devDependencies:
+          apm:
+            - acme/dev-tools#~1.2.0
+      `;
+      expect(extractPackageFile(content, packageFile)).toEqual({
+        deps: [
+          {
+            depName: 'acme/code-review-prompts',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/code-review-prompts',
+            registryUrls: [registryUrl],
+            currentValue: '^2.0.0',
+            replaceString: 'acme/code-review-prompts#^2.0.0',
+            autoReplaceStringTemplate:
+              '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+          },
+          {
+            depName: 'gitlab.com/acme/web-skills',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'gitlab.com/acme/web-skills',
+            registryUrls: [registryUrl],
+            currentValue: '1.4.0',
+            replaceString: 'gitlab.com/acme/web-skills#1.4.0',
+            autoReplaceStringTemplate:
+              '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+          },
+          {
+            depName: 'acme/prompt-library/prompts/code-review.prompt.md',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/prompt-library',
+            registryUrls: [registryUrl],
+            currentValue: 'stable',
+            replaceString:
+              'acme/prompt-library/prompts/code-review.prompt.md#stable',
+            autoReplaceStringTemplate:
+              '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+          },
+          {
+            depName: 'acme/dev-tools',
+            depType: 'apm-dev',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/dev-tools',
+            registryUrls: [registryUrl],
+            currentValue: '~1.2.0',
+            replaceString: 'acme/dev-tools#~1.2.0',
+            autoReplaceStringTemplate:
+              '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+          },
+        ],
+      });
+    });
+
+    it('still skips unpinned and invalid shorthand entries', () => {
+      const content = codeBlock`
+        registries:
+          corp-main:
+            url: ${registryUrl}
+          default: corp-main
+        dependencies:
+          apm:
+            - acme/foo
+            - foo#1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        { depName: 'acme/foo', skipReason: 'unspecified-version' },
+        {
+          depName: 'foo',
+          currentValue: '1.0.0',
+          skipReason: 'invalid-dependency-specification',
+        },
+      ]);
+    });
+
+    it('extracts object-form registry entries', () => {
+      const content = codeBlock`
+        registries:
+          corp-main:
+            url: ${registryUrl}
+          corp-snapshots:
+            url: https://artifactory.example.com/artifactory/api/agentpackages/apm-snapshots
+          default: corp-main
+        dependencies:
+          apm:
+            - id: acme/toolkit
+              version: ^2.0.0
+            - registry: corp-snapshots
+              id: acme/toolkit
+              version: "2.1.0-rc.1"
+            - registry: corp-main
+              id: acme/prompt-library
+              path: prompts/code-review.prompt.md
+              version: 1.4.0
+              alias: code-review
+      `;
+      expect(extractPackageFile(content, packageFile)).toEqual({
+        deps: [
+          {
+            depName: 'acme/toolkit',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/toolkit',
+            registryUrls: [registryUrl],
+            currentValue: '^2.0.0',
+            replaceString: '^2.0.0',
+            autoReplaceStringTemplate: '{{{newValue}}}',
+          },
+          {
+            depName: 'acme/toolkit',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/toolkit',
+            registryUrls: [
+              'https://artifactory.example.com/artifactory/api/agentpackages/apm-snapshots',
+            ],
+            currentValue: '2.1.0-rc.1',
+            replaceString: '2.1.0-rc.1',
+            autoReplaceStringTemplate: '{{{newValue}}}',
+          },
+          {
+            depName: 'acme/prompt-library',
+            depType: 'apm',
+            datasource: ApmDatasource.id,
+            packageName: 'acme/prompt-library',
+            registryUrls: [registryUrl],
+            currentValue: '1.4.0',
+            replaceString: '1.4.0',
+            autoReplaceStringTemplate: '{{{newValue}}}',
+          },
+        ],
+      });
+    });
+
+    it('skips entries whose registry url is not declared', () => {
+      const content = codeBlock`
+        registries:
+          corp-main:
+            url: ${registryUrl}
+          default: config-only
+        dependencies:
+          apm:
+            - acme/foo#1.0.0
+            - registry: corp-other
+              id: acme/bar
+              version: 1.0.0
+            - id: acme/baz
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'acme/foo',
+          datasource: ApmDatasource.id,
+          currentValue: '1.0.0',
+          skipReason: 'unknown-registry',
+        },
+        {
+          depName: 'acme/bar',
+          datasource: ApmDatasource.id,
+          currentValue: '1.0.0',
+          skipReason: 'unknown-registry',
+        },
+        { depName: 'acme/baz', skipReason: 'unspecified-version' },
+      ]);
+    });
+
+    it('keeps shorthand entries on git when no default registry is set', () => {
+      const content = codeBlock`
+        registries:
+          corp-main:
+            url: ${registryUrl}
+        dependencies:
+          apm:
+            - acme/foo#v1.0.0
+            - id: acme/bar
+              version: 1.0.0
+            - registry: corp-main
+              id: acme/baz
+              version: 1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'acme/foo',
+          datasource: GithubTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+        { depName: 'acme/bar', skipReason: 'unknown-registry' },
+        {
+          depName: 'acme/baz',
+          datasource: ApmDatasource.id,
+          registryUrls: [registryUrl],
+        },
+      ]);
+    });
+
+    it('ignores a malformed registries block', () => {
+      const content = codeBlock`
+        registries: corp-main
+        dependencies:
+          apm:
+            - acme/foo#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        { depName: 'acme/foo', datasource: GithubTagsDatasource.id },
+      ]);
+    });
+
+    it('ignores registry entries without a url and a blank default', () => {
+      const content = codeBlock`
+        registries:
+          corp-main: ${registryUrl}
+          corp-other:
+            url: ''
+          default: ''
+        dependencies:
+          apm:
+            - acme/foo#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        { depName: 'acme/foo', datasource: GithubTagsDatasource.id },
       ]);
     });
   });
