@@ -56,19 +56,17 @@ export function parseVersionCommit(version: string): VersionCommit | null {
   return { timestamp: groups.timestamp, revision: groups.revision };
 }
 
-// Go writes this version for a module whose `replace` directive points to a
-// local path, with the major version of the module path, such as
-// `v2.0.0-00010101000000-000000000000` for a `/v2` module
-const placeholderPseudoVersionRegex = regEx(
-  /^v\d+\.\d+\.\d+-00010101000000-000000000000$/,
-);
-
 /**
  * Whether the version is the placeholder which Go writes for a module that is
- * replaced by a local path, so it does not refer to a real commit.
+ * replaced by a local path, so it does not refer to a real commit. It is a
+ * pseudo-version with a zero timestamp and revision for the major version of
+ * the module path, such as `v2.0.0-00010101000000-000000000000` for a `/v2`
+ * module.
  */
 export function isPlaceholderPseudoVersion(version: string): boolean {
-  return placeholderPseudoVersionRegex.test(version);
+  return (
+    isPseudoVersion(version) && version.endsWith('-00010101000000-000000000000')
+  );
 }
 
 export const api: VersioningApi = { ...semver };
