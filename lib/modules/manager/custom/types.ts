@@ -3,13 +3,17 @@ import type { RegexManagerConfig } from './regex/types.ts';
 import type { validMatchFields } from './utils.ts';
 
 export interface CustomExtractConfig
-  extends Partial<RegexManagerConfig>, Partial<JSONataManagerConfig> {}
+  extends Partial<RegexManagerConfig>, Partial<JSONataManagerConfig> {
+  /** Optional user-defined name, matched as `custom.<customType>.<customName>` */
+  customName?: string;
+}
 
 export type CustomManagerName = 'jsonata' | 'regex';
 
 export interface CustomManager
   extends Partial<RegexManagerConfig>, Partial<JSONataManagerConfig> {
   customType: CustomManagerName;
+  customName?: string;
   managerFilePatterns: string[];
 }
 

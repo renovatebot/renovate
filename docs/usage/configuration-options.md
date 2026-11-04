@@ -1159,6 +1159,35 @@ image: my.new.registry/aRepository/andImage:1.21-alpine
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### `customManagers.customName`
+
+Give a custom manager a name, so you can target it in `packageRules` and tell it apart from other custom managers in the logs.
+The name may only contain letters, digits, `-` and `_`, and must be unique among custom managers of the same `customType`.
+
+A named custom manager can be matched with `matchManagers` as `custom.<customType>.<customName>`.
+`custom.regex` (or `custom.jsonata`) still matches all custom managers of that type, named or not.
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "customName": "dockerfile-versions",
+      "managerFilePatterns": ["/(^|/)Dockerfile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)\\s+ENV .*?_VERSION=(?<currentValue>.*)\\s"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["custom.regex.dockerfile-versions"],
+      "groupName": "Dockerfile tool versions"
+    }
+  ]
+}
+```
+
 ### `customManagers.customType`
 
 It specifies which custom manager to use. There are two available options: `regex` and `jsonata`.
@@ -3741,6 +3770,9 @@ Use this field to restrict rules to a particular package manager. e.g.
   ]
 }
 ```
+
+Custom managers are matched as `custom.regex` and `custom.jsonata`.
+If a custom manager has a [`customName`](#custommanagerscustomname), you can also match only that manager with `custom.<customType>.<customName>`, for example `custom.regex.dockerfile-versions`.
 
 ### `packageRules.matchNewValue`
 

@@ -284,6 +284,40 @@ function allowInternalNotAllowedMessage(configType: ConfigType): string {
   return `hostRules \`allowInternal\` is only allowed in the self-hosted administrator's own configuration.`;
 }
 
+const customNameRegex = regEx(/^[a-zA-Z0-9_-]+$/);
+
+/**
+ * `customName` is used in `matchManagers` as `custom.<customType>.<customName>`,
+ * so it must be a simple identifier and unique per `customType`.
+ */
+function validateCustomManagerNames(
+  customManagers: CustomManager[],
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+  const seen = new Set<string>();
+  for (const { customType, customName } of customManagers) {
+    if (!isString(customName)) {
+      continue;
+    }
+    if (!customNameRegex.test(customName)) {
+      errors.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Invalid customName \`${customName}\`: it may only contain letters, digits, \`-\` and \`_\``,
+      });
+      continue;
+    }
+    const key = `custom.${customType}.${customName}`;
+    if (seen.has(key)) {
+      errors.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Duplicate customName \`${customName}\`: each ${customType} custom manager needs a unique customName`,
+      });
+    }
+    seen.add(key);
+  }
+  return errors;
+}
+
 export async function validateConfig(
   configType: ConfigType,
   config: AllConfig,
@@ -683,6 +717,7 @@ export async function validateConfig(
                 if (key === 'customManagers') {
                   const allowedKeys = [
                     'customType',
+                    'customName',
                     'description',
                     'fileFormat',
                     'managerFilePatterns',
@@ -750,6 +785,9 @@ export async function validateConfig(
                       });
                     }
                   }
+                  errors.push(
+                    ...validateCustomManagerNames(val as CustomManager[]),
+                  );
                 }
                 if (['matchPackageNames', 'matchDepNames'].includes(key)) {
                   const startPattern = regEx(/!?\//);

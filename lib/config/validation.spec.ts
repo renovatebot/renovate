@@ -1310,6 +1310,95 @@ describe('config/validation', () => {
       ]);
     });
 
+    describe('customManagers.customName', () => {
+      const regexManager = {
+        customType: 'regex' as const,
+        managerFilePatterns: ['/Dockerfile/'],
+        matchStrings: ['ENV (?<depName>.*?)_VERSION=(?<currentValue>.*)\\s'],
+        datasourceTemplate: 'github-releases',
+      };
+      const jsonataManager = {
+        customType: 'jsonata' as const,
+        fileFormat: 'json',
+        managerFilePatterns: ['/versions.json/'],
+        matchStrings: ['packages.{ "depName": name, "currentValue": version }'],
+        datasourceTemplate: 'npm',
+      };
+
+      it('accepts unique names', async () => {
+        const config: RenovateConfig = {
+          customManagers: [
+            { ...regexManager, customName: 'dockerfile-versions' },
+            { ...regexManager, customName: 'other_1' },
+            { ...jsonataManager, customName: 'dockerfile-versions' },
+            regexManager,
+          ],
+          packageRules: [
+            {
+              matchManagers: ['custom.regex.dockerfile-versions'],
+              enabled: false,
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('errors on names which can not be used in matchManagers', async () => {
+        const config: RenovateConfig = {
+          customManagers: [
+            { ...regexManager, customName: 'my.manager' },
+            { ...regexManager, customName: '' },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid customName ``: it may only contain letters, digits, `-` and `_`',
+          },
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid customName `my.manager`: it may only contain letters, digits, `-` and `_`',
+          },
+        ]);
+      });
+
+      it('errors on duplicate names for the same customType', async () => {
+        const config: RenovateConfig = {
+          customManagers: [
+            { ...regexManager, customName: 'versions' },
+            { ...regexManager, customName: 'versions' },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'repo',
+          config,
+          true,
+        );
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Duplicate customName `versions`: each regex custom manager needs a unique customName',
+          },
+        ]);
+      });
+    });
+
     it('errors if customManager fields are missing', async () => {
       const config: RenovateConfig = {
         customManagers: [

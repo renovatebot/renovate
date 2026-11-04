@@ -3560,6 +3560,15 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'customName',
+    description:
+      'Optional name for a custom manager, so it can be targeted with `matchManagers` and told apart in logs. Valid only within a `customManagers` object.',
+    type: 'string',
+    parents: ['customManagers'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'fileFormat',
     description:
       'It specifies the syntax of the package file being managed by the custom JSONata manager.',

@@ -893,6 +893,7 @@ export interface PackageRuleInputConfig extends RenovateConfig {
   categories?: string[];
   baseBranch?: string;
   manager?: string;
+  customName?: string;
   datasource?: string;
   effectiveDatasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];

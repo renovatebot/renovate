@@ -64,6 +64,27 @@ describe('workers/repository/extract/manager-files', () => {
       ]);
     });
 
+    it('adds the customName of a named custom manager to its package files', async () => {
+      const managerConfig = {
+        manager: 'html',
+        customName: 'my-manager',
+        enabled: true,
+        fileList: ['index.html'],
+      };
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+      html.extractPackageFile = vi.fn(() => ({
+        deps: [{ depName: 'd' }],
+      }));
+      const res = await getManagerPackageFiles(managerConfig);
+      expect(res).toEqual([
+        {
+          packageFile: 'index.html',
+          customName: 'my-manager',
+          deps: [{ depName: 'd', packageName: 'd' }],
+        },
+      ]);
+    });
+
     it('handles an extractAllPackageFiles that finds nothing', async () => {
       const managerConfig = {
         manager: 'npm',

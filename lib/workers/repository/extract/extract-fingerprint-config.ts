@@ -28,6 +28,7 @@ function getCustomManagerFields(
   }
 
   return {
+    ...(config.customName && { customName: config.customName }),
     autoReplaceStringTemplate: config.autoReplaceStringTemplate,
     matchStrings: config.matchStrings,
     matchStringsStrategy: config.matchStringsStrategy,

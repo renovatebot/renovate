@@ -154,4 +154,30 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       );
     });
   });
+
+  describe('customName', () => {
+    it('is part of the fingerprint of a named custom manager only', () => {
+      const config = mergeChildConfig(getConfig(), {
+        enabledManagers: ['custom.regex'],
+        customManagers: [
+          {
+            customType: 'regex',
+            customName: 'my-manager',
+            managerFilePatterns: ['/a/'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          },
+          {
+            customType: 'regex',
+            managerFilePatterns: ['/b/'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+          },
+        ],
+      });
+
+      const [named, unnamed] = generateFingerprintConfig(config).managers;
+
+      expect(named.customName).toBe('my-manager');
+      expect(unnamed).not.toHaveProperty('customName');
+    });
+  });
 });

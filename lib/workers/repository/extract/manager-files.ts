@@ -40,7 +40,7 @@ function massageDepNames(packageFiles: PackageFile[] | null): void {
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig,
 ): Promise<PackageFile[] | null> {
-  const { enabled, manager, fileList } = config;
+  const { enabled, manager, fileList, customName } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
@@ -48,7 +48,11 @@ export async function getManagerPackageFiles(
   }
   // istanbul ignore else
   if (isNonEmptyArray(fileList)) {
-    logger.debug(`Matched ${fileList.length} file(s) for manager ${manager}`);
+    logger.debug(
+      `Matched ${fileList.length} file(s) for manager ${manager}${
+        customName ? ` (${customName})` : ''
+      }`,
+    );
     logger.trace(
       `Matched ${
         fileList.length
@@ -81,6 +85,7 @@ export async function getManagerPackageFiles(
       if (res) {
         packageFiles.push({
           ...res,
+          ...(customName && { customName }),
           packageFile,
         });
       }

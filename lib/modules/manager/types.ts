@@ -117,6 +117,10 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
   /**
+   * The `customName` of the custom manager which extracted this package file, if it has one.
+   */
+  customName?: string;
+  /**
    * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
    *
    * Renovate uses the larger of this and `minimumReleaseAge`.
