@@ -50,6 +50,20 @@ export function collectSharedConstraints(
 }
 
 /**
+ * Whether `value` is the current value or version of `upgrade`.
+ */
+function isCurrentValue(
+  value: string | null,
+  upgrade: BranchUpgradeConfig,
+): boolean {
+  return (
+    value === upgrade.currentValue ||
+    value === upgrade.currentVersion ||
+    value === upgrade.lockedVersion
+  );
+}
+
+/**
  * Returns `constraint` with the new version of `upgrade`, or with `null` if the versioning of the tool reads that as no version, or `undefined` if `upgrade` does not update it.
  */
 function getUpdatedConstraint(
@@ -61,9 +75,7 @@ function getUpdatedConstraint(
   if (
     constraint.depName !== upgrade.depName ||
     !upgrade.newVersion ||
-    (constraint.value !== upgrade.currentValue &&
-      constraint.value !== upgrade.currentVersion &&
-      constraint.value !== upgrade.lockedVersion)
+    !isCurrentValue(constraint.value, upgrade)
   ) {
     return undefined;
   }
