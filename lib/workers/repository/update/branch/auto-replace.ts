@@ -4,7 +4,8 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.
 import { logger } from '../../../../logger/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/index.ts';
 import type { PackageDependency } from '../../../../modules/manager/types.ts';
-import { writeLocalFile } from '../../../../util/fs/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { readLocalFile, writeLocalFile } from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../util/string.ts';
 import { compile } from '../../../../util/template/index.ts';
@@ -152,6 +153,22 @@ function getDepsSignature(deps: PackageDependency[]): string {
   return deps.map((dep) => `${dep.depName!}${dep.packageName!}`).join(',');
 }
 
+/**
+ * Extracts the deps of `content` with the single-file extraction of the upgrade's manager and normalizes their names.
+ */
+async function extractNormalizedDeps(
+  upgrade: BranchUpgradeConfig,
+  content: string,
+): Promise<PackageDependency[]> {
+  const { manager, packageFile } = upgrade;
+  const res = await extractPackageFile(manager, content, packageFile!, upgrade);
+  const deps = coerceArray(res?.deps);
+  for (const dep of deps) {
+    normalizeDepNames(dep);
+  }
+  return deps;
+}
+
 function firstIndexOf(
   existingContent: string,
   depName: string,
@@ -167,24 +184,33 @@ function firstIndexOf(
   return index;
 }
 
+/**
+ * Compares the deps of the branch's package file with the deps of the base branch's package file, which is checked out locally.
+ */
 export async function checkBranchDepsMatchBaseDeps(
   upgrade: BranchUpgradeConfig,
   branchContent: string,
 ): Promise<boolean> {
-  const { baseDeps, manager, packageFile } = upgrade;
+  const { manager, packageFile } = upgrade;
   try {
-    const res = await extractPackageFile(
-      manager,
-      branchContent,
-      packageFile!,
-      upgrade,
-    )!;
-    const branchDeps = res!.deps;
-    // `baseDeps` were normalized during extraction, so the freshly extracted `branchDeps` need the same treatment before their signatures can be compared
-    for (const dep of branchDeps) {
-      normalizeDepNames(dep);
+    const baseContent = await readLocalFile(packageFile!, 'utf8');
+    if (!baseContent) {
+      logger.debug(
+        { manager, packageFile },
+        'Could not read base package file - rebasing',
+      );
+      return false;
     }
-    return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
+    const baseDeps = await extractNormalizedDeps(upgrade, baseContent);
+    if (!baseDeps.length) {
+      logger.debug(
+        { manager, packageFile },
+        'Could not extract base package file - rebasing',
+      );
+      return false;
+    }
+    const branchDeps = await extractNormalizedDeps(upgrade, branchContent);
+    return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
   } catch /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
