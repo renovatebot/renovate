@@ -158,6 +158,77 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('performs lock file updates per importer for workspace with packages', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - legacy
+      `,
+    );
+
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        packageName: 'some-dep',
+        newVersion: '1.0.1',
+        isLockfileUpdate: true,
+        packageFile: 'some-folder/package.json',
+      },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+        packageFile: 'some-folder/package.json',
+      },
+      {
+        packageName: 'some-dep',
+        newVersion: '1.0.1',
+        isLockfileUpdate: true,
+        packageFile: 'some-folder/legacy/package.json',
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 --lockfile-only --ignore-scripts --ignore-pnpmfile --dir legacy',
+      },
+    ]);
+  });
+
+  it('performs one recursive lock file update when an upgrade has no package file', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - legacy
+      `,
+    );
+
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        packageName: 'some-dep',
+        newVersion: '1.0.1',
+        isLockfileUpdate: true,
+        packageFile: 'some-folder/legacy/package.json',
+      },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
   it('performs lock file updates for workspace with packages using pnpm 10.x', async () => {
     const execSnapshots = mockExecAll();
     mockPnpmFiles(
