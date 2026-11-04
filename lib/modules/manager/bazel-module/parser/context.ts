@@ -127,10 +127,12 @@ export class Ctx implements CtxCompatible {
         return true;
       }
       // v8 ignore else -- TODO: add test #40625
+      const parentHasAttributes =
+        parent.type === 'rule' ||
+        parent.type === 'extensionTag' ||
+        parent.type === 'repoRuleCall';
       if (
-        (parent.type === 'rule' ||
-          parent.type === 'extensionTag' ||
-          parent.type === 'repoRuleCall') &&
+        parentHasAttributes &&
         current.type === 'attribute' &&
         current.value !== undefined
       ) {

@@ -162,7 +162,8 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## `assignees`
 
 Must be valid usernames on the platform in use.
-This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
+Teams are not supported, and Renovate passes `team:` entries to the platform unchanged.
+To request a review from a team, use [`reviewers`](#reviewers) instead.
 
 ## `assigneesFromCodeOwners`
 
@@ -375,11 +376,11 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`:
 
-  ```json
-  {
-    "baseBranchPatterns": ["dev"]
-  }
-  ```
+```json
+{
+  "baseBranchPatterns": ["dev"]
+}
+```
 
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
 
@@ -742,6 +743,8 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
+
 To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
 ## `commitBodyTable`
@@ -844,6 +847,8 @@ If you want Renovate to sign off its commits, you can add the [`:gitSignOff` pre
   "extends": [":gitSignOff"]
 }
 ```
+
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
 
 ## `composerIgnorePlatformReqs`
 
@@ -1854,6 +1859,31 @@ A similar one could strip leading `v` prefixes:
     {
       "matchPackageNames": ["baz"],
       "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
+
+Instead of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
+The supported group names are `major`, `minor`, `patch`, `prerelease`, and `build`.
+
+- `major` is required
+- `minor` and `patch` default to `0` if not captured
+- `prerelease` adds a `-{prerelease}` suffix
+- `build` adds a `+{build}` suffix
+
+If a `version` group is also present, it takes priority and the part groups are ignored.
+
+For example, Docker Hub tags for `eclipse-temurin` use `17.0.19_10` where `_` separates the patch from the build metadata.
+To extract this as `17.0.19+10`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["eclipse-temurin"],
+      "extractVersion": "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)"
     }
   ]
 }
@@ -3097,6 +3127,18 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
 The entire database is downloaded locally by [osv-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+
+If you self-host Renovate, you can change how the database is downloaded with these osv-offline environment variables:
+
+- `OSV_OFFLINE_ROOT_DIR`: where the database is stored (default: `osv-offline` inside the [`cacheDir`](./self-hosted-configuration.md#cachedir), or `<tmpdir>/osv-offline` if `OSV_OFFLINE_DISABLE_DOWNLOAD=true` is set)
+- `OSV_OFFLINE_MAX_AGE`: how old the database may be before it's downloaded again, as an [`ms`](https://github.com/vercel/ms) duration such as `30m`, `4h` or `7d` (default: `1d`)
+- `OSV_OFFLINE_DATABASE_FORMAT=split`: download the database of each ecosystem on its first use, instead of all of them at once
+- `OSV_OFFLINE_DATABASE_URL` and `OSV_OFFLINE_DATABASE_INDEX_URL`: download from an internal mirror
+- `OSV_OFFLINE_DISABLE_DOWNLOAD=true`: use a database you've put into `OSV_OFFLINE_ROOT_DIR` yourself, without internet access
+
+If you persist the `cacheDir`, the database (roughly 85 MB compressed) is kept as well.
+
+Read the [osv-offline readme](https://github.com/renovatebot/osv-offline/tree/main/packages/osv-offline#readme) for all options, mirrors, and which hosts to allow.
 
 <!-- markdownlint-disable MD001 -->
 

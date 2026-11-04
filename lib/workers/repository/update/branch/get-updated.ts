@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isObject } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -245,11 +245,10 @@ export async function getUpdatedPackageFiles(
         config,
       );
     }
+    const isLockFileMissing = !!lockFile && !lockFileContent;
     // istanbul ignore if
-    if (
-      reuseExistingBranch &&
-      (!packageFileContent || (lockFile && !lockFileContent))
-    ) {
+    const isFileMissing = !packageFileContent || isLockFileMissing;
+    if (reuseExistingBranch && isFileMissing) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found',
@@ -372,11 +371,14 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const newContent = await updateDependency({
+      const result = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
+      const { content: newContent, updatedOutOfBand } = isObject(result)
+        ? result
+        : { content: result, updatedOutOfBand: false };
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -412,11 +414,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      }
-      if (
-        newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
-      ) {
+      } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }

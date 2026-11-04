@@ -129,12 +129,12 @@ export async function findPr({
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   const inProgressPrs = await getPrList();
-  const result = inProgressPrs.find(
-    (pr) =>
-      branchName === pr.sourceBranch &&
-      (!prTitle || prTitle === pr.title) &&
-      matchPrState(pr, state),
-  );
+  const result = inProgressPrs.find((pr) => {
+    if (branchName !== pr.sourceBranch || !matchPrState(pr, state)) {
+      return false;
+    }
+    return !prTitle || prTitle === pr.title;
+  });
 
   if (result) {
     logger.debug({ result }, `Found PR`);

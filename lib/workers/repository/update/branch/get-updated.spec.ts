@@ -822,7 +822,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         datasource: GitRefsDatasource.id,
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
@@ -833,6 +836,68 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('keeps out-of-band updates when no package version bump is supported', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+        bumpVersion: 'patch',
+        packageFileVersion: '1.0.9',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: '.gitmodules',
+          contents: 'existing content',
+        },
+      ]);
+    });
+
+    it('retains changed content returned with an out-of-band update', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'updated content',
+        updatedOutOfBand: true,
+      });
+
+      const result = await getUpdatedPackageFiles(config);
+
+      expect(result.updatedPackageFiles).toEqual([
+        {
+          type: 'addition',
+          path: '.gitmodules',
+          contents: 'updated content',
+        },
+      ]);
+    });
+
+    it('drops unchanged package file if not updated out of band', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({ updatedPackageFiles: [] });
     });
 
     /*
