@@ -23,9 +23,9 @@ import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.ts';
 import preferFsUtil from './rules/prefer-fs-util.ts';
 import preferIsHelpers from './rules/prefer-is-helpers.ts';
 import preferIsObject from './rules/prefer-is-object.ts';
-import preferJsonPipe from './rules/prefer-json-pipe.ts';
 import preferLuxon from './rules/prefer-luxon.ts';
 import preferNullishUtil from './rules/prefer-nullish-util.ts';
+import preferParserPipe from './rules/prefer-parser-pipe.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
@@ -67,11 +67,11 @@ export default definePlugin({
     'prefer-coerce-object': preferCoerceObject,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
-    'prefer-json-pipe': preferJsonPipe,
     'prefer-luxon': preferLuxon,
     'prefer-is-helpers': preferIsHelpers,
     'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
+    'prefer-parser-pipe': preferParserPipe,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
     'prefer-stub-env': preferStubEnv,
