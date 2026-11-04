@@ -1,12 +1,8 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { regEx } from '../../../util/regex.ts';
-import { Result } from '../../../util/result.ts';
 import { Datasource } from '../datasource.ts';
 import { defaultRegistryUrl } from '../npm/common.ts';
 import { NpmDatasource } from '../npm/index.ts';
-import { DigestsConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -37,8 +33,13 @@ export class UnpkgDatasource extends Datasource {
     this.npmDatasource = new NpmDatasource();
   }
 
-  override readonly customRegistrySupport = false;
-  override readonly defaultRegistryUrls = ['https://unpkg.com/'];
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://unpkg.com/'];
+  }
 
   private async getNpmReleases(
     config: GetReleasesConfig,
@@ -55,26 +56,17 @@ export class UnpkgDatasource extends Datasource {
 
   private async _getDigest(
     config: DigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
-    const { packageName } = config;
-    const { library, asset } = splitPackageAndAsset(packageName);
-
-    const result = Result.parse(config, DigestsConfig).transform(
-      ({ registryUrl }) => {
-        const url = `${registryUrl}${library}@${newValue}?meta`;
-        return this.http.getJsonSafe(url, UnpkgDigestResponse);
-      },
-    );
-
-    const { val = null, err } = await result.unwrap();
-    if (err instanceof ZodError) {
-      logger.debug({ err }, 'unpkg: validation error');
+    const { packageName, registryUrl } = config;
+    if (!newValue || !registryUrl) {
       return null;
     }
-    if (err) {
-      this.handleGenericErrors(err);
-    }
+
+    const { library, asset } = splitPackageAndAsset(packageName);
+
+    const url = `${registryUrl}${library}@${newValue}?meta`;
+    const val = await this.fetchJsonOrNull(url, UnpkgDigestResponse);
 
     const file = val?.files.find(
       (file) => file.path.replace(regEx(/^\/+/), '') === asset,
@@ -85,12 +77,17 @@ export class UnpkgDatasource extends Datasource {
 
   override getDigest(
     config: DigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${UnpkgDatasource.id}`,
-        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
+        public: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),

@@ -38,16 +38,25 @@ describe('modules/datasource/unpkg/index', () => {
         null,
       );
 
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource: UnpkgDatasource.id,
           packageName: 'does-not-exist',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
   });
 
   describe('getDigest', () => {
+    it('returns null without a version', async () => {
+      await expect(
+        getDigest({
+          datasource: UnpkgDatasource.id,
+          packageName: 'foo/bar',
+        }),
+      ).resolves.toBeNull();
+    });
+
     it('returns null for no result', async () => {
       httpMock
         .scope(baseUrl)
