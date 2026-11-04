@@ -429,13 +429,16 @@ export async function lookupUpdates(
         res.skipReason = 'invalid-version';
         return Result.ok(res);
       }
+      const releasesToFilter = inRangeOnlyStrategy
+        ? allSatisfyingVersions
+        : allVersions;
       // Filter latest, unstable, etc
       // TODO #22198
       let filteredReleases = filterVersions(
         config,
         currentVersion,
         latestVersion!,
-        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+        releasesToFilter,
         versioningApi,
       ).filter((release) =>
         isCompatibleRelease(
@@ -456,7 +459,7 @@ export async function lookupUpdates(
           { ...config, allowedVersions: undefined },
           currentVersion,
           latestVersion!,
-          inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+          releasesToFilter,
           versioningApi,
         ).filter((release) =>
           isCompatibleRelease(
