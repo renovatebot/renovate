@@ -6,8 +6,7 @@ import { hash } from '../../../hash.ts';
 import { safeStringify } from '../../../stringify.ts';
 import { CACHE_REVISION } from '../common.ts';
 import { cleanupHttpCache } from '../http-cache.ts';
-import type { RepoCacheRecord } from '../schema.ts';
-import { RepoCacheV13 } from '../schema.ts';
+import { RepoCacheRecord } from '../schema.ts';
 import type { RepoCache, RepoCacheData } from '../types.ts';
 
 export abstract class RepoCacheBase implements RepoCache {
@@ -65,7 +64,7 @@ export abstract class RepoCacheBase implements RepoCache {
         return;
       }
 
-      const cacheV13 = RepoCacheV13.safeParse(oldCache);
+      const cacheV13 = RepoCacheRecord.safeParse(oldCache);
       if (cacheV13.success) {
         await this.restore(cacheV13.data);
         logger.debug('Repository cache is restored from revision 13');

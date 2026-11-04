@@ -49,6 +49,7 @@ In this example, a `HelmRelease` whose `spec.chart.spec.sourceRef.name` is `podi
 Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
+When `commit` is being updated, if a `branch` key is also present, only commits from that branch will be considered.
 
 ### Kustomization support
 
@@ -59,6 +60,16 @@ Renovate can update `image`[^1] references from `Kustomization` resources.
 Renovate can update `oci` references from `OCIRepository` resources.
 
 The `flux` manager updates `OCIRepository` fields that have a `digest`, `tag` or both keys.
+
+### Helm chart `depType`
+
+Renovate sets the `HelmChart` `depType` on the Helm charts it extracts from:
+
+- `HelmRelease` resources, including charts from OCI `HelmRepository` sources
+- `HelmChart` resources
+- `OCIRepository` resources that set `spec.layerSelector.mediaType` to `application/vnd.cncf.helm.chart.content.v1.tar+gzip`
+
+Other `OCIRepository` resources have no `depType`.
 
 ### Flux system manifests support
 

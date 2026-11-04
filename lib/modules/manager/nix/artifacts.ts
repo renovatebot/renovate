@@ -9,6 +9,7 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 
 export async function updateArtifacts({
   packageFileName,
@@ -32,7 +33,7 @@ export async function updateArtifacts({
   );
 
   if (token) {
-    cmd += `--extra-access-tokens github.com=${token} `;
+    cmd += `--extra-access-tokens github.com=${quote(token)} `;
   }
 
   if (config.isLockFileMaintenance) {
@@ -50,7 +51,7 @@ export async function updateArtifacts({
     toolConstraints: [
       {
         toolName: 'nix',
-        constraint: config.constraints?.nix,
+        constraint: await resolveToolConstraint(config, 'nix'),
       },
     ],
     docker: {},

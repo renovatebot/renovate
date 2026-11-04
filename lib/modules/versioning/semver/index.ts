@@ -1,10 +1,11 @@
 import semver from 'semver';
 import stable from 'semver-stable';
+import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver';
 export const displayName = 'Semantic';
-export const urls = ['https://semver.org/'];
+export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = false;
 
 const { is: isStable } = stable;
@@ -24,7 +25,9 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => !!valid(input);
+export function isVersion(input: string): boolean {
+  return !!valid(input);
+}
 
 export { getSatisfyingVersion, isVersion as isValid };
 
@@ -34,7 +37,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(/^v/, '');
+    return newVersion.replace(regEx(/^v/), '');
   }
   return newVersion;
 }

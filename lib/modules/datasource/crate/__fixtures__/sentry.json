@@ -1,0 +1,37 @@
+{
+  "categories": null,
+  "crate": {
+    "badges": [],
+    "categories": null,
+    "created_at": "2016-05-20T17:24:17.084103Z",
+    "default_version": "0.48.3",
+    "description": "Sentry (sentry.io) client for Rust.\n",
+    "documentation": null,
+    "downloads": 41620428,
+    "exact_match": false,
+    "homepage": "https://sentry.io/welcome/",
+    "id": "sentry",
+    "keywords": null,
+    "links": {
+      "owner_team": "/api/v1/crates/sentry/owner_team",
+      "owner_user": "/api/v1/crates/sentry/owner_user",
+      "owners": "/api/v1/crates/sentry/owners",
+      "reverse_dependencies": "/api/v1/crates/sentry/reverse_dependencies",
+      "version_downloads": "/api/v1/crates/sentry/downloads",
+      "versions": "/api/v1/crates/sentry/versions"
+    },
+    "max_stable_version": null,
+    "max_version": "0.0.0",
+    "name": "sentry",
+    "newest_version": "0.0.0",
+    "num_versions": 101,
+    "recent_downloads": null,
+    "repository": "https://github.com/getsentry/sentry-rust",
+    "trustpub_only": false,
+    "updated_at": "2026-06-25T07:38:14.534561Z",
+    "versions": null,
+    "yanked": false
+  },
+  "keywords": null,
+  "versions": null
+}

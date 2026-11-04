@@ -1,5 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
+import { fakeSha, git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -14,11 +14,9 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { EnsureIssueConfig, RepoParams } from '../index.ts';
-import * as helper from './forgejo-helper.ts';
-import * as forgejo from './index.ts';
+import * as helper from '../gitea/gitea-helper.ts';
 import type {
   Comment,
   CommitStatus,
@@ -27,9 +25,10 @@ import type {
   Label,
   PR,
   Repo,
-  RepoPermission,
   User,
-} from './types.ts';
+} from '../gitea/schema.ts';
+import type { EnsureIssueConfig, RepoParams } from '../index.ts';
+import * as forgejo from './index.ts';
 
 /**
  * latest tested forgejo version.
@@ -39,18 +38,21 @@ const FORGEJO_VERSION = '11.0.1-99-c504062+gitea-1.22.0';
 describe('modules/platform/forgejo/index', () => {
   function mockedRepo(opts: Partial<Repo>): Repo {
     return partial<Repo>({
-      permissions: partial<RepoPermission>({ push: true, pull: true }),
+      id: 0,
+      permissions: { push: true, pull: true, admin: false },
+      has_issues: true,
       has_pull_requests: true,
+      default_branch: 'master',
+      owner: partial<User>({ id: 0, login: 'some', full_name: '' }),
       ...opts,
     });
   }
 
-  const mockCommitHash =
-    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
+  const mockCommitHash = fakeSha('forgejo');
 
   const mockUser: User = {
     id: 1,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -63,7 +65,9 @@ describe('modules/platform/forgejo/index', () => {
     default_branch: 'master',
     full_name: 'some/repo',
     owner: partial<User>({
-      username: 'some',
+      id: 0,
+      login: 'some',
+      full_name: '',
     }),
   });
 
@@ -97,7 +101,7 @@ describe('modules/platform/forgejo/index', () => {
       base: { ref: 'some-base-branch' },
       head: {
         label: 'some-head-branch',
-        sha: 'some-head-sha' as LongCommitSha,
+        sha: fakeSha('some-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -114,7 +118,7 @@ describe('modules/platform/forgejo/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'other-head-branch',
-        sha: 'other-head-sha' as LongCommitSha,
+        sha: fakeSha('other-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       labels: [
@@ -137,7 +141,7 @@ describe('modules/platform/forgejo/index', () => {
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',
-        sha: 'draft-head-sha' as LongCommitSha,
+        sha: fakeSha('draft-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -155,7 +159,7 @@ describe('modules/platform/forgejo/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'merged-head-branch',
-        sha: 'merged-head-sha' as LongCommitSha,
+        sha: fakeSha('merged-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       labels: [
@@ -182,7 +186,7 @@ describe('modules/platform/forgejo/index', () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
-      labels: undefined as never, // coverage
+      labels: undefined, // coverage
     },
     {
       number: 3,
@@ -243,7 +247,6 @@ describe('modules/platform/forgejo/index', () => {
     repoCache.resetCache();
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules.clear();
   });
 
   async function initFakePlatform(
@@ -269,7 +272,7 @@ describe('modules/platform/forgejo/index', () => {
     scope
       .get(`/repos/${repository}`)
       .reply(200, repoResult)
-      .get(`/orgs/${repoResult.owner.username}`)
+      .get(`/orgs/${repoResult.owner.login}`)
       .reply(orgCode, {});
     GlobalConfig.set({ ignorePrAuthor: true, ...config });
     await forgejo.initRepo({ repository });
@@ -277,7 +280,9 @@ describe('modules/platform/forgejo/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(forgejo.initPlatform({})).rejects.toThrow();
+      await expect(forgejo.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Forgejo personal access token',
+      );
     });
 
     it('should throw if auth fails', async () => {
@@ -286,7 +291,7 @@ describe('modules/platform/forgejo/index', () => {
 
       await expect(
         forgejo.initPlatform({ token: 'some-token' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Init: Authentication failure');
     });
 
     it('should support default endpoint', async () => {
@@ -297,7 +302,9 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        forgejo.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://code.forgejo.org/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -311,12 +318,12 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(
-        await forgejo.initPlatform({
+      await expect(
+        forgejo.initPlatform({
           token: 'some-token',
           endpoint: 'https://forgejo.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
@@ -330,18 +337,18 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(
-        await forgejo.initPlatform({
+      await expect(
+        forgejo.initPlatform({
           token: 'some-token',
           endpoint: 'https://forgejo.renovatebot.com',
         }),
-      ).toEqual({
+      ).resolves.toEqual({
         endpoint: 'https://forgejo.renovatebot.com/',
         gitAuthor: 'Renovate Bot <renovate@example.com>',
       });
     });
 
-    it('should use username as author name if full name is missing', async () => {
+    it('should use login as author name if full name is missing', async () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       scope
         .get('/user')
@@ -352,7 +359,9 @@ describe('modules/platform/forgejo/index', () => {
         .get('/version')
         .reply(200, { version: FORGEJO_VERSION });
 
-      expect(await forgejo.initPlatform({ token: 'some-token' })).toEqual({
+      await expect(
+        forgejo.initPlatform({ token: 'some-token' }),
+      ).resolves.toEqual({
         endpoint: 'https://code.forgejo.org/',
         gitAuthor: 'renovate <renovate@example.com>',
       });
@@ -628,18 +637,24 @@ describe('modules/platform/forgejo/index', () => {
       );
     });
 
-    it('should throw if unknown default merge style is configured', async () => {
+    it('should fall back to merge method when default merge style is unrecognized', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
+        .get(`/orgs/some`)
+        .reply(200, {})
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          default_merge_style: 'unknown',
+          default_merge_style: 'manually-merged',
         });
       await initFakePlatform(scope);
 
-      await expect(forgejo.initRepo(initRepoCfg)).rejects.toThrow(
-        REPOSITORY_BLOCKED,
+      await forgejo.initRepo(initRepoCfg);
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          mergeMethod: 'rebase',
+        }),
       );
     });
 
@@ -788,9 +803,10 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          url: `https://${token}@code.forgejo.org/${mockRepo.full_name}.git`,
+          url: `https://${token}:x-oauth-basic@code.forgejo.org/${mockRepo.full_name}.git`,
         }),
       );
     });
@@ -818,6 +834,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
+      url.password = 'x-oauth-basic';
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
       );
@@ -849,15 +866,17 @@ describe('modules/platform/forgejo/index', () => {
     it('should create a new commit status', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'success',
-            context: 'some-context',
-            description: 'some-description',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'success',
+          context: 'some-context',
+          description: 'some-description',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -877,15 +896,17 @@ describe('modules/platform/forgejo/index', () => {
     it('should default to pending state', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'pending',
-            context: 'some-context',
-            description: 'some-description',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'pending',
+          context: 'some-context',
+          description: 'some-description',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'pending',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -905,16 +926,18 @@ describe('modules/platform/forgejo/index', () => {
     it('should include url if specified', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'success',
-            context: 'some-context',
-            description: 'some-description',
-            target_url: 'some-url',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'success',
+          context: 'some-context',
+          description: 'some-description',
+          target_url: 'some-url',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -935,9 +958,7 @@ describe('modules/platform/forgejo/index', () => {
     it('should gracefully fail with warning when setting branch status', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`)
         .replyWithError('unknown error');
 
       await initFakePlatform(scope);
@@ -962,14 +983,16 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('getBranchStatus', () => {
-    const commitStatus = (status: CommitStatusType): CommitStatus => ({
-      id: 1,
-      status,
-      context: '',
-      description: '',
-      target_url: '',
-      created_at: '',
-    });
+    function commitStatus(status: CommitStatusType): CommitStatus {
+      return {
+        id: 1,
+        status,
+        context: '',
+        description: '',
+        target_url: '',
+        created_at: '',
+      };
+    }
 
     it('should return yellow for unknown result', async () => {
       const scope = httpMock
@@ -1103,9 +1126,9 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(
-        await forgejo.getBranchStatusCheck('some-branch', 'some-context'),
-      ).toBeNull();
+      await expect(
+        forgejo.getBranchStatusCheck('some-branch', 'some-context'),
+      ).resolves.toBeNull();
     });
 
     it('should return null with no matching results', async () => {
@@ -1211,15 +1234,16 @@ describe('modules/platform/forgejo/index', () => {
         state: 'open',
         diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
         created_at: '2011-08-18T22:30:38Z',
+        updated_at: '2012-08-18T22:30:38Z',
         closed_at: '2016-01-09T10:03:21Z',
         mergeable: true,
         base: { ref: 'third-party-base-branch' },
         head: {
           label: 'other-head-branch',
-          sha: 'other-head-sha' as LongCommitSha,
+          sha: fakeSha('other-head-sha'),
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { username: 'not-renovate' },
+        user: { id: 2, login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1230,7 +1254,7 @@ describe('modules/platform/forgejo/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { username: 'renovate' },
+            user: { id: 1, login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1254,7 +1278,7 @@ describe('modules/platform/forgejo/index', () => {
           state: 'all',
           sort: 'recentupdate',
           limit: 100,
-          poster: mockUser.username,
+          poster: mockUser.login,
         })
         .reply(200, mockPRs.slice(0, 2), {
           // test correct pagination handling, domain should be ignored
@@ -1287,7 +1311,7 @@ describe('modules/platform/forgejo/index', () => {
       const res1 = await forgejo.getPrList();
       expect(res1).toMatchObject([{ number: 2 }, { number: 1 }]);
 
-      memCache.set('forgejo-pr-cache-synced', false);
+      memCache.set('forgejo:pr-cache-synced', false);
 
       const res2 = await forgejo.getPrList();
       expect(res2).toMatchObject([
@@ -1338,7 +1362,15 @@ describe('modules/platform/forgejo/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [])
         .get('/repos/some/repo/pulls/42')
-        .reply(200); // TODO: 404 should be handled
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'Missing PR',
+          body: '',
+          mergeable: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        }); // no head/base => toRenovatePR returns null
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1574,7 +1606,7 @@ describe('modules/platform/forgejo/index', () => {
   describe('createPr', () => {
     beforeEach(() => {
       vi.restoreAllMocks();
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
     });
 
     const mockNewPR: MockPr = {
@@ -1749,7 +1781,7 @@ describe('modules/platform/forgejo/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [mockNewPR])
         .patch('/repos/some/repo/pulls/42')
-        .reply(200);
+        .reply(200, mockNewPR);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1781,7 +1813,25 @@ describe('modules/platform/forgejo/index', () => {
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Invalid input: expected number, received undefined');
+    });
+
+    it('should abort when the created pull request author is not the bot', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, { ...mockNewPR, user: { id: 2, login: 'not-the-bot' } });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      await expect(
+        forgejo.createPr({
+          sourceBranch: mockNewPR.head.label,
+          targetBranch: 'master',
+          prTitle: mockNewPR.title,
+          prBody: mockNewPR.body,
+        }),
+      ).rejects.toThrow('Can not parse newly created Pull Request');
     });
 
     it('should use platform automerge', async () => {
@@ -1882,13 +1932,13 @@ describe('modules/platform/forgejo/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        expect.objectContaining({ prNumber: 42 }),
-        'Forgejo-native automerge: fail',
+        expect.objectContaining({ prNumber: 42, platform: 'forgejo' }),
+        'Platform-native automerge: fail',
       );
     });
 
     it('continues if platform automerge is not supported', async () => {
-      memCache.set('forgejo-pr-cache-synced', true);
+      memCache.set('forgejo:pr-cache-synced', true);
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')
@@ -2010,7 +2060,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'New Title',
           base: 'New Base',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2033,7 +2083,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2056,7 +2106,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'WIP: New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[2]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2080,7 +2130,7 @@ describe('modules/platform/forgejo/index', () => {
           body: 'New Body',
           state: 'closed',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2341,7 +2391,11 @@ describe('modules/platform/forgejo/index', () => {
           body: mockIssue.body,
           title: mockIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, {
+          number: 42,
+          title: mockIssue.title,
+          body: mockIssue.body,
+        });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2376,7 +2430,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'new-title',
           labels: [1, 3],
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2396,7 +2450,11 @@ describe('modules/platform/forgejo/index', () => {
           body: closedIssue.body,
           title: closedIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, {
+          number: 42,
+          title: closedIssue.title,
+          body: closedIssue.body,
+        });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2611,7 +2669,7 @@ describe('modules/platform/forgejo/index', () => {
         .twice()
         .reply(200, mockIssues)
         .post('/repos/some/repo/issues')
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2734,7 +2792,7 @@ describe('modules/platform/forgejo/index', () => {
         .post('/repos/some/repo/issues/1/comments', {
           body: '### other-topic\n\nother-content',
         })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 33, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2753,7 +2811,7 @@ describe('modules/platform/forgejo/index', () => {
         .get('/repos/some/repo/issues/1/comments')
         .reply(200, mockComments)
         .post('/repos/some/repo/issues/1/comments', { body: 'other-content' })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 33, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2774,7 +2832,7 @@ describe('modules/platform/forgejo/index', () => {
         .patch('/repos/some/repo/issues/comments/13', {
           body: '### some-topic\n\nsome-new-content',
         })
-        .reply(200, partial<Comment>({ id: 13 }));
+        .reply(200, partial<Comment>({ id: 13, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2934,7 +2992,7 @@ describe('modules/platform/forgejo/index', () => {
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
-      expect(await forgejo.getBranchPr('missing')).toBeNull();
+      await expect(forgejo.getBranchPr('missing')).resolves.toBeNull();
     });
   });
 
@@ -2945,7 +3003,7 @@ describe('modules/platform/forgejo/index', () => {
         .patch('/repos/some/repo/issues/1', {
           assignees: ['me', 'you'],
         })
-        .reply(200);
+        .reply(200, mockIssues[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -3036,7 +3094,10 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3052,7 +3113,10 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope, { full_name: 'different/repo' });
@@ -3068,7 +3132,10 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3089,7 +3156,10 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
-          content: Buffer.from(json5Data, 'utf-8'),
+          type: 'file',
+          name: 'file.json5',
+          path: 'file.json5',
+          content: toBase64(json5Data),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3104,21 +3174,38 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from('!@#', 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64('!@#'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
-    it('returns null on missing content', async () => {
+    it('throws when file content is missing', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
-        .reply(200, {});
+        .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      expect(await forgejo.getJsonFile('file.json')).toBeNull();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow(
+        'Invalid input: expected string, received undefined',
+      );
+    });
+
+    it('returns null for non-file entries', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get('/repos/some/repo/contents/file.json')
+        .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(forgejo.getJsonFile('file.json')).resolves.toBeNull();
     });
 
     it('throws on errors', async () => {
@@ -3128,7 +3215,7 @@ describe('modules/platform/forgejo/index', () => {
         .replyWithError('unknown');
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow('unknown');
     });
   });
 });

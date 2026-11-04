@@ -3,7 +3,9 @@ import { parse as graphqlParse } from 'graphql';
 import { DateTime } from 'luxon';
 import { isDateExpired, prepareQuery } from './util.ts';
 
-const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
+function isoTs(t: string) {
+  return DateTime.fromJSDate(new Date(t)).toISO()!;
+}
 
 describe('util/github/graphql/util', () => {
   describe('prepareQuery', () => {
@@ -27,8 +29,12 @@ describe('util/github/graphql/util', () => {
 
     it('returns invalid query for invalid payload query', () => {
       const payloadQuery = '!@#';
-      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow();
-      expect(() => graphqlParse(prepareQuery(payloadQuery))).toThrow();
+      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow(
+        'Syntax Error: Expected Name, found "!".',
+      );
+      expect(() => graphqlParse(prepareQuery(payloadQuery))).toThrow(
+        'Syntax Error: Expected Name, found "!".',
+      );
     });
   });
 

@@ -57,9 +57,8 @@ function runtime(): RuntimeType {
     if (isSupportedRuntime(runtime)) {
       logger.trace({ runtime }, 'Using configured PGP runtime');
       return runtime;
-    } else {
-      logger.once.warn({ runtime }, 'Unknown PGP runtime, using wasm-java');
     }
+    logger.once.warn({ runtime }, 'Unknown PGP runtime, using wasm-java');
   }
   logger.trace('Using default PGP runtime: wasm-java');
   return 'wasm-java';

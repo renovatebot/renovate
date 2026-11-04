@@ -5,6 +5,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { resolveToolConstraint } from '../util.ts';
 import { updateBazelLockfile } from './lockfile.ts';
 
 export async function updateArtifacts({
@@ -35,6 +36,6 @@ export async function updateArtifacts({
     lockFileName,
     packageFileName,
     isLockFileMaintenance,
-    config.constraints?.bazelisk,
+    await resolveToolConstraint(config, 'bazelisk'),
   );
 }

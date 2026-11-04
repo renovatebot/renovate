@@ -7,7 +7,7 @@ import { ensureComment } from '../../../modules/platform/comment.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { uniqueStrings } from '../../../util/string.ts';
 import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
@@ -37,7 +37,7 @@ async function cleanUpBranches(
         // single base branch: branch name doesn't encode it, use the configured one
         baseBranch = config.baseBranches?.[0] ?? config.defaultBranch!;
       }
-      const pr = await platform.findPr({
+      let pr = await platform.findPr({
         branchName,
         state: 'open',
         targetBranch: baseBranch,
@@ -46,6 +46,25 @@ async function cleanUpBranches(
         branchName,
         baseBranch,
       );
+      if (pr && !GlobalConfig.get('dryRun')) {
+        const freshPr = await platform.getPr(pr.number, true);
+        if (!freshPr) {
+          logger.debug(
+            { branchName, prNo: pr.number },
+            'Could not refresh PR - skipping branch pruning',
+          );
+          continue;
+        }
+        if (freshPr.state === 'open') {
+          pr = freshPr;
+        } else {
+          logger.debug(
+            { branchName, prNo: pr.number, prState: freshPr.state },
+            'PR is no longer open - skipping PR update',
+          );
+          pr = null;
+        }
+      }
       if (pr) {
         if (branchIsModified) {
           logger.debug(
@@ -133,9 +152,11 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
   const branchPrefixes = [config.branchPrefix, config.branchPrefixOld]
     .filter(isNonEmptyStringAndNotWhitespace)
     .filter(uniqueStrings)
-    .map(escapeRegExp);
+    .map((prefix) => RegExp.escape(prefix));
 
-  const baseBranches = config.baseBranches.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map((branch) =>
+    RegExp.escape(branch),
+  );
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
@@ -161,6 +182,15 @@ export async function pruneStaleBranches(
     logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
+  if (!isNonEmptyStringAndNotWhitespace(config.branchPrefix)) {
+    // An empty branchPrefix matches every branch in the repo, so Renovate
+    // cannot reliably tell its own branches apart from unrelated ones. Skip
+    // pruning to avoid deleting non-Renovate branches as orphans.
+    logger.warn(
+      'config.branchPrefix is empty - skipping branch pruning to avoid treating all branches as Renovate-managed',
+    );
+    return;
+  }
   // TODO: types (#22198)
   let renovateBranches = getBranchList().filter(
     (branchName) =>
@@ -178,8 +208,8 @@ export async function pruneStaleBranches(
     },
     'Branch lists',
   );
-  // TODO: types (#22198)
-  const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
+
+  const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch,
   );

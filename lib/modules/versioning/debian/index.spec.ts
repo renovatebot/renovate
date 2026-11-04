@@ -381,17 +381,19 @@ describe('modules/versioning/debian/index', () => {
   );
 
   it.each`
-    currentValue      | rangeStrategy | currentVersion | newVersion    | expected
-    ${undefined}      | ${undefined}  | ${undefined}   | ${'foobar'}   | ${'foobar'}
-    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'11'}       | ${'bullseye'}
-    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'bullseye'} | ${'bullseye'}
-    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'stable'}   | ${'bookworm'}
-    ${'9'}            | ${undefined}  | ${undefined}   | ${'11'}       | ${'11'}
-    ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
-    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
-    ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}   | ${'12'}
-    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}       | ${'stable'}
-    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}        | ${'3'}
+    currentValue      | rangeStrategy | currentVersion | newVersion             | expected
+    ${undefined}      | ${undefined}  | ${undefined}   | ${'foobar'}            | ${'foobar'}
+    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'11'}                | ${'bullseye'}
+    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'bullseye'}          | ${'bullseye'}
+    ${'stretch'}      | ${undefined}  | ${undefined}   | ${'stable'}            | ${'bookworm'}
+    ${'9'}            | ${undefined}  | ${undefined}   | ${'11'}                | ${'11'}
+    ${'oldoldstable'} | ${undefined}  | ${undefined}   | ${'12'}                | ${'stable'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}                | ${'stable'}
+    ${'9'}            | ${undefined}  | ${undefined}   | ${'stable'}            | ${'12'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'12'}                | ${'stable'}
+    ${'oldstable'}    | ${undefined}  | ${undefined}   | ${'3'}                 | ${'3'}
+    ${'12'}           | ${undefined}  | ${undefined}   | ${'bookworm-20230816'} | ${'12'}
+    ${'bullseye'}     | ${undefined}  | ${undefined}   | ${'bookworm-20230816'} | ${'bookworm'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

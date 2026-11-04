@@ -1,10 +1,13 @@
+import { isFunction } from '@sindresorhus/is';
 import { regEx } from '../../util/regex.ts';
 import type { VersioningApi, VersioningApiConstructor } from './types.ts';
+
+export const markdownLinkRegex = regEx(/\[[^\]]+\]\([^)]+\)/);
 
 export function isVersioningApiConstructor(
   obj: VersioningApi | VersioningApiConstructor,
 ): obj is VersioningApiConstructor {
-  return typeof obj === 'function';
+  return isFunction(obj);
 }
 
 export function getExcludedVersions(range: string): string[] {

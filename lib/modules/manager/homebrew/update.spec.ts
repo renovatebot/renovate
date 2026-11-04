@@ -511,9 +511,7 @@ describe('modules/manager/homebrew/update', () => {
       createDependency: vi.fn(),
     };
 
-    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(
-      mockHandler as never,
-    );
+    vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(mockHandler);
 
     const upgrade = {
       currentValue: 'v0.8.2',

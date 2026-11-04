@@ -25,7 +25,8 @@ export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
     return true;
   }
 
-  if (state === '!open' && (pr.state === 'closed' || pr.state === 'merged')) {
+  const isClosed = pr.state === 'closed' || pr.state === 'merged';
+  if (state === '!open' && isClosed) {
     return true;
   }
 
@@ -78,7 +79,8 @@ export function getRepoUrl(
     url: endpoint,
   });
 
-  repoUrl.username = hostOptions.username ?? '';
+  // SCM-Manager ignores the username for API keys, `x-access-token` is our own choice and not documented by SCM-Manager
+  repoUrl.username = hostOptions.username ?? 'x-access-token';
   repoUrl.password = hostOptions.token ?? '';
 
   return repoUrl.toString();

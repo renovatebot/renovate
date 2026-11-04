@@ -19,9 +19,9 @@ import {
 export const id = 'maven';
 export const displayName = 'Maven';
 export const urls = [
-  'https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification',
-  'https://octopus.com/blog/maven-versioning-explained',
-  'https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html',
+  '[Maven POM - Dependency version requirements](https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification)',
+  '[Maven versioning explained](https://octopus.com/blog/maven-versioning-explained)',
+  '[Maven Enforcer - Version ranges](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -31,7 +31,15 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
+function equals(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
 
 function matches(a: string, b: string): boolean {
   if (!b) {
@@ -72,28 +80,28 @@ function matches(a: string, b: string): boolean {
   }, false);
 }
 
-const getMajor = (version: string): number | null => {
+function getMajor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
-    return +majorToken.val;
+    return parseInt(majorToken.val.toString(), 10);
   }
   return null;
-};
+}
 
-const getMinor = (version: string): number | null => {
+function getMinor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
     if (minorToken?.type === TYPE_NUMBER) {
-      return +minorToken.val;
+      return parseInt(minorToken.val.toString(), 10);
     }
     return 0;
   }
   return null;
-};
+}
 
-const getPatch = (version: string): number | null => {
+function getPatch(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -103,16 +111,53 @@ const getPatch = (version: string): number | null => {
       minorToken.type === TYPE_NUMBER &&
       patchToken.type === TYPE_NUMBER
     ) {
-      return +patchToken.val;
+      return parseInt(patchToken.val.toString(), 10);
     }
     return 0;
   }
   return null;
-};
+}
 
-const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
+function isGreaterThan(a: string, b: string): boolean {
+  return compare(a, b) === 1;
+}
 
-const isStable = (version: string): boolean => {
+function getExactSection(
+  version: string,
+  type: keyof typeof sectionIndexes,
+): bigint | null {
+  const tokens = tokenize(version);
+  const sectionIndex = sectionIndexes[type];
+  const token = tokens[sectionIndex];
+
+  if (sectionIndex === 0) {
+    return token?.type === TYPE_NUMBER ? token.val : null;
+  }
+  if (sectionIndex === 1) {
+    return token?.type === TYPE_NUMBER ? token.val : 0n;
+  }
+
+  const minorToken = tokens[1];
+  return minorToken?.type === TYPE_NUMBER && token?.type === TYPE_NUMBER
+    ? token.val
+    : 0n;
+}
+
+function isSame(
+  type: keyof typeof sectionIndexes,
+  a: string,
+  b: string,
+): boolean {
+  if (!(isVersion(a) && isVersion(b))) {
+    return false;
+  }
+
+  const left = getExactSection(a, type);
+  const right = getExactSection(b, type);
+  return left === right;
+}
+
+function isStable(version: string): boolean {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
@@ -126,14 +171,14 @@ const isStable = (version: string): boolean => {
     return true;
   }
   return false;
-};
+}
 
 // istanbul ignore next
-const getSatisfyingVersion = (
+function getSatisfyingVersion(
   versions: string[],
   range: string,
-): string | null =>
-  versions.reduce((result: string | null, version) => {
+): string | null {
+  return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -144,6 +189,7 @@ const getSatisfyingVersion = (
     }
     return result;
   }, null);
+}
 
 function getNewValue({
   currentValue,
@@ -169,6 +215,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isSingleVersion,
+  isSame,
   isStable,
   isValid,
   isVersion,

@@ -168,6 +168,7 @@ pnpm check
 pnpm check lib/util/http        # scope to a directory
 pnpm check lib/util/hash.ts     # scope to a file
 pnpm check --fix lib/util/http  # auto-fix only
+pnpm check --coverage-dir tmp/coverage lib/util/http  # write the coverage report to another directory (default: coverage)
 ```
 
 ### Vitest
@@ -194,6 +195,10 @@ We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
 You usually don't need to fix any Prettier errors by hand.
 
+We use [knip](https://knip.dev) to detect unused, unlisted or unresolved dependencies.
+Run `pnpm knip` to check, and remove packages from `package.json` that nothing uses anymore.
+If a package is used in a way knip cannot see, add it to `ignoreDependencies` in `knip.jsonc` with a comment explaining why.
+
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
 ### IDE extensions
@@ -213,7 +218,7 @@ To get real-time oxlint diagnostics, install the extension for your editor:
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
-To install the required dependency, use `pdm install`.
+To install the required dependency, use `uv sync`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.

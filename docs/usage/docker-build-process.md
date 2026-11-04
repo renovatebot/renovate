@@ -35,15 +35,13 @@ The full flow can be seen below:
 flowchart TD
     Ubuntu               --> ContainerbaseUbuntu
     ContainerbaseUbuntu  --> ContainerbaseBase
-    ContainerbaseBase    --> ContainerbaseSidecar
-    ContainerbaseSidecar --> RenovatebotBaseImage
+    ContainerbaseBase    --> RenovatebotBaseImage
     RenovatebotBaseImage --> RenovateSlim
     RenovatebotBaseImage --> RenovateFull
 
     Ubuntu[<code>docker.io/library/ubuntu</code>]
     ContainerbaseUbuntu[<a href="https://github.com/containerbase/ubuntu"><code>ghcr.io/containerbase/ubuntu</code></a>]
     ContainerbaseBase[<a href="https://github.com/containerbase/base"><code>ghcr.io/containerbase/base</code></a>]
-    ContainerbaseSidecar[<a href="https://github.com/containerbase/sidecar"><code>ghcr.io/containerbase/sidecar</code></a>]
     RenovatebotBaseImage[<a href="https://github.com/renovatebot/base-image"><code>ghcr.io/renovatebot/base-image</code></a>]
     RenovateSlim[<code>ghcr.io/renovatebot/renovate</code><br><code>docker.io/renovate/renovate</code>]
     RenovateFull[<code>ghcr.io/renovatebot/renovate:full</code><br><code>docker.io/renovate/renovate:full</code>]
@@ -54,9 +52,7 @@ flowchart TD
 ### Adding new tools
 
 If you, as a user, are looking to extend the tool support that Renovate has, for instance to install it via [`constraints`](./configuration-options.md#constraints), then you will need to [request a new tool](https://github.com/containerbase/base/issues/new?template=new-tool.yml).
-
-!!! note
-  In the future, there will be a [clearer guide](https://github.com/containerbase/base/issues/6570) for how to contribute tool support as a user.
+Once raised, you can then work through the ["how to add a new tool" documentation](https://github.com/containerbase/base/blob/HEAD/docs/new-tool.md).
 
 This tool will have its support added in `containerbase/base`, to allow Containerbase's `install-tool` command-line tool to install the tool.
 

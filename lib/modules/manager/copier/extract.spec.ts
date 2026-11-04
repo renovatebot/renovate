@@ -22,7 +22,7 @@ describe('modules/manager/copier/extract', () => {
       });
     });
 
-    it('extracts repository and version from .copier-answers.yml with ssh URL', () => {
+    it('converts ssh URL to https packageName', () => {
       const content = `
         _commit: v1.0.0
         _src_path: git@github.com:renovatebot/somedir/renovate.git
@@ -32,7 +32,7 @@ describe('modules/manager/copier/extract', () => {
         deps: [
           {
             depName: 'git@github.com:renovatebot/somedir/renovate.git',
-            packageName: 'git@github.com:renovatebot/somedir/renovate.git',
+            packageName: 'https://github.com/renovatebot/somedir/renovate.git',
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
             depType: 'template',
@@ -41,7 +41,7 @@ describe('modules/manager/copier/extract', () => {
       });
     });
 
-    it('extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo', () => {
+    it('converts ssh URL of a non-bare Repo to https packageName', () => {
       const content = `
         _commit: v1.0.0
         _src_path: git@some-scm-server.tld:renovatebot/somedir/renovate
@@ -51,7 +51,8 @@ describe('modules/manager/copier/extract', () => {
         deps: [
           {
             depName: 'git@some-scm-server.tld:renovatebot/somedir/renovate',
-            packageName: 'git@some-scm-server.tld:renovatebot/somedir/renovate',
+            packageName:
+              'https://some-scm-server.tld/renovatebot/somedir/renovate',
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
             depType: 'template',
@@ -60,7 +61,7 @@ describe('modules/manager/copier/extract', () => {
       });
     });
 
-    it('extracts repository and version from .copier-answers.yml with ssh URL and a username different from git', () => {
+    it('converts ssh URL with a username different from git to https packageName', () => {
       const content = `
         _commit: v1.0.0
         _src_path: someuser@some-scm-server.tld:renovatebot/somedir/renovate.git
@@ -72,7 +73,26 @@ describe('modules/manager/copier/extract', () => {
             depName:
               'someuser@some-scm-server.tld:renovatebot/somedir/renovate.git',
             packageName:
-              'someuser@some-scm-server.tld:renovatebot/somedir/renovate.git',
+              'https://some-scm-server.tld/renovatebot/somedir/renovate.git',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depType: 'template',
+          },
+        ],
+      });
+    });
+
+    it('keeps the original packageName if the URL cannot be converted', () => {
+      const content = `
+        _commit: v1.0.0
+        _src_path: user@:renovatebot/renovate.git
+      `;
+      const result = extractPackageFile(content);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'user@:renovatebot/renovate.git',
+            packageName: 'user@:renovatebot/renovate.git',
             currentValue: 'v1.0.0',
             datasource: 'git-tags',
             depType: 'template',
@@ -92,10 +112,18 @@ describe('modules/manager/copier/extract', () => {
         srcPath:
           'git+ssh://git@bitbucket.some-org/some-project/some-template.git',
         expectedPackageName:
-          'ssh://git@bitbucket.some-org/some-project/some-template.git',
+          'https://bitbucket.some-org/scm/some-project/some-template.git',
+      },
+      {
+        srcPath: 'git+ssh://git@gitlab.com/some-org/some-template.git',
+        expectedPackageName: 'https://gitlab.com/some-org/some-template.git',
+      },
+      {
+        srcPath: 'ssh://git@gitlab.com/some-org/some-template.git',
+        expectedPackageName: 'https://gitlab.com/some-org/some-template.git',
       },
     ])(
-      'extracts and strips git+ prefix from $srcPath',
+      'strips git+ prefix and converts ssh to https for $srcPath',
       ({ srcPath, expectedPackageName }) => {
         const content = codeBlock`
           _commit: v1.0.0

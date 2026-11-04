@@ -8,6 +8,10 @@ If you need to change the versioning format, read the [versioning](../../version
 
 ### Private Modules Authentication
 
+To look up new template versions, Renovate converts SSH-style `_src_path` URLs (like `git+ssh://git@gitlab.com/some-org/some-template.git`) to their HTTPS equivalent, the same way the [`git-submodules`](../git-submodules/index.md) manager does.
+This way the lookup works with `hostRules` credentials on setups which access the Git host via HTTPS only.
+The answers file itself keeps the original URL.
+
 Before running the `copier` command to update from the template, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
 
 Renovate uses this logic before it updates the template copy:

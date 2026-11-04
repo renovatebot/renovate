@@ -94,6 +94,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.62.1'}  | ${'~> 2.62.0'}
     ${'~> 2.62.0'}          | ${'update-lockfile'} | ${'2.62.0'}    | ${'2.67.0'}  | ${'~> 2.67.0'}
     ${'v0.14'}              | ${'replace'}         | ${'v0.14.2'}   | ${'v0.15.0'} | ${'v0.15'}
+    ${'<= 1.0.0, >= 0.5.0'} | ${'widen'}           | ${'0.5.0'}     | ${'2.0.0'}   | ${null}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

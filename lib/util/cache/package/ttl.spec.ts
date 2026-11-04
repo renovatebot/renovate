@@ -1,6 +1,5 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { getTtlOverride, resolveTtlValues } from './ttl.ts';
-import type { PackageCacheNamespace } from './types.ts';
 
 describe('util/cache/package/ttl', () => {
   beforeEach(() => {
@@ -93,12 +92,8 @@ describe('util/cache/package/ttl', () => {
         });
 
         const resDatasource = getTtlOverride('datasource-npm' as never);
-        const resChangelog = getTtlOverride(
-          'changelog-github-notes@v2' as never,
-        );
-        const resAny = getTtlOverride(
-          'any-namespace' as never as PackageCacheNamespace,
-        );
+        const resChangelog = getTtlOverride('changelog-github-notes@v2');
+        const resAny = getTtlOverride('any-namespace' as never);
 
         expect(resDatasource).toBe(45);
         expect(resChangelog).toBe(45);
@@ -129,10 +124,8 @@ describe('util/cache/package/ttl', () => {
           },
         });
 
-        const resColon = getTtlOverride(
-          'datasource-npm:cache-provider' as never,
-        );
-        const resAt = getTtlOverride('changelog-github-notes@v2' as never);
+        const resColon = getTtlOverride('datasource-npm:cache-provider');
+        const resAt = getTtlOverride('changelog-github-notes@v2');
 
         expect(resColon).toBe(120);
         expect(resAt).toBe(60);
@@ -149,9 +142,7 @@ describe('util/cache/package/ttl', () => {
 
         const resNpm = getTtlOverride('datasource-npm' as never);
         const resDocker = getTtlOverride('datasource-docker' as never);
-        const resChangelog = getTtlOverride(
-          'changelog-github-notes@v2' as never,
-        );
+        const resChangelog = getTtlOverride('changelog-github-notes@v2');
 
         expect(resNpm).toBe(75);
         expect(resDocker).toBe(75);
@@ -277,7 +268,7 @@ describe('util/cache/package/ttl', () => {
         });
 
         const resNpm = getTtlOverride('datasource-npm' as never);
-        const resEmpty = getTtlOverride('' as never as PackageCacheNamespace);
+        const resEmpty = getTtlOverride('' as never);
 
         expect(resNpm).toBe(120);
         expect(resEmpty).toBe(30);

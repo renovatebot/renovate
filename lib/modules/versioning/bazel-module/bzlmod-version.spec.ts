@@ -162,7 +162,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
     `('bad versions $a', ({ a }) => {
       expect(() => {
         new BzlmodVersion(a);
-      }).toThrow();
+      }).toThrow(Error);
     });
 
     it.each`

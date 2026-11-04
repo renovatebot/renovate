@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
 import { getCache } from '../../../../util/cache/repository/index.ts';
 import type { PrCache } from '../../../../util/cache/repository/types.ts';
@@ -44,7 +45,6 @@ export function setPrCache(
   branch.prCache = {
     bodyFingerprint,
     // update time when creating new cache or when pr was modified
-    lastEdited:
-      lastEdited && !prModified ? lastEdited : new Date().toISOString(),
+    lastEdited: lastEdited && !prModified ? lastEdited : DateTime.utc().toISO(),
   };
 }

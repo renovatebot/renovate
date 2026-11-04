@@ -65,6 +65,7 @@ export const GitRepository = KubernetesResource.extend({
       .object({
         tag: z.string().optional(),
         commit: z.string().optional(),
+        branch: z.string().optional(),
       })
       .optional(),
   }),
@@ -81,6 +82,12 @@ export const OCIRepository = KubernetesResource.extend({
         digest: z.string().optional(),
       })
       .optional(),
+    layerSelector: z
+      .object({
+        mediaType: z.string().optional(),
+      })
+      .optional()
+      .catch(undefined),
   }),
 });
 

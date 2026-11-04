@@ -4,7 +4,6 @@ import { clear, getThrottle } from './throttle.ts';
 describe('util/http/throttle', () => {
   beforeEach(() => {
     clear();
-    hostRules.clear();
     hostRules.add({
       matchHost: 'example.com',
       maxRequestsPerSecond: 143,

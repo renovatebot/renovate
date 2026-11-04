@@ -8,7 +8,6 @@ describe('modules/datasource/azure-tags/index', () => {
   let mockGitApi: any;
 
   beforeEach(() => {
-    vi.resetAllMocks();
     azureTags = new AzureTagsDatasource();
     mockGitApi = {
       getRefs: vi.fn(),
@@ -76,25 +75,6 @@ describe('modules/datasource/azure-tags/index', () => {
           packageName: 'repo',
         }),
       ).rejects.toThrow('API error');
-    });
-  });
-
-  describe('static methods', () => {
-    it('getCacheKey returns the expected format', () => {
-      const key = AzureTagsDatasource.getCacheKey(
-        'registry-url',
-        'repo-name',
-        'tags',
-      );
-      expect(key).toBe('registry-url:repo-name:tags');
-    });
-
-    it('getSourceUrl returns the correct URL format', () => {
-      const url = AzureTagsDatasource.getSourceUrl(
-        'repo-name',
-        'https://dev.azure.com/organization/',
-      );
-      expect(url).toBe('https://dev.azure.com/organization/_git/repo-name');
     });
   });
 });

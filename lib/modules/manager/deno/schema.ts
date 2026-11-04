@@ -86,7 +86,7 @@ export const DenoDependency = z
       const currentRawValue = match[0];
       // npm datasource
       if (datasource === 'npm') {
-        const dep: PackageDependency = {
+        const dep: PackageDependency<DenoManagerData> = {
           datasource,
           versioning: denoVersioningId,
         };
@@ -110,7 +110,7 @@ export const DenoDependency = z
       }
       // jsr datasource
       if (datasource === 'jsr') {
-        const dep: PackageDependency = {
+        const dep: PackageDependency<DenoManagerData> = {
           datasource,
           versioning: denoVersioningId,
         };
@@ -254,8 +254,11 @@ const DenoPackageFile = z
       .optional(
         z.object({
           types: CompilerOptionsTypes,
-          jsxImportSource: CompilerOptionsJsxImportSource,
-          jsxImportSourceTypes: CompilerOptionsJsxImportSourceTypes,
+          jsxImportSource: CompilerOptionsJsxImportSource.optional().default(
+            [],
+          ),
+          jsxImportSourceTypes:
+            CompilerOptionsJsxImportSourceTypes.optional().default([]),
         }),
       )
       .default({ types: [], jsxImportSource: [], jsxImportSourceTypes: [] }),

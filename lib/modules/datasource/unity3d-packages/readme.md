@@ -7,7 +7,11 @@ For example:
 
 ```json
 {
-  "matchDatasources": ["unity3d-packages"],
-  "registryUrls": ["https://package.openupm.com"]
+  "packageRules": [
+    {
+      "matchDatasources": ["unity3d-packages"],
+      "registryUrls": ["https://package.openupm.com"]
+    }
+  ]
 }
 ```

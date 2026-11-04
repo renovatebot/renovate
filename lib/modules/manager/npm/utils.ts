@@ -82,6 +82,25 @@ export async function resetNpmrcContent(
   }
 }
 
+/**
+ * Add the host-rule lines to the `.npmrc` in `dir`, run `fn`, and restore the original `.npmrc` afterwards.
+ *
+ * The restore runs in a `finally`, so a package manager that throws cannot leave the injected credentials behind in the working tree.
+ */
+export async function withNpmrcHostRules<T>(
+  dir: string,
+  additionalLines: string[],
+  fn: (originalNpmrcContent: string | null) => Promise<T>,
+): Promise<T> {
+  const originalContent = await getNpmrcContent(dir);
+  await updateNpmrcContent(dir, originalContent, additionalLines);
+  try {
+    return await fn(originalContent);
+  } finally {
+    await resetNpmrcContent(dir, originalContent);
+  }
+}
+
 export async function loadPackageJson(parentDir: string): Promise<PackageJson> {
   const json = await readLocalFile(
     upath.join(parentDir, 'package.json'),

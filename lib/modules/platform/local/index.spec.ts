@@ -3,7 +3,7 @@ import * as platform from './index.ts';
 describe('modules/platform/local/index', () => {
   describe('initPlatform', () => {
     it('returns input', async () => {
-      expect(await platform.initPlatform({})).toMatchInlineSnapshot(`
+      await expect(platform.initPlatform({})).resolves.toMatchInlineSnapshot(`
         {
           "dryRun": "lookup",
           "endpoint": "local",
@@ -42,13 +42,13 @@ describe('modules/platform/local/index', () => {
 
   describe('getRepos', () => {
     it('returns empty array', async () => {
-      expect(await platform.getRepos()).toEqual([]);
+      await expect(platform.getRepos()).resolves.toEqual([]);
     });
   });
 
   describe('initRepo', () => {
     it('returns object', async () => {
-      expect(await platform.initRepo()).toMatchInlineSnapshot(`
+      await expect(platform.initRepo()).resolves.toMatchInlineSnapshot(`
         {
           "defaultBranch": "",
           "isFork": false,
@@ -60,31 +60,31 @@ describe('modules/platform/local/index', () => {
 
   describe('dummy functions', () => {
     it('findIssue', async () => {
-      expect(await platform.findIssue()).toBeNull();
+      await expect(platform.findIssue()).resolves.toBeNull();
     });
 
     it('getIssueList', async () => {
-      expect(await platform.getIssueList()).toEqual([]);
+      await expect(platform.getIssueList()).resolves.toEqual([]);
     });
 
     it('getRawFile', async () => {
-      expect(await platform.getRawFile()).toBeNull();
+      await expect(platform.getRawFile()).resolves.toBeNull();
     });
 
     it('getJsonFile', async () => {
-      expect(await platform.getJsonFile()).toBeNull();
+      await expect(platform.getJsonFile()).resolves.toBeNull();
     });
 
     it('getPrList', async () => {
-      expect(await platform.getPrList()).toEqual([]);
+      await expect(platform.getPrList()).resolves.toEqual([]);
     });
 
     it('ensureIssueClosing', async () => {
-      expect(await platform.ensureIssueClosing()).toBeUndefined();
+      await expect(platform.ensureIssueClosing()).resolves.toBeUndefined();
     });
 
     it('ensureIssue', async () => {
-      expect(await platform.ensureIssue()).toBeNull();
+      await expect(platform.ensureIssue()).resolves.toBeNull();
     });
 
     it('massageMarkdown', () => {
@@ -96,59 +96,59 @@ describe('modules/platform/local/index', () => {
     });
 
     it('updatePr', async () => {
-      expect(await platform.updatePr()).toBeUndefined();
+      await expect(platform.updatePr()).resolves.toBeUndefined();
     });
 
     it('mergePr', async () => {
-      expect(await platform.mergePr()).toBe(false);
+      await expect(platform.mergePr()).resolves.toBe(false);
     });
 
     it('addReviewers', async () => {
-      expect(await platform.addReviewers()).toBeUndefined();
+      await expect(platform.addReviewers()).resolves.toBeUndefined();
     });
 
     it('addAssignees', async () => {
-      expect(await platform.addAssignees()).toBeUndefined();
+      await expect(platform.addAssignees()).resolves.toBeUndefined();
     });
 
     it('createPr', async () => {
-      expect(await platform.createPr()).toBeNull();
+      await expect(platform.createPr()).resolves.toBeNull();
     });
 
     it('deleteLabel', async () => {
-      expect(await platform.deleteLabel()).toBeUndefined();
+      await expect(platform.deleteLabel()).resolves.toBeUndefined();
     });
 
     it('setBranchStatus', async () => {
-      expect(await platform.setBranchStatus()).toBeUndefined();
+      await expect(platform.setBranchStatus()).resolves.toBeUndefined();
     });
 
     it('getBranchStatus', async () => {
-      expect(await platform.getBranchStatus()).toBe('red');
+      await expect(platform.getBranchStatus()).resolves.toBe('red');
     });
 
     it('getBranchStatusCheck', async () => {
-      expect(await platform.getBranchStatusCheck()).toBeNull();
+      await expect(platform.getBranchStatusCheck()).resolves.toBeNull();
     });
 
     it('ensureCommentRemoval', async () => {
-      expect(await platform.ensureCommentRemoval()).toBeUndefined();
+      await expect(platform.ensureCommentRemoval()).resolves.toBeUndefined();
     });
 
     it('ensureComment', async () => {
-      expect(await platform.ensureComment()).toBeFalse();
+      await expect(platform.ensureComment()).resolves.toBeFalse();
     });
 
     it('getPr', async () => {
-      expect(await platform.getPr()).toBeNull();
+      await expect(platform.getPr()).resolves.toBeNull();
     });
 
     it('findPr', async () => {
-      expect(await platform.findPr()).toBeNull();
+      await expect(platform.findPr()).resolves.toBeNull();
     });
 
     it('getBranchPr', async () => {
-      expect(await platform.getBranchPr()).toBeNull();
+      await expect(platform.getBranchPr()).resolves.toBeNull();
     });
   });
 });

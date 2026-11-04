@@ -21,7 +21,7 @@ export function extractPackageFile(
     const parsed = OCBConfig.safeParse(yaml);
     if (!parsed.success) {
       logger.trace(
-        { packageFile, error: parsed.error },
+        { packageFile, err: parsed.error },
         'Failed to parse OCB schema',
       );
       return null;
@@ -30,13 +30,14 @@ export function extractPackageFile(
     definition = parsed.data;
   } catch (error) {
     logger.debug(
-      { packageFile, error },
+      { packageFile, err: error },
       'OCB manager failed to parse file as YAML',
     );
     return null;
   }
 
   const deps: PackageDependency[] = [];
+  // v8 ignore else -- needs a builder definition whose dist omits the version
   if (definition.dist.otelcol_version) {
     deps.push({
       datasource: GoDatasource.id,

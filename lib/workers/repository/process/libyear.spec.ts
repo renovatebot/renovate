@@ -39,7 +39,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep1',
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '1.0.0',
@@ -65,7 +65,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep2',
                 currentVersion: '1.0.0',
                 datasource: 'rubygems',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '2.0.0',
@@ -140,6 +140,43 @@ describe('workers/repository/process/libyear', () => {
       });
     });
 
+    it('ignores an update released before the current version', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'dep1',
+                datasource: 'npm',
+                currentVersion: '1.0.0',
+                currentVersionTimestamp: '2020-07-01T00:00:00Z',
+                updates: [
+                  {
+                    newVersion: '2.0.0',
+                    releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      calculateLibYears(config, packageFiles);
+
+      expect(addLibYears).toHaveBeenCalledExactlyOnceWith(config, {
+        libYears: {
+          managers: { npm: 0 },
+          total: 0,
+        },
+        dependencyStatus: {
+          outdated: 1,
+          total: 1,
+        },
+      });
+    });
+
     // NOTE that it shouldn't be possible for `updates` to be set when `enabled: false`
     it('skips disabled dependencies when calculating libYears', () => {
       const packageFiles: Record<string, PackageFile[]> = {
@@ -151,7 +188,7 @@ describe('workers/repository/process/libyear', () => {
                 depName: 'dep1',
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 updates: [
                   {
                     newVersion: '1.0.0',
@@ -171,7 +208,7 @@ describe('workers/repository/process/libyear', () => {
                 enabled: false,
                 datasource: 'npm',
                 currentVersion: '0.1.0',
-                currentVersionTimestamp: '2019-07-01T00:00:00Z' as Timestamp,
+                currentVersionTimestamp: '2019-07-01T00:00:00Z',
                 // NOTE that updates shouldn't be set when `enabled: false`, but this clarifies that the existing behaviour is to take that into effect
                 updates: [
                   {

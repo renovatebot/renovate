@@ -1,5 +1,6 @@
 import { isObject, isString } from '@sindresorhus/is';
 import type { SkipReason } from '../../../types/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { DartDatasource } from '../../datasource/dart/index.ts';
 import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
@@ -117,6 +118,21 @@ function extractFlutter(pubspec: Pubspec): PackageDependency[] {
   ];
 }
 
+function extractConstraints(
+  pubspec: Pubspec,
+): Partial<Record<ConstraintName, string>> {
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {
+    // environment.sdk is a required field in a pubspec
+    dart: pubspec.environment.sdk,
+  };
+
+  if (pubspec.environment.flutter) {
+    extractedConstraints.flutter = pubspec.environment.flutter;
+  }
+
+  return extractedConstraints;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -133,5 +149,6 @@ export function extractPackageFile(
       ...extractDart(pubspec),
       ...extractFlutter(pubspec),
     ],
+    extractedConstraints: extractConstraints(pubspec),
   };
 }
