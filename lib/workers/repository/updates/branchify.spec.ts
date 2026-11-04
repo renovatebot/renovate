@@ -93,7 +93,7 @@ describe('workers/repository/updates/branchify', () => {
             sharedConstraintsScope: {
               directory: 'apps/web',
               precedence: 7,
-              constraints: { pnpm: '10.16.1' },
+              constraints: { pnpm: { depName: 'pnpm', value: '10.16.1' } },
             },
           },
         ],

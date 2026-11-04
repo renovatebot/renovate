@@ -1,10 +1,13 @@
 import type {
   PackageFile,
+  SharedConstraints,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
 import {
   collectSharedConstraints,
   getSharedConstraints,
+  updateSharedConstraints,
 } from './shared-constraints.ts';
 
 function packageFile(
@@ -14,12 +17,46 @@ function packageFile(
   return { packageFile: path, deps: [], sharedConstraintsScope };
 }
 
+function constraints(
+  values: Record<string, string | null>,
+): SharedConstraintsScope['constraints'] {
+  const res: SharedConstraintsScope['constraints'] = {};
+  for (const [name, value] of Object.entries(values)) {
+    res[name as keyof typeof res] = { depName: name, value };
+  }
+  return res;
+}
+
 function scope(
-  constraints: SharedConstraintsScope['constraints'],
+  values: Record<string, string | null>,
   directory = '',
   precedence = 0,
 ): SharedConstraintsScope {
-  return { directory, precedence, constraints };
+  return { directory, precedence, constraints: constraints(values) };
+}
+
+function shared(
+  path: string,
+  values: Record<string, string | null>,
+  directory = '',
+  precedence = 0,
+  manager = 'tools',
+): SharedConstraints {
+  return {
+    ...scope(values, directory, precedence),
+    manager,
+    packageFile: path,
+  };
+}
+
+function upgrade(config: Partial<BranchUpgradeConfig>): BranchUpgradeConfig {
+  return {
+    manager: 'tools',
+    packageFile: 'tools.toml',
+    depName: 'node',
+    branchName: 'some-branch',
+    ...config,
+  };
 }
 
 describe('workers/repository/extract/shared-constraints', () => {
@@ -38,8 +75,7 @@ describe('workers/repository/extract/shared-constraints', () => {
       expect(collectSharedConstraints(packageFiles)).toEqual([]);
     });
 
-    it('merges the package files of a directory by precedence, shallower directories first', () => {
-      const shared = { node: '20.11.0', pnpm: '10.16.1' };
+    it('orders the package files by depth, precedence and path in byte order', () => {
       const packageFiles = {
         tools: [
           packageFile(
@@ -47,63 +83,33 @@ describe('workers/repository/extract/shared-constraints', () => {
             scope({ pnpm: '9.15.0' }, 'apps/web'),
           ),
           packageFile('tools.local.toml', scope({ node: '22.0.0' }, '', 1)),
-          packageFile('b.toml', scope({ rust: '1.80.0' })),
-          packageFile('a.toml', scope({ rust: '1.79.0' })),
-          packageFile('tools.toml', scope(shared)),
-        ],
-      };
-
-      const res = collectSharedConstraints(packageFiles);
-
-      expect(res).toEqual([
-        {
-          manager: 'tools',
-          directory: '',
-          constraints: { node: '22.0.0', pnpm: '10.16.1', rust: '1.80.0' },
-        },
-        {
-          manager: 'tools',
-          directory: 'apps/web',
-          constraints: { pnpm: '9.15.0' },
-        },
-      ]);
-      expect(shared).toEqual({ node: '20.11.0', pnpm: '10.16.1' });
-    });
-
-    it('lets the later path in byte order win between package files of the same precedence', () => {
-      const packageFiles = {
-        tools: [
-          packageFile('conf.d/a.toml', scope({ node: '20.11.0' })),
-          packageFile('conf.d/B.toml', scope({ node: '22.0.0' })),
+          packageFile('conf.d/a.toml', scope({ rust: '1.80.0' })),
+          packageFile('conf.d/B.toml', scope({ rust: null })),
         ],
       };
 
       expect(collectSharedConstraints(packageFiles)).toEqual([
-        { manager: 'tools', directory: '', constraints: { node: '20.11.0' } },
+        shared('conf.d/B.toml', { rust: null }),
+        shared('conf.d/a.toml', { rust: '1.80.0' }),
+        shared('tools.local.toml', { node: '22.0.0' }, '', 1),
+        shared('apps/web/tools.toml', { pnpm: '9.15.0' }, 'apps/web'),
       ]);
     });
   });
 
   describe('getSharedConstraints()', () => {
     const sharedConstraints = [
-      {
-        manager: 'tools',
-        directory: '',
-        constraints: { node: '20.11.0', pnpm: '9.15.0' },
-      },
-      {
-        manager: 'tools',
-        directory: 'apps/web',
-        constraints: { pnpm: '10.16.1' },
-      },
+      shared('tools.toml', { node: '20.11.0', pnpm: '9.15.0' }),
+      shared('tools.local.toml', { node: '20.12.0' }, '', 1),
+      shared('apps/web/tools.toml', { pnpm: '10.16.1' }, 'apps/web'),
     ];
 
     it.each`
       packageFile                       | expected
-      ${'package.json'}                 | ${{ node: '20.11.0', pnpm: '9.15.0' }}
-      ${'apps/web/package.json'}        | ${{ node: '20.11.0', pnpm: '10.16.1' }}
-      ${'apps/web/nested/package.json'} | ${{ node: '20.11.0', pnpm: '10.16.1' }}
-      ${'apps/web-client/package.json'} | ${{ node: '20.11.0', pnpm: '9.15.0' }}
+      ${'package.json'}                 | ${{ node: '20.12.0', pnpm: '9.15.0' }}
+      ${'apps/web/package.json'}        | ${{ node: '20.12.0', pnpm: '10.16.1' }}
+      ${'apps/web/nested/package.json'} | ${{ node: '20.12.0', pnpm: '10.16.1' }}
+      ${'apps/web-client/package.json'} | ${{ node: '20.12.0', pnpm: '9.15.0' }}
     `('returns $expected for $packageFile', ({ packageFile, expected }) => {
       expect(
         getSharedConstraints(sharedConstraints, 'npm', packageFile),
@@ -113,13 +119,7 @@ describe('workers/repository/extract/shared-constraints', () => {
     it('ignores constraints outside of the directory', () => {
       expect(
         getSharedConstraints(
-          [
-            {
-              manager: 'tools',
-              directory: 'apps/api',
-              constraints: { node: '20' },
-            },
-          ],
+          [shared('apps/api/tools.toml', { node: '20' }, 'apps/api')],
           'npm',
           'apps/web/package.json',
         ),
@@ -130,6 +130,65 @@ describe('workers/repository/extract/shared-constraints', () => {
       expect(
         getSharedConstraints(sharedConstraints, 'tools', 'apps/web/tools.toml'),
       ).toEqual({});
+    });
+
+    it.each`
+      manager             | name      | files                                                                                        | file                 | expected
+      ${'rust-toolchain'} | ${'rust'} | ${[['rust-toolchain.toml', '', 0, '1.80.0'], ['fuzz/rust-toolchain.toml', 'fuzz', 0, null]]} | ${'fuzz/Cargo.toml'} | ${{}}
+      ${'rust-toolchain'} | ${'rust'} | ${[['rust-toolchain.toml', '', 0, '1.80.0'], ['rust-toolchain', '', 1, null]]}               | ${'Cargo.toml'}      | ${{}}
+      ${'rust-toolchain'} | ${'rust'} | ${[['rust-toolchain.toml', '', 0, null], ['rust-toolchain', '', 1, '1.80.0']]}               | ${'Cargo.toml'}      | ${{ rust: '1.80.0' }}
+      ${'mise'}           | ${'node'} | ${[['mise.toml', '', 7, '20.11.0'], ['apps/web/mise.toml', 'apps/web', 7, null]]}            | ${'apps/web/x.json'} | ${{}}
+      ${'mise'}           | ${'node'} | ${[['mise.toml', '', 7, '20.11.0'], ['apps/web/mise.toml', 'apps/web', 7, null]]}            | ${'apps/x.json'}     | ${{ node: '20.11.0' }}
+    `(
+      'returns $expected for $file with the $manager files $files',
+      ({ manager, name, files, file, expected }) => {
+        const packageFiles = {
+          [manager]: (files as [string, string, number, string | null][]).map(
+            ([path, directory, precedence, value]) =>
+              packageFile(
+                path,
+                scope({ [name]: value }, directory, precedence),
+              ),
+          ),
+        };
+
+        const res = getSharedConstraints(
+          collectSharedConstraints(packageFiles),
+          'consumer',
+          file,
+        );
+
+        expect(res).toEqual(expected);
+      },
+    );
+  });
+
+  describe('updateSharedConstraints()', () => {
+    const sharedConstraints = [
+      shared('tools.toml', { node: '20.11.0', pnpm: '9.15.0' }),
+    ];
+
+    it.each`
+      config                                                                          | expected
+      ${{ currentValue: '20.11.0', newValue: '22.1.0' }}                              | ${'22.1.0'}
+      ${{ currentValue: '20', lockedVersion: '20.11.0', newVersion: '20.12.0' }}      | ${'20.12.0'}
+      ${{ currentValue: '^20', currentVersion: '20.11.0', newVersion: '22.1.0' }}     | ${'22.1.0'}
+      ${{ currentValue: '20.11.0', newValue: '22.0.0-rc.1' }}                         | ${null}
+      ${{ currentValue: '20.10.0', newValue: '22.1.0', newVersion: '22.1.0' }}        | ${'20.11.0'}
+      ${{ currentValue: '20.11.0' }}                                                  | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newValue: '22.1.0', depName: 'nodejs' }}           | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newValue: '22.1.0', packageFile: 'a/tools.toml' }} | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newValue: '22.1.0', manager: 'other' }}            | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newValue: '22.1.0', updateType: 'replacement' }}   | ${'20.11.0'}
+    `('returns $expected for $config', ({ config, expected }) => {
+      const res = updateSharedConstraints(sharedConstraints, [upgrade(config)]);
+
+      expect(res).toEqual([
+        shared('tools.toml', { node: expected, pnpm: '9.15.0' }),
+      ]);
+      expect(sharedConstraints).toEqual([
+        shared('tools.toml', { node: '20.11.0', pnpm: '9.15.0' }),
+      ]);
     });
   });
 });

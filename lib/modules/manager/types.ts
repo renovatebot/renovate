@@ -421,6 +421,16 @@ export interface DepTypeMetadata {
 }
 
 /**
+ * A constraint which a package file shares, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraint {
+  /** The dependency which sets the constraint, a branch which updates it uses its new value */
+  depName: string;
+  /** The constraint, or `null` if the tool has a version which is no constraint, like the Rust channel `stable`, so that it hides the constraint of a parent directory */
+  value: string | null;
+}
+
+/**
  * The constraints which a package file shares with the package files of other managers, and the directory tree in which they apply.
  */
 export interface SharedConstraintsScope {
@@ -429,16 +439,15 @@ export interface SharedConstraintsScope {
   /** Decides between package files of the same directory, the higher one wins */
   precedence: number;
   /** The shared constraints, which unlike `extractedConstraints` do not apply to the package file itself */
-  constraints: Partial<Record<ConstraintName, string>>;
+  constraints: Partial<Record<ConstraintName, SharedConstraint>>;
 }
 
 /**
- * The constraints which the package files of a manager share for a directory, see {@link SharedConstraintsScope}.
+ * The constraints which a package file of a manager shares, see {@link SharedConstraintsScope}.
  */
-export interface SharedConstraints {
+export interface SharedConstraints extends SharedConstraintsScope {
   manager: string;
-  directory: string;
-  constraints: Partial<Record<ConstraintName, string>>;
+  packageFile: string;
 }
 
 export interface ManagerApiBase extends ModuleApi {

@@ -16,7 +16,10 @@ import type { Timestamp } from '../../../util/timestamp.ts';
 import { uniq } from '../../../util/uniq.ts';
 import { withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
-import { getSharedConstraints } from '../extract/shared-constraints.ts';
+import {
+  getSharedConstraints,
+  updateSharedConstraints,
+} from '../extract/shared-constraints.ts';
 import { CommitMessage } from '../model/commit-message.ts';
 
 function prettifyVersion(version: string): string {
@@ -527,6 +530,11 @@ export function generateBranchConfig(
     }
   }
 
+  // a branch which updates a shared constraint, like the version in a `rust-toolchain.toml` file, uses its new value
+  const branchSharedConstraints = updateSharedConstraints(
+    sharedConstraints,
+    config.upgrades,
+  );
   config.constraints = {};
   config.extractedConstraints = {};
   for (const upgrade of config.upgrades) {
@@ -535,7 +543,7 @@ export function generateBranchConfig(
     }
     // the constraints which other managers share for the directory of the package file come below its own, also on the upgrade, which the branch worker reads on its own
     const shared = getSharedConstraints(
-      sharedConstraints,
+      branchSharedConstraints,
       upgrade.manager,
       upgrade.packageFile ?? '',
     );
