@@ -54,7 +54,10 @@ function groupLockUpdatesByImporter(
       lockFileDir,
       upath.dirname(upgrade.packageFile),
     );
-    byImporter.set(importer, [...coerceArray(byImporter.get(importer)), upgrade]);
+    byImporter.set(importer, [
+      ...coerceArray(byImporter.get(importer)),
+      upgrade,
+    ]);
   }
   return byImporter;
 }
