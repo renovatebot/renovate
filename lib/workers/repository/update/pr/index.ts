@@ -443,13 +443,17 @@ export async function ensurePr(
         configuredLabels,
       );
 
+      // the body hash ignores the debug data, so check the upgrades fingerprint separately, unless the platform strips the debug data
+      const existingDebugData = existingPr.bodyStruct?.debugData;
+      const upgradesFingerprintNeedsUpdate =
+        !!existingDebugData &&
+        existingDebugData.upgradesFingerprint !== config.upgradesFingerprint;
+
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
-        // the body hash ignores the debug data, so check the upgrades fingerprint separately
-        existingPr.bodyStruct?.debugData?.upgradesFingerprint ===
-          config.upgradesFingerprint &&
+        !upgradesFingerprintNeedsUpdate &&
         !labelsNeedUpdate &&
         !config.autoApprove
       ) {

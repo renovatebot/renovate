@@ -611,7 +611,18 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('updates the PR when only the upgrades fingerprint changed', async () => {
-        platform.getBranchPr.mockResolvedValueOnce(pr);
+        const legacyPr: Pr = {
+          ...pr,
+          bodyStruct: {
+            ...bodyStruct,
+            debugData: {
+              createdInVer: '1.0.0',
+              updatedInVer: '1.0.0',
+              targetBranch: 'base',
+            },
+          },
+        };
+        platform.getBranchPr.mockResolvedValueOnce(legacyPr);
 
         const res = await ensurePr({ ...config, upgradesFingerprint: 'new' });
 
@@ -625,6 +636,18 @@ describe('workers/repository/update/pr/index', () => {
         );
         expect(platform.updatePr).toHaveBeenCalledWith(
           expect.objectContaining({ number }),
+        );
+      });
+
+      it('does not update the PR for the upgrades fingerprint when the platform strips the debug data', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, upgradesFingerprint: 'new' });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pull Request #123 does not need updating',
         );
       });
     });
