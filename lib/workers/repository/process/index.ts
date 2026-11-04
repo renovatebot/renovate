@@ -18,6 +18,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
+import { parseJson } from '../../../util/common.ts';
 import { getBranchList } from '../../../util/git/index.ts';
 import { addSplit } from '../../../util/split.ts';
 import { getRegexPredicate } from '../../../util/string-match.ts';
@@ -56,13 +57,13 @@ export async function getBaseBranchConfig(
     // TODO: types (#22198)
     const configFileName = cache.configFileName!;
 
+    let configFileRaw: string | null;
     try {
-      baseBranchConfig = await platform.getJsonFile(
+      configFileRaw = await platform.getRawFile(
         configFileName,
         config.repository,
         baseBranch,
       );
-      logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch (err) {
       if (
         err instanceof ExternalHostError ||
@@ -71,8 +72,16 @@ export async function getBaseBranchConfig(
         throw err;
       }
 
-      logger.error(
+      logger.debug(
         { configFileName, baseBranch, err },
+        'Error fetching config file from base branch',
+      );
+      configFileRaw = null;
+    }
+
+    if (configFileRaw === null) {
+      logger.error(
+        { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,
       );
 
@@ -82,6 +91,12 @@ export async function getBaseBranchConfig(
       error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
       throw error;
     }
+
+    baseBranchConfig = parseJson(
+      configFileRaw.length ? configFileRaw : '{}',
+      configFileName,
+    ) as RenovateConfig;
+    logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
 
     baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
     if (baseBranchConfig.errors?.length) {
