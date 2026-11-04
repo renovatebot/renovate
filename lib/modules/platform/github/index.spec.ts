@@ -3234,6 +3234,43 @@ describe('modules/platform/github/index', () => {
         .post('/graphql')
         .reply(200, {
           data: {
+            pinIssue: {
+              issue: {
+                number: 3,
+              },
+            },
+          },
+        });
+      const res = await github.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        shouldPin: true,
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith('Issue pinned');
+      expect(res).toBe('created');
+    });
+
+    it('creates unpinned issue when limit reached', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      const errors = [
+        {
+          type: 'UNPROCESSABLE',
+          path: ['pinIssue'],
+          locations: [
+            {
+              line: 4,
+              column: 3,
+            },
+          ],
+          message: 'Maximum 3 pinned issues per repository',
+        },
+      ];
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
             repository: {
               issues: {
                 pageInfo: {
@@ -3245,12 +3282,32 @@ describe('modules/platform/github/index', () => {
               },
             },
           },
+        })
+        .post('/repos/some/repo/issues')
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            pinIssue: null,
+          },
+          errors,
         });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
-        pinned: true,
+        shouldPin: true,
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { errors },
+        'Issue could not be pinned',
+      );
       expect(res).toBe('created');
     });
 
@@ -3426,7 +3483,7 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe('updated');
     });
 
-    it('updates pinned issue', async () => {
+    it('updates issue to be pinned', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
@@ -3482,6 +3539,45 @@ describe('modules/platform/github/index', () => {
         .post('/graphql')
         .reply(200, {
           data: {
+            pinIssue: {
+              issue: {
+                number: 2,
+              },
+            },
+          },
+        });
+      const res = await github.ensureIssue({
+        title: 'title-3',
+        reuseTitle: 'title-2',
+        body: 'newer-content',
+        shouldPin: true,
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith('Issue pinned');
+      expect(res).toBe('updated');
+    });
+
+    it('updates already pinned issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      const errors = [
+        {
+          type: 'UNPROCESSABLE',
+          path: ['pinIssue'],
+          locations: [
+            {
+              line: 4,
+              column: 3,
+            },
+          ],
+          message:
+            'The issue is already pinned or could not be pinned at this time',
+        },
+      ];
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
             repository: {
               issues: {
                 pageInfo: {
@@ -3494,27 +3590,56 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
-                    body: 'newer-content',
-                    updatedAt: '2023-01-01T00:00:00Z',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
                     body: 'body-1',
-                    updatedAt: '2023-01-01T00:00:00Z',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
             },
           },
+        })
+        .get('/repos/some/repo/issues/2')
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .patch('/repos/some/repo/issues/2')
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            pinIssue: null,
+          },
+          errors,
         });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
         body: 'newer-content',
-        pinned: true,
+        shouldPin: true,
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { errors },
+        'Issue could not be pinned',
+      );
       expect(res).toBe('updated');
     });
 
