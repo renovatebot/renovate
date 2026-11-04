@@ -26,7 +26,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { sanitizeMarkdown } from '../../../util/markdown.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
-import { titleCase } from '../../../util/string.ts';
+import { titleCase, uniqueStrings } from '../../../util/string.ts';
 import { datasourceToOsvEcosystem } from '../../../util/vulnerability/ecosystem.ts';
 import {
   getFixedVersionConstraint,
@@ -115,6 +115,13 @@ export class Vulnerabilities {
         groupPackageRules.push(rule);
       }
       this.sortByFixedVersion(groupPackageRules, versioningApi);
+      const fixVersions = groupPackageRules
+        .flatMap((rule) => coerceArray(rule.vulnerabilityFixVersions))
+        .filter(uniqueStrings)
+        .sort((a, b) => versioningApi.sortVersions(a, b));
+      for (const rule of groupPackageRules) {
+        rule.vulnerabilityFixVersions = fixVersions;
+      }
 
       config.packageRules.push(...groupPackageRules);
     }
@@ -522,6 +529,32 @@ export class Vulnerabilities {
     );
   }
 
+  private lowestFixAbove(
+    version: string,
+    affected: Osv.Affected,
+    versioningApi: VersioningApi,
+  ): string | null {
+    const fixedVersions: string[] = [];
+    for (const range of coerceArray(affected.ranges)) {
+      if (range.type === 'GIT') {
+        continue;
+      }
+      for (const event of range.events) {
+        if (
+          isNonEmptyString(event.fixed) &&
+          versioningApi.isVersion(event.fixed)
+        ) {
+          fixedVersions.push(event.fixed);
+        }
+      }
+    }
+    fixedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
+    const lowest = fixedVersions.find((fixed) =>
+      this.isVersionGt(fixed, version, versioningApi),
+    );
+    return lowest ?? null;
+  }
+
   private getFixedVersion(
     ecosystem: Ecosystem,
     depVersion: string,
@@ -640,6 +673,11 @@ export class Vulnerabilities {
 
     // Prefer the `versioning` already assigned to the dependency by its manager
     const versioning = depVersioning ?? getDefaultVersioning(datasource);
+    const fixVersion = this.lowestFixAbove(
+      depVersion,
+      affected,
+      getVersioning(versioning),
+    );
 
     logger.debug(
       {
@@ -662,6 +700,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       versioning,
       allowedVersions: fixedVersion,
+      ...(fixVersion ? { vulnerabilityFixVersions: [fixVersion] } : {}),
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
