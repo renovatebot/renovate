@@ -1,6 +1,7 @@
-import { parse, weave } from 'jsonc-weaver';
+import { weave } from 'jsonc-weaver';
 import { Document } from 'yaml';
 import { logger } from '../../../logger/index.ts';
+import { clone } from '../../../util/clone.ts';
 import { writeLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { parseSingleYamlDocument } from '../../../util/yaml.ts';
@@ -178,9 +179,23 @@ function updateLockFile(
     return false;
   }
   const bumpVersion = lockFile.config.header.version < LOCKFILE_VERSION_MIN;
+  // keep config in sync: the same lockfile may be edited again in the top pass
+  const config = clone(lockFile.config);
+  if (bumpVersion) {
+    config.header.version = LOCKFILE_VERSION_MIN;
+  }
+  config.overrides ??= {};
+  config.overrides.repos ??= {};
+  for (const [name, sha] of edits) {
+    config.overrides.repos[name] = {
+      ...config.overrides.repos[name],
+      commit: sha,
+    };
+  }
+  lockFile.config = config;
   lockFile.content = isYamlFilePath(lockFile.path)
     ? editYaml(lockFile.content, edits, bumpVersion)
-    : editJson(lockFile.content, edits, bumpVersion);
+    : editJson(lockFile.content, config);
   return true;
 }
 
@@ -201,21 +216,8 @@ function editYaml(
   return doc.toString();
 }
 
-function editJson(
-  content: string,
-  edits: Map<string, string>,
-  bumpVersion: boolean,
-): string {
-  const obj = content
-    ? parse(content)
-    : { header: { version: LOCKFILE_VERSION_MIN } };
-  if (bumpVersion) {
-    obj.header.version = LOCKFILE_VERSION_MIN;
-  }
-  obj.overrides ??= {};
-  obj.overrides.repos ??= {};
-  for (const [name, sha] of edits) {
-    obj.overrides.repos[name] = { ...obj.overrides.repos[name], commit: sha };
-  }
-  return content ? weave(content, obj) : `${JSON.stringify(obj, null, 2)}\n`;
+function editJson(content: string, config: KasConfig): string {
+  return content
+    ? weave(content, config)
+    : `${JSON.stringify(config, null, 2)}\n`;
 }
