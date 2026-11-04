@@ -101,12 +101,23 @@ export function decideBranchReuse({
     return { action: 'no-reuse', userRebaseRequested };
   }
 
+  if (config.cacheFingerprintMatch === 'no-match') {
+    logger.debug(
+      'Cache fingerprint does not match, cannot reuse existing branch',
+    );
+    return { action: 'no-reuse', userRebaseRequested };
+  }
+
+  // without a cached fingerprint, fall back to the one kept in the PR, so a branch whose upgrades shrank is rebuilt
+  const prUpgradesFingerprint =
+    branchPr?.bodyStruct?.debugData?.upgradesFingerprint;
   if (
-    config.cacheFingerprintMatch === 'no-match' ||
-    config.cacheFingerprintMatch === 'no-fingerprint'
+    config.cacheFingerprintMatch === 'no-fingerprint' &&
+    prUpgradesFingerprint &&
+    prUpgradesFingerprint !== config.upgradesFingerprint
   ) {
     logger.debug(
-      'Cache fingerprint missing or changed, cannot reuse existing branch',
+      'Upgrades changed since the PR was last updated, cannot reuse existing branch',
     );
     return { action: 'no-reuse', userRebaseRequested };
   }

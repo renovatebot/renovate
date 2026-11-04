@@ -53,15 +53,18 @@ export async function handleClosedPr(
 export async function handleModifiedPr(
   config: BranchConfig,
   pr: Pr,
-  userRebaseRequested: boolean,
 ): Promise<void> {
   if (config.suppressNotifications!.includes('prEditedNotification')) {
     return;
   }
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
+  const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
 
-  if (userRebaseRequested) {
+  const dependencyDashboardCheck =
+    config.dependencyDashboardChecks?.[config.branchName];
+
+  if (!!dependencyDashboardCheck || config.rebaseRequested) {
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -82,7 +85,6 @@ export async function handleModifiedPr(
       );
       return;
     }
-    const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
     logger.debug('Ensuring comment to indicate that rebasing is not possible');
     await ensureComment({
       number: pr.number,

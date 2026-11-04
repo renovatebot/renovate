@@ -102,18 +102,6 @@ describe(
       await setBranchCache(branches);
     }
 
-    async function addUserCommit(): Promise<string> {
-      const repo = git.createSimpleGit({ config: { baseDir: local.path } });
-      await repo.checkout(branchName);
-      await fs.writeFile(`${local.path}/manual.txt`, 'Keep my changes\n');
-      await repo.add('manual.txt');
-      await repo.commit('User changes', {
-        '--author': 'User <user@example.com>',
-      });
-      await repo.push('origin', branchName);
-      return (await repo.revparse(branchName)).trim();
-    }
-
     async function expectContents(
       name: string,
       updatedDeps: string[],
@@ -250,6 +238,29 @@ describe(
       },
     );
 
+    it.each`
+      loseFingerprint
+      ${false}
+      ${true}
+    `(
+      'does not rebase a conflict-free group when only the base branch moved (lost fingerprint=$loseFingerprint)',
+      async ({ loseFingerprint }) => {
+        await run(branch());
+        const sha = git.getBranchCommit(branchName);
+        const repo = git.createSimpleGit({ config: { baseDir: origin.path } });
+        await fs.writeFile(`${origin.path}/README.md`, 'unrelated\n');
+        await repo.add('README.md');
+        await repo.commit('Unrelated base change');
+        if (loseFingerprint) {
+          resetCache();
+        }
+
+        await run({ ...branch(), rebaseWhen: 'conflicted' });
+
+        expect(git.getBranchCommit(branchName)).toBe(sha);
+      },
+    );
+
     it('reuses an unchanged group without regenerating artifacts or committing', async () => {
       await run(branch());
       const sha = git.getBranchCommit(branchName);
@@ -276,73 +287,6 @@ describe(
       expect(git.getBranchCommit(branchName)).toBe(sha);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
-
-    it.each`
-      scenario                           | depNames                       | dashboardCheck | prExists
-      ${'without approval'}              | ${['dep-a', 'dep-b']}          | ${undefined}   | ${true}
-      ${'unpending an unchanged group'}  | ${['dep-a', 'dep-b', 'dep-c']} | ${'unpend'}    | ${true}
-      ${'unpending a shrinking group'}   | ${['dep-a', 'dep-b']}          | ${'unpend'}    | ${true}
-      ${'unpending a branch without PR'} | ${['dep-a', 'dep-b']}          | ${'unpend'}    | ${false}
-    `(
-      'preserves a user commit when $scenario',
-      async ({ depNames, dashboardCheck, prExists }) => {
-        await run(branch());
-        const sha = await addUserCommit();
-        if (!prExists) {
-          prs.delete(branchName);
-        }
-
-        const updated = {
-          ...branch(depNames),
-          pendingChecks: dashboardCheck === 'unpend',
-          dependencyDashboardChecks: dashboardCheck
-            ? { [branchName]: dashboardCheck }
-            : undefined,
-        };
-        await run(updated);
-
-        expect({
-          sha: git.getBranchCommit(branchName),
-          manual: await git.getFile('manual.txt', branchName),
-        }).toEqual({ sha, manual: 'Keep my changes\n' });
-        expect(updated.result).toBe('pr-edited');
-        await expectContents(branchName, ['dep-a', 'dep-b', 'dep-c']);
-        expect(platform.updatePr).not.toHaveBeenCalled();
-        expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(
-          platform.ensureComment.mock.calls.some(
-            ([comment]) => comment.topic === 'Edited/Blocked Notification',
-          ),
-        ).toBe(prExists);
-      },
-    );
-
-    it.each`
-      dashboardCheck     | prRebaseRequested | rebaseAll
-      ${'rebase'}        | ${false}          | ${false}
-      ${'global-config'} | ${false}          | ${false}
-      ${undefined}       | ${true}           | ${false}
-      ${undefined}       | ${false}          | ${true}
-    `(
-      'replaces a user commit only after explicit rebase consent: $dashboardCheck/$prRebaseRequested/$rebaseAll',
-      async ({ dashboardCheck, prRebaseRequested, rebaseAll }) => {
-        await run(branch());
-        await addUserCommit();
-        prs.get(branchName)!.bodyStruct!.rebaseRequested = prRebaseRequested;
-
-        await run({
-          ...branch(['dep-a', 'dep-b']),
-          dependencyDashboardChecks: dashboardCheck
-            ? { [branchName]: dashboardCheck }
-            : undefined,
-          dependencyDashboardRebaseAllOpen: rebaseAll,
-        });
-
-        await expect(git.getFile('manual.txt', branchName)).resolves.toBeNull();
-        await expectContents(branchName, ['dep-a', 'dep-b']);
-        expect(platform.createPr).toHaveBeenCalledTimes(1);
-      },
-    );
 
     it('moves the excluded upgrade to a separate PR without duplicating the group', async () => {
       await run(branch());

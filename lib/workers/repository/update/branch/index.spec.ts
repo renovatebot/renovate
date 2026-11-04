@@ -2381,7 +2381,7 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
 
-    it('restarts branch processing when reused package files need updating', async () => {
+    it('rebases branch onto new basebranch if no fingerprint found', async () => {
       const updatedPackageFile: FileChange = {
         type: 'addition',
         path: 'pom.xml',
@@ -2410,6 +2410,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         baseBranch: 'old_base',
         reuseExistingBranch: true,
+        cacheFingerprintMatch: 'no-fingerprint',
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -2419,7 +2420,8 @@ describe('workers/repository/update/branch/index', () => {
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
 
-    it('restarts branch processing when reused artifacts need updating', async () => {
+    // for coverage
+    it('rebases branch onto new basebranch if no fingerprint found - 2', async () => {
       const pr = partial<Pr>({
         state: 'open',
         targetBranch: 'old_base',
@@ -2444,6 +2446,7 @@ describe('workers/repository/update/branch/index', () => {
         baseBranch: 'old_base',
         reuseExistingBranch: true,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
+        cacheFingerprintMatch: 'no-fingerprint',
       });
 
       expect(logger.debug).toHaveBeenCalledWith(

@@ -224,13 +224,6 @@ export async function processBranch(
         result: 'commit-hourly-limit-reached',
       };
     }
-    const { action: reuseAction, userRebaseRequested } = decideBranchReuse({
-      config,
-      branchPr,
-      branchExists,
-      dependencyDashboardCheck,
-      forceRebase,
-    });
     if (branchExists) {
       // check if branch is labelled to stop
       config.stopUpdating = branchPr?.labels?.includes(
@@ -302,8 +295,8 @@ export async function processBranch(
         }
         if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
-          await handleModifiedPr(config, branchPr, userRebaseRequested);
-          if (!userRebaseRequested) {
+          await handleModifiedPr(config, branchPr);
+          if (!(!!dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
               prNo: branchPr.number,
@@ -313,7 +306,7 @@ export async function processBranch(
         }
       } else if (
         branchIsModified &&
-        !userRebaseRequested &&
+        !dependencyDashboardCheck &&
         !(await findClosedPrForModifiedBranch(config))
       ) {
         return {
@@ -378,16 +371,24 @@ export async function processBranch(
       }
     }
 
-    if (reuseAction === 'skip-update') {
+    const reuseDecision = decideBranchReuse({
+      config,
+      branchPr,
+      branchExists,
+      dependencyDashboardCheck,
+      forceRebase,
+    });
+    const { userRebaseRequested } = reuseDecision;
+    if (reuseDecision.action === 'skip-update') {
       return {
         branchExists,
         prNo: branchPr?.number,
         result: 'no-work',
       };
     }
-    if (reuseAction === 'no-reuse') {
+    if (reuseDecision.action === 'no-reuse') {
       config.reuseExistingBranch = false;
-    } else if (reuseAction === 'check-reuse') {
+    } else if (reuseDecision.action === 'check-reuse') {
       config = await shouldReuseExistingBranch(config, branchPr);
     }
     // TODO: types (#22198)
