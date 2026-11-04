@@ -1,7 +1,13 @@
-import { platform } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
+import { getConfig } from '../../../../../config/defaults.ts';
+import {
+  getManagerConfig,
+  mergeChildConfig,
+} from '../../../../../config/index.ts';
 import type { PackageFile } from '../../../../../modules/manager/types.ts';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body.ts';
 import * as _template from '../../../../../util/template/index.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
 import * as _changelogs from './changelogs.ts';
 import * as _configDescription from './config-description.ts';
 import * as _controls from './controls.ts';
@@ -101,6 +107,352 @@ describe('workers/repository/update/pr/body/index', () => {
         references: '',
       });
     });
+
+    it('shows the registry crate and local alias in the updates table', async () => {
+      const actualTemplate = await vi.importActual<typeof _template>(
+        '../../../../../util/template/index.ts',
+      );
+      const actualTable =
+        await vi.importActual<typeof _table>('./updates-table.ts');
+      template.compile.mockImplementation(actualTemplate.compile);
+      table.getPrUpdatesTable.mockReset();
+      table.getPrUpdatesTable.mockImplementation(actualTable.getPrUpdatesTable);
+      platform.massageMarkdown.mockImplementation((x) => x);
+      const managerConfig = getManagerConfig(
+        mergeChildConfig(getConfig(), {
+          prBodyDefinitions: { Alias: '{{{depNameLinked}}}' },
+        }),
+        'cargo',
+      );
+      const upgrade = partial<BranchUpgradeConfig>({
+        manager: 'cargo',
+        datasource: 'crate',
+        depName: 'divan',
+        packageName: 'codspeed-divan-compat',
+        dependencyUrl: 'https://crates.io/crates/codspeed-divan-compat',
+        depType: 'workspace.dependencies',
+        updateType: 'major',
+        currentValue: '5.0.0',
+        newValue: '6.0.0',
+        newVersion: '6.0.0',
+        displayFrom: '5.0.0',
+        displayTo: '6.0.0',
+        prBodyDefinitions: managerConfig.prBodyDefinitions,
+      });
+
+      const result = getPrBody(
+        {
+          manager: 'cargo',
+          branchName: 'renovate/divan-6.x',
+          baseBranch: 'main',
+          upgrades: [upgrade],
+          prBodyColumns: ['Package', 'Alias', 'Type', 'Update', 'Change'],
+          prBodyTemplate: '{{{table}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'main',
+          },
+        },
+        {},
+      );
+
+      expect(result).toContain(
+        '| [codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat) (aliased as `divan`) | [divan](https://crates.io/crates/codspeed-divan-compat) | workspace.dependencies | major | `5.0.0` → `6.0.0` |',
+      );
+      expect(upgrade).toMatchObject({
+        depName: 'divan',
+        packageName: 'codspeed-divan-compat',
+        currentValue: '5.0.0',
+        newValue: '6.0.0',
+        newVersion: '6.0.0',
+        depNameLinked:
+          '[divan](https://crates.io/crates/codspeed-divan-compat)',
+        packageNameLinked:
+          '[codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat)',
+      });
+    });
+
+    it('keeps aliases distinct in a mixed updates table', async () => {
+      const actualTemplate = await vi.importActual<typeof _template>(
+        '../../../../../util/template/index.ts',
+      );
+      const actualTable =
+        await vi.importActual<typeof _table>('./updates-table.ts');
+      template.compile.mockImplementation(actualTemplate.compile);
+      table.getPrUpdatesTable.mockReset();
+      table.getPrUpdatesTable.mockImplementation(actualTable.getPrUpdatesTable);
+      platform.massageMarkdown.mockImplementation((x) => x);
+      const config = mergeChildConfig(getConfig(), {
+        prBodyDefinitions: { Alias: '{{{depNameLinked}}}' },
+      });
+      const upgrades = [
+        partial<BranchUpgradeConfig>({
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+          dependencyUrl: 'https://crates.io/crates/codspeed-divan-compat',
+        }),
+        partial<BranchUpgradeConfig>({
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'other-alias',
+          packageName: 'codspeed-divan-compat',
+          dependencyUrl: 'https://crates.io/crates/codspeed-divan-compat',
+        }),
+        partial<BranchUpgradeConfig>({
+          manager: 'npm',
+          datasource: 'npm',
+          depName: 'local-alias',
+          packageName: 'registry-name',
+          homepage: 'https://example.com',
+          newName: 'replacement',
+        }),
+      ];
+      for (const upgrade of upgrades) {
+        upgrade.updateType = 'major';
+        upgrade.currentVersion = '5.0.0';
+        upgrade.newVersion = '6.0.0';
+        upgrade.displayFrom = '5.0.0';
+        upgrade.displayTo = '6.0.0';
+        upgrade.prBodyDefinitions = getManagerConfig(
+          config,
+          upgrade.manager,
+        ).prBodyDefinitions;
+      }
+
+      const result = getPrBody(
+        {
+          manager: 'npm',
+          branchName: 'renovate/group',
+          baseBranch: 'main',
+          upgrades,
+          prBodyColumns: ['Package', 'Alias', 'Change'],
+          prBodyTemplate: '{{{table}}}',
+        },
+        {
+          debugData: {
+            updatedInVer: '1.2.3',
+            createdInVer: '1.2.3',
+            targetBranch: 'main',
+          },
+        },
+        {},
+      );
+
+      expect(result).toContain(
+        '| [codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat) (aliased as `divan`) | [divan](https://crates.io/crates/codspeed-divan-compat) | `5.0.0` → `6.0.0` |',
+      );
+      expect(result).toContain(
+        '| [codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat) (aliased as `other-alias`) | [other-alias](https://crates.io/crates/codspeed-divan-compat) | `5.0.0` → `6.0.0` |',
+      );
+      expect(result).toContain(
+        '| [local-alias](https://example.com) → [replacement](https://example.com) | [local-alias](https://example.com) | [`5.0.0` → `6.0.0`](https://renovatebot.com/diffs/npm/local-alias/5.0.0/6.0.0) |',
+      );
+      expect(
+        upgrades.map(({ manager, datasource, depName, packageName }) => ({
+          manager,
+          datasource,
+          depName,
+          packageName,
+        })),
+      ).toEqual([
+        {
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+        },
+        {
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'other-alias',
+          packageName: 'codspeed-divan-compat',
+        },
+        {
+          manager: 'npm',
+          datasource: 'npm',
+          depName: 'local-alias',
+          packageName: 'registry-name',
+        },
+      ]);
+    });
+
+    it.each`
+      scope      | userConfig
+      ${'root'}  | ${{ prBodyDefinitions: { Package: '{{{depNameLinked}}}' } }}
+      ${'cargo'} | ${{ cargo: { prBodyDefinitions: { Package: '{{{depNameLinked}}}' } } }}
+    `(
+      'preserves an explicit $scope Package template',
+      async ({ userConfig }) => {
+        const actualTemplate = await vi.importActual<typeof _template>(
+          '../../../../../util/template/index.ts',
+        );
+        const actualTable =
+          await vi.importActual<typeof _table>('./updates-table.ts');
+        template.compile.mockImplementation(actualTemplate.compile);
+        table.getPrUpdatesTable.mockReset();
+        table.getPrUpdatesTable.mockImplementation(
+          actualTable.getPrUpdatesTable,
+        );
+        platform.massageMarkdown.mockImplementation((x) => x);
+        const managerConfig = getManagerConfig(
+          mergeChildConfig(
+            mergeChildConfig(getConfig(), {
+              prBodyDefinitions: { Alias: '{{{depNameLinked}}}' },
+            }),
+            userConfig,
+          ),
+          'cargo',
+        );
+        const upgrade = partial<BranchUpgradeConfig>({
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+          dependencyUrl: 'https://crates.io/crates/codspeed-divan-compat',
+          prBodyDefinitions: managerConfig.prBodyDefinitions,
+        });
+
+        const result = getPrBody(
+          {
+            manager: 'cargo',
+            branchName: 'renovate/divan-6.x',
+            baseBranch: 'main',
+            upgrades: [upgrade],
+            prBodyColumns: ['Package', 'Alias'],
+            prBodyTemplate: '{{{table}}}',
+          },
+          {
+            debugData: {
+              updatedInVer: '1.2.3',
+              createdInVer: '1.2.3',
+              targetBranch: 'main',
+            },
+          },
+          {},
+        );
+
+        expect(result).toContain(
+          '| [divan](https://crates.io/crates/codspeed-divan-compat) | [divan](https://crates.io/crates/codspeed-divan-compat) |',
+        );
+        expect(result).not.toContain('aliased as');
+        expect(upgrade).toMatchObject({
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+          depNameLinked:
+            '[divan](https://crates.io/crates/codspeed-divan-compat)',
+        });
+      },
+    );
+
+    it.each`
+      manager    | datasource       | depName      | packageName                   | expected
+      ${'cargo'} | ${'crate'}       | ${'serde'}   | ${'serde'}                    | ${'serde'}
+      ${'cargo'} | ${'crate'}       | ${'serde'}   | ${undefined}                  | ${'serde'}
+      ${'cargo'} | ${'crate'}       | ${'serde'}   | ${''}                         | ${'serde'}
+      ${'cargo'} | ${'crate'}       | ${''}        | ${'serde'}                    | ${''}
+      ${'cargo'} | ${'crate'}       | ${undefined} | ${'serde'}                    | ${undefined}
+      ${'cargo'} | ${'github-tags'} | ${'alias'}   | ${'owner/repository'}         | ${'alias'}
+      ${'cargo'} | ${'gitlab-tags'} | ${'alias'}   | ${'owner/repository'}         | ${'alias'}
+      ${'cargo'} | ${'git-tags'}    | ${'alias'}   | ${'https://example.com/repo'} | ${'alias'}
+      ${'cargo'} | ${'git-refs'}    | ${'alias'}   | ${'https://example.com/repo'} | ${'alias'}
+      ${'npm'}   | ${'npm'}         | ${'alias'}   | ${'another-package'}          | ${'alias'}
+    `(
+      'preserves $manager/$datasource display for $depName/$packageName',
+      ({ manager, datasource, depName, packageName, expected }) => {
+        const upgrade = partial<BranchUpgradeConfig>({
+          manager,
+          datasource,
+          depName,
+          packageName,
+        });
+
+        getPrBody(
+          {
+            manager,
+            branchName: 'some-branch',
+            baseBranch: 'base',
+            upgrades: [upgrade],
+          },
+          {
+            debugData: {
+              updatedInVer: '1.2.3',
+              createdInVer: '1.2.3',
+              targetBranch: 'base',
+            },
+          },
+          {},
+        );
+
+        expect(upgrade).toMatchObject({
+          depName,
+          packageName,
+          depNameLinked: expected,
+        });
+        expect(upgrade).not.toHaveProperty('packageNameLinked');
+      },
+    );
+
+    it.each`
+      homepage                 | sourceUrl                                        | dependencyUrl                                       | changelogUrl                       | expectedPackage                                                                                                                                       | expectedAlias                                                                                                                         | expectedNewName
+      ${undefined}             | ${undefined}                                     | ${undefined}                                        | ${undefined}                       | ${'codspeed-divan-compat'}                                                                                                                            | ${'divan'}                                                                                                                            | ${'replacement'}
+      ${undefined}             | ${undefined}                                     | ${'https://crates.io/crates/codspeed-divan-compat'} | ${undefined}                       | ${'[codspeed-divan-compat](https://crates.io/crates/codspeed-divan-compat)'}                                                                          | ${'[divan](https://crates.io/crates/codspeed-divan-compat)'}                                                                          | ${'[replacement](https://crates.io/crates/codspeed-divan-compat)'}
+      ${undefined}             | ${'https://github.com/CodSpeedHQ/codspeed-rust'} | ${'https://crates.io/crates/codspeed-divan-compat'} | ${undefined}                       | ${'[codspeed-divan-compat](https://github.com/CodSpeedHQ/codspeed-rust)'}                                                                             | ${'[divan](https://github.com/CodSpeedHQ/codspeed-rust)'}                                                                             | ${'[replacement](https://github.com/CodSpeedHQ/codspeed-rust)'}
+      ${'https://codspeed.io'} | ${'https://github.com/CodSpeedHQ/codspeed-rust'} | ${'https://crates.io/crates/codspeed-divan-compat'} | ${'https://codspeed.io/changelog'} | ${'[codspeed-divan-compat](https://codspeed.io) ([source](https://github.com/CodSpeedHQ/codspeed-rust), [changelog](https://codspeed.io/changelog))'} | ${'[divan](https://codspeed.io) ([source](https://github.com/CodSpeedHQ/codspeed-rust), [changelog](https://codspeed.io/changelog))'} | ${'[replacement](https://codspeed.io)'}
+    `(
+      'preserves Cargo alias links for $homepage/$sourceUrl/$dependencyUrl',
+      ({
+        homepage,
+        sourceUrl,
+        dependencyUrl,
+        changelogUrl,
+        expectedPackage,
+        expectedAlias,
+        expectedNewName,
+      }) => {
+        template.compile.mockImplementation((x) => x);
+        const upgrade = partial<BranchUpgradeConfig>({
+          manager: 'cargo',
+          datasource: 'crate',
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+          homepage,
+          sourceUrl,
+          dependencyUrl,
+          changelogUrl,
+          newName: 'replacement',
+        });
+
+        getPrBody(
+          {
+            manager: 'cargo',
+            branchName: 'some-branch',
+            baseBranch: 'base',
+            upgrades: [upgrade],
+          },
+          {
+            debugData: {
+              updatedInVer: '1.2.3',
+              createdInVer: '1.2.3',
+              targetBranch: 'base',
+            },
+          },
+          {},
+        );
+
+        expect(upgrade).toMatchObject({
+          depName: 'divan',
+          packageName: 'codspeed-divan-compat',
+          depNameLinked: expectedAlias,
+          packageNameLinked: expectedPackage,
+          newNameLinked: expectedNewName,
+        });
+      },
+    );
 
     it('massages upgrades', () => {
       template.compile.mockImplementation((x) => x);
