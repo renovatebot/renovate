@@ -1498,7 +1498,7 @@ export async function ensureIssue({
   labels,
   once = false,
   shouldReOpen = true,
-  isPinned = false,
+  pinned = false,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
   /* v8 ignore next -- specs initialize repos with issues enabled */
@@ -1567,7 +1567,7 @@ export async function ensureIssue({
         );
         GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
-        if (isPinned && updatedIssue.node_id) {
+        if (pinned && updatedIssue.node_id) {
           await pinIssue(updatedIssue.node_id);
         }
         return 'updated';
@@ -1587,7 +1587,7 @@ export async function ensureIssue({
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
-    if (isPinned && createdIssue.node_id) {
+    if (pinned && createdIssue.node_id) {
       await pinIssue(createdIssue.node_id);
     }
     return 'created';

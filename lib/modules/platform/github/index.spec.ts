@@ -3202,6 +3202,58 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe('created');
     });
 
+    it('creates pinned issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/repos/some/repo/issues')
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [],
+              },
+            },
+          },
+        });
+      const res = await github.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        pinned: true,
+      });
+      expect(res).toBe('created');
+    });
+
     it('closes others if ensuring only once', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -3370,6 +3422,98 @@ describe('modules/platform/github/index', () => {
         reuseTitle: 'title-2',
         body: 'newer-content',
         labels: ['Renovate', 'Maintenance'],
+      });
+      expect(res).toBe('updated');
+    });
+
+    it('updates pinned issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .get('/repos/some/repo/issues/2')
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .patch('/repos/some/repo/issues/2')
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+          node_id: 'I_kwDOVifsM88AAAABcZTwrw',
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                    body: 'newer-content',
+                    updatedAt: '2023-01-01T00:00:00Z',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2023-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        });
+      const res = await github.ensureIssue({
+        title: 'title-3',
+        reuseTitle: 'title-2',
+        body: 'newer-content',
+        pinned: true,
       });
       expect(res).toBe('updated');
     });
