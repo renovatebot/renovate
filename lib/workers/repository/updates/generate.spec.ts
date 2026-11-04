@@ -412,7 +412,7 @@ describe('workers/repository/updates/generate', () => {
       });
     });
 
-    it('merges the shared constraints for the package files below their own extractedConstraints', () => {
+    it('sets the shared constraints for the package files next to their own extractedConstraints', () => {
       const sharedConstraints = [
         sharedConstraint('tools.toml', {
           node: '20',
@@ -443,17 +443,17 @@ describe('workers/repository/updates/generate', () => {
 
       const res = generateBranchConfig(branch, sharedConstraints);
 
-      expect(res.extractedConstraints).toEqual({
-        node: '22',
-        pnpm: '10',
-        rust: '1.79.0',
-      });
+      expect(res.extractedConstraints).toEqual({ node: '22', rust: '1.79.0' });
+      expect(res.sharedConstraints).toEqual({ node: '20', pnpm: '10' });
       expect(res.upgrades[0].extractedConstraints).toEqual({
         node: '22',
-        pnpm: '10',
         rust: '1.79.0',
       });
-      expect(res.upgrades[1]).not.toHaveProperty('extractedConstraints');
+      expect(res.upgrades[0].sharedConstraints).toEqual({
+        node: '20',
+        pnpm: '10',
+      });
+      expect(res.upgrades[1]).not.toHaveProperty('sharedConstraints');
     });
 
     it.each`
@@ -504,13 +504,13 @@ describe('workers/repository/updates/generate', () => {
           sharedConstraints,
         );
 
-        expect(grouped.extractedConstraints).toEqual({
+        expect(grouped.sharedConstraints).toEqual({
           [constraint]: newValue,
         });
-        expect(grouped.upgrades[1].extractedConstraints).toEqual({
+        expect(grouped.upgrades[1].sharedConstraints).toEqual({
           [constraint]: newValue,
         });
-        expect(other.extractedConstraints).toEqual({
+        expect(other.sharedConstraints).toEqual({
           [constraint]: currentValue,
         });
       },

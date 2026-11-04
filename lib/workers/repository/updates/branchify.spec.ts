@@ -99,7 +99,7 @@ describe('workers/repository/updates/branchify', () => {
         ],
       });
 
-      expect(res.branches[0].extractedConstraints).toEqual({ pnpm: '10.16.1' });
+      expect(res.branches[0].sharedConstraints).toEqual({ pnpm: '10.16.1' });
     });
 
     it('returns one branch if one input', async () => {

@@ -69,6 +69,13 @@ export interface ToolConstraintsConfig {
    * the files it is called with.
    */
   extractedConstraints?: Partial<Record<ConstraintName, string>> | null;
+  /**
+   * Tool versions which other managers, like `mise`, share for the directory of
+   * the package files, see {@link SharedConstraintsScope}. They are the versions
+   * a version manager installs, so they win over a range which the package
+   * files only require, if they are within it.
+   */
+  sharedConstraints?: Partial<Record<ConstraintName, string>> | null;
 }
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
