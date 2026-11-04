@@ -1268,7 +1268,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
     default: true,
-    supportedManagers: ['npm', 'bun', 'composer', 'copier'],
+    supportedManagers: ['npm', 'bun', 'composer', 'copier', 'julia'],
   },
   {
     name: 'platform',
