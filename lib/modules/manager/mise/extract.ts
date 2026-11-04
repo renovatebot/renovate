@@ -15,7 +15,11 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import type { StaticTooling } from '../asdf/types.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  PackageDependency,
+  PackageFileContent,
+  SharedConstraint,
+} from '../types.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
@@ -135,13 +139,10 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = [
-    ...toolEntries.map(([name, toolData, depType]) =>
-      extractToolEntry(name, toolData, depType, lockFileData),
-    ),
-    ...taskFileDeps,
-    ...includeDeps,
-  ];
+  const toolDeps = toolEntries.map(([name, toolData, depType]) =>
+    extractToolEntry(name, toolData, depType, lockFileData),
+  );
+  const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {
@@ -150,7 +151,11 @@ export async function extractPackageFile(
 
   const scope = getSharedConstraintsScope(packageFile);
   if (scope) {
-    const constraints = extractToolConstraints(misefile.tools, lockFileData);
+    const constraints = extractToolConstraints(
+      misefile.tools,
+      toolDeps,
+      lockFileData,
+    );
     if (isNonEmptyObject(constraints)) {
       result.sharedConstraintsScope = { ...scope, constraints };
     }
@@ -160,26 +165,31 @@ export async function extractPackageFile(
 }
 
 /**
- * Returns the versions of the tools which are Containerbase tools, preferring the locked version, which is the one mise installs.
+ * Returns the versions of the tools which are Containerbase tools, preferring the locked version, which is the one mise installs, or `null` for a version which is no constraint, like `lts`.
  */
 function extractToolConstraints(
   tools: Record<string, MiseTool>,
+  toolDeps: MiseDependency[],
   lockFileData: MiseLockFile | undefined,
-): Partial<Record<ConstraintName, string>> {
-  const constraints: Partial<Record<ConstraintName, string>> = {};
-  const constraintTools = Object.entries(tools).flatMap(([name, toolData]) => {
-    const depName = optionInToolNameRegex.exec(name.trim())!.groups!.name;
-    const constraintName = getConstraintName(depName);
-    return constraintName ? [{ depName, constraintName, toolData }] : [];
-  });
-  for (const { depName, constraintName, toolData } of constraintTools) {
-    const constraint = getConstraintValue(
-      constraintName,
-      getInstalledVersion(lockFileData, depName, constraintName, toolData),
-    );
-    if (constraint) {
-      constraints[constraintName] = constraint;
-    }
+): Partial<Record<ConstraintName, SharedConstraint>> {
+  const constraints: Partial<Record<ConstraintName, SharedConstraint>> = {};
+  // the top level tools come first in `toolDeps`
+  const constraintTools = Object.entries(tools).flatMap(
+    ([name, toolData], index) => {
+      const depName = optionInToolNameRegex.exec(name.trim())!.groups!.name;
+      const constraintName = getConstraintName(depName);
+      const dep = toolDeps[index];
+      return constraintName ? [{ depName, constraintName, toolData, dep }] : [];
+    },
+  );
+  for (const { depName, constraintName, toolData, dep } of constraintTools) {
+    constraints[constraintName] = {
+      depName: dep.depName,
+      value: getConstraintValue(
+        constraintName,
+        getInstalledVersion(lockFileData, depName, constraintName, toolData),
+      ),
+    };
   }
   return constraints;
 }
@@ -458,7 +468,7 @@ function extractSelectorLockedDependency(
   toolConfig: StaticTooling | BackendToolingConfig | null,
   lockedVersion: string,
   depType: string,
-): PackageDependency | null {
+): MiseDependency | null {
   const selectorConfig = getSelectorConfig(
     version,
     backend,
@@ -497,7 +507,7 @@ function extractToolEntry(
   toolData: MiseTool,
   depType: string,
   lockFileData?: MiseLockFile,
-): PackageDependency {
+): MiseDependency {
   const toolValue = getPrimaryToolValue(toolData);
   const version = parseVersion(toolValue);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(

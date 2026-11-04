@@ -1341,9 +1341,11 @@ describe('modules/manager/mise/extract', () => {
         directory: '',
         precedence: expect.any(Number),
         constraints: {
-          node: '20.11.0',
-          python: '3.10.17',
-          pnpm: '10.16.1',
+          node: { depName: 'node', value: '20.11.0' },
+          python: { depName: 'python', value: '3.10.17' },
+          pnpm: { depName: 'npm:pnpm', value: '10.16.1' },
+          uv: { depName: 'aqua:astral-sh/uv', value: null },
+          rust: { depName: 'rust', value: null },
         },
       });
       expect(result).not.toHaveProperty('extractedConstraints');
@@ -1360,8 +1362,8 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
 
       expect(result?.sharedConstraintsScope?.constraints).toEqual({
-        node: '20.11.0',
-        python: '3.10.17',
+        node: { depName: 'node', value: '20.11.0' },
+        python: { depName: 'python', value: '3.10.17' },
       });
     });
 
@@ -1376,8 +1378,8 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
 
       expect(result?.sharedConstraintsScope?.constraints).toEqual({
-        node: '22.1.0',
-        python: '3.10.17',
+        node: { depName: 'node', value: '22.1.0' },
+        python: { depName: 'python', value: '3.10.17' },
       });
     });
 
@@ -1393,10 +1395,33 @@ describe('modules/manager/mise/extract', () => {
       expect(result).not.toHaveProperty('extractedConstraints');
     });
 
-    it('does not share constraints without usable tool versions', async () => {
+    it('shares no value for tool versions which are no constraint', async () => {
       const content = codeBlock`
         [tools]
+        node = "lts"
         python = "3.10"
+        elixir = "1.17.3-otp-27"
+        "npm:pnpm" = "ref:main"
+        terraform = "1.9.0"
+      `;
+
+      const result = await extractPackageFile(content, 'apps/web/mise.toml');
+
+      expect(result?.sharedConstraintsScope).toEqual({
+        directory: 'apps/web',
+        precedence: expect.any(Number),
+        constraints: {
+          node: { depName: 'node', value: null },
+          python: { depName: 'python', value: null },
+          elixir: { depName: 'elixir', value: null },
+          pnpm: { depName: 'npm:pnpm', value: null },
+        },
+      });
+    });
+
+    it('does not share constraints of tools which are no Containerbase tools', async () => {
+      const content = codeBlock`
+        [tools]
         terraform = "1.9.0"
       `;
 

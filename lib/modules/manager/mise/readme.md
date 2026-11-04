@@ -138,7 +138,8 @@ The lookup of new versions does not use them.
 For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory which holds the `.config` or `mise` directory.
 
 - The locked version from `mise.lock` is used, otherwise the version in the config file, which is also used if the locked version does not start with it, like mise does
-- Versions like `latest`, `lts`, `ref:` or `path:` without a locked version are ignored, as are partial versions like `3.12` for tools whose versioning reads them as a single version, and versions with a suffix like `1.17.3-otp-27`
+- Versions like `latest`, `lts`, `ref:` or `path:` without a locked version set no constraint, as do partial versions like `3.12` for tools whose versioning reads them as a single version, and versions with a suffix like `1.17.3-otp-27`; they still hide the version of the tool in a mise config file of a parent directory, like mise does
+- A branch which updates the version of a tool uses the new version for the other updates in the same branch
 - Only the top level `tools` are used, not `tasks.*.tools`
 - Environment-specific config files like `mise.production.toml` are ignored, while all files in `.config/mise/conf.d` are used, like mise does
 - A mise config file in a deeper directory takes precedence over one in a parent directory, like mise does
