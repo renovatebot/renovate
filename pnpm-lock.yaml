@@ -132,8 +132,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@renovatebot/osv-offline':
-        specifier: 4.5.9
-        version: 4.5.9(supports-color@7.2.0)(zod@4.6.7)
+        specifier: 4.5.10
+        version: 4.5.10(supports-color@7.2.0)(zod@4.6.7)
       '@renovatebot/pep440':
         specifier: 6.0.0
         version: 6.0.0
@@ -2049,12 +2049,12 @@ packages:
     resolution: {integrity: sha512-dvFb9ST8WVo+YsrhK6vbWBib49Biu4/fPmZf1QRNIR1Ov5T04god/AA3rRJcyRrofzt/K96vPO9RPhEE3u+hfg==}
     engines: {node: '>=24.10.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline-db@4.5.9':
-    resolution: {integrity: sha512-I9Rvo9YTSuQsdgYwEUHLROpnHfRbOS4Iiajb8wXVtkSwe0T30baLm0FoLN07tfVvKVoWXHMOjvTldqtClUpCGw==}
+  '@renovatebot/osv-offline-db@4.5.10':
+    resolution: {integrity: sha512-fFrlNqQKHnpVFEB9S5KOeUWCol0fnsLbhzxlAINUJC+0SFrgdI/a5FfUU/o4d7qzL2gdFNOmIogFpkxZwzEdXw==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
-  '@renovatebot/osv-offline@4.5.9':
-    resolution: {integrity: sha512-8uHcjca9ZYYAkPW23vrfmxHHE6XGZhQZXBkTfxSqLA622Yhr7+RPtkTbAQtJN2gRHO9mk3oU+IAfNPSjnVZh+Q==}
+  '@renovatebot/osv-offline@4.5.10':
+    resolution: {integrity: sha512-aHxcXVh2oDB2ia2S+Iz5fXTGsFKR2vQFvZPmoVyx8wkzC5RXW3vQDy/tR+tOCsart5qR7uZ9x/qkRuQ5OGBR6Q==}
     engines: {node: '>=24.11.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/pep440@6.0.0':
@@ -7432,7 +7432,7 @@ snapshots:
       klona: 2.0.6
       moo: 0.5.3
 
-  '@renovatebot/osv-offline-db@4.5.9(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline-db@4.5.10(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
       '@containerbase/base': 14.62.0(zod@4.6.7)
       debug: 4.4.3(supports-color@7.2.0)
@@ -7440,9 +7440,9 @@ snapshots:
       - supports-color
       - zod
 
-  '@renovatebot/osv-offline@4.5.9(supports-color@7.2.0)(zod@4.6.7)':
+  '@renovatebot/osv-offline@4.5.10(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
-      '@renovatebot/osv-offline-db': 4.5.9(supports-color@7.2.0)(zod@4.6.7)
+      '@renovatebot/osv-offline-db': 4.5.10(supports-color@7.2.0)(zod@4.6.7)
       fs-extra: 11.4.1
       got: 15.1.0
       luxon: 3.7.2
