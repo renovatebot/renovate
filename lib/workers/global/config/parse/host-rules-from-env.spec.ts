@@ -140,4 +140,18 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     };
     expect(hostRulesFromEnv(envParam)).toHaveLength(0);
   });
+
+  it('ignores a datasource env var that names no auth field', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_NPM_FOO: 'some-value',
+    };
+    expect(hostRulesFromEnv(envParam)).toHaveLength(0);
+  });
+
+  it('ignores a datasource env var with no value', () => {
+    const envParam: NodeJS.ProcessEnv = {
+      RENOVATE_NPM_TOKEN: undefined,
+    };
+    expect(hostRulesFromEnv(envParam)).toEqual([{ hostType: 'npm' }]);
+  });
 });

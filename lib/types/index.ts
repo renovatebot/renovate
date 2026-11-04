@@ -18,7 +18,11 @@ export type { BranchResult, PrBlockedBy } from '../workers/types.ts';
 export type { ModuleApi, RenovatePackageJson } from './base.ts';
 export type { BranchStatus } from './branch-status.ts';
 export type { CommitMessageJSON } from './commit-message-json.ts';
-export type { CombinedHostRule, HostRule } from './host-rules.ts';
+export type {
+  CombinedHostRule,
+  HostRule,
+  InternalHostGrant,
+} from './host-rules.ts';
 export type { PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
 export type { RangeStrategy } from './versioning.ts';

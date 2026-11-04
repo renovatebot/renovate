@@ -158,7 +158,7 @@ export class RenovateLogger implements Logger {
 
       if (isString(msg)) {
         const remappedLevel = getRemappedLevel(msg);
-        /* v8 ignore next 4 -- not easily testable */
+        /* v8 ignore next -- not easily testable */
         if (remappedLevel) {
           meta.oldLevel = level;
           level = remappedLevel;

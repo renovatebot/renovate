@@ -3,9 +3,6 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/types.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import * as npmVersioning from '../../../../modules/versioning/npm/index.ts';
-import * as pep440 from '../../../../modules/versioning/pep440/index.ts';
-import * as poetryVersioning from '../../../../modules/versioning/poetry/index.ts';
 import { getRegexPredicate } from '../../../../util/string-match.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { FilterConfig } from './types.ts';
@@ -33,13 +30,13 @@ function filterByMaxMajorIncrement(
   depName: string,
 ): Release[] {
   const currentMajor = versioningApi.getMajor(currentVersion);
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (currentMajor === null) {
     return releases;
   }
   return releases.filter((r) => {
     const releaseMajor = versioningApi.getMajor(r.version);
-    /* v8 ignore next 3 -- shouldn't happen */
+    /* v8 ignore next -- shouldn't happen */
     if (releaseMajor === null) {
       return true;
     }
@@ -64,7 +61,7 @@ export function filterVersions(
   const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
     config;
 
-  /* v8 ignore next 3 -- shouldn't happen */
+  /* v8 ignore next -- shouldn't happen */
   if (!currentVersion) {
     return [];
   }
@@ -127,10 +124,7 @@ export function filterVersions(
       filteredReleases = filteredReleases.filter((r) =>
         versioningApi.matches(r.version, allowedVersions),
       );
-    } else if (
-      config.versioning !== npmVersioning.id &&
-      semver.validRange(allowedVersions)
-    ) {
+    } else if (semver.validRange(allowedVersions)) {
       logger.debug(
         { depName: config.depName },
         'Falling back to npm semver syntax for allowedVersions',
@@ -139,23 +133,12 @@ export function filterVersions(
         semver.satisfies(
           semver.valid(r.version)
             ? r.version
-            : /* v8 ignore start: not reachable, but it's safer to preserve it */ semver.coerce(
+            : /* v8 ignore start: only for a version the configured versioning accepts but semver cannot parse, e.g. a four-part docker tag, see #40625 */ semver.coerce(
                 r.version,
               )!,
           /* v8 ignore stop */
           allowedVersions,
         ),
-      );
-    } else if (
-      config.versioning === poetryVersioning.id &&
-      pep440.isValid(allowedVersions)
-    ) {
-      logger.debug(
-        { depName: config.depName },
-        'Falling back to pypi syntax for allowedVersions',
-      );
-      filteredReleases = filteredReleases.filter((r) =>
-        pep440.matches(r.version, allowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);

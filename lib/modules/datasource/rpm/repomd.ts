@@ -1,6 +1,7 @@
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import type { Http } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { datasource, repomdXmlFileName } from './common.ts';
 
@@ -27,12 +28,15 @@ function getPrimaryRepodataUrl(
 
   // replace trailing "repodata/" from registryUrl, if it exists, with a "/"
   // because href includes "repodata/"
-  const registryUrlWithoutRepodata = registryUrl.replace(/\/repodata\/?$/, '/');
+  const registryUrlWithoutRepodata = registryUrl.replace(
+    regEx(/\/repodata\/?$/),
+    '/',
+  );
 
   return joinUrlParts(registryUrlWithoutRepodata, href);
 }
 
-export async function fetchPrimaryGzipUrl(
+export async function fetchPrimaryUrl(
   http: Http,
   registryUrl: string,
 ): Promise<string> {

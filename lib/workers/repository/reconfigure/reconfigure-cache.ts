@@ -1,17 +1,16 @@
 import { logger } from '../../../logger/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import type { ExtractResult } from '../process/extract-update.ts';
 
 export function setReconfigureBranchCache(
   reconfigureBranchSha: string,
   isConfigValid: boolean,
-  extractResult?: ExtractResult,
+  extractionSucceeded?: boolean,
 ): void {
   const cache = getCache();
   const reconfigureBranchCache = {
     reconfigureBranchSha,
     isConfigValid,
-    ...(extractResult && { extractResult }),
+    ...(extractionSucceeded && { extractionSucceeded }),
   };
   if (cache.reconfigureBranchCache) {
     logger.debug(

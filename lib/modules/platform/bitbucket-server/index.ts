@@ -23,6 +23,11 @@ import {
   setBaseUrl,
 } from '../../../util/http/bitbucket-server.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import {
+  isConflict,
+  isNoContent,
+  isNotFound,
+} from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sampleSize } from '../../../util/sample.ts';
@@ -66,6 +71,8 @@ import type {
   BbsRestPr,
   BbsRestRepo,
   BbsRestUserRef,
+  BitbucketCommitStatus,
+  BitbucketStatus,
 } from './types.ts';
 import * as utils from './utils.ts';
 import {
@@ -283,7 +290,7 @@ export async function initRepo({
     );
 
     // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
-    if ([204, 404].includes(branchRes.statusCode)) {
+    if (isNoContent(branchRes) || isNotFound(branchRes)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 
@@ -314,7 +321,7 @@ export async function initRepo({
 
     return repoConfig;
   } catch (err) /* v8 ignore next -- initRepo error mapping (404, empty repo) is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_EMPTY) {
@@ -397,10 +404,12 @@ function isRelevantPr(
   prTitle: string | null | undefined,
   state: string,
 ) {
-  return (p: Pr): boolean =>
-    p.sourceBranch === branchName &&
-    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-    matchesState(p.state, state);
+  return (p: Pr): boolean => {
+    if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+      return false;
+    }
+    return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+  };
 }
 
 // TODO: coverage (#40625)
@@ -483,7 +492,7 @@ export async function refreshPr(number: number): Promise<void> {
 async function getStatus(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketCommitStatus> {
+): Promise<BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
   /* v8 ignore next: temporary code */
@@ -492,7 +501,7 @@ async function getStatus(
     : { memCache: false };
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketCommitStatus>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketCommitStatus>(
       // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
       opts,
@@ -534,7 +543,7 @@ export async function getBranchStatus(
 async function getStatusCheck(
   branchName: string,
   memCache = true,
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
   const opts: BitbucketServerHttpOptions = { paginate: true };
@@ -546,7 +555,7 @@ async function getStatusCheck(
   }
 
   return (
-    await bitbucketServerHttp.getJsonUnchecked<utils.BitbucketStatus[]>(
+    await bitbucketServerHttp.getJsonUnchecked<BitbucketStatus[]>(
       `./rest/build-status/1.0/commits/${branchCommit!}`,
       opts,
     )
@@ -783,9 +792,9 @@ async function updatePRAndAddReviewers(
     await getPr(prNo, true);
   } catch (err) {
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err)) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1202,9 +1211,9 @@ export async function updatePr({
     );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1244,9 +1253,9 @@ export async function mergePr({
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
     } else {
@@ -1423,9 +1432,9 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<!--.*?-->/gs), '')
     .replace(
       regEx(
-        /(!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
+        /(?<badge>!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
       ),
-      '$1{height=20}',
+      '$<badge>{height=20}',
     );
 }
 

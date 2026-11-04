@@ -81,6 +81,13 @@ describe('workers/global/config/parse/cli', () => {
       expect(cli.getConfig(argv)).toEqual({ labels: ['a', 'b', 'c'] });
     });
 
+    it('supports base branch patterns', () => {
+      argv.push('--base-branch-patterns=main,develop');
+      expect(cli.getConfig(argv)).toEqual({
+        baseBranchPatterns: ['main', 'develop'],
+      });
+    });
+
     it('supports string', () => {
       argv.push('--token=a');
       expect(cli.getConfig(argv)).toEqual({ token: 'a' });
@@ -205,6 +212,16 @@ describe('workers/global/config/parse/cli', () => {
     it('requireConfig boolean false', () => {
       argv.push('--require-config=false');
       expect(cli.getConfig(argv)).toEqual({ requireConfig: 'optional' });
+    });
+
+    it('dryRun keeps a value that is already current', () => {
+      argv.push('--dry-run=extract');
+      expect(cli.getConfig(argv)).toEqual({ dryRun: 'extract' });
+    });
+
+    it('requireConfig keeps a value that is already current', () => {
+      argv.push('--require-config=ignored');
+      expect(cli.getConfig(argv)).toEqual({ requireConfig: 'ignored' });
     });
   });
 

@@ -34,7 +34,7 @@ Before Renovate can look up a dependency and decide about updates, it must have 
 
 You must:
 
-- Capture the `currentValue` of the dependency _or_ use the `currentValueTemplate` template field
+- Capture the `currentValue` or `currentDigest` of the dependency _or_ use the `currentValueTemplate` or `currentDigestTemplate` template field
 - Capture the `depName` or `packageName`. _Or_ use a template field: `depNameTemplate` and `packageNameTemplate`
 - Capture the `datasource`, _or_ use the `datasourceTemplate` template field
 
@@ -45,7 +45,6 @@ You may use any of these items:
 - `depType`, _or_ use the `depTypeTemplate` template field
 - `versioning`, _or_ the use `versioningTemplate` template field. If neither are present, Renovate defaults to `semver-coerced`
 - `extractVersion`, _or_ use the `extractVersionTemplate` template field
-- `currentDigest`
 - `registryUrl`, _or_ use the `registryUrlTemplate` template field. If it's a valid URL, it will be converted to the `registryUrls` field as a single-length array
 - `indentation`. Must be empty, _or_ whitespace. Else Renovate restes only `indentation` to an empty string
 

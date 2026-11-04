@@ -1,4 +1,5 @@
 import { isString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 
 export const TokenType = {
@@ -8,7 +9,7 @@ export const TokenType = {
 
 interface Token {
   type: number;
-  val: string | number;
+  val: string | bigint;
 }
 
 function iterateChars(
@@ -38,10 +39,10 @@ function isLetter(char: string): boolean {
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
-  return (
-    (isDigit(prevChar) && isLetter(nextChar)) ||
-    (isLetter(prevChar) && isDigit(nextChar))
-  );
+  if (isDigit(prevChar) && isLetter(nextChar)) {
+    return true;
+  }
+  return isLetter(prevChar) && isDigit(nextChar);
 }
 
 export function tokenize(versionStr: string): Token[] | null {
@@ -54,7 +55,7 @@ export function tokenize(versionStr: string): Token[] | null {
       if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
-          val: parseInt(val, 10),
+          val: BigInt(val),
         });
       } else {
         result.push({
@@ -167,20 +168,21 @@ function tokenCmp(left: Token | null, right: Token | null): number {
     if (left.val > right.val) {
       return 1;
     }
-  } else if (typeof left.val === 'string' && typeof right.val === 'string') {
-    return stringTokenCmp(left.val, right.val);
-  } else if (right.type === TokenType.Number) {
-    return -1;
-  } else if (left.type === TokenType.Number) {
-    return 1;
+    return 0;
   }
 
-  return 0;
+  if (isString(left.val) && isString(right.val)) {
+    return stringTokenCmp(left.val, right.val);
+  }
+
+  // `Number` and `String` are the only token types, so exactly one side is a
+  // number here, and a number sorts above a string
+  return right.type === TokenType.Number ? -1 : 1;
 }
 
 export function compare(left: string, right: string): number {
-  const leftTokens = tokenize(left) ?? [];
-  const rightTokens = tokenize(right) ?? [];
+  const leftTokens = coerceArray(tokenize(left));
+  const rightTokens = coerceArray(tokenize(right));
   const length = Math.max(leftTokens.length, rightTokens.length);
   for (let idx = 0; idx < length; idx += 1) {
     const leftToken = leftTokens[idx] || null;
@@ -222,7 +224,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-export type RangeBound = 'inclusive' | 'exclusive';
+type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;
@@ -278,10 +280,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   const preferredVal = matchGroups.preferredVal || null;
   const isVersionLeft = isString(leftVal) && isVersion(leftVal);
   const isVersionRight = isString(rightVal) && isVersion(rightVal);
-  if (
-    (leftVal !== null && !isVersionLeft) ||
-    (rightVal !== null && !isVersionRight)
-  ) {
+  const isInvalidLeft = leftVal !== null && !isVersionLeft;
+  const isInvalidRight = rightVal !== null && !isVersionRight;
+  if (isInvalidLeft || isInvalidRight) {
     return null;
   }
 

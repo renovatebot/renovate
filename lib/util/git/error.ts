@@ -111,8 +111,10 @@ export function handleCommitError(
       `proceed. Original error: \`${err.message.replaceAll('`', "'")}\``;
     throw error;
   }
+  const isRejected =
+    err.message.includes('remote rejected') || err.message.includes('403');
   if (
-    (err.message.includes('remote rejected') || err.message.includes('403')) &&
+    isRejected &&
     files?.some((file) => file.path?.startsWith('.github/workflows/'))
   ) {
     logger.debug({ err }, 'commitFiles error');

@@ -1,10 +1,6 @@
 import upath from 'upath';
 
 import { getParentDir, localPathExists } from '../../../util/fs/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
-import { DockerDatasource } from '../../datasource/docker/index.ts';
-import { generateLoginCmd } from '../helmv3/common.ts';
-import type { RepositoryRule } from '../helmv3/types.ts';
 
 import type { HelmRelease, HelmRepository } from './schema.ts';
 
@@ -28,23 +24,6 @@ export function localChartHasKustomizationsYaml(
   );
 }
 
-export function isOCIRegistry(repository: HelmRepository): boolean {
+export function isOciRepositoryFlagSet(repository: HelmRepository): boolean {
   return repository.oci === true;
-}
-
-export async function generateRegistryLoginCmd(
-  repositoryName: string,
-  repositoryBaseURL: string,
-  repositoryHost: string,
-): Promise<string | null> {
-  const repositoryRule: RepositoryRule = {
-    name: repositoryName,
-    repository: repositoryHost,
-    hostRule: hostRules.find({
-      url: repositoryBaseURL,
-      hostType: DockerDatasource.id,
-    }),
-  };
-
-  return await generateLoginCmd(repositoryRule);
 }

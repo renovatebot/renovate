@@ -7,7 +7,7 @@ This document describes Renovate's scheduling.
 
 ## Default behavior
 
-On the backend side, Renovate bot runs as often as its administrator has configured Renovate to run.
+On the backend side, Renovate runs as often as its administrator has configured Renovate to run.
 For example, the administrator configure Renovate to begin its runs hourly, daily, or outside office hours only.
 How often Renovate runs per-repository subsequently depends on how many repositories there are to check, and how many updates are pending for each repository at the time.
 If the backend configuration for Renovate means it runs scheduled jobs per-repo approximately every X hours, it is not possible for _repository configuration_ to reduce that to less than X, or to force Renovate to run at exact times on specific repos.
@@ -39,10 +39,10 @@ The table below shows how the number of dependencies and repositories affect Ren
 
 At a high level, you have two ways to schedule Renovate, a "global way" and a "specific way":
 
-| Way to schedule Renovate | What this does                                                                                           | Notes                                                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Global                   | Decides when Renovate runs.                                                                              | This schedule is usually controlled by your organization's bot administor. For the Mend Renovate app, Mend decides when Renovate runs. |
-| Specific                 | When Renovate runs it checks the schedule to see if it should look for updates to a specific dependency. | Usually set in the `renovate.json` config file, or similar config file.                                                                |
+| Way to schedule Renovate | What this does                                                                                           | Notes                                                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Global                   | Decides when Renovate runs.                                                                              | This schedule is usually controlled by your organization's administrator. For the Mend Renovate app, Mend decides when Renovate runs. |
+| Specific                 | When Renovate runs it checks the schedule to see if it should look for updates to a specific dependency. | Usually set in the `renovate.json` config file, or similar config file.                                                               |
 
 Renovate can only update a dependency if _both_ of these conditions are true:
 
@@ -63,7 +63,7 @@ You can use the scheduling tools to:
 
 - Run Renovate outside office hours, to free up continous integration resources for your developers
 - Get updates for certain packages on a regular interval, instead of right away
-- Reduce Renovate bot PR notifications during the day
+- Reduce Renovate PR notifications during the day
 
 ## Customizing the schedule
 
@@ -136,7 +136,7 @@ The `@breejs/later` library also controls the interpretation of "days", time_bef
 
 ### In-repository schedule configuration
 
-Important: _when_ the Renovate process runs is usually controlled by the bot admin, using tools such as `cron`.
+Important: _when_ the Renovate process runs is usually controlled by the administrator, using tools such as `cron`.
 For the Mend Renovate App, the Mend maintainers control when the Renovate process runs, usually hourly.
 
 If you control the hardware that Renovate runs on, we recommend you:

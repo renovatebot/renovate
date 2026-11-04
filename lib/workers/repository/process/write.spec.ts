@@ -40,6 +40,7 @@ const newBaseBranchSha = fakeSha('new_base_sha');
 
 beforeEach(() => {
   config = getConfig();
+  counts.clear();
   repoCache.getCache.mockReturnValue({});
   limits.getConcurrentPrsCount.mockResolvedValue(0);
   limits.getConcurrentBranchesCount.mockResolvedValue(0);
@@ -105,6 +106,53 @@ describe('workers/repository/process/write', () => {
       const res = await writeUpdates(config, branches);
       expect(res).toBe('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
+    });
+
+    it('counts vulnerability alert branches separately', async () => {
+      const branches = partial<BranchConfig[]>([
+        {
+          baseBranch: 'main',
+          branchName: 'regular',
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+        {
+          baseBranch: 'main',
+          branchName: 'vulnerability',
+          isVulnerabilityAlert: true,
+          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          manager: 'npm',
+        },
+      ]);
+      repoCache.getCache.mockReturnValueOnce({});
+      branchWorker.processBranch.mockResolvedValue({
+        branchExists: true,
+        result: 'pr-created',
+      });
+      // each branch is checked twice: before processing, then after
+      scm.branchExists
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValue(true);
+      GlobalConfig.set({ dryRun: 'full' });
+
+      await writeUpdates(config, branches);
+
+      expect(counts.get('Branches')).toBe(1);
+      expect(counts.get('VulnerabilityBranches')).toBe(1);
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[0],
+      ]);
+      expect(limits.getConcurrentPrsCount).toHaveBeenCalledWith(config, [
+        branches[1],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[0],
+      ]);
+      expect(limits.getConcurrentBranchesCount).toHaveBeenCalledWith([
+        branches[1],
+      ]);
     });
 
     it('increments branch counter', async () => {
@@ -174,7 +222,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'no-work',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
@@ -216,7 +264,7 @@ describe('workers/repository/process/write', () => {
         commitFingerprintConfig: generateCommitFingerprintConfig(branch),
         managers,
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -261,7 +309,7 @@ describe('workers/repository/process/write', () => {
       });
       scm.branchExists.mockResolvedValue(true);
       config.repositoryCache = 'enabled';
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -303,7 +351,7 @@ describe('workers/repository/process/write', () => {
         branchExists: true,
         result: 'done',
       });
-      expect(await writeUpdates(config, branches)).toBe('done');
+      await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
     });
 
@@ -344,6 +392,135 @@ describe('workers/repository/process/write', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('generateCommitFingerprintConfig()', () => {
+    it('does not include postUpgradeTasks when not set', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toBeUndefined();
+    });
+
+    it('includes postUpgradeTasks commands and fileFilters', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              fileFilters: ['**/*.txt'],
+              executionMode: 'update',
+              installTools: { node: {} },
+            },
+          }),
+        ],
+      });
+      const [res] = generateCommitFingerprintConfig(branch);
+      expect(res.postUpgradeTasks).toEqual({
+        commands: ['echo hello'],
+        fileFilters: ['**/*.txt'],
+        installTools: { node: {} },
+      });
+    });
+
+    it('includes only the constraints for tools', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'gomod',
+            constraints: {
+              golang: '1.27',
+              // not a Containerbase tool, so won't be included
+              ghActionsLock: 'v0.3.0',
+            },
+          }),
+          partial<BranchUpgradeConfig>({
+            manager: 'github-actions',
+            constraints: { ghActionsLock: 'v0.3.0' },
+          }),
+        ],
+      });
+      const [withTool, withoutTool] = generateCommitFingerprintConfig(branch);
+      expect(withTool.constraints).toEqual({ golang: '1.27' });
+      expect(withoutTool).not.toHaveProperty('constraints');
+    });
+
+    it('changes fingerprint when a tool constraint changes', () => {
+      const branch125 = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'gomod',
+            constraints: { golang: '1.25' },
+          }),
+        ],
+      });
+      const branch127 = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'gomod',
+            constraints: { golang: '1.27' },
+          }),
+        ],
+      });
+      expect(fingerprint(generateCommitFingerprintConfig(branch125))).not.toBe(
+        fingerprint(generateCommitFingerprintConfig(branch127)),
+      );
+    });
+
+    it('changes fingerprint when postUpgradeTasks installTools change', () => {
+      const branchWithoutTools = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const branchWithTools = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              executionMode: 'update',
+              installTools: { node: {} },
+            },
+          }),
+        ],
+      });
+      expect(
+        fingerprint(generateCommitFingerprintConfig(branchWithoutTools)),
+      ).not.toBe(fingerprint(generateCommitFingerprintConfig(branchWithTools)));
+    });
+
+    it('changes fingerprint when postUpgradeTasks commands change', () => {
+      const branchWithoutTasks = partial<BranchConfig>({
+        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+      });
+      const branchWithTasks = partial<BranchConfig>({
+        upgrades: [
+          partial<BranchUpgradeConfig>({
+            manager: 'npm',
+            postUpgradeTasks: {
+              commands: ['echo hello'],
+              executionMode: 'update',
+            },
+          }),
+        ],
+      });
+      const fingerprintWithoutTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithoutTasks),
+      );
+      const fingerprintWithTasks = fingerprint(
+        generateCommitFingerprintConfig(branchWithTasks),
+      );
+      expect(fingerprintWithoutTasks).not.toBe(fingerprintWithTasks);
     });
   });
 

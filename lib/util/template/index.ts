@@ -49,6 +49,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   replace: (find, replace, context) =>
     (context ?? '').replace(regEx(find, 'g'), replace),
   lowercase: (str: string) => str?.toLowerCase(),
+  uppercase: (str: string) => str?.toUpperCase(),
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {
@@ -181,6 +182,8 @@ export const allowedFields = {
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
+  effectiveDatasource:
+    'The datasources used to fetch releases after delegation',
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
   isGroup: 'true if the upgrade is part of a group',

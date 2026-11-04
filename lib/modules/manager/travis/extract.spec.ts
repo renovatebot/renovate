@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -17,8 +18,20 @@ describe('modules/manager/travis/extract', () => {
 
     it('returns results', () => {
       const res = extractPackageFile('node_js:\n  - 6\n  - 8\n');
-      expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(2);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '6',
+            datasource: 'node-version',
+            depName: 'node',
+          },
+          {
+            currentValue: '8',
+            datasource: 'node-version',
+            depName: 'node',
+          },
+        ],
+      });
     });
 
     it('should handle invalid YAML', () => {
@@ -90,6 +103,16 @@ describe('modules/manager/travis/extract', () => {
 
     it('handles invalid matrix node_js syntax', () => {
       const res = extractPackageFile(invalidMatrixYAML);
+      expect(res).toBeNull();
+    });
+
+    it('ignores a matrix node_js that is neither a string nor an array', () => {
+      const content = codeBlock`
+        jobs:
+          include:
+            - node_js: 18
+      `;
+      const res = extractPackageFile(content);
       expect(res).toBeNull();
     });
   });
