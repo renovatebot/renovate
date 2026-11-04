@@ -2,6 +2,7 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import {
@@ -18,7 +19,6 @@ import { scm } from '../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
-import { parseJson } from '../../../util/common.ts';
 import { getBranchList } from '../../../util/git/index.ts';
 import { addSplit } from '../../../util/split.ts';
 import { getRegexPredicate } from '../../../util/string-match.ts';
@@ -92,10 +92,18 @@ export async function getBaseBranchConfig(
       throw error;
     }
 
-    baseBranchConfig = parseJson(
-      configFileRaw.length ? configFileRaw : '{}',
+    const parseResult = parseFileConfig(
       configFileName,
-    ) as RenovateConfig;
+      configFileRaw.length ? configFileRaw : '{}',
+    );
+    if (!parseResult.success) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = configFileName;
+      error.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${parseResult.validationError}`;
+      error.validationMessage = parseResult.validationMessage;
+      throw error;
+    }
+    baseBranchConfig = parseResult.parsedContents as RenovateConfig;
     logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
 
     baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
