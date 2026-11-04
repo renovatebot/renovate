@@ -40,7 +40,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
     '.github/workflows/dependency-review.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294'
@@ -66,7 +66,7 @@ workflows:
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        - 'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26'
         - 'ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e'
     '.github/workflows/undesirable-test-additions.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
@@ -167,14 +167,14 @@ dependencies:
         commit: 'sha1-99012661954931238ded8c8b007157a8430204e1'
         owner_id: 5429470
         repo_id: 288487894
+    'github/codeql-action@1fc58d04a4d4374f921bdac573c3811c240f9c26':
+        ref: 'v4.39.2'
+        commit: 'sha1-1fc58d04a4d4374f921bdac573c3811c240f9c26'
+        owner_id: 9919
+        repo_id: 259445878
     'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2':
         ref: 'v4.38.2'
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-        owner_id: 9919
-        repo_id: 259445878
-    'github/codeql-action@9b3254085494b55a0f7c4c2b3d2d52cc712ce370':
-        ref: 'v4.39.1'
-        commit: 'sha1-9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         owner_id: 9919
         repo_id: 259445878
     'hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158':
