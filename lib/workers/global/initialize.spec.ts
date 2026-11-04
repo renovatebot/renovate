@@ -1,4 +1,5 @@
 import {
+  configure as _configure,
   validateContainerbaseVersion as _validateContainerbaseVersion,
   containerbaseVersionFile,
   packageVersion,
@@ -19,6 +20,7 @@ vi.mock('node:fs/promises', async () => {
   return { ...fs.promises, default: fs.promises };
 });
 
+const configure = vi.mocked(_configure);
 const initPlatform = vi.mocked(_initPlatform);
 const validateContainerbaseVersion = vi.mocked(_validateContainerbaseVersion);
 
@@ -27,6 +29,14 @@ describe('workers/global/initialize', () => {
     vi.stubEnv('CONTAINERBASE', undefined);
     vi.stubEnv('RENOVATE_X_IGNORE_CONTAINERBASE_VERSION', undefined);
     initPlatform.mockImplementationOnce((r) => Promise.resolve(r));
+  });
+
+  it('configures the containerbase logger', async () => {
+    git.validateGitVersion.mockResolvedValueOnce(true);
+    await expect(globalInitialize({})).toResolve();
+    expect(configure).toHaveBeenCalledExactlyOnceWith({
+      logger: logger.logger,
+    });
   });
 
   describe('checkVersions()', () => {

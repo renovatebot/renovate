@@ -1,4 +1,8 @@
-import gomod, { isPseudoVersion, parseVersionCommit } from './index.ts';
+import gomod, {
+  isPlaceholderPseudoVersion,
+  isPseudoVersion,
+  parseVersionCommit,
+} from './index.ts';
 
 describe('modules/versioning/gomod/index', () => {
   it.each`
@@ -32,6 +36,22 @@ describe('modules/versioning/gomod/index', () => {
   `('isPseudoVersion("$version") === $expected', ({ version, expected }) => {
     expect(isPseudoVersion(version)).toBe(expected);
   });
+
+  it.each`
+    version                                   | expected
+    ${'v0.0.0-00010101000000-000000000000'}   | ${true}
+    ${'v2.0.0-00010101000000-000000000000'}   | ${true}
+    ${'v2.1.3-00010101000000-000000000000'}   | ${false}
+    ${'v0.0.0-20191109021931-daa7c04131f5'}   | ${false}
+    ${'v0.0.0-00010101000000-000000000000.1'} | ${false}
+    ${'0.0.0-00010101000000-000000000000'}    | ${false}
+    ${'v1.2.3'}                               | ${false}
+  `(
+    'isPlaceholderPseudoVersion("$version") === $expected',
+    ({ version, expected }) => {
+      expect(isPlaceholderPseudoVersion(version)).toBe(expected);
+    },
+  );
 
   it.each`
     version                                   | other                                     | expected
