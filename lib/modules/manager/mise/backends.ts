@@ -5,6 +5,7 @@ import {
   isUrlString,
 } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -90,6 +91,17 @@ export function createCargoToolConfig(
         currentValue: gitVersion,
       };
   }
+}
+
+/**
+ * Create a tooling config for conda backend
+ * @link https://mise.jdx.dev/dev-tools/backends/conda.html
+ */
+export function createCondaToolConfig(name: string): BackendToolingConfig {
+  return {
+    packageName: name,
+    datasource: CondaDatasource.id,
+  };
 }
 
 /**

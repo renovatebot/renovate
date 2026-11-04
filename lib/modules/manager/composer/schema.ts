@@ -256,7 +256,7 @@ export const ComposerExtract = z
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
-    const deps: PackageDependency[] = [];
+    const deps: PackageDependency<ComposerManagerData>[] = [];
 
     const profiles = [
       {
@@ -294,7 +294,7 @@ export const ComposerExtract = z
           continue;
         }
 
-        const dep: PackageDependency = {
+        const dep: PackageDependency<ComposerManagerData> = {
           depType,
           depName,
           currentValue,

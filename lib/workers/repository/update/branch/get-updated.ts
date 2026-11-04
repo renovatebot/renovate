@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isObject } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -16,6 +16,7 @@ import { getFile } from '../../../../util/git/index.ts';
 import type { FileAddition, FileChange } from '../../../../util/git/types.ts';
 import { coerceString } from '../../../../util/string.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { normalizeDepNames } from '../../extract/manager-files.ts';
 import { doAutoReplace } from './auto-replace.ts';
 
 export interface PackageFilesResult {
@@ -224,11 +225,10 @@ export async function getUpdatedPackageFiles(
         config,
       );
     }
+    const isLockFileMissing = !!lockFile && !lockFileContent;
     // istanbul ignore if
-    if (
-      reuseExistingBranch &&
-      (!packageFileContent || (lockFile && !lockFileContent))
-    ) {
+    const isFileMissing = !packageFileContent || isLockFileMissing;
+    if (reuseExistingBranch && isFileMissing) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found',
@@ -351,12 +351,15 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const result = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
-      newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
+      const { content, updatedOutOfBand } = isObject(result)
+        ? result
+        : { content: result, updatedOutOfBand: false };
+      const newContent = await applyManagerBumpPackageVersion(content, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
           logger.debug(
@@ -391,11 +394,7 @@ export async function getUpdatedPackageFiles(
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
-      }
-      if (
-        newContent === packageFileContent &&
-        upgrade.manager === 'git-submodules'
-      ) {
+      } else if (updatedOutOfBand) {
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
       }
@@ -635,7 +634,15 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        updatedArtifacts.push(file);
+        // several updateArtifacts() calls can return the same file, keep only the latest
+        const existingIndex = updatedArtifacts.findIndex(
+          (artifact) => artifact.path === file.path,
+        );
+        if (existingIndex === -1) {
+          updatedArtifacts.push(file);
+        } else {
+          updatedArtifacts[existingIndex] = file;
+        }
       }
 
       if (artifactError) {
@@ -696,7 +703,9 @@ async function checkForPendingVersions(
   }
 
   for (const dep of extracted.deps) {
-    const depName = dep.depName ?? dep.packageName;
+    // the re-extracted deps have not been through the extract phase, so their names need normalizing before they can be matched against the upgrades
+    normalizeDepNames(dep);
+    const { depName } = dep;
     // shouldn't ever happen
     if (!depName) {
       logger.error(

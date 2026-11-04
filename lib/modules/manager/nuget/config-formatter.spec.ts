@@ -5,10 +5,6 @@ import type { Registry } from './types.ts';
 
 describe('modules/manager/nuget/config-formatter', () => {
   describe('createNuGetConfigXml', () => {
-    beforeEach(() => {
-      hostRules.clear();
-    });
-
     it('returns xml with registries', () => {
       const registries: Registry[] = [
         {

@@ -8,9 +8,10 @@ import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { api as pep440 } from '../../versioning/pep440/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { Pep621ManagerData } from './types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
-type Pep508Dependency = z.ZodType<PackageDependency>;
+type Pep508Dependency = z.ZodType<PackageDependency<Pep621ManagerData>>;
 
 function Pep508Dependency(depType: string): Pep508Dependency {
   return z.string().transform((x, ctx) => {
@@ -27,15 +28,15 @@ function Pep508Dependency(depType: string): Pep508Dependency {
     }
 
     return res;
-  }) as Pep508Dependency;
+  });
 }
 
-type DependencyGroup = z.ZodType<PackageDependency[]>;
+type DependencyGroup = z.ZodType<PackageDependency<Pep621ManagerData>[]>;
 
 export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
     (depGroups) => {
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<Pep621ManagerData>[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
           // v8 ignore else -- the parser always sets a package name on a group dep

@@ -11,7 +11,12 @@ import { parse as parseToml } from '../../../util/toml.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { PipFile, PipRequirement, PipSource } from './types.ts';
+import type {
+  PipFile,
+  PipRequirement,
+  PipSource,
+  PipenvManagerData,
+} from './types.ts';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
@@ -77,7 +82,7 @@ function extractFromSection(
           skipReason = 'invalid-version';
         }
       }
-      const dep: PackageDependency = {
+      const dep: PackageDependency<PipenvManagerData> = {
         depType: sectionName,
         depName,
         packageName: normalizePythonDepName(depName),
@@ -111,6 +116,10 @@ function extractFromSection(
   return deps;
 }
 
+function isInvalidRequirementEntry(dep: unknown): boolean {
+  return !isObject(dep) && !isString(dep);
+}
+
 function isPipRequirements(
   section?:
     Record<string, PipRequirement> | Record<string, string> | PipSource[],
@@ -118,7 +127,7 @@ function isPipRequirements(
   return (
     !isArray(section) &&
     isObject(section) &&
-    !Object.values(section).some((dep) => !isObject(dep) && !isString(dep))
+    !Object.values(section).some(isInvalidRequirementEntry)
   );
 }
 

@@ -87,7 +87,7 @@ export async function updateArtifacts({
 
 function getExecCommand(
   toolName: string,
-  updatedDeps: Upgrade<Record<string, unknown>>[],
+  updatedDeps: Upgrade[],
   isLockFileMaintenance: boolean | undefined,
 ): string {
   if (isLockFileMaintenance) {

@@ -58,13 +58,7 @@ export function isStable(version: string): boolean {
     return false;
   }
 
-  // Node 27+ reworked the release schedule: the dedicated LTS date was dropped
-  // (every line now eventually becomes LTS), so the LTS-promotion point is read
-  // from a different milestone for those newer entries.
-  let ltsStart = schedule.lts;
-  if (schedule.alpha) {
-    ltsStart = schedule.maintenance;
-  }
+  const ltsStart = schedule.lts;
   if (!ltsStart) {
     return false;
   }

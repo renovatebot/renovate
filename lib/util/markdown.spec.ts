@@ -100,6 +100,36 @@ describe('util/markdown', () => {
       expect(sanitizeMarkdown(input)).toEqual(input);
     });
 
+    it('should not add zero-width space to @ inside quadruple-backtick code blocks', () => {
+      const input = codeBlock`
+        \`\`\`\`md
+        \`\`\`js
+        import foo from '@atlaskit/tokens';
+        \`\`\`
+        \`\`\`\`
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(input);
+    });
+
+    it('should add zero-width space to @ after a quadruple-backtick code block', () => {
+      const input = codeBlock`
+        \`\`\`\`
+        x
+        \`\`\`\`
+
+        Thanks @user!
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(codeBlock`
+        \`\`\`\`
+        x
+        \`\`\`\`
+
+        Thanks @&#8203;user!
+      `);
+    });
+
     it('should not add zero-width space to @ inside inline code spans', () => {
       const input = 'Use `@atlaskit/tokens` here';
       expect(sanitizeMarkdown(input)).toEqual(input);

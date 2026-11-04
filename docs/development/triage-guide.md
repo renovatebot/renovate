@@ -64,6 +64,8 @@ Read the [issue-labeling guide](./issue-labeling.md) to get all the necessary in
 
 In general, make a good-faith effort to label issues correctly.
 
+When applying a `bucket:*` label, use the [bucket definitions](./bucket-definitions.md) to tell adjacent buckets apart: each one gives a one-line test plus worked examples and near-misses.
+
 ### Closing issues
 
 You can close an issue yourself if it's:

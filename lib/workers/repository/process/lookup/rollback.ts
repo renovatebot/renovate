@@ -9,14 +9,7 @@ export function getRollbackUpdate(
   versions: Release[],
   versioningApi: VersioningApi,
 ): LookupUpdate | null {
-  const {
-    packageFile,
-    versioning,
-    packageName,
-    depName,
-    currentValue,
-    datasource,
-  } = config;
+  const { packageFile, versioning, depName, currentValue, datasource } = config;
   // istanbul ignore if
   if (!('isLessThanRange' in versioningApi)) {
     logger.debug(
@@ -89,7 +82,7 @@ export function getRollbackUpdate(
     registryUrl,
     updateType: 'rollback',
     prBodyNotes: [
-      `The version of \`${depName ?? packageName}\` in use (\`${currentValue}\`) was not found once Renovate filtered the dependencies. The ${datasource} datasource returned ${versions.length} entries, but when Renovate applied its filtering, none were left, so Renovate will roll back to a supported version`,
+      `The version of \`${depName}\` in use (\`${currentValue}\`) was not found once Renovate filtered the dependencies. The ${datasource} datasource returned ${versions.length} entries, but when Renovate applied its filtering, none were left, so Renovate will roll back to a supported version`,
     ],
   };
 }

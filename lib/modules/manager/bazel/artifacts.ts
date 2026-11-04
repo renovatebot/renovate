@@ -16,7 +16,11 @@ import {
   patchCodeAtFragments,
   updateCode,
 } from './common.ts';
-import type { RecordFragment, StringFragment } from './types.ts';
+import type {
+  BazelManagerData,
+  RecordFragment,
+  StringFragment,
+} from './types.ts';
 
 const http = new Http('bazel');
 
@@ -129,15 +133,22 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<BazelManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   const oldContents = updateArtifact.newPackageFileContent;
   let newContents = oldContents;
   const artifactErrors: ArtifactError[] = [];
   for (const upgrade of upgrades) {
-    const { managerData } = upgrade;
-    const idx = managerData?.idx as number;
+    /* v8 ignore next -- defensive handling of upgrades without Bazel manager data */
+    if (!upgrade.managerData) {
+      logger.debug(
+        `Skipping Bazel artifact update for ${upgrade.depName} in ${path}: missing manager data`,
+      );
+      continue;
+    }
+
+    const idx = upgrade.managerData.idx;
 
     // v8 ignore else -- only http rules reach updateArtifacts
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {

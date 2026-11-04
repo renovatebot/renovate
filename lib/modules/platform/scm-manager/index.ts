@@ -129,12 +129,12 @@ export async function findPr({
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   const inProgressPrs = await getPrList();
-  const result = inProgressPrs.find(
-    (pr) =>
-      branchName === pr.sourceBranch &&
-      (!prTitle || prTitle === pr.title) &&
-      matchPrState(pr, state),
-  );
+  const result = inProgressPrs.find((pr) => {
+    if (branchName !== pr.sourceBranch || !matchPrState(pr, state)) {
+      return false;
+    }
+    return !prTitle || prTitle === pr.title;
+  });
 
   if (result) {
     logger.debug({ result }, `Found PR`);
@@ -244,7 +244,7 @@ export function setBranchStatus(
 
 export function getBranchStatusCheck(
   _branchName: string,
-  _context: string | null | undefined,
+  _context: string,
 ): Promise<BranchStatus | null> {
   logger.debug('Not implemented setBranchStatus');
   return Promise.resolve(null);
@@ -308,10 +308,6 @@ export function ensureCommentRemoval(
 
 export function massageMarkdown(prBody: string): string {
   return smartTruncate(smartLinks(prBody), maxBodyLength());
-}
-
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
 }
 
 export function getRawFile(

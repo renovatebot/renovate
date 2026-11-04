@@ -45,6 +45,38 @@ describe('modules/datasource/gitlab-releases/index', () => {
       });
     });
 
+    it('returns releases from custom registry with api path', async () => {
+      httpMock
+        .scope('https://gitlab.company.com')
+        .get('/api/v4/projects/some%2Fdep2/releases')
+        .reply(200, body);
+
+      const res = await getPkgReleases({
+        datasource: GitlabReleasesDatasource.id,
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        packageName: 'some/dep2',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.company.com/api/v4',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            registryUrl: 'https://gitlab.company.com/api/v4',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            registryUrl: 'https://gitlab.company.com/api/v4',
+            releaseTimestamp: '2021-03-01T00:00:00.000Z',
+            version: 'v1.1.0',
+          },
+        ],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      });
+    });
+
     it('returns releases from default registry', async () => {
       httpMock
         .scope('https://gitlab.com')

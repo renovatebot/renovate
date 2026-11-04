@@ -159,6 +159,11 @@ If you want to make config edits directly, follow these steps:
 1. You can continue to edit the configuration file in the same PR, and Renovate will update its comment accordingly
 1. If you only want to validate your configuration changes, check out: [Validate your config](../config-validation.md)
 
+!!! note
+  The reconfigure branch is only meant for changes to your Renovate configuration.
+  Renovate reads the config from the reconfigure branch, but extracts dependencies from your default branch.
+  Any other file changes in the reconfigure branch, like new package files or dependency versions, are not extracted and do not show in the comment.
+
 ### Nuke config and re-onboard
 
 Perhaps you really liked the interactive onboarding PR and want to use it again.

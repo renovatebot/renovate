@@ -41,7 +41,6 @@ const changelogSource = new BitbucketServerChangeLogSource();
 describe('workers/repository/update/pr/changelog/bitbucket-server/source', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'bitbucket-server',
         matchHost: baseUrl,

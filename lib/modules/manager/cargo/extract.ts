@@ -33,7 +33,7 @@ function extractFromSection(
   dependencies: PackageDependency<CargoManagerData>[] | undefined,
   cargoRegistries: CargoRegistries,
   target?: string,
-): PackageDependency[] {
+): PackageDependency<CargoManagerData>[] {
   if (!dependencies) {
     return [];
   }
@@ -80,9 +80,9 @@ function extractFromSection(
   return deps;
 }
 
-/** Reads `.cargo/config.toml`, or, if not found, `.cargo/config` */
+/** Reads `.cargo/config`, or, if not found, `.cargo/config.toml`, as cargo uses `.cargo/config` if both exist */
 async function readCargoConfig(): Promise<CargoConfig | null> {
-  for (const configName of ['config.toml', 'config']) {
+  for (const configName of ['config', 'config.toml']) {
     const path = `.cargo/${configName}`;
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
@@ -196,7 +196,7 @@ export async function extractPackageFile(
   */
   const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
-  let targetDeps: PackageDependency[] = [];
+  let targetDeps: PackageDependency<CargoManagerData>[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach((target) => {
@@ -224,7 +224,7 @@ export async function extractPackageFile(
   }
 
   const workspaceSection = cargoManifest.workspace;
-  let workspaceDeps: PackageDependency[] = [];
+  let workspaceDeps: PackageDependency<CargoManagerData>[] = [];
   if (workspaceSection) {
     workspaceDeps = extractFromSection(
       workspaceSection.dependencies,
@@ -262,7 +262,10 @@ export async function extractPackageFile(
     packageFile,
     'Cargo.lock',
   );
-  const res: PackageFileContent = { deps, packageFileVersion: version };
+  const res: PackageFileContent<CargoManagerData> = {
+    deps,
+    packageFileVersion: version,
+  };
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,

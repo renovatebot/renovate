@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../config/global.ts';
 import { PLATFORM_FAMILIES } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
-import type { CombinedHostRule, HostRule } from '../../types/index.ts';
+import type { CombinedHostRuleWithTrustedHeaders } from '../host-rules.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
@@ -12,7 +12,7 @@ import { keepAliveAgents } from './keep-alive.ts';
 import type { GotOptions } from './types.ts';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions & InternalHttpOptions,
+  GotOptions & Omit<InternalHttpOptions, 'headers'>,
   | 'hostType'
   | 'noAuth'
   | 'headers'
@@ -33,7 +33,7 @@ export type HostRulesGotOptions = Pick<
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-): CombinedHostRule {
+): CombinedHostRuleWithTrustedHeaders {
   const { hostType, readOnly } = options;
   let res = hostRules.find({ hostType, url, readOnly });
 
@@ -61,31 +61,12 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
-  const platform = GlobalConfig.get('platform');
-  const platformEndpoint = GlobalConfig.get('endpoint');
-
-  // in the case that an API URL is used for GitHub.com, fallback to `github` hostType, and use the `url`'s host to find a `matchHost: api.github.com` (or `matchHost: github.com`)
-  if (url.startsWith('https://api.github.com/')) {
+  // Fallback to `github` hostType for the GitHub.com API and the host of the GitHub platform endpoint, such as GitHub Enterprise Server or GitHub Enterprise Cloud
+  if (hostRules.usesGithubUrlFallback(url)) {
     res = {
-      ...hostRules.find({
-        hostType: 'github',
-        url,
-      }),
+      ...hostRules.find({ hostType: 'github', url }),
       ...res,
     };
-  } else if (platform === 'github' && platformEndpoint) {
-    // Fallback to `github` hostType when the request URL targets the same host
-    // as the configured GitHub platform endpoint.
-    //
-    // This covers GitHub Enterprise Server without hardcoding URLs.
-    const requestHost = parseUrl(url)?.hostname;
-    const endpointHost = parseUrl(platformEndpoint)?.hostname;
-    if (requestHost && endpointHost && requestHost === endpointHost) {
-      res = {
-        ...hostRules.find({ hostType: 'github', url }),
-        ...res,
-      };
-    }
   }
 
   // Fallback to `gitlab` hostType
@@ -165,6 +146,30 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  // Fallback to `go` hostType, which requests to a Go module proxy used until they were split into the `go-proxy` datasource
+  if (hostType === 'go-proxy') {
+    // only inherit the authentication-related fields
+    const {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
+    } = hostRules.find({ hostType: 'go', url });
+    res = {
+      token,
+      authType,
+      username,
+      password,
+      httpsCertificate,
+      httpsPrivateKey,
+      httpsCertificateAuthority,
+      ...res,
+    };
+  }
+
   return res;
 }
 
@@ -172,7 +177,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
 export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-  hostRule: HostRule,
+  hostRule: CombinedHostRuleWithTrustedHeaders,
 ): GotOptions {
   if (hostRule.enabled === false) {
     options.enabled = false;
@@ -218,10 +223,15 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.headers) {
     const allowedHeaders = GlobalConfig.get('allowedHeaders');
+    // headers already known to have come from the self-hosted administrator's own (`trusted`) config bypassed `allowedHeaders` at registration - see `hostRules.add()` - so must not be re-checked, and dropped, here
+    const trustedHeaderNames = new Set(hostRule.trustedHeaderNames);
     const filteredHeaders: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(hostRule.headers)) {
-      if (matchRegexOrGlobList(header, allowedHeaders)) {
+      if (
+        trustedHeaderNames.has(header) ||
+        matchRegexOrGlobList(header, allowedHeaders)
+      ) {
         filteredHeaders[header] = value;
       } else {
         logger.once.error(

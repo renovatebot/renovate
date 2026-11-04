@@ -12,6 +12,7 @@ import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
 import type { Release } from '../../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../../modules/versioning/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { memoize } from '../../../../../util/memoize.ts';
 import { regEx } from '../../../../../util/regex.ts';
@@ -329,7 +330,7 @@ export abstract class ChangeLogSource {
     prev: string,
     next: string,
   ): string {
-    return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
+    return buildCacheKey(slugifyUrl(sourceUrl), packageName, prev, next);
   }
 
   getBaseUrl(config: BranchUpgradeConfig): string {

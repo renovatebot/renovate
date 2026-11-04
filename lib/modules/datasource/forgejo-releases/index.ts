@@ -12,15 +12,17 @@ export class ForgejoReleasesDatasource extends GiteaReleasesDatasource {
 
   static override readonly defaultRegistryUrls = ['https://code.forgejo.org'];
 
-  override readonly defaultRegistryUrls =
-    ForgejoReleasesDatasource.defaultRegistryUrls;
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ForgejoReleasesDatasource.defaultRegistryUrls;
+  }
 
   protected override readonly cacheNamespace: PackageCacheNamespace =
     'datasource-forgejo-releases';
 
-  override http = new ForgejoHttp(ForgejoReleasesDatasource.id);
-
   constructor() {
-    super(ForgejoReleasesDatasource.id);
+    super(
+      ForgejoReleasesDatasource.id,
+      new ForgejoHttp(ForgejoReleasesDatasource.id),
+    );
   }
 }

@@ -10,7 +10,6 @@ import type {
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as gomod from './index.ts';
@@ -75,7 +74,6 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     env.getChildProcessEnv.mockReturnValue({ ...envMock.basic, ...goEnv });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     datasource.getPkgReleases.mockResolvedValue({
       releases: [{ version: '1.21.0' }],
     });
