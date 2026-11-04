@@ -109,15 +109,15 @@ export function decideBranchReuse({
   }
 
   // without a cached fingerprint, fall back to the one kept in the PR, so a branch whose upgrades shrank is rebuilt
-  const prUpgradesFingerprint =
-    branchPr?.bodyStruct?.debugData?.upgradesFingerprint;
+  // debug data proves the platform keeps it, so a PR without a fingerprint predates it and is rebuilt once
+  const debugData = branchPr?.bodyStruct?.debugData;
   if (
     config.cacheFingerprintMatch === 'no-fingerprint' &&
-    prUpgradesFingerprint &&
-    prUpgradesFingerprint !== config.upgradesFingerprint
+    debugData &&
+    debugData.upgradesFingerprint !== config.upgradesFingerprint
   ) {
     logger.debug(
-      'Upgrades changed since the PR was last updated, cannot reuse existing branch',
+      'PR upgrades fingerprint is missing or changed, cannot reuse existing branch',
     );
     return { action: 'no-reuse', userRebaseRequested };
   }

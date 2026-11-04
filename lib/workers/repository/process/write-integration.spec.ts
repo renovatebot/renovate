@@ -238,6 +238,23 @@ describe(
       },
     );
 
+    it('removes excluded upgrades once from a PR created before the upgrades fingerprint', async () => {
+      await run(branch());
+      delete prs.get(branchName)!.bodyStruct!.debugData!.upgradesFingerprint;
+      resetCache();
+
+      await run(branch(['dep-a', 'dep-b']));
+
+      await expectContents(branchName, ['dep-a', 'dep-b']);
+      const sha = git.getBranchCommit(branchName);
+      resetCache();
+
+      await run(branch(['dep-a', 'dep-b']));
+
+      expect(git.getBranchCommit(branchName)).toBe(sha);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+
     it.each`
       loseFingerprint
       ${false}

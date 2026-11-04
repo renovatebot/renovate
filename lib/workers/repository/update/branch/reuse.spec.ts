@@ -470,11 +470,28 @@ describe('workers/repository/update/branch/reuse', () => {
         });
       }
 
-      it('does not reuse the branch if it differs and the cache has no fingerprint', () => {
+      it.each`
+        prUpgradesFingerprint
+        ${'previous'}
+        ${undefined}
+      `(
+        'does not reuse the branch if the cache has no fingerprint and the PR has $prUpgradesFingerprint',
+        ({ prUpgradesFingerprint }) => {
+          input.config.cacheFingerprintMatch = 'no-fingerprint';
+          withPrFingerprint(prUpgradesFingerprint);
+          expect(decideBranchReuse(input)).toEqual({
+            action: 'no-reuse',
+            userRebaseRequested: false,
+          });
+        },
+      );
+
+      it('checks the branch itself if the platform strips the debug data', () => {
         input.config.cacheFingerprintMatch = 'no-fingerprint';
-        withPrFingerprint('previous');
+        input.config.upgradesFingerprint = 'current';
+        input.branchPr = partial<Pr>({ bodyStruct: { hash: 'hash' } });
         expect(decideBranchReuse(input)).toEqual({
-          action: 'no-reuse',
+          action: 'check-reuse',
           userRebaseRequested: false,
         });
       });
@@ -482,7 +499,6 @@ describe('workers/repository/update/branch/reuse', () => {
       it.each`
         cacheFingerprintMatch | prUpgradesFingerprint
         ${'no-fingerprint'}   | ${'current'}
-        ${'no-fingerprint'}   | ${undefined}
         ${'matched'}          | ${'previous'}
       `(
         'checks the branch itself when the cache is $cacheFingerprintMatch and the PR has $prUpgradesFingerprint',
