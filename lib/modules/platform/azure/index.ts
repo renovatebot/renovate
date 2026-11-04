@@ -34,7 +34,7 @@ import { isServerError } from '../../../util/http/status.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type {
   BranchStatusConfig,
@@ -295,7 +295,7 @@ export async function initRepo({
   const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
     projectName,
   )}/_git/${encodeURIComponent(repoName)}`;
-  const url = repo.remoteUrl ?? manualUrl;
+  const url = parseUrl(repo.remoteUrl)?.toString() ?? manualUrl;
   await git.initRepo({
     ...config,
     url,
