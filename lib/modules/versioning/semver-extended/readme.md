@@ -13,6 +13,7 @@ Release parts may have leading zeros, which are ignored when comparing, so `01.2
 Numeric prerelease identifiers may not have leading zeros, so `1.2.3-01` is not a valid version.
 Missing release parts count as zero when comparing versions of different lengths, so `1.2.3` equals `1.2.3.0`.
 The first three parts are the major, minor and patch parts.
+Unlike `semver-coerced`, which coerced `26.2.5.3` to `26.2.5`, all parts are compared, so `<=26.2.5` doesn't match `26.2.5.3` and `>26.2.5` does.
 
 Like `semver`, an update counts as breaking when either version has a prerelease, when the current first part is `0`, or when the first part changes, so `0.6.0.1` to `0.7.0.0` is breaking and `27.3.4.19` to `27.3.4.20` is not.
 
