@@ -61,7 +61,7 @@ export abstract class ChangeLogSource {
   ): string;
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return this.family.apiBaseUrl(this.getBaseUrl(config));
+    return this.family.apiBaseUrl?.(this.getBaseUrl(config)) ?? '';
   }
 
   /**
@@ -341,6 +341,11 @@ export abstract class ChangeLogSource {
     const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
     const host = parsedUrl.host;
     return `${protocol}//${host}/`;
+  }
+
+  getNotesCacheKey(project: ChangeLogProject): string {
+    const { repository, sourceDirectory } = project;
+    return buildCacheKey(repository, sourceDirectory);
   }
 
   getRepositoryFromUrl(config: BranchUpgradeConfig): string {

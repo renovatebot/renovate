@@ -74,7 +74,7 @@ export interface PlatformFamily {
  */
 export const PLATFORM_FAMILIES = {
   azure: {
-    apiUsingHostTypes: ['azure', 'azure-tags'],
+    apiUsingHostTypes: ['azure', 'azure-tags', 'azure-changelog'],
     knownHosts: ['dev.azure.com'],
     tagsDatasource: 'azure-tags',
     apiBaseUrl: null,
