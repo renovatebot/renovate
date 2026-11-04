@@ -486,11 +486,6 @@ jobs:
             ./coverage/json
 
   test-node-secondary:
-    if: |
-      github.event_name == 'merge_group' ||
-      (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) ||
-      contains(github.event.pull_request.labels.*.name, 'ci:node-secondary')
-
     name: test-node-secondary (${{ matrix.shard }})
 
     runs-on: ubuntu-latest
