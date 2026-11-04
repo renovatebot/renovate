@@ -699,7 +699,7 @@ export async function ensureDependencyDashboard(
         template.compile(label, config),
       ),
       confidential: config.confidential,
-      isPinned: true,
+      shouldPin: config.dependencyDashboard?.pinned,
     });
     // ensureIssue doesn't return the issue, so a newly created (or renamed)
     // dashboard needs a lookup to record its number

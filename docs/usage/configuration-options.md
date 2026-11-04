@@ -1587,6 +1587,10 @@ This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
+### `dependencyDashboard.pinned`
+
+If there are already the maximum number of Issues pinned, Renovate will leave the Dependency Dashboard unpinned.
+
 ### `dependencyDashboard.reportAbandonment`
 
 Controls whether abandoned packages are reported in the Dependency Dashboard.
