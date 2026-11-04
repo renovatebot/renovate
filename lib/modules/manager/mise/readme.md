@@ -141,8 +141,9 @@ For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory 
 - Versions like `latest`, `lts`, `ref:` or `path:` without a locked version set no constraint, as do partial versions like `3.12` for tools whose versioning reads them as a single version, and versions with a suffix like `1.17.3-otp-27`; they still hide the version of the tool in a mise config file of a parent directory, like mise does
 - A branch which updates the version of a tool uses the new version for the other updates in the same branch
 - Only the top level `tools` are used, not `tasks.*.tools`
+- Only mise TOML config files are used, not `.tool-versions` files, which belong to the [`asdf`](../asdf/index.md) manager
 - Environment-specific config files like `mise.production.toml` are ignored, while all files in `.config/mise/conf.d` are used, like mise does
-- A mise config file in a deeper directory takes precedence over one in a parent directory, like mise does
+- A mise config file in a deeper directory takes precedence over one in a parent directory, and within a directory the [order of mise](https://github.com/jdx/mise/blob/02d59ef93faf219319cccac23249501e8763e2da/src/config/mod.rs#L2530-L2608) applies, like `mise.local.toml` over `mise.toml`
 - `constraints` from the Renovate config and constraints which the manager detects itself, like `packageManager` in a `package.json` or the `lockfileVersion` of a `pnpm-lock.yaml`, take precedence
 
 ### Renovate only updates primary versions
