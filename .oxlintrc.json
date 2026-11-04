@@ -262,6 +262,13 @@
     },
     {
       "files": ["lib/**"],
+      "excludeFiles": ["**/*.spec.ts", "lib/modules/versioning/**"],
+      "rules": {
+        "renovate/prefer-versioning-helpers": "error"
+      }
+    },
+    {
+      "files": ["lib/**"],
       "excludeFiles": ["**/*.spec.ts"],
       "rules": {
         "renovate/require-build-cache-key": "error",
