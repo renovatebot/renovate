@@ -48,7 +48,7 @@ describe('modules/datasource/unpkg/index', () => {
   });
 
   describe('getDigest', () => {
-    it('returs null for no result', async () => {
+    it('returns null for no result', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('foo/bar', '1.2.0'))
@@ -64,11 +64,11 @@ describe('modules/datasource/unpkg/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returs null for empty sri object', async () => {
+    it('returns null for an empty files list', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('foo/bar', '1.2.0'))
-        .reply(200, JSON.stringify({ sri: {} }));
+        .reply(200, JSON.stringify({ files: [] }));
 
       const res = await getDigest(
         {
@@ -80,11 +80,11 @@ describe('modules/datasource/unpkg/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returs null if file not found', async () => {
+    it('returns null if file is not found', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('foo/bar', '1.2.0'))
-        .reply(200, JSON.stringify({ sri: { string: 'hash' } }));
+        .reply(200, JSON.stringify({ files: [{ path: '/other.js' }] }));
 
       const res = await getDigest(
         {
@@ -96,7 +96,7 @@ describe('modules/datasource/unpkg/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returs null if matching file has no integrity', async () => {
+    it('returns null if matching file has no integrity', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('foo/bar', '1.2.0'))
@@ -112,7 +112,7 @@ describe('modules/datasource/unpkg/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null for 404', async () => {
+    it('throws an HttpError for 404', async () => {
       httpMock.scope(baseUrl).get(pathForDigest('foo/bar', '1.2.0')).reply(404);
       await expect(
         getDigest(

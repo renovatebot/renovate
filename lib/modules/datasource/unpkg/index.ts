@@ -40,7 +40,7 @@ export class UnpkgDatasource extends Datasource {
   override readonly customRegistrySupport = false;
   override readonly defaultRegistryUrls = ['https://unpkg.com/'];
 
-  async getNpmReleases(
+  private async getNpmReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     return await this.npmDatasource.getReleases({
@@ -50,14 +50,7 @@ export class UnpkgDatasource extends Datasource {
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return withCache(
-      {
-        namespace: `datasource-${UnpkgDatasource.id}`,
-        key: `getReleases:${config.packageName}`,
-        fallback: true,
-      },
-      () => this.getNpmReleases(config),
-    );
+    return this.getNpmReleases(config);
   }
 
   private async _getDigest(
@@ -87,7 +80,7 @@ export class UnpkgDatasource extends Datasource {
       (file) => file.path.replace(regEx(/^\/+/), '') === asset,
     );
 
-    return file?.integrity ? `${file.integrity}` : null;
+    return file?.integrity ?? null;
   }
 
   override getDigest(
