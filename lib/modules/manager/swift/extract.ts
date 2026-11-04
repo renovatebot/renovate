@@ -222,6 +222,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         if (deps.length) {
           break;
         }
+        // v8 ignore else -- this state is only re-entered at a deps boundary
         if (label === DEPS) {
           state = 'dependencies';
         }

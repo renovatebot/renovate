@@ -11,8 +11,8 @@ Renovate stores its metadata in the _commit message footer_.
 ## Authentication
 
 <figure markdown>
-  ![Gerrit HTTP access token](../../../assets/images/gerrit-http-password.png){ loading=lazy }
-  <figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
+![Gerrit HTTP access token](../../../assets/images/gerrit-http-password.png){ loading=lazy }
+<figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
 </figure>
 
 Let Renovate use your HTTP access token by doing _one_ of the following:

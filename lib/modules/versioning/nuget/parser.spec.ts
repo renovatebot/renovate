@@ -34,6 +34,8 @@ describe('modules/versioning/nuget/parser', () => {
       expect(parseFloatingRange('abc')).toBeNull();
       expect(parseFloatingRange('1.2.*-foo')).toBeNull();
       expect(parseFloatingRange('1.2.3')).toBeNull();
+      // a major component, floating or numeric, is mandatory
+      expect(parseFloatingRange('-*')).toBeNull();
     });
 
     it.each`

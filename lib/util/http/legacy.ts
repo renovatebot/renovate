@@ -26,6 +26,7 @@ Object.defineProperty(HttpError.prototype, 'headers', {
   get: function headers(this: HttpError) {
     return this.response?.headers;
   },
+  configurable: true,
 });
 
 Object.defineProperty(HttpError.prototype, 'url', {

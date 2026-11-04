@@ -202,6 +202,12 @@ describe('util/template/index', () => {
     expect(output).toBe('foo');
   });
 
+  it('uppercase', () => {
+    const userTemplate = "{{{ uppercase 'foo'}}}";
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('FOO');
+  });
+
   it('has access to basic environment variables (basicEnvVars)', () => {
     const userTemplate = 'HOME is {{env.HOME}}';
     const output = template.compile(userTemplate, {});

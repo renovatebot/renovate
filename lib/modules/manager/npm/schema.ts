@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import {
+  Ini,
   Json,
   LooseRecord,
   Nullish,
@@ -144,6 +145,7 @@ const DevEngine = z.object({
   packageManager: DevEngineDependency.or(
     z.array(DevEngineDependency),
   ).optional(),
+  runtime: DevEngineDependency.or(z.array(DevEngineDependency)).optional(),
 });
 
 export const PackageJson = Json.pipe(
@@ -190,3 +192,10 @@ export const PackageLock = Json.pipe(
   }
   return { lockedVersions, lockfileVersion };
 });
+
+export const NpmrcCooldown = Ini.pipe(
+  z.object({
+    before: z.string().optional().catch(undefined),
+    'min-release-age': z.string().optional().catch(undefined),
+  }),
+);

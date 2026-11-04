@@ -64,10 +64,11 @@ class DockerVersioningApi extends GenericVersioningApi {
       if (parsed1.prerelease && !parsed2.prerelease) {
         return -1;
       }
-      // alphabetic order
-      if (parsed1.prerelease && parsed2.prerelease) {
-        return parsed1.prerelease.localeCompare(parsed2.prerelease);
-      }
+      // alphabetic order: both are non-empty here, since an empty one is
+      // handled above and two equal ones never enter this block
+      return coerceString(parsed1.prerelease).localeCompare(
+        coerceString(parsed2.prerelease),
+      );
     }
 
     // equals

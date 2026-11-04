@@ -144,7 +144,7 @@ export async function checkOnboardingBranch(
 function handleOnboardingManualRebase(onboardingPr: Pr): void {
   const pl = GlobalConfig.get('platform');
   const { rebaseRequested } = coerceObject(onboardingPr.bodyStruct);
-  if (!['github', 'gitlab', 'gitea'].includes(pl)) {
+  if (!['github', 'gitlab', 'gitea', 'forgejo'].includes(pl)) {
     logger.trace(`Platform '${pl}' does not support extended markdown`);
     OnboardingState.prUpdateRequested = true;
   } else if (isNullOrUndefined(rebaseRequested)) {
@@ -184,7 +184,7 @@ function isOnboardingCacheValid(
 function isConfigHashPresent(pr: Pr): boolean {
   const platform = GlobalConfig.get('platform');
   // if platform does not support html comments return true
-  if (!['github', 'gitlab', 'gitea'].includes(platform)) {
+  if (!['github', 'gitlab', 'gitea', 'forgejo'].includes(platform)) {
     return true;
   }
 

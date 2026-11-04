@@ -64,7 +64,6 @@ describe('modules/manager/helmv3/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     ecrMock.reset();
   });
 
@@ -1231,7 +1230,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     });
     expect(execSnapshots).toMatchObject([
       {
-        cmd: `helm registry login --username ${username} --password '${password}' '123456789.dkr.ecr.us-east-1.amazonaws.com/bitnami || date'`,
+        cmd: `helm registry login --username ${username} --password '${password}' 123456789.dkr.ecr.us-east-1.amazonaws.com`,
       },
       {
         cmd: "helm dependency update ''",

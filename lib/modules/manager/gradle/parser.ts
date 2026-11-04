@@ -103,6 +103,7 @@ export function parseKotlinSource(
     globalVars: vars,
   });
 
+  // v8 ignore else -- every parsed script yields a result here
   if (parsedResult) {
     deps.push(...parsedResult.deps);
     vars = { ...vars, ...parsedResult.globalVars };

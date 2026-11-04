@@ -32,9 +32,13 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
   - Only use [`v8` comments](https://github.com/AriPerkkio/ast-v8-to-istanbul?tab=readme-ov-file#ignore-hints) for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `v8` comments
   - Do not add a line count after `next`, for example `next 3`, because V8 does not honor the count and always exempts only the next code block
+  - Do not remove existing `v8` comments; document why the branch is unreachable instead
+  - Before adding a `v8` comment, try to construct an input that reaches the branch, and prefer a real test
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
 - Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
+- Keep TSDoc to a factual statement of what a function does, without explanatory prose paragraphs
+- Build strings with template literals rather than `+`, at least in code you add or rewrite
 
 ```ts
 /* v8 ignore next -- can never happen */
@@ -212,6 +216,7 @@ Use `for ( ... of ...)` loops instead of `[Array|Set|Map].prototype.forEach` and
 - Using `for ( ... in ...)` for objects is error-prone. It will include enumerable properties from the prototype chain
 - Using `for ( ... in ...)` to iterate over arrays, will counterintuitively return the array's indices
 - Avoid `[Array|Set|Map].prototype.forEach`. It makes code harder to debug and defeats some useful compiler checks like reachability
+- Prefer branch-free forms such as `.filter(isTruthy)` or `flatMap` over `if (!x) continue` inside loops; each explicit branch needs its own test for full coverage
 
 Only use `Array.prototype.map()` when the return value is used, otherwise use `for ( ... of ...)`.
 
@@ -265,6 +270,7 @@ try {
 
 Never use `Promise.resolve` in async functions.
 Never use `Promise.reject` in async functions, instead throw an `Error` class type.
+Never put `await` inside a ternary or other conditional expression; use `if`/`else`, as V8 coverage misreports such constructs.
 
 ## Dates and times
 
@@ -284,6 +290,7 @@ if (end) {
 
 ## Unit testing
 
+- Spec files have exactly one root `describe`, named by the file path (e.g. `describe('workers/repository/process/extract-update', ...)`); nest any grouping inside it
 - Separate the _Arrange_, _Act_ and _Assert_ phases with newlines
 - Use `it.each` rather than `test.each`
 - Prefer [Tagged Template Literal](https://vitest.dev/api/#test-each) style for `it.each`, Prettier will help with formatting
@@ -309,6 +316,7 @@ if (end) {
 
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
+Write them inline with real indentation, not as joined arrays, and do not add a new file under `__fixtures__` for content that fits inline.
 
 ```ts
 import { codeBlock } from 'common-tags';

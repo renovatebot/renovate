@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import type { Http } from '../../../util/http/index.ts';
 import type { AsyncResult } from '../../../util/result.ts';
@@ -19,7 +20,17 @@ function hashVersions(versions: string[]): string {
 }
 
 function hashReleases(releases: ReleaseResult): string {
-  return hashVersions(releases.releases.map((release) => release.version));
+  const versions = releases.releases.map((release) => {
+    const platform = release.constraints?.platform?.[0];
+
+    if (platform && platform !== 'ruby') {
+      return `${release.version}-${platform}`;
+    }
+
+    return release.version;
+  });
+
+  return hashVersions(versions);
 }
 
 interface CacheNotFoundError {
@@ -48,7 +59,7 @@ export class MetadataCache {
     versions: string[],
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
-    const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
+    const cacheKey = buildCacheKey('metadata-cache', registryUrl, packageName);
     const versionsHash = hashVersions(versions);
 
     function loadCache(): AsyncResult<ReleaseResult, CacheLoadError> {

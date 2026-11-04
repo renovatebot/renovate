@@ -204,6 +204,58 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBeUndefined();
   });
 
+  it('unsets skipReason=unknown-registry if a rule gives it a registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          registryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('unsets skipReason=unknown-registry if config gives it a default registry', async () => {
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      defaultRegistryUrls: ['https://packages.wolfi.dev/os?arch=x86_64'],
+      packageRules: [],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('keeps skipReason=unknown-registry when enabled=true gives it no registry', async () => {
+    // the dependency is wanted, but there is still nowhere to look it up
+    const dep: any = {
+      depName: 'foo',
+      datasource: 'apk',
+      skipReason: 'unknown-registry',
+      skipStage: 'extract',
+      packageRules: [
+        {
+          matchDatasources: ['apk'],
+          enabled: true,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'pre-lookup');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBe('unknown-registry');
+    expect(res.skipStage).toBe('extract');
+  });
+
   it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
     const dep: any = {
       depName: 'foo',
@@ -314,7 +366,7 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBe('datasource-merge');
   });
 
-  it('skips skipReason=package-rules if enabled=true', async () => {
+  it('sets skipReason=package-rules if the dependency is already disabled', async () => {
     const dep: any = {
       enabled: false,
       depName: 'foo',
@@ -325,7 +377,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const res = await applyPackageRules(dep);
-    expect(res.skipReason).toBeUndefined();
+    expect(res.skipReason).toBe('package-rules');
   });
 
   it('matches anything if missing inclusive rules', async () => {
@@ -674,6 +726,34 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
+  it('filters isBreaking', async () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchIsBreaking: true,
+          // @ts-expect-error -- testing
+          x: 1,
+        },
+        {
+          matchIsBreaking: false,
+          // @ts-expect-error -- testing
+          y: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      packageName: 'a',
+      updateType: 'minor' as UpdateType,
+      isBreaking: true,
+    };
+
+    const res = await applyPackageRules({ ...config, ...dep });
+
+    expect(res.x).toBe(1);
+    expect(res.y).toBeUndefined();
+  });
+
   it('matches matchSourceUrls with glob', async () => {
     const config: TestConfig = {
       packageRules: [
@@ -863,7 +943,6 @@ describe('util/package-rules/index', () => {
     };
 
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add(hostRule);
     });
 

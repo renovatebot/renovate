@@ -71,18 +71,28 @@ Instead of a dedicated account with a Personal Access Token you can run `renovat
 
 When creating the GitHub App give it the following permissions:
 
-| Permission        | Scope            |
+**Repository permissions**
+
+| Permission        | Access           |
 | ----------------- | ---------------- |
+| Administration    | `read`           |
 | Checks            | `read` + `write` |
 | Commit statuses   | `read` + `write` |
 | Contents          | `read` + `write` |
+| Dependabot alerts | `read`           |
 | Issues            | `read` + `write` |
+| Merge queues      | `read` + `write` |
+| Metadata          | `read`           |
 | Pull requests     | `read` + `write` |
 | Workflows         | `read` + `write` |
-| Administration    | `read`           |
-| Dependabot alerts | `read`           |
-| Members           | `read`           |
-| Metadata          | `read`           |
+
+The `Merge queues` permission is needed to enqueue pull requests when the repository uses a merge queue.
+
+**Organization permissions**
+
+| Permission | Access |
+| ---------- | ------ |
+| Members    | `read` |
 
 Other values like Homepage URL, User authorization callback URL and webhooks can be disabled or filled with dummy values.
 

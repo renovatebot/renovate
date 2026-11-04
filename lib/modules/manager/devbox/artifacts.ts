@@ -6,7 +6,11 @@ import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../util.ts';
 
 export async function updateArtifacts({
   config,
@@ -45,7 +49,7 @@ export async function updateArtifacts({
     docker: {},
   };
 
-  const cmd = [];
+  const cmd: string[] = [];
   if (config.isLockFileMaintenance) {
     cmd.push(
       supportsNoInstall ? 'devbox update --no-install' : 'devbox update',
@@ -79,34 +83,13 @@ export async function updateArtifacts({
   }
 
   try {
-    await exec(cmd, execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName);
-
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
-      return null;
-    }
-    logger.trace('Returning updated devbox.lock');
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return await updateLockFile({
+      lockFileName,
+      existingLockFileContent: oldLockFileContent,
+      run: () => exec(cmd, execOptions),
+    });
   } catch (err) {
     logger.warn({ err }, 'Error updating devbox.lock');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

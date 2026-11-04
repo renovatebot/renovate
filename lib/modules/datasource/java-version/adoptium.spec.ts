@@ -10,6 +10,7 @@ describe('modules/datasource/java-version/adoptium', () => {
 
     await expect(
       getAdoptiumReleases(mockHttp, {
+        vendor: 'adoptium',
         imageType: 'jdk',
         architecture: null,
         os: null,

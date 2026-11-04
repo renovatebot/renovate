@@ -36,7 +36,6 @@ describe('modules/manager/cargo/extract', () => {
       vi.stubEnv('CARGO_REGISTRIES_PRIVATE_CRATES_INDEX', undefined);
       vi.stubEnv('CARGO_REGISTRIES_MCORBIN_INDEX', undefined);
 
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'git.example.com',
@@ -339,7 +338,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
-      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
+      mockReadLocalFile({ '.cargo/config': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -357,6 +356,32 @@ describe('modules/manager/cargo/extract', () => {
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
         { depName: 'tokio', currentValue: '0.2' },
+      ]);
+    });
+
+    it('reads .cargo/config if .cargo/config.toml exists as well, like cargo', async () => {
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`
+          [registries.mine]
+          index = "https://legacy.example.com/index"
+        `,
+        '.cargo/config.toml': codeBlock`
+          [registries.mine]
+          index = "https://toml.example.com/index"
+        `,
+      });
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [dependencies]
+          foo = { version = "1.0.0", registry = "mine" }
+        `,
+        'Cargo.toml',
+        config,
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depName: 'foo', registryUrls: ['https://legacy.example.com/index'] },
       ]);
     });
 
@@ -984,6 +1009,19 @@ replace-with = "mcorbin"
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.packageFileVersion).toBe('0.1.0');
+    });
+
+    it('should leave the project version unset when the package has none', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBeUndefined();
     });
 
     it('should extract project version from workspace', async () => {

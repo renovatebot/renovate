@@ -3,15 +3,20 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile, statLocalFile } from '../../../util/fs/index.ts';
+import { statLocalFile } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus, isFileModeEnabled } from '../../../util/git/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types.ts';
-import { resolveToolConstraint } from '../util.ts';
+import {
+  artifactError,
+  artifactErrorResult,
+  resolveToolConstraint,
+} from '../util.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
 const ownerExecutePermission = 0o100;
@@ -56,20 +61,6 @@ function buildCommand(
   return command.join(' ');
 }
 
-function artifactError(
-  packageFileName: string,
-  message: string,
-): UpdateArtifactsResult[] {
-  return [
-    {
-      artifactError: {
-        fileName: packageFileName,
-        stderr: message,
-      },
-    },
-  ];
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -77,18 +68,22 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (updatedDeps?.length !== 1) {
     // Each answers file (~ packageFileName) has exactly one dependency to update.
-    return artifactError(
-      packageFileName,
-      `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
-    );
+    return [
+      artifactError(
+        packageFileName,
+        `Unexpected number of dependencies: ${updatedDeps?.length} (should be 1)`,
+      ),
+    ];
   }
 
   const newValue = updatedDeps[0]?.newValue;
   if (!newValue) {
-    return artifactError(
-      packageFileName,
-      'Missing copier template version to update to',
-    );
+    return [
+      artifactError(
+        packageFileName,
+        'Missing copier template version to update to',
+      ),
+    ];
   }
 
   const command = buildCommand(config, packageFileName, newValue);
@@ -110,7 +105,7 @@ export async function updateArtifacts({
     await gitExec(command, execOptions);
   } catch (err) {
     logger.debug({ err }, `Failed to update copier template: ${err.message}`);
-    return artifactError(packageFileName, err.message);
+    return artifactErrorResult(packageFileName, err);
   }
 
   const status = await getRepoStatus();
@@ -125,60 +120,32 @@ export async function updateArtifacts({
     // Sometimes, Copier erroneously reports conflicts.
     const msg = `Updating the Copier template yielded ${status.conflicted.length} merge conflicts. Please check the proposed changes carefully! Conflicting files:\n  * ${status.conflicted.join('\n  * ')}`;
     logger.debug({ packageFileName, depName: updatedDeps[0]?.depName }, msg);
-    res.push(...artifactError(packageFileName, msg));
+    res.push(artifactError(packageFileName, msg));
   }
 
   const canReadFileMode = await isFileModeEnabled();
 
-  for (const f of [
-    ...status.modified,
-    ...status.not_added,
-    ...status.conflicted,
-  ]) {
-    const fileRes: UpdateArtifactsResult = {
-      file: {
-        type: 'addition',
-        path: f,
-        contents: await readLocalFile(f),
-        isExecutable: await detectExecutable(f, canReadFileMode),
-      },
-    };
-    if (status.conflicted.includes(f)) {
+  // `git status` might detect a rename, which is then not contained
+  // in not_added/deleted. Ensure we respect renames as well if they happen.
+  const changes = await collectFileChanges(status, {
+    include: ['modified', 'not_added', 'conflicted', 'deleted', 'renamed'],
+    additionMetadata: async (f) => ({
+      isExecutable: await detectExecutable(f, canReadFileMode),
+    }),
+  });
+
+  for (const change of changes) {
+    const fileRes: UpdateArtifactsResult = { file: change };
+    if (change.type === 'addition' && status.conflicted.includes(change.path)) {
       // Make the reviewer aware of the conflicts.
       // This will be posted in a comment.
       fileRes.notice = {
-        file: f,
+        file: change.path,
         message:
           'This file had merge conflicts. Please check the proposed changes carefully!',
       };
     }
     res.push(fileRes);
-  }
-  for (const f of status.deleted) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f,
-      },
-    });
-  }
-  // `git status` might detect a rename, which is then not contained
-  // in not_added/deleted. Ensure we respect renames as well if they happen.
-  for (const f of status.renamed) {
-    res.push({
-      file: {
-        type: 'deletion',
-        path: f.from,
-      },
-    });
-    res.push({
-      file: {
-        type: 'addition',
-        path: f.to,
-        contents: await readLocalFile(f.to),
-        isExecutable: await detectExecutable(f.to, canReadFileMode),
-      },
-    });
   }
   return res;
 }

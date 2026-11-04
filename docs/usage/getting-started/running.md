@@ -176,6 +176,7 @@ If you are configuring Renovate using environment variables, there are two possi
 - Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, for example: `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
+Mergeable options, like `hostRules` or `packageRules`, are combined instead: lists are appended and objects are merged.
 
 !!! note
   It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.

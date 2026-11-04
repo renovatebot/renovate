@@ -82,6 +82,13 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       deleteOnboardingCache();
       expect(dummyCache.onboardingBranchCache).toBeUndefined();
     });
+
+    it('does nothing when there is no cache', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      deleteOnboardingCache();
+      expect(dummyCache).toEqual({});
+    });
   });
 
   describe('hasOnboardingBranchChanged()', () => {
@@ -303,6 +310,13 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
           configFileParsed: 'parsed',
         },
       });
+    });
+
+    it('does nothing when there is no cache', () => {
+      const dummyCache = {} satisfies RepoCacheData;
+      cache.getCache.mockReturnValueOnce(dummyCache);
+      setOnboardingConfigDetails('renovate.json', 'parsed');
+      expect(dummyCache).toEqual({});
     });
   });
 });

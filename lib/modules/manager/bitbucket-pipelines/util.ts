@@ -28,8 +28,10 @@ export function addDepAsDockerImage(
   currentDockerImage: string,
   registryAliases?: Record<string, string>,
 ): void {
-  const dep = getDep(currentDockerImage, true, registryAliases);
-  dep.depType = 'docker';
+  const dep = getDep(currentDockerImage, {
+    registryAliases,
+    depType: 'docker',
+  });
   deps.push(dep);
 }
 
@@ -56,8 +58,7 @@ export function addDepFromObject(
 
     const groups = nameRegex.exec(line)?.groups;
     if (groups) {
-      const dep = getDep(groups.image, true, registryAliases);
-      dep.depType = 'docker';
+      const dep = getDep(groups.image, { registryAliases, depType: 'docker' });
       deps.push(dep);
       return idx;
     }

@@ -122,7 +122,7 @@ async function prepareRawExec(
   } else if (isDynamicInstall(opts.toolConstraints)) {
     logger.debug('Using containerbase dynamic installs');
     rawCommands = [
-      ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(await generateInstallCommands(opts.toolConstraints, true)),
       ...preCommands,
       ...rawCommands,
     ];
@@ -147,7 +147,7 @@ async function prepareRawExec(
   ) {
     logger.once.debug(
       { toolConstraints: opts.toolConstraints },
-      'Ignoring tool contraints because of `binarySource=global`',
+      'Ignoring tool constraints because of `binarySource=global`',
     );
   }
 

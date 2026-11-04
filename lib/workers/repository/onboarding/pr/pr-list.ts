@@ -59,10 +59,12 @@ function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
     'branchConcurrentLimit',
   );
 
+  const isBelowPrLimit =
+    prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
     typeof config.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
-    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+    isBelowPrLimit
   ) {
     return {
       limit: branchConcurrentLimit,
@@ -105,10 +107,12 @@ function resolveVulnerabilityConcurrentLimit(
     'branchConcurrentLimit',
   );
 
+  const isBelowPrLimit =
+    prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
     typeof vulnerabilityAlerts?.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
-    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+    isBelowPrLimit
   ) {
     return {
       limit: branchConcurrentLimit,
@@ -281,8 +285,8 @@ function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
 // Sort: default branch (empty string) first, then named branches alphabetically.
 function sortBaseBranches(bases: Iterable<string>): string[] {
   return [...bases].sort((a, b) => {
+    // v8 ignore if -- base branches are unique Record keys, so never equal
     if (a === b) {
-      /* v8 ignore next -- base branches are unique Record keys; equal comparison cannot occur */
       return 0;
     }
     if (a === '') {

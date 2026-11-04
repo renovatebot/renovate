@@ -262,6 +262,7 @@ function emptyExtract(): ExtractResult {
 
 export function printRepositoryProblems(repository: string | undefined): void {
   const repoProblems = extractRepoProblems(repository);
+  // v8 ignore else -- only called when the repository logged a problem
   if (repoProblems.size) {
     logger.debug(
       { repoProblems: Array.from(repoProblems) },

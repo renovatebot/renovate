@@ -1,6 +1,5 @@
 // TODO: types (#22198)
 import { isNonEmptyString, isNumber, isString } from '@sindresorhus/is';
-import ini from 'ini';
 import { DateTime } from 'luxon';
 import semver from 'semver';
 import { quote } from 'shlex';
@@ -30,7 +29,8 @@ import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
-import { PackageLock } from '../schema.ts';
+import { NpmrcCooldown, PackageLock } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
@@ -47,7 +47,7 @@ export function parseNpmrcCooldownDate(
     return null;
   }
 
-  const parsed = ini.parse(npmrcContent);
+  const parsed = NpmrcCooldown.parse(npmrcContent);
 
   const before = parsed.before;
   if (isNonEmptyString(before)) {
@@ -105,8 +105,8 @@ export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   filename: string,
-  config: Partial<PostUpdateConfig> = {},
-  upgrades: Upgrade[] = [],
+  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
+  upgrades: Upgrade<NpmManagerData>[] = [],
   npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
@@ -135,11 +135,10 @@ export async function generateLockFile(
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     let commands: string[] = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions?.includes('npmDedupe') === true &&
-        !supportsPreferDedupeFlag) ||
-      skipInstalls === false
-    ) {
+    const needsDedupeWithoutFlag =
+      postUpdateOptions?.includes('npmDedupe') === true &&
+      !supportsPreferDedupeFlag;
+    if (needsDedupeWithoutFlag || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
@@ -251,6 +250,7 @@ export async function generateLockFile(
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
           .map((update) => update.managerData?.packageKey)
+          .filter(isString)
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         // v8 ignore else -- TODO: add test #40625
@@ -267,6 +267,7 @@ export async function generateLockFile(
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd = `npm install ${cmdOptions}${beforeFlag} ${lockRootUpdates
         .map((update) => update.managerData?.packageKey)
+        .filter(isString)
         .map(quote)
         .join(' ')}`;
       commands.push(updateCmd);
@@ -405,15 +406,15 @@ export async function generateLockFile(
 
 export function divideWorkspaceAndRootDeps(
   lockFileDir: string,
-  lockUpdates: Upgrade[],
+  lockUpdates: Upgrade<NpmManagerData>[],
 ): {
-  lockRootUpdates: Upgrade[];
-  lockWorkspacesUpdates: Upgrade[];
+  lockRootUpdates: Upgrade<NpmManagerData>[];
+  lockWorkspacesUpdates: Upgrade<NpmManagerData>[];
   workspaces: Set<string>;
   rootDeps: Set<string>;
 } {
-  const lockRootUpdates: Upgrade[] = []; // stores all upgrades which are present in root package.json
-  const lockWorkspacesUpdates: Upgrade[] = []; // stores all upgrades which are present in workspaces package.json
+  const lockRootUpdates: Upgrade<NpmManagerData>[] = []; // stores all upgrades which are present in root package.json
+  const lockWorkspacesUpdates: Upgrade<NpmManagerData>[] = []; // stores all upgrades which are present in workspaces package.json
   const workspaces = new Set<string>(); // name of all workspaces
   const rootDeps = new Set<string>(); // packageName of all upgrades in root package.json (makes it check duplicate deps in root)
 
@@ -446,10 +447,7 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
-          const massagedPattern = (workspacePattern as string).replace(
-            regEx(/^\.\//),
-            '',
-          );
+          const massagedPattern = workspacePattern.replace(regEx(/^\.\//), '');
           if (minimatch(massagedPattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;

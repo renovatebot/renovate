@@ -34,6 +34,25 @@ describe('modules/manager/deno/compat', () => {
       const result = await extractDenoCompatiblePackageJson('package.json');
       expect(result).toBeNull();
     });
+
+    it('ignores workspaces given as an object', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'root',
+          workspaces: { packages: ['packages/*'] },
+          dependencies: {
+            dep1: '1.0.0',
+          },
+        }),
+      );
+
+      const result = await extractDenoCompatiblePackageJson('package.json');
+
+      expect(result?.managerData).toEqual({
+        packageName: 'root',
+        workspaces: undefined,
+      });
+    });
   });
 
   describe('collectPackageJson()', () => {

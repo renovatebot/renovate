@@ -23,6 +23,25 @@ describe('modules/manager/bazel/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('does not set digestOneAndOnly when a go_repository has both tag and commit', () => {
+      const res = extractPackageFile(codeBlock`
+        go_repository(
+          name = "com_github_pkg_errors",
+          importpath = "github.com/pkg/errors",
+          tag = "v1.0.0",
+          commit = "816c9085562cd7ee03e7f8188a1cfd942858cded",
+        )
+      `);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'go_repository',
+          currentValue: 'v1.0.0',
+          currentDigest: '816c9085562cd7ee03e7f8188a1cfd942858cded',
+        },
+      ]);
+      expect(res?.deps[0].digestOneAndOnly).toBeUndefined();
+    });
+
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(Fixtures.get('WORKSPACE1'));
       expect(res).toEqual({

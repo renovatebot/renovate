@@ -25,6 +25,7 @@ The manager's `index.ts` file supports the following values or functions:
 | `knownDepTypes`               | yes      |       |
 | `supportsDynamicDepTypesNote` | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
+| `supportsNpmrc`               | yes      |       |
 | `updateArtifacts`             | yes      | yes   |
 | `updateDependency`            | yes      |       |
 | `updateLockedDependency`      | yes      |       |
@@ -107,6 +108,11 @@ This should be placed in `dep-types.ts`.
 
 Set to `true` if this package manager needs to update lock files in addition to package files.
 
+### `supportsNpmrc` (optional)
+
+Set to `true` if the manager's returned values carry an `npmrc` resolved from the repository's `.npmrc` and the `npmrc` config.
+Only such a manager may return `NpmrcPackageFileContent` / `NpmrcPackageFile`, the types which have the `npmrc` field; this is checked at compile time.
+
 ### `updateArtifacts` (async, optional)
 
 Use `updateArtifacts` to run binaries that in turn will update files.
@@ -140,6 +146,11 @@ Use `updateDependency` if _both_ conditions apply:
 
 - the manager can't be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
+
+It returns the new package file content, or `null` on failure.
+If the update is also applied outside the package file, for example by modifying the checkout on disk, return `{ content, updatedOutOfBand: true }` instead.
+Renovate then treats the package file as updated even if `content` is unchanged, so that `updateArtifacts` still runs for it.
+The `git-submodules` manager uses this.
 
 ### `updateLockedDependency` (optional)
 

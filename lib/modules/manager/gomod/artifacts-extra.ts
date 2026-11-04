@@ -53,6 +53,7 @@ export function getExtraDeps(
     }
 
     const newValue = addDeps[depName];
+    // v8 ignore else -- needs a removed dep that is not added back
     if (newValue) {
       result.push({
         depName,

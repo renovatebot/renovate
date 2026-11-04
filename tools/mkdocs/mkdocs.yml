@@ -88,16 +88,16 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-      primary: 'indigo'
-      accent: 'indigo'
+      primary: 'custom'
+      accent: 'custom'
 
     - media: '(prefers-color-scheme: dark)'
       scheme: slate
       toggle:
         icon: material/weather-sunny
         name: Switch to system preference
-      primary: 'indigo'
-      accent: 'indigo'
+      primary: 'custom'
+      accent: 'custom'
 
   features:
     # Navigation pruning (not compatible with navigation.expand)

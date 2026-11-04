@@ -162,7 +162,8 @@ By configuring this setting to `true`, Renovate will instead always assign revie
 ## `assignees`
 
 Must be valid usernames on the platform in use.
-This setting is following the same convention as [`reviewers`](#reviewers) for platform-specific behaviors such as Github teams.
+Teams are not supported, and Renovate passes `team:` entries to the platform unchanged.
+To request a review from a team, use [`reviewers`](#reviewers) instead.
 
 ## `assigneesFromCodeOwners`
 
@@ -375,11 +376,11 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`:
 
-  ```json
-  {
-    "baseBranchPatterns": ["dev"]
-  }
-  ```
+```json
+{
+  "baseBranchPatterns": ["dev"]
+}
+```
 
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
 
@@ -742,6 +743,8 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
+
 To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
 ## `commitBodyTable`
@@ -844,6 +847,8 @@ If you want Renovate to sign off its commits, you can add the [`:gitSignOff` pre
   "extends": [":gitSignOff"]
 }
 ```
+
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
 
 ## `composerIgnorePlatformReqs`
 
@@ -1859,6 +1864,31 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
+Instead of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
+The supported group names are `major`, `minor`, `patch`, `prerelease`, and `build`.
+
+- `major` is required
+- `minor` and `patch` default to `0` if not captured
+- `prerelease` adds a `-{prerelease}` suffix
+- `build` adds a `+{build}` suffix
+
+If a `version` group is also present, it takes priority and the part groups are ignored.
+
+For example, Docker Hub tags for `eclipse-temurin` use `17.0.19_10` where `_` separates the patch from the build metadata.
+To extract this as `17.0.19+10`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["eclipse-temurin"],
+      "extractVersion": "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)"
+    }
+  ]
+}
+```
+
 ## `fetchChangeLogs`
 
 Use this config option to configure changelogs/release notes fetching.
@@ -2344,8 +2374,8 @@ Do not combine with `hostType` in the same rule or it won't work.
 
 ### `hostRules.dnsCache`
 
-Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
+This option is deprecated and has no effect.
+Renovate removed its DNS cache in v38.0.0.
 
 ### `hostRules.enableHttp2`
 
@@ -2358,8 +2388,10 @@ By default, all headers starting with "X-" are allowed.
 
 A self-hosted administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
-`headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
+`headers` you configure in a repository config file, or a preset it extends, are checked against `allowedHeaders`.
 Any header which is not permitted is dropped, and a warning is logged.
+
+`allowedHeaders` does not constrain the self-hosted administrator's own `hostRules` (for example in a `config.js` file, or a `repositories[]` entry): their `headers` are always applied, regardless of `allowedHeaders`.
 
 When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
@@ -2437,6 +2469,8 @@ This can be a base URL (e.g. `https://api.github.com`) or a hostname like `githu
 If the value starts with `http(s)` then it will only match against URLs which start with the full base URL.
 Otherwise, it will be matched by checking if the URL's hostname matches the `matchHost` directly or ends with it.
 When checking the end of the hostname, a single dot is prefixed to the value of `matchHost`, if one is not already present, to ensure it can only match against whole domain segments.
+
+A base URL ending in `/` (e.g. `https://gitlab.com/api/v4/projects/1/`) matches that path and everything below it, also when the URL has no trailing `/`, but not a sibling path like `https://gitlab.com/api/v4/projects/10`.
 
 The `matchHost` URL must be the same as the `registryUrl` set in `.npmrc`, or you'll get authentication issues when the artifacts are updated when yarn or npm runs.
 
@@ -3002,6 +3036,33 @@ When set to `timestamp-optional`, Renovate will treat a release without a releas
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgeBuffer`
+
+Use this option to extend the time Renovate waits before suggesting an update, on top of [`minimumReleaseAge`](#minimumreleaseage).
+
+Some projects publish a set of related packages, where companion packages (like platform-specific binaries) are published _after_ the main package.
+For example, `@biomejs/biome@2.5.10` may be published some minutes before `@biomejs/cli-linux-x64@2.5.10`.
+If your package manager enforces its own release age cooldown, like pnpm's `minimumReleaseAge` setting or npm's `--before` flag, Renovate may suggest the main package as soon as it passes `minimumReleaseAge`, while a companion package published later is still within the package manager's cooldown.
+The package manager then refuses to update the lock file, and the update fails with an artifact error.
+
+`minimumReleaseAgeBuffer` avoids this by letting Renovate wait longer than the package manager's cooldown.
+Renovate defers the update until `minimumReleaseAge` _plus_ the buffer duration has passed, while the package manager keeps using the plain `minimumReleaseAge` cutoff.
+This way, packages published up to the buffer time after the suggested release have also passed the package manager's cooldown.
+
+By default, Renovate uses a buffer of 30 minutes.
+Set `minimumReleaseAgeBuffer` to `null` to disable the buffer.
+
+For example, with the following configuration Renovate waits 3 days plus 1 hour before suggesting an update, while the package manager's cooldown stays at 3 days:
+
+```json
+{
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBuffer": "1 hour"
+}
+```
+
+This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
+
 ## `minor`
 
 Add to this object if you wish to define rules that apply only to minor updates.
@@ -3024,6 +3085,7 @@ Configuring `silent` mode is quite similar to `dryRun=lookup` except:
 When in `silent` mode Renovate will:
 
 - _not_ create or update any Issue: even the Dependency Dashboard or Config Warning Issues will stay as-is
+- _not_ read checkboxes from an existing Dependency Dashboard: use `checkedBranches` to request branches instead
 - _not_ prune or close any existing Issues
 - _not_ create any Config Migration PRs, even if you explicitly enabled Config Migration PRs in your Renovate config
 
@@ -3065,6 +3127,18 @@ Renovate only queries the OSV database for dependencies that use one of these da
 - [`rubygems`](./modules/datasource/rubygems/index.md)
 
 The entire database is downloaded locally by [osv-offline](https://github.com/renovatebot/osv-offline) and queried offline.
+
+If you self-host Renovate, you can change how the database is downloaded with these osv-offline environment variables:
+
+- `OSV_OFFLINE_ROOT_DIR`: where the database is stored (default: `osv-offline` inside the [`cacheDir`](./self-hosted-configuration.md#cachedir), or `<tmpdir>/osv-offline` if `OSV_OFFLINE_DISABLE_DOWNLOAD=true` is set)
+- `OSV_OFFLINE_MAX_AGE`: how old the database may be before it's downloaded again, as an [`ms`](https://github.com/vercel/ms) duration such as `30m`, `4h` or `7d` (default: `1d`)
+- `OSV_OFFLINE_DATABASE_FORMAT=split`: download the database of each ecosystem on its first use, instead of all of them at once
+- `OSV_OFFLINE_DATABASE_URL` and `OSV_OFFLINE_DATABASE_INDEX_URL`: download from an internal mirror
+- `OSV_OFFLINE_DISABLE_DOWNLOAD=true`: use a database you've put into `OSV_OFFLINE_ROOT_DIR` yourself, without internet access
+
+If you persist the `cacheDir`, the database (roughly 85 MB compressed) is kept as well.
+
+Read the [osv-offline readme](https://github.com/renovatebot/osv-offline/tree/main/packages/osv-offline#readme) for all options, mirrors, and which hosts to allow.
 
 <!-- markdownlint-disable MD001 -->
 
@@ -3601,6 +3675,32 @@ The following example matches any `.toml` file in a `v1`, `v2` or `v3` directory
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+### `packageRules.matchIsBreaking`
+
+Use `matchIsBreaking` to match updates based on whether Renovate considers them breaking.
+Set it to `true` to match only breaking updates, or `false` to match only non-breaking updates.
+
+What counts as breaking depends on the versioning of the dependency:
+
+- Versionings with their own notion of breaking changes decide themselves, for example Cargo treats a minor bump of a `0.x` crate (`0.1.0` to `0.2.0`) as breaking
+- For all other versionings, an update is breaking if its `updateType` is `major`
+
+Rules with `matchIsBreaking` never match when there is no update to evaluate, for example for `lockFileMaintenance`.
+
+The following example automerges all non-breaking updates of packages in the `@myorg` scope:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@myorg{/,}**"],
+      "matchIsBreaking": false,
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### `packageRules.matchJsonata`
 
 Use the `matchJsonata` field to define custom matching logic using [JSONata](https://jsonata.org/) query logic.
@@ -3616,6 +3716,7 @@ $exists(vulnerabilityFixVersion)
 manager = 'dockerfile' and depType = 'final'
 updateType = 'major' and newVersionAgeInDays < 7
 $detectPlatform(sourceUrl) = 'github'
+$matchRegexOrGlob(packageName, ["@myorg{/,}**"]) or $matchRegexOrGlob(registryUrls, ["https://registry.example.com/**"])
 ```
 
 `matchJsonata` accepts an array of strings, and will return `true` if any of those JSONata expressions evaluate to `true`.
@@ -3623,6 +3724,7 @@ $detectPlatform(sourceUrl) = 'github'
 Renovate provides the following custom JSONata functions:
 
 - `$detectPlatform(url)` - Takes a URL string and returns the detected platform (`azure`, `bitbucket`, `bitbucket-server`, `forgejo`, `gitea`, `github`, `gitlab`) or `null`.
+- `$matchRegexOrGlob(input, patterns)` - Returns `true` if `input` matches `patterns`, using Renovate's [string pattern matching](./string-pattern-matching.md) syntax. `input` can be a string or an array of strings, in which case any matching element returns `true`. `patterns` is an array of strings, or a single string. Returns `false` if `input` is missing. Use this to combine conditions on different fields with `or`, which separate `match*` options can't do because they are combined with `and`.
 
 ### `packageRules.matchManagers`
 
@@ -4566,6 +4668,7 @@ It usually doesn't _know_ why they're there, instead it simply knows that it has
 
 If a branch appears stale but has been modified by a different git author, then Renovate won't delete the branch or autoclose any associated PR.
 Instead, it will update the title to append " - abandoned" plus add a comment noting that autoclosing is skipped.
+Read the [Abandoned PRs](./key-concepts/pull-requests.md#abandoned-prs) docs to learn more.
 
 If a branch appears stale and hasn't been modified, then:
 
@@ -4745,6 +4848,10 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
+
+In some situations managers can not derive which registry a given dependency comes from.
+In that case, managers skip it with `skipReason: unknown-registry` rather than look it up somewhere which may hold the wrong versions.
+When specifying `registryUrls` alongside a dependency with `skipReason: unknown-registry`, Renovate will use the configured `registryUrls`.
 
 ## `replacement`
 
@@ -5277,6 +5384,10 @@ You may use the `vulnerabilityAlerts` configuration object to customize vulnerab
   This means that Renovate _always_ tries to create a `vulnerabilityAlerts` PR.
   In short: vulnerability alerts "skip the line".
 
+!!! note
+  Some managers disable certain dependencies by default, such as `indirect` Go modules or Gradle `strictly` constraints.
+  Renovate still raises vulnerability-fix PRs for those dependencies, unless you disable them yourself with a `packageRules` entry that sets `enabled=false`.
+
 If you get many alerts at once, for example when you onboard a repository which was not using Renovate before, then set `prConcurrentLimit` or `branchConcurrentLimit` inside the `vulnerabilityAlerts` object.
 Vulnerability fixes get their _own_ budget, they do not take a share of the repository-wide one:
 
@@ -5292,6 +5403,7 @@ Vulnerability fixes get their _own_ budget, they do not take a share of the repo
 With the config above Renovate creates at most 10 open PRs: 5 for regular updates, plus 5 for vulnerability fixes.
 The default is `0`, which means "no limit", so vulnerability alerts keep skipping the line until you set a limit yourself.
 You do not need to set `branchConcurrentLimit` as well, because its `null` default already means "inherit `prConcurrentLimit`".
+These limits also apply to updates that a `packageRules` entry marks with `isVulnerabilityAlert=true`.
 
 !!! note
   Only the concurrent limits can be set this way.

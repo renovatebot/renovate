@@ -9,6 +9,7 @@ import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
 import { extractLockFileEntries } from './locked-version.ts';
+import type { BundlerManagerData } from './types.ts';
 
 function formatContent(input: string): string {
   return `${input.replace(regEx(/^ {2}/), '')}\n`; //remove leading whitespace and add a new line at the end
@@ -31,7 +32,7 @@ const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 export async function extractPackageFile(
   content: string,
   packageFile?: string,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFileContent<BundlerManagerData> | null> {
   let lineNumber: number;
   async function processGroupBlock(
     line: string,
@@ -90,7 +91,7 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFileContent = {
+  const res: PackageFileContent<BundlerManagerData> = {
     registryUrls: [],
     deps: [],
   };
@@ -138,7 +139,7 @@ export async function extractPackageFile(
     const gemMatch = gemMatchRegex.exec(line)?.groups;
 
     if (gemMatch) {
-      const dep: PackageDependency = {
+      const dep: PackageDependency<BundlerManagerData> = {
         depName: gemMatch.depName,
         managerData: { lineNumber },
         datasource: RubygemsDatasource.id,
