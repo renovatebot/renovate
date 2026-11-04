@@ -75,10 +75,8 @@ function updateQueryParameter(
 ): string {
   const queryStart = url.indexOf('?');
   const fragmentStart = url.indexOf('#');
-  if (
-    queryStart === -1 ||
-    (fragmentStart !== -1 && queryStart > fragmentStart)
-  ) {
+  const queryIsInFragment = fragmentStart !== -1 && queryStart > fragmentStart;
+  if (queryStart === -1 || queryIsInFragment) {
     return url;
   }
 
@@ -155,13 +153,12 @@ function isRootInput(content: string, end: number): boolean {
     }
   }
 
-  return (
-    openingBraces.length === 1 ||
-    (openingBraces.length === 2 &&
-      regEx(/(?:^|[;{])\s*inputs\s*=\s*$/).test(
-        nixSyntax.slice(0, openingBraces[1]),
-      ))
-  );
+  const isInputsBlock =
+    openingBraces.length === 2 &&
+    regEx(/(?:^|[;{])\s*inputs\s*=\s*$/).test(
+      nixSyntax.slice(0, openingBraces[1]),
+    );
+  return openingBraces.length === 1 || isInputsBlock;
 }
 
 function findInputUrl(
