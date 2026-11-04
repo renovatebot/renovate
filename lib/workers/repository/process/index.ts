@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
+import { formatValidationMessages } from '../../../config/validation-helpers/utils.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
@@ -69,9 +70,9 @@ export async function getBaseBranchConfig(
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = configFileName;
       error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
-      error.validationMessage = baseBranchConfig.errors
-        .map((e) => e.message)
-        .join(', ');
+      error.validationMessage = formatValidationMessages(
+        baseBranchConfig.errors.map((e) => e.message),
+      );
       throw error;
     }
 

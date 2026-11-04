@@ -14,6 +14,7 @@ import type {
   ValidationMessage,
 } from '../../../config/types.ts';
 import { validateConfig } from '../../../config/validation.ts';
+import { formatValidationMessages } from '../../../config/validation-helpers/utils.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
@@ -41,7 +42,9 @@ function throwInheritedConfigValidationError(
   const error = new Error(CONFIG_VALIDATION);
   error.validationSource = validationSource;
   error.validationError = inheritedConfigValidationError;
-  error.validationMessage = errors.map((err) => err.message).join(', ');
+  error.validationMessage = formatValidationMessages(
+    errors.map((err) => err.message),
+  );
   throw error;
 }
 

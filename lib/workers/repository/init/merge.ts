@@ -23,6 +23,7 @@ import type {
 } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
 import { ConfigValidationTopic } from '../../../config/validation-helpers/types.ts';
+import { formatValidationMessages } from '../../../config/validation-helpers/utils.ts';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -220,7 +221,9 @@ function throwConfigValidationError(
   const error = new Error(CONFIG_VALIDATION);
   error.validationSource = validationSource;
   error.validationError = validationError;
-  error.validationMessage = errors.map((e) => e.message).join(', ');
+  error.validationMessage = formatValidationMessages(
+    errors.map((e) => e.message),
+  );
   throw error;
 }
 

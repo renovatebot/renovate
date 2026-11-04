@@ -54,7 +54,11 @@ describe('workers/repository/reconfigure/validate', () => {
   it('adds comment if reconfigure PR exists', async () => {
     await validateReconfigureBranch(
       config,
-      { ...reconfigureConfig, enabledManagers: ['docker'] },
+      {
+        ...reconfigureConfig,
+        enabledManagers: ['docker'],
+        schedule: ['whenever'],
+      },
       configFileName,
       mock<Pr>({ number: 1 }),
     );
@@ -64,7 +68,36 @@ describe('workers/repository/reconfigure/validate', () => {
       'Validation Errors',
     );
     expect(platform.setBranchStatus).toHaveBeenCalled();
-    expect(platform.ensureComment).toHaveBeenCalled();
+    expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        content: `There is an error with this repository's Renovate configuration that needs to be fixed.
+
+Location: \`${configFileName}\`
+
+Message:
+
+- \`Invalid enabledManagers: enabledManagers had invalid values '["docker"]' which are not part of the allowedValues, which are listed at https://docs.renovatebot.com/configuration-options/#enabledmanagers\`
+- \`Invalid schedule: 'Invalid schedule: Failed to parse "whenever"'\`
+`,
+      }),
+    );
+  });
+
+  it('adds a single error to the comment on the same line', async () => {
+    await validateReconfigureBranch(
+      config,
+      { ...reconfigureConfig, schedule: ['whenever'] },
+      configFileName,
+      mock<Pr>({ number: 1 }),
+    );
+
+    expect(platform.ensureComment).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        content: expect.stringContaining(
+          `Message: \`Invalid schedule: 'Invalid schedule: Failed to parse "whenever"'\`\n`,
+        ),
+      }),
+    );
   });
 
   it('handles successful validation', async () => {

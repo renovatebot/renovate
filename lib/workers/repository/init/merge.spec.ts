@@ -1358,6 +1358,28 @@ describe('workers/repository/init/merge', () => {
       expect(res).toBeDefined();
     });
 
+    it('reports several validation errors as a list', async () => {
+      memCache.set('preset:local>injectsInvalid', {
+        notARealOption: true,
+        alsoNotARealOption: true,
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>injectsInvalid'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          configValidationError: true,
+          repositoryEntryConfig: {},
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationMessage:
+          '- Invalid configuration option: alsoNotARealOption\n- Invalid configuration option: notARealOption',
+      });
+    });
+
     it('escalates non-security resolved-preset issues to fatal under configValidationError', async () => {
       memCache.set('preset:local>injectsInvalid', { notARealOption: true });
       fs.readLocalFile.mockResolvedValue(
