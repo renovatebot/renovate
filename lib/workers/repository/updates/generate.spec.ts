@@ -3,8 +3,13 @@ import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
-import type { SharedConstraints } from '../../../modules/manager/types.ts';
+import type {
+  SharedConstraint,
+  SharedConstraints,
+} from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
+import { getParentDir } from '../../../util/fs/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchConfig } from './generate.ts';
@@ -34,15 +39,17 @@ function sharedConstraint(
   manager = 'tools',
   depName?: string,
 ): SharedConstraints {
-  const constraints: SharedConstraints['constraints'] = {};
+  const constraints: Partial<Record<ConstraintName, SharedConstraint>> = {};
   for (const [name, value] of Object.entries(values)) {
-    constraints[name as keyof typeof constraints] = {
-      depName: depName ?? name,
-      value,
-    };
+    constraints[name as ConstraintName] = { depName: depName ?? name, value };
   }
-  const directory = packageFile.split('/').slice(0, -1).join('/');
-  return { manager, packageFile, directory, precedence: 0, constraints };
+  return {
+    manager,
+    packageFile,
+    directory: getParentDir(packageFile),
+    precedence: 0,
+    constraints,
+  };
 }
 
 describe('workers/repository/updates/generate', () => {

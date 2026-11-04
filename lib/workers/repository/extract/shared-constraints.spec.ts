@@ -1,8 +1,10 @@
 import type {
   PackageFile,
+  SharedConstraint,
   SharedConstraints,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import {
   collectSharedConstraints,
@@ -19,10 +21,10 @@ function packageFile(
 
 function constraints(
   values: Record<string, string | null>,
-): SharedConstraintsScope['constraints'] {
-  const res: SharedConstraintsScope['constraints'] = {};
+): Partial<Record<ConstraintName, SharedConstraint>> {
+  const res: Partial<Record<ConstraintName, SharedConstraint>> = {};
   for (const [name, value] of Object.entries(values)) {
-    res[name as keyof typeof res] = { depName: name, value };
+    res[name as ConstraintName] = { depName: name, value };
   }
   return res;
 }

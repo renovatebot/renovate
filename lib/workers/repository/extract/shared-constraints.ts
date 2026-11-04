@@ -48,26 +48,32 @@ export function collectSharedConstraints(
 }
 
 /**
- * Returns the new value of a shared constraint which `upgrade` updates, `null` if it is no version number, or `undefined` if `upgrade` does not update it.
+ * Returns `constraint` with the new value of `upgrade`, or with `null` if that is no version number, or `undefined` if `upgrade` does not update it.
  */
-function getUpdatedValue(
-  { value }: SharedConstraint,
+function getUpdatedConstraint(
+  constraint: SharedConstraint,
   upgrade: BranchUpgradeConfig,
-): string | null | undefined {
+): SharedConstraint | undefined {
+  if (constraint.depName !== upgrade.depName) {
+    return undefined;
+  }
   // only replace the value being updated, like for the `constraints` which a branch updates
   let newValue: string | undefined;
-  if (value === upgrade.currentValue) {
+  if (constraint.value === upgrade.currentValue) {
     newValue = upgrade.newValue;
   } else if (
-    value === upgrade.lockedVersion ||
-    value === upgrade.currentVersion
+    constraint.value === upgrade.lockedVersion ||
+    constraint.value === upgrade.currentVersion
   ) {
     newValue = upgrade.newVersion;
   }
   if (!newValue) {
     return undefined;
   }
-  return versionNumberRegex.test(newValue) ? newValue : null;
+  return {
+    ...constraint,
+    value: versionNumberRegex.test(newValue) ? newValue : null,
+  };
 }
 
 function updateSharedConstraint(
@@ -84,12 +90,9 @@ function updateSharedConstraint(
       continue;
     }
     for (const [name, constraint] of Object.entries(constraints)) {
-      const value =
-        constraint.depName === upgrade.depName
-          ? getUpdatedValue(constraint, upgrade)
-          : undefined;
-      if (value !== undefined) {
-        constraints[name as ConstraintName] = { ...constraint, value };
+      const updated = getUpdatedConstraint(constraint, upgrade);
+      if (updated) {
+        constraints[name as ConstraintName] = updated;
       }
     }
   }
