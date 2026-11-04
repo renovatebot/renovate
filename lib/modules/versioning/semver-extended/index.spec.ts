@@ -28,14 +28,114 @@ describe('modules/versioning/semver-extended/index', () => {
     ${'1.2.3a'}                   | ${false}
     ${'1.2.'}                     | ${false}
     ${'.1.2'}                     | ${false}
+    ${'1.2.x'}                    | ${false}
     ${'^1.2.3'}                   | ${false}
     ${'foo'}                      | ${false}
     ${''}                         | ${false}
-  `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(semverExtended.isValid(version)).toBe(expected);
+  `('isVersion("$version") === $expected', ({ version, expected }) => {
     expect(semverExtended.isVersion(version)).toBe(expected);
-    expect(semverExtended.isSingleVersion(version)).toBe(expected);
     expect(semverExtended.isCompatible(version, '1.0.0')).toBe(expected);
+  });
+
+  it.each`
+    range                                            | expected
+    ${'1.2.3'}                                       | ${true}
+    ${'27.3.4.19'}                                   | ${true}
+    ${'17.04.0'}                                     | ${true}
+    ${'1.2'}                                         | ${true}
+    ${'1'}                                           | ${true}
+    ${'*'}                                           | ${false}
+    ${'x'}                                           | ${false}
+    ${'X'}                                           | ${false}
+    ${'x.x'}                                         | ${false}
+    ${'<*'}                                          | ${false}
+    ${'<x'}                                          | ${false}
+    ${'<x.x'}                                        | ${false}
+    ${'>*'}                                          | ${false}
+    ${'>=*'}                                         | ${false}
+    ${'<=X'}                                         | ${false}
+    ${'=*'}                                          | ${false}
+    ${'^*'}                                          | ${false}
+    ${'~x'}                                          | ${false}
+    ${'~>*'}                                         | ${false}
+    ${'* - 2.0.0'}                                   | ${false}
+    ${'1.0.0 - x'}                                   | ${false}
+    ${'^1.0.0 || *'}                                 | ${false}
+    ${'1.x'}                                         | ${true}
+    ${'>=1.x'}                                       | ${true}
+    ${'^1.x'}                                        | ${false}
+    ${'1.2.x'}                                       | ${true}
+    ${'1.2.X'}                                       | ${true}
+    ${'1.2.*'}                                       | ${true}
+    ${'1.2.3.x'}                                     | ${true}
+    ${'1.x.5'}                                       | ${true}
+    ${'1.x.5-alpha+build'}                           | ${false}
+    ${'1.2.x-beta'}                                  | ${false}
+    ${'>=1.2.x-beta.1'}                              | ${false}
+    ${'1.2.3.x+build'}                               | ${false}
+    ${'1.2.3-foo'}                                   | ${true}
+    ${'1.2-beta'}                                    | ${false}
+    ${'1.2+build'}                                   | ${false}
+    ${'1.2.3foo'}                                    | ${false}
+    ${'1.2.3.4.5.6.7.8.9.10.11'}                     | ${false}
+    ${'^1.2.3'}                                      | ${false}
+    ${'^0.6.0.1'}                                    | ${false}
+    ${'^v1.2.3'}                                     | ${false}
+    ${'~1.2.3'}                                      | ${false}
+    ${'~27.3.4.19'}                                  | ${false}
+    ${'>= >=1.2.3'}                                  | ${false}
+    ${'< <=1.2.3'}                                   | ${false}
+    ${'~>1.2'}                                       | ${false}
+    ${'~> 1.2.3.4'}                                  | ${false}
+    ${'>1.2.3'}                                      | ${true}
+    ${'>= 1.2.3 < 2'}                                | ${true}
+    ${'=1.2.3.4'}                                    | ${false}
+    ${'= 1.2.3.4'}                                   | ${false}
+    ${'==1.2.3.4'}                                   | ${false}
+    ${'=1.2'}                                        | ${false}
+    ${'1.2.3 - 2.3'}                                 | ${true}
+    ${'>=1 - 2'}                                     | ${false}
+    ${'1.2.3 - foo'}                                 | ${false}
+    ${'1.2.3 -'}                                     | ${false}
+    ${'^1.0.0 || ^2.0.0'}                            | ${false}
+    ${'1.x || >=2.0.0 <3'}                           | ${true}
+    ${'1.0.0 ||| 2.0.0'}                             | ${false}
+    ${'^1.0.0 ||'}                                   | ${false}
+    ${'|| ^1.0.0'}                                   | ${false}
+    ${'>='}                                          | ${false}
+    ${'1.2.3 <'}                                     | ${false}
+    ${'>=1.2.3<2.0.0'}                               | ${false}
+    ${'1.2.3^2.0.0'}                                 | ${false}
+    ${'1.2.3~1.2.4'}                                 | ${false}
+    ${'1.2.3foo - 2.0.0'}                            | ${false}
+    ${'1.0.0 - 2.0.0foo'}                            | ${false}
+    ${'1.0.0 -2.0.0'}                                | ${false}
+    ${'1.0.0 - 2.0.0 - 3.0.0'}                       | ${false}
+    ${'>=\n1.2.3'}                                   | ${true}
+    ${'>=  1.2.3   <2'}                              | ${true}
+    ${''}                                            | ${false}
+    ${'renovatebot/renovate'}                        | ${false}
+    ${'renovatebot/renovate#main'}                   | ${false}
+    ${'https://github.com/renovatebot/renovate.git'} | ${false}
+  `('isValid("$range") === $expected', ({ range, expected }) => {
+    expect(semverExtended.isValid(range)).toBe(expected);
+  });
+
+  it.each`
+    version              | expected
+    ${'1.2.3'}           | ${true}
+    ${'1.2.3.4-alpha.1'} | ${true}
+    ${'=1.2.3.4'}        | ${false}
+    ${'= 1.2.3.4'}       | ${false}
+    ${'==1.2.3.4'}       | ${false}
+    ${'== 1.2.3.4'}      | ${false}
+    ${'1.2'}             | ${false}
+    ${'=1.2'}            | ${false}
+    ${'1.x'}             | ${false}
+    ${'^1.2.3'}          | ${false}
+    ${'>=1.2.3'}         | ${false}
+  `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
+    expect(semverExtended.isSingleVersion(version)).toBe(expected);
   });
 
   it.each`
@@ -80,7 +180,6 @@ describe('modules/versioning/semver-extended/index', () => {
     ${'1.2.3'}                        | ${'foo'}                          | ${false}
   `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semverExtended.equals(a, b)).toBe(expected);
-    expect(semverExtended.matches(a, b)).toBe(expected);
   });
 
   it.each`
@@ -144,31 +243,126 @@ describe('modules/versioning/semver-extended/index', () => {
   });
 
   it.each`
-    version      | range        | expected
-    ${'1.2.3.3'} | ${'1.2.3.4'} | ${true}
-    ${'1.2.3.4'} | ${'1.2.3.4'} | ${false}
-    ${'1.2.3.5'} | ${'1.2.3.4'} | ${false}
+    version           | range                     | expected
+    ${'1.2.3.4'}      | ${'1.2.3.4'}              | ${true}
+    ${'1.2.3'}        | ${'1.2.3.0'}              | ${true}
+    ${'1.2.3.1'}      | ${'1.2.3'}                | ${false}
+    ${'1.2.3.4-rc.1'} | ${'1.2.3.4'}              | ${false}
+    ${'1.2.5'}        | ${'1.2'}                  | ${true}
+    ${'1.3.0'}        | ${'1.2'}                  | ${false}
+    ${'1.9.9.9'}      | ${'1'}                    | ${true}
+    ${'2.0.0'}        | ${'1'}                    | ${false}
+    ${'1.2.3.4'}      | ${'1.2.3.x'}              | ${true}
+    ${'1.2.4'}        | ${'1.2.3.x'}              | ${false}
+    ${'5.0.0'}        | ${'*'}                    | ${false}
+    ${'5.0.0'}        | ${'X'}                    | ${false}
+    ${'1.2.0'}        | ${'1.x.5'}                | ${true}
+    ${'1.2.0'}        | ${'1.x.5-alpha+build'}    | ${false}
+    ${'2.0.0'}        | ${'1.x.5'}                | ${false}
+    ${'1.2.3.5'}      | ${'>1.2.3.4'}             | ${true}
+    ${'1.2.3.4'}      | ${'>1.2.3.4'}             | ${false}
+    ${'1.2.3.4'}      | ${'<=1.2.3.4'}            | ${true}
+    ${'1.2.3.4'}      | ${'>= 1.2.3.4'}           | ${true}
+    ${'1.2.3.4'}      | ${'=1.2.3.4'}             | ${false}
+    ${'1.2.3.4'}      | ${'== 1.2.3.4'}           | ${false}
+    ${'1.2.9'}        | ${'>1.2'}                 | ${false}
+    ${'1.3.0'}        | ${'>1.2'}                 | ${true}
+    ${'1.2.0'}        | ${'>=1.2'}                | ${true}
+    ${'1.1.9'}        | ${'>=1.2'}                | ${false}
+    ${'1.1.9.9'}      | ${'<1.2'}                 | ${true}
+    ${'1.2.0'}        | ${'<1.2'}                 | ${false}
+    ${'1.2.9.9'}      | ${'<=1.2'}                | ${true}
+    ${'1.3.0'}        | ${'<=1.2'}                | ${false}
+    ${'1.2.5'}        | ${'=1.2'}                 | ${false}
+    ${'1.0.0'}        | ${'>*'}                   | ${false}
+    ${'1.0.0'}        | ${'<*'}                   | ${false}
+    ${'1.0.0'}        | ${'>=*'}                  | ${false}
+    ${'1.0.0'}        | ${'<=x'}                  | ${false}
+    ${'0.6.0.1'}      | ${'>=0.6.0.1 <0.7'}       | ${true}
+    ${'0.6.9'}        | ${'>=0.6.0.1 <0.7'}       | ${true}
+    ${'0.6.0.0'}      | ${'>=0.6.0.1 <0.7'}       | ${false}
+    ${'0.7.0'}        | ${'>=0.6.0.1 <0.7'}       | ${false}
+    ${'0.7.0-rc.1'}   | ${'>=0.6.0.1 <0.7'}       | ${false}
+    ${'1.9.0'}        | ${'1.x'}                  | ${true}
+    ${'2.0.0-rc.1'}   | ${'1.x'}                  | ${false}
+    ${'1.5.0'}        | ${'^1.2.3'}               | ${false}
+    ${'1.2.9'}        | ${'~1.2.3'}               | ${false}
+    ${'1.2.9'}        | ${'~>1.2.3'}              | ${false}
+    ${'1.2.3-beta.4'} | ${'>=1.2.3-beta.2 <2'}    | ${true}
+    ${'1.2.4-beta'}   | ${'>=1.2.3-beta.2 <2'}    | ${false}
+    ${'1.2.3'}        | ${'>=1.2.3-beta.2 <2'}    | ${true}
+    ${'2.3.9'}        | ${'1.2.3 - 2.3'}          | ${true}
+    ${'2.4.0'}        | ${'1.2.3 - 2.3'}          | ${false}
+    ${'1.2.2'}        | ${'1.2.3 - 2.3'}          | ${false}
+    ${'2.3.4.5'}      | ${'1.2.3.4 - 2.3.4.5'}    | ${true}
+    ${'2.3.4.6'}      | ${'1.2.3.4 - 2.3.4.5'}    | ${false}
+    ${'1.2.0'}        | ${'1.2 - 2'}              | ${true}
+    ${'2.9.0'}        | ${'1.2 - 2'}              | ${true}
+    ${'3.0.0'}        | ${'1.2 - 2'}              | ${false}
+    ${'0.0.1'}        | ${'* - 2.0.0'}            | ${false}
+    ${'9.0.0'}        | ${'1.0.0 - *'}            | ${false}
+    ${'1.2.0'}        | ${'1.x || *'}             | ${false}
+    ${'2.5.0'}        | ${'1.x || 2.x'}           | ${true}
+    ${'3.0.0'}        | ${'1.x || 2.x'}           | ${false}
+    ${'1.2.3.9'}      | ${'>=1.2.3.4 <1.2.4'}     | ${true}
+    ${'1.2.4'}        | ${'>=1.2.3.4 <1.2.4'}     | ${false}
+    ${'1.2.3-beta'}   | ${'>=1.2.3-alpha <2.0.0'} | ${true}
+    ${'1.3.0-beta'}   | ${'>=1.2.3-alpha <2.0.0'} | ${false}
+    ${'1.2.3.4-rc.1'} | ${'>=1.2.3.4-rc.0'}       | ${true}
+    ${'1.2.3-rc.1'}   | ${'>=1.2.3.0-rc.0'}       | ${true}
+    ${'foo'}          | ${'1.x'}                  | ${false}
+    ${'1.2.3'}        | ${'foo'}                  | ${false}
   `(
-    'isLessThanRange("$version", "$range") === $expected',
+    'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(semverExtended.isLessThanRange?.(version, range)).toBe(expected);
+      expect(semverExtended.matches(version, range)).toBe(expected);
     },
   );
 
   it.each`
-    versions                         | range        | expected
-    ${['1.2.3', '1.2.3.4', '1.2.4']} | ${'1.2.3.4'} | ${'1.2.3.4'}
-    ${['1.2.3', '1.2.4']}            | ${'1.2.3.0'} | ${'1.2.3'}
-    ${['1.2.3', '1.2.4']}            | ${'1.2.3.4'} | ${null}
+    versions                                          | range             | max          | min
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'*'}            | ${null}      | ${null}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'x'}            | ${null}      | ${null}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2'}            | ${'2.5.1'}   | ${'2.3.4'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*'}          | ${'2.5.1'}   | ${'2.3.4'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.*.3'}        | ${'2.5.1'}   | ${'2.3.4'}
+    ${['4.2.1', '4.2.5', '4.3.0']}                    | ${'4.*.0 <4.2.5'} | ${'4.2.1'}   | ${'4.2.1'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3'}          | ${'2.3.4'}   | ${'2.3.4'}
+    ${['2.3.3.', '2.3.4', '2.4.5', '2.5.1', '3.0.0']} | ${'2.3.*'}        | ${'2.3.4'}   | ${'2.3.4'}
+    ${['1.0.0', '1.2.0', '2.0.0']}                    | ${'1.x.5'}        | ${'1.2.0'}   | ${'1.0.0'}
+    ${['0.6.0.2', '0.6.1', '0.7.0', '0.6.0.1']}       | ${'0.6'}          | ${'0.6.1'}   | ${'0.6.0.1'}
+    ${['1.2.3', '1.2.3.4', '1.2.4']}                  | ${'1.2.3.4'}      | ${'1.2.3.4'} | ${'1.2.3.4'}
+    ${['1.2.3', '1.2.4']}                             | ${'1.2.3.0'}      | ${'1.2.3'}   | ${'1.2.3'}
+    ${['1.2.3', '1.2.4']}                             | ${'1.2.3.4'}      | ${null}      | ${null}
   `(
-    'getSatisfyingVersion($versions, "$range") === $expected',
-    ({ versions, range, expected }) => {
-      expect(semverExtended.getSatisfyingVersion(versions, range)).toBe(
-        expected,
-      );
-      expect(semverExtended.minSatisfyingVersion(versions, range)).toBe(
-        expected,
-      );
+    'getSatisfyingVersion/minSatisfyingVersion($versions, "$range") === $max/$min',
+    ({ versions, range, max, min }) => {
+      expect(semverExtended.getSatisfyingVersion(versions, range)).toBe(max);
+      expect(semverExtended.minSatisfyingVersion(versions, range)).toBe(min);
+    },
+  );
+
+  it.each`
+    version      | range               | expected
+    ${'0.9.0'}   | ${'1.x.5'}          | ${true}
+    ${'1.2.0'}   | ${'1.x.5'}          | ${false}
+    ${'1.2.3.3'} | ${'1.2.3.4'}        | ${true}
+    ${'1.2.3.4'} | ${'1.2.3.4'}        | ${false}
+    ${'1.2.3.5'} | ${'1.2.3.4'}        | ${false}
+    ${'1.2.3.4'} | ${'>1.2.3.4'}       | ${true}
+    ${'1.2.3.5'} | ${'>1.2.3.4'}       | ${false}
+    ${'1.0.0'}   | ${'>=1.0.0'}        | ${false}
+    ${'0.6.0.0'} | ${'>=0.6.0.1 <0.7'} | ${true}
+    ${'0.6.0.1'} | ${'>=0.6.0.1 <0.7'} | ${false}
+    ${'0.5.0'}   | ${'<1.0.0'}         | ${false}
+    ${'0.5.0'}   | ${'1.x || 2.x'}     | ${true}
+    ${'1.5.0'}   | ${'1.x || 2.x'}     | ${false}
+    ${'foo'}     | ${'1.x'}            | ${false}
+    ${'1.0.0'}   | ${'foo'}            | ${false}
+  `(
+    'isLessThanRange("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(semverExtended.isLessThanRange?.(version, range)).toBe(expected);
     },
   );
 
@@ -208,17 +402,19 @@ describe('modules/versioning/semver-extended/index', () => {
   );
 
   it.each`
-    currentValue  | currentVersion | newVersion    | expected
-    ${'1.2.3.4'}  | ${'1.2.3.4'}   | ${'1.2.3.5'}  | ${'1.2.3.5'}
-    ${'v1.2.3.4'} | ${'v1.2.3.4'}  | ${'v1.2.3.5'} | ${'v1.2.3.5'}
-    ${'1.2.3.4'}  | ${'v1.2.3.4'}  | ${'v1.2.3.5'} | ${'1.2.3.5'}
+    currentValue  | rangeStrategy | currentVersion | newVersion    | expected
+    ${'1.2.3.4'}  | ${'replace'}  | ${'1.2.3.4'}   | ${'1.2.3.5'}  | ${'1.2.3.5'}
+    ${'v1.2.3.4'} | ${'replace'}  | ${'v1.2.3.4'}  | ${'v1.2.3.5'} | ${'v1.2.3.5'}
+    ${'1.2.3.4'}  | ${'replace'}  | ${'v1.2.3.4'}  | ${'v1.2.3.5'} | ${'1.2.3.5'}
+    ${'1.2.3'}    | ${'pin'}      | ${'1.2.3.5'}   | ${'1.2.3.5'}  | ${'1.2.3.5'}
+    ${'0.6'}      | ${'pin'}      | ${'0.6.0.3'}   | ${'0.6.0.3'}  | ${'0.6.0.3'}
   `(
-    'getNewValue("$currentValue", "$currentVersion", "$newVersion") === "$expected"',
-    ({ currentValue, currentVersion, newVersion, expected }) => {
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
       expect(
         semverExtended.getNewValue({
           currentValue,
-          rangeStrategy: 'replace',
+          rangeStrategy,
           currentVersion,
           newVersion,
         }),
