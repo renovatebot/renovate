@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.10.19 linux-x64 (2026-10-24)"
+    "version": "2026.10.25 linux-x64 (2026-10-31)"
   },
   "tools": {
     "1password": {
@@ -382,6 +382,9 @@
     },
     "black": {
       "aqua": "psf/black"
+    },
+    "blaze": {
+      "github": "indexable-inc/blaze"
     },
     "blender": {
       "aqua": "blender/blender"
@@ -1728,7 +1731,9 @@
       "asdf": "virtualstaticvoid/asdf-istioctl"
     },
     "jactionlint": {
-      "github": "jdx/jactionlint"
+      "aqua": "jdx/jactionlint",
+      "github": "jdx/jactionlint",
+      "packslip": "github.com/jdx/jactionlint"
     },
     "janet": {
       "github": "janet-lang/janet"
@@ -1787,6 +1792,10 @@
     "jnv": {
       "aqua": "ynqa/jnv",
       "asdf": "raimon49/asdf-jnv"
+    },
+    "jouet": {
+      "github": "jdx/jouet",
+      "packslip": "github.com/jdx/jouet"
     },
     "jq": {
       "aqua": "jqlang/jq",
@@ -2639,6 +2648,7 @@
       "go": "github.com/DarthSim/overmind/v2"
     },
     "oxfmt": {
+      "aqua": "oxc-project/oxc/oxfmt",
       "npm": "oxfmt"
     },
     "oxipng": {
@@ -3699,6 +3709,10 @@
     "ttyd": {
       "aqua": "tsl0922/ttyd",
       "asdf": "ivanvc/asdf-ttyd"
+    },
+    "tuios": {
+      "aqua": "Gaurav-Gosain/tuios",
+      "github": "Gaurav-Gosain/tuios"
     },
     "tuist": {
       "aqua": "tuist/tuist",

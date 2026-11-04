@@ -19,6 +19,7 @@ import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { getGoEnv } from '../../datasource/go/env.ts';
 import { isValid } from '../../versioning/semver/index.ts';
 import type {
   PackageDependency,
@@ -141,11 +142,14 @@ export async function updateArtifacts({
   // the go workspaces are used.
   const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
   const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
-  const useVendor =
-    !!config.postUpdateOptions?.includes('gomodVendor') ||
-    (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
-      vendorDir &&
-      (await readLocalFile(vendorModulesFileName)) !== null);
+  let useVendor = !!config.postUpdateOptions?.includes('gomodVendor');
+  if (
+    !useVendor &&
+    !config.postUpdateOptions?.includes('gomodSkipVendor') &&
+    vendorDir
+  ) {
+    useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  }
   let massagedGoMod = newGoModContent;
   const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
   const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
@@ -217,14 +221,15 @@ export async function updateArtifacts({
 
     const cmd = 'go';
     const env = getEnv();
+    const goEnv = getGoEnv(true);
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,
       extraEnv: {
         GOPATH: await ensureCacheDir('go'),
-        GOPROXY: env.GOPROXY,
-        GOPRIVATE: env.GOPRIVATE,
-        GONOPROXY: env.GONOPROXY,
-        GONOSUMDB: env.GONOSUMDB,
+        GOPROXY: goEnv.GOPROXY,
+        GOPRIVATE: goEnv.GOPRIVATE,
+        GONOPROXY: goEnv.GONOPROXY,
+        GONOSUMDB: goEnv.GONOSUMDB,
         GOSUMDB: env.GOSUMDB,
         GOINSECURE: env.GOINSECURE,
         /* v8 ignore next -- TODO: add test */
@@ -307,13 +312,15 @@ export async function updateArtifacts({
     // dependent modules can only be tidied once the updated module is settled
     const isGoModTidyAllRequired =
       config.postUpdateOptions?.includes('gomodTidyAll') === true;
-    const isGoModTidyRequired =
-      !mustSkipGoModTidy &&
-      (config.postUpdateOptions?.includes('gomodTidy') === true ||
-        config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
-        config.postUpdateOptions?.includes('gomodTidyE') === true ||
-        isGoModTidyAllRequired ||
-        (config.updateType === 'major' && isImportPathUpdateRequired));
+    const isMajorImportPathUpdate =
+      config.updateType === 'major' && isImportPathUpdateRequired;
+    const isTidyEnabled =
+      config.postUpdateOptions?.includes('gomodTidy') === true ||
+      config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
+      config.postUpdateOptions?.includes('gomodTidyE') === true ||
+      isGoModTidyAllRequired ||
+      isMajorImportPathUpdate;
+    const isGoModTidyRequired = !mustSkipGoModTidy && isTidyEnabled;
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');

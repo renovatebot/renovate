@@ -307,7 +307,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
   if (
     e instanceof CommanderError &&
-    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+    ['commander.helpDisplayed', 'commander.version'].includes(e.code)
   ) {
     return;
   }

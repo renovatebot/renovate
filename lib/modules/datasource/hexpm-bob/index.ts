@@ -3,9 +3,13 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { id as semverId } from '../../versioning/semver/index.ts';
+import {
+  api as semver,
+  id as semverId,
+} from '../../versioning/semver/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
@@ -73,7 +77,7 @@ export class HexpmBobDatasource extends Datasource {
           };
         });
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+      if (err instanceof HttpError && !isNotFound(err)) {
         throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
@@ -116,8 +120,15 @@ export class HexpmBobDatasource extends Datasource {
 
   private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
-      case 'elixir':
-        return regEx(/^v\d+\.\d+\.\d+(?:$|-otp)/).test(version);
+      case 'elixir': {
+        // `-otp-<n>` builds of a stable release are stable too
+        const release = version.split('-otp')[0];
+        return (
+          release.startsWith('v') &&
+          semver.isVersion(release) &&
+          semver.isStable(release)
+        );
+      }
       case 'erlang':
         return version.startsWith('OTP-');
     }
