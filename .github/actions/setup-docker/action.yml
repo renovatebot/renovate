@@ -8,15 +8,22 @@ runs:
     - run: df -h
       shell: bash
 
-    - name: Check for old vm with low disk space
+    # A multi-platform image build and release use about 24 GB, so keep some headroom
+    - name: Check for low disk space
       id: check
       shell: bash
+      env:
+        MIN_FREE_GB: '40'
       run: |
+        free=$(df --output=avail -BG / | tail -n 1 | tr -dc '0-9')
         if [[ -e /dev/sdb1 ]]; then
           echo "::warning::We're on old vm, running cleanup"
           echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
+        elif (( free < MIN_FREE_GB )); then
+          echo "::warning::Only ${free} GB free, running cleanup"
+          echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
         else
-          echo "::notice::We're on new vm, no cleanup required"
+          echo "::notice::${free} GB free, no cleanup required"
           echo "do-cleanup=false" >> "$GITHUB_OUTPUT"
         fi
 
