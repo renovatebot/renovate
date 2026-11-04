@@ -12,6 +12,36 @@ const cnbContent = Fixtures.get(`full_cnb.pom.xml`);
 
 describe('modules/manager/maven/update', () => {
   describe('updateDependency', () => {
+    it('leaves a dependency unchanged when it already has the target version', () => {
+      const res = updateDependency({
+        fileContent: simpleContent,
+        packageFile: 'pom.xml',
+        upgrade: {
+          depName: 'org.example:foo',
+          currentValue: '0.0.0',
+          fileReplacePosition: 905,
+          newValue: '0.0.1',
+        },
+      });
+
+      expect(res).toBe(simpleContent);
+    });
+
+    it('does not overwrite a dependency with an unexpected version', () => {
+      const res = updateDependency({
+        fileContent: simpleContent,
+        packageFile: 'pom.xml',
+        upgrade: {
+          depName: 'org.example:foo',
+          currentValue: '0.0.0',
+          fileReplacePosition: 905,
+          newValue: '0.0.2',
+        },
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('should update version', () => {
       const res = updateDependency({
         fileContent: simpleContent,
