@@ -661,7 +661,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
             releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
           },
@@ -686,7 +686,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
             releaseTimestamp: new Date().toISOString() as Timestamp,
           },
