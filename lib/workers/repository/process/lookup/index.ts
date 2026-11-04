@@ -88,6 +88,24 @@ async function getTimestamp(
   return remoteRelease?.releaseTimestamp;
 }
 
+function isCompatibleRelease(
+  release: Release,
+  config: LookupUpdateConfig,
+  versioningApi: allVersioning.VersioningApi,
+  compareValue: string | undefined,
+  unconstrainedValue: boolean,
+): boolean {
+  if (config.isLockfileOnly) {
+    return true;
+  }
+
+  // Leave only compatible versions
+  return (
+    unconstrainedValue ||
+    versioningApi.isCompatible(release.version, compareValue)
+  );
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
 ): Promise<Result<UpdateResult>> {
@@ -411,17 +429,6 @@ export async function lookupUpdates(
         res.skipReason = 'invalid-version';
         return Result.ok(res);
       }
-      const isCompatibleRelease = (v: Release): boolean => {
-        if (config.isLockfileOnly) {
-          return true;
-        }
-
-        // Leave only compatible versions
-        return (
-          unconstrainedValue ||
-          versioningApi.isCompatible(v.version, compareValue)
-        );
-      };
       // Filter latest, unstable, etc
       // TODO #22198
       let filteredReleases = filterVersions(
@@ -430,19 +437,37 @@ export async function lookupUpdates(
         latestVersion!,
         inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
-      ).filter(isCompatibleRelease);
-      const fixFallbackCandidates =
+      ).filter((release) =>
+        isCompatibleRelease(
+          release,
+          config,
+          versioningApi,
+          compareValue,
+          unconstrainedValue,
+        ),
+      );
+      let fixFallbackCandidates: Release[] = [];
+      if (
         config.isVulnerabilityAlert &&
         config.vulnerabilityFixStrategy !== 'highest' &&
         isNonEmptyArray(config.vulnerabilityFixVersions)
-          ? filterVersions(
-              { ...config, allowedVersions: undefined },
-              currentVersion,
-              latestVersion!,
-              inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
-              versioningApi,
-            ).filter(isCompatibleRelease)
-          : [];
+      ) {
+        fixFallbackCandidates = filterVersions(
+          { ...config, allowedVersions: undefined },
+          currentVersion,
+          latestVersion!,
+          inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+          versioningApi,
+        ).filter((release) =>
+          isCompatibleRelease(
+            release,
+            config,
+            versioningApi,
+            compareValue,
+            unconstrainedValue,
+          ),
+        );
+      }
       const vulnerabilityFix = applyVulnerabilityFixFilter(
         config,
         res,
