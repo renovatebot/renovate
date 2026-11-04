@@ -1,6 +1,10 @@
 import { isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../config/global.ts';
+import type { UrlReplacement } from '../../config/types.ts';
+import { coerceArray } from '../array.ts';
+import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
+import { isHttpUrlPrefix, parseUrl } from '../url.ts';
 
 export const basicEnvVars = [
   'HTTP_PROXY',
@@ -53,12 +57,64 @@ export const hardcodedProcessEnv: Readonly<NodeJS.ProcessEnv> = {
   CI: 'true',
 } as const;
 
+const urlReplaceRegex = regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/);
+
+// existing `URL_REPLACE_<n>_*` indexes from this one up don't move the start of the numbering, but are still skipped
+const maxUrlReplaceIndex = 1_000_000;
+
+/**
+ * Returns whether `rule` replaces a whole host for every host type.
+ */
+function isHostReplacement(rule: UrlReplacement): boolean {
+  return (
+    isUndefined(rule.matchHostTypes) &&
+    isHttpUrlPrefix(rule.matchUrlPrefix) &&
+    isHttpUrlPrefix(rule.replaceUrlPrefix) &&
+    parseUrl(rule.matchUrlPrefix)!.pathname === '/'
+  );
+}
+
+/**
+ * Returns the global `urlReplacements` which replace a whole host as containerbase `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` variables, numbered after those in `process.env`, `customEnvVariables` and the repository's `env`.
+ */
+function getUrlReplacementEnv(): NodeJS.ProcessEnv {
+  const existingKeys = new Set(
+    Object.keys(getEnv()).filter((key) => urlReplaceRegex.test(key)),
+  );
+  const existingIndexes = [...existingKeys]
+    .map((key) => parseInt(key.slice('URL_REPLACE_'.length), 10))
+    .filter(
+      (index) => Number.isSafeInteger(index) && index < maxUrlReplaceIndex,
+    );
+  let index = Math.max(0, ...existingIndexes);
+
+  const env: NodeJS.ProcessEnv = {};
+  for (const rule of coerceArray(GlobalConfig.get('urlReplacements')).filter(
+    isHostReplacement,
+  )) {
+    // skip any number an existing variable uses, whatever its size
+    do {
+      index += 1;
+    } while (
+      existingKeys.has(`URL_REPLACE_${index}_FROM`) ||
+      existingKeys.has(`URL_REPLACE_${index}_TO`)
+    );
+    env[`URL_REPLACE_${index}_FROM`] = rule.matchUrlPrefix;
+    env[`URL_REPLACE_${index}_TO`] = rule.replaceUrlPrefix;
+  }
+  return env;
+}
+
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
-    return { ...process.env, ...hardcodedProcessEnv };
+    return {
+      ...process.env,
+      ...getUrlReplacementEnv(),
+      ...hardcodedProcessEnv,
+    };
   }
   const envVars = [...basicEnvVars, ...customEnvVars];
   envVars.forEach((envVar) => {
@@ -69,10 +125,11 @@ export function getChildProcessEnv(
 
   // Copy containerbase url replacements
   for (const key of Object.keys(process.env)) {
-    if (regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/).test(key)) {
+    if (urlReplaceRegex.test(key)) {
       env[key] = process.env[key];
     }
   }
+  Object.assign(env, getUrlReplacementEnv());
 
   for (const [key, value] of Object.entries(hardcodedProcessEnv)) {
     env[key] = value;

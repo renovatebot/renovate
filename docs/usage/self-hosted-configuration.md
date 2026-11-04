@@ -1694,7 +1694,8 @@ Leave `sbt` out of `matchHostTypes` unless your mirror lists the remote content.
 A mirror caches metadata such as `maven-metadata.xml`, so new releases can show up later than on the original registry.
 Set the mirror's metadata cache time to the delay you accept, for example "Maximum metadata age" in Nexus (24 hours by default) or "Metadata Retrieval Cache Period" in Artifactory.
 
-The rewrite only applies to the HTTP requests Renovate makes itself, not to package manager commands.
+The rewrite applies to the HTTP requests Renovate makes itself.
+Rules which replace a whole host are also passed to containerbase in child processes, see below.
 Registry URLs, lookup results and cache keys keep the original URL.
 
 It is not applied to Docker registries, use [`registryAliases`](./configuration-options.md#registryaliases) for those.
@@ -1723,6 +1724,19 @@ If the mirror is on an internal host, it needs its own host rule in your global 
 !!! warning
   `urlReplacements` is not a security or egress control.
   Requests with credentials for rules which aren't `public`, requests to Docker registries, requests whose host type isn't in `matchHostTypes`, URLs which don't match a `matchUrlPrefix`, redirects to other hosts, and [`fallback`](#urlreplacementsfallback) requests still go to the original or redirected host.
+
+Renovate also passes the rules which replace a whole host, like `https://repo.example.com/`, and have no `matchHostTypes` to child processes, as the `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` environment variables of containerbase.
+They are numbered after any `URL_REPLACE_*` variables which the child process already gets from Renovate's environment, `customEnvVariables` or the repository's `env`, in the order of `urlReplacements`.
+Containerbase applies them to its tool downloads, like `install-tool`, and to the npm, pip and gem registry it uses to install npm-, pip- and gem-based tools.
+It doesn't apply them to the requests of the package managers Renovate runs.
+Other rules only apply to Renovate's own requests, and `public` and `fallback` don't apply in child processes.
+
+The exported rules don't take effect when:
+
+- `CONTAINERBASE_CDN` is set, as containerbase then replaces `https://` with the CDN first, so the rules no longer match
+- `binarySource=docker` is used, as the sidecar container only gets the environment variables Renovate explicitly passes to it
+
+Don't put secrets, like a token, in the prefixes of rules which replace a whole host: they are passed to child processes, which can run repository code.
 
 ### `urlReplacements.fallback`
 
