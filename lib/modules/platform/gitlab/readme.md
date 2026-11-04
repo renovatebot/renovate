@@ -1,5 +1,22 @@
 # GitLab
 
+## Easiest way to run Renovate
+
+For users on GitLab.com, the easiest way to get started is to install the Mend-hosted Renovate app [by following these instructions](https://docs.mend.io/integrations/latest/install-mend-developer-platform-for-gitlab-com) when logging into [the Mend Developer Platform](https://developer.mend.io).
+When you use the app, Mend will:
+
+- authenticate Renovate to GitLab.com
+- keep the tokens safe
+- maintain and update the Renovate version used
+
+If you self-host Renovate you must do the things listed above yourself.
+Self-hosting is meant for users with advanced use cases, or who want to be in full control of the bot and the environment it runs in.
+We recommend most users install the Mend-hosted app.
+
+Read the [GitLab security](../../../gitlab-bot-security.md) page to learn about the security model for both the Mend-hosted app and self-hosted deployments.
+
+After you installed the hosted app, please read the [reading list](../../../reading-list.md) to learn how to use and configure Renovate.
+
 ## Authentication
 
 You can authenticate Renovate to GitLab, with _one_ of these methods:
@@ -12,22 +29,22 @@ You can authenticate Renovate to GitLab, with _one_ of these methods:
 
 To start, create either:
 
-- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) for the bot account
+- a [Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) for the Renovate account
 - or a [Project Access Token](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#create-a-project-access-token) if Renovate only needs to check and update _one_ project. We do not recommend Project Access Tokens, as you need to configure Renovate, and the token, for _each_ project
 - or a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#create-a-group-access-token-using-ui) to the group Renovate will be working on
 
-#### Bot or token must have at least developer role
+#### Renovate account or token must have at least developer role
 
-The bot account, or token, must have at least the Developer role.
+The Renovate account, or token, must have at least the Developer role.
 The developer role allows Renovate to [create issues and merge requests](https://docs.gitlab.com/ee/user/permissions.html#project-members-permissions).
 
 #### If you want Renovate to automerge, give appropriate permissions
 
-If you are using automerge, the bot account, or token, must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
+If you are using automerge, the Renovate account, or token, must have the appropriate ["Allowed to merge" permission on the protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html#require-everyone-to-submit-merge-requests-for-a-protected-branch) of your projects.
 
 #### If only maintainers are allowed to merge, give Maintainer role
 
-If merging is restricted to Maintainers, the bot account or token must have the Maintainer role.
+If merging is restricted to Maintainers, the Renovate account or token must have the Maintainer role.
 
 #### Setting up Project Access Tokens or Group Access Tokens
 
@@ -97,6 +114,7 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Do not truncate Markdown body to 25K chars since `v13.4.0`
 - Allow configure reviewers since `v13.9.0`
 - Add automerged MRs to merge trains since `v17.11.0` (when [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/) are enabled on the project)
+- With `platformAutomerge=false`, Renovate adds MRs to the merge train itself once all checks have passed, see [GitLab Merge Trains](../../../key-concepts/automerge.md#gitlab-merge-trains)
 
 ## Multiple merge request assignees
 

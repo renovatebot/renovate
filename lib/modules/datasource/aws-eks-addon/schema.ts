@@ -10,6 +10,7 @@ export const EksAddonsFilter = Json.pipe(
       .regex(regEx('^[a-z0-9][a-z0-9-]*[a-z0-9]$')),
     kubernetesVersion: z
       .string()
+      // oxlint-disable-next-line renovate/prefer-versioning-helpers -- EKS addon lookups need exactly the `major.minor` Kubernetes release, which no versioning models
       .regex(regEx('^(?<major>\\d+)\\.(?<minor>\\d+)$'))
       .optional(),
     default: z

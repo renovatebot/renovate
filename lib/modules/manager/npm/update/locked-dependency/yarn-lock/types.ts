@@ -18,12 +18,3 @@ export interface YarnLockEntrySummary {
 export interface YarnLockEntryUpdate extends YarnLockEntrySummary {
   newVersion: string;
 }
-
-export interface ParentDependency {
-  depType?: string;
-  parentDepName?: string;
-  parentConstraint?: string;
-  parentVersion?: string;
-  childName: string;
-  childConstraint: string;
-}

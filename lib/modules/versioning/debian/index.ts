@@ -1,8 +1,11 @@
 import type { RangeStrategy } from '../../../types/index.ts';
 import { DistroInfo } from '../distro.ts';
-import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
-import type { NewValueConfig, VersioningApi } from '../types.ts';
+import type {
+  GenericVersion,
+  NewValueConfig,
+  VersioningApi,
+} from '../types.ts';
 import {
   RollingReleasesData,
   getDatedContainerImageCodename,
@@ -34,10 +37,10 @@ export class DebianVersioningApi extends GenericVersioningApi {
     let ver: string;
     ver = this._rollingReleases.getVersionByLts(version);
     ver = this._distroInfo.getVersionByCodename(ver);
-    return (
-      (isValid && this._distroInfo.isCreated(ver)) ||
-      isDatedCodeName(version, this._distroInfo)
-    );
+    if (isValid && this._distroInfo.isCreated(ver)) {
+      return true;
+    }
+    return isDatedCodeName(version, this._distroInfo);
   }
 
   override isStable(version: string): boolean {

@@ -313,6 +313,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e CI ' +
             '-e GRADLE_OPTS ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
@@ -364,6 +365,30 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         {
           cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
           options: { cwd: '/tmp/github/some/repo' },
+        },
+      ]);
+    });
+
+    it('prefers the derived Java version over the extracted constraint', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config: { ...config, extractedConstraints: { java: '8.0.1' } },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool java 11.0.1' },
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
         },
       ]);
     });

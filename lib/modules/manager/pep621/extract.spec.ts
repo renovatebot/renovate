@@ -409,6 +409,33 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
+    it('should apply the index registryUrl for array form uv sources', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+        [project]
+        dependencies = ["dep1==0.1.0"]
+
+        [[tool.uv.index]]
+        name = "custom"
+        url = "https://custom.example.com/simple"
+        explicit = true
+
+        [tool.uv.sources]
+        dep1 = [{ index = "custom" }]
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          currentValue: '==0.1.0',
+          registryUrls: ['https://custom.example.com/simple'],
+        },
+      ]);
+    });
+
     it('should handle SSH git URLs correctly for GitHub sources', async () => {
       const result = await extractPackageFile(
         codeBlock`

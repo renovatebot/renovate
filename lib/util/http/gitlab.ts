@@ -5,6 +5,12 @@ import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { getEnv } from '../env.ts';
 import { parseLinkHeader, parseUrl } from '../url.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import {
+  isBadRequest,
+  isConflict,
+  isNotFound,
+  isRateLimitedOrServerError,
+} from './status.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -72,8 +78,11 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           } else {
             // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
             logger.once.warn(
-              { requestHost: resolvedUrl.host, paginationHost: nextUrl.host },
-              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+              {
+                requestOrigin: resolvedUrl.origin,
+                paginationOrigin: nextUrl.origin,
+              },
+              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different origin in pagination links.',
             );
           }
         }
@@ -90,16 +99,13 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     err: Error,
   ): never {
     if (err instanceof RequestError && err.response?.statusCode) {
-      if (err.response.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.trace({ err }, 'GitLab 404');
         logger.debug({ url }, 'GitLab API 404');
         throw err;
       }
       logger.debug({ err }, 'Gitlab API error');
-      if (
-        err.response.statusCode === 429 ||
-        (err.response.statusCode >= 500 && err.response.statusCode < 600)
-      ) {
+      if (isRateLimitedOrServerError(err)) {
         throw new ExternalHostError(err, 'gitlab');
       }
     }
@@ -149,12 +155,12 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
  */
 function isRetryablePostError(error: RequestError): boolean {
   const { response } = error;
-  if (response?.statusCode === 409) {
-    return response.rawBody.toString().includes('Resource lock');
+  if (isConflict(response)) {
+    return Buffer.from(response!.rawBody).toString().includes('Resource lock');
   }
 
-  if (response?.statusCode === 400) {
-    const rawBody = response.rawBody.toString();
+  if (isBadRequest(response)) {
+    const rawBody = Buffer.from(response!.rawBody).toString();
     return (
       rawBody.includes('source_branch') && rawBody.includes('does not exist')
     );

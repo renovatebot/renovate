@@ -283,6 +283,7 @@ describe('modules/versioning/rust-release-channel/index', () => {
     ${'1.82.0'}             | ${'pin'}      | ${'1.82.0'}             | ${'1.82.0'}
     ${'invalid'}            | ${'replace'}  | ${'1.83.0'}             | ${null}
     ${'1.82.0'}             | ${'replace'}  | ${'invalid'}            | ${null}
+    ${'1.82.0'}             | ${'replace'}  | ${'stable'}             | ${'stable'}
   `(
     'getNewValue({ currentValue: "$currentValue", rangeStrategy: "$rangeStrategy", newVersion: "$newVersion" }) === $expected',
     ({ currentValue, rangeStrategy, newVersion, expected }) => {

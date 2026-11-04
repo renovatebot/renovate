@@ -24,6 +24,7 @@ describe('util/cache/package/impl/redis', () => {
 
   describe('PackageCacheRedis', () => {
     const clientMock = {
+      on: vi.fn(),
       connect: vi.fn(),
       set: vi.fn(),
       del: vi.fn(),
@@ -49,6 +50,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis://host', undefined);
 
         expect(createClient).toHaveBeenCalledWith({
+          RESP: 2,
           pingInterval: 30000,
           socket: { reconnectStrategy: expect.any(Function) },
           url: 'redis://host',
@@ -64,6 +66,27 @@ describe('util/cache/package/impl/redis', () => {
         expect(reconnectStrategy(100)).toBe(3000);
       });
 
+      it('logs connection errors instead of throwing them', async () => {
+        await PackageCacheRedis.create('redis://host', undefined);
+
+        expect(clientMock.on).toHaveBeenCalledWith(
+          'error',
+          expect.any(Function),
+        );
+        const onError = clientMock.on.mock.calls[0][1] as (err: Error) => void;
+        const err = new Error('Socket closed unexpectedly');
+
+        expect(() => onError(err)).not.toThrow();
+        expect(logger.once.warn).toHaveBeenCalledWith(
+          { err },
+          'Redis cache connection error',
+        );
+        expect(logger.debug).toHaveBeenCalledWith(
+          { err },
+          'Redis cache connection error',
+        );
+      });
+
       it('initializes single-node client with secure url', async () => {
         await PackageCacheRedis.create('rediss://host', '');
 
@@ -76,6 +99,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           rootNodes: [
             {
               pingInterval: 30000,
@@ -93,6 +117,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://user:pass@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { username: 'user', password: 'pass' },
           rootNodes: [
             expect.objectContaining({
@@ -106,6 +131,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://user@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { username: 'user' },
           rootNodes: [
             expect.objectContaining({
@@ -119,6 +145,7 @@ describe('util/cache/package/impl/redis', () => {
         await PackageCacheRedis.create('redis+cluster://:pass@host', '');
 
         expect(createCluster).toHaveBeenCalledWith({
+          RESP: 2,
           defaults: { password: 'pass' },
           rootNodes: [
             expect.objectContaining({
@@ -143,7 +170,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
         // Redis cleanup uses native TTL, so it must not rewrite on read.
         expect(clientMock.set).not.toHaveBeenCalled();
       });
@@ -156,7 +185,9 @@ describe('util/cache/package/impl/redis', () => {
           await encodeEntry(value, DateTime.local()),
         );
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
       });
 
       // TODO: Delete this legacy JSON-wrapper expiry case once legacy.ts is
@@ -172,7 +203,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -186,7 +219,9 @@ describe('util/cache/package/impl/redis', () => {
         const payload = JSON.stringify({ value: payloadValue });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -203,7 +238,9 @@ describe('util/cache/package/impl/redis', () => {
         });
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
@@ -212,7 +249,9 @@ describe('util/cache/package/impl/redis', () => {
 
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(logger.once.debug).toHaveBeenCalledWith(
           { err: expect.any(Error) },
           'Error while reading package cache value',
@@ -226,7 +265,9 @@ describe('util/cache/package/impl/redis', () => {
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
         clientMock.del.mockRejectedValueOnce(new Error('delete failed'));
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
         expect(logger.once.debug).toHaveBeenCalledWith(
           { err: expect.any(Error) },
           'Error while removing package cache value',
@@ -238,7 +279,9 @@ describe('util/cache/package/impl/redis', () => {
 
         binaryClientMock.get.mockResolvedValueOnce(null);
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
       });
 
       it('returns undefined on error', async () => {
@@ -248,7 +291,9 @@ describe('util/cache/package/impl/redis', () => {
           new Error('connection lost'),
         );
 
-        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        await expect(
+          cache.get('_test-namespace', 'key'),
+        ).resolves.toBeUndefined();
       });
     });
 
@@ -279,7 +324,9 @@ describe('util/cache/package/impl/redis', () => {
         const [, rawPayload] = vi.mocked(clientMock.set).mock.calls[0];
         binaryClientMock.get.mockResolvedValueOnce(rawPayload);
 
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        await expect(cache.get('_test-namespace', 'key')).resolves.toEqual(
+          value,
+        );
       });
 
       it('deletes entry with non-positive TTL', async () => {

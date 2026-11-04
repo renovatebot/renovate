@@ -26,8 +26,8 @@ export function get(versioning: string | null | undefined): VersioningApi {
 
   if (!res.success) {
     const [issue] = res.error.issues;
-    // oxlint-disable-next-line typescript/prefer-optional-chain
-    if (issue && issue.code === 'custom' && issue.params?.error) {
+    // v8 ignore else -- a string input can only fail with the custom issue
+    if (issue?.code === 'custom' && issue.params?.error) {
       throw issue.params.error;
     }
 

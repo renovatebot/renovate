@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": [
+    // referenced by name as a vitest coverage reporter
+    "@containerbase/istanbul-reports-html",
+    // used for types via `declare module 'commander'` in lib/commander.d.ts
+    "@commander-js/extra-typings",
+    // semantic-release `preset: conventionalcommits` in .releaserc.json
+    "conventional-changelog-conventionalcommits",
+    // JSON files are read from node_modules by tools/generate-imports.mjs
+    "emojibase-data",
+    // referenced by name as a formatter in .markdownlint-cli2.mjs
+    "markdownlint-cli2-formatter-template"
+  ],
+  // external tools installed by mise, not npm
+  "ignoreBinaries": ["uv", "mise"]
+}
