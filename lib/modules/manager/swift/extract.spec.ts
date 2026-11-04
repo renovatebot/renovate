@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { extractPackageFile } from './extract.ts';
 
@@ -592,6 +593,35 @@ describe('modules/manager/swift/extract', () => {
             currentValue: 'from: "1.0.0"',
           },
         ]);
+      });
+
+      it('does not treat "id" inside a package name as an id-form dep', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(name: "Rapid", url: "https://github.com/acme/rapid", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toMatchObject([
+          {
+            datasource: GithubTagsDatasource.id,
+            depName: 'acme/rapid',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('ignores an id-form dep that has no version requirement', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib"),
+            ]
+          )
+        `;
+        expect(extractPackageFile(content)).toBeNull();
       });
     });
 

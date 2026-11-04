@@ -1287,5 +1287,32 @@ describe('modules/manager/swift/artifacts', () => {
       const { contents } = result![0].file as { contents: string };
       expect(contents).toContain('"version": "1.5.0"');
     });
+
+    it('matches a pin when the dep identity differs in case', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      // SwiftPM lowercases identities in Package.resolved, so a dep that keeps
+      // the original casing must still match the lowercased pin.
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Acme.SomeLib',
+            packageName: 'Acme.SomeLib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+    });
   });
 });

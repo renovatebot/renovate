@@ -54,7 +54,11 @@ function matchPinForDep(
     if (!identity) {
       return null;
     }
-    return pins.find((pin) => pin.identity === identity) ?? null;
+    // SwiftPM lowercases identities in Package.resolved, so compare case-insensitively.
+    const lowerIdentity = identity.toLowerCase();
+    return (
+      pins.find((pin) => pin.identity.toLowerCase() === lowerIdentity) ?? null
+    );
   }
 
   let depUrl: string;

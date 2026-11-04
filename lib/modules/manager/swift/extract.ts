@@ -24,8 +24,11 @@ const regExps = {
   beginSection: regEx(/\[/),
   endSection: regEx(/],?/),
   package: regEx(/\s*.\s*package\s*\(\s*/),
-  urlKey: regEx(/url/),
-  idKey: regEx(/id/),
+  // Word boundary so `id`/`url` inside a package name (e.g. `name: "Valid"`)
+  // is not mistaken for the label. RE2 has no lookahead, so the following
+  // colon is matched as a separate token by the state machine.
+  urlKey: regEx(/\burl/),
+  idKey: regEx(/\bid/),
   stringLiteral: regEx(/"[^"]+"/),
   comma: regEx(/,/),
   from: regEx(/from/),
@@ -214,7 +217,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       return;
     }
     if (currentForm === 'id') {
-      /* v8 ignore next: currentValue is always set before id-form yieldDep is reached on valid input */
       if (currentValue) {
         const dep: PackageDependency = {
           datasource: SwiftPackageRegistryDatasource.id,
