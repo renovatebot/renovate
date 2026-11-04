@@ -199,7 +199,9 @@ export async function postUpgradeCommandsExecutor(
 
                 execOpts.toolConstraints.push({
                   toolName: tool,
-                  constraint: upgrade.constraints?.[tool],
+                  constraint: validConstraint
+                    ? upgrade.constraints?.[tool]
+                    : undefined,
                 });
               }
             }
