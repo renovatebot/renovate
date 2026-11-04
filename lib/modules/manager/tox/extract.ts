@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { PackageFileContent } from '../types.ts';
 import type { ToxConfig } from './schema.ts';
 import { ToxFile, ToxPyProject } from './schema.ts';
@@ -46,8 +47,8 @@ export function extractPackageFile(
 
   const deps = [
     ...config.requires,
-    ...(config.env_run_base?.deps ?? []),
-    ...(config.env ?? []),
+    ...coerceArray(config.env_run_base?.deps),
+    ...coerceArray(config.env),
   ];
 
   return deps.length ? { deps } : null;
