@@ -202,6 +202,14 @@ export function getNewConstraint(
   return newValue;
 }
 
+/**
+ * Renovate resolves provider versions itself during lock file maintenance and
+ * applies `minimumReleaseAge` to them, see `getLatestAllowedVersion`.
+ */
+export function enforcesMinimumReleaseAge(): boolean {
+  return true;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,

@@ -6,7 +6,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { asTimestamp } from '../../../../util/timestamp.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
-import { updateArtifacts } from '../index.ts';
+import { enforcesMinimumReleaseAge, updateArtifacts } from '../index.ts';
 import { TerraformProviderHash } from './hash.ts';
 import { getNewConstraint } from './index.ts';
 
@@ -1560,5 +1560,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
         ),
       ).toBe('>= 5.81.0, ~> 6.0');
     });
+  });
+
+  it('enforces minimumReleaseAge during lock file maintenance', () => {
+    expect(enforcesMinimumReleaseAge()).toBeTrue();
   });
 });

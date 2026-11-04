@@ -9,7 +9,10 @@ import { TerraformModuleDatasource } from '../../datasource/terraform-module/ind
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider/index.ts';
 
 export { extractPackageFile } from './extract.ts';
-export { updateArtifacts } from './lockfile/index.ts';
+export {
+  enforcesMinimumReleaseAge,
+  updateArtifacts,
+} from './lockfile/index.ts';
 export { updateLockedDependency } from './lockfile/update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
