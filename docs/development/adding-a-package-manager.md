@@ -132,11 +132,17 @@ The helper applies, in this order:
 
 1. the user's `constraints` config
 2. a value your manager derives from the updated package files, if you pass a callback
-3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+3. the `extractedConstraints` that `extractPackageFile` collected on the base branch, followed by the constraints that other managers share for the package file's directory
 
 The third step matters during `lockFileMaintenance`.
 Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
 The value collected during extraction keeps the tool version constrained in that case.
+
+A manager whose files set tool versions for a whole directory tree, like `mise`, can share them with the package files of other managers by returning a `sharedConstraintsScope` from `extractPackageFile`.
+Renovate adds them to the `extractedConstraints` of the package files in that directory and below, so a package file's own `extractedConstraints` win over shared ones.
+Within a manager, the nearest directory wins, then the higher `precedence`.
+Between managers, the order in `lib/workers/repository/extract/shared-constraints.ts` decides.
+Share a `null` value for a tool version which is no constraint, like the Rust channel `stable`, so that it hides the version of a parent directory.
 
 The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
 

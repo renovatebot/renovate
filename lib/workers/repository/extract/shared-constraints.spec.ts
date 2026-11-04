@@ -102,6 +102,22 @@ describe('workers/repository/extract/shared-constraints', () => {
         shared('apps/web/tools.toml', { pnpm: '9.15.0' }, 'apps/web'),
       ]);
     });
+
+    it('orders the package files by manager before depth and precedence', () => {
+      const packageFiles = {
+        mise: [packageFile('mise.toml', scope({ rust: '1.80.0' }))],
+        tools: [packageFile('a/tools.toml', scope({ rust: null }, 'a', 9))],
+        other: [
+          packageFile('a/b/other.toml', scope({ rust: '1.85.0' }, 'a/b')),
+        ],
+      };
+
+      expect(collectSharedConstraints(packageFiles)).toEqual([
+        shared('a/b/other.toml', { rust: '1.85.0' }, 'a/b', 0, 'other'),
+        shared('a/tools.toml', { rust: null }, 'a', 9),
+        shared('mise.toml', { rust: '1.80.0' }, '', 0, 'mise'),
+      ]);
+    });
   });
 
   describe('getSharedConstraints()', () => {
@@ -173,6 +189,34 @@ describe('workers/repository/extract/shared-constraints', () => {
           collectSharedConstraints(packageFiles),
           'consumer',
           file,
+        );
+
+        expect(res).toEqual(expected);
+      },
+    );
+
+    it.each`
+      mise                  | expected
+      ${{ rust: '1.80.0' }} | ${{ rust: '1.80.0' }}
+      ${{ rust: null }}     | ${{}}
+      ${{ node: '22.0.0' }} | ${{ node: '22.0.0', rust: '1.85.0' }}
+    `(
+      'returns $expected for the mise tools $mise over a nested rust-toolchain file',
+      ({ mise, expected }) => {
+        const packageFiles = {
+          mise: [packageFile('mise.toml', scope(mise))],
+          'rust-toolchain': [
+            packageFile(
+              'fuzz/rust-toolchain.toml',
+              scope({ rust: '1.85.0' }, 'fuzz'),
+            ),
+          ],
+        };
+
+        const res = getSharedConstraints(
+          collectSharedConstraints(packageFiles),
+          'cargo',
+          'fuzz/Cargo.toml',
         );
 
         expect(res).toEqual(expected);

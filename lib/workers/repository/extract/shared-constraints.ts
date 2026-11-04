@@ -22,13 +22,24 @@ function isInScope(directory: string, packageFile: string): boolean {
 }
 
 /**
- * Orders the sources by depth, then by precedence, then by path in byte order, the order in which mise loads the `conf.d` files of a directory.
+ * The managers whose shared constraints win over those of the other managers, the last one winning, like `mise` over a `rust-toolchain.toml` in any directory, as mise sets `RUSTUP_TOOLCHAIN`, which rustup prefers over a toolchain file.
+ */
+const managerOrder = ['mise'];
+
+function compareBytes(a: string, b: string): number {
+  return Buffer.compare(Buffer.from(a), Buffer.from(b));
+}
+
+/**
+ * Orders the sources by manager, see {@link managerOrder}, else by name, and the sources of a manager by depth, then by precedence, then by path in byte order, the order in which mise loads the `conf.d` files of a directory.
  */
 function compareSources(a: SharedConstraints, b: SharedConstraints): number {
   return (
+    managerOrder.indexOf(a.manager) - managerOrder.indexOf(b.manager) ||
+    compareBytes(a.manager, b.manager) ||
     getDepth(a.directory) - getDepth(b.directory) ||
     a.precedence - b.precedence ||
-    Buffer.compare(Buffer.from(a.packageFile), Buffer.from(b.packageFile))
+    compareBytes(a.packageFile, b.packageFile)
   );
 }
 

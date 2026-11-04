@@ -453,7 +453,7 @@ export interface SharedConstraint {
 export interface SharedConstraintsScope {
   /** The directory, relative to the repository root, whose package files and subdirectories the constraints apply to */
   directory: string;
-  /** Decides between package files of the same directory, the higher one wins */
+  /** Decides between package files of the manager in the same directory, the higher one wins */
   precedence: number;
   /** The shared constraints, which unlike `extractedConstraints` do not apply to the package file itself */
   constraints: Partial<Record<ConstraintName, SharedConstraint>>;
