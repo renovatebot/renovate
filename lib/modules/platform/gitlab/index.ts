@@ -999,14 +999,13 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  return (
-    prList.find(
-      (p: { sourceBranch: string; title: string; state: string }) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    ) ?? null
+  const pr = prList.find(
+    (p: { sourceBranch: string; title: string; state: string }) =>
+      p.sourceBranch === branchName &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
+      matchesState(p.state, state),
   );
+  return pr ?? null;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.

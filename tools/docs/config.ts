@@ -151,12 +151,11 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     if (key === 'env' && !val) {
       ignoredKeys.push('env');
     }
-    if (
-      !ignoredKeys.includes(el[0]) ||
-      (el[0] === 'default' &&
-        (typeof el[1] !== 'object' || ['array', 'object'].includes(type)) &&
-        name !== 'prBody')
-    ) {
+    const isShownDefault =
+      el[0] === 'default' &&
+      (typeof el[1] !== 'object' || ['array', 'object'].includes(type)) &&
+      name !== 'prBody';
+    if (!ignoredKeys.includes(el[0]) || isShownDefault) {
       if (type === 'string' && el[0] === 'default') {
         el[1] = `<code>"${el[1]}"</code>`;
       }
@@ -167,10 +166,12 @@ function genTable(obj: [string, string][], type: string, def: any): string {
       ) {
         el[1] = `<code>${el[1]}</code>`;
       }
+      // objects and arrays should be printed in JSON notation
+      const isObjectOrArrayValue =
+        (type === 'object' || type === 'array') &&
+        (el[0] === 'default' || el[0] === 'additionalProperties');
       if (
-        // objects and arrays should be printed in JSON notation
-        ((type === 'object' || type === 'array') &&
-          (el[0] === 'default' || el[0] === 'additionalProperties')) ||
+        isObjectOrArrayValue ||
         // enum values for `allowedValues` should be printed in JSON notation
         el[0] === 'allowedValues' ||
         // previous names should be printed in JSON notation

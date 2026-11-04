@@ -178,10 +178,9 @@ export abstract class Datasource<
       this.handleHttpErrors(err);
 
       const statusCode = err.response?.statusCode;
-      if (
-        statusCode &&
-        (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
-      ) {
+      const isServerError =
+        !!statusCode && statusCode >= 500 && statusCode < 600;
+      if (statusCode === 429 || isServerError) {
         throw new ExternalHostError(err);
       }
     }

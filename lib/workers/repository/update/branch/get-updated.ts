@@ -225,11 +225,9 @@ export async function getUpdatedPackageFiles(
         config,
       );
     }
+    const isLockFileMissing = !!lockFile && !lockFileContent;
     // istanbul ignore if
-    if (
-      reuseExistingBranch &&
-      (!packageFileContent || (lockFile && !lockFileContent))
-    ) {
+    if (reuseExistingBranch && (!packageFileContent || isLockFileMissing)) {
       logger.debug(
         { packageFile, depName },
         'Rebasing branch after file not found',

@@ -316,6 +316,27 @@ function isWithinHost(matchHost: string, adminMatchHost: string): boolean {
 }
 
 /**
+ * Whether the admin granted `allowInternal` for every host `matchHost` can reach. A `null` entry is a grant without host restriction.
+ */
+function isCoveredByAdminHosts(
+  adminHosts: Set<string | null> | undefined,
+  matchHost: string | undefined,
+): boolean {
+  if (!adminHosts) {
+    return false;
+  }
+  if (adminHosts.has(null)) {
+    return true;
+  }
+  return (
+    !!matchHost &&
+    [...adminHosts].some(
+      (adminHost) => adminHost !== null && isWithinHost(matchHost, adminHost),
+    )
+  );
+}
+
+/**
  * Migrate a config, tolerating a migration which throws.
  *
  * `hostRules` migration throws when a rule carries more than one host-matching field. That is per-rule invalid config which {@link applyHostRules} logs and skips over, keeping the rest of the run going, so migrating a whole config here must not escalate it into an error which aborts the repository.
@@ -449,16 +470,7 @@ function withoutAdminSuppliedValues(
         const adminHosts = admin.internalGrants.get(
           filtered.allowInternal.toString(),
         );
-        const covered =
-          adminHosts &&
-          (adminHosts.has(null) ||
-            (!!filtered.matchHost &&
-              [...adminHosts].some(
-                (adminHost) =>
-                  adminHost !== null &&
-                  isWithinHost(filtered.matchHost!, adminHost),
-              )));
-        if (covered) {
+        if (isCoveredByAdminHosts(adminHosts, filtered.matchHost)) {
           delete filtered.allowInternal;
         }
       }

@@ -289,10 +289,9 @@ export function generateBranchConfig(
   const singleUpdateGroup =
     hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
   logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
-  const useGroupSettings =
-    hasGroupName &&
-    (groupEligible ||
-      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
+  const groupSingleUpdate =
+    singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true;
+  const useGroupSettings = hasGroupName && (groupEligible || groupSingleUpdate);
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 

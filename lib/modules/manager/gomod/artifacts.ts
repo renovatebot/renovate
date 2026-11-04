@@ -309,13 +309,15 @@ export async function updateArtifacts({
     // dependent modules can only be tidied once the updated module is settled
     const isGoModTidyAllRequired =
       config.postUpdateOptions?.includes('gomodTidyAll') === true;
+    const isMajorImportPathUpdate =
+      config.updateType === 'major' && isImportPathUpdateRequired;
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         isGoModTidyAllRequired ||
-        (config.updateType === 'major' && isImportPathUpdateRequired));
+        isMajorImportPathUpdate);
     if (isGoModTidyRequired) {
       args = `mod tidy${modFileFlag}${tidyOpts}`;
       logger.debug('go mod tidy command included');

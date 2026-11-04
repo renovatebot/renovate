@@ -263,12 +263,11 @@ export async function ensurePr(
         logger.debug(`Branch status is yellow - checking timeout`);
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const elapsedHours = getElapsedHours(lastCommitTime);
-        if (
-          !dependencyDashboardCheck &&
-          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (isNumber(config.prNotPendingHours) &&
-              elapsedHours < config.prNotPendingHours))
-        ) {
+        const isAwaitingTests =
+          (!!config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
+          (isNumber(config.prNotPendingHours) &&
+            elapsedHours < config.prNotPendingHours);
+        if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
