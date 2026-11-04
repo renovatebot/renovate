@@ -942,6 +942,7 @@ export interface DependencyDashboardConfig {
   labels?: string[];
   osvVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   reportAbandonment?: boolean;
+  pinned?: boolean;
   customize?: Record<string, string>;
 }
 

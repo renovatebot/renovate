@@ -1567,6 +1567,14 @@ This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
+### `dependencyDashboard.pinned`
+
+Controls whether the Dependency Dashboard should be pinned.
+
+When disabled (default), the Dependency Dashboard won't be pinned.
+
+Set this to `true` if you prefer the dDependency Dashboard to be pinned.
+
 ### `dependencyDashboard.reportAbandonment`
 
 Controls whether abandoned packages are reported in the Dependency Dashboard.
