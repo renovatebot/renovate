@@ -4,6 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
@@ -53,7 +54,7 @@ function groupLockUpdatesByImporter(
       lockFileDir,
       upath.dirname(upgrade.packageFile),
     );
-    byImporter.set(importer, [...(byImporter.get(importer) ?? []), upgrade]);
+    byImporter.set(importer, [...coerceArray(byImporter.get(importer)), upgrade]);
   }
   return byImporter;
 }
