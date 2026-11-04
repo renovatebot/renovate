@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
@@ -331,14 +332,14 @@ describe('modules/manager/mix/extract', () => {
     });
 
     it('treats hexpm repos as hex.pm itself', async () => {
-      const content = [
-        'defp deps do',
-        '  [',
-        '    {:plug, "~> 1.0", repo: "hexpm"},',
-        '    {:secret, "~> 1.0", repo: "hexpm:acme"}',
-        '  ]',
-        'end',
-      ].join('\n');
+      const content = codeBlock`
+        defp deps do
+          [
+            {:plug, "~> 1.0", repo: "hexpm"},
+            {:secret, "~> 1.0", repo: "hexpm:acme"}
+          ]
+        end
+      `;
 
       const res = await extractPackageFile(content, 'mix.exs', {});
 

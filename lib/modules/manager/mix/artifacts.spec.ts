@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '~test/exec-util.ts';
@@ -373,7 +374,7 @@ describe('modules/manager/mix/artifacts', () => {
       '-----BEGIN RSA PUBLIC KEY-----\nabc\n-----END RSA PUBLIC KEY-----';
     const hexHome = upath.join(privateCacheDir, 'hex');
     const keyFile = upath.join(hexHome, 'oban.pem');
-    const mixExs = `
+    const mixExs = codeBlock`
       defp deps do
         [{:oban_pro, "~> 1.7", repo: "oban"}]
       end
@@ -479,7 +480,7 @@ describe('modules/manager/mix/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'plug' }],
-        newPackageFileContent: `
+        newPackageFileContent: codeBlock`
           defp deps do
             # [{:oban_pro, "~> 1.7", repo: "oban"}]
             [{:plug, "~> 1.0"}]
@@ -502,7 +503,7 @@ describe('modules/manager/mix/artifacts', () => {
       await updateArtifacts({
         packageFileName: 'mix.exs',
         updatedDeps: [{ depName: 'secret' }],
-        newPackageFileContent: `
+        newPackageFileContent: codeBlock`
           defp deps do
             [{:secret, "~> 1.0", repo: "hexpm:acme"}, {:plug, "~> 1.0", repo: "hexpm"}]
           end
