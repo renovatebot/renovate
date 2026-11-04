@@ -50,6 +50,8 @@ Location: \`package.json\`
 Error type: some-error
 
 Message: some-message
+
+Once this is resolved, Renovate will close this issue automatically on its next successful run.
 `;
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -79,7 +81,10 @@ Message: some-message
       await raiseConfigWarningIssue(config, error);
 
       const { body } = platform.ensureIssue.mock.calls[0][0];
-      expect(body).toEndWith(`Location: \`renovate.json\`
+      expect(body)
+        .toBe(`There is an error with this repository's Renovate configuration that needs to be fixed. As a precaution, Renovate will stop PRs until it is resolved.
+
+Location: \`renovate.json\`
 
 Error type: some-error
 
@@ -87,6 +92,10 @@ Message:
 
 - first error
 - second error
+
+If the error is in a Renovate configuration file, you can check your changes before committing them with [\`renovate-config-validator\`](https://docs.renovatebot.com/config-validation/).
+
+Once this is resolved, Renovate will close this issue automatically on its next successful run.
 `);
     });
 
@@ -138,6 +147,9 @@ Message:
       expect(platform.updatePr).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ prTitle: pr.title, number: pr.number }),
       );
+      const { prBody } = platform.updatePr.mock.calls[0][0];
+      expect(prBody).toContain('renovate-config-validator');
+      expect(prBody).not.toContain('close this issue automatically');
     });
 
     it('handles onboarding (dryRun)', async () => {
