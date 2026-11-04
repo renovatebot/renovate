@@ -29,6 +29,13 @@ export class BaseGoDatasource {
   private static readonly gitVcsRegexp = regEx(
     /^(?:[^/]+)\/(?<module>.*)\.git(?:$|\/)/,
   );
+  private static readonly goImportRegexp = regEx(
+    /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
+  );
+  private static readonly goImportAllRegexp = regEx(
+    BaseGoDatasource.goImportRegexp.source,
+    'g',
+  );
 
   private static readonly id = 'go';
   private static readonly http = new Http(BaseGoDatasource.id);
@@ -78,7 +85,7 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('dev.azure.com/')) {
       const split = goModule.split('/');
-      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
+      if (split.length > 3) {
         const packageName = `https://dev.azure.com/${split[1]}/${split[2]}/_git/${(split[3] === '_git' ? split[4] : split[3]).replace(regEx(/\.git$/), '')}`;
         return {
           datasource: GitTagsDatasource.id,
@@ -122,12 +129,72 @@ export class BaseGoDatasource {
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
+  /**
+   * Returns the module proxy URL that a `go-import` meta tag with the `mod` VCS advertises for the module.
+   *
+   * @see https://go.dev/ref/mod#serving-from-proxy
+   */
+  static async getModProxyUrl(goModule: string): Promise<string | null> {
+    const html = await BaseGoDatasource.goGet(goModule);
+    return BaseGoDatasource.findModProxyUrl(html, goModule);
+  }
+
+  /**
+   * Finds the first `go-import` meta tag with the `mod` VCS whose prefix is a path prefix of the module.
+   *
+   * The proxy URL is controlled by the host serving the page, so only a valid `https:` URL is accepted, as with `go` (unless `GOINSECURE` is set).
+   */
+  private static findModProxyUrl(
+    html: string,
+    goModule: string,
+  ): string | null {
+    for (const match of html.matchAll(BaseGoDatasource.goImportAllRegexp)) {
+      const { prefix, proto, goImportURL } = match.groups as Record<
+        string,
+        string
+      >;
+
+      if (
+        proto !== 'mod' ||
+        !(goModule === prefix || goModule.startsWith(`${prefix}/`))
+      ) {
+        continue;
+      }
+
+      if (parseUrl(goImportURL)?.protocol !== 'https:') {
+        logger.debug(
+          { goModule, goImportURL },
+          'Ignoring go-import mod proxy URL which is not a valid https URL',
+        );
+        continue;
+      }
+
+      return goImportURL;
+    }
+
+    return null;
+  }
+
+  private static async goGet(goModule: string): Promise<string> {
+    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
+    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
+    const { body } = await BaseGoDatasource.http.getText(pkgUrl);
+    return body;
+  }
+
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const goModuleUrl = goModule.replace(regEx(/\.git(?:\/[a-z0-9/]*)?$/), '');
-    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
-    const { body: html } = await BaseGoDatasource.http.getText(pkgUrl);
+    const html = await BaseGoDatasource.goGet(goModule);
+
+    // `go` prefers a `mod` proxy over a VCS for the same module, so leave it to the caller to look it up
+    if (BaseGoDatasource.findModProxyUrl(html, goModule)) {
+      logger.debug(
+        { goModule },
+        'Preferring go-import mod proxy over other go-import and go-source entries',
+      );
+      return null;
+    }
 
     const goSourceHeader = BaseGoDatasource.goSourceHeader(html, goModule);
     if (goSourceHeader) {
@@ -248,9 +315,8 @@ export class BaseGoDatasource {
     html: string,
     goModule: string,
   ): DataSource | null {
-    const importMatchGroups = regEx(
-      /<meta\s+name="?go-import"?\s+content="(?<prefix>[^"\s]+)\s+(?<proto>[^"\s]+)\s+(?<goImportURL>[^"\s]+)/,
-    ).exec(html)?.groups;
+    const importMatchGroups =
+      BaseGoDatasource.goImportRegexp.exec(html)?.groups;
     if (!importMatchGroups) {
       logger.trace({ goModule }, 'No go-source or go-import header found');
       return null;

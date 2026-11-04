@@ -27,6 +27,7 @@ import {
 } from '../util.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
+import { getLockfilePoetryVersion } from './utils.ts';
 
 const gitExec = withGitEnvironment(['poetry']);
 
@@ -64,28 +65,14 @@ export function getPoetryRequirement(
   pyProjectContent: string,
   existingLockFileContent: string,
 ): undefined | string | null {
-  // Read Poetry version from first line of poetry.lock
-  const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = regEx(/by Poetry (?<version>[\d\\.]+)/).exec(
-    firstLine,
-  );
-  if (poetryVersionMatch?.groups?.version) {
-    const poetryVersion = poetryVersionMatch.groups.version;
-    logger.debug(
-      `Using poetry version ${poetryVersion} from poetry.lock header`,
-    );
-    return poetryVersion;
-  }
-
-  const { val: lockfilePoetryConstraint } = Result.parse(
+  const lockfilePoetryVersion = getLockfilePoetryVersion(
     existingLockFileContent,
-    Lockfile.transform(({ poetryConstraint }) => poetryConstraint),
-  ).unwrap();
-  if (lockfilePoetryConstraint) {
+  );
+  if (lockfilePoetryVersion) {
     logger.debug(
-      `Using poetry version ${lockfilePoetryConstraint} from poetry.lock metadata`,
+      `Using poetry version ${lockfilePoetryVersion} from poetry.lock`,
     );
-    return lockfilePoetryConstraint;
+    return lockfilePoetryVersion;
   }
 
   const { val: pyprojectPoetryConstraint } = Result.parse(

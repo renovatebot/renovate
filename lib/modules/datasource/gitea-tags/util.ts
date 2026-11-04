@@ -2,8 +2,8 @@ import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 
 /**
- * URL helpers shared by the datasources which speak the Gitea
- * API (`gitea-tags`, `gitea-releases`, `forgejo-tags`, `forgejo-releases`).
+ * URL helpers shared by the datasources which speak the Gitea API
+ * (`gitea-tags`, `gitea-releases`, `forgejo-tags`, `forgejo-releases`).
  *
  * All of them take an already resolved registry URL, so each datasource
  * applies its own default registry URL before calling them.

@@ -3,7 +3,7 @@ import type {
   ReadableSpan,
   Span,
   SpanProcessor,
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace';
 import { ATTR_VCS_GIT_OPERATION_TYPE } from '../../instrumentation/types.ts';
 import { GitOperationStats } from '../stats.ts';
 import type { GitOperationType } from './types.ts';

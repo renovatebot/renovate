@@ -41,8 +41,3 @@ export interface PoetrySource {
 export interface PoetryGroup {
   dependencies: Record<string, PoetryDependency | string>;
 }
-
-export interface PoetryLockSection {
-  name?: string;
-  version?: string;
-}

@@ -458,6 +458,25 @@ describe('modules/versioning/rez/index', () => {
   });
 
   it.each`
+    currentValue  | newVersion | expected
+    ${'1.0'}      | ${'3.2.1'} | ${'3.2.1'}
+    ${'==1.0'}    | ${'3.2.1'} | ${'3.2.1'}
+    ${'1.0..2.0'} | ${'3.2.1'} | ${'3.2.1'}
+  `(
+    'getNewValue() uses the full replacement version for $currentValue',
+    ({ currentValue, newVersion, expected }) => {
+      const res = versioning.getNewValue({
+        currentValue,
+        rangeStrategy: 'replace',
+        newVersion,
+        isReplacement: true,
+      });
+
+      expect(res).toBe(expected);
+    },
+  );
+
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {

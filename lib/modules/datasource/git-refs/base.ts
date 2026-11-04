@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { createSimpleGit } from '../../../util/git/index.ts';
 import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
@@ -150,7 +151,8 @@ export abstract class GitDatasource extends Datasource {
     }
 
     return {
-      sourceUrl: this.getSourceUrl(packageName),
+      // the result is cached, while `packageName` may carry the credentials the refs are listed with
+      sourceUrl: withoutUrlCredentials(this.getSourceUrl(packageName)),
       releases: Object.values(releases),
     };
   }

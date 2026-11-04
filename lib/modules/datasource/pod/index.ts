@@ -9,6 +9,11 @@ import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import type { HttpError } from '../../../util/http/index.ts';
+import {
+  isNotFound,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
@@ -62,15 +67,14 @@ function releasesGithubUrl(
 function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
-  const statusCode = err.response?.statusCode ?? 0;
-  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
+  if (isRateLimitedOrServerError(err)) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (statusCode === 401) {
+  if (isUnauthorized(err)) {
     logger.debug(errorData, 'Authorization error');
-  } else if (statusCode === 404) {
+  } else if (isNotFound(err)) {
     logger.debug(errorData, 'Package lookup error');
   } else if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
     logger.trace(errorData, refusedHostMessage(err));

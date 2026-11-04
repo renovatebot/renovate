@@ -6,6 +6,7 @@ import { createDecompressStream } from '../../../../util/compress.ts';
 import * as fs from '../../../../util/fs/index.ts';
 import { toSha256 } from '../../../../util/hash.ts';
 import type { Http, HttpOptions } from '../../../../util/http/index.ts';
+import { isNotModified } from '../../../../util/http/status.ts';
 import { acquireLock } from '../../../../util/mutex.ts';
 import type { ReleaseResult } from '../../types.ts';
 import { datasource } from '../common.ts';
@@ -65,7 +66,7 @@ async function checkIfModified(
 
   try {
     const response = await http.head(url, options);
-    return response.statusCode !== 304;
+    return !isNotModified(response);
   } catch (err) {
     logger.warn(
       {
