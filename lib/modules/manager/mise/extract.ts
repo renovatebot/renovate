@@ -205,10 +205,10 @@ function getInstalledVersion(
 ): string | null {
   const version = parseVersion(getPrimaryToolValue(toolData));
   // mise locks an alias like `nodejs` under the name of the tool
-  const lockedVersion =
-    lockFileData &&
-    (getLockedVersion(lockFileData, depName) ??
-      getLockedVersion(lockFileData, constraintName));
+  const lockedVersion = lockFileData
+    ? (getLockedVersion(lockFileData, depName) ??
+      getLockedVersion(lockFileData, constraintName))
+    : undefined;
   return lockedVersion && isLockedVersionOf(lockedVersion, version)
     ? lockedVersion
     : version;
