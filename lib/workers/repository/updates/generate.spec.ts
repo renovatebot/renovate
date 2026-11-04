@@ -8,7 +8,7 @@ import type {
   SharedConstraints,
 } from '../../../modules/manager/types.ts';
 import { coerceArray } from '../../../util/array.ts';
-import type { ConstraintName } from '../../../util/exec/types.ts';
+import { type ConstraintName, isToolName } from '../../../util/exec/types.ts';
 import { getParentDir } from '../../../util/fs/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
@@ -41,7 +41,9 @@ function sharedConstraint(
 ): SharedConstraints {
   const constraints: Partial<Record<ConstraintName, SharedConstraint>> = {};
   for (const [name, value] of Object.entries(values)) {
-    constraints[name as ConstraintName] = { depName: depName ?? name, value };
+    if (isToolName(name)) {
+      constraints[name] = { depName: depName ?? name, value };
+    }
   }
   return {
     manager,

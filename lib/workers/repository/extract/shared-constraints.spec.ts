@@ -4,7 +4,10 @@ import type {
   SharedConstraints,
   SharedConstraintsScope,
 } from '../../../modules/manager/types.ts';
-import type { ConstraintName } from '../../../util/exec/types.ts';
+import {
+  type ConstraintName,
+  isConstraintName,
+} from '../../../util/exec/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import {
   collectSharedConstraints,
@@ -24,7 +27,9 @@ function constraints(
 ): Partial<Record<ConstraintName, SharedConstraint>> {
   const res: Partial<Record<ConstraintName, SharedConstraint>> = {};
   for (const [name, value] of Object.entries(values)) {
-    res[name as ConstraintName] = { depName: name, value };
+    if (isConstraintName(name)) {
+      res[name] = { depName: name, value };
+    }
   }
   return res;
 }
@@ -116,6 +121,16 @@ describe('workers/repository/extract/shared-constraints', () => {
       expect(
         getSharedConstraints(sharedConstraints, 'npm', packageFile),
       ).toEqual(expected);
+    });
+
+    it('ignores constraints which are no tools', () => {
+      expect(
+        getSharedConstraints(
+          [shared('tools.toml', { go: '1.22.0', node: '20.11.0' })],
+          'npm',
+          'package.json',
+        ),
+      ).toEqual({ node: '20.11.0' });
     });
 
     it('ignores constraints outside of the directory', () => {

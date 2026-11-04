@@ -99,19 +99,17 @@ function updateSharedConstraint(
   if (!updates.length) {
     return shared;
   }
-  const constraints = Object.fromEntries(
-    Object.entries(shared.constraints).map(([name, constraint]) => [
-      name,
-      // the managers only share the constraints of tools
-      isToolName(name)
-        ? updates.reduce(
-            (current, upgrade) =>
-              getUpdatedConstraint(name, current, upgrade) ?? current,
-            constraint,
-          )
-        : constraint,
-    ]),
-  );
+  const constraints = { ...shared.constraints };
+  for (const [name, constraint] of Object.entries(shared.constraints)) {
+    // the managers only share the constraints of tools
+    if (isToolName(name)) {
+      let current = constraint;
+      for (const upgrade of updates) {
+        current = getUpdatedConstraint(name, current, upgrade) ?? current;
+      }
+      constraints[name] = current;
+    }
+  }
   return { ...shared, constraints };
 }
 
@@ -146,8 +144,8 @@ export function getSharedConstraints(
   }
   const constraints: Partial<Record<ConstraintName, string>> = {};
   for (const [name, { value }] of Object.entries(merged)) {
-    if (value !== null) {
-      constraints[name as ConstraintName] = value;
+    if (value !== null && isToolName(name)) {
+      constraints[name] = value;
     }
   }
   return constraints;
