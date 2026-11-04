@@ -4,7 +4,8 @@ import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
-import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { newlineRegex } from '../../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../../util/string.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
 import type { LazyPackageJson } from './types.ts';
@@ -12,9 +13,9 @@ import type { LazyPackageJson } from './types.ts';
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
     // TODO #22198
-    const constraint = (await readLocalFile(filename, 'utf8'))!
-      .split(newlineRegex)[0]
-      .replace(regEx(/^v/), '');
+    const constraint = stripVersionPrefix(
+      (await readLocalFile(filename, 'utf8'))!.split(newlineRegex)[0],
+    );
     if (semver.validRange(constraint)) {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;

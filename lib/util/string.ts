@@ -1,3 +1,8 @@
+import { regEx } from './regex.ts';
+
+const versionPrefixPattern = regEx(/^v/);
+const versionPrefixIgnoreCasePattern = regEx(/^v/i);
+
 // Return true if the match string is found at index in content
 export function matchAt(
   content: string,
@@ -171,4 +176,17 @@ export function stripTemplates(content: string): string {
 
 export function capitalize(input: string): string {
   return input[0].toUpperCase() + input.slice(1);
+}
+
+/**
+ * Removes a leading `v` from the version, or a leading `v` or `V` with `ignoreCase`.
+ */
+export function stripVersionPrefix(
+  version: string,
+  ignoreCase = false,
+): string {
+  return version.replace(
+    ignoreCase ? versionPrefixIgnoreCasePattern : versionPrefixPattern,
+    '',
+  );
 }

@@ -5,6 +5,7 @@ import { hashStream } from '../../../util/hash.ts';
 import { Http } from '../../../util/http/index.ts';
 import { map as pMap } from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type {
   ArtifactError,
   UpdateArtifact,
@@ -62,7 +63,7 @@ function massageUrl(url: string): string {
 }
 
 function migrateUrl(url: string, upgrade: Upgrade): string {
-  const newValue = upgrade.newValue?.replace(regEx(/^v/), '');
+  const newValue = upgrade.newValue && stripVersionPrefix(upgrade.newValue);
 
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.3.5
   // @see https://github.com/bazelbuild/rules_webtesting/releases/tag/0.4.0
@@ -89,8 +90,8 @@ function replaceValues(
   if (!from || !to || from === to) {
     return content;
   }
-  const massagedFrom = from.replace(regEx(/^v/), '');
-  const massagedTo = to.replace(regEx(/^v/), '');
+  const massagedFrom = stripVersionPrefix(from);
+  const massagedTo = stripVersionPrefix(to);
   return replaceAll(content, massagedFrom, massagedTo);
 }
 

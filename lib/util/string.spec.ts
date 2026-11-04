@@ -4,9 +4,30 @@ import {
   looseEquals,
   replaceAt,
   stripTemplates,
+  stripVersionPrefix,
 } from './string.ts';
 
 describe('util/string', () => {
+  describe('stripVersionPrefix', () => {
+    it.each`
+      version      | ignoreCase   | expected
+      ${'v1.2.3'}  | ${undefined} | ${'1.2.3'}
+      ${'V1.2.3'}  | ${undefined} | ${'V1.2.3'}
+      ${'1.2.3'}   | ${undefined} | ${'1.2.3'}
+      ${'vv1.2.3'} | ${undefined} | ${'v1.2.3'}
+      ${'1.2.3v'}  | ${undefined} | ${'1.2.3v'}
+      ${'v1.2.3'}  | ${true}      | ${'1.2.3'}
+      ${'V1.2.3'}  | ${true}      | ${'1.2.3'}
+      ${'1.2.3'}   | ${true}      | ${'1.2.3'}
+      ${''}        | ${true}      | ${''}
+    `(
+      'stripVersionPrefix("$version", $ignoreCase) === "$expected"',
+      ({ version, ignoreCase, expected }) => {
+        expect(stripVersionPrefix(version, ignoreCase)).toBe(expected);
+      },
+    );
+  });
+
   describe('replaceAt', () => {
     it('replaceAt inserts newString which is one char longer than oldString', () => {
       const content = 'I am a dog';

@@ -5,6 +5,7 @@ import {
   isUrlString,
 } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { CondaDatasource } from '../../datasource/conda/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -37,7 +38,7 @@ export function createAquaToolConfig(
     packageName: name,
     datasource: GithubTagsDatasource.id,
     // Trim the leading 'v' from both the current and extracted version
-    currentValue: version.replace(regEx(/^v/), ''),
+    currentValue: stripVersionPrefix(version),
     extractVersion: '^v?(?<version>.+)',
   };
 }

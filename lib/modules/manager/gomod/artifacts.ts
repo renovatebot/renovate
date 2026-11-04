@@ -19,6 +19,7 @@ import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { getGoEnv } from '../../datasource/go/env.ts';
 import { isValid } from '../../versioning/semver/index.ts';
 import type {
@@ -86,7 +87,7 @@ async function getUpdateImportPathCmds(
     if (gomodModCompatibility) {
       if (
         gomodModCompatibility.startsWith('v') &&
-        isValid(gomodModCompatibility.replace(regEx(/^v/), ''))
+        isValid(stripVersionPrefix(gomodModCompatibility))
       ) {
         installMarwanModArgs = installMarwanModArgs.replace(
           regEx(/@latest$/),
