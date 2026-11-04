@@ -6,6 +6,7 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotAcceptable } from '../../../util/http/status.ts';
 import type {
   HttpResponse,
   OutgoingHttpHeaders,
@@ -374,7 +375,7 @@ export class PypiDatasource extends Datasource {
       // A registry which cannot serve any of the negotiated types may pick a content type of its own, answer `406`, or answer `300`; the spec mandates none of them, but `406` is the common choice.
       // https://packaging.python.org/en/latest/specifications/simple-repository-api/#version-format-selection
       // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
-      if (statusCode !== 406) {
+      if (!isNotAcceptable(statusCode)) {
         throw err;
       }
 

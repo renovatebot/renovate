@@ -3,6 +3,7 @@ import { hostRules } from '~test/host-rules.ts';
 import { fakeSha, git, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
+import type { HttpError } from '../../../util/http/index.ts';
 import { repoFingerprint } from '../util.ts';
 import { client as _client } from './client.ts';
 import * as gerrit from './index.ts';
@@ -24,6 +25,10 @@ import {
 } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
+
+const notFoundError = partial<HttpError>({
+  response: partial<NonNullable<HttpError['response']>>({ statusCode: 404 }),
+});
 
 const codeReviewLabel: GerritLabelTypeInfo = {
   values: {
@@ -440,7 +445,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPr() - 404 returns null', async () => {
       prCacheMock.getPrs.mockResolvedValueOnce([]);
-      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
+      clientMock.getChange.mockRejectedValueOnce(notFoundError);
       await expect(gerrit.getPr(123456)).resolves.toBeNull();
       expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
@@ -507,7 +512,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('updatePr() - PR not found', async () => {
       prCacheMock.getPrs.mockResolvedValueOnce([]);
-      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
+      clientMock.getChange.mockRejectedValueOnce(notFoundError);
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'title',
@@ -938,7 +943,7 @@ describe('modules/platform/gerrit/index', () => {
         }),
       );
       // post-submit getPr: list empty and get-by-id 404
-      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
+      clientMock.getChange.mockRejectedValueOnce(notFoundError);
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
       expect(clientMock.submitChange).toHaveBeenCalledExactlyOnceWith(123456);
       expect(prCacheMock.setPr).not.toHaveBeenCalled();

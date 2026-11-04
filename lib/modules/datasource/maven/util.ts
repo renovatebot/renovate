@@ -10,6 +10,13 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import {
+  isForbidden,
+  isNotFound,
+  isRateLimited,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
 import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -33,13 +40,7 @@ function isTemporaryError(err: HttpError): boolean {
     return true;
   }
 
-  if (err.response) {
-    const status = err.response.statusCode;
-    const isServerError = status >= 500 && status < 600;
-    return status === 429 || isServerError;
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 function isHostError(err: HttpError): boolean {
@@ -47,12 +48,11 @@ function isHostError(err: HttpError): boolean {
 }
 
 function isNotFoundError(err: HttpError): boolean {
-  return err.code === 'ENOTFOUND' || err.response?.statusCode === 404;
+  return err.code === 'ENOTFOUND' || isNotFound(err);
 }
 
 function isPermissionsIssue(err: HttpError): boolean {
-  const status = err.response?.statusCode;
-  return status === 401 || status === 403;
+  return isUnauthorized(err) || isForbidden(err);
 }
 
 function isConnectionError(err: HttpError): boolean {
@@ -185,8 +185,7 @@ export async function downloadHttpProtocol(
         logger.debug({ failedUrl, err }, 'Temporary error');
 
         if (isMavenCentral(url)) {
-          const statusCode = err?.response?.statusCode;
-          if (statusCode === 429) {
+          if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
