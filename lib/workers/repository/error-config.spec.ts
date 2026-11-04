@@ -42,6 +42,16 @@ describe('workers/repository/error-config', () => {
       );
     });
 
+    it('reports several locations, each as its own code span', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = ['./foo', 'github>org/repo'];
+
+      await raiseConfigWarningIssue(config, error);
+
+      const { body } = platform.ensureIssue.mock.calls[0][0];
+      expect(body).toContain('Location: `./foo`, `github>org/repo`\n');
+    });
+
     it('creates issues', async () => {
       const expectedBody = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.
 

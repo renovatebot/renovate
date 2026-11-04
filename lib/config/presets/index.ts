@@ -3,6 +3,7 @@ import {
   isNullOrUndefined,
   isObject,
   isString,
+  isTruthy,
 } from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
@@ -18,6 +19,7 @@ import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
 import { buildCacheKey } from '../../util/cache/package/key.ts';
 import { clone } from '../../util/clone.ts';
+import { formatMarkdownList } from '../../util/markdown-list.ts';
 import { regEx } from '../../util/regex.ts';
 import * as template from '../../util/template/index.ts';
 import { GlobalConfig } from '../global.ts';
@@ -61,6 +63,127 @@ export const presetSources: Record<string, PresetSource> = {
 };
 
 const presetCacheNamespace = 'preset';
+
+/**
+ * A preset which could not be resolved.
+ */
+class PresetError extends Error {
+  override validationSource: string;
+
+  /** Where the preset is included: via a chain of presets, or `undefined` when included directly. */
+  readonly inclusions: (PresetInclusion | undefined)[] = [];
+
+  /** Further detail about why the preset could not be resolved. */
+  details: string[] = [];
+
+  constructor(preset: string) {
+    super(CONFIG_VALIDATION);
+    // presets may be URLs, which could include credentials
+    this.validationSource = sanitizeUrls(preset);
+  }
+
+  /**
+   * Describe why the preset could not be resolved, and where else it's included.
+   */
+  describe(): string | undefined {
+    const nested = this.inclusions.filter(isTruthy);
+    const notes = nested.map(
+      ({ chain }) => `It is also included via ${chain}.`,
+    );
+    // only a preset which isn't also included directly needs its parent's author to fix it
+    if (nested.length && !this.inclusions.includes(undefined)) {
+      const [{ chain, parent }] = nested;
+      notes[0] = `This is a *nested* preset, included via ${chain}, so please contact the author of ${parent} if you are unable to fix it yourself.`;
+    }
+    const paragraphs = [...this.details, ...notes];
+    return paragraphs.length ? paragraphs.join('\n\n') : undefined;
+  }
+}
+
+interface PresetInclusion {
+  /** The chain of presets, from the config, which includes the preset. */
+  chain: string;
+  /** The preset which directly includes the preset. */
+  parent: string;
+}
+
+/**
+ * Several presets which could not be resolved.
+ */
+class PresetErrors extends Error {
+  readonly errors: PresetError[];
+
+  constructor(errors: PresetError[]) {
+    super(CONFIG_VALIDATION);
+    this.errors = errors;
+    // each preset's `validationSource` is already sanitized
+    this.validationSource = errors.map((e) => e.validationSource);
+    this.validationError = 'Several presets could not be resolved';
+    this.validationMessage = formatMarkdownList(
+      errors.map((e) => {
+        const description = e.describe();
+        return description
+          ? `\`${e.validationSource}\`: ${e.validationError}\n\n${description}`
+          : `\`${e.validationSource}\`: ${e.validationError}`;
+      }),
+    );
+  }
+}
+
+/**
+ * Add a preset error to `presetErrors`, skipping any already added, or rethrow any other error.
+ */
+function collectPresetError(presetErrors: PresetError[], err: unknown): void {
+  // any other error, such as a host being unavailable, may be temporary, so is rethrown even when presets could not be resolved, so the run can be retried
+  if (!(err instanceof PresetError || err instanceof PresetErrors)) {
+    throw err;
+  }
+  for (const e of err instanceof PresetErrors ? err.errors : [err]) {
+    // the same preset may be included by several others, so is only reported once, noting where else it's included
+    const seen = presetErrors.find(
+      (p) =>
+        p.validationSource === e.validationSource &&
+        p.validationError === e.validationError,
+    );
+    if (seen) {
+      const newInclusions = e.inclusions.filter(
+        (inclusion) =>
+          !seen.inclusions.some((i) => i?.chain === inclusion?.chain),
+      );
+      seen.inclusions.push(...newInclusions);
+    } else {
+      presetErrors.push(e);
+    }
+  }
+}
+
+/**
+ * Run `resolve`, returning an empty result if a preset could not be resolved, after adding it to `presetErrors`.
+ */
+async function tryResolve(
+  presetErrors: PresetError[],
+  resolve: () => Promise<ResolveConfigPresetsResult>,
+): Promise<ResolveConfigPresetsResult> {
+  try {
+    return await resolve();
+  } catch (err) {
+    collectPresetError(presetErrors, err);
+    // the result is unused, as the preset errors are thrown once all presets have been tried
+    return { config: {}, visitedPresets: { merged: [], unmerged: [] } };
+  }
+}
+
+/**
+ * Throw the preset errors, as a single error if there's only one.
+ */
+function throwPresetErrors(presetErrors: PresetError[]): never {
+  if (presetErrors.length === 1) {
+    const [error] = presetErrors;
+    error.validationMessage = error.describe();
+    throw error;
+  }
+  throw new PresetErrors(presetErrors);
+}
 
 export function replaceArgs(
   obj: string,
@@ -234,12 +357,33 @@ export interface ResolveConfigPresetsResult {
  *   When set to `false`, this will resolve these internal presets (recursively), but not merge them.
  *   This is primarily intended to be used by "shallow config" resolution (for logging purposes).
  */
-export async function resolveConfigPresets(
+export function resolveConfigPresets(
   inputConfig: AllConfig,
   baseConfig?: RenovateConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
   mergeInternalPresets = true,
+): Promise<ResolveConfigPresetsResult> {
+  return resolvePresets(
+    inputConfig,
+    baseConfig,
+    _ignorePresets,
+    existingPresets,
+    mergeInternalPresets,
+    new Map(),
+  );
+}
+
+/**
+ * Resolve presets, as `resolveConfigPresets`, remembering the presets which could not be fetched in `failedPresets`.
+ */
+async function resolvePresets(
+  inputConfig: AllConfig,
+  baseConfig: RenovateConfig | undefined,
+  _ignorePresets: string[] | undefined,
+  existingPresets: string[],
+  mergeInternalPresets: boolean,
+  failedPresets: Map<string, Error>,
 ): Promise<ResolveConfigPresetsResult> {
   const allVisitedPresets = {
     merged: new Set<string>(),
@@ -256,6 +400,8 @@ export async function resolveConfigPresets(
   );
 
   let config: AllConfig = {};
+  // presets which could not be resolved, which are reported once all presets have been tried
+  const presetErrors: PresetError[] = [];
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
     // Compile templates
@@ -276,20 +422,27 @@ export async function resolveConfigPresets(
 
       if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
-        const fetchedPreset = await fetchPreset(
-          preset,
-          baseConfig,
-          inputConfig,
-          existingPresets,
+        // carry on, so that every preset which can't be resolved is reported, not only the first
+        const { config: presetConfig, visitedPresets } = await tryResolve(
+          presetErrors,
+          async () => {
+            const fetchedPreset = await fetchPreset(
+              preset,
+              baseConfig,
+              inputConfig,
+              existingPresets,
+              failedPresets,
+            );
+            return resolvePresets(
+              fetchedPreset,
+              baseConfig ?? inputConfig,
+              ignorePresets,
+              existingPresets.concat([preset]),
+              mergeInternalPresets,
+              failedPresets,
+            );
+          },
         );
-        const { config: presetConfig, visitedPresets } =
-          await resolveConfigPresets(
-            fetchedPreset,
-            baseConfig ?? inputConfig,
-            ignorePresets,
-            existingPresets.concat([preset]),
-            mergeInternalPresets,
-          );
         config = mergeChildConfig(config, presetConfig);
         allVisitedPresets.merged.add(preset);
 
@@ -327,12 +480,15 @@ export async function resolveConfigPresets(
       for (const element of val) {
         if (isObject(element)) {
           const { config: presetConfig, visitedPresets: visited } =
-            await resolveConfigPresets(
-              element,
-              baseConfig,
-              ignorePresets,
-              existingPresets,
-              mergeInternalPresets,
+            await tryResolve(presetErrors, () =>
+              resolvePresets(
+                element,
+                baseConfig,
+                ignorePresets,
+                existingPresets,
+                mergeInternalPresets,
+                failedPresets,
+              ),
             );
           (config[key] as RenovateConfig[]).push(presetConfig);
 
@@ -352,12 +508,15 @@ export async function resolveConfigPresets(
       // Resolve nested objects
       logger.trace(`Resolving object "${key}"`);
       const { config: presetConfig, visitedPresets: visited } =
-        await resolveConfigPresets(
-          val,
-          baseConfig,
-          ignorePresets,
-          existingPresets,
-          mergeInternalPresets,
+        await tryResolve(presetErrors, () =>
+          resolvePresets(
+            val,
+            baseConfig,
+            ignorePresets,
+            existingPresets,
+            mergeInternalPresets,
+            failedPresets,
+          ),
         );
       config[key] = presetConfig as never; // type can't be narrowed
 
@@ -370,6 +529,9 @@ export async function resolveConfigPresets(
         allVisitedPresets.unmerged.add(unmergedPreset);
       }
     }
+  }
+  if (presetErrors.length) {
+    throwPresetErrors(presetErrors);
   }
   logger.trace({ config: inputConfig }, 'Input config');
   logger.trace(
@@ -391,11 +553,20 @@ async function fetchPreset(
   baseConfig: RenovateConfig | undefined,
   inputConfig: AllConfig,
   existingPresets: string[],
+  failedPresets: Map<string, Error>,
 ): Promise<AllConfig> {
+  // a preset which can't be fetched may be included in several places, so is only fetched once while resolving
+  const previousFailure = failedPresets.get(preset);
   try {
+    if (previousFailure) {
+      throw previousFailure;
+    }
     return await getPreset(preset, baseConfig ?? inputConfig);
   } catch (err) {
-    logger.debug({ preset, err }, 'Preset fetch error');
+    // only log when the preset was fetched, rather than for each place it's included
+    if (!previousFailure) {
+      logger.debug({ preset, err }, 'Preset fetch error');
+    }
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -406,20 +577,21 @@ async function fetchPreset(
     if (err.cause?.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
       throw err.cause;
     }
-    const error = new Error(CONFIG_VALIDATION);
-    // presets may be URLs, which could include credentials
-    error.validationSource = sanitizeUrls(preset);
+    failedPresets.set(preset, err);
+    const error = new PresetError(preset);
     // further detail, shown below the error type when the error is reported to users
     const details: string[] = [];
     // most preset sources report a blocked host as the preset not being found
     if (err.message === HOST_BLOCKED || err.cause?.message === HOST_BLOCKED) {
-      logger.warn(
-        {
-          preset,
-          documentationUrl: `${GlobalConfig.get('productLinks').documentation}self-hosted-configuration/#hostrulesallowinternal`,
-        },
-        'Preset host is blocked by this Renovate instance',
-      );
+      if (!previousFailure) {
+        logger.warn(
+          {
+            preset,
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}self-hosted-configuration/#hostrulesallowinternal`,
+          },
+          'Preset host is blocked by this Renovate instance',
+        );
+      }
       error.validationError =
         'Preset host is blocked by this Renovate instance';
       // a preset's response becomes configuration, so a plain hostname grant is not enough - say what the administrator actually has to configure
@@ -475,25 +647,27 @@ async function fetchPreset(
       error.validationError = `Preset caused unexpected error`;
     }
     const parentPreset = existingPresets.at(-1);
-    if (parentPreset) {
-      const chain = [...existingPresets, preset]
-        .map((p) => `\`${sanitizeUrls(p)}\``)
-        .join(' → ');
-      details.push(
-        `This is a *nested* preset, included via ${chain}, so please contact the author of \`${sanitizeUrls(parentPreset)}\` if you are unable to fix it yourself.`,
+    error.inclusions.push(
+      parentPreset
+        ? {
+            chain: [...existingPresets, preset]
+              .map((p) => `\`${sanitizeUrls(p)}\``)
+              .join(' → '),
+            parent: `\`${sanitizeUrls(parentPreset)}\``,
+          }
+        : undefined,
+    );
+    error.details = details;
+    if (!previousFailure) {
+      logger.info(
+        {
+          preset: error.validationSource,
+          validationError: error.validationError,
+          details,
+        },
+        'Throwing preset error',
       );
     }
-    if (details.length) {
-      error.validationMessage = details.join('\n\n');
-    }
-    logger.info(
-      {
-        preset: error.validationSource,
-        validationError: error.validationError,
-        validationMessage: error.validationMessage,
-      },
-      'Throwing preset error',
-    );
     throw error;
   }
 }

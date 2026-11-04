@@ -373,6 +373,160 @@ describe('config/presets/index', () => {
       expect(e!.validationMessage).toBeUndefined();
     });
 
+    it('reports every preset which cannot be resolved, including nested presets', async () => {
+      config.extends = [
+        'github>some/repo#v1.0.0',
+        ':pinVersions',
+        'wrongpreset:invalid-preset',
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        extends: ['somepackage:webapp', 'notfound'],
+      });
+      npm.getPreset.mockResolvedValueOnce({ extends: ['./x'] });
+
+      const err = await presets.resolveConfigPresets(config).catch((e) => e);
+
+      expect(err).toMatchObject({
+        message: CONFIG_VALIDATION,
+        validationError: 'Several presets could not be resolved',
+        validationMessage: [
+          '- `./x`: Relative preset reference cannot be resolved',
+          '',
+          '  Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends).',
+          '',
+          '  This is a *nested* preset, included via `github>some/repo#v1.0.0` → `somepackage:webapp` → `./x`, so please contact the author of `somepackage:webapp` if you are unable to fix it yourself.',
+          "- `notfound`: Cannot find preset's package",
+          '',
+          '  This is a *nested* preset, included via `github>some/repo#v1.0.0` → `notfound`, so please contact the author of `github>some/repo#v1.0.0` if you are unable to fix it yourself.',
+          '- `wrongpreset:invalid-preset`: Preset name not found within published preset config',
+        ].join('\n'),
+      });
+      expect(err.validationSource).toEqual([
+        './x',
+        'notfound',
+        'wrongpreset:invalid-preset',
+      ]);
+    });
+
+    it('reports a preset included in several places once, noting where else it is included', async () => {
+      config.extends = ['local>some/repo:a', 'local>some/repo:b', 'notfound'];
+      config.packageRules = [
+        { extends: ['local>some/repo:b'] },
+        { extends: ['local>some/repo:a'] },
+      ];
+      local.getPreset.mockResolvedValue({ extends: ['notfound'] });
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationSource: 'notfound',
+        validationError: "Cannot find preset's package",
+        validationMessage: [
+          'It is also included via `local>some/repo:a` → `notfound`.',
+          'It is also included via `local>some/repo:b` → `notfound`.',
+        ].join('\n\n'),
+      });
+    });
+
+    it('notes where else a preset is included, from within a nested preset', async () => {
+      config.extends = ['notfound', 'local>some/repo:a'];
+      local.getPreset.mockImplementation(({ presetName }) =>
+        Promise.resolve(
+          presetName === 'a'
+            ? { extends: ['local>some/repo:b', 'local>some/repo:c'] }
+            : { extends: ['notfound'] },
+        ),
+      );
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationSource: 'notfound',
+        validationMessage: [
+          'It is also included via `local>some/repo:a` → `local>some/repo:b` → `notfound`.',
+          'It is also included via `local>some/repo:a` → `local>some/repo:c` → `notfound`.',
+        ].join('\n\n'),
+      });
+      expect(npm.getPreset).toHaveBeenCalledOnce();
+    });
+
+    it('notes where else a preset is included, when it is first included directly', async () => {
+      config.extends = ['notfound', 'local>some/repo:a'];
+      local.getPreset.mockResolvedValue({ extends: ['notfound'] });
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationSource: 'notfound',
+        validationMessage:
+          'It is also included via `local>some/repo:a` → `notfound`.',
+      });
+    });
+
+    it('reports presets which cannot be resolved within nested config', async () => {
+      config.extends = ['wrongpreset:a'];
+      config.major = { extends: ['noconfig:b'] };
+      config.packageRules = [
+        { extends: ['wrongpreset:c'] },
+        { extends: ['noconfig:d'] },
+      ];
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toMatchObject({
+        validationSource: [
+          'wrongpreset:a',
+          'noconfig:b',
+          'wrongpreset:c',
+          'noconfig:d',
+        ],
+        validationError: 'Several presets could not be resolved',
+        validationMessage: [
+          '- `wrongpreset:a`: Preset name not found within published preset config',
+          '- `noconfig:b`: Preset package is missing a renovate-config entry',
+          '- `wrongpreset:c`: Preset name not found within published preset config',
+          '- `noconfig:d`: Preset package is missing a renovate-config entry',
+        ].join('\n'),
+      });
+    });
+
+    it('rethrows a later host error, rather than reporting a preset which cannot be resolved', async () => {
+      config.extends = ['wrongpreset:a', 'github>some/repo'];
+      gitHub.getPreset.mockRejectedValueOnce(
+        new ExternalHostError(new Error('unavailable')),
+      );
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        ExternalHostError,
+      );
+    });
+
+    it('fetches a preset again, after it failed while resolving other config', async () => {
+      config.extends = ['github>some/repo'];
+      gitHub.getPreset
+        .mockRejectedValueOnce(new Error(PRESET_DEP_NOT_FOUND))
+        .mockResolvedValueOnce({ labels: ['foo'] });
+
+      await expect(
+        presets.resolveConfigPresets(structuredClone(config)),
+      ).rejects.toThrow(CONFIG_VALIDATION);
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res).toEqual({ labels: ['foo'] });
+    });
+
+    it('warns once for a blocked preset host, however many times it is included', async () => {
+      const url = 'http://10.1.2.3/preset.json';
+      config.extends = [url];
+      config.packageRules = [{ extends: [url] }];
+      http.getPreset.mockRejectedValueOnce(new Error(HOST_BLOCKED));
+
+      await expect(presets.resolveConfigPresets(config)).rejects.toThrow(
+        CONFIG_VALIDATION,
+      );
+      expect(http.getPreset).toHaveBeenCalledOnce();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        'Preset host is blocked by this Renovate instance',
+      );
+      expect(logger.logger.info).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        'Throwing preset error',
+      );
+    });
+
     it('works with valid', async () => {
       // @ts-expect-error -- invalid config
       config.foo = 1;
