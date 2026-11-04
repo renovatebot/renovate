@@ -10,6 +10,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { sanitizeUrls } from '../../logger/utils.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
 import * as memCache from '../../util/cache/memory/index.ts';
@@ -400,6 +401,10 @@ async function fetchPreset(
       throw err;
     }
     const error = new Error(CONFIG_VALIDATION);
+    // presets may be URLs, which could include credentials
+    error.validationSource = sanitizeUrls(preset);
+    // further detail, shown below the error type when the error is reported to users
+    const details: string[] = [];
     if (err.message === HOST_BLOCKED) {
       logger.warn(
         {
@@ -408,31 +413,50 @@ async function fetchPreset(
         },
         'Preset host is blocked by this Renovate instance',
       );
+      error.validationError =
+        'Preset host is blocked by this Renovate instance';
       // a preset's response becomes configuration, so a plain hostname grant is not enough - say what the administrator actually has to configure
-      error.validationError = `Preset host is blocked by this Renovate instance (${preset}). If this is intended, ask your Renovate administrator to permit it with a \`hostRules\` entry setting \`allowInternal=true\`, scoped either by \`hostType\` (for example \`preset\` or \`npm\`) or by a URL-prefix \`matchHost\``;
+      details.push(
+        'If this is intended, ask your Renovate administrator to permit it with a `hostRules` entry setting `allowInternal=true`, scoped either by `hostType` (for example `preset` or `npm`) or by a URL-prefix `matchHost`.',
+      );
     } else if (err.message === PRESET_DEP_NOT_FOUND) {
-      error.validationError = `Cannot find preset's package (${preset})`;
+      error.validationError = `Cannot find preset's package`;
     } else if (err.message === PRESET_RENOVATE_CONFIG_NOT_FOUND) {
-      error.validationError = `Preset package is missing a renovate-config entry (${preset})`;
+      error.validationError = `Preset package is missing a renovate-config entry`;
     } else if (err.message === PRESET_NOT_FOUND) {
-      error.validationError = `Preset name not found within published preset config (${preset})`;
+      error.validationError = `Preset name not found within published preset config`;
     } else if (err.message === PRESET_INVALID) {
-      error.validationError = `Preset is invalid (${preset})`;
+      error.validationError = `Preset is invalid`;
     } else if (err.message === PRESET_PROHIBITED_SUBPRESET) {
-      error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
+      error.validationError = `Sub-presets cannot be combined with a custom path`;
     } else if (err.message === PRESET_INVALID_JSON) {
-      error.validationError = `Preset is invalid JSON (${preset})`;
+      error.validationError = `Preset is invalid JSON`;
     } else if (err.message === PRESET_RELATIVE_NO_PARENT) {
-      error.validationError = `Relative preset reference cannot be resolved (${preset}). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends)`;
+      error.validationError = `Relative preset reference cannot be resolved`;
+      details.push(
+        'Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends).',
+      );
     } else {
-      error.validationError = `Preset caused unexpected error (${preset})`;
+      error.validationError = `Preset caused unexpected error`;
     }
-    if (existingPresets.length) {
-      error.validationError +=
-        '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
+    const parentPreset = existingPresets.at(-1);
+    if (parentPreset) {
+      const chain = [...existingPresets, preset]
+        .map((p) => `\`${sanitizeUrls(p)}\``)
+        .join(' → ');
+      details.push(
+        `This is a *nested* preset, included via ${chain}, so please contact the author of \`${sanitizeUrls(parentPreset)}\` if you are unable to fix it yourself.`,
+      );
+    }
+    if (details.length) {
+      error.validationMessage = details.join('\n\n');
     }
     logger.info(
-      { validationError: error.validationError },
+      {
+        preset: error.validationSource,
+        validationError: error.validationError,
+        validationMessage: error.validationMessage,
+      },
       'Throwing preset error',
     );
     throw error;
