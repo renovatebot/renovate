@@ -4,12 +4,14 @@ import type {
   SharedConstraint,
   SharedConstraints,
 } from '../../../modules/manager/types.ts';
-import type { ConstraintName } from '../../../util/exec/types.ts';
-import { regEx } from '../../../util/regex.ts';
+import { get as getVersioning } from '../../../modules/versioning/index.ts';
+import { getToolConfig } from '../../../util/exec/containerbase.ts';
+import {
+  type ConstraintName,
+  type ToolName,
+  isToolName,
+} from '../../../util/exec/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
-
-// the shared constraints are version numbers, optionally with build metadata like `+13`
-const versionNumberRegex = regEx(/^\d+(?:\.\d+)*(?:\+[0-9A-Za-z.+-]+)?$/);
 
 function getDepth(directory: string): number {
   return directory === '' ? 0 : directory.split('/').length;
@@ -48,31 +50,27 @@ export function collectSharedConstraints(
 }
 
 /**
- * Returns `constraint` with the new value of `upgrade`, or with `null` if that is no version number, or `undefined` if `upgrade` does not update it.
+ * Returns `constraint` with the new version of `upgrade`, or with `null` if the versioning of the tool reads that as no version, or `undefined` if `upgrade` does not update it.
  */
 function getUpdatedConstraint(
+  toolName: ToolName,
   constraint: SharedConstraint,
   upgrade: BranchUpgradeConfig,
 ): SharedConstraint | undefined {
-  if (constraint.depName !== upgrade.depName) {
-    return undefined;
-  }
   // only replace the value being updated, like for the `constraints` which a branch updates
-  let newValue: string | undefined;
-  if (constraint.value === upgrade.currentValue) {
-    newValue = upgrade.newValue;
-  } else if (
-    constraint.value === upgrade.lockedVersion ||
-    constraint.value === upgrade.currentVersion
+  if (
+    constraint.depName !== upgrade.depName ||
+    !upgrade.newVersion ||
+    (constraint.value !== upgrade.currentValue &&
+      constraint.value !== upgrade.currentVersion &&
+      constraint.value !== upgrade.lockedVersion)
   ) {
-    newValue = upgrade.newVersion;
-  }
-  if (!newValue) {
     return undefined;
   }
+  const versioning = getVersioning(getToolConfig(toolName)?.versioning);
   return {
     ...constraint,
-    value: versionNumberRegex.test(newValue) ? newValue : null,
+    value: versioning.isVersion(upgrade.newVersion) ? upgrade.newVersion : null,
   };
 }
 
@@ -80,22 +78,28 @@ function updateSharedConstraint(
   shared: SharedConstraints,
   upgrades: BranchUpgradeConfig[],
 ): SharedConstraints {
-  const constraints = { ...shared.constraints };
-  for (const upgrade of upgrades) {
-    if (
-      upgrade.manager !== shared.manager ||
-      upgrade.packageFile !== shared.packageFile ||
-      upgrade.updateType === 'replacement'
-    ) {
-      continue;
-    }
-    for (const [name, constraint] of Object.entries(constraints)) {
-      const updated = getUpdatedConstraint(constraint, upgrade);
-      if (updated) {
-        constraints[name as ConstraintName] = updated;
-      }
-    }
+  const updates = upgrades.filter(
+    (upgrade) =>
+      upgrade.manager === shared.manager &&
+      upgrade.packageFile === shared.packageFile &&
+      upgrade.updateType !== 'replacement',
+  );
+  if (!updates.length) {
+    return shared;
   }
+  const constraints = Object.fromEntries(
+    Object.entries(shared.constraints).map(([name, constraint]) => [
+      name,
+      // the managers only share the constraints of tools
+      isToolName(name)
+        ? updates.reduce(
+            (current, upgrade) =>
+              getUpdatedConstraint(name, current, upgrade) ?? current,
+            constraint,
+          )
+        : constraint,
+    ]),
+  );
   return { ...shared, constraints };
 }
 

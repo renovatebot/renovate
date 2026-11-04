@@ -171,17 +171,17 @@ describe('workers/repository/extract/shared-constraints', () => {
     ];
 
     it.each`
-      config                                                                          | expected
-      ${{ currentValue: '20.11.0', newValue: '22.1.0' }}                              | ${'22.1.0'}
-      ${{ currentValue: '20', lockedVersion: '20.11.0', newVersion: '20.12.0' }}      | ${'20.12.0'}
-      ${{ currentValue: '^20', currentVersion: '20.11.0', newVersion: '22.1.0' }}     | ${'22.1.0'}
-      ${{ currentValue: '20.11.0', newValue: '22.0.0-rc.1' }}                         | ${null}
-      ${{ currentValue: '20.10.0', newValue: '22.1.0', newVersion: '22.1.0' }}        | ${'20.11.0'}
-      ${{ currentValue: '20.11.0' }}                                                  | ${'20.11.0'}
-      ${{ currentValue: '20.11.0', newValue: '22.1.0', depName: 'nodejs' }}           | ${'20.11.0'}
-      ${{ currentValue: '20.11.0', newValue: '22.1.0', packageFile: 'a/tools.toml' }} | ${'20.11.0'}
-      ${{ currentValue: '20.11.0', newValue: '22.1.0', manager: 'other' }}            | ${'20.11.0'}
-      ${{ currentValue: '20.11.0', newValue: '22.1.0', updateType: 'replacement' }}   | ${'20.11.0'}
+      config                                                                            | expected
+      ${{ currentValue: '20.11.0', newVersion: '22.1.0' }}                              | ${'22.1.0'}
+      ${{ currentValue: '20', lockedVersion: '20.11.0', newVersion: '20.12.0' }}        | ${'20.12.0'}
+      ${{ currentValue: '^20', currentVersion: '20.11.0', newVersion: '22.1.0' }}       | ${'22.1.0'}
+      ${{ currentValue: '20.11.0', newVersion: '22' }}                                  | ${null}
+      ${{ currentValue: '20.10.0', newVersion: '22.1.0' }}                              | ${'20.11.0'}
+      ${{ currentValue: '20.11.0' }}                                                    | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newVersion: '22.1.0', depName: 'nodejs' }}           | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newVersion: '22.1.0', packageFile: 'a/tools.toml' }} | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newVersion: '22.1.0', manager: 'other' }}            | ${'20.11.0'}
+      ${{ currentValue: '20.11.0', newVersion: '22.1.0', updateType: 'replacement' }}   | ${'20.11.0'}
     `('returns $expected for $config', ({ config, expected }) => {
       const res = updateSharedConstraints(sharedConstraints, [upgrade(config)]);
 
@@ -191,6 +191,53 @@ describe('workers/repository/extract/shared-constraints', () => {
       expect(sharedConstraints).toEqual([
         shared('tools.toml', { node: '20.11.0', pnpm: '9.15.0' }),
       ]);
+    });
+
+    it('uses the versioning of the tool for the new version', () => {
+      const res = updateSharedConstraints(
+        [
+          shared(
+            'rust-toolchain.toml',
+            { rust: '1.84' },
+            '',
+            0,
+            'rust-toolchain',
+          ),
+        ],
+        [
+          upgrade({
+            manager: 'rust-toolchain',
+            packageFile: 'rust-toolchain.toml',
+            depName: 'rust',
+            currentValue: '1.84',
+            newVersion: '1.91.1',
+          }),
+        ],
+      );
+
+      expect(res).toEqual([
+        shared(
+          'rust-toolchain.toml',
+          { rust: '1.91.1' },
+          '',
+          0,
+          'rust-toolchain',
+        ),
+      ]);
+    });
+
+    it('does not update constraints which are no tools', () => {
+      const sharedGo = [shared('tools.toml', { go: '1.22.0' })];
+
+      const res = updateSharedConstraints(sharedGo, [
+        upgrade({
+          depName: 'go',
+          currentValue: '1.22.0',
+          newVersion: '1.23.0',
+        }),
+      ]);
+
+      expect(res).toEqual(sharedGo);
     });
   });
 });

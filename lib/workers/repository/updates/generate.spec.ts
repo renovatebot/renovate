@@ -484,6 +484,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           currentValue,
           newValue,
+          newVersion: newValue,
         };
         const consumerUpgrade: BranchUpgradeConfig = {
           manager: consumer,
