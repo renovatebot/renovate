@@ -492,6 +492,37 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
     });
 
+    it('caches the compare url briefly for a fresh release', async () => {
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+      githubReleasesMock.mockResolvedValue([]);
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            date: DateTime.now().toISO(),
+            compare: { url: 'https://example.com/compare' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(githubReleasesMock).toHaveBeenCalledTimes(2);
+      expect(packageCacheSetSpy).toHaveBeenCalledExactlyOnceWith(
+        'changelog-github-notes@v2',
+        'react/react-native::1.0.0:',
+        { url: 'https://example.com/compare', notesSourceUrl: '' },
+        5,
+      );
+    });
+
     it('includes sourceDirectory and gitRef in cache key', async () => {
       const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
       githubReleasesMock.mockResolvedValueOnce([
@@ -927,6 +958,88 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseNotes()', () => {
+    describe('fresh releases', () => {
+      const freshRelease = partial<ChangeLogRelease>({
+        version: '1.0.1',
+        gitRef: '1.0.1',
+        date: DateTime.now().toISO(),
+      });
+
+      it('refetches the release list when the release is missing', async () => {
+        githubReleasesMock.mockResolvedValueOnce([]).mockResolvedValueOnce([
+          {
+            version: '1.0.1',
+            releaseTimestamp: DateTime.now().toISO() as Timestamp,
+            id: 2,
+            url: 'https://github.com/some/other-repository/releases/1.0.1',
+            name: 'some/dep',
+            description: 'some body',
+          },
+        ]);
+
+        const res = await getReleaseNotes(
+          {
+            ...githubProject,
+            repository: 'some/other-repository',
+            packageName: 'other',
+          },
+          freshRelease,
+          partial<BranchUpgradeConfig>(),
+        );
+
+        expect(res).toMatchObject({
+          tag: '1.0.1',
+          url: 'https://github.com/some/other-repository/releases/1.0.1',
+        });
+        expect(githubReleasesMock).toHaveBeenLastCalledWith(
+          {
+            registryUrl: 'https://api.github.com/',
+            packageName: 'some/other-repository',
+          },
+          expect.anything(),
+          { refresh: true },
+        );
+      });
+
+      it('returns null when refetching the release list fails', async () => {
+        githubReleasesMock
+          .mockResolvedValueOnce([])
+          .mockRejectedValueOnce(new Error('unknown'));
+
+        const res = await getReleaseNotes(
+          {
+            ...githubProject,
+            repository: 'some/other-repository',
+            packageName: 'other',
+          },
+          freshRelease,
+          partial<BranchUpgradeConfig>(),
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('does not refetch when the platform does not support it', async () => {
+        httpMock
+          .scope('https://api.gitlab.com/')
+          .get('/projects/some%2Fother-repository/releases?per_page=100')
+          .reply(200, []);
+
+        const res = await getReleaseNotes(
+          {
+            ...gitlabProject,
+            repository: 'some/other-repository',
+            packageName: 'other',
+            apiBaseUrl: 'https://api.gitlab.com/',
+          },
+          freshRelease,
+          partial<BranchUpgradeConfig>(),
+        );
+
+        expect(res).toBeNull();
+      });
+    });
+
     it('should return null for release notes without body and name', async () => {
       githubReleasesMock.mockResolvedValueOnce([
         {
