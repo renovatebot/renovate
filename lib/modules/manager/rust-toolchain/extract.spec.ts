@@ -454,6 +454,9 @@ describe('modules/manager/rust-toolchain/extract', () => {
         ${'fuzz/rust-toolchain'}            | ${'nightly-2025-10-12'}
         ${'rust-toolchain'}                 | ${'1.100.0-beta.1'}
         ${'rust-toolchain'}                 | ${'1.100.0-x86_64-unknown-linux-gnu'}
+        ${'rust-toolchain'}                 | ${'1.100-beta'}
+        ${'rust-toolchain'}                 | ${'1.100.0-beta'}
+        ${'rust-toolchain'}                 | ${'1.100-x86_64-unknown-linux-gnu'}
         ${'crates/foo/rust-toolchain.toml'} | ${'[toolchain]\npath = "/opt/rust"'}
       `('shares no Rust version for $content in $file', ({ file, content }) => {
         const result = extractPackageFile(content, file);

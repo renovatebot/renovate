@@ -5,6 +5,7 @@ It supports both the TOML format and the legacy plain-text format as specified i
 Renovate also uses a pinned version like `1.90.0` or `1.90` as the `rust` constraint when it updates `Cargo.lock` files with the `cargo` manager in the same directory and below.
 A branch which updates the pinned version uses the new version for the `cargo` updates in the same branch.
 A channel like `stable` or `nightly`, or a `path`, sets no `rust` constraint, and hides the version of a toolchain file in a parent directory, like with `rustup`.
+A `rust` version in a [mise](../mise/index.md) config file takes precedence over toolchain files in any directory, as mise sets `RUSTUP_TOOLCHAIN`, which `rustup` prefers over a toolchain file.
 
 ### Version pinning
 

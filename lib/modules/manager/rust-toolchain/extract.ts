@@ -1,11 +1,11 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { getParentDir } from '../../../util/fs/index.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
-import { get as getVersioning } from '../../versioning/index.ts';
 import * as rustVersioning from '../../versioning/rust-release-channel/index.ts';
+import { parse } from '../../versioning/rust-release-channel/parse.ts';
 import type {
   PackageDependency,
   PackageFileContent,
@@ -72,8 +72,6 @@ export function extractPackageFile(
   return createPackageFileContent(lines[0], packageFile);
 }
 
-const semverPartialVersioning = getVersioning('semver-partial');
-
 function createPackageFileContent(
   channel: string,
   packageFile: string,
@@ -91,15 +89,13 @@ function createPackageFileContent(
  * Returns the toolchain channel as a constraint if it is a Rust version like `1.100.0` or `1.100`, else `null`, as other managers cannot use a channel like `stable` or `nightly`.
  */
 function getConstraintValue(channel: string): string | null {
-  const { api } = rustVersioning;
-  // a pre-release or a host like `1.100.0-x86_64-unknown-linux-gnu` is no version Containerbase installs
-  if (api.isVersion(channel) && semverPartialVersioning.isStable(channel)) {
-    return channel;
+  const toolchain = parse(channel);
+  if (!toolchain || isString(toolchain.channel)) {
+    return null;
   }
-  // a version without patch, unlike the channel names, has a minor version
-  return !api.isSingleVersion(channel) && api.getMinor(channel) !== null
-    ? channel
-    : null;
+  // a pre-release, a date or a host like `1.100.0-x86_64-unknown-linux-gnu` is no version Containerbase installs
+  const { channel: version, date, host } = toolchain;
+  return !version.prerelease && !date && !host ? channel : null;
 }
 
 /**
