@@ -1427,6 +1427,47 @@ function isAllowedValue(
 }
 
 /**
+ * Finds preset arguments (e.g. `{{arg1}}`) left in a fully-resolved config, for options with `allowedValues`.
+ *
+ * `validateConfig` accepts these, as a preset is validated before its arguments are substituted, so a preset argument that was not given a value is only caught here.
+ */
+export function findUnrenderedPresetArgs(
+  config: AllConfig,
+): ValidationMessage[] {
+  initOptions();
+  const errors: ValidationMessage[] = [];
+
+  // `name` is the option that `val` is a value of; the keys of an option with `additionalProperties` (e.g. `env`) are free-form, not options, so they are not checked
+  function walk(val: unknown, path: string, name: string): void {
+    if (isArray(val)) {
+      val.forEach((item, index) => walk(item, `${path}[${index}]`, name));
+    } else if (isPlainObject(val)) {
+      const option = optionsByName.get(name);
+      if (option?.type === 'object' && option.additionalProperties) {
+        return;
+      }
+      for (const [key, child] of Object.entries(val)) {
+        walk(child, `${path}.${key}`, key);
+      }
+    } else if (
+      isString(val) &&
+      presetArgRe.test(val) &&
+      optionsByName.get(name)?.allowedValues?.length
+    ) {
+      errors.push({
+        topic: ConfigValidationTopic.Error,
+        message: `Invalid ${path}: ${name} had a preset argument \`${val}\` which was not given a value by the preset's arguments`,
+      });
+    }
+  }
+
+  for (const [key, child] of Object.entries(config)) {
+    walk(child, key, key);
+  }
+  return errors;
+}
+
+/**
  * A templated value can't be checked until it's been rendered, and a preset argument (which can be used in any option) can't be checked until it's been replaced.
  */
 function isTemplatedValue(option: RenovateOptions, val: string): boolean {

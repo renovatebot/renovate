@@ -1400,6 +1400,28 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('fails validation when a parameterised preset is used without its argument', async () => {
+      memCache.set('preset:local>matchUpdateTypesArg', {
+        packageRules: [{ matchUpdateTypes: ['{{arg0}}'], enabled: false }],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>matchUpdateTypesArg'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          configValidationError: true,
+          repositoryEntryConfig: {},
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationMessage: expect.stringContaining(
+          'matchUpdateTypes had a preset argument `{{arg0}}` which was not given a value',
+        ),
+      });
+    });
+
     it("exempts the admin's own header when migration rewrites their matchHost", async () => {
       // `adminSuppliedValues` must compare migrated spellings: the resolved config only ever contains the migrated `matchHost` (massaged to a full URL), so building the exemption keys from the admin's unmigrated config would report their own header as a violation
       const { migrateConfig } = await vi.importActual<typeof _migrate>(

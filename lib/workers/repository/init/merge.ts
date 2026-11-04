@@ -239,11 +239,14 @@ async function validateResolvedConfig(
   strict: boolean,
   validationError?: string,
 ): Promise<void> {
+  // `validateConfig` expects massaged input
+  const massagedResolved = massageConfig(resolved);
   const { errors, warnings } = await configValidation.validateConfig(
     'repo',
-    // `validateConfig` expects massaged input
-    massageConfig(resolved),
+    massagedResolved,
   );
+  // preset arguments are only substituted when a preset is resolved, so one still here was never given a value
+  errors.push(...configValidation.findUnrenderedPresetArgs(massagedResolved));
 
   // Security findings are collected from the warnings too: `validateConfig` folds the results of the sub-validations it runs (notably `onboardingConfig`) into its warnings, and a finding is no less real for having been reported from within one
   const securityErrors = [...errors, ...warnings].filter(
