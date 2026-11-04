@@ -2,7 +2,7 @@ import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
-import { Http, HttpError } from '../../../util/http/index.ts';
+import { Http } from '../../../util/http/index.ts';
 import { isServerError } from '../../../util/http/status.ts';
 import { AsyncResult, Result } from '../../../util/result.ts';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
@@ -18,7 +18,7 @@ function unlessServerSide<
   T extends NonNullable<unknown>,
   E extends NonNullable<unknown>,
 >(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
-  if (err instanceof HttpError && isServerError(err)) {
+  if (isServerError(err)) {
     return AsyncResult.err(err);
   }
   return cb();

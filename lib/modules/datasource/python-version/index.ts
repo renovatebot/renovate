@@ -1,6 +1,5 @@
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import { HttpError } from '../../../util/http/index.ts';
 import { isRateLimited } from '../../../util/http/status.ts';
 import { id as versioning } from '../../versioning/python/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -80,7 +79,7 @@ export class PythonVersionDatasource extends Datasource {
           .filter((release) => pythonPrebuildVersions.has(release.version)),
       );
     } catch (err) {
-      if (err instanceof HttpError && isRateLimited(err)) {
+      if (isRateLimited(err)) {
         logger.debug(
           { err },
           'Rate limited by python.org, using prebuild releases',
