@@ -248,15 +248,8 @@ async function hexHomeDir(): Promise<string> {
 }
 
 /**
- * `mix` will not fetch from a third-party repo unless a registry public key is
- * stored for it — with none, `:mix_hex_registry.key(nil)` raises and the fetch
- * hangs until the registry timeout. `registryAliases` is a name-to-URL map with
- * nowhere to put a key or its fingerprint, so we fetch the key from the registry
- * ourselves. This is the same trust-on-first-use model the hex datasource
- * already applies when it verifies V2 payloads.
- *
- * `registryAliases` is inherited from top-level config, so it may hold entries
- * belonging to other managers. Only the repos `mix.exs` declares are added.
+ * Builds a `mix hex.repo add` command for each third-party repo that `mix.exs`
+ * declares and `registryAliases` maps to a URL.
  */
 async function getRepoAddCommands(
   packageFileContent: string,
@@ -264,6 +257,8 @@ async function getRepoAddCommands(
   hexHome: string,
 ): Promise<string[]> {
   const commands: string[] = [];
+  // `registryAliases` is inherited from top-level config, so it may hold
+  // entries belonging to other managers.
   const declaredRepos = new Set(getRepoOptions(packageFileContent));
 
   for (const [name, url] of Object.entries(coerceObject(registryAliases))) {
@@ -277,6 +272,11 @@ async function getRepoAddCommands(
       continue;
     }
 
+    // `mix` will not fetch from a third-party repo unless a registry public key
+    // is stored for it. With none, `:mix_hex_registry.key(nil)` raises and the
+    // fetch hangs until the registry timeout. `registryAliases` has nowhere to
+    // put a key or its fingerprint, so fetch the key from the registry. The hex
+    // datasource applies the same trust-on-first-use model to V2 payloads.
     const publicKey = await getRegistryPublicKey(url);
     if (!publicKey) {
       logger.warn(

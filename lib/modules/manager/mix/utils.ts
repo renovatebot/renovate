@@ -4,8 +4,7 @@ const commentMatchRegExp = regEx(/#.*$/);
 const repoOptionRegExp = regEx(/repo:\s*"(?<value>[^"]+)"/g);
 
 /**
- * `#` starts a line comment in Elixir. Both extraction and artifact updates
- * must ignore commented-out code, or they disagree on what `mix.exs` declares.
+ * Removes `#` line comments from Elixir source.
  */
 export function stripComments(content: string): string {
   return content
