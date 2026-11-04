@@ -24,6 +24,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
   'pin',
   'replace',
+  'widen',
 ];
 
 const prefixPattern = regEx(/^[vV]/);
