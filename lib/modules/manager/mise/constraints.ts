@@ -83,7 +83,7 @@ export function getConstraintName(depName: string): ToolName | undefined {
 }
 
 /**
- * Returns the mise version of a tool as a constraint, or `null` unless the tool versioning reads it as a full version or a range.
+ * Returns the mise version of a tool as a constraint, or `null` unless it is a full version or a partial version which the tool versioning reads as a range.
  */
 export function getConstraintValue(
   constraintName: ToolName,
@@ -93,11 +93,11 @@ export function getConstraintValue(
     return null;
   }
   const constraint = version.replace(leadingVRegex, '');
-  const versioning = getVersioning(getToolConfig(constraintName)?.versioning);
   if (isFullVersion(constraint)) {
-    return versioning.isVersion(constraint) ? constraint : null;
+    return constraint;
   }
   // mise matches a partial version like `20` as a prefix, unlike a versioning which reads it as a single version, like python `3.12`
+  const versioning = getVersioning(getToolConfig(constraintName)?.versioning);
   return isPartialVersion(constraint) && isRange(versioning, constraint)
     ? constraint
     : null;
