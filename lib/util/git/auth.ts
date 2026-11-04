@@ -153,7 +153,8 @@ export function getAuthenticationRules(
 }
 
 function hasCredentials(rule: HostRule): boolean {
-  return !!(rule.token ?? (rule.username && rule.password));
+  const basicAuth = rule.username && rule.password;
+  return !!(rule.token ?? basicAuth);
 }
 
 /**

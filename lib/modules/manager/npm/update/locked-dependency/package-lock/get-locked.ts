@@ -15,7 +15,9 @@ export function getLockedDependencies(
       return [];
     }
     const dep = dependencies[depName];
-    if (dep && (currentVersion === null || dep?.version === currentVersion)) {
+    const isVersionMatch =
+      currentVersion === null || dep?.version === currentVersion;
+    if (dep && isVersionMatch) {
       if (bundled || entry.bundled) {
         dep.bundled = true;
       }

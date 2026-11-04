@@ -526,11 +526,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    statuses.every(
-      (status) =>
-        status.state === GitStatusState.Succeeded &&
-        status.context?.genre === 'renovate',
-    )
+    statuses.every((status) => {
+      const isInternal = status.context?.genre === 'renovate';
+      return status.state === GitStatusState.Succeeded && isInternal;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -824,10 +823,10 @@ export async function ensureComment({
   let commentNeedsUpdating = false;
   threads.forEach((thread) => {
     const firstCommentContent = thread.comments?.[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
+    const isMatchingComment = topic
+      ? firstCommentContent?.startsWith(header) === true
+      : firstCommentContent === body;
+    if (isMatchingComment) {
       threadIdFound = thread.id;
       commentIdFound = thread.comments?.[0].id;
       commentNeedsUpdating = firstCommentContent !== body;
@@ -1118,14 +1117,16 @@ async function getUserIds(users: string[]): Promise<User[]> {
           reviewer = reviewer.replace(requiredReviewerPrefix, '');
           isRequired = true;
         }
+        const isMatchingIdentity =
+          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase();
         if (
-          (reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-            reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()) &&
+          isMatchingIdentity &&
           ids.filter((c) => c.id === m.identity?.id).length === 0
         ) {
           // TODO #22198
           ids.push({
-            id: m.identity.id!,
+            id: m.identity!.id!,
             name: reviewer,
             isRequired,
           });

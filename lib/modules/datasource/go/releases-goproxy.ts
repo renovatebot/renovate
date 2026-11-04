@@ -276,10 +276,13 @@ export class GoProxyDatasource extends Datasource {
     for (const release of releases) {
       const version = release.version.replace(incompatibleSuffixRegex, '');
       const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+      if (!releaseTimestamp) {
+        continue;
+      }
+
       if (
-        releaseTimestamp &&
-        (!release.releaseTimestamp ||
-          releaseTimestamp > release.releaseTimestamp)
+        !release.releaseTimestamp ||
+        releaseTimestamp > release.releaseTimestamp
       ) {
         release.releaseTimestamp = releaseTimestamp;
       }
@@ -537,9 +540,10 @@ export class GoProxyDatasource extends Datasource {
         const potentialHttpError =
           err instanceof ExternalHostError ? err.err : err;
         const status = potentialHttpError.response?.statusCode;
+        const isNotFoundOrForbidden = status === 404 || status === 403;
         if (
           potentialHttpError instanceof HttpError &&
-          (status === 404 || status === 403) &&
+          isNotFoundOrForbidden &&
           major !== packageMajor
         ) {
           break;

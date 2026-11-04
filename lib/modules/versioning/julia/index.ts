@@ -249,8 +249,10 @@ function getNewValue({
   }
   let newJulia = npm2julia(newSemver);
   // Preserve precision (number of components) when current uses `^` or `~`.
+  const isTildeOrCaret =
+    currentValue.startsWith('~') || currentValue.startsWith('^');
   if (
-    (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
+    isTildeOrCaret &&
     rangeStrategy === 'replace' &&
     newJulia.split('.').length > componentCount(currentValue)
   ) {

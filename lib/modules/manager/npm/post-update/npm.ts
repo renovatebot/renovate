@@ -135,11 +135,10 @@ export async function generateLockFile(
       semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     let commands: string[] = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions?.includes('npmDedupe') === true &&
-        !supportsPreferDedupeFlag) ||
-      skipInstalls === false
-    ) {
+    const needsDedupeWithoutFlag =
+      postUpdateOptions?.includes('npmDedupe') === true &&
+      !supportsPreferDedupeFlag;
+    if (needsDedupeWithoutFlag || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {

@@ -63,7 +63,8 @@ function handleError(packageName: string, err: HttpError): void {
   const errorData = { packageName, err };
 
   const statusCode = err.response?.statusCode ?? 0;
-  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
+  const isServerError = statusCode >= 500 && statusCode < 600;
+  if (statusCode === 429 || isServerError) {
     logger.warn({ packageName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }

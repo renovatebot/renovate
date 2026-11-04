@@ -136,7 +136,8 @@ export class ApkDatasource extends Datasource {
     } catch (err) {
       if (err instanceof HttpError) {
         const statusCode = err.response?.statusCode;
-        if (statusCode === 429 || (statusCode && statusCode >= 500)) {
+        const isServerError = statusCode !== undefined && statusCode >= 500;
+        if (statusCode === 429 || isServerError) {
           throw new ExternalHostError(err);
         }
         // The caller logs the failure once for the component it was skipping

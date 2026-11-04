@@ -399,10 +399,12 @@ function isRelevantPr(
   prTitle: string | null | undefined,
   state: string,
 ) {
-  return (p: Pr): boolean =>
-    p.sourceBranch === branchName &&
-    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-    matchesState(p.state, state);
+  return (p: Pr): boolean => {
+    if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+      return false;
+    }
+    return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+  };
 }
 
 // TODO: coverage (#40625)

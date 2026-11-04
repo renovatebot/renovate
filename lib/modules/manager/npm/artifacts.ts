@@ -63,13 +63,16 @@ async function handlePackageManagerUpdates(
 ): Promise<UpdateArtifactsResult | null> {
   const { packageFileName, updatedDeps, newPackageFileContent } =
     updateArtifactsConfig;
-  const packageManagerUpdates = updatedDeps.filter(
-    (dep) =>
-      (dep.depType === 'packageManager' ||
-        dep.depType === 'devEngines.packageManager') &&
+  const packageManagerUpdates = updatedDeps.filter((dep) => {
+    const isPackageManager =
+      dep.depType === 'packageManager' ||
+      dep.depType === 'devEngines.packageManager';
+    return (
+      isPackageManager &&
       dep.currentValue &&
-      regEx(versionWithHashRegString).test(dep.currentValue),
-  );
+      regEx(versionWithHashRegString).test(dep.currentValue)
+    );
+  });
 
   let newContent = newPackageFileContent;
   for (const packageManagerUpdate of packageManagerUpdates) {

@@ -31,6 +31,28 @@ import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
+function isSourceLabel(lower: string, projectUrl: string): boolean {
+  return (
+    lower.startsWith('repo') ||
+    lower === 'code' ||
+    lower === 'source' ||
+    isGitHubRepo(projectUrl)
+  );
+}
+
+function isChangelogLabel(lower: string): boolean {
+  return (
+    [
+      'changelog',
+      'change log',
+      'changes',
+      'release notes',
+      'news',
+      "what's new",
+    ].includes(lower) || !!changelogFilenameRegex.exec(lower)
+  );
+}
+
 export class PypiDatasource extends Datasource {
   static readonly id = pypiDatasourceId;
 
@@ -179,26 +201,12 @@ export class PypiDatasource extends Datasource {
         if (
           projectUrl &&
           !dependency.sourceUrl &&
-          (lower.startsWith('repo') ||
-            lower === 'code' ||
-            lower === 'source' ||
-            isGitHubRepo(projectUrl))
+          isSourceLabel(lower, projectUrl)
         ) {
           dependency.sourceUrl = projectUrl;
         }
 
-        if (
-          !dependency.changelogUrl &&
-          ([
-            'changelog',
-            'change log',
-            'changes',
-            'release notes',
-            'news',
-            "what's new",
-          ].includes(lower) ||
-            changelogFilenameRegex.exec(lower))
-        ) {
+        if (!dependency.changelogUrl && isChangelogLabel(lower)) {
           // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
           dependency.changelogUrl = projectUrl;
         }
@@ -218,7 +226,10 @@ export class PypiDatasource extends Datasource {
     for (const { upload_time } of releases) {
       const timestamp = asTimestamp(upload_time);
       // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings compares the instants
-      if (timestamp && (!earliest || timestamp < earliest)) {
+      if (!timestamp) {
+        continue;
+      }
+      if (!earliest || timestamp < earliest) {
         earliest = timestamp;
       }
     }

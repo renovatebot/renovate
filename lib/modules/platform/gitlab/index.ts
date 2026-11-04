@@ -522,11 +522,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    branchStatuses.every(
-      (check) =>
-        check.name?.startsWith('renovate/') &&
-        gitlabToRenovateStatusMapping[check.status] === 'green',
-    )
+    branchStatuses.every((check) => {
+      const isGreen = gitlabToRenovateStatusMapping[check.status] === 'green';
+      return check.name?.startsWith('renovate/') && isGreen;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -684,8 +683,10 @@ async function tryPrAutomerge(
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Only continue if the merge request can be merged and has a pipeline.
+        const merge_status_check =
+          detailed_merge_status_check || deprecated_merge_status_check;
         if (
-          (detailed_merge_status_check || deprecated_merge_status_check) &&
+          merge_status_check &&
           body.pipeline !== null &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
@@ -1000,10 +1001,12 @@ export async function findPr({
 
   const prList = await getPrList();
   const pr = prList.find(
-    (p: { sourceBranch: string; title: string; state: string }) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
+    (p: { sourceBranch: string; title: string; state: string }) => {
+      if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+        return false;
+      }
+      return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+    },
   );
   return pr ?? null;
 }

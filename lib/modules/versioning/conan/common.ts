@@ -78,6 +78,16 @@ export function matchesWithOptions(
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
 
+function isBetterCandidate(
+  cur: any,
+  curSV: any,
+  candidate: string,
+  options: semver.Options,
+  compareRt: number,
+): boolean {
+  return !cur || semver.compare(curSV, candidate, options) === compareRt;
+}
+
 export function findSatisfyingVersion(
   versions: string[],
   range: string,
@@ -97,7 +107,7 @@ export function findSatisfyingVersion(
       const cleanRange = cleanVersion(range);
       if (
         matchesWithOptions(cleanedVersion, cleanRange, options) &&
-        (!cur || semver.compare(curSV, versionFromList, options) === compareRt)
+        isBetterCandidate(cur, curSV, versionFromList, options, compareRt)
       ) {
         cur = versionFromList;
         curIndex = index;

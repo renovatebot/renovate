@@ -316,7 +316,8 @@ export function getRegistryRepository(
   }
   let registryHost = registryUrl;
   const split = packageName.split('/');
-  if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
+  const hasRegistryHost = split[0].includes('.') || split[0].includes(':');
+  if (split.length > 1 && hasRegistryHost) {
     [registryHost] = split;
     split.shift();
   }

@@ -93,7 +93,7 @@ export default defineRule({
           !callee.computed &&
           callee.object.type === 'Identifier' &&
           callee.property.type === 'Identifier' &&
-          (callee.property.name === 'test' || callee.property.name === 'exec')
+          ['test', 'exec'].includes(callee.property.name)
         ) {
           statefulUsages.add(callee.object.name);
         }

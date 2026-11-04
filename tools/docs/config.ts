@@ -151,25 +151,24 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     if (key === 'env' && !val) {
       ignoredKeys.push('env');
     }
+    const isScalarOrCollection =
+      typeof el[1] !== 'object' || ['array', 'object'].includes(type);
     const isShownDefault =
-      el[0] === 'default' &&
-      (typeof el[1] !== 'object' || ['array', 'object'].includes(type)) &&
-      name !== 'prBody';
+      el[0] === 'default' && isScalarOrCollection && name !== 'prBody';
     if (!ignoredKeys.includes(el[0]) || isShownDefault) {
       if (type === 'string' && el[0] === 'default') {
         el[1] = `<code>"${el[1]}"</code>`;
       }
-      if (
-        (type === 'boolean' && el[0] === 'default') ||
-        el[0] === 'cli' ||
-        el[0] === 'env'
-      ) {
+      const isBooleanDefault = type === 'boolean' && el[0] === 'default';
+      if (isBooleanDefault || el[0] === 'cli' || el[0] === 'env') {
         el[1] = `<code>${el[1]}</code>`;
       }
       // objects and arrays should be printed in JSON notation
+      const isDefaultOrAdditionalProperties =
+        el[0] === 'default' || el[0] === 'additionalProperties';
+      const isCollectionType = type === 'object' || type === 'array';
       const isObjectOrArrayValue =
-        (type === 'object' || type === 'array') &&
-        (el[0] === 'default' || el[0] === 'additionalProperties');
+        isCollectionType && isDefaultOrAdditionalProperties;
       if (
         isObjectOrArrayValue ||
         // enum values for `allowedValues` should be printed in JSON notation
