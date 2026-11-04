@@ -1698,7 +1698,8 @@ Maven release timestamps come from the `Last-Modified` header of the mirror, whi
 A proxy of `repo.maven.apache.org` keeps the dates of Maven Central, while a proxy of a re-hosted copy, like Google's Maven Central mirror, reports the upload time of that copy, which is later.
 Timestamps can only be later than the real release, so [`minimumReleaseAge`](./configuration-options.md#minimumreleaseage) waits longer, never shorter.
 
-The rewrite only applies to the HTTP requests Renovate makes itself, not to package manager commands.
+The rewrite applies to the HTTP requests Renovate makes itself.
+Rules without `matchHostTypes` are also passed to containerbase in child processes, see below.
 Registry URLs, lookup results and cache keys keep the original URL.
 
 It is not applied to Docker registries, use [`registryAliases`](./configuration-options.md#registryaliases) for those.
@@ -1743,6 +1744,25 @@ Rewriting a paginated GitHub or GitLab API, like `api.github.com`, stops paginat
 !!! warning
   `urlReplacements` is not a security or egress control.
   Requests with credentials, requests to Docker registries, requests whose host type isn't in `matchHostTypes`, URLs which don't match a `matchUrlPrefix`, and redirects to other hosts still go to the original or redirected host.
+
+Renovate also passes the rules without `matchHostTypes` to child processes, as the `URL_REPLACE_<n>_FROM` and `URL_REPLACE_<n>_TO` environment variables of containerbase.
+They are numbered in the order of `urlReplacements`, after the highest index below 1,000,000 of any `URL_REPLACE_*` variables which the child process already gets from Renovate's environment, `customEnvVariables` or the repository's `env`.
+Indexes of 1,000,000 or more aren't counted, so Renovate's rules may be numbered below them, but never reuse an index which is already set.
+Containerbase replaces the URL prefixes like Renovate does, for whole hosts and for path prefixes.
+It applies them to its tool downloads, like `install-tool`, and to the npm, pip and gem registry it uses to install npm-, pip- and gem-based tools.
+It doesn't apply them to the requests of the package managers Renovate runs.
+Rules with `matchHostTypes` only apply to Renovate's own requests.
+
+Containerbase only supports anonymous access to the mirror.
+So Renovate doesn't pass a rule when any host rule which can apply to the `replaceUrlPrefix` has a `username`, a `password`, a `token`, a client certificate or key, or any `headers`, for any host type.
+This includes host rules without `matchHost`, and host rules whose `matchHost` is a URL under the `replaceUrlPrefix`.
+
+The exported rules don't take effect when:
+
+- `CONTAINERBASE_CDN` is set, as containerbase rewrites tool download URLs to the CDN before it applies the URL replacements, so the exported `matchUrlPrefix` values are matched against the CDN URLs and rules for the original hosts don't apply to tool downloads
+- `binarySource=docker` is used, as the sidecar container only gets the environment variables Renovate explicitly passes to it
+
+Don't put secrets, like a token, in the prefixes of rules without `matchHostTypes`: they are passed to child processes, which can run repository code.
 
 ### `urlReplacements.matchHostTypes`
 
