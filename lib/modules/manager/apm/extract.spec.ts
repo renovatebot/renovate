@@ -2,7 +2,9 @@ import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
 import { fs } from '~test/util.ts';
 import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { extractPackageFile } from './extract.ts';
@@ -362,6 +364,125 @@ describe('modules/manager/apm/extract', () => {
         },
       ]);
     });
+
+    it('follows a SHA pinned to a branch with github-digest', async () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - anthropics/skills/skills/doc-coauthoring#b0cbd3df1533b396d281a6886d5132f623393a9c # main
+      `;
+      expect((await extractPackageFile(content, packageFile))?.deps).toEqual([
+        {
+          depName: 'anthropics/skills/skills/doc-coauthoring',
+          depType: 'apm',
+          packageName: 'anthropics/skills',
+          datasource: GithubDigestDatasource.id,
+          versioning: 'exact',
+          currentValue: 'main',
+          currentDigest: 'b0cbd3df1533b396d281a6886d5132f623393a9c',
+          replaceString:
+            'anthropics/skills/skills/doc-coauthoring#b0cbd3df1533b396d281a6886d5132f623393a9c # main',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+        },
+      ]);
+    });
+
+    it('follows a branch ref with github-digest', async () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - owner/repo#main
+            - github.example.com/team/project#develop
+      `;
+      expect(
+        (await extractPackageFile(content, packageFile))?.deps,
+      ).toMatchObject([
+        {
+          packageName: 'owner/repo',
+          datasource: GithubDigestDatasource.id,
+          versioning: 'exact',
+          currentValue: 'main',
+          replaceString: 'owner/repo#main',
+        },
+        {
+          packageName: 'team/project',
+          datasource: GithubDigestDatasource.id,
+          versioning: 'exact',
+          registryUrls: ['https://github.example.com'],
+          currentValue: 'develop',
+        },
+      ]);
+    });
+
+    it('follows a branch ref with git-refs on other hosts', async () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/team/project#main
+      `;
+      expect((await extractPackageFile(content, packageFile))?.deps).toEqual([
+        {
+          depName: 'gitlab.com/team/project',
+          depType: 'apm',
+          packageName: 'https://gitlab.com/team/project',
+          datasource: GitRefsDatasource.id,
+          versioning: 'exact',
+          currentValue: 'main',
+          replaceString: 'gitlab.com/team/project#main',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+        },
+      ]);
+    });
+
+    it('follows a SHA pinned to a branch with git-refs on other hosts', async () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/team/project#b0cbd3df1533b396d281a6886d5132f623393a9c # main
+      `;
+      expect((await extractPackageFile(content, packageFile))?.deps).toEqual([
+        {
+          depName: 'gitlab.com/team/project',
+          depType: 'apm',
+          packageName: 'https://gitlab.com/team/project',
+          datasource: GitRefsDatasource.id,
+          versioning: 'exact',
+          currentValue: 'main',
+          currentDigest: 'b0cbd3df1533b396d281a6886d5132f623393a9c',
+          replaceString:
+            'gitlab.com/team/project#b0cbd3df1533b396d281a6886d5132f623393a9c # main',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
+        },
+      ]);
+    });
+
+    it.each`
+      ref
+      ${'^1.0.0'}
+      ${'foo--v1.0.0'}
+      ${'documentation-plugin-v1.12.0'}
+      ${'release-2024'}
+      ${'release/2024'}
+    `(
+      'keeps $ref, which the default versioning reads, on github-tags',
+      async ({ ref }) => {
+        const content = codeBlock`
+        dependencies:
+          apm:
+            - owner/repo#${ref}
+      `;
+
+        const deps = (await extractPackageFile(content, packageFile))?.deps;
+
+        expect(deps).toMatchObject([
+          { datasource: GithubTagsDatasource.id, currentValue: ref },
+        ]);
+        expect(deps?.[0]).not.toHaveProperty('versioning');
+      },
+    );
 
     it('skips unpinned dependencies', async () => {
       const content = codeBlock`

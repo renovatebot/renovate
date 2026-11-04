@@ -353,6 +353,7 @@ export const Toml = z.string().transform((str, ctx) => {
 
 export const Ini = z.string().transform((str, ctx): Record<string, unknown> => {
   try {
+    // oxlint-disable-next-line renovate/prefer-parser-pipe -- this is the Ini helper itself
     return ini.parse(str);
   } catch /* v8 ignore next -- TODO: add test #40625 */ {
     ctx.addIssue({ code: 'custom', message: 'Invalid INI' });
@@ -455,3 +456,13 @@ export type EmailAddress = z.infer<typeof EmailAddress>;
 export function isEmailAdress(value: string): boolean {
   return EmailAddress.safeParse(value).success;
 }
+
+export const StringOrStringArray = z.union([z.string(), z.array(z.string())]);
+
+/**
+ * A config option definition whose value is a string or an array of strings.
+ */
+export const StringOrStringArrayOption = z.union([
+  z.object({ type: z.literal('string') }),
+  z.object({ type: z.literal('array'), subType: z.literal('string') }),
+]);

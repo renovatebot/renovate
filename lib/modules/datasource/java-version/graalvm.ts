@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
 import { MiseJavaRelease } from './schema.ts';
@@ -61,7 +62,7 @@ export async function getGraalvmReleases(
     result.releases.push(...filteredReleases);
   } catch (err) {
     if (err instanceof HttpError) {
-      if (err.response?.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.debug({ url }, 'GraalVM releases not found (404)');
         return null;
       }

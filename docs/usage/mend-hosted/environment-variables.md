@@ -26,7 +26,9 @@ If you are a paying Mend customer, in addition to being able to control reposito
 | `RENOVATE_ALLOW_SCRIPTS`                                  | [`allowScripts`](../self-hosted-configuration.md#allowscripts)                                                         |
 | `RENOVATE_ALLOW_SHELL_EXECUTOR_FOR_POST_UPGRADE_COMMANDS` | [`allowShellExecutorForPostUpgradeCommands`](../self-hosted-configuration.md#allowshellexecutorforpostupgradecommands) |
 | `RENOVATE_CUSTOM_ENV_VARIABLES`                           | [`customEnvVariables`](../self-hosted-configuration.md#customenvvariables)                                             |
+| `RENOVATE_FORK_PROCESSING`                                | [`forkProcessing`](../configuration-options.md#forkprocessing)                                                         |
 | `RENOVATE_INHERIT_CONFIG`                                 | [`inheritConfig`](../self-hosted-configuration.md#inheritconfig)                                                       |
 | `RENOVATE_INHERIT_CONFIG_FILE_NAME`                       | [`inheritConfigFileName`](../self-hosted-configuration.md#inheritconfigfilename)                                       |
 | `RENOVATE_INHERIT_CONFIG_REPO_NAME`                       | [`inheritConfigRepoName`](../self-hosted-configuration.md#inheritconfigreponame)                                       |
 | `RENOVATE_INHERIT_CONFIG_STRICT`                          | [`inheritConfigStrict`](../self-hosted-configuration.md#inheritconfigstrict)                                           |
+| `RENOVATE_ONBOARDING_NO_DEPS`                             | [`onboardingNoDeps`](../self-hosted-configuration.md#onboardingnodeps)                                                 |

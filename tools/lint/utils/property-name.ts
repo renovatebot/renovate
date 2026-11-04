@@ -8,10 +8,9 @@ export function getPropertyName(
   node: Pick<ESTree.ObjectProperty, 'key' | 'computed'>,
 ): string | undefined {
   const { key } = node;
-  if (
-    (key.type === 'Identifier' || key.type === 'PrivateIdentifier') &&
-    !node.computed
-  ) {
+  const isIdentifierKey =
+    key.type === 'Identifier' || key.type === 'PrivateIdentifier';
+  if (isIdentifierKey && !node.computed) {
     return key.name;
   }
   if (key.type === 'Literal' && typeof key.value === 'string') {

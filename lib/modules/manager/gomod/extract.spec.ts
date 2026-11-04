@@ -274,7 +274,7 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
         extractedConstraints: {
-          '%goMod': '~1.23.x',
+          '%goMod': '<=1.23.x',
         },
         constraintsVersioning: {
           '%goMod': 'semver-coerced',
@@ -330,7 +330,7 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
         extractedConstraints: {
-          '%goMod': '~1.25.x',
+          '%goMod': '<=1.25.x',
         },
         constraintsVersioning: {
           '%goMod': 'semver-coerced',
@@ -429,7 +429,7 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
         extractedConstraints: {
-          '%goMod': '~1.23.x',
+          '%goMod': '<=1.23.x',
           golang: '1.23.3',
         },
         constraintsVersioning: {
@@ -695,7 +695,7 @@ describe('modules/manager/gomod/extract', () => {
         },
       ],
       extractedConstraints: {
-        '%goMod': '~1.19.x',
+        '%goMod': '<=1.19.x',
       },
       constraintsVersioning: {
         '%goMod': 'semver-coerced',
@@ -704,7 +704,7 @@ describe('modules/manager/gomod/extract', () => {
   });
 
   it.each(['1.19', '1.19.0', '1.19.5'])(
-    'extracts `go` directive %s as a `%goMod` extracted constraint as a SemVer-minor compatible range',
+    'extracts `go` directive %s as a `%goMod` extracted constraint as a range up to and including its SemVer minor',
     (goDirective) => {
       const goMod = codeBlock`
         module github.com/renovate-tests/gomod
@@ -726,8 +726,8 @@ describe('modules/manager/gomod/extract', () => {
           },
         ],
         extractedConstraints: {
-          // NOTE that this is extracted as a range for the whole SemVer minor version
-          '%goMod': '~1.19.x',
+          // NOTE that this is extracted as a range up to and including the SemVer minor version, as modules requiring an older Go version can still be used
+          '%goMod': '<=1.19.x',
         },
         constraintsVersioning: {
           '%goMod': 'semver-coerced',
@@ -776,9 +776,9 @@ describe('modules/manager/gomod/extract', () => {
       expect(versioning.matches('1.20.10', constraint)).toBeFalse();
     });
 
-    it('does not match the previous SemVer minor', () => {
-      expect(versioning.matches('1.18.0', constraint)).toBeFalse();
-      expect(versioning.matches('1.18.5', constraint)).toBeFalse();
+    it('matches previous SemVer minors', () => {
+      expect(versioning.matches('1.18.0', constraint)).toBeTrue();
+      expect(versioning.matches('1.18.5', constraint)).toBeTrue();
     });
   });
 

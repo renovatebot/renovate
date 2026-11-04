@@ -8,12 +8,14 @@ import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { instrument } from '../../../../../instrumentation/index.ts';
 import { logger } from '../../../../../logger/index.ts';
+import { extractVersionFromGroups } from '../../../../../modules/datasource/common.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
 import * as memCache from '../../../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { buildCacheKey } from '../../../../../util/cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../../../../util/cache/package/types.ts';
 import { detectPlatform } from '../../../../../util/common.ts';
+import { isNotFound } from '../../../../../util/http/status.ts';
 import { linkify } from '../../../../../util/markdown.ts';
 import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
@@ -52,7 +54,7 @@ export async function getReleaseList(
   try {
     return await source.getReleaseList(project, release);
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug({ repository, type, apiBaseUrl }, 'getReleaseList 404');
     } else {
       logger.debug(
@@ -173,8 +175,10 @@ export async function getReleaseNotes(
     if (isUndefined(matchedRelease) && config.extractVersion) {
       const extractVersionRegEx = regEx(config.extractVersion);
       matchedRelease = releases.find((r) => {
-        const extractedVersion = extractVersionRegEx.exec(r.tag!)?.groups
-          ?.version;
+        const extractedVersionGroups = extractVersionRegEx.exec(r.tag!)?.groups;
+        const extractedVersion = extractVersionFromGroups(
+          extractedVersionGroups,
+        );
         return version === extractedVersion;
       });
     }
@@ -313,7 +317,7 @@ export async function getReleaseNotesMdFileInner(
       sourceDirectory,
     );
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       logger.debug(
         { repository, type, apiBaseUrl },
         'Error 404 getting changelog md',

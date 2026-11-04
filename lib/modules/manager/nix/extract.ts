@@ -198,9 +198,5 @@ export async function extractPackageFile(
     deps.push(dep);
   }
 
-  if (deps.length) {
-    return { deps };
-  }
-
-  return null;
+  return { deps };
 }

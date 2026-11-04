@@ -60,6 +60,10 @@ function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
   return template;
 }
 
+function lineIncludes(line: string, value: unknown): boolean {
+  return isString(value) && line.includes(value);
+}
+
 function processDepForAutoReplace(
   dep: PackageDependency,
   lineNumberRanges: number[][],
@@ -69,11 +73,10 @@ function processDepForAutoReplace(
   const lineNumberRangesToReplace: number[][] = [];
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
+      const line = lines[lineNumber];
       if (
-        (isString(dep.currentValue) &&
-          lines[lineNumber].includes(dep.currentValue)) ||
-        (isString(dep.currentDigest) &&
-          lines[lineNumber].includes(dep.currentDigest))
+        lineIncludes(line, dep.currentValue) ||
+        lineIncludes(line, dep.currentDigest)
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
       }
@@ -266,10 +269,8 @@ function getDepFromImageRef(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (
-    (dep.depName === 'debian' || dep.depName?.endsWith('/debian')) &&
-    debianVersioning.api.isVersion(dep.currentValue)
-  ) {
+  const isDebian = dep.depName === 'debian' || dep.depName?.endsWith('/debian');
+  if (isDebian && debianVersioning.api.isVersion(dep.currentValue)) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -370,10 +371,11 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) ||
-        (argMatchValue.startsWith("'") && argMatchValue.endsWith("'"))
-      ) {
+      const isDoubleQuoted =
+        argMatchValue.startsWith('"') && argMatchValue.endsWith('"');
+      const isSingleQuoted =
+        argMatchValue.startsWith("'") && argMatchValue.endsWith("'");
+      if (isDoubleQuoted || isSingleQuoted) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 

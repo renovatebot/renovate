@@ -1,13 +1,19 @@
 import { partial } from '../../../test/util.ts';
-import type { RenovateOptions, RenovateStringOption } from '../types.ts';
+import type {
+  ConfigScope,
+  RenovateOptions,
+  RenovateStringOption,
+} from '../types.ts';
 import {
   describeAllowedLocations,
   getAllowedParents,
   sharedScopes,
 } from './scopes.ts';
 
-function option(overrides: Partial<RenovateStringOption>): RenovateOptions {
-  return partial<RenovateStringOption>({
+function option(
+  overrides: Partial<RenovateStringOption & { scopes: ConfigScope[] }>,
+): RenovateOptions {
+  return partial<RenovateStringOption & { scopes: ConfigScope[] }>({
     name: 'anOption',
     description: 'A description',
     type: 'string',
@@ -57,6 +63,21 @@ describe('config/options/scopes', () => {
       expect(parents).toContain('major');
       expect(parents).toContain('lockFileMaintenance');
       expect(parents).not.toContain('.');
+    });
+
+    it('expands the `any` scope to every object a config nests in', () => {
+      const parents = getAllowedParents(option({ scopes: ['any'] }));
+
+      expect(parents).toContain('.');
+      expect(parents).toContain('packageRules');
+      // manager(s)
+      expect(parents).toContain('npm');
+      // `updateType`s
+      expect(parents).toContain('major');
+      // the objects which aren't a scope of their own
+      expect(parents).toContain('hostRules');
+      expect(parents).toContain('customManagers');
+      expect(parents).toContain('postUpgradeTasks');
     });
 
     it('combines parents and scopes without duplicates', () => {
