@@ -1,7 +1,4 @@
-import { ZodError } from 'zod/v4';
-import { logger } from '../../../logger/index.ts';
-import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -27,8 +24,13 @@ export class JsDelivrDatasource extends Datasource {
     this.npmDatasource = new NpmDatasource();
   }
 
-  override readonly customRegistrySupport = false;
-  override readonly defaultRegistryUrls = ['https://data.jsdelivr.com/v1/'];
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return false;
+  }
+
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://data.jsdelivr.com/v1/'];
+  }
 
   private async getNpmReleases(
     packageName: string,
@@ -42,33 +44,24 @@ export class JsDelivrDatasource extends Datasource {
   private async _getReleases({
     packageName,
     registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null | undefined> {
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (!registryUrl) {
-      return undefined;
+      return null;
     }
 
     const { type, package: parsedPackageName } =
       parseJsDelivrPackageName(packageName);
     const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}`;
 
-    try {
-      const { body } = await this.http.getJson(
-        url,
-        { cacheProvider: memCacheProvider },
-        JsDelivrPackageResponse,
-      );
-      return {
-        releases: body.versions,
-        tags: body.tags,
-      };
-    } catch (err) {
-      if (err instanceof ZodError) {
-        logger.debug({ err }, 'jsdelivr: validation error');
-        return undefined;
-      }
-
-      this.handleGenericErrors(err);
+    const body = await this.fetchJsonOrNull(url, JsDelivrPackageResponse);
+    if (!body) {
+      return null;
     }
+
+    return {
+      releases: body.versions,
+      tags: body.tags,
+    };
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -77,36 +70,27 @@ export class JsDelivrDatasource extends Datasource {
     );
 
     if (type === 'npm') {
-      return withCache(
-        {
-          namespace: `datasource-${JsDelivrDatasource.id}`,
-          key: `getReleases:${type}:${parsedPackageName}`,
-          cacheable: true,
-          fallback: true,
-        },
-        () => this.getNpmReleases(parsedPackageName),
-      );
+      return this.getNpmReleases(parsedPackageName);
     }
 
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${JsDelivrDatasource.id}`,
-        key: `getReleases:${type}:${parsedPackageName}`,
-        cacheable: true,
+        key: buildCacheKey('getReleases', type, parsedPackageName),
+        public: true,
         fallback: true,
       },
       () => this._getReleases(config),
-    ).then((result) => result ?? null);
+    );
   }
 
   private async _getDigest(
     config: DigestConfig,
-    newValue: string,
-  ): Promise<string | null | undefined> {
+    newValue?: string,
+  ): Promise<string | null> {
     const { packageName, registryUrl } = config;
 
-    if (!registryUrl) {
-      return undefined;
+    if (!newValue || !registryUrl) {
+      return null;
     }
 
     const {
@@ -116,38 +100,29 @@ export class JsDelivrDatasource extends Datasource {
     } = parseJsDelivrPackageName(packageName);
     const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
 
-    try {
-      const { body } = await this.http.getJson(url, JsDelivrDigestResponse);
-      const file = body.files.find(
-        (file) => file.name.replace(regEx(/^\/+/), '') === asset,
-      );
-      return file ? `sha256-${file.hash}` : null;
-    } catch (err) {
-      if (err instanceof ZodError) {
-        logger.debug({ err }, 'jsdelivr: validation error');
-        return undefined;
-      }
-
-      this.handleGenericErrors(err);
-    }
+    const body = await this.fetchJsonOrNull(url, JsDelivrDigestResponse);
+    const file = body?.files.find(
+      (file) => file.name.replace(regEx(/^\/+/), '') === asset,
+    );
+    return file?.hash ? `sha256-${file.hash}` : null;
   }
 
   override getDigest(
     config: DigestConfig,
-    newValue: string,
+    newValue?: string,
   ): Promise<string | null> {
-    /* v8 ignore next -- should never happen */
-    if (!newValue) {
-      return Promise.resolve(null);
-    }
-    return withCache(
+    return this.cached(
       {
-        namespace: `datasource-${JsDelivrDatasource.id}`,
-        key: `getDigest:${config.registryUrl}:${config.packageName}:${newValue}`,
-        cacheable: true,
+        key: buildCacheKey(
+          'getDigest',
+          config.registryUrl,
+          config.packageName,
+          newValue,
+        ),
+        public: true,
         fallback: true,
       },
       () => this._getDigest(config, newValue),
-    ).then((result) => result ?? null);
+    );
   }
 }

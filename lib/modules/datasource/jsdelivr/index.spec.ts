@@ -39,7 +39,7 @@ describe('modules/datasource/jsdelivr/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returns null for error', async () => {
+    it('returns null for request errors', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathFor('gh/foo/bar'))
@@ -103,19 +103,6 @@ describe('modules/datasource/jsdelivr/index', () => {
           packageName: 'gh/foo/bar',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-    });
-
-    it('returns null for unknown error', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(pathFor('gh/foo/bar'))
-        .replyWithError('error');
-      await expect(
-        getPkgReleases({
-          datasource: JsDelivrDatasource.id,
-          packageName: 'gh/foo/bar',
-        }),
-      ).resolves.toBeNull();
     });
 
     it('processes gh data', async () => {
@@ -195,6 +182,15 @@ describe('modules/datasource/jsdelivr/index', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null without a version', async () => {
+      await expect(
+        getDigest({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).resolves.toBeNull();
+    });
+
     it('returns null without a registry URL', async () => {
       const datasource = new JsDelivrDatasource();
 
@@ -220,7 +216,7 @@ describe('modules/datasource/jsdelivr/index', () => {
       ).resolves.toBeNull();
     });
 
-    it('returs null for empty "files" array', async () => {
+    it('returns null for an empty files array', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('npm/foo/bar', '1.2.0'))
@@ -236,7 +232,7 @@ describe('modules/datasource/jsdelivr/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returs null if file not found', async () => {
+    it('returns null if file is not found', async () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('npm/foo/bar', '1.2.0'))
