@@ -144,7 +144,7 @@ For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory 
 - Only mise TOML config files are used, not `.tool-versions` files, which belong to the [`asdf`](../asdf/index.md) manager
 - Environment-specific config files like `mise.production.toml` are ignored, while all files in `.config/mise/conf.d` are used, like mise does
 - A mise config file in a deeper directory takes precedence over one in a parent directory, and within a directory the [order of mise](https://github.com/jdx/mise/blob/02d59ef93faf219319cccac23249501e8763e2da/src/config/mod.rs#L2530-L2608) applies, like `mise.local.toml` over `mise.toml`
-- `constraints` from the Renovate config and constraints which the manager detects itself, like `packageManager` in a `package.json` or the `lockfileVersion` of a `pnpm-lock.yaml`, take precedence
+- `constraints` from the Renovate config take precedence, as do constraints which the manager detects itself, like `packageManager` in a `package.json`, unless the mise version is within them, like `20.11.0` within an `engines` range of `>=18`, or `9.12.0` within the `>=9` which Renovate reads from the `lockfileVersion` of a `pnpm-lock.yaml`
 
 ### Renovate only updates primary versions
 
