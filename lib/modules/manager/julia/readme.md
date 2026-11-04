@@ -46,9 +46,19 @@ For example, to group the updates of test dependencies:
 
 The default `rangeStrategy` is `widen`, which adds a specifier for the new release, as CompatHelper does: `"0.10, 0.11"` with 0.12.1 becomes `"0.10, 0.11, 0.12"`, and `"0.12"` with 1.9.24 becomes `"0.12, 1"`.
 
-The manager updates `Project.toml` only, not `Manifest.toml`.
+The manager updates the project's manifests with Pkg, as Pkg picks them: those of the workspace that lists the project in its `[workspace]` `projects`, as in Julia 1.12 and later, or else the file that the project's `manifest` entry names, or else each `JuliaManifest-vX.Y.toml` or `Manifest-vX.Y.toml`, and `JuliaManifest.toml` or `Manifest.toml`.
 With [`bumpVersion`](../../../configuration-options.md#bumpversion), it also increments the project's `version`.
+An update sets the manifest to the versions that Renovate updates to, and `lockFileMaintenance` updates all the manifest's packages.
+Pkg runs in the Julia that wrote the manifest: exactly its `julia_version`, or the latest 1.6 for a manifest without `julia_version`, which Julia 1.6 or older wrote.
+With `binarySource=install` or `docker`, `constraints.julia` sets another, in Julia's compat syntax, such as `"=1.10.12"`.
+With `binarySource=global`, `julia` on the `PATH` must be that version, or [juliaup](https://github.com/JuliaLang/juliaup) 1.12 or later installed, which runs it as `julia +<version>`.
+juliaup needs the channel of that exact version, such as `1.10.12`, even if a `1.10` channel has it: add it with `juliaup add 1.10.12`, or set `juliaup config autoinstallchannels true` to let juliaup add it, or install it first.
+`JULIAUP_DEPOT_PATH`, `JULIAUP_SERVER` and `JULIAUP_NIGHTLY_SERVER` are passed on to juliaup.
+juliaup has no channel for a manifest written by a nightly build, with a `julia_version` such as `1.14.0-DEV`, so its update fails.
 
-The locked versions come from the manifest that the project's `manifest` entry names, or else from `JuliaManifest.toml` or `Manifest.toml`, or else from the versioned manifest of the newest Julia, such as `Manifest-v1.12.toml`.
-A project that a workspace's `[workspace]` lists in `projects` takes them from the workspace's manifest instead, as Julia 1.12 and later do.
+The locked versions come from the unversioned manifest, or else from the versioned manifest of the newest Julia, such as `Manifest-v1.12.toml`.
 A package that the manifest takes from a local path or a git URL, as with `Pkg.develop` or `Pkg.add(url=...)`, has no locked version.
+
+Pkg neither builds the packages, which runs their `deps/build.jl`, nor downloads their artifacts, unless the repository may run package scripts: with `allowScripts=true` and `ignoreScripts=false`, Pkg does both.
+
+To see what Pkg does, set `JULIA_DEBUG` to `Pkg` with [`env`](../../../configuration-options.md#env), which needs `JULIA_DEBUG` in [`allowedEnv`](../../../self-hosted-configuration.md#allowedenv), or with [`customEnvVariables`](../../../self-hosted-configuration.md#customenvvariables).

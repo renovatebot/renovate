@@ -50,3 +50,7 @@ export const JuliaManifest = Toml.pipe(
     ? ManifestPackages.parse(packages)
     : coerceObject(deps),
 );
+
+export const ManifestJuliaVersion = Toml.pipe(
+  z.object({ julia_version: z.string().optional().catch(undefined) }),
+);

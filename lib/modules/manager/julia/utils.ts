@@ -9,7 +9,7 @@ import {
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as juliaVersioning } from '../../versioning/julia/index.ts';
-import { JuliaProject } from './schema.ts';
+import { JuliaProject, ManifestJuliaVersion } from './schema.ts';
 
 const versionedManifestRegex = regEx(/^(?:Julia)?Manifest-v\d+\.\d+\.toml$/);
 
@@ -137,4 +137,43 @@ export function getLockedVersionsManifest(
     }
   }
   return newestFile;
+}
+
+/**
+ * Returns the `julia_version` of the manifest, or `undefined` for a manifest
+ * without one, which Julia 1.6 or older wrote.
+ */
+function getManifestJuliaVersion(manifestContent: string): string | undefined {
+  return ManifestJuliaVersion.safeParse(manifestContent).data?.julia_version;
+}
+
+/**
+ * Returns the minor version of the Julia that wrote the manifest, such as
+ * `1.10`, and `1.6` for a manifest without `julia_version`.
+ */
+export function getJuliaMinor(manifestContent: string): string {
+  const juliaVersion = getManifestJuliaVersion(manifestContent);
+  if (!juliaVersion || !juliaVersioning.isVersion(juliaVersion)) {
+    return '1.6';
+  }
+  const major = juliaVersioning.getMajor(juliaVersion);
+  const minor = juliaVersioning.getMinor(juliaVersion);
+  return `${major}.${minor}`;
+}
+
+/**
+ * Returns the juliaup channel of the Julia that wrote the manifest: its
+ * `julia_version`, or `1.6` for a manifest without one.
+ */
+export function getJuliaupChannel(manifestContent: string): string {
+  return getManifestJuliaVersion(manifestContent) ?? '1.6';
+}
+
+/**
+ * Returns the `julia` tool constraint for the Julia that wrote the manifest:
+ * exactly its `julia_version`, or the 1.6 series for a manifest without one.
+ */
+export function getJuliaConstraint(manifestContent: string): string {
+  const juliaVersion = getManifestJuliaVersion(manifestContent);
+  return juliaVersion ? `=${juliaVersion}` : '~1.6';
 }

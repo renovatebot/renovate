@@ -2,7 +2,12 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../logger/index.ts';
-import { getLockedVersionsManifest, getManifestFileNames } from './utils.ts';
+import {
+  getJuliaConstraint,
+  getJuliaMinor,
+  getLockedVersionsManifest,
+  getManifestFileNames,
+} from './utils.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -197,6 +202,27 @@ describe('modules/manager/julia/utils', () => {
       [[], undefined],
     ])('takes from %j: %s', (manifestFiles, expected) => {
       expect(getLockedVersionsManifest(manifestFiles)).toBe(expected);
+    });
+  });
+
+  describe('getJuliaMinor()', () => {
+    it.each([
+      ['julia_version = "1.10.12"', '1.10'],
+      ['julia_version = "1.14.0-DEV"', '1.14'],
+      ['[[Example]]\nversion = "0.5.5"', '1.6'],
+      ['not [ toml', '1.6'],
+    ])('returns the minor version for %j', (manifest, expected) => {
+      expect(getJuliaMinor(codeBlock`${manifest}`)).toBe(expected);
+    });
+  });
+
+  describe('getJuliaConstraint()', () => {
+    it.each([
+      ['julia_version = "1.10.12"', '=1.10.12'],
+      ['[[Example]]\nversion = "0.5.5"', '~1.6'],
+      ['not [ toml', '~1.6'],
+    ])('returns the constraint for %j', (manifest, expected) => {
+      expect(getJuliaConstraint(codeBlock`${manifest}`)).toBe(expected);
     });
   });
 });
