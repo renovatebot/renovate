@@ -80,13 +80,14 @@ export async function fetchRepositoryMetadata(
     'primary_db',
     metadataSource !== 'primary_db',
   );
+  const hasPrimaryDbInAutoMode =
+    metadataSource === 'auto' && primaryDbUrl !== undefined;
   const primaryUrl = getRepodataUrl(
     xml,
     registryUrl,
     repomdUrl.toString(),
     'primary',
-    metadataSource === 'primary_db' ||
-      (metadataSource === 'auto' && primaryDbUrl !== undefined),
+    metadataSource === 'primary_db' || hasPrimaryDbInAutoMode,
   );
 
   if (!primaryUrl && !primaryDbUrl) {
