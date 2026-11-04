@@ -2489,7 +2489,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(config.packageRules).toHaveLength(11);
-      expect(config.packageRules[10]).toMatchObject({
+      expect(config.packageRules?.[10]).toMatchObject({
         matchCurrentVersion: '1.0.0',
         allowedVersions: '>= 12.0.0',
       });

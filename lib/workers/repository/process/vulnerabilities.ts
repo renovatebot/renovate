@@ -619,7 +619,10 @@ export class Vulnerabilities {
     let highest: string | null = null;
     for (const { affected } of vulnerabilities) {
       const fix = this.lowestFixAbove(version, affected, versioningApi);
-      if (fix && (!highest || this.isVersionGt(fix, highest, versioningApi))) {
+      if (!fix) {
+        continue;
+      }
+      if (!highest || this.isVersionGt(fix, highest, versioningApi)) {
         highest = fix;
       }
     }
