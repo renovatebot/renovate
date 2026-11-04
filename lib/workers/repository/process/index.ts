@@ -4,13 +4,18 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import {
+  CONFIG_VALIDATION,
+  PlatformErrors,
+  TemporaryErrors,
+} from '../../../constants/error-messages.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
 import { getBranchList } from '../../../util/git/index.ts';
@@ -21,6 +26,13 @@ import { readDashboardBody } from '../dependency-dashboard.ts';
 import type { ExtractResult } from './extract-update.ts';
 import { extract, lookup, update } from './extract-update.ts';
 import type { WriteUpdateResult } from './write.ts';
+
+function isPlatformOrTemporaryError(message: unknown): boolean {
+  return (
+    (PlatformErrors as readonly unknown[]).includes(message) ||
+    (TemporaryErrors as readonly unknown[]).includes(message)
+  );
+}
 
 export async function getBaseBranchConfig(
   baseBranch: string,
@@ -51,9 +63,16 @@ export async function getBaseBranchConfig(
         baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch {
+    } catch (err) {
+      if (
+        err instanceof ExternalHostError ||
+        isPlatformOrTemporaryError(err.message)
+      ) {
+        throw err;
+      }
+
       logger.error(
-        { configFileName, baseBranch },
+        { configFileName, baseBranch, err },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,
       );
 

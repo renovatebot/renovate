@@ -2,9 +2,15 @@ import type { RenovateConfig } from '~test/util.ts';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+} from '../../../constants/error-messages.ts';
 import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
@@ -150,6 +156,24 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
+
+    it.each`
+      error
+      ${new ExternalHostError(new Error('server error'), 'github')}
+      ${new Error(PLATFORM_RATE_LIMIT_EXCEEDED)}
+      ${new Error(PLATFORM_BAD_CREDENTIALS)}
+      ${new Error(REPOSITORY_CHANGED)}
+    `(
+      'rethrows $error.message when fetching base branch config',
+      async ({ error }) => {
+        scm.branchExists.mockResolvedValue(true);
+        platform.getJsonFile = vi.fn().mockRejectedValue(error);
+        getCache().configFileName = 'renovate.json';
+        config.baseBranchPatterns = ['master', 'dev'];
+        config.useBaseBranchConfig = 'merge';
+        await expect(extractDependencies(config)).rejects.toBe(error);
+      },
+    );
 
     it('processes baseBranchPatterns dryRun extract', async () => {
       extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
