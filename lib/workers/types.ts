@@ -183,6 +183,8 @@ export interface BranchConfig
 
   errors?: ValidationMessage[];
   forcePr?: boolean;
+  /** True for a group branch in a run where a dependency lookup failed, so the branch must not be updated. */
+  skippedForLookupFailure?: boolean;
   hasTypes?: boolean;
   isModified?: boolean;
   isScheduledNow?: boolean;

@@ -1,6 +1,7 @@
 import { type RenovateConfig, git, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { extractPackageJson } from '../../../modules/manager/npm/extract/common/package-file.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import * as _changelog from '../changelog/index.ts';
 import { getUpdatedPackageFiles } from '../update/branch/get-updated.ts';
@@ -204,6 +205,62 @@ describe('workers/repository/updates/branchify', () => {
       );
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(2);
+    });
+
+    describe('with lookup failures', () => {
+      const groupUpdates = partial<BranchUpgradeConfig>([
+        {
+          depName: 'foo',
+          branchName: 'renovate/my-group',
+          prTitle: 'some-title',
+          version: '1.1.0',
+          groupName: 'My Group',
+          group: { branchName: 'renovate/my-group' },
+        },
+        {
+          depName: 'bar',
+          branchName: 'renovate/bar',
+          prTitle: 'some-title',
+          version: '1.1.0',
+        },
+      ]);
+
+      function getPackageFiles(lookupFailed: boolean): {
+        maven: PackageFile[];
+      } {
+        return {
+          maven: [
+            partial<PackageFile>({
+              packageFile: 'pom.xml',
+              deps: [{ depName: 'failed', lookupFailed }, { depName: 'fine' }],
+            }),
+          ],
+        };
+      }
+
+      it('flags only the group branches', async () => {
+        flattenUpdates.mockResolvedValueOnce(groupUpdates);
+
+        const res = await branchifyUpgrades(config, getPackageFiles(true));
+
+        expect(
+          res.branches.map((b) => [b.branchName, b.skippedForLookupFailure]),
+        ).toEqual([
+          ['renovate/my-group', true],
+          ['renovate/bar', undefined],
+        ]);
+      });
+
+      it('flags nothing without a failed lookup', async () => {
+        flattenUpdates.mockResolvedValueOnce(groupUpdates);
+
+        const res = await branchifyUpgrades(config, getPackageFiles(false));
+
+        expect(res.branches.map((b) => b.skippedForLookupFailure)).toEqual([
+          undefined,
+          undefined,
+        ]);
+      });
     });
 
     it('no fetch changelogs', async () => {
