@@ -173,6 +173,21 @@ describe('workers/repository/process/index', () => {
       });
     });
 
+    it('throws CONFIG_VALIDATION with the parse error if base branch config file is invalid JSON', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getRawFile = vi.fn().mockResolvedValue('{"extends": [');
+      getCache().configFileName = 'renovate.json';
+      config.baseBranchPatterns = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      await expect(extractDependencies(config)).rejects.toMatchObject({
+        message: CONFIG_VALIDATION,
+        validationSource: 'renovate.json',
+        validationError:
+          'The renovate configuration file of branch master could not be parsed: Invalid JSON (parsing failed)',
+        validationMessage: 'Syntax error: unclosed statement near xtends": [',
+      });
+    });
+
     it('throws CONFIG_VALIDATION if base branch config file is not found', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getRawFile = vi.fn().mockResolvedValue(null);
