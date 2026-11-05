@@ -357,7 +357,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       // runs from the repo root, since the tool re-resolves every workflow
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `gh extension install github/gh-actions-lock --force --pin ${actionsLockVersion}`,
+          cmd: `gh extension install https://github.com/github/gh-actions-lock --force --pin ${actionsLockVersion}`,
           options: { cwd: '/tmp/github/some/repo' },
         },
         {
@@ -567,7 +567,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
 
       expect(execSnapshots[0].cmd).toBe(
-        'gh extension install github/gh-actions-lock --force --pin v0.1.7-rc.1',
+        'gh extension install https://github.com/github/gh-actions-lock --force --pin v0.1.7-rc.1',
       );
     });
 
@@ -595,7 +595,7 @@ describe('modules/manager/github-actions/artifacts', () => {
         );
 
         expect(execSnapshots[0].cmd).toBe(
-          `gh extension install github/gh-actions-lock --force --pin ${quoted}`,
+          `gh extension install https://github.com/github/gh-actions-lock --force --pin ${quoted}`,
         );
       },
     );
@@ -612,7 +612,7 @@ describe('modules/manager/github-actions/artifacts', () => {
       );
 
       expect(execSnapshots[0].cmd).toBe(
-        'gh extension install github/gh-actions-lock --force',
+        'gh extension install https://github.com/github/gh-actions-lock --force',
       );
     });
 
@@ -774,7 +774,66 @@ describe('modules/manager/github-actions/artifacts', () => {
         GH_HOST: 'github.example.com',
         GH_ENTERPRISE_TOKEN: 'ghes-token',
         GH_TOKEN: 'dot-com-token',
+        GH_ACTIONS_LOCK_GITHUB_COM_TOKEN: 'dot-com-token',
       });
+    });
+
+    it('passes a GHE.com tenant token as `GH_TOKEN`, and the github.com token separately', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        platform: 'github',
+        endpoint: 'https://example.ghe.com/api/v3/',
+      });
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'example.ghe.com',
+        token: 'tenant-token',
+      });
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'dot-com-token',
+      });
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(makeConfig(), packageFiles);
+
+      // `gh` ignores `GH_ENTERPRISE_TOKEN` for a GHE.com tenant, and would send a github.com token in `GH_TOKEN` to it
+      expect(execSnapshots[1].options?.env).toMatchObject({
+        GH_HOST: 'example.ghe.com',
+        GH_TOKEN: 'tenant-token',
+        GH_ACTIONS_LOCK_GITHUB_COM_TOKEN: 'dot-com-token',
+      });
+      // the tenant token would be rejected by github.com, where the extension is downloaded from
+      expect(execSnapshots[0].cmd).toBe(
+        `env -u GH_TOKEN gh extension install https://github.com/github/gh-actions-lock --force --pin ${actionsLockVersion}`,
+      );
+    });
+
+    it('passes a GHE.com tenant token as `GH_TOKEN` without a github.com token', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        platform: 'github',
+        endpoint: 'https://example.ghe.com/api/v3/',
+      });
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'example.ghe.com',
+        token: 'tenant-token',
+      });
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(makeConfig(), packageFiles);
+
+      expect(execSnapshots[1].options?.env).toMatchObject({
+        GH_HOST: 'example.ghe.com',
+        GH_TOKEN: 'tenant-token',
+      });
+      expect(execSnapshots[1].options?.env).not.toHaveProperty(
+        'GH_ACTIONS_LOCK_GITHUB_COM_TOKEN',
+      );
     });
 
     it('does not let an ambient token shadow the one we resolved', async () => {

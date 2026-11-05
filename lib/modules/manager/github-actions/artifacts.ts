@@ -22,8 +22,12 @@ import { actionsLockFile, isLockfileManaged } from './common.ts';
 import { ActionsLockfile, type Finding, FindingsOutput } from './schema.ts';
 import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 
-/** The `gh` CLI extension that generates and verifies the lockfile. */
-const extensionName = 'github/gh-actions-lock';
+/**
+ * The `gh` CLI extension that generates and verifies the lockfile.
+ *
+ * A full URL, as `gh extension install` looks an `owner/repo` up on `GH_HOST`, which is the enterprise host when there is one.
+ */
+const extensionUrl = 'https://github.com/github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
 const lockedDepTypes = ['action', 'workflow', 'docker'];
@@ -40,16 +44,22 @@ function needsRelock(version: string | undefined): boolean {
   );
 }
 
+function isGheTenant(hostname: string): boolean {
+  return hostname.endsWith('.ghe.com');
+}
+
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));
 }
 
 /**
  * `gh` takes the token from a different variable for GitHub Enterprise Server, and has to be told which host to talk to.
+ * A GHE.com tenant is the exception: `gh` reads its token from `GH_TOKEN`, like github.com's, and ignores `GH_ENTERPRISE_TOKEN`.
  *
  * Public actions are still resolved against github.com from there, so pass a token for both hosts.
+ * `gh actions-lock` reads that one from `GH_ACTIONS_LOCK_GITHUB_COM_TOKEN` whenever `GH_HOST` is an enterprise host.
  */
-function getTokenEnv(): ExtraEnv {
+function getTokenEnv(): ExtraEnv<string> {
   const githubComEndpoint = 'https://api.github.com/';
   const configuredEndpoint = GlobalConfig.get('endpoint');
   // The configured endpoint only says where GitHub lives when Renovate is talking to GitHub: workflows mirrored onto another platform still resolve their actions against github.com.
@@ -62,19 +72,26 @@ function getTokenEnv(): ExtraEnv {
   const isEnterprise =
     !!hostname && hostname !== 'api.github.com' && hostname !== 'github.com';
 
-  const env: ExtraEnv = {};
+  const env: ExtraEnv<string> = {};
+  const githubComToken = findToken(githubComEndpoint);
 
   if (isEnterprise) {
     const enterpriseToken = findToken(endpoint);
     if (enterpriseToken) {
       env.GH_HOST = hostname;
       env.GH_ENTERPRISE_TOKEN = enterpriseToken;
+      if (isGheTenant(hostname)) {
+        env.GH_TOKEN = enterpriseToken;
+      }
+    }
+    if (githubComToken) {
+      env.GH_ACTIONS_LOCK_GITHUB_COM_TOKEN = githubComToken;
     }
   }
 
-  const token = findToken(githubComEndpoint);
-  if (token) {
-    env.GH_TOKEN = token;
+  // On a GHE.com tenant, `GH_TOKEN` already holds the tenant's token, and a github.com token there would be sent to the tenant
+  if (githubComToken && !env.GH_TOKEN) {
+    env.GH_TOKEN = githubComToken;
   }
 
   if (!Object.keys(env).length) {
@@ -251,13 +268,15 @@ export async function updateActionsLockfile(
     );
   } else {
     // `--force` makes an install a no-op when the specified version is already installed
+    let install = `gh extension install ${extensionUrl} --force`;
     if (ghActionsLockConstraint) {
-      commands.unshift(
-        `gh extension install ${extensionName} --force --pin ${quote(ghActionsLockConstraint)}`,
-      );
-    } else {
-      commands.unshift(`gh extension install ${extensionName} --force`);
+      install += ` --pin ${quote(ghActionsLockConstraint)}`;
     }
+    // `gh` would send a GHE.com tenant's token in `GH_TOKEN` to github.com as well, which rejects it, so the public download goes unauthenticated
+    if (tokenEnv.GH_HOST && isGheTenant(tokenEnv.GH_HOST)) {
+      install = `env -u GH_TOKEN ${install}`;
+    }
+    commands.unshift(install);
   }
 
   try {
