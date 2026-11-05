@@ -1,13 +1,14 @@
 import { codeBlock } from 'common-tags';
 import jsonValidator from 'json-dup-key-validator';
-import { parseFileConfig } from './parse.ts';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
+import { parseFileConfig, safeParseFileConfig } from './parse.ts';
 
 vi.mock('json-dup-key-validator', { spy: true });
 
 describe('config/parse', () => {
   describe('json', () => {
     it('parses', () => {
-      expect(parseFileConfig('config.json', '{}')).toEqual({
+      expect(safeParseFileConfig('config.json', '{}')).toEqual({
         success: true,
         parsedContents: {},
       });
@@ -20,7 +21,7 @@ describe('config/parse', () => {
           "extends": ["config:best-practices"],
         }
       `;
-      expect(parseFileConfig('config.jsonc', content)).toEqual({
+      expect(safeParseFileConfig('config.jsonc', content)).toEqual({
         success: true,
         parsedContents: { extends: ['config:best-practices'] },
       });
@@ -33,7 +34,7 @@ describe('config/parse', () => {
           "bar": "b,}",
         }
       `;
-      expect(parseFileConfig('config.jsonc', content)).toEqual({
+      expect(safeParseFileConfig('config.jsonc', content)).toEqual({
         success: true,
         parsedContents: { foo: 'a,]', bar: 'b,}' },
       });
@@ -41,7 +42,7 @@ describe('config/parse', () => {
 
     it('returns error', () => {
       // syntax validation
-      expect(parseFileConfig('config.json', '{')).toEqual({
+      expect(safeParseFileConfig('config.json', '{')).toEqual({
         success: false,
         validationError: 'Invalid JSON (parsing failed)',
         validationMessage: 'Syntax error: unclosed statement near {',
@@ -49,7 +50,7 @@ describe('config/parse', () => {
 
       // duplicate keys
       vi.mocked(jsonValidator).validate.mockReturnValueOnce(undefined);
-      expect(parseFileConfig('config.json', '{')).toEqual({
+      expect(safeParseFileConfig('config.json', '{')).toEqual({
         success: false,
         validationError: 'Duplicate keys in JSON',
         validationMessage: '"Syntax error: unclosed statement near {"',
@@ -57,7 +58,7 @@ describe('config/parse', () => {
 
       // JSON.parse
       vi.mocked(jsonValidator).validate.mockReturnValue(undefined);
-      expect(parseFileConfig('config.json', '{')).toEqual({
+      expect(safeParseFileConfig('config.json', '{')).toEqual({
         success: false,
         validationError: 'Invalid JSON (parsing failed)',
         validationMessage:
@@ -68,19 +69,35 @@ describe('config/parse', () => {
 
   describe('json5', () => {
     it('parses', () => {
-      expect(parseFileConfig('config.json5', '{}')).toEqual({
+      expect(safeParseFileConfig('config.json5', '{}')).toEqual({
         success: true,
         parsedContents: {},
       });
     });
 
     it('returns error', () => {
-      expect(parseFileConfig('config.json5', '{')).toEqual({
+      expect(safeParseFileConfig('config.json5', '{')).toEqual({
         success: false,
         validationError: 'Invalid JSON5 (parsing failed)',
         validationMessage:
           'JSON5.parse error: `JSON5: invalid end of input at 1:2`',
       });
+    });
+  });
+
+  describe('parseFileConfig', () => {
+    it('returns the parsed contents', () => {
+      expect(parseFileConfig('config.json', '{"a":1}')).toEqual({ a: 1 });
+    });
+
+    it('throws CONFIG_VALIDATION on parse errors', () => {
+      expect(() => parseFileConfig('config.json5', '{')).toThrow(
+        expect.objectContaining({
+          message: CONFIG_VALIDATION,
+          validationSource: 'config.json5',
+          validationError: 'Invalid JSON5 (parsing failed)',
+        }),
+      );
     });
   });
 });

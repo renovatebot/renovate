@@ -2,11 +2,12 @@ import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 import stripJsonComments from 'strip-json-comments';
 import upath from 'upath';
+import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
 import { logger } from '../logger/index.ts';
 import { parseJson } from '../util/common.ts';
 import { regEx } from '../util/regex.ts';
 
-export function parseFileConfig(
+export function safeParseFileConfig(
   fileName: string,
   fileContents: string,
 ):
@@ -81,4 +82,19 @@ export function parseFileConfig(
       return { success: false, validationError, validationMessage };
     }
   }
+}
+
+export function parseFileConfig(
+  fileName: string,
+  fileContents: string,
+): unknown {
+  const result = safeParseFileConfig(fileName, fileContents);
+  if (!result.success) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = fileName;
+    error.validationError = result.validationError;
+    error.validationMessage = result.validationMessage;
+    throw error;
+  }
+  return result.parsedContents;
 }

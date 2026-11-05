@@ -92,18 +92,17 @@ export async function getBaseBranchConfig(
       throw error;
     }
 
-    const parseResult = parseFileConfig(
-      configFileName,
-      configFileRaw.length ? configFileRaw : '{}',
-    );
-    if (!parseResult.success) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = configFileName;
-      error.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${parseResult.validationError}`;
-      error.validationMessage = parseResult.validationMessage;
-      throw error;
+    try {
+      baseBranchConfig = parseFileConfig(
+        configFileName,
+        configFileRaw.length ? configFileRaw : '{}',
+      ) as RenovateConfig;
+    } catch (err) {
+      if (err.message === CONFIG_VALIDATION) {
+        err.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${err.validationError}`;
+      }
+      throw err;
     }
-    baseBranchConfig = parseResult.parsedContents as RenovateConfig;
     logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
 
     baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);

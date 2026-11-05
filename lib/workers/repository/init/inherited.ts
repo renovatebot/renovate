@@ -6,7 +6,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import { massageConfig } from '../../../config/massage.ts';
-import { parseFileConfig } from '../../../config/parse.ts';
+import { safeParseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type {
@@ -112,7 +112,7 @@ export async function mergeInheritedConfig(
     logger.debug(`No inherited config found in ${inheritConfigRepoName}.`);
     return config;
   }
-  const parseResult = parseFileConfig(
+  const parseResult = safeParseFileConfig(
     config.inheritConfigFileName,
     configFileRaw,
   );

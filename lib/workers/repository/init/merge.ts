@@ -12,7 +12,7 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { massageConfig } from '../../../config/massage.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import { migrateConfig } from '../../../config/migration.ts';
-import { parseFileConfig } from '../../../config/parse.ts';
+import { safeParseFileConfig } from '../../../config/parse.ts';
 import * as presets from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type {
@@ -166,7 +166,7 @@ export async function detectRepoFileConfig(
       configFileRaw = '{}';
     }
 
-    const parseResult = parseFileConfig(configFileName, configFileRaw);
+    const parseResult = safeParseFileConfig(configFileName, configFileRaw);
 
     if (!parseResult.success) {
       return {
