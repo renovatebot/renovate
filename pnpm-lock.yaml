@@ -120,8 +120,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@redis/client':
-        specifier: 6.3.0
-        version: 6.3.0(@opentelemetry/api@1.10.0)
+        specifier: 6.3.1
+        version: 6.3.1(@opentelemetry/api@1.10.0)
       '@renovatebot/base-image':
         specifier: 13.160.4
         version: 13.160.4(zod@4.6.7)
@@ -2020,8 +2020,8 @@ packages:
   '@quansync/fs@1.1.0':
     resolution: {integrity: sha512-qAPG/t3HqML1TlN7sY/pTbEjzFVAKsMjNNMGheyDosro+kT4iw2KCUoHcVdmliwWjorm4elZbgNQyU2eD97eDg==}
 
-  '@redis/client@6.3.0':
-    resolution: {integrity: sha512-fHrjwGCBvAANGi+TuRuwKi83sIOzgHr8eh+Uf48w3fSX7Hhrz174NrWqfJhAC2vnN0d/tfaZpdr6+o6JC3QHwg==}
+  '@redis/client@6.3.1':
+    resolution: {integrity: sha512-masbfVKULdoAofwddepZxRhWa4w6zvBHn6TRn90TRPrRkVIlGCur3pFqwWaCbMxtYI9twepkz63e/T/tEH8GjA==}
     engines: {node: '>= 20.0.0'}
     peerDependencies:
       '@node-rs/xxhash': ^1.1.0
@@ -7409,7 +7409,7 @@ snapshots:
     dependencies:
       quansync: 1.0.0
 
-  '@redis/client@6.3.0(@opentelemetry/api@1.10.0)':
+  '@redis/client@6.3.1(@opentelemetry/api@1.10.0)':
     optionalDependencies:
       '@opentelemetry/api': 1.10.0
 
