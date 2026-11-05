@@ -128,6 +128,33 @@ describe('modules/manager/julia/extract', () => {
       expect(dep).not.toHaveProperty('packageName');
     });
 
+    it('takes the depType of an [extras] package from [targets]', () => {
+      const content = codeBlock`
+        [extras]
+        Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+        Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
+        JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+        Example = "7876af07-990d-54b4-ab0e-23690620f79a"
+
+        [targets]
+        test = ["Aqua", "JSON"]
+        build = ["Conda", "JSON"]
+
+        [compat]
+        Aqua = "0.8"
+        Conda = "1"
+        JSON = "1"
+        Example = "0.5"
+      `;
+
+      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
+        { depName: 'Aqua', depType: 'test' },
+        { depName: 'Conda', depType: 'build' },
+        { depName: 'JSON', depType: 'test' },
+        { depName: 'Example', depType: 'extras' },
+      ]);
+    });
+
     it('takes the depType from [deps] for a package also in [extras]', () => {
       const content = codeBlock`
         [deps]

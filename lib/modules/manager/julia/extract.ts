@@ -53,7 +53,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const { version, compat = {}, sources = {} } = parsed.data;
+  const { version, compat = {}, sources = {}, targets = {} } = parsed.data;
   // A package listed in several sections is a dependency of the first.
   const sections = (['deps', 'weakdeps', 'extras'] as const).map((depType) => ({
     depType,
@@ -67,9 +67,17 @@ export function extractPackageFile(
     }
 
     const section = sections.find(({ uuids }) => depName in uuids);
+    let depType = section?.depType ?? 'compat';
+    if (depType === 'extras') {
+      // `[targets]` names the `[extras]` packages of each target.
+      depType =
+        (['test', 'build'] as const).find((target) =>
+          targets[target]?.includes(depName),
+        ) ?? depType;
+    }
     const dep: PackageDependency = {
       depName,
-      depType: section?.depType ?? 'compat',
+      depType,
       currentValue,
       datasource: JuliaGeneralMetadataDatasource.id,
     };
