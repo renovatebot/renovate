@@ -14,6 +14,9 @@ This versioning scheme handles Rust release channel identifiers as used by rustu
 - Version ranges: `1.82` (`1.82.0` <= version < `1.83.0`)
 - Beta ranges: `1.83.0-beta` (matches all beta versions for `1.83.0`)
 
+Rustup does not support lower bounds like `>=1.100.0`, so they are no valid versions or ranges.
+Renovate only uses them internally, to check if a toolchain is at least `1.100.0`.
+
 #### Dated Nightlies
 
 - `nightly-2025-11-24` - specific nightly release from a date
