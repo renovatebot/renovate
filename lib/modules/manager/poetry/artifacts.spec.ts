@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
+import { DateTime } from 'luxon';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
@@ -12,8 +13,13 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -46,6 +52,10 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 };
 
 const config: UpdateArtifactsConfig = {};
+
+function releasedDaysAgo(days: number): Timestamp {
+  return DateTime.now().minus({ days }).toISO() as Timestamp;
+}
 
 describe('modules/manager/poetry/artifacts', () => {
   describe('getPythonConstraint', () => {
@@ -784,123 +794,891 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
-    it('sets POETRY_SOLVER_MIN_RELEASE_AGE from minimumReleaseAge config', async () => {
-      const execSnapshots = mockExecAll();
-      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: '',
-        config: { ...config, minimumReleaseAge: '7 days' },
-      });
-      expect(execSnapshots).toMatchObject([
-        {
-          options: {
-            env: expect.objectContaining({
-              POETRY_SOLVER_MIN_RELEASE_AGE: '7',
-            }),
+    describe('without minimumReleaseAgePackageManagerSync', () => {
+      it('sets POETRY_SOLVER_MIN_RELEASE_AGE from minimumReleaseAge config', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        const updatedDeps = [{ depName: 'dep1' }];
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config: { ...config, minimumReleaseAge: '7 days' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+              }),
+            },
           },
-        },
-      ]);
+        ]);
+      });
+
+      it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when minimumReleaseAge is an invalid duration', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        const updatedDeps = [{ depName: 'dep1' }];
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config: { ...config, minimumReleaseAge: 'not-a-duration' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.not.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
+              }),
+            },
+          },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { minimumReleaseAge: 'not-a-duration' },
+          'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
+        );
+      });
+
+      it('rounds up sub-day durations to 1 day for POETRY_SOLVER_MIN_RELEASE_AGE', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        const updatedDeps = [{ depName: 'dep1' }];
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config: { ...config, minimumReleaseAge: '12 hours' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '1',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('sets POETRY_SOLVER_MIN_RELEASE_AGE to 0 for "0 days"', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        const updatedDeps = [{ depName: 'dep1' }];
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config: { ...config, minimumReleaseAge: '0 days' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '0',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when minimumReleaseAge is not configured', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        const updatedDeps = [{ depName: 'dep1' }];
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.not.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('passes minimumReleaseAge of the config without reading poetry.toml or excluding packages', async () => {
+        const execSnapshots = mockExecAll();
+        fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+
+        const res = await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAge: null,
+              minimumReleaseAgePackageManagerSync: false,
+              minimumReleaseAgeRepository: '3 days',
+              releaseTimestamp: releasedDaysAgo(1),
+            },
+          ],
+          newPackageFileContent: '',
+          config: {
+            ...config,
+            minimumReleaseAge: '14 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        });
+
+        expect(res).toEqual([
+          {
+            file: {
+              type: 'addition',
+              path: 'poetry.lock',
+              contents: 'New poetry.lock',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '14',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('passes minimumReleaseAge of the config for security updates', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1', isVulnerabilityAlert: true }],
+          newPackageFileContent: '',
+          config: { ...config, minimumReleaseAge: '7 days' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+              }),
+            },
+          },
+        ]);
+      });
     });
 
-    it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when minimumReleaseAge is an invalid duration', async () => {
-      const execSnapshots = mockExecAll();
-      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: '',
-        config: { ...config, minimumReleaseAge: 'not-a-duration' },
-      });
-      expect(execSnapshots).toMatchObject([
-        {
-          options: {
-            env: expect.not.objectContaining({
-              POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
-            }),
-          },
-        },
-      ]);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { minimumReleaseAge: 'not-a-duration' },
-        'Invalid minimumReleaseAge, skipping POETRY_SOLVER_MIN_RELEASE_AGE',
-      );
-    });
+    describe('with minimumReleaseAgePackageManagerSync', () => {
+      const syncConfig: UpdateArtifactsConfig = {
+        ...config,
+        minimumReleaseAgePackageManagerSync: true,
+      };
 
-    it('rounds up sub-day durations to 1 day for POETRY_SOLVER_MIN_RELEASE_AGE', async () => {
-      const execSnapshots = mockExecAll();
-      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: '',
-        config: { ...config, minimumReleaseAge: '12 hours' },
-      });
-      expect(execSnapshots).toMatchObject([
-        {
-          options: {
-            env: expect.objectContaining({
-              POETRY_SOLVER_MIN_RELEASE_AGE: '1',
-            }),
+      it('sets POETRY_SOLVER_MIN_RELEASE_AGE from minimumReleaseAgeRepository', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '7 days',
+              minimumReleaseAgeRepository: '7 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+              }),
+            },
           },
-        },
-      ]);
-    });
+        ]);
+      });
 
-    it('sets POETRY_SOLVER_MIN_RELEASE_AGE to 0 for "0 days"', async () => {
-      const execSnapshots = mockExecAll();
-      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: '',
-        config: { ...config, minimumReleaseAge: '0 days' },
-      });
-      expect(execSnapshots).toMatchObject([
-        {
-          options: {
-            env: expect.objectContaining({
-              POETRY_SOLVER_MIN_RELEASE_AGE: '0',
-            }),
+      it('uses minimumReleaseAgeRepository instead of a larger packageRules minimumReleaseAge', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '14 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: { ...syncConfig, minimumReleaseAgeRepository: '3 days' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '3',
+              }),
+            },
           },
-        },
-      ]);
-    });
+        ]);
+      });
 
-    it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when minimumReleaseAge is not configured', async () => {
-      const execSnapshots = mockExecAll();
-      fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
-      fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
-      await updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        updatedDeps,
-        newPackageFileContent: '',
-        config,
-      });
-      expect(execSnapshots).toMatchObject([
-        {
-          options: {
-            env: expect.not.objectContaining({
-              POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
-            }),
+      it('rounds up sub-day durations to 1 day for POETRY_SOLVER_MIN_RELEASE_AGE', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '12 hours',
+              minimumReleaseAgeRepository: '12 hours',
+            },
+          ],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '1',
+              }),
+            },
           },
-        },
-      ]);
+        ]);
+      });
+
+      async function runYoung(
+        updatedDeps: UpdateArtifact['updatedDeps'],
+      ): Promise<NodeJS.ProcessEnv | undefined> {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        return execSnapshots[0].options?.env;
+      }
+
+      it('excludes a young update without minimumReleaseAge and keeps the age', async () => {
+        const env = await runYoung([
+          {
+            depName: 'mycorp-lib',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '3 days',
+            releaseTimestamp: releasedDaysAgo(1),
+          },
+        ]);
+        expect(env).toMatchObject({
+          POETRY_SOLVER_MIN_RELEASE_AGE: '3',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'mycorp-lib',
+        });
+      });
+
+      it('excludes all young updates with a smaller minimumReleaseAge', async () => {
+        const env = await runYoung([
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '2 days',
+            minimumReleaseAgeRepository: '7 days',
+            releaseTimestamp: releasedDaysAgo(3),
+          },
+          {
+            depName: 'Dep_2',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '36 hours',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'dep3',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '7 days',
+            minimumReleaseAgeRepository: '7 days',
+            releaseTimestamp: releasedDaysAgo(1),
+          },
+        ]);
+        expect(env).toMatchObject({
+          POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'dep1,dep-2',
+        });
+      });
+
+      it('excludes only updates which pin a single version', async () => {
+        const env = await runYoung([
+          {
+            depName: 'pinned',
+            manager: 'poetry',
+            newValue: '1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'equals',
+            manager: 'poetry',
+            newValue: '==1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'caret',
+            manager: 'poetry',
+            newValue: '^1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'no-value',
+            manager: 'poetry',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ]);
+        expect(env).toMatchObject({
+          POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'pinned',
+        });
+      });
+
+      it('sets no exclude if the constraint of an exempted update is a range', async () => {
+        const env = await runYoung([
+          {
+            depName: 'boto3',
+            manager: 'poetry',
+            newValue: '^1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]);
+        expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '3' });
+        expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
+      });
+
+      it('does not exclude a release older than minimumReleaseAgeRepository', async () => {
+        const env = await runYoung([
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+            releaseTimestamp: releasedDaysAgo(10),
+          },
+        ]);
+        expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+        expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
+      });
+
+      describe('with solver.min-release-age in poetry.toml', () => {
+        async function runWithPoetryToml(
+          poetryToml: string,
+          updatedDeps: UpdateArtifact['updatedDeps'],
+        ): Promise<{
+          env: NodeJS.ProcessEnv | undefined;
+          res: UpdateArtifactsResult[] | null;
+        }> {
+          const execSnapshots = mockExecAll();
+          fs.ensureCacheDir.mockResolvedValueOnce(
+            '/tmp/renovate/cache/others/pip',
+          );
+          fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+          fs.readLocalFile.mockResolvedValueOnce(poetryToml);
+          fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+          const res = await updateArtifacts({
+            packageFileName: 'pyproject.toml',
+            updatedDeps,
+            newPackageFileContent: '',
+            config: syncConfig,
+          });
+          return { env: execSnapshots[0].options?.env, res };
+        }
+
+        it('passes the minimum release age of Renovate if it is larger', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 3
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '7 days',
+                minimumReleaseAgeRepository: '7 days',
+              },
+            ],
+          );
+          expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+        });
+
+        it('does not pass less than a non-integer Poetry value', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2.5
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '1 day',
+              },
+            ],
+          );
+          expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
+        });
+
+        it('passes no age if the Poetry value is not smaller', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 7
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '7 days',
+                minimumReleaseAgeRepository: '7 days',
+              },
+            ],
+          );
+          expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
+        });
+
+        it('excludes an exempted update and passes the larger age of Renovate', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '4 days',
+                minimumReleaseAgeRepository: '7 days',
+                releaseTimestamp: releasedDaysAgo(5),
+              },
+            ],
+          );
+          expect(env).toMatchObject({
+            POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+            POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'dep1',
+          });
+        });
+
+        it('lists the entries of solver.min-release-age-exclude first', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age-exclude = ["My_Package"]
+          `,
+            [
+              {
+                depName: 'dep2',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '7 days',
+                releaseTimestamp: releasedDaysAgo(2),
+              },
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '7 days',
+              },
+            ],
+          );
+          expect(env).toMatchObject({
+            POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+            POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'my-package,dep2,dep1',
+          });
+        });
+
+        it('does not exclude a release younger than solver.min-release-age', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 7
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '3 days',
+                releaseTimestamp: releasedDaysAgo(5),
+              },
+            ],
+          );
+          expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
+        });
+
+        it('does not exclude a release without timestamp if solver.min-release-age is set', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 2
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '7 days',
+              },
+            ],
+          );
+          expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
+        });
+
+        it('does not exclude a release which Poetry accepts', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age = 3
+          `,
+            [
+              {
+                depName: 'dep1',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '2 days',
+                releaseTimestamp: releasedDaysAgo(4),
+              },
+            ],
+          );
+          expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE');
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
+        });
+
+        it('does not exclude a package of solver.min-release-age-exclude again', async () => {
+          const { env } = await runWithPoetryToml(
+            codeBlock`
+            [solver]
+            min-release-age-exclude = ["My_Package"]
+          `,
+            [
+              {
+                depName: 'My.Package',
+                packageName: 'my-package',
+                manager: 'poetry',
+                newValue: '1.2.3',
+                minimumReleaseAgePackageManagerSync: true,
+                minimumReleaseAge: '1 day',
+                minimumReleaseAgeRepository: '7 days',
+                releaseTimestamp: releasedDaysAgo(2),
+              },
+            ],
+          );
+          expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+          expect(env).not.toHaveProperty(
+            'POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE',
+          );
+        });
+      });
+
+      it('uses the own minimumReleaseAge for lock file maintenance', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: {
+            ...syncConfig,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '5 days',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('reads the poetry update if a pep621 update of pyproject.toml comes first', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'pep621',
+              minimumReleaseAgeRepository: '3 days',
+            },
+            {
+              depName: 'dep2',
+              manager: 'poetry',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '5 days',
+              minimumReleaseAgeRepository: '5 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('reads the poetry lock file maintenance in a branch whose first upgrade is npm', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: {
+            ...syncConfig,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+            upgrades: [
+              {
+                isLockFileMaintenance: true,
+                manager: 'npm',
+                packageFile: 'package.json',
+                minimumReleaseAge: '3 days',
+              },
+              {
+                isLockFileMaintenance: true,
+                manager: 'poetry',
+                minimumReleaseAgePackageManagerSync: true,
+                packageFile: 'pyproject.toml',
+                minimumReleaseAge: '5 days',
+              },
+            ],
+          },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '5',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('does not set POETRY_SOLVER_MIN_RELEASE_AGE for security updates', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              isVulnerabilityAlert: true,
+              minimumReleaseAgeRepository: '7 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.not.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when only minimumReleaseAge is configured', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1', minimumReleaseAge: '7 days' }],
+          newPackageFileContent: '',
+          config: { ...syncConfig, minimumReleaseAge: '7 days' },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.not.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('does not set POETRY_SOLVER_MIN_RELEASE_AGE when minimumReleaseAgeRepository is not configured', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1' }],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.not.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: expect.anything(),
+              }),
+            },
+          },
+        ]);
+      });
     });
   });
 });
