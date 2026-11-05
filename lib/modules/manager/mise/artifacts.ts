@@ -30,7 +30,10 @@ import {
   updateLockFile,
 } from '../util.ts';
 import { getConfigType, getLockFileName, getSidecarDir } from './lockfile.ts';
-import { rebindUpdatedToolSelectors } from './update-locked.ts';
+import {
+  rebindUpdatedToolSelectors,
+  restoreSelectedLockedVersions,
+} from './update-locked.ts';
 
 /**
  * First mise release that supports the features this manager relies on:
@@ -283,7 +286,22 @@ export async function updateArtifacts({
 
   try {
     if (newLockFileContent) {
-      await writeLocalFile(lockFileName, newLockFileContent);
+      let inputLockFileContent = newLockFileContent;
+      if (regenerateSelected) {
+        if (!originalLockFileContent) {
+          throw new Error(
+            'Cannot regenerate selected mise entries without the original lock file',
+          );
+        }
+        // A version-only edit can make mise reuse the old version's checksums.
+        // Let mise see the original version while retaining unrelated edits.
+        inputLockFileContent = restoreSelectedLockedVersions(
+          originalLockFileContent,
+          newLockFileContent,
+          updatedDeps,
+        );
+      }
+      await writeLocalFile(lockFileName, inputLockFileContent);
     }
     const lockFileResults = await updateLockFile({
       lockFileName,

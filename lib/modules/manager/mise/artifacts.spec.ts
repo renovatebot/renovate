@@ -469,6 +469,25 @@ describe('modules/manager/mise/artifacts', () => {
       expect(result).toBeNull();
     });
 
+    it('reports an error instead of regenerating without the original lock', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+      const result = await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [{ depName: 'ansible', newVersion: '14.5.0' }],
+        newPackageFileContent: packageFileContent,
+        newLockFileContent: updatedLock,
+        config,
+      });
+
+      expect(result).toMatchObject([
+        { artifactError: { fileName: 'mise.lock' } },
+      ]);
+      expect(execSnapshots.map(({ cmd }) => cmd)).toEqual([miseVersionCmd]);
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+    });
+
     it.each([true, false])(
       'regenerates aqua platform metadata after a version-only edit (allowlisted: %s)',
       async (allowlisted) => {
@@ -482,10 +501,10 @@ describe('modules/manager/mise/artifacts', () => {
           backend = "aqua:jdx/hk"
           specifiers = ["latest"]
           [tools.hk.platforms.linux-x64]
-          url = "https://github.com/jdx/hk/releases/download/v2.5.0/hk-x86_64-unknown-linux-gnu.tar.gz"
+          url = "https://example.com/v2.5.0/bin/hk-linux"
           checksum = "old-checksum"
           [tools.hk.platforms.windows-x64]
-          url = "https://github.com/jdx/hk/releases/download/v2.5.0/hk-x86_64-pc-windows-msvc.zip"
+          url = "https://example.com/v2.5.0/bin/hk-windows.exe"
           checksum = "old-checksum"
 
           [[tools.jq]]
@@ -512,8 +531,9 @@ describe('modules/manager/mise/artifacts', () => {
           throw new Error('Expected the version-only lock edit');
         }
         expect(updated.files?.['mise.lock']).toContain('version = "2.6.0"');
-        expect(updated.files?.['mise.lock']).toContain('/download/v2.5.0/');
+        expect(updated.files?.['mise.lock']).toContain('/v2.5.0/bin/');
         let workingLock = originalLock;
+        let lockAtRegeneration: string | undefined;
         fs.readLocalFile.mockImplementation(() => Promise.resolve(workingLock));
         fs.writeLocalFile.mockImplementation((file, contents) => {
           if (file === 'mise.lock' && isString(contents)) {
@@ -525,8 +545,9 @@ describe('modules/manager/mise/artifacts', () => {
           if (cmd === miseVersionCmd) {
             return Promise.resolve(safeMiseVersionOutput);
           }
-          // Model mise retaining locked metadata on a plain successful refresh.
           if (cmd === 'mise lock --bump hk@2.6.0') {
+            // With the pre-edited version, mise may reuse the old URLs instead.
+            lockAtRegeneration = workingLock;
             workingLock = exactVersionLock;
           }
           return Promise.resolve({ stdout: '', stderr: '' });
@@ -548,6 +569,7 @@ describe('modules/manager/mise/artifacts', () => {
           config,
         });
 
+        expect(lockAtRegeneration).toBe(originalLock);
         expect(result).toEqual([
           {
             file: {

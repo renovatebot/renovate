@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import {
   isNonEmptyStringAndNotWhitespace,
   isNullOrUndefined,
@@ -83,16 +84,13 @@ function getVersionValueNode(
     return undefined;
   }
 
-  const table = astTableForTool(content, toolName, toolIndex);
-  const versionKeyValue = table?.body.find(
-    (keyValue) => getVersionKeyValue(keyValue.key) === 'version',
-  );
-  if (versionKeyValue?.value.type !== 'TOMLValue') {
+  const versionNode = astVersionForTool(content, toolName, toolIndex);
+  if (!versionNode) {
     return undefined;
   }
   return {
     currentLockedVersion: lockedTools[toolIndex].version,
-    versionNode: versionKeyValue.value,
+    versionNode,
   };
 }
 
@@ -111,6 +109,93 @@ function astTableForTool(
       node.resolvedKey[1] === toolName &&
       node.resolvedKey[2] === toolIndex,
   );
+}
+
+function astVersionForTool(
+  content: string,
+  toolName: string,
+  toolIndex: number,
+): AST.TOMLValue | undefined {
+  const table = astTableForTool(content, toolName, toolIndex);
+  const value = table?.body.find(
+    (keyValue) => getVersionKeyValue(keyValue.key) === 'version',
+  )?.value;
+  return value?.type === 'TOMLValue' ? value : undefined;
+}
+
+/** Restore selected versions before mise regenerates their metadata. */
+export function restoreSelectedLockedVersions(
+  original: string,
+  updated: string,
+  updatedDeps: UpdateArtifact['updatedDeps'],
+): string {
+  const updates = updatedDeps.flatMap(({ depName, newVersion }) =>
+    isNonEmptyStringAndNotWhitespace(depName) &&
+    isNonEmptyStringAndNotWhitespace(newVersion)
+      ? [{ depName, newVersion }]
+      : [],
+  );
+  if (!updates.length) {
+    return updated;
+  }
+
+  const before = MiseLockFile.parse(original);
+  const after = MiseLockFile.parse(updated);
+  const changes = new Map<number, { end: number; value: string }>();
+  for (const { depName, newVersion } of updates) {
+    const oldEntries = lockfile.getLockedTool(before, depName);
+    const newEntries = lockfile.getLockedTool(after, depName);
+    if (!oldEntries && !newEntries) {
+      continue;
+    }
+    if (!oldEntries || !newEntries || oldEntries.length !== newEntries.length) {
+      throw new Error(`Cannot match original mise lock entries for ${depName}`);
+    }
+    const changedIndexes = newEntries.flatMap(({ version }, index) => {
+      const oldVersion = oldEntries[index].version;
+      return version !== oldVersion &&
+        version === formatLockedVersion(oldVersion, newVersion)
+        ? [index]
+        : [];
+    });
+    if (changedIndexes.length > 1) {
+      throw new Error(`Ambiguous original mise lock entry for ${depName}`);
+    }
+    if (!changedIndexes.length) {
+      continue;
+    }
+    const index = changedIndexes[0];
+    const oldMetadata = { ...oldEntries[index], version: undefined };
+    const newMetadata = { ...newEntries[index], version: undefined };
+    if (!isDeepStrictEqual(oldMetadata, newMetadata)) {
+      throw new Error(`Changed mise lock metadata for ${depName}`);
+    }
+    const oldNode = astVersionForTool(
+      original,
+      getToolName(depName, before),
+      index,
+    );
+    const newNode = astVersionForTool(
+      updated,
+      getToolName(depName, after),
+      index,
+    );
+    if (!oldNode || !newNode) {
+      throw new Error(`Unsupported mise lock version for ${depName}`);
+    }
+    changes.set(newNode.range[0], {
+      end: newNode.range[1],
+      value: original.slice(oldNode.range[0], oldNode.range[1]),
+    });
+  }
+
+  let result = updated;
+  for (const [start, { end, value }] of [...changes].sort(
+    ([left], [right]) => right - left,
+  )) {
+    result = `${result.slice(0, start)}${value}${result.slice(end)}`;
+  }
+  return result;
 }
 
 /** Restore configured selectors after regenerating exact-version lock entries. */
