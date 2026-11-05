@@ -267,14 +267,11 @@ export async function getMinPublishAgeEnv(
     : configAgeMs;
   // the `min-publish-age` of a registry takes precedence over the environment variable, so lowering it does not help the crates of that registry
   const exemption = getMinimumReleaseAgeExemption(
-    options.upgrades
-      .filter(
-        (upgrade) =>
-          upgrade.datasource === CrateDatasource.id &&
-          !hasRegistryMinPublishAge(cargoConfig, upgrade),
-      )
-      // the buffer only delays the check of Renovate, so cargo gets the age without it
-      .map((upgrade) => ({ ...upgrade, minimumReleaseAgeBuffer: null })),
+    options.upgrades.filter(
+      (upgrade) =>
+        upgrade.datasource === CrateDatasource.id &&
+        !hasRegistryMinPublishAge(cargoConfig, upgrade),
+    ),
     'cargo',
     ageMs,
   );
