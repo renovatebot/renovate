@@ -29,35 +29,6 @@ import type { ExtractResult } from './extract-update.ts';
 import { extract, lookup, update } from './extract-update.ts';
 import type { WriteUpdateResult } from './write.ts';
 
-async function resolveAndMerge(
-  config: RenovateConfig,
-  rawBranchConfig: RenovateConfig,
-  configFileName: string,
-  baseBranch: string,
-): Promise<RenovateConfig> {
-  const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
-  if (migratedConfig.errors?.length) {
-    const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = configFileName;
-    error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
-    error.validationMessage = migratedConfig.errors
-      .map((e) => e.message)
-      .join(', ');
-    throw error;
-  }
-  let result: RenovateConfig;
-  ({ config: result } = await resolveConfigPresets(migratedConfig, config));
-  result = mergeChildConfig(config, result);
-  // baseBranches value should be based off the default branch
-  result.baseBranchPatterns = config.baseBranchPatterns;
-  result.baseBranches = config.baseBranches;
-  /* v8 ignore if -- TODO: add test #40625 */
-  if (config.printConfig) {
-    logger.info({ config: result }, 'Base branch config after merge');
-  }
-  return result;
-}
-
 function isPlatformOrTemporaryError(message: unknown): boolean {
   return (
     (PlatformErrors as readonly unknown[]).includes(message) ||
@@ -155,12 +126,30 @@ async function readBaseBranchConfig(
   const rawBranchConfig = parseResult.parsedContents as RenovateConfig;
   logger.debug({ config: rawBranchConfig }, 'Base branch config raw');
 
-  return await resolveAndMerge(
+  const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
+  if (migratedConfig.errors?.length) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = configFileName;
+    error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
+    error.validationMessage = migratedConfig.errors
+      .map((e) => e.message)
+      .join(', ');
+    throw error;
+  }
+
+  const { config: resolvedConfig } = await resolveConfigPresets(
+    migratedConfig,
     config,
-    rawBranchConfig,
-    configFileName,
-    baseBranch,
   );
+  const result = mergeChildConfig(config, resolvedConfig);
+  // baseBranches value should be based off the default branch
+  result.baseBranchPatterns = config.baseBranchPatterns;
+  result.baseBranches = config.baseBranches;
+  /* v8 ignore if -- TODO: add test #40625 */
+  if (config.printConfig) {
+    logger.info({ config: result }, 'Base branch config after merge');
+  }
+  return result;
 }
 
 export async function getBaseBranchConfig(
