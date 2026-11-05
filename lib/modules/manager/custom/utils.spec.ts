@@ -78,5 +78,13 @@ describe('modules/manager/custom/utils', () => {
       expect(dep.packageName).toBeUndefined();
       expect(dep.registryUrls).toBeUndefined();
     });
+    it('doesnt substitute when registry alias does not match', () => {
+      const s = utils.substituteRegistryAlias('baz/abc', { foo: 'bar' });
+      expect(s).toBe('baz/abc');
+    });
+    it('substitutes when registry alias matches followed by a /', () => {
+      const s = utils.substituteRegistryAlias('foo/abc', { foo: 'bar' });
+      expect(s).toBe('bar/abc');
+    });
   });
 });

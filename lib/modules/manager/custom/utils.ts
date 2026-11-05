@@ -16,6 +16,20 @@ export const validMatchFields = [
   'indentation',
 ] as const;
 
+export function substituteRegistryAlias(
+  s: string,
+  registryAliases: Record<string, string> | undefined,
+): string {
+  for (const [original, replace] of Object.entries(
+    coerceObject(registryAliases),
+  )) {
+    if (s.startsWith(original)) {
+      return replace + s.slice(original.length);
+    }
+  }
+  return s;
+}
+
 export function substituteRegistryAliases(
   dep: PackageDependency,
   registryAliases: Record<string, string> | undefined,
@@ -24,32 +38,14 @@ export function substituteRegistryAliases(
   // because registryUrls will be used instead of dep/packageName
   if (dep.registryUrls) {
     dep.registryUrls = dep.registryUrls.map((s) => {
-      for (const [original, replace] of Object.entries(
-        coerceObject(registryAliases),
-      )) {
-        if (s.startsWith(original)) {
-          return replace + s.slice(original.length);
-        }
-      }
-      return s;
+      return substituteRegistryAlias(s, registryAliases);
     });
   } else if (dep.packageName) {
-    for (const [original, replace] of Object.entries(
-      coerceObject(registryAliases),
-    )) {
-      if (dep.packageName.startsWith(original)) {
-        dep.packageName = replace + dep.packageName.slice(original.length);
-        break;
-      }
-    }
+    dep.packageName = substituteRegistryAlias(dep.packageName, registryAliases);
   } else if (dep.depName) {
-    for (const [original, replace] of Object.entries(
-      coerceObject(registryAliases),
-    )) {
-      if (dep.depName.startsWith(original)) {
-        dep.packageName = replace + dep.depName.slice(original.length);
-        break;
-      }
+    const replace = substituteRegistryAlias(dep.depName, registryAliases);
+    if (replace !== dep.depName) {
+      dep.packageName = replace;
     }
   }
 }
