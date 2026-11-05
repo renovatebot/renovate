@@ -98,9 +98,7 @@ export async function getBaseBranchConfig(
         configFileRaw.length ? configFileRaw : '{}',
       ) as RenovateConfig;
     } catch (err) {
-      if (err.message === CONFIG_VALIDATION) {
-        err.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${err.validationError}`;
-      }
+      err.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${err.validationError}`;
       throw err;
     }
     logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
