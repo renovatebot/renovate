@@ -969,7 +969,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
 
-      expect(execSnapshots).toMatchObject([{ cmd: 'uv lock ' }]);
+      // the lock file is refreshed, but `setuptools` is not given to `uv` to
+      // upgrade, so the version it holds stays where it is
+      expect(execSnapshots).toHaveLength(1);
+      expect(execSnapshots[0].cmd).toBe('uv lock ');
+      expect(execSnapshots[0].cmd).not.toInclude('setuptools');
     });
 
     it('does not pin the upgrade of a transitive dep locked at several versions', async () => {

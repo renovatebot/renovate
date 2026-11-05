@@ -27,12 +27,15 @@ export const defaultConfig = {
 
 export const supportedDatasources = [PypiDatasource.id];
 
-// `uv` projects only: a `uv.lock` transitive dependency is extracted, and an
-// alert which matches it clears its `lockfile-only` skip
+// `uv` projects only: a `uv.lock` transitive dependency is extracted, and any
+// alert which matches it clears its `lockfile-only` skip, whichever source the
+// alert came from - they are all `packageRules` by the time it is looked up
 export const supportsTransitiveRemediation: Partial<
   Record<VulnerabilityAlertSource, true>
 > = {
+  $platform: true,
   OSV: true,
+  packageRules: true,
 };
 
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
