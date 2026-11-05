@@ -131,7 +131,6 @@ export async function checkAutoMerge(
   if (automergeType === 'label') {
     // TODO: types (#22198)
     logger.debug(`Applying automerge label: ${automergeLabel!}`);
-    // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(`DRY-RUN: Would add automerge label to PR #${pr.number}`);
       return {

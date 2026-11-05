@@ -219,5 +219,21 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(res).toEqual(expectedResult);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
+
+    it('dryRun full label', async () => {
+      config.automerge = true;
+      config.automergeType = 'label';
+      config.automergeLabel = 'merge';
+      const expectedResult = {
+        automerged: false,
+        prAutomergeBlockReason: 'DryRun',
+      };
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      GlobalConfig.set({ dryRun: 'full' });
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+      expect(res).toEqual(expectedResult);
+      expect(platform.updatePr).not.toHaveBeenCalled();
+      expect(platform.mergePr).toHaveBeenCalledTimes(0);
+    });
   });
 });

@@ -360,6 +360,9 @@ The final value for `automergeType` is `"pr-comment"`, intended only for users w
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
 The value `"label"` is similar: Renovate adds a label (default `automerge`, configurable with [`automergeLabel`](#automergelabel)) to the PR once it is ready to merge, and a merge bot or platform rule that watches for that label does the actual merge.
+This only works on platforms where Renovate can add labels to a PR through the `updatePr` API.
+On platforms that cannot set labels this way, Renovate never adds the label, so those PRs are never merged.
+If someone removes the label from the PR, Renovate adds it again on its next run.
 
 ## `azureWorkItemId`
 
