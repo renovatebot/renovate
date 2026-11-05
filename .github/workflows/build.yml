@@ -34,6 +34,8 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
+  # an additional Node version, tested on Linux only; failures are reported but don't block
+  NODE_VERSION_ALTERNATE: 26
   DRY_RUN: true
   SPARSE_CHECKOUT: |-
     .github/actions/
@@ -483,6 +485,32 @@ jobs:
             ./coverage/lcov
             ./coverage/json
 
+  test-node-alternate:
+    name: test-node-alternate (${{ matrix.shard }})
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Setup Node.js
+        uses: $/.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION_ALTERNATE }}
+          os: ${{ runner.os }}
+
+      - name: Unit tests
+        run: pnpm vitest --shard ${{ matrix.shard }} --coverage.enabled=false
+
   codecov:
     needs: [test]
     runs-on: ubuntu-latest
@@ -563,6 +591,7 @@ jobs:
     needs:
       - setup
       - test
+      - test-node-alternate
       - codecov
       - coverage-threshold
       - lint-actions
@@ -581,6 +610,11 @@ jobs:
           needs.test.result == 'failure' ||
           needs.test.result == 'cancelled'
         run: exit 1
+
+      # failures on the alternate Node version don't block, they are only reported
+      - name: Report failed tests on the alternate Node version
+        if: needs.test-node-alternate.result == 'failure'
+        run: echo "::error title=Node ${NODE_VERSION_ALTERNATE}::Unit tests failed on Node ${NODE_VERSION_ALTERNATE}, see the test-node-alternate jobs."
 
       - name: Fail for skipped tests when PR is ready for review
         if: |
