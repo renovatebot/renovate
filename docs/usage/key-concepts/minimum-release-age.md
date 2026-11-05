@@ -21,6 +21,26 @@ Renovate does not wait until the package has seen no releases for x time-duratio
 When the time passed since the release is _less_ than the set `minimumReleaseAge`: Renovate adds a "pending" status check to that update's branch.
 After enough days have passed: Renovate replaces the "pending" status with a "passing" status check.
 
+## How long does Renovate wait?
+
+This flowchart shows how Renovate decides how long to wait before it raises an update:
+
+```mermaid
+flowchart TD
+    A["Renovate finds a new release"] --> B{"Security update?"}
+    B -- Yes --> C["Wait the minimumReleaseAge of vulnerabilityAlerts, null by default"]
+    B -- No --> D["Age = the larger of minimumReleaseAge after packageRules and the age configured in the package manager ¹, plus minimumReleaseAgeBuffer"]
+    D --> E{"Lock file maintenance, and the package manager enforces the age itself ¹?"}
+    E -- Yes --> F["No wait"]
+    E -- No --> G{"Does the release have a timestamp?"}
+    G -- Yes --> H["Raise the update once the release is older than the age"]
+    G -- No --> I{"minimumReleaseAgeBehaviour"}
+    I -- timestamp-required --> J["Hold the update"]
+    I -- timestamp-optional --> K["Raise the update with a warning"]
+```
+
+¹ Only with [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), for the managers in the [table of package managers](#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both).
+
 ## Configuration options
 
 The following configuration options can be used to enable and tune the functionality of Minimum Release Age:
