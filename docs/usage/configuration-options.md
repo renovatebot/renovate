@@ -5240,7 +5240,7 @@ Renovate will error if the config file is not found on the branch.
 Set `useBaseBranchConfig=merge-if-present` to merge the config from each base branch in the same way, but only if the config file exists on the branch.
 If the config file does not exist on the branch, Renovate will use the default branch config instead.
 If the config file exists but is invalid or contains validation errors, Renovate will error.
-This is useful for repos with many branches where only some branches have branch-specific config.
+This is useful for repos with many branches where only some branches have branch-specific config, but [`baseBranchPatterns`](#basebranchpatterns) and `useBaseBranchConfig` are set in a shared preset.
 
 With both `merge` and `merge-if-present`, an empty config file on a branch is treated as an empty config (`{}`).
 
