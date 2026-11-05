@@ -37,7 +37,6 @@ describe('modules/manager/cargo/minimum-release-age', () => {
       ${'3d'}       | ${null}
       ${'1.5 days'} | ${null}
       ${'1 Day'}    | ${null}
-      ${'3  days'}  | ${null}
       ${'1M'}       | ${null}
       ${undefined}  | ${null}
     `('returns $expected for $age', ({ age, expected }) => {
@@ -46,6 +45,14 @@ describe('modules/manager/cargo/minimum-release-age', () => {
           registry: { 'global-min-publish-age': age },
         }),
       ).toBe(expected);
+    });
+
+    it('returns null for more than one space before the unit', () => {
+      expect(
+        getGlobalMinPublishAge({
+          registry: { 'global-min-publish-age': '3  days' },
+        }),
+      ).toBeNull();
     });
 
     it('returns null without a registry section', () => {
