@@ -86,5 +86,13 @@ describe('modules/manager/custom/utils', () => {
       const s = utils.substituteRegistryAlias('foo/abc', { foo: 'bar' });
       expect(s).toBe('bar/abc');
     });
+    it('substitutes when registry alias is the entire string', () => {
+      const s = utils.substituteRegistryAlias('foo', { foo: 'bar' });
+      expect(s).toBe('bar');
+    });
+    it('doesnt substitutes when registry alias is not followed by a /', () => {
+      const s = utils.substituteRegistryAlias('foobar/abc', { foo: 'baz' });
+      expect(s).toBe('foobar/abc');
+    });
   });
 });

@@ -23,7 +23,10 @@ export function substituteRegistryAlias(
   for (const [original, replace] of Object.entries(
     coerceObject(registryAliases),
   )) {
-    if (s.startsWith(original)) {
+    if (
+      s.startsWith(original) &&
+      (s.length === original.length || s[original.length] === '/')
+    ) {
       return replace + s.slice(original.length);
     }
   }
