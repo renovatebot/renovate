@@ -68,7 +68,7 @@ function isPlatformOrTemporaryError(message: unknown): boolean {
 /**
  * Reads, validates and merges the config file from `baseBranch` over the default branch's config.
  *
- * Returns `null` when `useBaseBranchConfig=fallback` and the config file does not exist on `baseBranch`, so the default branch's config is used.
+ * Returns `null` when `useBaseBranchConfig=merge-if-present` and the config file does not exist on `baseBranch`, so the default branch's config is used.
  */
 async function readBaseBranchConfig(
   baseBranch: string,
@@ -86,7 +86,7 @@ async function readBaseBranchConfig(
   const configFileName = cache.configFileName!;
 
   const hasConfigFile = !!configFileName && configFileName !== 'package.json';
-  if (mode === 'fallback' && !hasConfigFile) {
+  if (mode === 'merge-if-present' && !hasConfigFile) {
     logger.debug(
       { baseBranch, configFileName },
       'Cannot read branch-specific config without a dedicated config file, using default branch config',
@@ -118,7 +118,7 @@ async function readBaseBranchConfig(
   }
 
   if (configFileRaw === null) {
-    if (mode === 'fallback' && !fetchFailed) {
+    if (mode === 'merge-if-present' && !fetchFailed) {
       logger.debug(
         { baseBranch, configFileName },
         'No branch-specific config file found, falling back to default branch config',
@@ -170,7 +170,7 @@ export async function getBaseBranchConfig(
 
   const usesBaseBranchConfig =
     config.useBaseBranchConfig === 'merge' ||
-    config.useBaseBranchConfig === 'fallback';
+    config.useBaseBranchConfig === 'merge-if-present';
   if (usesBaseBranchConfig && baseBranch !== config.defaultBranch) {
     const branchConfig = await readBaseBranchConfig(baseBranch, config);
     if (branchConfig) {

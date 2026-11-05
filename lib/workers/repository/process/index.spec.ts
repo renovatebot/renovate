@@ -101,14 +101,14 @@ describe('workers/repository/process/index', () => {
       );
     });
 
-    it('applies branch-specific config for non-default branches when useBaseBranchConfig=fallback', async () => {
+    it('applies branch-specific config for non-default branches when useBaseBranchConfig=merge-if-present', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getRawFile.mockResolvedValue(
         '{"extends": ["config:recommended"]}',
       );
       config.baseBranchPatterns = ['main', 'dev'];
       config.defaultBranch = 'main';
-      config.useBaseBranchConfig = 'fallback';
+      config.useBaseBranchConfig = 'merge-if-present';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
@@ -130,12 +130,12 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('falls back gracefully when branch-specific config not found (useBaseBranchConfig=fallback)', async () => {
+    it('falls back gracefully when branch-specific config not found (useBaseBranchConfig=merge-if-present)', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getRawFile.mockRejectedValue(notFoundError);
       config.baseBranchPatterns = ['main', 'dev'];
       config.defaultBranch = 'main';
-      config.useBaseBranchConfig = 'fallback';
+      config.useBaseBranchConfig = 'merge-if-present';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
@@ -147,12 +147,12 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('throws on invalid branch-specific config (useBaseBranchConfig=fallback)', async () => {
+    it('throws on invalid branch-specific config (useBaseBranchConfig=merge-if-present)', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getRawFile.mockResolvedValue('{"labels": "not-an-array"}');
       config.baseBranchPatterns = ['main', 'dev'];
       config.defaultBranch = 'main';
-      config.useBaseBranchConfig = 'fallback';
+      config.useBaseBranchConfig = 'merge-if-present';
       getCache().configFileName = 'renovate.json';
       await expect(extractDependencies(config)).rejects.toMatchObject({
         message: CONFIG_VALIDATION,
@@ -428,10 +428,10 @@ describe('workers/repository/process/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledOnce();
     });
 
-    describe('useBaseBranchConfig=fallback', () => {
+    describe('useBaseBranchConfig=merge-if-present', () => {
       beforeEach(() => {
         config.defaultBranch = 'main';
-        config.useBaseBranchConfig = 'fallback';
+        config.useBaseBranchConfig = 'merge-if-present';
         getCache().configFileName = 'renovate.json';
       });
 

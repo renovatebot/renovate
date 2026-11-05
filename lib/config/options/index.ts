@@ -1440,7 +1440,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
-    allowedValues: ['fallback', 'merge', 'none'],
+    allowedValues: ['merge', 'merge-if-present', 'none'],
     default: 'none',
   },
   {

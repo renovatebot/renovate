@@ -5237,8 +5237,11 @@ By default, Renovate will read config file from the default branch only and will
 Set `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
 Renovate will error if the config file is not found on the branch.
 
-Set `useBaseBranchConfig=fallback` to read branch-specific config with graceful fallback: if the config file does not exist on the branch, Renovate will silently use the default branch config instead.
+Set `useBaseBranchConfig=merge-if-present` to merge the config from each base branch in the same way, but only if the config file exists on the branch.
+If the config file does not exist on the branch, Renovate will use the default branch config instead.
 If the config file exists but is invalid or contains validation errors, Renovate will error.
+
+With both `merge` and `merge-if-present`, an empty config file on a branch is treated as an empty config (`{}`).
 This is useful for repos with many branches where only some branches have branch-specific config.
 
 The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
