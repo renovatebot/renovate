@@ -1,4 +1,5 @@
 import { fs } from '~test/util.ts';
+import { stripNpmrc } from '../npm/npmrc.ts';
 import { extractAllPackageFiles } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -6,16 +7,22 @@ vi.mock('../../../util/fs/index.ts');
 describe('modules/manager/aube/extract', () => {
   describe('extractAllPackageFiles()', () => {
     it('ignores non-aube files', async () => {
-      expect(await extractAllPackageFiles({}, ['package.json'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['package.json']),
+      ).resolves.toEqual([]);
     });
 
     it('ignores missing package.json file', async () => {
-      expect(await extractAllPackageFiles({}, ['aube-lock.yaml'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['aube-lock.yaml']),
+      ).resolves.toEqual([]);
     });
 
     it('ignores invalid package.json file', async () => {
       vi.mocked(fs.readLocalFile).mockResolvedValueOnce('invalid');
-      expect(await extractAllPackageFiles({}, ['aube-lock.yaml'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['aube-lock.yaml']),
+      ).resolves.toEqual([]);
     });
 
     it('handles null response', async () => {
@@ -23,7 +30,9 @@ describe('modules/manager/aube/extract', () => {
       fs.readLocalFile.mockResolvedValueOnce(
         JSON.stringify({ _id: 1, _args: 1, _from: 1 }),
       );
-      expect(await extractAllPackageFiles({}, ['aube-lock.yaml'])).toEqual([]);
+      await expect(
+        extractAllPackageFiles({}, ['aube-lock.yaml']),
+      ).resolves.toEqual([]);
     });
 
     it('parses valid package.json file', async () => {
@@ -275,5 +284,42 @@ describe('modules/manager/aube/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
+    expect(packageFiles[0].managerData?.repoNpmrc).toMatchObject({
+      fileName: '.npmrc',
+      content: 'registry=https://custom.registry.com\n',
+    });
+    expect(packageFiles[0].managerData?.npmrcFileName).toBe('.npmrc');
+  });
+
+  it('marks an unreadable repository .npmrc to be read from disk again', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue('.npmrc');
+    fs.readLocalFile
+      .mockResolvedValueOnce(
+        JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+      )
+      .mockResolvedValueOnce(null);
+
+    const packageFiles = await extractAllPackageFiles({}, ['aube-lock.yaml']);
+
+    expect(packageFiles[0]).not.toHaveProperty('npmrc');
+    expect(stripNpmrc(packageFiles)[0].managerData).toMatchObject({
+      npmrcFileName: '.npmrc',
+      uncachedNpmrcFileName: '.npmrc',
+    });
+  });
+
+  it('does not store a repository .npmrc when there is none', async () => {
+    fs.getSiblingFileName.mockReturnValueOnce('package.json');
+    fs.findLocalSiblingOrParent.mockResolvedValue(null);
+    fs.readLocalFile.mockResolvedValueOnce(
+      JSON.stringify({ name: 'test', dependencies: { dep1: '1.0.0' } }),
+    );
+
+    const packageFiles = await extractAllPackageFiles({}, ['aube-lock.yaml']);
+
+    expect(packageFiles).toHaveLength(1);
+    expect(packageFiles[0]).not.toHaveProperty('npmrc');
+    expect(packageFiles[0].managerData).not.toHaveProperty('repoNpmrc');
   });
 });
