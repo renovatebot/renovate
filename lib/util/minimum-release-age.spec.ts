@@ -343,6 +343,26 @@ describe('util/minimum-release-age', () => {
       expect(res).toEqual({ ageMs: toMs('1 day'), depNames: ['dep1'] });
     });
 
+    it('ignores the minimumReleaseAgeBuffer of the updates', () => {
+      dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
+
+      const res = getMinimumReleaseAgeExemption(
+        [
+          { ...update, minimumReleaseAgeBuffer: '30 minutes' },
+          {
+            ...update,
+            depName: 'dep2',
+            minimumReleaseAge: '71 hours',
+            minimumReleaseAgeBuffer: '2 hours',
+          },
+        ],
+        'poetry',
+        ageMs,
+      );
+
+      expect(res).toEqual({ ageMs: toMs('1 day'), depNames: ['dep1', 'dep2'] });
+    });
+
     it('returns null if the release is older than the age', () => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('4 days') ?? 0);
 
