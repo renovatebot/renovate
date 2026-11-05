@@ -1,5 +1,9 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
+import {
+  LooseArray,
+  LooseRecord,
+} from '../../../../util/schema-utils/index.ts';
 
 const TfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type TfPrimitive = z.infer<typeof TfPrimitive>;
@@ -55,6 +59,16 @@ function oneOrMany<T extends z.ZodType>(
     .transform((v): z.infer<T>[] => (isArray(v) ? v : [v]));
 }
 
+/**
+ * Like `oneOrMany`, but invalid array elements are dropped instead of
+ * failing the whole value.
+ */
+function looseOneOrMany<T extends z.ZodType>(
+  schema: T,
+): z.ZodType<z.infer<T>[]> {
+  return z.union([LooseArray(schema), schema.transform((v) => [v])]);
+}
+
 const TerraformRequiredProvider = z.object({
   source: z.string().optional(),
   version: z.string().optional(),
@@ -108,7 +122,7 @@ const TerraformWorkspace = z.object({
 
 export type TerraformWorkspace = z.infer<typeof TerraformWorkspace>;
 
-const TerraformWorkspaceArray = oneOrMany(TerraformWorkspace);
+const TerraformWorkspaceArray = looseOneOrMany(TerraformWorkspace);
 
 const DockerSimpleInstance = z.record(z.string(), tfLiteral);
 const DockerTaskSpec = z
@@ -132,9 +146,9 @@ const DockerServiceInstance = z
   .catchall(tfLiteral);
 
 const GenericResourceInstance = z.record(z.string(), tfLiteral);
-const GenericResource = z.record(
+const GenericResource = LooseRecord(
   z.string(),
-  oneOrMany(GenericResourceInstance),
+  looseOneOrMany(GenericResourceInstance),
 );
 
 const KubernetesInstance = tfLiteral.transform((orig) => {
@@ -144,47 +158,66 @@ const KubernetesInstance = tfLiteral.transform((orig) => {
 
 const TerraformResources = z
   .object({
-    helm_release: z
-      .record(z.string(), oneOrMany(TerraformHelmRelease))
-      .optional(),
-    docker_container: z
-      .record(z.string(), oneOrMany(DockerSimpleInstance))
-      .optional(),
+    helm_release: LooseRecord(
+      z.string(),
+      looseOneOrMany(TerraformHelmRelease),
+    ).optional(),
+    docker_container: LooseRecord(
+      z.string(),
+      looseOneOrMany(DockerSimpleInstance),
+    ).optional(),
 
-    docker_image: z
-      .record(z.string(), oneOrMany(DockerSimpleInstance))
-      .optional(),
+    docker_image: LooseRecord(
+      z.string(),
+      looseOneOrMany(DockerSimpleInstance),
+    ).optional(),
 
-    docker_service: z
-      .record(z.string(), oneOrMany(DockerServiceInstance))
-      .optional(),
-    kubernetes_cron_job_v1: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_cron_job: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_daemon_set_v1: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    kubernetes_daemonset: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_deployment: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_deployment_v1: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    kubernetes_job: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_job_v1: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_pod: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_pod_v1: z.record(z.string(), KubernetesInstance).optional(),
-    kubernetes_replication_controller: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    kubernetes_replication_controller_v1: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    kubernetes_stateful_set: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    kubernetes_stateful_set_v1: z
-      .record(z.string(), KubernetesInstance)
-      .optional(),
-    tfe_workspace: z.record(z.string(), TerraformWorkspaceArray).optional(),
+    docker_service: LooseRecord(
+      z.string(),
+      looseOneOrMany(DockerServiceInstance),
+    ).optional(),
+    kubernetes_cron_job_v1: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_cron_job: LooseRecord(z.string(), KubernetesInstance).optional(),
+    kubernetes_daemon_set_v1: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_daemonset: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_deployment: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_deployment_v1: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_job: LooseRecord(z.string(), KubernetesInstance).optional(),
+    kubernetes_job_v1: LooseRecord(z.string(), KubernetesInstance).optional(),
+    kubernetes_pod: LooseRecord(z.string(), KubernetesInstance).optional(),
+    kubernetes_pod_v1: LooseRecord(z.string(), KubernetesInstance).optional(),
+    kubernetes_replication_controller: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_replication_controller_v1: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_stateful_set: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    kubernetes_stateful_set_v1: LooseRecord(
+      z.string(),
+      KubernetesInstance,
+    ).optional(),
+    tfe_workspace: LooseRecord(z.string(), TerraformWorkspaceArray).optional(),
   })
   .catchall(GenericResource);
 
@@ -193,7 +226,7 @@ export type TerraformResources = z.infer<typeof TerraformResources>;
 export const TerraformDefinitionFile = z.object({
   terraform: oneOrMany(TerraformBlock).optional(),
 
-  module: z.record(z.string(), oneOrMany(TerraformModule)).optional(),
+  module: LooseRecord(z.string(), looseOneOrMany(TerraformModule)).optional(),
 
   resource: TerraformResources.optional(),
 

@@ -8,8 +8,8 @@ const lockedVersion = Fixtures.get('lockedVersion.tf');
 
 describe('modules/manager/terraform/hcl/index', () => {
   describe('parseHCL() for .tf', () => {
-    it('should return null for invalid name', async () => {
-      const res = await parseHCL(modulesTF, 'file');
+    it('should return null for invalid content', async () => {
+      const res = await parseHCL('module "foo" {', 'file.tf');
       expect(res).toBeNil();
     });
 
@@ -62,9 +62,12 @@ describe('modules/manager/terraform/hcl/index', () => {
           {
             required_providers: [
               {
-                aws: {},
-                azurerm: {},
-                kubernetes: {},
+                aws: { source: 'aws', version: '~> 3.0' },
+                azurerm: { version: '~> 2.50.0' },
+                kubernetes: {
+                  source: 'terraform.example.com/example/kubernetes',
+                  version: '>= 1.0',
+                },
               },
             ],
           },
@@ -77,8 +80,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       expect(res).toMatchObject({
         resource: {
           docker_container: {
-            foo: {},
-            invalid: {},
+            foo: [{ name: 'foo', image: 'nginx:1.7.8' }],
+            invalid: [{ name: 'foo' }],
           },
           docker_service: {
             foo: [
@@ -86,12 +89,14 @@ describe('modules/manager/terraform/hcl/index', () => {
                 name: 'foo-service',
                 task_spec: [
                   {
-                    container_spec: {},
+                    container_spec: [
+                      { image: 'repo.mycompany.com:8080/foo-service:v1' },
+                    ],
                   },
                 ],
                 endpoint_spec: [
                   {
-                    ports: {},
+                    ports: [{ target_port: '8080' }],
                   },
                 ],
               },
@@ -195,9 +200,12 @@ describe('modules/manager/terraform/hcl/index', () => {
           {
             required_providers: [
               {
-                aws: {},
-                azurerm: {},
-                kubernetes: {},
+                aws: { source: 'aws', version: '~> 3.0' },
+                azurerm: { version: '~> 2.50.0' },
+                kubernetes: {
+                  source: 'terraform.example.com/example/kubernetes',
+                  version: '>= 1.0',
+                },
               },
             ],
           },
@@ -248,8 +256,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       expect(res).toMatchObject({
         resource: {
           docker_container: {
-            foo: {},
-            invalid: {},
+            foo: [{ name: 'foo', image: 'nginx:1.7.8' }],
+            invalid: [{ name: 'foo' }],
           },
           docker_service: {
             foo: [
@@ -257,12 +265,14 @@ describe('modules/manager/terraform/hcl/index', () => {
                 name: 'foo-service',
                 task_spec: [
                   {
-                    container_spec: {},
+                    container_spec: [
+                      { image: 'repo.mycompany.com:8080/foo-service:v1' },
+                    ],
                   },
                 ],
                 endpoint_spec: [
                   {
-                    ports: {},
+                    ports: [{ target_port: '8080' }],
                   },
                 ],
               },

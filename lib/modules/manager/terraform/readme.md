@@ -18,14 +18,12 @@ You can override this default with your own `packageRules`, for example:
 
 ### Supported file types
 
-Renovate supports the following filetypes for Terraform dependency tracking
+Renovate supports the following filetypes for Terraform dependency tracking:
 
-```
-    '**/*.tf',
-    '**/*.tf.json',
-    '**/*.tofu',
-    '**/*.tofu.json',
-```
+- \*.tf
+- \*.tf.json
+- \*.tofu
+- \*.tofu.json
 
 ### Supported dependencies
 
