@@ -86,6 +86,7 @@ If you have a package manager you'd like supported, please raise a [Suggest an I
 With `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of your repository or manager config, but not a larger `minimumReleaseAge` from `packageRules`.
 A package manager applies the minimum release age to every package of the lock file, so a larger value for some updates, such as major updates, would fail on packages which other updates locked.
 A `minimumReleaseAge` from `packageRules` still decides when Renovate raises an update.
+Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#minimumreleaseagebuffer) to the package manager.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value for its branch.
 How Renovate does this depends on the package manager.
 It never wins over the minimum release age which your repository configures in the package manager itself.

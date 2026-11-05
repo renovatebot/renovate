@@ -156,7 +156,7 @@ export interface MinimumReleaseAgeExemptionConfig
 }
 
 export interface MinimumReleaseAgeExemption {
-  /** The smallest own minimum release age of the exempted updates. */
+  /** The smallest own minimum release age of the exempted updates, without `minimumReleaseAgeBuffer`. */
   ageMs: number;
   /** The `depName` of each exempted update. */
   depNames: string[];
@@ -175,7 +175,17 @@ function isYoungerThan(
 }
 
 /**
- * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
+ * The own minimum release age of `upgrade` without `minimumReleaseAgeBuffer`, as the package manager applies the plain age.
+ */
+function getOwnAgeMs(upgrade: MinimumReleaseAgeExemptionConfig): number {
+  return calculateMinimumReleaseAgeMs({
+    ...upgrade,
+    minimumReleaseAgeBuffer: null,
+  });
+}
+
+/**
+ * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age without `minimumReleaseAgeBuffer` is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
  */
 export function getMinimumReleaseAgeExemption(
   upgrades: MinimumReleaseAgeExemptionConfig[],
@@ -188,16 +198,14 @@ export function getMinimumReleaseAgeExemption(
       upgrade.minimumReleaseAgePackageManagerSync === true &&
       !upgrade.isLockFileMaintenance &&
       !upgrade.isVulnerabilityAlert &&
-      calculateMinimumReleaseAgeMs(upgrade) < ageMs &&
+      getOwnAgeMs(upgrade) < ageMs &&
       isYoungerThan(upgrade, ageMs),
   );
   if (!exempted.length) {
     return null;
   }
   return {
-    ageMs: Math.min(
-      ...exempted.map((upgrade) => calculateMinimumReleaseAgeMs(upgrade)),
-    ),
+    ageMs: Math.min(...exempted.map(getOwnAgeMs)),
     depNames: exempted
       .map((upgrade) => upgrade.depName)
       .filter(isString)
