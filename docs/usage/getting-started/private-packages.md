@@ -114,7 +114,9 @@ Assume this config is used on the `github.com/some-other-org` repo:
 ```json {configType=global}
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "hostRules": [
     {
       "matchHost": "https://gitlab.com",

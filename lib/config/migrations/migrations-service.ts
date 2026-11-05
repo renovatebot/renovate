@@ -19,6 +19,7 @@ import { ConstraintsMigration } from './custom/constraints-migration.ts';
 import { CustomManagersMigration } from './custom/custom-managers-migration.ts';
 import { DatasourceMigration } from './custom/datasource-migration.ts';
 import { DepTypesMigration } from './custom/dep-types-migration.ts';
+import { DependencyDashboardMigration } from './custom/dependency-dashboard-migration.ts';
 import { DryRunMigration } from './custom/dry-run-migration.ts';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration.ts';
 import { ExtendsMigration } from './custom/extends-migration.ts';
@@ -175,6 +176,7 @@ export class MigrationsService {
     FileMatchMigration,
     UpdateLockFilesMigration,
     ConstraintsMigration,
+    DependencyDashboardMigration,
   ];
 
   static run(

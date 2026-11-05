@@ -128,7 +128,7 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate configuration migration PRs when needed.',
   },
   dependencyDashboard: {
-    dependencyDashboard: true,
+    dependencyDashboard: { enabled: true },
     description: 'Enable Renovate Dependency Dashboard creation.',
   },
   dependencyDashboardApproval: {
@@ -136,7 +136,7 @@ export const presets: Record<string, Preset> = {
     description: 'Enable Renovate Dependency Dashboard approval workflow.',
   },
   disableDependencyDashboard: {
-    dependencyDashboard: false,
+    dependencyDashboard: { enabled: false },
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
