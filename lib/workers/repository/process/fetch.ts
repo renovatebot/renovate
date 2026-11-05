@@ -172,10 +172,12 @@ async function lookup(
         );
       })
       .catch((err): Result<UpdateResult> => {
+        if (!(err instanceof ExternalHostError)) {
+          return Result.err(err);
+        }
         if (
-          !(err instanceof ExternalHostError) ||
-          (packageFileConfig.repoIsOnboarded === true &&
-            !err.onlyThisDependencyAffected)
+          packageFileConfig.repoIsOnboarded === true &&
+          !err.onlyThisDependencyAffected
         ) {
           return Result.err(err);
         }
