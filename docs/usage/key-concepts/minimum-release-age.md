@@ -129,29 +129,36 @@ The `--before` date is calculated as `now - minimumReleaseAge`.
 If a `before=<date>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
 If the project's `.npmrc` has a `min-release-age=<days>` setting, Renovate does not pass `--before`, as npm rejects both together, and npm applies the `min-release-age` itself.
 
-Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate passes `--before` for the `minimumReleaseAge` of the update, including a value from `packageRules`, and does not read the `.npmrc` when it looks up updates.
+If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
+In this case, Renovate automatically retries without `--before` and logs a warning.
+This ensures existing lock files are never broken by the `--before` flag.
 
-With `minimumReleaseAgePackageManagerSync`, Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
+After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
+
+##### Default npm behaviour
+
+Renovate passes `--before` for the `minimumReleaseAge` of the update, including a value from `packageRules`, and does not read the `.npmrc` when it looks up updates.
+
+For example, with `minimumReleaseAge` set to `7 days` in the `npm` config, and in `packageRules` to `30 days` for major updates and to `null` for `@types/node`, Renovate runs npm with `--before` set to 30 days ago for a major update, and without `--before` for the `@types/node` update.
+
+##### npm with `minimumReleaseAgePackageManagerSync`
+
+Renovate uses the `minimumReleaseAge` of the repository or `npm` manager config, not one from `packageRules`, as npm applies `--before` to every package of the lock file.
 A larger `minimumReleaseAgePackageManager` raises it.
 If an updated package has a smaller `minimumReleaseAge` and its release is younger than that value or has no timestamp, Renovate uses the smaller value for `--before`, or passes no `--before` for `0`, and adds a notice to the PR.
 Lock file maintenance uses its own `minimumReleaseAge`, and security updates do not pass `--before`.
 A lowered `--before` also uses the older `before=<date>` of the `.npmrc`, and the notice names the `.npmrc` date if it applies.
 
-With `minimumReleaseAgePackageManagerSync`, Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
+Renovate also uses the larger of the `.npmrc` age and `minimumReleaseAge` when it looks up updates.
 A `before=<date>` setting counts as the time elapsed since that date.
 This applies to the npm dependencies of every `package.json` of the `npm` manager for which Renovate finds no Yarn or pnpm lock file, as Renovate then assumes npm.
 
-If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
-In this case, Renovate automatically retries without `--before` and logs a warning.
-This ensures existing lock files are never broken by the `--before` flag.
-With `minimumReleaseAgePackageManagerSync`, lock file maintenance does not retry, and reports the `ETARGET` error as an artifact error instead.
+Lock file maintenance does not retry after an `ETARGET` error, and reports it as an artifact error instead.
 
-With `minimumReleaseAgePackageManagerSync`, npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
+npm enforces the minimum release age during lock file maintenance of a `package-lock.json` or `npm-shrinkwrap.json`, so Renovate creates the branch without waiting for release timestamps, if:
 
 - Renovate passes `--before`, or the project's `.npmrc` has a `before=<date>` setting, or
 - the project's `.npmrc` has a `min-release-age=<days>` setting of at least `minimumReleaseAge`, and the `constraints` config or the `packageManager`, `devEngines` or `engines` field of the `package.json` only allow npm v11.10.0 or later, which added `min-release-age`
-
-After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
 For example, with this config:
 
@@ -178,7 +185,6 @@ For example, with this config:
 - An update of `@types/node` to a release which is 2 days old runs npm without `--before`, and the PR notes that npm checked no minimum release age instead of 7 days.
 - With `before=2024-06-01` in the `.npmrc`, Renovate only raises updates to versions released before that date, also for `@types/node`, and runs npm with `--before=2024-06-01T00:00:00.000Z`.
 - With `min-release-age=10` in the `.npmrc`, Renovate waits 10 days before it raises an update and passes no `--before`. If the `packageManager` field of the `package.json` is `npm@11.10.0` or later, lock file maintenance does not wait for release timestamps.
-- Without `minimumReleaseAgePackageManagerSync`, Renovate runs npm with `--before` set to 30 days ago for a major update, and without `--before` for the `@types/node` update.
 
 #### Poetry
 
