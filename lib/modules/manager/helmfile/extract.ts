@@ -73,6 +73,7 @@ export async function extractPackageFile(
       let depName = dep.chart;
       let ociDep: PackageDependency | null = null;
       let repoName: string | null = null;
+      let currentDigest: string | undefined;
 
       // If it starts with ./ ../ or / then it's a local path
       if (isLocalChartPath(dep.chart)) {
@@ -90,7 +91,9 @@ export async function extractPackageFile(
       }
 
       if (isOCIRegistry(dep.chart)) {
-        depName = removeOCIPrefix(dep.chart);
+        // An OCI reference may carry a digest, e.g. oci://ghcr.io/org/chart@sha256:abc.
+        // Keep it out of the name, otherwise the chart name validation below rejects it.
+        [depName, currentDigest] = removeOCIPrefix(dep.chart).split('@');
         ociDep = getOciChartDep(dep.chart, undefined, config.registryAliases);
       } else {
         if (dep.chart.includes('/')) {
@@ -132,6 +135,13 @@ export async function extractPackageFile(
         res.registryUrls = [registryData[repoName]?.url]
           .concat([config.registryAliases?.[repoName]] as string[])
           .filter(isString);
+      }
+      if (currentDigest) {
+        delete res.pinDigests;
+        res.currentDigest = currentDigest;
+        res.replaceString = dep.chart;
+        res.autoReplaceStringTemplate =
+          'oci://{{depName}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       }
 
       // By definition on helm the chart name should be lowercase letter + number + -
