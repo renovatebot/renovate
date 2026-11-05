@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { JuliaGeneralMetadataDatasource } from '../../datasource/julia-general-metadata/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -53,11 +54,11 @@ export function extractPackageFile(
   }
 
   const { version, compat = {} } = parsed.data;
-  const uuids = {
-    ...parsed.data.extras,
-    ...parsed.data.weakdeps,
-    ...parsed.data.deps,
-  };
+  // A package listed in several sections is a dependency of the first.
+  const sections = (['deps', 'weakdeps', 'extras'] as const).map((depType) => ({
+    depType,
+    uuids: coerceObject(parsed.data[depType]),
+  }));
   const deps: PackageDependency[] = [];
   for (const [depName, currentValue] of Object.entries(compat)) {
     // `julia` constrains the Julia version, not a registered package.
@@ -65,18 +66,17 @@ export function extractPackageFile(
       continue;
     }
 
+    const section = sections.find(({ uuids }) => depName in uuids);
     const dep: PackageDependency = {
       depName,
-      depType: 'compat',
+      depType: section?.depType ?? 'compat',
       currentValue,
       datasource: JuliaGeneralMetadataDatasource.id,
     };
-    // Pkg shows a package as `[7876af07] Example`.
-    const uuid = uuids[depName];
+    const uuid = section?.uuids[depName];
     if (uuid && uuidRegex.test(uuid)) {
       // Another registry's package can have the name of a General package.
       dep.packageName = `${depName}=${uuid}`;
-      dep.commitMessageTopic = `${depName} [${uuid.slice(0, 8)}]`;
     }
     if (unregisteredStdlibs.has(depName)) {
       dep.skipReason = 'unsupported';

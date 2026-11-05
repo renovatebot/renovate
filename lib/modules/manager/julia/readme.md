@@ -1,6 +1,20 @@
 Extracts the `[compat]` entries of Julia `Project.toml` and `JuliaProject.toml` files.
 Each entry is looked up with the [`julia-general-metadata`](../../datasource/julia-general-metadata/index.md) datasource and [`julia`](../../versioning/julia/index.md) versioning.
 When `[deps]`, `[weakdeps]` or `[extras]` gives the package's UUID, the lookup checks it: a package from another registry that has the name of a General package gets no updates.
+Such a package, and a package that General does not register, fails its lookup on every run.
+To skip them, disable them with `packageRules`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["julia"],
+      "matchDepNames": ["MyPrivatePackage"],
+      "enabled": false
+    }
+  ]
+}
+```
 
 The `julia` entry constrains the Julia version itself, not a registered package, so the manager skips it.
 Raising its lower bound drops support for older Julia versions, which is the maintainer's decision.

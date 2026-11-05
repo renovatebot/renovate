@@ -160,7 +160,9 @@ describe('modules/datasource/julia-general-metadata/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/Example/info.json')
-        .reply(200, { name: 'Example', uuid: exampleUuid });
+        .reply(200, { name: 'Example', uuid: exampleUuid })
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
       await expect(
         getPkgReleases({
           datasource,
@@ -170,7 +172,12 @@ describe('modules/datasource/julia-general-metadata/index', () => {
     });
 
     it('returns null when General has no package of that name', async () => {
-      httpMock.scope(baseUrl).get('/Example/info.json').reply(404);
+      httpMock
+        .scope(baseUrl)
+        .get('/Example/info.json')
+        .reply(404)
+        .get('/Example/versions.json')
+        .reply(200, { '0.5.0': { registered: '2018-08-09T10:04:18' } });
       await expect(
         getPkgReleases({ datasource, packageName: `Example=${exampleUuid}` }),
       ).resolves.toBeNull();
