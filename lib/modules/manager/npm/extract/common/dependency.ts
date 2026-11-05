@@ -97,6 +97,11 @@ export function extractDependency(
     } else if (depName === 'bun') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'Bun';
+    } else if (depName === 'aube') {
+      dep.datasource = NpmDatasource.id;
+      // the `aube` package on npm is unrelated to this tool
+      dep.packageName = '@endevco/aube';
+      dep.commitMessageTopic = 'aube';
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -247,6 +252,7 @@ export function getExtractedConstraints(
 ): Partial<Record<ConstraintName, string>> {
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   const constraints: ConstraintName[] = [
+    'aube',
     'bun',
     'node',
     'yarn',

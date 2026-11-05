@@ -137,6 +137,21 @@ describe('modules/manager/aube/artifacts', () => {
       );
     });
 
+    it('installs the aube version extracted from the package file', async () => {
+      updateArtifact.config.extractedConstraints = { aube: '2.9.0' };
+      updateArtifact.updatedDeps = [
+        { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
+      ];
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+      await updateArtifacts(updateArtifact);
+      expect(exec).toHaveBeenCalledWith(
+        'aube install --ignore-scripts',
+        expect.objectContaining({
+          toolConstraints: [{ toolName: 'aube', constraint: '2.9.0' }],
+        }),
+      );
+    });
+
     it('handles temporary error', async () => {
       const execError = new ExecError(TEMPORARY_ERROR, {
         cmd: '',
