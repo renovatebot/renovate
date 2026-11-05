@@ -67,3 +67,21 @@ export type RecursiveOverride = string | { [_: string]: RecursiveOverride };
 export type NpmrcCooldown =
   | { source: 'before'; date: DateTime<true> }
   | { source: 'min-release-age'; days: number };
+
+/**
+ * The settings of a `pnpm-workspace.yaml` which decide whether pnpm enforces the minimum release age, with `minimumReleaseAge` in minutes.
+ */
+export interface PnpmWorkspaceMinimumReleaseAgeSettings {
+  minimumReleaseAge?: number;
+  minimumReleaseAgeStrict?: boolean;
+}
+
+/**
+ * The `minimumReleaseAgeExclude` entries of a `pnpm-workspace.yaml`, with the package names as `matchPackageNames` patterns.
+ */
+export interface PnpmMinimumReleaseAgeExclude {
+  /** One pattern per entry which excludes every version of the packages it matches */
+  packageNames: string[];
+  /** The entries which exclude only some versions of a package */
+  versions: { packageName: string; versions: string[] }[];
+}
