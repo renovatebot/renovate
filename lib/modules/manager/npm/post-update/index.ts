@@ -544,6 +544,12 @@ async function getAdditionalFilesInner(
             stderr: res.stderr,
           });
         } else if (res.lockFile) {
+          if (res.minimumReleaseAgeNotice) {
+            artifactNotices.push({
+              file: npmLock,
+              message: res.minimumReleaseAgeNotice,
+            });
+          }
           if (res.beforeFallback) {
             const message =
               'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.';
