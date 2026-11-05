@@ -356,7 +356,6 @@ Renovate takes the `rust` constraint from your config, or from the Rust version 
 
 Cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
 
-- the self-hosted Renovate sets the experimental [`RENOVATE_X_CARGO_MIN_PUBLISH_AGE`](../self-hosted-experimental.md#renovate_x_cargo_min_publish_age) environment variable,
 - the `rust` constraint only allows Rust 1.100.0 or later, for example `1.100.0` or `1.100`,
 - the lock file has no packages from git repositories, as cargo updates them without checking their age, and
 - no registry in the cargo config has a `min-publish-age` which is smaller than the `minimumReleaseAge` of lock file maintenance, invalid, or `"0"`
@@ -379,7 +378,7 @@ For example, with this config:
 ```
 
 - Without a cargo config, Renovate runs `cargo update` with `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE=7 days` and `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny`.
-- If the self-hosted Renovate sets `RENOVATE_X_CARGO_MIN_PUBLISH_AGE` and a `rust-toolchain.toml` pins Rust `1.100.0`, lock file maintenance does not wait for release timestamps.
+- If a `rust-toolchain.toml` pins Rust `1.100.0`, lock file maintenance does not wait for release timestamps.
 - An update of `cc` to a release which is 2 days old sets neither variable, and the PR notes that cargo checked no publish age instead of 7 days.
 - With `registry.global-min-publish-age = "10 days"` in the `.cargo/config.toml`, Renovate waits 10 days before it raises an update, also for `cc`, and sets neither variable, as cargo applies its own 10 days.
 - With `registries.crates-io.min-publish-age = "2 days"` in the `.cargo/config.toml`, Renovate still waits 7 days and passes `7 days`, but cargo checks 2 days for crates from crates.io.
