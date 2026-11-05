@@ -9,6 +9,7 @@ workflows:
         - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
         - 'hkusu/review-assign-action@5bee595fdb9765d4a0bd35724b6302fa15569158'
     '.github/workflows/build.yml':
+        - 'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6'
         - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346'
@@ -78,6 +79,11 @@ workflows:
     '.github/workflows/ws_scan.yaml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
 dependencies:
+    'actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6':
+        ref: 'v4.2.2'
+        commit: 'sha1-1e69f48acb82d1966a394da916b4c1698aa569d6'
+        owner_id: 44036562
+        repo_id: 760701061
     'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
         ref: 'v6.1.0'
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'

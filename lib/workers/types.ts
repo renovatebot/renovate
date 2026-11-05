@@ -129,6 +129,8 @@ export interface BranchUpgradeConfig
   sourceRepoName?: string;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /** The constraints which other managers share for the directory of the package file, see `ToolConstraintsConfig` */
+  sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -181,6 +183,8 @@ export interface BranchConfig
 
   errors?: ValidationMessage[];
   forcePr?: boolean;
+  /** True for a group branch in a run where a dependency lookup failed, so the branch must not be updated. */
+  skippedForLookupFailure?: boolean;
   hasTypes?: boolean;
   isModified?: boolean;
   isScheduledNow?: boolean;

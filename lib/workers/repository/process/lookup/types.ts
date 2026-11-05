@@ -81,6 +81,8 @@ export interface UpdateResult {
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
+  /** True when the lookup failed with an error that only fails this dependency. */
+  lookupFailed?: boolean;
   versioning?: string;
   currentVersionAgeInDays?: number;
   currentVersionTimestamp?: Timestamp;

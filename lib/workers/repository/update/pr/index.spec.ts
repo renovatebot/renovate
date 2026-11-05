@@ -1204,7 +1204,7 @@ describe('workers/repository/update/pr/index', () => {
             > ❗ **Important**
             >
             > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
-            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+            > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md#githubcom-token-for-changelogs-and-tools).
           `,
         ]);
       });

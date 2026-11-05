@@ -39,6 +39,15 @@ Before you start any Pull Request, it's recommended that you open a [discussion]
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
 Also, let the maintainers know that you plan to work on a particular issue so that no one else starts any duplicate work.
 
+Although the presence of an Issue is generally "yes, please come and help us fix it", and sometimes may have a `help wanted` label, it doesn't necessarily mean that this is the right Issue for you, right now.
+Long-standing issues, or those with a bit of back-and-forth or contention, are not recommended for first-time contributors to Renovate.
+Additionally, some of these long-standing issues haven't had a maintainer work on them already because they are often complex to undertake or require some more in-depth thinking, and so we would prefer folks more familiar with Renovate approach these, after discussing more with the maintainers.
+
+If you've dropped a comment on an Issue, asking to be assigned, but haven't yet had a response, please don't start working on it anyway.
+We will likely close the PR, as we've not yet got to any agreement on the path forwards, and it's easier to not review code for a solution we may not agree with.
+
+With Large Language Models (LLMs) and AI Agents, it's now easier to produce a PR for any Issue - but it does not mean we can or want to review it right now.
+
 ### AI Assistance Notice
 
 > [!IMPORTANT]
