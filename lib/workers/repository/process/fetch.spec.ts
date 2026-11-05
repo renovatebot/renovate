@@ -924,7 +924,7 @@ describe('workers/repository/process/fetch', () => {
 
     it('throws external host errors for onboarded repos', async () => {
       config.rangeStrategy = 'auto';
-      const packageFiles: any = {
+      const packageFiles: Record<string, PackageFile[]> = {
         maven: [
           {
             packageFile: 'pom.xml',
@@ -954,7 +954,7 @@ describe('workers/repository/process/fetch', () => {
       'marks the dependency as failed for dependency-only external host errors (repoIsOnboarded=$repoIsOnboarded)',
       async ({ repoIsOnboarded }: { repoIsOnboarded: boolean }) => {
         config.rangeStrategy = 'auto';
-        const packageFiles: any = {
+        const packageFiles: Record<string, PackageFile[]> = {
           maven: [
             {
               packageFile: 'pom.xml',
