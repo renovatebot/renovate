@@ -245,6 +245,8 @@ export interface PackageDependency<
   prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
+  /** True when the lookup failed with an error that only fails this dependency. */
+  lookupFailed?: boolean;
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
