@@ -419,7 +419,7 @@ describe('workers/repository/process/index', () => {
       expect(platform.getJsonFile).not.toHaveBeenCalled();
     });
 
-    it('does not attempt branch-specific config fetch when useBaseBranchConfig=merge', async () => {
+    it('fetches the base branch config once when useBaseBranchConfig=merge', async () => {
       getCache().configFileName = 'renovate.json';
       platform.getRawFile.mockResolvedValueOnce('{}');
       const res = await getBaseBranchConfig('feature', {
