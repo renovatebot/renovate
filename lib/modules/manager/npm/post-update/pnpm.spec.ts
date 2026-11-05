@@ -1250,7 +1250,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     it.each`
       name                                   | upgrade                                                                           | warns
       ${'a non-npm datasource'}              | ${{ datasource: 'node-version' }}                                                 | ${false}
-      ${'a minimumReleaseAgeBuffer'}         | ${{ minimumReleaseAge: '2 days', minimumReleaseAgeBuffer: '1 day' }}              | ${false}
+      ${'a minimumReleaseAgeBuffer'}         | ${{ minimumReleaseAge: '2 days', minimumReleaseAgeBuffer: '1 day' }}              | ${true}
       ${'the same sub-minute value'}         | ${{ minimumReleaseAge: '90 seconds', minimumReleaseAgeRepository: '90 seconds' }} | ${true}
       ${'a version older than the cutoff'}   | ${{ releaseTimestamp: '2020-01-01T00:00:00.000Z' }}                               | ${false}
       ${'a version younger than the cutoff'} | ${{ releaseTimestamp: new Date().toISOString() }}                                 | ${true}
