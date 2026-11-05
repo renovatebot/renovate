@@ -1,6 +1,9 @@
-import _fs from 'fs-extra';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec as _exec } from '../../../util/exec/index.ts';
@@ -8,12 +11,11 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/exec/index.ts');
-vi.mock('fs-extra');
+vi.mock('../../../util/fs/index.ts');
 
 const exec = vi.mocked(_exec);
-const fs = vi.mocked(_fs);
 
-const globalConfig: RepoGlobalConfig = {
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
   binarySource: 'global',
 };
@@ -33,19 +35,19 @@ describe('modules/manager/aube/artifacts', () => {
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if no lock file in config', async () => {
       updateArtifact.updatedDeps = [{}];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('skips if cannot read lock file', async () => {
       updateArtifact.updatedDeps = [
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('returns null if lock content unchanged', async () => {
@@ -53,9 +55,9 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      expect(await updateArtifacts(updateArtifact)).toBeNull();
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      await expect(updateArtifacts(updateArtifact)).resolves.toBeNull();
     });
 
     it('returns updated lock content', async () => {
@@ -63,11 +65,11 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'aube-lock.yaml',
@@ -87,11 +89,11 @@ describe('modules/manager/aube/artifacts', () => {
       updateArtifact.config.lockFiles = ['aube-lock.yaml'];
       updateArtifact.config.isLockFileMaintenance = true;
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         {
           file: {
             path: 'aube-lock.yaml',
@@ -100,6 +102,7 @@ describe('modules/manager/aube/artifacts', () => {
           },
         },
       ]);
+      expect(fs.deleteLocalFile).toHaveBeenCalledWith('aube-lock.yaml');
     });
 
     it('runs aube install without --ignore-scripts when scripts allowed', async () => {
@@ -108,10 +111,10 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       await updateArtifacts(updateArtifact);
       expect(exec).toHaveBeenCalledWith('aube install', expect.any(Object));
     });
@@ -123,10 +126,10 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       await updateArtifacts(updateArtifact);
       expect(exec).toHaveBeenCalledWith(
         'aube install --ignore-scripts',
@@ -145,7 +148,7 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
@@ -163,11 +166,33 @@ describe('modules/manager/aube/artifacts', () => {
         { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
-      expect(await updateArtifacts(updateArtifact)).toEqual([
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
         { artifactError: { fileName: 'aube-lock.yaml', stderr: 'nope' } },
       ]);
+    });
+
+    it('restores .npmrc when the install fails', async () => {
+      const execError = new ExecError('nope', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: {},
+      });
+      updateArtifact.updatedDeps = [
+        { manager: 'aube', lockFiles: ['aube-lock.yaml'] },
+      ];
+      fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
+      // npmrc
+      fs.readLocalFile.mockResolvedValueOnce('# dummy');
+      exec.mockRejectedValueOnce(execError);
+
+      await expect(updateArtifacts(updateArtifact)).resolves.toEqual([
+        { artifactError: { fileName: 'aube-lock.yaml', stderr: 'nope' } },
+      ]);
+
+      expect(fs.writeLocalFile).toHaveBeenCalledWith('.npmrc', '# dummy');
     });
   });
 });

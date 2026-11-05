@@ -13,6 +13,7 @@ export const supersedesManagers = ['npm'];
 export const supportsLockFileMaintenance = true;
 export const supportsNpmrc = true;
 export const lockFileNames = ['aube-lock.yaml'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)aube-lock\\.yaml$/', '/(^|/)package\\.json$/'],
