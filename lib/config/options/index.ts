@@ -2504,6 +2504,18 @@ const options: Readonly<RenovateOptions>[] = [
     nullable: true,
   },
   {
+    name: 'minimumReleaseAgePackageManagerSync',
+    scopes: ['repo', 'manager'],
+    description:
+      "Opt early into the new `minimumReleaseAge` behaviour: Renovate uses the minimum release age of the package manager's config and passes `minimumReleaseAge` of the repository to the package manager.",
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    experimentalDescription:
+      'The behaviour may change while the integration with each package manager is completed.',
+    experimentalIssues: [41652],
+  },
+  {
     name: 'abandonmentThreshold',
     scopes: lookupScopes,
     description:
