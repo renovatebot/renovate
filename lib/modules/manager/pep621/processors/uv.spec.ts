@@ -15,7 +15,11 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import type {
+  PackageDependency,
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+} from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { PyProject, UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
@@ -504,6 +508,304 @@ describe('modules/manager/pep621/processors/uv', () => {
       );
     });
 
+    it('returns deps unchanged if lock file cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [...deps],
+        'pyproject.toml',
+      );
+      expect(result).toEqual(deps);
+    });
+
+    it('logs debug and returns deps unchanged if lock file fails to parse', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('not valid toml [[[');
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [...deps],
+        'pyproject.toml',
+      );
+      expect(result).toEqual(deps);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageFile: 'pyproject.toml',
+          err: expect.anything(),
+        }),
+        'Error parsing uv lock file',
+      );
+    });
+
+    it('adds indirect deps from lock file not present in direct deps', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "markupsafe"
+        version = "2.1.5"
+        source = { registry = "https://example.com/simple" }
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'pyproject.toml',
+      );
+
+      expect(result).toMatchObject([
+        { packageName: 'dep1', lockedVersion: '1.2.3' },
+        {
+          packageName: 'mako',
+          depName: 'mako',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          lockedVersion: '1.3.10',
+          depType: 'indirect',
+          enabled: false,
+        },
+        {
+          packageName: 'markupsafe',
+          depName: 'markupsafe',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+          lockedVersion: '2.1.5',
+          depType: 'indirect',
+          enabled: false,
+        },
+      ]);
+    });
+
+    it('does not add indirect deps for workspace members using a parent lock file', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'packages/member/pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          lockedVersion: '1.2.3',
+        },
+      ]);
+    });
+
+    it('does not add direct deps of workspace members as indirect deps of the workspace root', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [manifest]
+        members = [
+            "member",
+            "root",
+        ]
+
+        [[package]]
+        name = "mako"
+        version = "1.3.10"
+        source = { registry = "https://pypi.org/simple" }
+        dependencies = [
+            { name = "markupsafe" },
+        ]
+
+        [[package]]
+        name = "markupsafe"
+        version = "2.1.5"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "member"
+        version = "0.1.0"
+        source = { editable = "packages/member" }
+        dependencies = [
+            { name = "mako" },
+        ]
+
+        [package.dev-dependencies]
+        dev = [
+            { name = "pytest" },
+        ]
+
+        [package.metadata]
+        requires-dist = [{ name = "mako", specifier = ">=1.3.0" }]
+
+        [package.metadata.requires-dev]
+        dev = [{ name = "pytest", specifier = ">=8.0.0" }]
+
+        [[package]]
+        name = "pytest"
+        version = "8.4.2"
+        source = { registry = "https://pypi.org/simple" }
+
+        [[package]]
+        name = "root"
+        version = "0.1.0"
+        source = { editable = "." }
+        dependencies = [
+            { name = "member" },
+        ]
+
+        [package.metadata]
+        requires-dist = [{ name = "member", editable = "packages/member" }]
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      // mako and pytest are direct deps of the member, so only markupsafe is
+      // an indirect dep of the workspace
+      expect(result).toEqual([
+        {
+          packageName: 'markupsafe',
+          depName: 'markupsafe',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          lockedVersion: '2.1.5',
+          depType: depTypes.indirect,
+          enabled: false,
+        },
+      ]);
+    });
+
+    it('only adds indirect deps with a registry source', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "root-project"
+        version = "0.1.0"
+        source = { editable = "." }
+
+        [[package]]
+        name = "virtual-project"
+        version = "0.1.0"
+        source = { virtual = "packages/virtual" }
+
+        [[package]]
+        name = "path-dep"
+        version = "1.0.0"
+        source = { path = "dist/path_dep-1.0.0-py3-none-any.whl" }
+
+        [[package]]
+        name = "directory-dep"
+        version = "1.0.0"
+        source = { directory = "packages/directory-dep" }
+
+        [[package]]
+        name = "git-dep"
+        version = "1.0.0"
+        source = { git = "https://github.com/foo/git-dep?rev=v1.0.0#0123456789abcdef0123456789abcdef01234567" }
+
+        [[package]]
+        name = "url-dep"
+        version = "1.0.0"
+        source = { url = "https://example.com/url_dep-1.0.0.tar.gz" }
+
+        [[package]]
+        name = "no-source-dep"
+        version = "1.0.0"
+
+        [[package]]
+        name = "registry-dep"
+        version = "1.0.0"
+        source = { registry = "https://pypi.org/simple" }
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'registry-dep',
+          depName: 'registry-dep',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          lockedVersion: '1.0.0',
+          depType: depTypes.indirect,
+          enabled: false,
+        },
+      ]);
+    });
+
+    it('does not add indirect dep if already present as direct dep', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.11"
+
+        [[package]]
+        name = "dep1"
+        version = "1.2.3"
+      `);
+
+      const deps: PackageDependency[] = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+      ];
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        deps,
+        'pyproject.toml',
+      );
+
+      // dep1 should not be duplicated as indirect
+      expect(result.filter((d) => d.packageName === 'dep1')).toHaveLength(1);
+      expect(result).toHaveLength(1);
+    });
+
     it('resolves to lowest version found', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
@@ -558,6 +860,48 @@ describe('modules/manager/pep621/processors/uv', () => {
 
       const dep = result[0];
       expect(dep.lockedVersion).toBe('8.4.2');
+    });
+
+    it('adds indirect dep listed twice only once with lowest version', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        version = 1
+        requires-python = ">=3.9"
+
+        [[package]]
+        name = "iniconfig"
+        version = "2.3.0"
+        source = { registry = "https://pypi.org/simple" }
+        resolution-markers = [
+            "python_full_version >= '3.10'",
+        ]
+
+        [[package]]
+        name = "iniconfig"
+        version = "2.1.0"
+        source = { registry = "https://example.com/simple" }
+        resolution-markers = [
+            "python_full_version < '3.10'",
+        ]
+      `);
+
+      const result = await processor.extractLockedVersions(
+        partial(),
+        [],
+        'pyproject.toml',
+      );
+
+      expect(result).toEqual([
+        {
+          packageName: 'iniconfig',
+          depName: 'iniconfig',
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+          lockedVersion: '2.1.0',
+          depType: depTypes.indirect,
+          enabled: false,
+        },
+      ]);
     });
   });
 
@@ -856,6 +1200,54 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('pins indirect deps to the new version in upgrade command', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        { packageName: 'dep1', depType: depTypes.dependencies },
+        {
+          packageName: 'mako',
+          depType: depTypes.indirect,
+          newVersion: '1.2.2',
+        },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako==1.2.2',
+        },
+      ]);
+    });
+
     it('performs update on private package registry', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
@@ -1097,6 +1489,87 @@ describe('modules/manager/pep621/processors/uv', () => {
               UV_INDEX_PINNED_INDEX_PASSWORD: 'pass',
               UV_INDEX_IMPLICIT_INDEX_USERNAME: 'user',
               UV_INDEX_IMPLICIT_INDEX_PASSWORD: 'pass',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('dont propagate indirect dep registries into UV_EXTRA_INDEX_URL', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      hostRules.add({
+        matchHost: 'https://private.com/simple',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      // uv
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      // indirect deps take their registryUrls from uv.lock, which already
+      // records where each package comes from. Passing them as extra indexes
+      // would give them priority over the project's default index.
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://example.com/simple'],
+        },
+        {
+          packageName: 'mako',
+          depType: depTypes.indirect,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://pypi.org/simple'],
+          newVersion: '1.3.11',
+        },
+        {
+          packageName: 'markupsafe',
+          depType: depTypes.indirect,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://private.com/simple'],
+          newVersion: '2.1.6',
+        },
+      ];
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1 --upgrade-package mako==1.3.11 --upgrade-package markupsafe==2.1.6',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL: 'https://user:pass@example.com/simple',
             },
           },
         },
