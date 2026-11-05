@@ -53,7 +53,8 @@ export async function updateArtifacts(
       pkgFileDir,
       additionalNpmrcContent,
       async () => {
-        let cmd = 'aube install';
+        // aube defaults to `--frozen-lockfile` under the `CI=true` that Renovate sets for child processes
+        let cmd = 'aube install --lockfile-only --prefer-frozen-lockfile';
 
         if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
           cmd += ' --ignore-scripts';

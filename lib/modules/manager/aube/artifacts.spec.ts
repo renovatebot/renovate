@@ -78,11 +78,14 @@ describe('modules/manager/aube/artifacts', () => {
           },
         },
       ]);
-      expect(exec).toHaveBeenCalledWith('aube install --ignore-scripts', {
-        cwdFile: 'aube-lock.yaml',
-        docker: {},
-        toolConstraints: [{ toolName: 'aube' }],
-      });
+      expect(exec).toHaveBeenCalledWith(
+        'aube install --lockfile-only --prefer-frozen-lockfile --ignore-scripts',
+        {
+          cwdFile: 'aube-lock.yaml',
+          docker: {},
+          toolConstraints: [{ toolName: 'aube' }],
+        },
+      );
     });
 
     it('resolves lock file from config when no updated dep carries one', async () => {
@@ -116,7 +119,10 @@ describe('modules/manager/aube/artifacts', () => {
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       await updateArtifacts(updateArtifact);
-      expect(exec).toHaveBeenCalledWith('aube install', expect.any(Object));
+      expect(exec).toHaveBeenCalledWith(
+        'aube install --lockfile-only --prefer-frozen-lockfile',
+        expect.any(Object),
+      );
     });
 
     it('runs with --ignore-scripts when config.ignoreScripts is set', async () => {
@@ -132,7 +138,7 @@ describe('modules/manager/aube/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       await updateArtifacts(updateArtifact);
       expect(exec).toHaveBeenCalledWith(
-        'aube install --ignore-scripts',
+        'aube install --lockfile-only --prefer-frozen-lockfile --ignore-scripts',
         expect.any(Object),
       );
     });
@@ -145,7 +151,7 @@ describe('modules/manager/aube/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(Buffer.from('old') as never);
       await updateArtifacts(updateArtifact);
       expect(exec).toHaveBeenCalledWith(
-        'aube install --ignore-scripts',
+        'aube install --lockfile-only --prefer-frozen-lockfile --ignore-scripts',
         expect.objectContaining({
           toolConstraints: [{ toolName: 'aube', constraint: '2.9.0' }],
         }),
