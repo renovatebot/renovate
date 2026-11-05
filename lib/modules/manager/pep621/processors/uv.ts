@@ -241,31 +241,35 @@ export class UvProcessor extends BasePyProjectProcessor {
       ...deps.map((dep) => dep.packageName).filter(isString),
     ]);
 
-    const transitiveEntries = Object.entries(packages).filter(
-      // only a registry-sourced package can be remediated by name, which rules
-      // out the workspace root and any virtual/editable/path/git package
-      ([packageName, locked]) =>
-        !declaredPackageNames.has(packageName) && locked.registryUrl,
+    const transitiveDeps = Object.entries(packages).flatMap(
+      ([packageName, locked]): PackageDependency[] => {
+        const { registryUrl } = locked;
+        // only a registry-sourced package can be remediated by name, which
+        // rules out the workspace root and any virtual/editable/path/git one
+        if (declaredPackageNames.has(packageName) || !registryUrl) {
+          return [];
+        }
+
+        const transitiveDep: PackageDependency = {
+          packageName,
+          depName: packageName,
+          depType: depTypes.uvTransitiveDependencies,
+          datasource: PypiDatasource.id,
+          lockedVersion: locked.version,
+          skipReason: 'lockfile-only',
+          skipStage: 'extract',
+        };
+        if (locked.hasMultipleEntries) {
+          transitiveDep.managerData = { hasMultipleLockedEntries: true };
+        }
+        if (trimTrailingSlash(registryUrl) !== defaultPypiRegistry) {
+          transitiveDep.registryUrls = [registryUrl];
+        }
+        return [transitiveDep];
+      },
     );
 
-    for (const [packageName, locked] of transitiveEntries) {
-      const transitiveDep: PackageDependency = {
-        packageName,
-        depName: packageName,
-        depType: depTypes.uvTransitiveDependencies,
-        datasource: PypiDatasource.id,
-        lockedVersion: locked.version,
-        skipReason: 'lockfile-only',
-        skipStage: 'extract',
-      };
-      if (locked.hasMultipleEntries) {
-        transitiveDep.managerData = { hasMultipleLockedEntries: true };
-      }
-      if (trimTrailingSlash(locked.registryUrl!) !== defaultPypiRegistry) {
-        transitiveDep.registryUrls = [locked.registryUrl!];
-      }
-      deps.push(transitiveDep);
-    }
+    deps.push(...transitiveDeps);
   }
 
   async updateArtifacts(
