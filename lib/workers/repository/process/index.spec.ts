@@ -103,11 +103,10 @@ describe('workers/repository/process/index', () => {
 
     it('applies branch-specific config for non-default branches when useBaseBranchConfig=merge-if-present', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getRawFile.mockResolvedValue(
-        '{"extends": ["config:recommended"]}',
-      );
+      platform.getRawFile.mockResolvedValue('{"labels": ["dev-branch"]}');
       config.baseBranchPatterns = ['main', 'dev'];
       config.defaultBranch = 'main';
+      config.labels = ['default-branch'];
       config.useBaseBranchConfig = 'merge-if-present';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
@@ -125,6 +124,17 @@ describe('workers/repository/process/index', () => {
         'renovate.json',
         config.repository,
         'dev',
+      );
+      expect(extract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseBranch: 'main',
+          labels: ['default-branch'],
+        }),
+        true,
+      );
+      expect(extract).toHaveBeenCalledWith(
+        expect.objectContaining({ baseBranch: 'dev', labels: ['dev-branch'] }),
+        true,
       );
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
