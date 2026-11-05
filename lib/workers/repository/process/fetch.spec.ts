@@ -519,6 +519,67 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
+    it('applies the packageRules of the package file after those of the repository', async () => {
+      config.packageRules = [
+        { matchDatasources: ['npm'], minimumReleaseAge: '1 day' },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            packageRules: [
+              {
+                matchDatasources: ['npm'],
+                minimumReleaseAgeExtracted: '3 days',
+              },
+              {
+                matchPackageNames: ['@myorg/*'],
+                minimumReleaseAgeExtracted: null,
+              },
+            ],
+            deps: [
+              { depName: 'foo', packageName: 'foo', datasource: 'npm' },
+              {
+                depName: '@myorg/bar',
+                packageName: '@myorg/bar',
+                datasource: 'npm',
+              },
+              {
+                depName: 'node',
+                packageName: 'node',
+                datasource: 'node-version',
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue(
+        Result.ok(partial<UpdateResult>({ updates: [] })),
+      );
+
+      await fetchUpdates(config, packageFiles);
+
+      const lookupConfigs = Object.fromEntries(
+        lookupUpdates.mock.calls.map(([c]) => [c.depName, c]),
+      );
+      expect(lookupConfigs).toMatchObject({
+        foo: {
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: '3 days',
+        },
+        '@myorg/bar': {
+          minimumReleaseAge: '1 day',
+          minimumReleaseAgeExtracted: null,
+        },
+      });
+      expect(lookupConfigs.node).not.toHaveProperty(
+        'minimumReleaseAgeExtracted',
+      );
+      expect(packageFiles.npm[0].deps[0]).not.toHaveProperty(
+        'minimumReleaseAgeExtracted',
+      );
+    });
+
     describe('constraintsVersioning', () => {
       it('is merged from packageFile with config', async () => {
         config.constraintsVersioning = { gomodMod: 'config-version' };

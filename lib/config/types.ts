@@ -126,6 +126,7 @@ export interface RenovateSharedConfig {
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
+  minimumReleaseAgePackageManagerSync?: boolean;
   npmrc?: string;
   npmrcMerge?: boolean;
   npmToken?: string;
