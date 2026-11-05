@@ -110,7 +110,7 @@ Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#mi
 Set [`minimumReleaseAgePackageManager`](../configuration-options.md#minimumreleaseagepackagemanager) at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
-How Renovate does this depends on the package manager, for example Poetry excludes an updated package from its check only if its constraint pins a single version, while npm gets the smaller value for that branch.
+How Renovate does this depends on the package manager, for example pnpm excludes the updated versions, Poetry excludes an updated package only if its constraint pins a single version, while npm gets the smaller value for that branch.
 It never wins over the minimum release age which your repository configures in the package manager itself.
 The package manager still applies that age, like for security updates, and refuses a younger release.
 Without `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of the update, including a value from `packageRules`, and `minimumReleaseAgePackageManager` has no effect.
@@ -188,6 +188,97 @@ For example, with this config:
 - An update of `@types/node` to a release which is 2 days old runs npm without `--before`, and the PR notes that npm checked no minimum release age instead of 7 days.
 - With `before=2024-06-01` in the `.npmrc`, Renovate only raises updates to versions released before that date, also for `@types/node`, and runs npm with `--before=2024-06-01T00:00:00.000Z`.
 - With `min-release-age=10` in the `.npmrc`, Renovate waits 10 days before it raises an update and passes no `--before`. If the `packageManager` field of the `package.json` is `npm@11.10.0` or later, lock file maintenance does not wait for release timestamps.
+
+#### pnpm
+
+##### Default pnpm behavior
+
+Renovate passes no minimum release age to pnpm, and pnpm applies its own config.
+Renovate does not read the pnpm config when it looks up updates, and does not use the pnpm v11 default of 1 day.
+If pnpm refuses a version because of its own config, it fails with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` or `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`, and Renovate does not retry.
+
+##### pnpm with `minimumReleaseAgePackageManagerSync`
+
+When `minimumReleaseAge` is configured, Renovate passes `--config.minimum-release-age=<minutes>` to pnpm commands during lock file generation.
+This ensures that pnpm only resolves package versions that are at least as old as the cooldown threshold, including transitive dependencies.
+pnpm added this setting in v10.16.0, and older versions ignore it.
+Renovate does not pass it for security updates, as they bypass `minimumReleaseAge`.
+
+The value used is the larger of `minimumReleaseAge` or the configured one, rounded up to whole minutes, and the value that pnpm uses.
+pnpm uses the `minimumReleaseAge` setting of the project's `pnpm-workspace.yaml`, or before pnpm v11 the `minimum-release-age` setting of the project's `.npmrc`.
+If neither is set, pnpm v11 uses its default of 1 day.
+If the pnpm version may be older than v11 or Renovate does not know it, Renovate uses the `.npmrc` setting, and does not use the pnpm v11 default.
+The flag takes precedence over both files, and pnpm applies the value strictly because it is set explicitly.
+
+pnpm applies the value to every package it resolves, including the ones already in the `pnpm-lock.yaml`.
+For dependency updates, Renovate therefore passes the `minimumReleaseAge` of your repository or `npm` manager config, and not a `minimumReleaseAge` from `packageRules`.
+A larger `minimumReleaseAgePackageManager` raises it.
+Otherwise a larger `minimumReleaseAge` for major updates would fail on packages which patch and minor updates locked before.
+If you set `minimumReleaseAge` only in `packageRules`, Renovate passes no value to pnpm for dependency updates.
+
+Renovate already applied its own `minimumReleaseAge` to the updated versions, so it also passes `--config.minimum-release-age-exclude=<name>@<version>` for each updated npm package whose release is at least as old as the value that pnpm uses.
+pnpm still checks a younger version, or one without a release timestamp, and refuses it if it is younger than the passed value.
+New transitive dependencies still get the passed value.
+The flag replaces the `minimumReleaseAgeExclude` list of the `pnpm-workspace.yaml`, so Renovate passes those entries first.
+Renovate passes the exclusions if the pnpm version is v10.19.0 or later, which added exact versions to `minimumReleaseAgeExclude`, or if Renovate does not know the pnpm version.
+For pnpm v10.16.0 to v10.18.x, if Renovate looked up an npm package with a smaller minimum release age than the value Renovate passes, and the proposed version may be younger than that value, Renovate passes the smaller value, rounded down to whole minutes but not below the value that pnpm uses, and adds a notice to the PR.
+Renovate neither passes exclusions for nor lowers the value for versions which `minimumReleaseAgeExclude` already excludes.
+Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `pnpm-lock.yaml`, and passes no exclusions.
+
+Renovate also uses the larger of the project's pnpm setting and `minimumReleaseAge` when it looks up updates.
+If neither the `pnpm-workspace.yaml` nor the `.npmrc` sets it, Renovate uses the pnpm v11 default of 1 day, but only if the pnpm version is v11 or later.
+Renovate uses the `.npmrc` setting unless the pnpm version is v11 or later.
+Like for the lock file update, Renovate reads the pnpm version from the `constraints` config, the `package.json`, or the `lockfileVersion` of the `pnpm-lock.yaml`.
+To get updates younger than 1 day, set `minimumReleaseAge` in the `pnpm-workspace.yaml`.
+This applies per dependency to the npm packages of every `package.json` and `pnpm-workspace.yaml` of the `npm` manager that belongs to a `pnpm-lock.yaml`.
+Renovate honors the package names and name patterns of `minimumReleaseAgeExclude`, and then uses only `minimumReleaseAge` for those packages.
+Entries with exact versions, like `foo@1.2.3`, exclude only those versions from pnpm's check, so Renovate does not use them when it looks up updates.
+
+If pnpm finds no version old enough, or the existing lock file contains packages published within the cooldown, pnpm fails with `ERR_PNPM_NO_MATURE_MATCHING_VERSION` or `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`.
+Renovate does not retry, and reports an artifact error which names the rejected packages.
+`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` means that the `pnpm-lock.yaml` contains packages younger than the value Renovate passes, for example because your local pnpm uses a smaller `minimumReleaseAge` than Renovate.
+To fix it, raise `minimumReleaseAge` in the `pnpm-workspace.yaml` to the value Renovate passes, or set `trustLockfile: true` there (pnpm v11.3.0 or later) to skip this check.
+Renovate does not set `trustLockfile` itself.
+
+pnpm enforces the minimum release age during lock file maintenance of a `pnpm-lock.yaml`, so Renovate creates the branch without waiting for release timestamps, if:
+
+- `minimumReleaseAge` or the project's pnpm setting is set, and
+- the project's `pnpm-workspace.yaml` does not set `minimumReleaseAgeStrict: false`, and
+- the project's `pnpm-workspace.yaml` does not set `minimumReleaseAgeExclude`, which lets pnpm install versions of the excluded packages which are too new, and
+- the pnpm version used is v10.17.0 to v10.x, v11.0.4 to v11.x, or v12.3.0 or later
+
+pnpm v10.16.0 skips the check for an exact version from its metadata cache, and pnpm v11.0.0 to v11.0.3 and v12.0.0 to v12.2.x install a version which is too new if no other version matches.
+Renovate reads the pnpm version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), the `lockfileVersion` of the `pnpm-lock.yaml`, or the extracted constraints of tool managers.
+For the workspace packages and the `pnpm-workspace.yaml`, Renovate uses the pnpm version and `.npmrc` of the `package.json` next to the `pnpm-lock.yaml`.
+
+For example, with pnpm v11 and this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "npm": {
+    "minimumReleaseAge": "7 days"
+  }
+}
+```
+
+- Without a pnpm setting, Renovate waits 7 days before it raises an update, and runs pnpm with `--config.minimum-release-age=10080`.
+  A package with `minimumReleaseAge: null` in `packageRules` still waits 1 day, the pnpm v11 default.
+
+With this `pnpm-workspace.yaml` in addition:
+
+```yaml
+minimumReleaseAge: 14400
+minimumReleaseAgeExclude:
+  - '@types/node'
+```
+
+- Renovate waits 10 days before it raises an update, and 7 days for `@types/node`.
+- An update of `semver` to `7.7.3` runs pnpm with `--config.minimum-release-age=14400 --config.minimum-release-age-exclude=@types/node --config.minimum-release-age-exclude=semver@7.7.3`.
+- An update of `@types/node` runs pnpm with `--config.minimum-release-age=14400` only, as the `pnpm-workspace.yaml` already excludes it.
+- Lock file maintenance runs pnpm with `--config.minimum-release-age=14400`.
+  As pnpm installs new versions of `@types/node`, Renovate still waits for the release timestamps before it creates the branch.
+  Without `minimumReleaseAgeExclude`, Renovate creates the branch without waiting, unless the `pnpm-workspace.yaml` sets `minimumReleaseAgeStrict: false`.
 
 #### Poetry
 

@@ -3,7 +3,11 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
-import { minReleaseAgeNpmRange } from './minimum-release-age.ts';
+import {
+  minReleaseAgeNpmRange,
+  minimumReleaseAgeEnforcedPnpmRange,
+  minimumReleaseAgePnpmRange,
+} from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
@@ -37,7 +41,12 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
     enforcedInLockFile: true,
     note: 'Passes `--before`, unless `.npmrc` sets `min-release-age`. If `minimumReleaseAgePackageManagerSync` is enabled, reads `.npmrc`, see [npm](#npm).',
   },
-  pnpm: {},
+  pnpm: {
+    passesMinimumReleaseAge: minimumReleaseAgePnpmRange,
+    readsConfiguredAge: minimumReleaseAgePnpmRange,
+    enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `--config.minimum-release-age` and reads `pnpm-workspace.yaml`, see [pnpm](#pnpm).',
+  },
   yarn: {},
 };
 

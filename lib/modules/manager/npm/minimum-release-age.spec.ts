@@ -35,8 +35,9 @@ describe('modules/manager/npm/minimum-release-age', () => {
       ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
       ${{ ...npmLockManagerData, yarnLock: 'some-dir/yarn.lock' }}
       ${{ ...npmLockManagerData, pnpmLockFile: 'some-dir/pnpm-lock.yaml' }}
+      ${{ pnpmLockFile: 'some-dir/pnpm-lock.yaml', yarnLock: 'some-dir/yarn.lock' }}
     `(
-      'returns false without an npm lock file: $managerData',
+      'returns false without a single npm or pnpm lock file: $managerData',
       async ({ managerData }) => {
         await expect(
           enforcesMinimumReleaseAge({
@@ -190,6 +191,135 @@ describe('modules/manager/npm/minimum-release-age', () => {
           }),
         ).resolves.toBeFalse();
       });
+    });
+  });
+
+  describe('enforcesMinimumReleaseAge() for pnpm', () => {
+    const pnpmLockManagerData: NpmManagerData = {
+      pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+    };
+
+    it.each`
+      constraint     | expected
+      ${'10.17.0'}   | ${true}
+      ${'^10.17.0'}  | ${true}
+      ${'10.16.0'}   | ${false}
+      ${'11.0.4'}    | ${true}
+      ${'>=11.0.4'}  | ${false}
+      ${'^11.28.0'}  | ${true}
+      ${'^12.0.0'}   | ${false}
+      ${'12.3.0'}    | ${true}
+      ${'>=12.3.0'}  | ${true}
+      ${'10.15.1'}   | ${false}
+      ${'>=10'}      | ${false}
+      ${'11.0.3'}    | ${false}
+      ${'^11.0.0'}   | ${false}
+      ${'>=10.17.0'} | ${false}
+      ${'bananas'}   | ${false}
+    `(
+      'returns $expected for the pnpm constraint $constraint',
+      async ({ constraint, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: pnpmLockManagerData,
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+            constraints: { pnpm: constraint },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it.each`
+      minimumReleaseAge | workspace                                                      | expected
+      ${null}           | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
+      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
+      ${null}           | ${undefined}                                                   | ${false}
+      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                    | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                          | ${false}
+      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }} | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                           | ${true}
+    `(
+      'returns $expected for minimumReleaseAge=$minimumReleaseAge and workspace=$workspace',
+      async ({ minimumReleaseAge, workspace, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: {
+              ...pnpmLockManagerData,
+              pnpmWorkspaceMinimumReleaseAge: workspace,
+            },
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            minimumReleaseAge,
+            constraints: { pnpm: '10.17.0' },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it('does not read the pnpm-workspace.yaml in the working tree', async () => {
+      fs.readLocalFile.mockResolvedValue('minimumReleaseAgeStrict: false\n');
+
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          constraints: { pnpm: '10.17.0' },
+        }),
+      ).resolves.toBeTrue();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it.each`
+      pnpm         | npmrc                           | expected
+      ${'10.17.0'} | ${'minimum-release-age=1440\n'} | ${true}
+      ${'10.17.0'} | ${'minimum-release-age=0\n'}    | ${false}
+      ${'10.17.0'} | ${undefined}                    | ${false}
+      ${'11.0.4'}  | ${'minimum-release-age=1440\n'} | ${false}
+    `(
+      'returns $expected for pnpm $pnpm with npmrc=$npmrc and no minimumReleaseAge',
+      async ({ pnpm, npmrc, expected }) => {
+        await expect(
+          enforcesMinimumReleaseAge({
+            managerData: pnpmLockManagerData,
+            minimumReleaseAgePackageManagerSync: true,
+            isLockFileMaintenance: true,
+            npmrc,
+            constraints: { pnpm },
+          }),
+        ).resolves.toBe(expected);
+      },
+    );
+
+    it('does not derive the pnpm constraint from the package.json in the working tree', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ packageManager: 'pnpm@11.28.7' }),
+      );
+
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '1 day',
+          extractedConstraints: { pnpm: '>=9' },
+        }),
+      ).resolves.toBeFalse();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('returns false without a pnpm constraint', async () => {
+      await expect(
+        enforcesMinimumReleaseAge({
+          managerData: pnpmLockManagerData,
+          minimumReleaseAgePackageManagerSync: true,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '1 day',
+        }),
+      ).resolves.toBeFalse();
     });
   });
 });
