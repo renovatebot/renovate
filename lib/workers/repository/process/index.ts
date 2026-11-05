@@ -20,6 +20,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
 import { getBranchList } from '../../../util/git/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { addSplit } from '../../../util/split.ts';
 import { getRegexPredicate } from '../../../util/string-match.ts';
 import type { BranchConfig } from '../../types.ts';
@@ -64,6 +65,97 @@ function isPlatformOrTemporaryError(message: unknown): boolean {
   );
 }
 
+/**
+ * Reads, validates and merges the config file from `baseBranch` over the default branch's config.
+ *
+ * Returns `null` when `useBaseBranchConfig=fallback` and the config file does not exist on `baseBranch`, so the default branch's config is used.
+ */
+async function readBaseBranchConfig(
+  baseBranch: string,
+  config: RenovateConfig,
+): Promise<RenovateConfig | null> {
+  const mode = config.useBaseBranchConfig;
+  logger.debug(
+    { baseBranch },
+    `Reading config from base branch because useBaseBranchConfig=${mode}`,
+  );
+
+  // Retrieve config file name autodetected for this repo
+  const cache = getCache();
+  // TODO: types (#22198)
+  const configFileName = cache.configFileName!;
+
+  const hasConfigFile = !!configFileName && configFileName !== 'package.json';
+  if (mode === 'fallback' && !hasConfigFile) {
+    return null;
+  }
+
+  let configFileRaw: string | null = null;
+  let fetchFailed = false;
+  try {
+    configFileRaw = await platform.getRawFile(
+      configFileName,
+      config.repository,
+      baseBranch,
+    );
+  } catch (err) {
+    if (
+      err instanceof ExternalHostError ||
+      isPlatformOrTemporaryError(err.message)
+    ) {
+      throw err;
+    }
+
+    logger.debug(
+      { configFileName, baseBranch, err },
+      'Error fetching config file from base branch',
+    );
+    fetchFailed = !isNotFound(err);
+  }
+
+  if (configFileRaw === null) {
+    if (mode === 'fallback' && !fetchFailed) {
+      logger.debug(
+        { baseBranch, configFileName },
+        'No branch-specific config file found, falling back to default branch config',
+      );
+      return null;
+    }
+
+    logger.error(
+      { configFileName, baseBranch },
+      `Error fetching config file from base branch - possible config name mismatch between branches?`,
+    );
+
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = 'config';
+    error.validationError = 'Error fetching config file';
+    error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
+    throw error;
+  }
+
+  const parseResult = parseFileConfig(
+    configFileName,
+    configFileRaw.length ? configFileRaw : '{}',
+  );
+  if (!parseResult.success) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = configFileName;
+    error.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${parseResult.validationError}`;
+    error.validationMessage = parseResult.validationMessage;
+    throw error;
+  }
+  const rawBranchConfig = parseResult.parsedContents as RenovateConfig;
+  logger.debug({ config: rawBranchConfig }, 'Base branch config raw');
+
+  return await resolveAndMerge(
+    config,
+    rawBranchConfig,
+    configFileName,
+    baseBranch,
+  );
+}
+
 export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
@@ -72,124 +164,13 @@ export async function getBaseBranchConfig(
 
   let baseBranchConfig: RenovateConfig = clone(config);
 
-  if (
-    config.useBaseBranchConfig === 'merge' &&
-    baseBranch !== config.defaultBranch
-  ) {
-    logger.debug(
-      { baseBranch },
-      `Merging config from base branch because useBaseBranchConfig=merge`,
-    );
-
-    // Retrieve config file name autodetected for this repo
-    const cache = getCache();
-    // TODO: types (#22198)
-    const configFileName = cache.configFileName!;
-
-    let configFileRaw: string | null;
-    try {
-      configFileRaw = await platform.getRawFile(
-        configFileName,
-        config.repository,
-        baseBranch,
-      );
-    } catch (err) {
-      if (
-        err instanceof ExternalHostError ||
-        isPlatformOrTemporaryError(err.message)
-      ) {
-        throw err;
-      }
-
-      logger.debug(
-        { configFileName, baseBranch, err },
-        'Error fetching config file from base branch',
-      );
-      configFileRaw = null;
-    }
-
-    if (configFileRaw === null) {
-      logger.error(
-        { configFileName, baseBranch },
-        `Error fetching config file from base branch - possible config name mismatch between branches?`,
-      );
-
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = 'config';
-      error.validationError = 'Error fetching config file';
-      error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
-      throw error;
-    }
-
-    const parseResult = parseFileConfig(
-      configFileName,
-      configFileRaw.length ? configFileRaw : '{}',
-    );
-    if (!parseResult.success) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = configFileName;
-      error.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${parseResult.validationError}`;
-      error.validationMessage = parseResult.validationMessage;
-      throw error;
-    }
-    baseBranchConfig = parseResult.parsedContents as RenovateConfig;
-    logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-
-    baseBranchConfig = await resolveAndMerge(
-      config,
-      baseBranchConfig,
-      configFileName,
-      baseBranch,
-    );
-  }
-
-  if (
-    config.useBaseBranchConfig === 'fallback' &&
-    baseBranch !== config.defaultBranch
-  ) {
-    logger.debug(
-      { baseBranch },
-      'Attempting to read branch-specific config because useBaseBranchConfig=fallback',
-    );
-
-    const cache = getCache();
-    const configFileName = cache.configFileName;
-
-    if (configFileName && configFileName !== 'package.json') {
-      let rawBranchConfig: RenovateConfig | null = null;
-      try {
-        rawBranchConfig = await platform.getJsonFile(
-          configFileName,
-          config.repository,
-          baseBranch,
-        );
-      } catch (err) {
-        if (err instanceof ExternalHostError) {
-          throw err;
-        }
-        if (err.response?.statusCode === 404) {
-          logger.debug(
-            { baseBranch, configFileName },
-            'No branch-specific config file found, falling back to default branch config',
-          );
-        } else {
-          const error = new Error(CONFIG_VALIDATION);
-          error.validationSource = configFileName;
-          error.validationError = 'Error fetching config file';
-          error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
-          throw error;
-        }
-      }
-
-      if (rawBranchConfig) {
-        baseBranchConfig = await resolveAndMerge(
-          config,
-          rawBranchConfig,
-          configFileName,
-          baseBranch,
-        );
-        logger.debug({ baseBranch }, 'Applied branch-specific renovate config');
-      }
+  const usesBaseBranchConfig =
+    config.useBaseBranchConfig === 'merge' ||
+    config.useBaseBranchConfig === 'fallback';
+  if (usesBaseBranchConfig && baseBranch !== config.defaultBranch) {
+    const branchConfig = await readBaseBranchConfig(baseBranch, config);
+    if (branchConfig) {
+      baseBranchConfig = branchConfig;
     }
   }
 
