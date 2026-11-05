@@ -2286,11 +2286,10 @@ export async function preparePrPush({
 
   // GitHub may store a default body when none was passed, so only compare the body when one is passed
   // and treat a missing stored body like an empty one
-  if (
-    autoMergeRequest.commitHeadline === commitHeadline &&
-    (commitBody === undefined ||
-      (autoMergeRequest.commitBody ?? '') === commitBody)
-  ) {
+  const storedCommitBody = autoMergeRequest.commitBody ?? '';
+  const isBodyUnchanged =
+    commitBody === undefined || storedCommitBody === commitBody;
+  if (autoMergeRequest.commitHeadline === commitHeadline && isBodyUnchanged) {
     return;
   }
 
