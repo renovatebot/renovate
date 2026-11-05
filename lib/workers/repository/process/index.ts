@@ -95,7 +95,7 @@ async function readBaseBranchConfig(
   }
 
   let configFileRaw: string | null = null;
-  let fetchFailed = false;
+  let fetchError: Error | undefined;
   try {
     configFileRaw = await platform.getRawFile(
       configFileName,
@@ -110,26 +110,29 @@ async function readBaseBranchConfig(
       throw err;
     }
 
-    logger.debug(
-      { configFileName, baseBranch, err },
-      'Error fetching config file from base branch',
-    );
-    fetchFailed = !isNotFound(err);
+    if (!isNotFound(err)) {
+      fetchError = err;
+    }
   }
 
   if (configFileRaw === null) {
-    if (mode === 'merge-if-present' && !fetchFailed) {
+    if (fetchError) {
+      logger.error(
+        { configFileName, baseBranch, err: fetchError },
+        'Error fetching config file from base branch',
+      );
+    } else if (mode === 'merge-if-present') {
       logger.debug(
         { baseBranch, configFileName },
         'No branch-specific config file found, falling back to default branch config',
       );
       return null;
+    } else {
+      logger.error(
+        { configFileName, baseBranch },
+        `Config file not found on base branch - possible config name mismatch between branches?`,
+      );
     }
-
-    logger.error(
-      { configFileName, baseBranch },
-      `Error fetching config file from base branch - possible config name mismatch between branches?`,
-    );
 
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'config';

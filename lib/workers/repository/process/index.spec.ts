@@ -258,6 +258,10 @@ describe('workers/repository/process/index', () => {
       await expect(extractDependencies(config)).rejects.toThrow(
         CONFIG_VALIDATION,
       );
+      expect(logger.logger.error).toHaveBeenCalledWith(
+        { configFileName: 'renovate.json', baseBranch: 'master' },
+        'Config file not found on base branch - possible config name mismatch between branches?',
+      );
     });
 
     it.each`
@@ -482,17 +486,24 @@ describe('workers/repository/process/index', () => {
       });
 
       it('throws CONFIG_VALIDATION when fetching the config file fails for a reason other than not found', async () => {
-        platform.getRawFile.mockRejectedValueOnce(
-          Object.assign(new Error('Bad Request'), {
-            response: { statusCode: 400 },
-          }),
-        );
+        const error = Object.assign(new Error('Bad Request'), {
+          response: { statusCode: 400 },
+        });
+        platform.getRawFile.mockRejectedValueOnce(error);
         await expect(
           getBaseBranchConfig('postgresql/v18/dev', config),
         ).rejects.toMatchObject({
           message: CONFIG_VALIDATION,
           validationError: 'Error fetching config file',
         });
+        expect(logger.logger.error).toHaveBeenCalledWith(
+          {
+            configFileName: 'renovate.json',
+            baseBranch: 'postgresql/v18/dev',
+            err: error,
+          },
+          'Error fetching config file from base branch',
+        );
       });
 
       it.each`
