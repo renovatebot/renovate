@@ -33,8 +33,9 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     extractVersion: '^v(?<version>.*)$',
   },
   aube: {
-    datasource: 'npm',
-    packageName: '@endevco/aube',
+    datasource: 'github-releases',
+    packageName: 'aubepkg/aube',
+    extractVersion: '^v(?<version>.*)$',
     versioning: 'npm',
   },
   bazelisk: {

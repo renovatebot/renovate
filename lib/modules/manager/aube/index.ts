@@ -6,7 +6,7 @@ export { getRangeStrategy, updateDependency } from '../npm/index.ts';
 export { updateArtifacts } from './artifacts.ts';
 export { extractAllPackageFiles } from './extract.ts';
 
-export const url = 'https://github.com/jdx/aube';
+export const url = 'https://github.com/aubepkg/aube';
 export const categories: Category[] = ['js'];
 
 export const supersedesManagers = ['npm'];
