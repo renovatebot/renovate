@@ -693,7 +693,9 @@ export async function ensureDependencyDashboard(
       title: config.dependencyDashboardTitle!,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
-      labels: config.dependencyDashboardLabels,
+      labels: config.dependencyDashboardLabels?.map((label) =>
+        template.compile(label, config),
+      ),
       confidential: config.confidential,
     });
     // ensureIssue doesn't return the issue, so a newly created (or renamed)
