@@ -223,6 +223,13 @@ export async function readDashboardBody(
   Object.assign(config, dashboardChecks);
 }
 
+function needsDashboardApproval(branch: BranchConfig): boolean {
+  return (
+    !!branch.dependencyDashboardApproval ||
+    !!branch.dependencyDashboardPrApproval
+  );
+}
+
 function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
@@ -372,11 +379,7 @@ export async function ensureDependencyDashboard(
     config.dependencyDashboardApproval === true ||
     config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
       true ||
-    branches.some(
-      (branch) =>
-        !!branch.dependencyDashboardApproval ||
-        !!branch.dependencyDashboardPrApproval,
-    )
+    branches.some(needsDashboardApproval)
   )) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -426,7 +429,9 @@ export async function ensureDependencyDashboard(
                 replacementUpdate.newName,
               )
             );
-          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
+          const deprecationOrReplacement =
+            dep.deprecationMessage ?? hasAnyReplacement;
+          if (name && deprecationOrReplacement) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {

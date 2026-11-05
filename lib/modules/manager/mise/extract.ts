@@ -312,7 +312,8 @@ function getLtsDatasource(
   if (datasource) {
     return datasource;
   }
-  if ((backend === '' || backend === 'core') && toolName === 'java') {
+  const isCoreBackend = backend === '' || backend === 'core';
+  if (isCoreBackend && toolName === 'java') {
     return JavaVersionDatasource.id;
   }
   return undefined;

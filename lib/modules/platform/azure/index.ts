@@ -30,10 +30,11 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isServerError } from '../../../util/http/status.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type {
   BranchStatusConfig,
@@ -218,7 +219,7 @@ export async function getRawFile(
     if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
       throw new ExternalHostError(err, id);
     }
-    if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
+    if (isServerError(err)) {
       throw new ExternalHostError(err, id);
     }
     throw err;
@@ -294,7 +295,7 @@ export async function initRepo({
   const manualUrl = `${defaults.endpoint!}${encodeURIComponent(
     projectName,
   )}/_git/${encodeURIComponent(repoName)}`;
-  const url = repo.remoteUrl ?? manualUrl;
+  const url = parseUrl(repo.remoteUrl)?.toString() ?? manualUrl;
   await git.initRepo({
     ...config,
     url,
@@ -526,11 +527,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    statuses.every(
-      (status) =>
-        status.state === GitStatusState.Succeeded &&
-        status.context?.genre === 'renovate',
-    )
+    statuses.every((status) => {
+      const isInternal = status.context?.genre === 'renovate';
+      return status.state === GitStatusState.Succeeded && isInternal;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -751,20 +751,38 @@ export async function updatePr({
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
-  if (platformPrOptions?.autoApprove) {
+  if (
+    platformPrOptions?.autoApprove ||
+    platformPrOptions?.usePlatformAutomerge
+  ) {
     const pr = await azureApiGit.getPullRequestById(prNo, config.project);
-    await azureApiGit.createPullRequestReviewer(
-      {
-        reviewerUrl: pr.createdBy!.url,
-        vote: AzurePrVote.Approved,
-        isFlagged: false,
-        isRequired: false,
-      },
-      config.repoId,
-      // TODO #22198
-      pr.pullRequestId!,
-      pr.createdBy!.id!,
-    );
+    if (platformPrOptions.autoApprove) {
+      await azureApiGit.createPullRequestReviewer(
+        {
+          reviewerUrl: pr.createdBy!.url,
+          vote: AzurePrVote.Approved,
+          isFlagged: false,
+          isRequired: false,
+        },
+        config.repoId,
+        // TODO #22198
+        pr.pullRequestId!,
+        pr.createdBy!.id!,
+      );
+    }
+    // auto-complete keeps the merge commit message it was set with, so keep it in sync with the title
+    // only when Renovate set auto-complete, which it does with the PR creator's id
+    if (
+      platformPrOptions.usePlatformAutomerge &&
+      pr.autoCompleteSetBy?.id &&
+      pr.autoCompleteSetBy.id === pr.createdBy?.id &&
+      pr.completionOptions?.mergeCommitMessage !== title
+    ) {
+      objToUpdate.completionOptions = {
+        ...pr.completionOptions,
+        mergeCommitMessage: title,
+      };
+    }
   }
 
   const updatedPr = await azureApiGit.updatePullRequest(
@@ -806,10 +824,10 @@ export async function ensureComment({
   let commentNeedsUpdating = false;
   threads.forEach((thread) => {
     const firstCommentContent = thread.comments?.[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
+    const isMatchingComment = topic
+      ? firstCommentContent?.startsWith(header) === true
+      : firstCommentContent === body;
+    if (isMatchingComment) {
       threadIdFound = thread.id;
       commentIdFound = thread.comments?.[0].id;
       commentNeedsUpdating = firstCommentContent !== body;
@@ -1044,6 +1062,10 @@ export function massageMarkdown(input: string): string {
       // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
       // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
       .replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>')
+      // Azure DevOps reads the `#8203` inside the `&#8203;` entity as a mention of work item 8203,
+      // so the merge commit of a PR whose changelog has an escaped issue reference gets linked to it.
+      // Emit the zero-width space itself, which still stops issue auto-linking.
+      .replace(regEx(/&#8203;/g), '\u200B')
   );
 }
 
@@ -1100,14 +1122,16 @@ async function getUserIds(users: string[]): Promise<User[]> {
           reviewer = reviewer.replace(requiredReviewerPrefix, '');
           isRequired = true;
         }
+        const isMatchingIdentity =
+          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase();
         if (
-          (reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-            reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()) &&
+          isMatchingIdentity &&
           ids.filter((c) => c.id === m.identity?.id).length === 0
         ) {
           // TODO #22198
           ids.push({
-            id: m.identity.id!,
+            id: m.identity!.id!,
             name: reviewer,
             isRequired,
           });

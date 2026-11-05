@@ -49,13 +49,11 @@ export async function getLockedVersions(
               `${dep.depName}@${dep.currentValue}`
             ];
         }
-        if (
-          (dep.depType === 'engines' ||
-            dep.depType === 'packageManager' ||
-            dep.depType === 'devEngines.packageManager') &&
-          dep.depName === 'yarn' &&
-          !isYarn1
-        ) {
+        const isPackageManagerDepType =
+          dep.depType === 'engines' ||
+          dep.depType === 'packageManager' ||
+          dep.depType === 'devEngines.packageManager';
+        if (isPackageManagerDepType && dep.depName === 'yarn' && !isYarn1) {
           dep.packageName = '@yarnpkg/cli-dist';
         }
       }

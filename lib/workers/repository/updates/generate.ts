@@ -278,10 +278,11 @@ export function generateBranchConfig(
       }
     }
   }
+  const hasMultipleValuesWithoutVersion = !toVersions[0] && newValue.length > 1;
   const groupEligible =
     depNames.length > 1 ||
     toVersions.length > 1 ||
-    (!toVersions[0] && newValue.length > 1);
+    hasMultipleValuesWithoutVersion;
 
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
@@ -289,10 +290,10 @@ export function generateBranchConfig(
   const singleUpdateGroup =
     hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
   logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
-  const useGroupSettings =
-    hasGroupName &&
-    (groupEligible ||
-      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
+  const groupSingleUpdate =
+    singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true;
+  const isGroupUsable = groupEligible || groupSingleUpdate;
+  const useGroupSettings = hasGroupName && isGroupUsable;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -337,6 +338,8 @@ export function generateBranchConfig(
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
 
+    const isDigestUpgrade =
+      upgrade.isDigest === true || upgrade.isPinDigest === true;
     if (
       toVersions.length > 1 &&
       toValues.size > 1 &&
@@ -347,10 +350,7 @@ export function generateBranchConfig(
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
-    } else if (
-      newValue.length > 1 &&
-      (upgrade.isDigest || upgrade.isPinDigest)
-    ) {
+    } else if (newValue.length > 1 && isDigestUpgrade) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = upgrade.recreateWhen !== 'never';

@@ -41,7 +41,8 @@ function massageUpdateMetadata(config: BranchConfig): void {
       : 'tree/HEAD';
 
     const otherLinks = [];
-    if (sourceUrl && (!!sourceDirectory || homepage)) {
+    const hasSourceDirectoryOrHomepage = !!sourceDirectory || homepage;
+    if (sourceUrl && hasSourceDirectoryOrHomepage) {
       otherLinks.push(
         `[source](${getFullSourceUrl(sourceUrl, sourceRootPath, sourceDirectory)})`,
       );

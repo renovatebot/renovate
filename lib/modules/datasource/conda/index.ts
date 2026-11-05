@@ -3,6 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { coerceArray } from '../../../util/array.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { Timestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
@@ -80,7 +81,7 @@ export class CondaDatasource extends Datasource {
         result.releases.push(thisRelease);
       });
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+      if (err instanceof HttpError && !isNotFound(err)) {
         throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);

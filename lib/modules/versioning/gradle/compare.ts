@@ -39,10 +39,10 @@ function isLetter(char: string): boolean {
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
-  return (
-    (isDigit(prevChar) && isLetter(nextChar)) ||
-    (isLetter(prevChar) && isDigit(nextChar))
-  );
+  if (isDigit(prevChar) && isLetter(nextChar)) {
+    return true;
+  }
+  return isLetter(prevChar) && isDigit(nextChar);
 }
 
 export function tokenize(versionStr: string): Token[] | null {
@@ -280,10 +280,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   const preferredVal = matchGroups.preferredVal || null;
   const isVersionLeft = isString(leftVal) && isVersion(leftVal);
   const isVersionRight = isString(rightVal) && isVersion(rightVal);
-  if (
-    (leftVal !== null && !isVersionLeft) ||
-    (rightVal !== null && !isVersionRight)
-  ) {
+  const isInvalidLeft = leftVal !== null && !isVersionLeft;
+  const isInvalidRight = rightVal !== null && !isVersionRight;
+  if (isInvalidLeft || isInvalidRight) {
     return null;
   }
 
