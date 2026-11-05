@@ -7,6 +7,7 @@ import type {
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { collectSharedConstraints } from '../extract/shared-constraints.ts';
 import { flattenUpdates } from './flatten.ts';
 import { generateBranchConfig } from './generate.ts';
 
@@ -41,6 +42,7 @@ export async function branchifyUpgrades(
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
+  const sharedConstraints = collectSharedConstraints(packageFiles);
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({
@@ -75,7 +77,10 @@ export async function branchifyUpgrades(
       })
       .reverse();
 
-    const branch = generateBranchConfig(branchUpgrades[branchName]);
+    const branch = generateBranchConfig(
+      branchUpgrades[branchName],
+      sharedConstraints,
+    );
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
     branches.push(branch);

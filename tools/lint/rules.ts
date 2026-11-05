@@ -30,6 +30,7 @@ import preferParserPipe from './rules/prefer-parser-pipe.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
 import preferResolveToolConstraint from './rules/prefer-resolve-tool-constraint.ts';
 import preferStubEnv from './rules/prefer-stub-env.ts';
+import preferVersioningHelpers from './rules/prefer-versioning-helpers.ts';
 import requireBuildCacheKey from './rules/require-build-cache-key.ts';
 import requireCachePrivacy from './rules/require-cache-privacy.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
@@ -77,6 +78,7 @@ export default definePlugin({
     'prefer-partial-in-specs': preferPartialInSpecs,
     'prefer-resolve-tool-constraint': preferResolveToolConstraint,
     'prefer-stub-env': preferStubEnv,
+    'prefer-versioning-helpers': preferVersioningHelpers,
     'require-build-cache-key': requireBuildCacheKey,
     'require-cache-privacy': requireCachePrivacy,
     'require-regex-util': requireRegexUtil,

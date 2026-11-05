@@ -2,9 +2,14 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import {
+  CONFIG_VALIDATION,
+  PlatformErrors,
+  TemporaryErrors,
+} from '../../../constants/error-messages.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { ATTR_RENOVATE_SPLIT } from '../../../instrumentation/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
@@ -51,6 +56,13 @@ async function resolveAndMerge(
   return result;
 }
 
+function isPlatformOrTemporaryError(message: unknown): boolean {
+  return (
+    (PlatformErrors as readonly unknown[]).includes(message) ||
+    (TemporaryErrors as readonly unknown[]).includes(message)
+  );
+}
+
 export async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig,
@@ -73,14 +85,29 @@ export async function getBaseBranchConfig(
     // TODO: types (#22198)
     const configFileName = cache.configFileName!;
 
+    let configFileRaw: string | null;
     try {
-      baseBranchConfig = await platform.getJsonFile(
+      configFileRaw = await platform.getRawFile(
         configFileName,
         config.repository,
         baseBranch,
       );
-      logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
-    } catch {
+    } catch (err) {
+      if (
+        err instanceof ExternalHostError ||
+        isPlatformOrTemporaryError(err.message)
+      ) {
+        throw err;
+      }
+
+      logger.debug(
+        { configFileName, baseBranch, err },
+        'Error fetching config file from base branch',
+      );
+      configFileRaw = null;
+    }
+
+    if (configFileRaw === null) {
       logger.error(
         { configFileName, baseBranch },
         `Error fetching config file from base branch - possible config name mismatch between branches?`,
@@ -92,6 +119,20 @@ export async function getBaseBranchConfig(
       error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
       throw error;
     }
+
+    const parseResult = parseFileConfig(
+      configFileName,
+      configFileRaw.length ? configFileRaw : '{}',
+    );
+    if (!parseResult.success) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = configFileName;
+      error.validationError = `The renovate configuration file of branch ${baseBranch} could not be parsed: ${parseResult.validationError}`;
+      error.validationMessage = parseResult.validationMessage;
+      throw error;
+    }
+    baseBranchConfig = parseResult.parsedContents as RenovateConfig;
+    logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
 
     baseBranchConfig = await resolveAndMerge(
       config,

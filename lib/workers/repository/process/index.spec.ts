@@ -2,7 +2,12 @@ import type { RenovateConfig } from '~test/util.ts';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_BAD_CREDENTIALS,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  REPOSITORY_CHANGED,
+} from '../../../constants/error-messages.ts';
 import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -89,7 +94,7 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
-      expect(platform.getJsonFile).not.toHaveBeenCalledExactlyOnceWith(
+      expect(platform.getRawFile).not.toHaveBeenCalledExactlyOnceWith(
         'renovate.json',
         undefined,
         'dev',
@@ -156,9 +161,9 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi
+      platform.getRawFile = vi
         .fn()
-        .mockResolvedValue({ extends: [':approveMajorUpdates'] });
+        .mockResolvedValue('{"extends": [":approveMajorUpdates"]}');
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
@@ -169,7 +174,7 @@ describe('workers/repository/process/index', () => {
         packageFiles: undefined,
       });
 
-      expect(platform.getJsonFile).toHaveBeenCalledWith(
+      expect(platform.getRawFile).toHaveBeenCalledWith(
         'renovate.json',
         undefined,
         'dev',
@@ -180,11 +185,13 @@ describe('workers/repository/process/index', () => {
 
     it('throws if base branch config is invalid', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi.fn().mockResolvedValue({
-        extends: [':approveMajorUpdates'],
-        labels: '123',
-        invalidKey: 'invalidValue',
-      });
+      platform.getRawFile = vi.fn().mockResolvedValue(
+        JSON.stringify({
+          extends: [':approveMajorUpdates'],
+          labels: '123',
+          invalidKey: 'invalidValue',
+        }),
+      );
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
@@ -195,13 +202,13 @@ describe('workers/repository/process/index', () => {
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi
+      platform.getRawFile = vi
         .fn()
         .mockImplementation((fileName, repoName, branchName) => {
           if (branchName === 'dev') {
             throw new Error();
           }
-          return {};
+          return '{}';
         });
       getCache().configFileName = 'renovate.json';
       config.baseBranchPatterns = ['master', 'dev'];
@@ -212,6 +219,64 @@ describe('workers/repository/process/index', () => {
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
+
+    it('treats an empty base branch config file as empty config', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getRawFile = vi.fn().mockResolvedValue('');
+      getCache().configFileName = 'renovate.json';
+      config.baseBranchPatterns = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+    });
+
+    it('throws CONFIG_VALIDATION with the parse error if base branch config file is invalid JSON', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getRawFile = vi.fn().mockResolvedValue('{"extends": [');
+      getCache().configFileName = 'renovate.json';
+      config.baseBranchPatterns = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      await expect(extractDependencies(config)).rejects.toMatchObject({
+        message: CONFIG_VALIDATION,
+        validationSource: 'renovate.json',
+        validationError:
+          'The renovate configuration file of branch master could not be parsed: Invalid JSON (parsing failed)',
+        validationMessage: 'Syntax error: unclosed statement near xtends": [',
+      });
+    });
+
+    it('throws CONFIG_VALIDATION if base branch config file is not found', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getRawFile = vi.fn().mockResolvedValue(null);
+      getCache().configFileName = 'renovate.json';
+      config.baseBranchPatterns = ['master', 'dev'];
+      config.useBaseBranchConfig = 'merge';
+      await expect(extractDependencies(config)).rejects.toThrow(
+        CONFIG_VALIDATION,
+      );
+    });
+
+    it.each`
+      error
+      ${new ExternalHostError(new Error('server error'), 'github')}
+      ${new Error(PLATFORM_RATE_LIMIT_EXCEEDED)}
+      ${new Error(PLATFORM_BAD_CREDENTIALS)}
+      ${new Error(REPOSITORY_CHANGED)}
+    `(
+      'rethrows $error.message when fetching base branch config',
+      async ({ error }) => {
+        scm.branchExists.mockResolvedValue(true);
+        platform.getRawFile = vi.fn().mockRejectedValue(error);
+        getCache().configFileName = 'renovate.json';
+        config.baseBranchPatterns = ['master', 'dev'];
+        config.useBaseBranchConfig = 'merge';
+        await expect(extractDependencies(config)).rejects.toBe(error);
+      },
+    );
 
     it('processes baseBranchPatterns dryRun extract', async () => {
       extract.mockResolvedValue(partial<Record<string, PackageFile[]>>());
@@ -352,15 +417,15 @@ describe('workers/repository/process/index', () => {
 
     it('does not attempt branch-specific config fetch when useBaseBranchConfig=merge', async () => {
       getCache().configFileName = 'renovate.json';
-      platform.getJsonFile.mockResolvedValueOnce({});
+      platform.getRawFile.mockResolvedValueOnce('{}');
       const res = await getBaseBranchConfig('feature', {
         ...config,
         defaultBranch: 'main',
         useBaseBranchConfig: 'merge',
       });
       expect(res.baseBranch).toBe('feature');
-      expect(platform.getRawFile).not.toHaveBeenCalled();
-      expect(platform.getJsonFile).toHaveBeenCalledOnce();
+      expect(platform.getJsonFile).not.toHaveBeenCalled();
+      expect(platform.getRawFile).toHaveBeenCalledOnce();
     });
 
     describe('useBaseBranchConfig=fallback', () => {

@@ -129,6 +129,8 @@ export interface BranchUpgradeConfig
   sourceRepoName?: string;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /** The constraints which other managers share for the directory of the package file, see `ToolConstraintsConfig` */
+  sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =

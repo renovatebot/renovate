@@ -2,7 +2,10 @@ import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { GolangVersionDatasource } from '../../datasource/golang-version/index.ts';
-import { parseVersionCommit } from '../../versioning/gomod/index.ts';
+import {
+  isPlaceholderPseudoVersion,
+  parseVersionCommit,
+} from '../../versioning/gomod/index.ts';
 import { isVersion } from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 import type { GoModManagerData } from './types.ts';
@@ -28,17 +31,6 @@ const toolRegex = regEx(/^(?<keyword>tool)?\s+(?<module>[^\s]+\/?[^\s]+)\s*$/);
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
-
-// Go writes this version for a module whose `replace` directive points to a
-// local path, with the major version of the module path, such as
-// `v2.0.0-00010101000000-000000000000` for a `/v2` module
-const placeholderPseudoVersionRegex = regEx(
-  /^v\d+\.\d+\.\d+-00010101000000-000000000000$/,
-);
-
-function isPlaceholderPseudoVersion(version: string): boolean {
-  return placeholderPseudoVersionRegex.test(version);
-}
 
 export function parseLine(
   input: string,

@@ -56,6 +56,19 @@ export function parseVersionCommit(version: string): VersionCommit | null {
   return { timestamp: groups.timestamp, revision: groups.revision };
 }
 
+/**
+ * Whether the version is the placeholder which Go writes for a module that is
+ * replaced by a local path, so it does not refer to a real commit. It is a
+ * pseudo-version with a zero timestamp and revision for the major version of
+ * the module path, such as `v2.0.0-00010101000000-000000000000` for a `/v2`
+ * module.
+ */
+export function isPlaceholderPseudoVersion(version: string): boolean {
+  return (
+    isPseudoVersion(version) && version.endsWith('-00010101000000-000000000000')
+  );
+}
+
 export const api: VersioningApi = { ...semver };
 
 export default api;

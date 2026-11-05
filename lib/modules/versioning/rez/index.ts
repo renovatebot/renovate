@@ -143,7 +143,12 @@ function getNewValue({
   rangeStrategy,
   currentVersion,
   newVersion,
+  isReplacement,
 }: NewValueConfig): string | null {
+  if (isReplacement) {
+    return newVersion;
+  }
+
   const precisionMatchedVersion = matchVersionPrecision(
     currentValue,
     newVersion,
