@@ -28,7 +28,7 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
     passesMinimumReleaseAge: minPublishAgeRustRange,
     readsConfiguredAge: minPublishAgeRustRange,
     enforcedInLockFile: minPublishAgeRustRange,
-    note: 'Only with `minimumReleaseAgePackageManagerSync`. Sets `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` to the `minimumReleaseAge` of the repository or manager config, unless cargo applies the same age itself. Reads `registry.global-min-publish-age` and `registries.<name>.min-publish-age` from the repository `.cargo/config`, or `.cargo/config.toml`. Renovate relies on the enforcement only with `RENOVATE_X_CARGO_MIN_PUBLISH_AGE`, a Rust constraint of at least 1.100.0, no git sources in the lock file, and no per-registry `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.',
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, sets `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` and reads `.cargo/config.toml`, see [Cargo](#cargo).',
   },
 };
 
