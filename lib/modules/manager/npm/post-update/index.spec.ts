@@ -884,6 +884,24 @@ describe('modules/manager/npm/post-update/index', () => {
       );
     });
 
+    it('adds the minimum release age notice', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: '{}',
+        minimumReleaseAgeNotice: 'some notice',
+      });
+      fs.readLocalFile.mockResolvedValue('');
+
+      const res = await getAdditionalFiles(
+        { ...updateConfig, reuseExistingBranch: true },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        { file: 'package-lock.json', message: 'some notice' },
+      ]);
+    });
+
     it('adds artifact notice on beforeFallback', async () => {
       spyNpm.mockResolvedValueOnce({
         error: false,
