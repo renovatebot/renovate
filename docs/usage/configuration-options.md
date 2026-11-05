@@ -3107,6 +3107,33 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgePackageManager`
+
+Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
+Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
+
+Renovate passes the value to these package managers:
+
+- Poetry, as `POETRY_SOLVER_MIN_RELEASE_AGE`
+
+Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
+
+This option does not change when Renovate raises an update.
+You can only set it at the top level of a config or in a manager's config, not in `packageRules`, because the package manager applies one value to the whole lock file.
+Security updates pass no minimum release age to the package manager.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "poetry": {
+    "minimumReleaseAgePackageManager": "7 days"
+  }
+}
+```
+
+A smaller `minimumReleaseAge` of an update, for example from `packageRules`, wins over `minimumReleaseAgePackageManager` for the update's branch, but not over the minimum release age configured in the package manager itself.
+
 ## `minimumReleaseAgePackageManagerSync`
 
 This is a feature flag to opt early into the new `minimumReleaseAge` behavior, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
@@ -3117,6 +3144,7 @@ With `minimumReleaseAgePackageManagerSync=true`, Renovate:
 
 - applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
 - does not hold back lock file maintenance if the package manager enforces the minimum release age itself
+- applies [`minimumReleaseAgePackageManager`](#minimumreleaseagepackagemanager)
 
 Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
 

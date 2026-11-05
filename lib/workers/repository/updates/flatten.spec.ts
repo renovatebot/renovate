@@ -509,20 +509,65 @@ describe('workers/repository/updates/flatten', () => {
       ]);
     });
 
-    it('ignores minimumReleaseAgePackageManagerSync of rules', async () => {
+    it('passes minimumReleaseAgePackageManager of the manager config', async () => {
+      config.minimumReleaseAgePackageManager = '1 day';
       // @ts-expect-error -- managers are not defined on RenovateConfig
-      config.npm = { minimumReleaseAgePackageManagerSync: true };
+      config.npm = { minimumReleaseAgePackageManager: '7 days' };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+        cargo: [
+          {
+            packageFile: 'Cargo.toml',
+            deps: [
+              {
+                depName: 'bar',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgePackageManager: '7 days' },
+        { depName: 'bar', minimumReleaseAgePackageManager: '1 day' },
+      ]);
+    });
+
+    it('ignores minimumReleaseAgePackageManager and minimumReleaseAgePackageManagerSync of rules', async () => {
+      // @ts-expect-error -- managers are not defined on RenovateConfig
+      config.npm = {
+        minimumReleaseAgePackageManager: '3 days',
+        minimumReleaseAgePackageManagerSync: true,
+      };
       config.packageRules = [
         {
           matchPackageNames: ['*'],
+          minimumReleaseAgePackageManager: '14 days',
           minimumReleaseAgePackageManagerSync: false,
         },
       ];
       config.lockFileMaintenance = {
         enabled: true,
+        minimumReleaseAgePackageManager: '7 days',
         minimumReleaseAgePackageManagerSync: false,
       };
       config.vulnerabilityAlerts = {
+        minimumReleaseAgePackageManager: '7 days',
         minimumReleaseAgePackageManagerSync: false,
       };
       config.remediations = {
@@ -549,14 +594,20 @@ describe('workers/repository/updates/flatten', () => {
       const res = await flattenUpdates(config, packageFiles);
 
       expect(res).toMatchObject([
-        { depName: 'foo', minimumReleaseAgePackageManagerSync: true },
+        {
+          depName: 'foo',
+          minimumReleaseAgePackageManager: '3 days',
+          minimumReleaseAgePackageManagerSync: true,
+        },
         {
           isLockFileMaintenance: true,
+          minimumReleaseAgePackageManager: '3 days',
           minimumReleaseAgePackageManagerSync: true,
         },
         {
           depName: 'bar',
           isRemediation: true,
+          minimumReleaseAgePackageManager: '3 days',
           minimumReleaseAgePackageManagerSync: true,
         },
       ]);
