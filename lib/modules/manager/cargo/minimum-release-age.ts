@@ -1,7 +1,6 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { escape as escapeGlob } from 'minimatch';
 import { logger } from '../../../logger/index.ts';
-import { getEnv } from '../../../util/env.ts';
 import {
   calculateMinimumReleaseAgeMs,
   calculatePackageManagerMinimumReleaseAgeMs,
@@ -335,14 +334,11 @@ function registriesEnforceMinimumReleaseAge(
 /**
  * Whether cargo enforces the minimum release age when it regenerates the lock file.
  *
- * Requires `RENOVATE_X_CARGO_MIN_PUBLISH_AGE`, a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, and that no registry of the cargo config has a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
+ * Requires a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, and that no registry of the cargo config has a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
  */
 export async function enforcesMinimumReleaseAge(
   config: CargoEnforcesMinimumReleaseAgeConfig,
 ): Promise<boolean> {
-  if (!getEnv().RENOVATE_X_CARGO_MIN_PUBLISH_AGE) {
-    return false;
-  }
   if (config.managerData?.lockFileHasGitSources) {
     logger.debug(
       'Cargo does not enforce the minimum release age, as the lock file has packages from git repositories, which cargo updates without checking their age',

@@ -639,18 +639,6 @@ describe('modules/manager/cargo/minimum-release-age', () => {
   });
 
   describe('enforcesMinimumReleaseAge()', () => {
-    beforeEach(() => {
-      vi.stubEnv('RENOVATE_X_CARGO_MIN_PUBLISH_AGE', 'true');
-    });
-
-    it('returns false without RENOVATE_X_CARGO_MIN_PUBLISH_AGE', async () => {
-      vi.stubEnv('RENOVATE_X_CARGO_MIN_PUBLISH_AGE', undefined);
-
-      await expect(
-        enforcesMinimumReleaseAge({ constraints: { rust: '1.100.0' } }),
-      ).resolves.toBe(false);
-    });
-
     it.each`
       constraint              | expected
       ${'1.100.0'}            | ${true}
