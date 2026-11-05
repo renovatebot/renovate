@@ -352,14 +352,6 @@ export class UvProcessor extends BasePyProjectProcessor {
  * looked up, or to whichever version `uv` resolves when it cannot be pinned.
  */
 function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
-  // Only a vulnerability fix needs a version of its own, to honour
-  // `vulnerabilityFixStrategy`. A routine update has no reason to hold `uv` to
-  // one, and pinning could fail to resolve, or move a package which another
-  // dependency of the update constrains.
-  if (!dep.isVulnerabilityAlert) {
-    return dep.packageName!;
-  }
-
   // A package the lock file holds more than once, e.g. at a version per
   // resolution marker, can only be upgraded without a version: `uv` reads a
   // pinned one as a constraint on every marker, so it would downgrade the
@@ -400,8 +392,10 @@ function generateCMD(updatedDeps: Upgrade<Pep621ManagerData>[]): string {
       }
       case depTypes.buildSystemRequires:
         // A build requirement is not locked, unless something depends on it at
-        // runtime as well, in which case the lock holds a version to update.
-        if (dep.lockedVersion) {
+        // runtime as well. Only a vulnerability fix has a reason to move that
+        // locked copy: a routine bump of the requirement leaves it alone, as
+        // it always has.
+        if (dep.isVulnerabilityAlert && dep.lockedVersion) {
           deps.push(pinnedUpgrade(dep));
         }
         break;

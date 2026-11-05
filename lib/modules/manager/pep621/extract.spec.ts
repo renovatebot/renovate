@@ -837,6 +837,12 @@ describe('modules/manager/pep621/extract', () => {
         version = 1
         requires-python = ">=3.11"
 
+        [manifest]
+        members = [
+            "pkg-a",
+            "workspace-root",
+        ]
+
         [[package]]
         name = "attrs"
         version = "24.2.0"

@@ -1,4 +1,3 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { coerceArray } from '../../../util/array.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -332,8 +331,11 @@ export const UvLockfile = Toml.pipe(
     // Only a workspace member declares its dependencies in a `pyproject.toml`
     // of its own. A git, path or url package also has no registry, but what it
     // depends on is as transitive as anything else in the lock file.
+    // A workspace names its members, and the root is the lock file's own
+    // directory. An editable path dependency outside the workspace carries a
+    // path of its own, and what it pulls in is as transitive as anything else.
     const workspacePath = source?.virtual ?? source?.editable;
-    if (members.has(name) || isNonEmptyString(workspacePath)) {
+    if (members.has(name) || workspacePath === '.') {
       for (const group of [
         pkg.dependencies,
         ...Object.values(coerceObject(pkg['optional-dependencies'])),

@@ -943,14 +943,14 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
-    it('does not pin a routine upgrade of a build requirement', async () => {
+    it('leaves the lock file alone on a routine upgrade of a build requirement', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
       fs.readLocalFile.mockResolvedValueOnce('test content');
       fs.readLocalFile.mockResolvedValueOnce('changed test content');
 
-      // no vulnerability to fix, so `uv` is free to resolve the version
+      // no vulnerability to fix, so the locked copy is left as it is
       const updatedDeps = [
         {
           packageName: 'setuptools',
@@ -969,9 +969,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
 
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'uv lock --upgrade-package setuptools' },
-      ]);
+      expect(execSnapshots).toMatchObject([{ cmd: 'uv lock ' }]);
     });
 
     it('does not pin the upgrade of a transitive dep locked at several versions', async () => {
