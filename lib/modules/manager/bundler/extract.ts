@@ -9,6 +9,7 @@ import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
 import { extractLockFileEntries } from './locked-version.ts';
+import type { BundlerManagerData } from './types.ts';
 
 function formatContent(input: string): string {
   return `${input.replace(regEx(/^ {2}/), '')}\n`; //remove leading whitespace and add a new line at the end
@@ -31,17 +32,17 @@ const pathMatchRegex = regEx(`path:\\s*['"](?<path>[^'"]+)['"]`);
 export async function extractPackageFile(
   content: string,
   packageFile?: string,
-): Promise<PackageFileContent | null> {
+): Promise<PackageFileContent<BundlerManagerData> | null> {
   let lineNumber: number;
   async function processGroupBlock(
     line: string,
     repositoryUrl?: string,
     trimGroupLine = false,
   ): Promise<void> {
-    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
+    const groupMatch = regEx(/^group\s+(?<groups>.*?)\s+do/).exec(line);
     if (groupMatch) {
-      const depTypes = groupMatch[1]
-        .split(',')
+      const depTypes = groupMatch
+        .groups!.groups.split(',')
         .map((group) => group.trim())
         .map((group) => group.replace(regEx(/^:/), ''));
 
@@ -78,7 +79,7 @@ export async function extractPackageFile(
               depTypes,
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + groupLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + groupLineNumber + 1,
               },
             };
             if (repositoryUrl) {
@@ -90,7 +91,7 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFileContent = {
+  const res: PackageFileContent<BundlerManagerData> = {
     registryUrls: [],
     deps: [],
   };
@@ -131,16 +132,14 @@ export async function extractPackageFile(
     }
 
     const variableMatch = variableMatchRegex.exec(line);
-    if (variableMatch) {
-      if (variableMatch.groups?.key) {
-        variables[variableMatch.groups?.key] = variableMatch.groups?.value;
-      }
+    if (variableMatch?.groups?.key) {
+      variables[variableMatch.groups?.key] = variableMatch.groups?.value;
     }
 
     const gemMatch = gemMatchRegex.exec(line)?.groups;
 
     if (gemMatch) {
-      const dep: PackageDependency = {
+      const dep: PackageDependency<BundlerManagerData> = {
         depName: gemMatch.depName,
         managerData: { lineNumber },
         datasource: RubygemsDatasource.id,
@@ -172,9 +171,10 @@ export async function extractPackageFile(
           dep.packageName = gitUrl;
 
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
-        } else if (gitRefsMatch.repoName) {
+        } else {
+          // we always have repoName, as `gitRefsMatchRegex`'s first group requires either `gitUrl` or `repoName`
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
           dep.sourceUrl = dep.packageName;
         }
@@ -201,10 +201,11 @@ export async function extractPackageFile(
         if (sourceBlockMatch.groups?.registryUrl) {
           repositoryUrl = sourceBlockMatch.groups.registryUrl;
         }
-        if (sourceBlockMatch.groups?.sourceName) {
-          if (variables[sourceBlockMatch.groups.sourceName]) {
-            repositoryUrl = variables[sourceBlockMatch.groups.sourceName];
-          }
+        if (
+          sourceBlockMatch.groups?.sourceName &&
+          variables[sourceBlockMatch.groups.sourceName]
+        ) {
+          repositoryUrl = variables[sourceBlockMatch.groups.sourceName];
         }
         const sourceLineNumber = lineNumber;
         let sourceContent = '';
@@ -238,14 +239,14 @@ export async function extractPackageFile(
               registryUrls: [repositoryUrl],
               managerData: {
                 lineNumber:
-                  Number(dep.managerData?.lineNumber) + sourceLineNumber + 1,
+                  (dep.managerData?.lineNumber ?? NaN) + sourceLineNumber + 1,
               },
             })),
           );
         }
       }
     }
-    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line);
+    const platformsMatch = regEx(/^platforms\s+(?:.*?)\s+do/).test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -272,13 +273,13 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + platformsLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + platformsLineNumber + 1,
             },
           })),
         );
       }
     }
-    const ifMatch = regEx(/^if\s+(.*?)/).test(line);
+    const ifMatch = regEx(/^if\s+(?:.*?)/).test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
@@ -305,7 +306,7 @@ export async function extractPackageFile(
             ...dep,
             managerData: {
               lineNumber:
-                Number(dep.managerData?.lineNumber) + ifLineNumber + 1,
+                (dep.managerData?.lineNumber ?? NaN) + ifLineNumber + 1,
             },
           })),
         );

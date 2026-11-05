@@ -89,8 +89,12 @@ export function extractRepository(
 
 export function extractContainer(
   container: Container,
+  config: ExtractConfig,
 ): PackageDependency | null {
-  const dep = getDep(container.image);
+  const dep = getDep(container.image, {
+    registryAliases: config.registryAliases,
+    depType: 'docker',
+  });
   logger.debug(
     {
       depName: dep.depName,
@@ -99,7 +103,6 @@ export function extractContainer(
     },
     'Azure pipelines docker image',
   );
-  dep.depType = 'docker';
 
   return dep;
 }
@@ -125,18 +128,16 @@ export function parseAzurePipelines(
   const res = AzurePipelinesYaml.safeParse(content);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug(
-      { err: res.error, packageFile },
-      'Error parsing pubspec lockfile.',
-    );
   }
+  logger.debug(
+    { err: res.error, packageFile },
+    'Error parsing pubspec lockfile.',
+  );
+
   return null;
 }
 
-function extractSteps(
-  steps: Step[] | undefined,
-): PackageDependency<Record<string, any>>[] {
+function extractSteps(steps: Step[] | undefined): PackageDependency[] {
   const deps = [];
   for (const step of coerceArray(steps)) {
     const task = extractAzurePipelinesTasks(step.task);
@@ -199,7 +200,8 @@ export function extractPackageFile(
   }
 
   for (const container of coerceArray(pkg.resources?.containers)) {
-    const dep = extractContainer(container);
+    const dep = extractContainer(container, config);
+    // v8 ignore else -- `extractContainer()` always returns a dep
     if (dep) {
       deps.push(dep);
     }

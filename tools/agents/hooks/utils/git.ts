@@ -3,9 +3,12 @@ import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git';
 const config: Partial<SimpleGitOptions> = {
   completion: { onClose: true, onExit: false },
   config: ['core.quotePath=false'],
+  // simple-git v4 rejects guarded variables (`PAGER`, `GIT_*`, ...) passed via `.env()` unless allowed
+  allowEnvironment: Object.keys(process.env),
   unsafe: {
     allowUnsafePager: true,
     allowUnsafeEditor: true,
+    allowUnsafeAskPass: true, // set by vscode
   },
 };
 
@@ -25,7 +28,10 @@ export async function getRepoRoot(dir?: string): Promise<string | null> {
   }
 }
 
-async function getBaseRef(): Promise<string> {
+/**
+ * Returns the merge base with `origin/main`, else the upstream branch, else `HEAD`.
+ */
+export async function getBaseRef(): Promise<string> {
   try {
     const out = await git.raw(['merge-base', 'origin/main', 'HEAD']);
     if (out.trim()) {
@@ -51,9 +57,26 @@ async function getBaseRef(): Promise<string> {
   return 'HEAD';
 }
 
-export async function getChangedFiles(): Promise<string[]> {
-  const baseRef = await getBaseRef();
-  const out = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
+/**
+ * Returns the files added, copied, modified or renamed since `baseRef`, and the untracked files that are not ignored.
+ */
+export async function getChangedFiles(baseRef: string): Promise<string[]> {
+  const diff = await git.diff(['--name-only', '--diff-filter=ACMR', baseRef]);
+  const untracked = await git.raw([
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+    '--full-name',
+  ]);
+  const files = `${diff}\n${untracked}`.split('\n').filter((f) => f.length > 0);
+  return [...new Set(files)];
+}
+
+/**
+ * Returns the files deleted since `baseRef`.
+ */
+export async function getDeletedFiles(baseRef: string): Promise<string[]> {
+  const out = await git.diff(['--name-only', '--diff-filter=D', baseRef]);
   return out
     .trim()
     .split('\n')

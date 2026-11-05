@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { api as gradleVersioning } from '../../versioning/gradle/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -48,14 +49,34 @@ export function isDependencyString(input: string): boolean {
 
   const [groupId, artifactId, version, classifier] = parts;
 
+  const isValidClassifier = !classifier || artifactRegex.test(classifier);
+
   return !!(
     groupId &&
     artifactId &&
     version &&
     artifactRegex.test(groupId) &&
     artifactRegex.test(artifactId) &&
-    (!classifier || artifactRegex.test(classifier)) &&
+    isValidClassifier &&
     version === versionLikeSubstring(version)
+  );
+}
+
+// Matches the `group:artifact` notation used by dependencies whose version is
+// declared separately, e.g. inside a rich version constraint block
+export function isGroupArtifactString(input: string): boolean {
+  const parts = input.split(':');
+  if (parts.length !== 2) {
+    return false;
+  }
+
+  const [groupId, artifactId] = parts;
+
+  return !!(
+    groupId &&
+    artifactId &&
+    artifactRegex.test(groupId) &&
+    artifactRegex.test(artifactId)
   );
 }
 
@@ -194,7 +215,7 @@ export function updateVars(
   dir: string,
   newVars: PackageVariables,
 ): void {
-  const oldVars = registry[dir] ?? {};
+  const oldVars = coerceObject(registry[dir]);
   registry[dir] = { ...oldVars, ...newVars };
 }
 
@@ -209,7 +230,7 @@ export function updateVarsFromDefaultCatalog(
   }
 
   const rootDir = upath.dirname(dir);
-  const oldVars = registry[rootDir] ?? {};
+  const oldVars = coerceObject(registry[rootDir]);
   let defaultLibsExtName = 'libs';
   if (
     oldVars.defaultLibrariesExtensionName?.packageFile &&

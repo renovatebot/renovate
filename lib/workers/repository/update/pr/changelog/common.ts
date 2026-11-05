@@ -1,7 +1,7 @@
 import _slugify from 'slugify';
 import { regEx } from '../../../../../util/regex.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 export function slugifyUrl(url: string): string {
   const r = regEx(/[:/.]+/g);
@@ -36,15 +36,16 @@ export function slugifyUrl(url: string): string {
  */
 export function compareChangelogFilePath(a: string, b: string): number {
   const preferedChangelogRegexList = [
-    /\.(?:md|markdown|mkd)$/i,
-    /\.(?:txt|text)$/i,
+    regEx(/\.(?:md|markdown|mkd)$/i),
+    regEx(/\.(?:txt|text)$/i),
   ];
 
   const aPreferedIndex = preferedChangelogRegexList.findIndex((f) => f.test(a));
   const bPreferedIndex = preferedChangelogRegexList.findIndex((f) => f.test(b));
   if (aPreferedIndex === bPreferedIndex) {
     return a.localeCompare(b);
-  } else if (aPreferedIndex >= 0 && bPreferedIndex >= 0) {
+  }
+  if (aPreferedIndex >= 0 && bPreferedIndex >= 0) {
     return aPreferedIndex - bPreferedIndex;
   }
   return aPreferedIndex >= 0 ? -1 : 1;

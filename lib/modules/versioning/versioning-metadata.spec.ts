@@ -1,15 +1,17 @@
-import { readdirSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import { readFile } from 'fs-extra';
 import { z } from 'zod/v4';
 import { markdownLinkRegex } from './common.ts';
 
-describe('modules/versioning/versioning-metadata', () => {
-  const allVersioning = readdirSync('lib/modules/versioning', {
+const allVersioning = (
+  await readdir('lib/modules/versioning', {
     withFileTypes: true,
   })
-    .filter((item) => item.isDirectory())
-    .map((item) => item.name);
+)
+  .filter((item) => item.isDirectory())
+  .map((item) => item.name);
 
+describe('modules/versioning/versioning-metadata', () => {
   describe.each(allVersioning)('%s', (versioning) => {
     it('readme with no h1 or h2 markdown headers', async () => {
       let readme = '';

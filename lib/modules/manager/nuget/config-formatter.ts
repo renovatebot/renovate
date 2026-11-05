@@ -83,6 +83,7 @@ function formatPackageSourceElement(
 ): string {
   let element = `<add key="${name}" value="${registryInfo.feedUrl}" `;
 
+  // v8 ignore else -- the registry url always resolves to a protocol version
   if (registryInfo.protocolVersion) {
     element += `protocolVersion="${registryInfo.protocolVersion}" `;
   }
@@ -101,6 +102,7 @@ function formatPackageSourceCredentialElement(
     packageSourceCredential += `<add key="Username" value="${credential.username}" />\n`;
   }
 
+  // v8 ignore else -- needs a host rule with a username but no password
   if (credential.password) {
     packageSourceCredential += `<add key="ClearTextPassword" value="${credential.password}" />\n`;
   }

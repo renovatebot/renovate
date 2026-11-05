@@ -36,11 +36,10 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
     const newVal = newTuple[idx];
 
     let leadingDigit = false;
-    if (oldVal !== 0 || newVal !== 0) {
-      if (leadingZero) {
-        leadingZero = false;
-        leadingDigit = true;
-      }
+    const isNonZero = oldVal !== 0 || newVal !== 0;
+    if (isNonZero && leadingZero) {
+      leadingZero = false;
+      leadingDigit = true;
     }
 
     if (leadingDigit && newVal > oldVal) {
@@ -58,7 +57,7 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
 }
 
 function stripV(value: string): string {
-  return value.replace(/^v/, '');
+  return value.replace(regEx(/^v/), '');
 }
 
 function satisfiesRange(version: string, range: string): boolean {
@@ -90,7 +89,7 @@ export function getNewValue({
     });
   }
   const parsedRange = semverUtils.parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   if (rangeStrategy === 'widen') {
     if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
@@ -109,7 +108,7 @@ export function getNewValue({
       return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
-      const previousElement = parsedRange[parsedRange.length - 2];
+      const previousElement = parsedRange.at(-2)!;
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();

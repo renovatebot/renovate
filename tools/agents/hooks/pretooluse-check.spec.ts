@@ -23,8 +23,6 @@ function makeInput(
 
 beforeEach(() => {
   vi.resetModules();
-  deny.mockReset();
-  readStdin.mockReset();
 });
 
 it('blocks npm install', async () => {
@@ -54,6 +52,37 @@ it('blocks chained command with npm', async () => {
   );
   await import('./pretooluse-check.ts');
   expect(deny).toHaveBeenCalledOnce();
+});
+
+it.each`
+  command
+  ${'echo hi; yarn add foo'}
+  ${'ls || npx foo'}
+  ${'cat package.json | npx json'}
+  ${'(npm test)'}
+  ${'echo $(npm bin)'}
+  ${'echo `npm bin`'}
+  ${'echo hi\nnpm test'}
+  ${'CI=1 npm test'}
+  ${'  npm test'}
+`('blocks $command', async ({ command }) => {
+  readStdin.mockResolvedValue(makeInput('Bash', { command }));
+  await import('./pretooluse-check.ts');
+  expect(deny).toHaveBeenCalledExactlyOnceWith(
+    'Use pnpm instead of npm/npx/yarn',
+  );
+});
+
+it.each`
+  command
+  ${"gh pr comment 1 --body 'documented by npm, see the npm docs'"}
+  ${'git commit -m "fix: support yarn workspaces"'}
+  ${'pnpm vitest lib/modules/manager/npm'}
+  ${'pnpm exec tsx tools/foo.ts --manager npm'}
+`('allows $command, which only mentions the tool', async ({ command }) => {
+  readStdin.mockResolvedValue(makeInput('Bash', { command }));
+  await import('./pretooluse-check.ts');
+  expect(deny).not.toHaveBeenCalled();
 });
 
 it('allows pnpm install', async () => {

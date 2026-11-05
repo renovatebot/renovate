@@ -15,6 +15,63 @@ Renovate supports all standard mise configuration file patterns:
 
 Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
 
+### Remote task files
+
+Renovate supports remote [git task files](https://mise.jdx.dev/tasks/toml-tasks.html#git) in `tasks.<name>.file`, using the same `git::` forms as for remote `include` entries.
+The path may point to any file, not only to TOML files.
+`ref` handling, datasources and comment hints work like for remote `include` entries, and the dependencies have the `depType` `task-<name>-file`.
+Local paths and plain `http(s)://` URLs without the `git::` prefix have no version and are ignored.
+
+```toml
+[tasks.build]
+file = "git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0"
+
+[tasks.lint]
+file = "git::ssh://git@gitlab.com/org/tasks.git//lint.sh?ref=0123456789abcdef0123456789abcdef01234567" # v1.0.0
+```
+
+### Remote `include` support
+
+Renovate supports the remote forms of the top level [`include`](https://mise.jdx.dev/configuration.html#include) key:
+
+- `git::<https|http|ssh>://<host>/<repo>.git//<path>?ref=<ref>` or `git::git@ssh.dev.azure.com:v3/<org>/<project>/<repo>//<path>?ref=<ref>`: the `ref` is looked up as a Git tag.
+  GitHub, GitLab and Bitbucket Cloud repositories use the `github-tags`, `gitlab-tags` and `bitbucket-tags` datasources, other hosts use `git-tags`.
+  Entries without a `ref` are skipped, as mise then uses the default branch.
+- `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
+
+A tag `ref` is updated to the newest tag:
+
+```toml
+include = [
+  "git::https://github.com/org/cfg.git//mise.toml?ref=v0.5.0",
+  "oci::ghcr.io/org/base:1.0",
+]
+```
+
+#### Pinning to a commit sha
+
+Optionally, a `ref` can be a full or short commit sha, if it has a trailing `# <version>` or `# <branch>` comment.
+Renovate updates the sha and the comment:
+
+```toml
+include = [
+  # tracks tags: the sha and the comment are bumped to the new tag
+  "git::https://github.com/org/cfg.git//mise.toml?ref=0123456789abcdef0123456789abcdef01234567", # v0.5.0
+  # tracks a branch: the sha is bumped to the head of the branch
+  "git::https://gitlab.com/org/cfg.git//mise.toml?ref=0123456789abcdef0123456789abcdef01234567", # main
+]
+```
+
+- The comment must only contain the version (`# v0.5.0`) or the branch name (`# main`).
+- Branches use the `github-digest` datasource for GitHub and `git-refs` for other hosts.
+- Sha refs without a usable comment are skipped (`unversioned-reference`).
+- Comments of non-sha refs are ignored.
+- Only comments of entries in multi-line arrays are read, as the comment of a single-line array can not be assigned to one entry.
+- `oci::` entries with a digest but no tag do not support comment hints.
+
+Renovate does not fetch the included files, so the tools they define are not updated.
+`include` entries are not locked by `mise.lock`.
+
 ### Lock file support
 
 Renovate supports mise lock files (`mise.lock`).
@@ -22,7 +79,26 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
-- Lock file maintenance is supported via the `lockFileMaintenance` option
+- Fuzzy selectors such as `latest`, `lts`, `25`, `25.1`, and `temurin-25` are
+  resolved against their locked version and updated in `mise.lock` only
+- `latest` remains unbounded; partial selectors remain restricted to their
+  major/minor range; `lts` is supported for the core Node.js and Java tools
+- Concrete versions such as `25.0.3` retain Renovate's normal source-file
+  update behavior
+- To keep concrete versions pinned, set `updatePinnedDependencies` to `false`
+  in the `mise` manager configuration
+
+  ```json
+  {
+    "mise": {
+      "updatePinnedDependencies": false
+    }
+  }
+  ```
+
+- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#trust-model-for-lock-file-updates) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
+
+When `mise lock` pins a tool's dependencies in a [native dependency sidecar](https://mise.jdx.dev/dev-tools/mise-lock.html#native-dependency-sidecars) (for example `.mise/locks/npm-prettier/3.3.3/aube-lock.yaml`), Renovate commits the sidecar changes together with the lock file, including new sidecar directories and the removal of ones that `mise lock` deleted.
 
 Renovate recognizes environment-specific lock files:
 
@@ -39,7 +115,15 @@ Running `mise lock` can execute repository-defined behavior, so Renovate treats 
 
 Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
 
-When `mise` is allowed and an existing `mise.lock` is present, Renovate explicitly runs `mise trust` before `mise lock` from the repository checkout. This makes the trust step visible in logs and lets mise own any future trust behavior changes.
+Because mise lock can execute repository-defined scripts, Renovate treats lockfile refreshes as an unsafe execution and attempts to run mise in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe).
+
+If mise does not support safe mode or version detection fails, Renovate blocks all mise operations.
+
+#### Allowing Unsafe Executions
+
+Self-hosted administrators can permit these operations by adding "mise" to the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) configuration.
+
+Once allowed, Renovate runs mise trust before mise lock when a mise.lock file is present. This exposes the trust step in execution logs and defers trust rules to mise.
 
 In particular:
 
@@ -62,6 +146,18 @@ erlang = ["23.3", "22.0"]
 ```
 
 Renovate will update `"23.3"` (the primary version) but will not touch `"22.0"` (the fallback version).
+
+The same applies when the array items are inline tables:
+
+```toml
+[tools]
+rust = [
+  { version = "1.98.1", components = "clippy,rustfmt" },
+  { version = "nightly-2026-07-12", profile = "minimal" },
+]
+```
+
+Renovate will update `"1.98.1"` and read backend options such as `version_prefix` or `tag_regex` from that first item only.
 
 #### Why can Renovate only update primary versions?
 
@@ -99,11 +195,14 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`asdf`](https://mise.jdx.dev/dev-tools/backends/asdf.html)
 - [`aqua`](https://mise.jdx.dev/dev-tools/backends/aqua.html)
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
+- [`conda`](https://mise.jdx.dev/dev-tools/backends/conda.html)
 - [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
 - [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
+- [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)
+- [`pypi`](https://mise.jdx.dev/dev-tools/backends/pypi.html)
 - [`spm`](https://mise.jdx.dev/dev-tools/backends/spm.html)
 - [`ubi`](https://mise.jdx.dev/dev-tools/backends/ubi.html)
 - [`vfox`](https://mise.jdx.dev/dev-tools/backends/vfox.html)

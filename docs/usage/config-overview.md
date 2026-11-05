@@ -41,9 +41,12 @@ The default config is loaded first, and may be superseded/overridden by the conf
 
 ### Global config
 
-Global config means: the config defined by the person or team responsible for running the bot.
-This is also referred to as "bot config", because it's the config passed to the bot by the person running it.
+Global config means: the config defined by the person or team responsible for running the deployment of Renovate.
+
 Global config can contain config which is "global only" as well as any configuration options which are valid in Inherited config or Repository config.
+
+Previously, this may have been referred to as "bot config", because it is the config passed to Renovate by the person running it.
+We no longer use "bot" terminology, so it is now called "global self-hosted configuration".
 
 If you are an end user of Renovate, for example if you're using the Mend Renovate App, then you don't need to care as much about any global config.
 As a end-user you can not change some settings because those settings are global-only.
@@ -93,6 +96,7 @@ If the configuration option lacks a `env` field, the config option also lacks a 
 A special case for Environment config is the `RENOVATE_CONFIG` "meta" config option.
 The `RENOVATE_CONFIG` option accepts a stringified full config, for example: `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
+For mergeable options, like `hostRules`, `packageRules` or `registryAliases`, the values are combined instead: lists are appended to the list in `RENOVATE_CONFIG`, and objects are merged into the object in `RENOVATE_CONFIG`, with the Environment config variable winning for keys that exist in both.
 
 ##### Environment variable examples
 
@@ -246,14 +250,13 @@ Your `renovate.js` where you run Renovate cannot contain any `extends` definitio
 
 ```js
 module.exports = {
-    ...
-    onboardingConfig: {
-      "argocd": {
-        "fileMatch": [
-          "application\\.yaml$"
-        ]
-      },
-    };
+  // ...
+  onboardingConfig: {
+    argocd: {
+      managerFilePatterns: ['application\\.yaml$'],
+    },
+  },
+};
 ```
 
 The resulting onboarding config will be:

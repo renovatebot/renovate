@@ -121,7 +121,7 @@ function getDep(
   if (!subject) {
     return null;
   }
-  const dep = getDockerDep(subject, true, registryAliases);
+  const dep = getDockerDep(subject, { registryAliases });
   if (!isValidDependency(dep)) {
     logger.trace(
       { subject, packageFile },

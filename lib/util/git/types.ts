@@ -3,7 +3,7 @@ import type { GitOptions } from '../../types/git.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
-export type { DiffResult, StatusResult } from 'simple-git';
+export type { StatusResult } from 'simple-git';
 
 export interface GitAuthor {
   name?: string | null;
@@ -11,6 +11,18 @@ export interface GitAuthor {
 }
 
 export type GitNoVerifyOption = 'commit' | 'push';
+
+/**
+ * Represents a virtual branch tracked as `refs/remotes/origin/<name>`.
+ * Used by platforms like Gerrit where changes are represented as refs
+ * (e.g., refs/changes/34/1234/1) instead of regular branches.
+ */
+export interface VirtualBranch {
+  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
+  ref: string;
+  /** The commit SHA this virtual branch points to */
+  sha: LongCommitSha;
+}
 
 export interface StorageConfig {
   currentBranch?: string;
@@ -21,6 +33,12 @@ export interface StorageConfig {
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
+  /**
+   * Virtual branches to initialize from non-standard refs (e.g., Gerrit change refs).
+   * Each virtual branch is fetched and stored as refs/remotes/origin/<name>.
+   * Keyed by branch name.
+   */
+  virtualBranches?: Record<string, VirtualBranch>;
 }
 
 export interface LocalConfig extends StorageConfig {
@@ -28,11 +46,14 @@ export interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
+  /** Single registry of virtual branches, always initialized in initRepo. Keyed by branch name. */
+  virtualBranches: Record<string, VirtualBranch>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
   gitAuthorEmail?: EmailAddress;
+  fileModeEnabled?: boolean;
 
   writeGitDone?: boolean;
 }
@@ -80,6 +101,8 @@ export interface CommitFilesConfig {
   branchName: string;
   files: FileChange[];
   message: string | string[];
+  /** Structured git trailers (`Key: value` lines) to add in the final block of the commit message */
+  trailers?: string[];
   force?: boolean;
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */
@@ -94,8 +117,6 @@ export interface PushFilesConfig {
   files: FileChange[];
   pushOptions?: string[];
 }
-
-export type BranchName = string;
 
 export interface CommitResult {
   parentCommitSha: LongCommitSha;

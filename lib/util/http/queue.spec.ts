@@ -4,7 +4,6 @@ import { clear, getQueue } from './queue.ts';
 describe('util/http/queue', () => {
   beforeEach(() => {
     clear();
-    hostRules.clear();
     hostRules.add({
       matchHost: 'example.com',
       concurrentRequestLimit: 143,

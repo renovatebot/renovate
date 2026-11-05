@@ -58,6 +58,7 @@ describe('util/github/graphql/query-adapters/tags-query-adapter', () => {
 
   it('returns null for other types', () => {
     expect(
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid target.type
       adapter.transform({
         target: { type: 'Blob' },
       } as never),

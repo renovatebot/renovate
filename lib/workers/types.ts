@@ -2,12 +2,15 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
+  PostUpgradeTasks,
   RenovateConfig,
   RenovateSharedConfig,
   UpdateType,
   ValidationMessage,
 } from '../config/types.ts';
 import type { Release } from '../modules/datasource/types.ts';
+import type { JSONataManagerConfig } from '../modules/manager/custom/jsonata/types.ts';
+import type { RegexManagerConfig } from '../modules/manager/custom/regex/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -18,7 +21,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
-import type { ConstraintName } from '../util/exec/types.ts';
+import type { ConstraintName, ToolName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -33,6 +36,8 @@ export interface BranchUpgradeConfig
   extends
     Merge<RenovateConfig, PackageDependency>,
     Partial<LookupUpdate>,
+    Partial<RegexManagerConfig>,
+    Partial<JSONataManagerConfig>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
   artifactNotices?: ArtifactNotice[];
@@ -99,6 +104,7 @@ export interface BranchUpgradeConfig
   remediationNotPossible?: boolean;
   repoName?: string;
   minimumConfidence?: MergeConfidence | undefined;
+  minimumReleaseAgeExtracted?: string;
   sourceDirectory?: string;
   sourceRepoSlug?: string;
 
@@ -123,6 +129,8 @@ export interface BranchUpgradeConfig
   sourceRepoName?: string;
 
   constraints?: Partial<Record<ConstraintName, string>>;
+  /** The constraints which other managers share for the directory of the package file, see `ToolConstraintsConfig` */
+  sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -153,9 +161,7 @@ export type BranchResult =
   | 'minimum-group-size-not-met';
 
 export type CacheFingerprintMatchResult =
-  | 'matched'
-  | 'no-match'
-  | 'no-fingerprint';
+  'matched' | 'no-match' | 'no-fingerprint';
 
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
@@ -289,6 +295,12 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+  constraints?: Partial<Record<ToolName, string>>;
+  postUpgradeTasks?: {
+    commands?: string[];
+    fileFilters?: string[];
+    installTools?: PostUpgradeTasks['installTools'];
+  };
 }
 
 export interface ExtractResult {

@@ -1,14 +1,9 @@
-import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
-import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
-import { compile } from '../../../../util/template/index.ts';
-import {
-  getDefaultConfigFileName,
-  getSemanticCommitPrTitle,
-} from '../common.ts';
-import { OnboardingCommitMessageFactory } from './commit-message.ts';
+import { commitConfigFile } from '../../model/commit-config-file.ts';
+import { getDefaultConfigFileName, getOnboardingPrTitle } from '../common.ts';
+import { getOnboardingCommitMessage } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
 export async function createOnboardingBranch(
@@ -20,48 +15,14 @@ export async function createOnboardingBranch(
   const contents = await getOnboardingConfigContents(config, configFile);
   logger.debug('Creating onboarding branch');
 
-  const commitMessageFactory = new OnboardingCommitMessageFactory(
+  return await commitConfigFile({
     config,
-    configFile,
-  );
-  let commitMessage = commitMessageFactory.create().toString();
-
-  if (config.commitBody) {
-    commitMessage = `${commitMessage}\n\n${compile(
-      config.commitBody,
-      // only allow gitAuthor template value in the commitBody
-      { gitAuthor: config.gitAuthor },
-    )}`;
-
-    logger.trace(`commitMessage: ${commitMessage}`);
-  }
-
-  // istanbul ignore if
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would commit files to onboarding branch');
-    return null;
-  }
-
-  const prTitle =
-    config.semanticCommits === 'enabled'
-      ? getSemanticCommitPrTitle(config)
-      : getInheritedOrGlobal('onboardingPrTitle')!;
-
-  return scm.commitAndPush({
-    baseBranch: config.baseBranch,
     branchName: getInheritedOrGlobal('onboardingBranch')!,
-    files: [
-      {
-        type: 'addition',
-        // TODO #22198
-        path: configFile,
-        contents,
-      },
-    ],
-    message: commitMessage,
-    platformCommit: config.platformCommit,
+    // TODO #22198
+    getFiles: () => [{ type: 'addition', path: configFile, contents }],
+    message: getOnboardingCommitMessage(config, configFile),
+    prTitle: getOnboardingPrTitle(config),
     force: true,
-    // Only needed by Gerrit platform
-    prTitle,
+    dryRunMessage: 'DRY-RUN: Would commit files to onboarding branch',
   });
 }

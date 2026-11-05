@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const BitbucketSourceType = z.enum(['commit_directory', 'commit_file']);
@@ -29,14 +30,11 @@ export const RepoInfo = z
     mainbranch: z.object({
       name: z.string(),
     }),
-    has_issues: z.boolean().catch(() => {
-      return false;
-    }),
     uuid: z.string(),
     full_name: z
       .string()
       .regex(
-        /^[^/]+\/[^/]+$/,
+        regEx(/^[^/]+\/[^/]+$/),
         'Expected repository full_name to be in the format "owner/repo"',
       ),
     is_private: z.boolean().catch(() => {
@@ -60,7 +58,6 @@ export const RepoInfo = z
       name,
       mainbranch: repoInfoBody.mainbranch.name,
       mergeMethod: 'merge',
-      has_issues: repoInfoBody.has_issues,
       uuid: repoInfoBody.uuid,
       is_private: repoInfoBody.is_private,
       projectName: repoInfoBody.project?.name,

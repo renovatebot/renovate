@@ -7,13 +7,14 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../../util/array.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as fs from '../../../util/fs/index.ts';
 import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { Http } from '../../../util/http/index.ts';
-import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
@@ -37,13 +38,13 @@ export class NugetV3Api {
     resourceType = 'RegistrationsBaseUrl',
   ): Promise<string | null> {
     // https://learn.microsoft.com/nuget/api/service-index
-    const resultCacheKey = `${url}:${resourceType}`;
+    const resultCacheKey = buildCacheKey(url, resourceType);
     const cachedResult = await packageCache.get<string>(
       NugetV3Api.cacheNamespace,
       resultCacheKey,
     );
 
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (cachedResult) {
       return cachedResult;
     }
@@ -54,6 +55,7 @@ export class NugetV3Api {
         NugetV3Api.cacheNamespace,
         responseCacheKey,
       );
+      // v8 ignore else -- needs a primed package cache
       if (!servicesIndexRaw) {
         servicesIndexRaw = (
           await http.getJson(
@@ -227,25 +229,42 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
+      let shouldTryNupkg = false;
       if (isNonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
         )}${pkgName.toLowerCase()}/${
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.getText(nuspecUrl, {
-          cacheProvider: memCacheProvider,
-        });
-        const nuspec = new XmlDocument(metaresult.body);
-        const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
-        if (releaseNotes) {
-          dep.changelogContent = releaseNotes;
+        try {
+          const metaresult = await http.getText(nuspecUrl, {
+            cacheProvider: memCacheProvider,
+          });
+          const nuspec = new XmlDocument(metaresult.body);
+          const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
+          if (releaseNotes) {
+            dep.changelogContent = releaseNotes;
+          }
+          const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
+          if (sourceUrl) {
+            dep.sourceUrl = massageUrl(sourceUrl);
+          }
+        } catch (err) {
+          if (isNotFound(err)) {
+            shouldTryNupkg = true;
+            logger.debug(
+              { registryUrl, pkgName, pkgVersion: latestStable },
+              `package manifest (.nuspec) not found`,
+            );
+          } else {
+            throw err;
+          }
         }
-        const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
-        if (sourceUrl) {
-          dep.sourceUrl = massageUrl(sourceUrl);
-        }
-      } else if (nupkgUrl) {
+      } else {
+        shouldTryNupkg = true;
+      }
+
+      if (!dep.sourceUrl && shouldTryNupkg && nupkgUrl) {
         const sourceUrl = await this.getSourceUrlFromNupkg(
           http,
           registryUrl,
@@ -264,7 +283,7 @@ export class NugetV3Api {
         throw err;
       }
       // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (isNotFound(err)) {
         logger.debug(
           { registryUrl, pkgName, pkgVersion: latestStable },
           `package manifest (.nuspec) not found`,
@@ -293,7 +312,7 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    /* v8 ignore next 4 */
+    /* v8 ignore if -- specs enable RENOVATE_X_NUGET_DOWNLOAD_NUPKGS, so the disabled path is unexercised */
     if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
@@ -334,7 +353,7 @@ export class NugetV3Api {
     return withCache(
       {
         namespace: NugetV3Api.cacheNamespace,
-        key: `source-url:${registryUrl}:${packageName}`,
+        key: buildCacheKey('source-url', registryUrl, packageName),
         ttlMinutes: 10080, // 1 week
       },
       () =>

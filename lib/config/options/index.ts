@@ -1,14 +1,94 @@
 import { isArray, isObject } from '@sindresorhus/is';
+import { Categories } from '../../constants/category.ts';
 import { PLATFORM_HOST_TYPES } from '../../constants/platforms.ts';
+import { AllDatasourcesListLiteral } from '../../datasource-list.generated.ts';
 import { managerDefaultConfigs } from '../../manager-default-configs.generated.ts';
-import { AllManagersListLiteral } from '../../manager-list.generated.ts';
+import {
+  AllManagersListLiteral,
+  CustomManagersListLiteral,
+} from '../../manager-list.generated.ts';
+import { getSupportedToolNames } from '../../util/exec/containerbase.ts';
+import type { ConstraintDefinition } from '../../util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitionDocumentation,
+} from '../../util/exec/types.ts';
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
-import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
+import {
+  CustomDatasourceFormats,
+  type RenovateOptions,
+  allowedStatusCheckStrings,
+  allowedStatusCheckWhenValues,
+} from '../types.ts';
+import { lookupScopes, sharedScopes } from './scopes.ts';
+
+/**
+ * The constraints which a Containerbase tool defines, as the keys of an object option.
+ */
+function toolConstraintProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const toolName of getSupportedToolNames()) {
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+    const description = def?.description ?? '';
+
+    const base = `A constraint for the \`${toolName}\` Containerbase tool`;
+    properties[toolName] = {
+      type: 'string',
+      description: description ? `${base}. ${description}` : base,
+    };
+  }
+
+  return properties;
+}
+
+/**
+ * The constraints which aren't a Containerbase tool, as the keys of an object option.
+ */
+function additionalConstraintProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const {
+    name,
+    description,
+  } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+    properties[name] = {
+      type: 'string',
+      // prioritise contraint definitions, as they're more useful than the generated one
+      /* v8 ignore next -- every current `additionalConstraintDefinitions` entry has a description, but the type allows one to be added without one */
+      description: description ?? `A constraint for \`${name}\``,
+    };
+  }
+
+  return properties;
+}
+
+/**
+ * The Containerbase tools which can be installed, as the keys of an object option.
+ */
+function installToolProperties(): Record<string, unknown> {
+  const properties: Record<string, unknown> = {};
+
+  for (const toolName of getSupportedToolNames()) {
+    const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
+    const description = def?.description ?? '';
+
+    const base = `A constraint for the \`${toolName}\` Containerbase tool`;
+    properties[toolName] = {
+      type: 'object',
+      description: description ? `${base}. ${description}` : base,
+      additionalProperties: false,
+    };
+  }
+
+  return properties;
+}
 
 const options: Readonly<RenovateOptions>[] = [
   {
     name: 'mode',
+    scopes: sharedScopes,
     description: 'Mode of operation.',
     type: 'string',
     default: 'full',
@@ -101,6 +181,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'internalHostAccess',
+    description:
+      'Whether Renovate may make HTTP requests to internal hosts, such as loopback, private-range and link-local addresses. `warn` logs the requests which `block` would refuse.',
+    type: 'string',
+    allowedValues: ['allow', 'warn', 'block'],
+    default: 'warn',
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'useCloudMetadataServices',
     description:
       'If `false`, Renovate does not try to access cloud metadata services.',
@@ -130,6 +221,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bumpVersions',
+    scopes: sharedScopes,
     description:
       'A list of bumpVersion config options to bump generic version numbers.',
     type: 'array',
@@ -145,7 +237,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The semver level to use when bumping versions. This is used by the `bumpVersions` feature.',
     type: 'string',
     parents: ['bumpVersions'],
-    allowedValues: ['major', 'minor', 'patch', 'sync'],
+    allowedValues: ['major', 'minor', 'patch', 'prerelease', 'sync'],
     supportsTemplating: true,
   },
   {
@@ -166,6 +258,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'postUpgradeTasks',
+    scopes: sharedScopes,
     description:
       'Post-upgrade tasks that are executed before a commit is made by Renovate.',
     type: 'object',
@@ -175,6 +268,7 @@ const options: Readonly<RenovateOptions>[] = [
       executionMode: 'update',
       installTools: {},
     },
+    additionalProperties: false,
   },
   {
     name: 'commands',
@@ -222,11 +316,8 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     parents: ['postUpgradeTasks'],
     default: {},
-    additionalProperties: {
-      type: 'object',
-      properties: {},
-      additionalProperties: false,
-    },
+    properties: installToolProperties(),
+    additionalProperties: false,
     mergeable: false,
     freeChoice: true,
     cli: false,
@@ -237,7 +328,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['customDatasources'],
     default: 'json',
-    allowedValues: ['json', 'plain'],
+    allowedValues: [...CustomDatasourceFormats],
     cli: false,
     env: false,
   },
@@ -321,6 +412,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'configMigration',
+    scopes: ['repo'],
     description: 'Enable this to get config migration PRs when needed.',
     stage: 'repository',
     type: 'boolean',
@@ -370,10 +462,18 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'statusCheckNames',
+    scopes: sharedScopes,
     description: 'Custom strings to use as status check names.',
     type: 'object',
     mergeable: true,
     advancedUse: true,
+    properties: Object.fromEntries(
+      allowedStatusCheckStrings.map((statusCheck) => [
+        statusCheck,
+        { type: ['string', 'null'] },
+      ]),
+    ),
+    additionalProperties: false,
     default: {
       artifactError: 'renovate/artifacts',
       configValidation: 'renovate/config-validation',
@@ -383,11 +483,19 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'statusCheckWhen',
+    scopes: sharedScopes,
     description:
       'Control when each Renovate status check is set on branches. Keys match `statusCheckNames`.',
     type: 'object',
     mergeable: true,
     advancedUse: true,
+    properties: Object.fromEntries(
+      allowedStatusCheckStrings.map((statusCheck) => [
+        statusCheck,
+        { type: 'string', enum: [...allowedStatusCheckWhenValues] },
+      ]),
+    ),
+    additionalProperties: false,
     default: {
       artifactError: 'failed',
       configValidation: 'always',
@@ -397,15 +505,29 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'extends',
+    scopes: ['any'],
     description: 'Configuration presets to use or extend.',
     stage: 'package',
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues:
+      /* These are sorted in priority order, but editors may not suggest in that order */
+      [
+        'config:best-practices',
+        'config:recommended',
+        'mergeConfidence:all-badges',
+        'abandonments:recommended',
+        'group:all',
+        'replacements:all',
+        'security:minimumReleaseAgeNpm',
+        'security:only-security-updates',
+      ],
     cli: false,
   },
   {
     name: 'ignorePresets',
+    scopes: ['any'],
     description:
       'A list of presets to ignore, including any that are nested inside an `extends` array.',
     stage: 'package',
@@ -427,6 +549,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumGroupSize',
+    scopes: sharedScopes,
     description:
       'The minimum number of updates which must be in a group for branches to be created.',
     type: 'integer',
@@ -449,6 +572,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'description',
+    scopes: ['any'],
     description: 'Plain text description for a config or preset.',
     type: 'array',
     subType: 'string',
@@ -459,22 +583,29 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'overrideDescription',
+    scopes: ['any'],
+    description:
+      'Description which replaces the descriptions of any presets which this config extends.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    allowString: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'enabled',
     description: `Enable or disable corresponding functionality.`,
     stage: 'package',
     type: 'boolean',
     default: true,
-    parents: [
-      '.',
-      'packageRules',
-      ...AllManagersListLiteral,
-      'hostRules',
-      'vulnerabilityAlerts',
-      ...UpdateTypesOptions,
-    ],
+    scopes: ['repo', 'packageRule', 'manager', 'updateType'],
+    parents: ['hostRules', 'vulnerabilityAlerts'],
   },
   {
     name: 'constraintsFiltering',
+    scopes: lookupScopes,
     description: 'Perform release filtering based on language constraints.',
     type: 'string',
     allowedValues: ['none', 'strict'],
@@ -557,12 +688,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'draftPR',
+    scopes: sharedScopes,
     description:
       'If set to `true` then Renovate creates draft PRs, instead of normal status PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: [
       'azure',
+      'bitbucket',
       'forgejo',
       'gitea',
       'github',
@@ -581,6 +714,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'printConfig',
+    scopes: ['repo'],
     description:
       'If enabled, Renovate logs the fully resolved config for each repository, plus the fully resolved presets.',
     type: 'boolean',
@@ -639,21 +773,33 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     type: 'object',
     default: {},
+    additionalProperties: {
+      type: 'string',
+    },
   },
   {
     name: 'env',
+    scopes: ['repo'],
     description:
       'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
     default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'customDatasources',
+    scopes: lookupScopes,
     description: 'Defines custom datasources for usage by managers.',
     type: 'object',
     experimental: true,
     experimentalIssues: [23286],
     default: {},
+    additionalProperties: {
+      type: 'object',
+    },
     mergeable: true,
   },
   {
@@ -680,7 +826,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.71.6',
+    default: 'ghcr.io/renovatebot/base-image:13.160.4',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -697,6 +843,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'composerIgnorePlatformReqs',
+    scopes: sharedScopes,
     description:
       'Configure use of `--ignore-platform-reqs` or `--ignore-platform-req` for the Composer package manager.',
     type: 'array',
@@ -705,6 +852,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'goGetDirs',
+    scopes: sharedScopes,
     description: 'Directory pattern to run `go get` on.',
     type: 'array',
     subType: 'string',
@@ -752,6 +900,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'forkProcessing',
+    scopes: ['repo'],
     description:
       'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
@@ -806,6 +955,15 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'goEnvFromHostRules',
+    description:
+      'Derive `GOPROXY`, `GONOPROXY` and `GONOSUMDB` from host rules when they are not set in the environment.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+  },
+  {
     name: 'encryptedWarning',
     description: 'Warning text to use if encrypted config is found.',
     type: 'string',
@@ -846,6 +1004,16 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'inheritConfigTrusted',
+    description:
+      'If `true`, `hostRules` in inherited config may grant access to internal hosts.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+    experimental: true,
+    advancedUse: true,
+  },
+  {
     name: 'requireConfig',
     description:
       "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
@@ -868,6 +1036,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Dependency Dashboard
   {
     name: 'dependencyDashboard',
+    scopes: ['repo'],
     description:
       'Whether to create a "Dependency Dashboard" issue in the repository.',
     type: 'boolean',
@@ -875,6 +1044,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardApproval',
+    scopes: sharedScopes,
     description:
       'Controls if updates need manual approval from the Dependency Dashboard issue before PRs are created.',
     type: 'boolean',
@@ -882,6 +1052,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardAutoclose',
+    scopes: ['repo'],
     description:
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
     type: 'boolean',
@@ -889,12 +1060,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardTitle',
+    scopes: ['repo'],
     description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
   },
   {
     name: 'dependencyDashboardCategory',
+    scopes: sharedScopes,
     description:
       'The category to group branches on the Dependency Dashboard issue.',
     type: 'string',
@@ -904,6 +1077,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardHeader',
+    scopes: ['repo'],
     description:
       'Any text added here will be placed first in the Dependency Dashboard issue body.',
     type: 'string',
@@ -913,6 +1087,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardFooter',
+    scopes: ['repo'],
     description:
       'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
     type: 'string',
@@ -920,6 +1095,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardLabels',
+    scopes: ['repo'],
     description:
       'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
     type: 'array',
@@ -928,6 +1104,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
+    scopes: ['repo'],
     description:
       'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
     type: 'string',
@@ -937,6 +1114,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'configWarningReuseIssue',
+    scopes: ['repo'],
     description:
       'Set this to `true` to make Renovate reuse/reopen an existing closed Config Warning issue, instead of opening a new one each time.',
     type: 'boolean',
@@ -976,21 +1154,27 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'encrypted',
+    scopes: ['any'],
     description:
       'An object containing configuration encrypted with project key.',
     stage: 'repository',
     type: 'object',
     default: null,
+    additionalProperties: {
+      type: 'string',
+    },
   },
   // Scheduling
   {
     name: 'timezone',
+    scopes: sharedScopes,
     description:
       'Must conform to [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format.',
     type: 'string',
   },
   {
     name: 'schedule',
+    scopes: sharedScopes,
     description: 'Limit branch creation to these times of day or week.',
     type: 'array',
     subType: 'string',
@@ -1001,6 +1185,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeSchedule',
+    scopes: sharedScopes,
     description: 'Limit automerge to these times of day or week.',
     type: 'array',
     subType: 'string',
@@ -1011,13 +1196,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updateNotScheduled',
+    scopes: sharedScopes,
     description:
       'Whether to update branches when not scheduled. Renovate will not create branches outside of the schedule.',
     stage: 'branch',
     type: 'boolean',
     default: true,
   },
-  // Bot administration
+  // Admin/self-hosted administration
   {
     name: 'persistRepoData',
     description:
@@ -1060,14 +1246,16 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
-    name: 'allowCustomCrateRegistries',
-    description: 'Set this to `true` to allow custom crate registries.',
+    name: 'allowCustomCrateGitRegistries',
+    description:
+      'Set this to `true` to allow cloning custom Cargo `git` registries. This only restricts non-sparse registries.',
     globalOnly: true,
     type: 'boolean',
     default: false,
   },
   {
     name: 'ignorePlugins',
+    scopes: sharedScopes,
     description:
       'Set this to `true` if `allowPlugins=true` but you wish to skip running plugins when updating lock files.',
     type: 'boolean',
@@ -1075,6 +1263,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreScripts',
+    scopes: sharedScopes,
     description:
       'Set this to `false` if `allowScripts=true` and you wish to run scripts when updating lock files.',
     type: 'boolean',
@@ -1126,6 +1315,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmrc',
+    scopes: sharedScopes,
     description:
       'String copy of `.npmrc` file. Use `\\n` instead of line breaks.',
     stage: 'branch',
@@ -1133,6 +1323,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmrcMerge',
+    scopes: ['repo', 'manager'],
     description:
       'Whether to merge `config.npmrc` with repo `.npmrc` content if both are found.',
     stage: 'branch',
@@ -1141,18 +1332,21 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'npmToken',
+    scopes: ['repo'],
     description: 'npm token used to authenticate with the default registry.',
     stage: 'branch',
     type: 'string',
   },
   {
     name: 'skipArtifactsUpdate',
+    scopes: sharedScopes,
     description: "Skip Renovate's automatic artifact updating.",
     type: 'boolean',
     default: false,
   },
   {
     name: 'skipInstalls',
+    scopes: sharedScopes,
     description:
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
@@ -1222,7 +1416,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'repositories',
-    description: 'List of Repositories.',
+    description:
+      'List of Repositories, or an object that contains a `repository`, and any Global or Repo config to target that specific repository.',
     stage: 'global',
     type: 'array',
     subType: 'string',
@@ -1231,16 +1426,17 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'baseBranchPatterns',
+    scopes: ['repo'],
     description:
       'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
     subType: 'string',
     stage: 'package',
-    cli: false,
     patternMatch: true,
   },
   {
     name: 'useBaseBranchConfig',
+    scopes: ['repo'],
     description:
       'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
@@ -1249,6 +1445,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitAuthor',
+    scopes: ['repo'],
     description:
       'Author to use for Git commits. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
     type: 'string',
@@ -1272,8 +1469,10 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitIgnoredAuthors',
+    scopes: ['repo'],
     description:
-      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git author emails ignored by Renovate. Entries can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322) strings, glob patterns, or regex patterns using Renovate regex syntax.',
+    patternMatch: true,
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1288,15 +1487,24 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'enabledManagers',
+    scopes: ['repo'],
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
     subType: 'string',
+    allowedValues: [
+      ...AllManagersListLiteral,
+      ...CustomManagersListLiteral,
+      ...CustomManagersListLiteral.map(
+        (manager: string) => `custom.${manager}`,
+      ),
+    ],
     mergeable: false,
     stage: 'repository',
   },
   {
     name: 'includePaths',
+    scopes: ['repo', 'manager'],
     description: 'Include package files only within these defined paths.',
     type: 'array',
     subType: 'string',
@@ -1306,6 +1514,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignorePaths',
+    scopes: ['repo', 'manager'],
     description:
       'Skip any package file whose path matches one of these. Can be a string or glob pattern.',
     type: 'array',
@@ -1317,6 +1526,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'excludeCommitPaths',
+    scopes: sharedScopes,
     description:
       'A file matching any of these glob patterns will not be committed, even if the file has been updated.',
     type: 'array',
@@ -1334,7 +1544,17 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'exitCodeForErrors',
+    description:
+      'Exit with an error-specific exit code when a repository run ends in a known error state.',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    globalOnly: true,
+  },
+  {
     name: 'registryAliases',
+    scopes: sharedScopes,
     description: 'Aliases for registries.',
     mergeable: true,
     type: 'object',
@@ -1344,6 +1564,7 @@ const options: Readonly<RenovateOptions>[] = [
     },
     supportedManagers: [
       'ansible',
+      'argocd',
       'bitbucket-pipelines',
       'buildpacks',
       'crossplane',
@@ -1355,6 +1576,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gitlabci',
       'helm-requirements',
       'helmfile',
+      'helmsman',
       'helmv3',
       'kubernetes',
       'kustomize',
@@ -1366,6 +1588,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'defaultRegistryUrls',
+    scopes: lookupScopes,
     description:
       'List of registry URLs to use as the default for a datasource.',
     type: 'array',
@@ -1388,6 +1611,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'registryUrls',
+    scopes: lookupScopes,
     description:
       'List of URLs to try for dependency lookup. Package manager specific.',
     type: 'array',
@@ -1399,6 +1623,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'extractVersion',
+    scopes: lookupScopes,
     description:
       "A regex (`re2`) to extract a version from a datasource's raw version string.",
     type: 'string',
@@ -1408,6 +1633,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'versionCompatibility',
+    scopes: lookupScopes,
     description:
       'A regex (`re2`) with named capture groups to show how version and compatibility are split from a raw version string.',
     type: 'string',
@@ -1417,6 +1643,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'versioning',
+    scopes: lookupScopes,
     description: 'Versioning to use for filtering and comparisons.',
     type: 'string',
     allowedValues: [...AllVersioningsListLiteral],
@@ -1425,6 +1652,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'azureWorkItemId',
+    scopes: sharedScopes,
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
     type: 'integer',
@@ -1432,7 +1660,17 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
+    name: 'azureWorkItemType',
+    scopes: ['repo'],
+    description:
+      'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on Azure DevOps.',
+    type: 'string',
+    default: 'Issue',
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'autoApprove',
+    scopes: sharedScopes,
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
@@ -1441,6 +1679,7 @@ const options: Readonly<RenovateOptions>[] = [
   // depType
   {
     name: 'ignoreDeps',
+    scopes: lookupScopes,
     description: 'Dependencies to ignore.',
     type: 'array',
     subType: 'string',
@@ -1449,14 +1688,23 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updateInternalDeps',
+    scopes: ['repo', 'manager'],
     description:
       'Whether to update internal dep versions in a monorepo. Works on Yarn Workspaces.',
     type: 'boolean',
     default: false,
     stage: 'package',
+    supportedManagers: ['npm'],
   },
   {
     name: 'packageRules',
+    scopes: [
+      'repo',
+      'packageRule',
+      'manager',
+      'updateType',
+      'vulnerabilityAlert',
+    ],
     description: 'Rules for matching packages.',
     type: 'array',
     stage: 'package',
@@ -1480,6 +1728,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues: [...Categories],
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
@@ -1522,6 +1771,12 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     allowString: true,
+    suggestedValues: [
+      ...AllManagersListLiteral,
+      ...CustomManagersListLiteral.map(
+        (manager: string) => `custom.${manager}`,
+      ),
+    ],
     parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
@@ -1535,6 +1790,7 @@ const options: Readonly<RenovateOptions>[] = [
       'List of datasources to match (e.g. `["orb"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
+    suggestedValues: [...AllDatasourcesListLiteral],
     allowString: true,
     parents: ['packageRules'],
     stage: 'package',
@@ -1669,6 +1925,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'autoReplaceGlobalMatch',
+    scopes: sharedScopes,
     description:
       'Control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
@@ -1718,6 +1975,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'replacementApproach',
+    scopes: sharedScopes,
     description:
       'Select whether to perform a direct replacement or alias replacement.',
     type: 'string',
@@ -1754,6 +2012,7 @@ const options: Readonly<RenovateOptions>[] = [
       'pinDigest',
       'digest',
       'lockFileMaintenance',
+      'lockfileUpdate',
       'rollback',
       'bump',
       'replacement',
@@ -1765,6 +2024,16 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     patternMatch: true,
+  },
+  {
+    name: 'matchIsBreaking',
+    description:
+      'Matches only if the update is considered breaking (e.g. major, or minor for 0.x in ecosystems like Cargo) when `true`, or non-breaking when `false`. Valid only within a `packageRules` object.',
+    type: 'boolean',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
   },
   {
     name: 'matchFileNames',
@@ -1815,12 +2084,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pinDigests',
+    scopes: lookupScopes,
     description: 'Whether to add digests to Dockerfile source images.',
     type: 'boolean',
     default: false,
   },
   {
     name: 'separateMajorMinor',
+    scopes: lookupScopes,
     description:
       'If set to `false`, Renovate will upgrade dependencies to their latest release only. Renovate will not separate major or minor branches.',
     type: 'boolean',
@@ -1828,6 +2099,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMultipleMajor',
+    scopes: lookupScopes,
     description:
       'If set to `true`, PRs will be raised separately for each available `major` upgrade version.',
     stage: 'package',
@@ -1836,6 +2108,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMultipleMinor',
+    scopes: lookupScopes,
     description:
       'If set to `true`, Renovate creates separate PRs for each `minor` stream.',
     stage: 'package',
@@ -1845,6 +2118,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'separateMinorPatch',
+    scopes: lookupScopes,
     description:
       'If set to `true`, Renovate will separate `minor` and `patch` updates into separate branches.',
     type: 'boolean',
@@ -1852,6 +2126,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreUnstable',
+    scopes: lookupScopes,
     description: 'Ignore versions with unstable SemVer.',
     stage: 'package',
     type: 'boolean',
@@ -1859,6 +2134,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreDeprecated',
+    scopes: lookupScopes,
     description:
       'Avoid upgrading from a non-deprecated version to a deprecated one.',
     stage: 'package',
@@ -1867,6 +2143,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'followTag',
+    scopes: lookupScopes,
     description: 'If defined, packages will follow this release tag exactly.',
     stage: 'package',
     type: 'string',
@@ -1876,6 +2153,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'maxMajorIncrement',
+    scopes: lookupScopes,
     description:
       'Limit the maximum major version increment allowed. Set to 0 to disable.',
     stage: 'package',
@@ -1886,6 +2164,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'respectLatest',
+    scopes: lookupScopes,
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',
     type: 'boolean',
@@ -1893,6 +2172,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rangeStrategy',
+    scopes: lookupScopes,
     description: 'Determines how to modify or update existing ranges.',
     type: 'string',
     default: 'auto',
@@ -1910,6 +2190,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchPrefix',
+    scopes: sharedScopes,
     description: 'Prefix to use for all branch names.',
     stage: 'branch',
     type: 'string',
@@ -1918,6 +2199,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchPrefixOld',
+    scopes: sharedScopes,
     description: 'Old branchPrefix value to check for existing PRs.',
     stage: 'branch',
     type: 'string',
@@ -1925,6 +2207,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bumpVersion',
+    scopes: sharedScopes,
     description: 'Bump the version in the package file being updated.',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch', 'prerelease'],
@@ -1933,6 +2216,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Major/Minor/Patch
   {
     name: 'major',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `major`.',
     stage: 'package',
     type: 'object',
@@ -1942,6 +2226,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minor',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `minor`.',
     stage: 'package',
     type: 'object',
@@ -1951,6 +2236,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'patch',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `patch`.',
     stage: 'package',
     type: 'object',
@@ -1960,6 +2246,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pin',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when an update type is `pin`.',
     stage: 'package',
     type: 'object',
@@ -1978,6 +2265,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'digest',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description:
       'Configuration to apply when updating a digest (no change in tag/version).',
     stage: 'package',
@@ -1992,6 +2280,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pinDigest',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description:
       'Configuration to apply when pinning a digest (no change in tag/version).',
     stage: 'package',
@@ -2010,6 +2299,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rollback',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when rolling back a version.',
     stage: 'package',
     type: 'object',
@@ -2023,6 +2313,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'replacement',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration to apply when replacing a dependency.',
     stage: 'package',
     type: 'object',
@@ -2041,6 +2332,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Semantic commit / Semantic release
   {
     name: 'semanticCommits',
+    scopes: sharedScopes,
     description: 'Enable Semantic Commit prefixes for commits and PR titles.',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
@@ -2048,6 +2340,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'semanticCommitType',
+    scopes: sharedScopes,
     description: 'Commit type to use if Semantic Commits is enabled.',
     type: 'string',
     default: 'chore',
@@ -2055,13 +2348,16 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'semanticCommitScope',
+    scopes: sharedScopes,
     description: 'Commit scope to use if Semantic Commits are enabled.',
     type: 'string',
     default: 'deps',
+    nullable: true,
     supportsTemplating: true,
   },
   {
     name: 'commitMessageLowerCase',
+    scopes: sharedScopes,
     description: 'Lowercase PR- and commit titles.',
     type: 'string',
     allowedValues: ['auto', 'never'],
@@ -2070,6 +2366,7 @@ const options: Readonly<RenovateOptions>[] = [
   // PR Behavior
   {
     name: 'keepUpdatedLabel',
+    scopes: sharedScopes,
     description:
       'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
@@ -2084,6 +2381,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rollbackPrs',
+    scopes: lookupScopes,
     description:
       'Create PRs to roll back versions if the current version is not found in the registry.',
     type: 'boolean',
@@ -2091,6 +2389,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'recreateWhen',
+    scopes: sharedScopes,
     description: 'Recreate PRs even if same ones were closed previously.',
     type: 'string',
     default: 'auto',
@@ -2098,6 +2397,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rebaseWhen',
+    scopes: sharedScopes,
     description: 'Controls when Renovate rebases an existing branch.',
     type: 'string',
     allowedValues: [
@@ -2111,12 +2411,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'rebaseLabel',
-    description: 'Label to request a rebase from Renovate bot.',
+    scopes: sharedScopes,
+    description: 'Label to request a rebase from Renovate.',
     type: 'string',
     default: 'rebase',
   },
   {
     name: 'stopUpdatingLabel',
+    scopes: sharedScopes,
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
@@ -2131,12 +2433,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'minimumReleaseAge',
+    scopes: [...lookupScopes, 'updateType'],
     description: 'Time required before a new release is considered stable.',
     type: 'string',
     default: null,
   },
   {
     name: 'minimumReleaseAgeBehaviour',
+    scopes: [...lookupScopes, 'updateType'],
     description:
       'When set in conjunction with `minimumReleaseAge`, controls whether the `releaseTimestamp` for a dependency update is required.',
     type: 'string',
@@ -2144,7 +2448,17 @@ const options: Readonly<RenovateOptions>[] = [
     allowedValues: ['timestamp-required', 'timestamp-optional'],
   },
   {
+    name: 'minimumReleaseAgeBuffer',
+    scopes: [...lookupScopes, 'updateType'],
+    description:
+      'Extra time added to `minimumReleaseAge` before an update is considered stable.',
+    type: 'string',
+    default: '30 minutes',
+    nullable: true,
+  },
+  {
     name: 'abandonmentThreshold',
+    scopes: lookupScopes,
     description:
       'Flags packages that have not been updated within this period as abandoned.',
     type: 'string',
@@ -2152,6 +2466,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'dependencyDashboardReportAbandonment',
+    scopes: ['repo'],
     description:
       'Controls whether abandoned packages are reported in the dependency dashboard.',
     type: 'boolean',
@@ -2159,6 +2474,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'internalChecksAsSuccess',
+    scopes: sharedScopes,
     description:
       'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
     type: 'boolean',
@@ -2177,6 +2493,7 @@ const options: Readonly<RenovateOptions>[] = [
   */
   {
     name: 'internalChecksFilter',
+    scopes: [...lookupScopes, 'updateType'],
     description: 'When and how to filter based on internal checks.',
     type: 'string',
     allowedValues: ['strict', 'flexible', 'none'],
@@ -2195,6 +2512,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prCreation',
+    scopes: sharedScopes,
     description: 'When to create the PR for a branch.',
     type: 'string',
     allowedValues: ['immediate', 'not-pending', 'status-success', 'approval'],
@@ -2202,18 +2520,21 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prNotPendingHours',
+    scopes: sharedScopes,
     description: 'Timeout in hours for when `prCreation=not-pending`.',
     type: 'integer',
     default: 25,
   },
   {
     name: 'commitHourlyLimit',
+    scopes: sharedScopes,
     description: 'Rate limit commits to maximum x per hour. 0 means no limit.',
     type: 'integer',
     default: 0,
   },
   {
     name: 'prHourlyLimit',
+    scopes: sharedScopes,
     description:
       'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
@@ -2221,6 +2542,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prConcurrentLimit',
+    scopes: sharedScopes,
     description:
       'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
@@ -2228,6 +2550,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchConcurrentLimit',
+    scopes: sharedScopes,
     description:
       'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
     type: 'integer',
@@ -2278,6 +2601,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bbAutoResolvePrTasks',
+    scopes: sharedScopes,
     description:
       'The PR tasks will be automatically completed after the PR is raised.',
     type: 'boolean',
@@ -2286,6 +2610,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'bbUseDefaultReviewers',
+    scopes: sharedScopes,
     description: 'Use the default reviewers (Bitbucket only).',
     type: 'boolean',
     default: true,
@@ -2303,6 +2628,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Automatic merging
   {
     name: 'automerge',
+    scopes: sharedScopes,
     description:
       'Whether to automerge branches/PRs automatically, without human intervention.',
     type: 'boolean',
@@ -2310,6 +2636,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeType',
+    scopes: sharedScopes,
     description: 'How to automerge, if enabled.',
     type: 'string',
     allowedValues: ['branch', 'pr', 'pr-comment'],
@@ -2317,6 +2644,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeStrategy',
+    scopes: sharedScopes,
     description:
       'The merge strategy to use when automerging PRs. Used only if `automergeType=pr`.',
     type: 'string',
@@ -2333,6 +2661,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'automergeComment',
+    scopes: sharedScopes,
     description:
       'PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.',
     type: 'string',
@@ -2340,6 +2669,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreTests',
+    scopes: sharedScopes,
     description: 'Set to `true` to enable automerging without tests.',
     type: 'boolean',
     default: false,
@@ -2355,6 +2685,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'vulnerabilityAlerts',
+    scopes: ['repo'],
     description:
       'Config to apply when a PR is needed due to a vulnerability in the existing package version.',
     type: 'object',
@@ -2368,6 +2699,7 @@ const options: Readonly<RenovateOptions>[] = [
       branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
       vulnerabilityFixStrategy: 'lowest',
+      prConcurrentLimit: 0,
     },
     mergeable: true,
     cli: false,
@@ -2385,6 +2717,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'osvVulnerabilityAlerts',
+    scopes: ['repo'],
     description: 'Use vulnerability alerts from `osv.dev`.',
     type: 'boolean',
     default: false,
@@ -2393,6 +2726,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pruneBranchAfterAutomerge',
+    scopes: sharedScopes,
     description: 'Set to `true` to enable branch pruning after automerging.',
     type: 'boolean',
     default: true,
@@ -2400,6 +2734,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Default templates
   {
     name: 'branchName',
+    scopes: sharedScopes,
     description: 'Branch name template.',
     type: 'string',
     default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
@@ -2410,6 +2745,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'additionalBranchPrefix',
+    scopes: sharedScopes,
     description: 'Additional string value to be appended to `branchPrefix`.',
     type: 'string',
     default: '',
@@ -2418,6 +2754,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchTopic',
+    scopes: sharedScopes,
     description: 'Branch topic.',
     type: 'string',
     default:
@@ -2427,6 +2764,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessage',
+    scopes: sharedScopes,
     description: 'Message to use for commit messages and pull request titles.',
     type: 'string',
     default:
@@ -2438,6 +2776,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitBody',
+    scopes: sharedScopes,
     description:
       'Commit message body template. Will be appended to commit message, separated by two line returns.',
     type: 'string',
@@ -2446,13 +2785,27 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitBodyTable',
+    scopes: sharedScopes,
     description:
       'If enabled, append a table in the commit message body describing all updates in the commit.',
     type: 'boolean',
     default: false,
   },
   {
+    name: 'commitTrailers',
+    scopes: sharedScopes,
+    description:
+      'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    mergeable: true,
+    cli: false,
+    supportsTemplating: true,
+  },
+  {
     name: 'commitMessagePrefix',
+    scopes: sharedScopes,
     description:
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
     type: 'string',
@@ -2462,6 +2815,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageAction',
+    scopes: sharedScopes,
     description: 'Action verb to use in commit messages and PR titles.',
     type: 'string',
     default: 'Update',
@@ -2471,6 +2825,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageTopic',
+    scopes: sharedScopes,
     description:
       'The upgrade topic/noun used in commit messages and PR titles.',
     type: 'string',
@@ -2481,6 +2836,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageExtra',
+    scopes: sharedScopes,
     description:
       'Extra description used after the commit message topic - typically the version.',
     type: 'string',
@@ -2492,6 +2848,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'commitMessageSuffix',
+    scopes: sharedScopes,
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
     cli: false,
@@ -2500,6 +2857,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyTemplate',
+    scopes: sharedScopes,
     description:
       'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
@@ -2510,6 +2868,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prTitle',
+    scopes: sharedScopes,
     description:
       'Pull Request title template. Inherits from `commitMessage` if null.',
     type: 'string',
@@ -2521,6 +2880,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prTitleStrict',
+    scopes: sharedScopes,
     description:
       'Whether to bypass appending extra context to the Pull Request title.',
     type: 'boolean',
@@ -2530,20 +2890,23 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prHeader',
+    scopes: sharedScopes,
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
     supportsTemplating: true,
   },
   {
     name: 'prFooter',
+    scopes: sharedScopes,
     description:
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
-    default: `This PR has been generated by [Mend Renovate](https://github.com/renovatebot/renovate).`,
+    default: `This PR has been generated by [Mend Renovate CLI](https://github.com/renovatebot/renovate).`,
     supportsTemplating: true,
   },
   {
     name: 'customizeDashboard',
+    scopes: ['repo'],
     description: 'Customize sections in the Dependency Dashboard issue.',
     type: 'object',
     default: {},
@@ -2554,6 +2917,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'lockFileMaintenance',
+    scopes: ['repo', 'packageRule', 'manager', 'vulnerabilityAlert'],
     description: 'Configuration for lock file maintenance.',
     stage: 'branch',
     type: 'object',
@@ -2575,6 +2939,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'hashedBranchLength',
+    scopes: sharedScopes,
     description:
       'If enabled, branch names will use a hashing function to ensure each branch has that length.',
     type: 'integer',
@@ -2584,6 +2949,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Dependency Groups
   {
     name: 'groupName',
+    scopes: sharedScopes,
     description: 'Human understandable name for the dependency group.',
     type: 'string',
     default: null,
@@ -2591,6 +2957,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'groupSlug',
+    scopes: sharedScopes,
     description:
       'Slug to use for group (e.g. in branch name). Slug is calculated from `groupName` if `null`.',
     type: 'string',
@@ -2601,6 +2968,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'group',
+    scopes: sharedScopes,
     description: 'Config if `groupName` is enabled.',
     type: 'object',
     default: {
@@ -2614,6 +2982,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'groupSingleUpdates',
+    scopes: sharedScopes,
     description:
       'Apply group settings even when the group contains only one update.',
     type: 'boolean',
@@ -2624,6 +2993,7 @@ const options: Readonly<RenovateOptions>[] = [
   // Pull Request options
   {
     name: 'labels',
+    scopes: sharedScopes,
     description: 'Labels to set in Pull Request.',
     type: 'array',
     subType: 'string',
@@ -2631,6 +3001,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'addLabels',
+    scopes: sharedScopes,
     description: 'Labels to add to Pull Request.',
     type: 'array',
     subType: 'string',
@@ -2639,6 +3010,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assignees',
+    scopes: sharedScopes,
     description:
       'Assignees for Pull Request (either username or email address depending on the platform).',
     type: 'array',
@@ -2646,6 +3018,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assigneesFromCodeOwners',
+    scopes: sharedScopes,
     description:
       'Determine assignees based on configured code owners and changes in PR.',
     type: 'boolean',
@@ -2653,6 +3026,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'expandCodeOwnersGroups',
+    scopes: sharedScopes,
     description:
       'Expand the configured code owner groups into a full list of group members.',
     type: 'boolean',
@@ -2661,12 +3035,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'assigneesSampleSize',
+    scopes: sharedScopes,
     description: 'Take a random sample of given size from `assignees`.',
     type: 'integer',
     default: null,
   },
   {
     name: 'assignAutomerge',
+    scopes: sharedScopes,
     description:
       'Assign reviewers and assignees even if the PR is to be automerged.',
     type: 'boolean',
@@ -2674,6 +3050,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'ignoreReviewers',
+    scopes: sharedScopes,
     description:
       'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
     type: 'array',
@@ -2681,6 +3058,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewers',
+    scopes: sharedScopes,
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',
     type: 'array',
@@ -2688,6 +3066,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewersFromCodeOwners',
+    scopes: sharedScopes,
     description:
       'Determine reviewers based on configured code owners and changes in PR.',
     type: 'boolean',
@@ -2695,6 +3074,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'filterUnavailableUsers',
+    scopes: sharedScopes,
     description: 'Filter reviewers and assignees based on their availability.',
     type: 'boolean',
     default: false,
@@ -2702,6 +3082,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'forkModeDisallowMaintainerEdits',
+    scopes: sharedScopes,
     description:
       'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
     type: 'boolean',
@@ -2710,6 +3091,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'confidential',
+    scopes: ['repo'],
     description:
       'If enabled, issues created by Renovate are set as confidential.',
     type: 'boolean',
@@ -2718,12 +3100,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'reviewersSampleSize',
+    scopes: sharedScopes,
     description: 'Take a random sample of given size from `reviewers`.',
     type: 'integer',
     default: null,
   },
   {
     name: 'additionalReviewers',
+    scopes: sharedScopes,
     description:
       'Additional reviewers for Pull Requests (in contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it).',
     type: 'array',
@@ -2741,10 +3125,12 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
-    parents: [...AllManagersListLiteral, 'customManagers'],
+    scopes: ['manager'],
+    parents: ['customManagers'],
   },
   {
     name: 'postUpdateOptions',
+    scopes: sharedScopes,
     description:
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
@@ -2758,6 +3144,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
+      'gomodTidyAll',
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
@@ -2777,15 +3164,17 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'constraints',
+    scopes: sharedScopes,
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: {},
+    default: { ghActionsLock: 'v0.4.1' },
     mergeable: true,
     cli: false,
     supportedManagers: [
       'bundler',
       'composer',
+      'github-actions',
       'gomod',
       'mise',
       'npm',
@@ -2794,24 +3183,29 @@ const options: Readonly<RenovateOptions>[] = [
       'poetry',
     ],
     freeChoice: true,
-    additionalProperties: {
-      type: 'string',
+    properties: {
+      ...toolConstraintProperties(),
+      ...additionalConstraintProperties(),
     },
+    additionalProperties: false,
   },
   {
     name: 'hostRules',
+    scopes: ['repo'],
     description: 'Host rules/configuration including credentials.',
     type: 'array',
     subType: 'object',
     stage: 'repository',
     cli: true,
     mergeable: true,
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'hostType',
     description:
       'hostType for a package rule. Can be a platform name or a datasource name.',
     type: 'string',
+    suggestedValues: [...PLATFORM_HOST_TYPES, ...AllDatasourcesListLiteral],
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,
@@ -2855,6 +3249,19 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     advancedUse: true,
+  },
+  {
+    name: 'allowInternal',
+    description:
+      "Whether requests to this host may reach internal addresses when `internalHostAccess=block`. Only honored from the self-hosted administrator's own configuration, or from inherited config when `inheritConfigTrusted=true`.",
+    type: 'boolean',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+    advancedUse: true,
+    globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'abortOnError',
@@ -2948,6 +3355,9 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Put fields to be forwarded to the HTTP request headers in the headers config option.',
     type: 'object',
+    additionalProperties: {
+      type: 'string',
+    },
     parents: ['hostRules'],
     cli: false,
     env: false,
@@ -3012,12 +3422,16 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'object',
     stage: 'repository',
     default: {},
+    additionalProperties: {
+      type: 'number',
+    },
     globalOnly: true,
     experimental: true,
     advancedUse: true,
   },
   {
     name: 'prBodyDefinitions',
+    scopes: sharedScopes,
     description: 'Table column definitions to use in PR tables.',
     type: 'object',
     freeChoice: true,
@@ -3047,6 +3461,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyHeadingDefinitions',
+    scopes: sharedScopes,
     description: 'Table header definitions to use in PR tables.',
     type: 'object',
     freeChoice: true,
@@ -3061,6 +3476,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyColumns',
+    scopes: sharedScopes,
     description: 'List of columns to use in PR bodies.',
     type: 'array',
     subType: 'string',
@@ -3068,6 +3484,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'prBodyNotes',
+    scopes: sharedScopes,
     description:
       'List of extra notes or templates to include in the Pull Request body.',
     type: 'array',
@@ -3079,6 +3496,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'suppressNotifications',
+    scopes: sharedScopes,
     description:
       'Options to suppress various types of warnings and other notifications.',
     type: 'array',
@@ -3101,6 +3519,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'pruneStaleBranches',
+    scopes: ['repo'],
     description: 'Set to `false` to disable pruning stale branches.',
     type: 'boolean',
     default: true,
@@ -3114,12 +3533,14 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'gitLabIgnoreApprovals',
+    scopes: sharedScopes,
     description: `Ignore approval rules for MRs created by Renovate, which is useful for automerge.`,
     type: 'boolean',
     default: false,
   },
   {
     name: 'customManagers',
+    scopes: ['repo'],
     description: 'Custom managers using regex matching.',
     type: 'array',
     subType: 'object',
@@ -3280,6 +3701,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'cloneSubmodules',
+    scopes: ['repo'],
     description:
       'Set to `true` to initialize submodules during repository clone.',
     type: 'boolean',
@@ -3287,6 +3709,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'cloneSubmodulesFilter',
+    scopes: ['repo'],
     description:
       'List of submodules names or patterns to clone when cloneSubmodules=true.',
     type: 'array',
@@ -3309,7 +3732,13 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper', 'mise'],
+    allowedValues: [
+      'bazelModDeps',
+      'goGenerate',
+      'gradleWrapper',
+      'mise',
+      'pixi',
+    ],
     stage: 'repository',
     globalOnly: true,
   },
@@ -3327,6 +3756,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'updatePinnedDependencies',
+    scopes: lookupScopes,
     description:
       'Whether to update pinned (single version) dependencies or not.',
     type: 'boolean',
@@ -3359,6 +3789,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'platformAutomerge',
+    scopes: sharedScopes,
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     default: true,
@@ -3373,6 +3804,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'userStrings',
+    scopes: sharedScopes,
     description:
       'User-facing strings for the Renovate comment when a PR is closed.',
     type: 'object',
@@ -3390,6 +3822,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'platformCommit',
+    scopes: sharedScopes,
     description:
       'Use platform API to perform commits instead of using Git directly.',
     type: 'string',
@@ -3399,6 +3832,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'branchNameStrict',
+    scopes: sharedScopes,
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',
     default: false,
@@ -3409,9 +3843,20 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
     type: 'array',
     subType: 'string',
+    cli: true,
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'rebaseAllOpenBranches',
+    description:
+      'Rebase all open branches at once, as if the rebase-all-open-PRs checkbox was selected in the Dependency Dashboard issue.',
+    type: 'boolean',
+    cli: true,
+    experimental: true,
+    globalOnly: true,
+    default: false,
   },
   {
     name: 'maxRetryAfter',
@@ -3426,6 +3871,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'logLevelRemap',
+    scopes: ['repo'],
     description: 'Remap log levels to different levels.',
     type: 'array',
     subType: 'object',
@@ -3453,6 +3899,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'milestone',
+    scopes: sharedScopes,
     description: `The number of a milestone. If set, the milestone will be set when Renovate creates the PR.`,
     type: 'integer',
     default: null,
@@ -3531,9 +3978,11 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'toolSettings',
+    scopes: sharedScopes,
     description:
       'Tool specific configuration. Global self-hosted configuration takes precedence.',
     type: 'object',
@@ -3541,6 +3990,7 @@ const options: Readonly<RenovateOptions>[] = [
       jvmMaxMemory: 512,
       jvmMemory: 512,
     },
+    additionalProperties: false,
     cli: false,
   },
   {
@@ -3575,6 +4025,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'constraintsVersioning',
+    scopes: lookupScopes,
     description:
       'Override the versioning scheme used when filtering releases by specific constraint names. Does not apply to tools.',
     type: 'object',
@@ -3583,9 +4034,8 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
     env: false,
     freeChoice: true,
-    additionalProperties: {
-      type: 'string',
-    },
+    properties: additionalConstraintProperties(),
+    additionalProperties: false,
   },
 ];
 
@@ -3594,16 +4044,19 @@ export function getOptions(): Readonly<RenovateOptions>[] {
 }
 
 function loadManagerOptions(): void {
-  for (const [name, defaultConfig] of Object.entries(managerDefaultConfigs)) {
+  for (const [name, { displayName, defaultConfig }] of Object.entries(
+    managerDefaultConfigs,
+  )) {
     const managerConfig: Readonly<RenovateOptions> = {
       name,
-      description: `Configuration object for the ${name} manager`,
+      description: `Configuration object for the ${displayName} manager`,
       stage: 'package',
       type: 'object',
       default: defaultConfig,
       mergeable: true,
       cli: false,
-      autogenerated: true,
+      autogenerated: 'manager',
+      scopes: ['repo'],
     };
     options.push(managerConfig);
   }

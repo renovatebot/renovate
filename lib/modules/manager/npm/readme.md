@@ -5,6 +5,7 @@
 Unfortunately, `npm` itself sometimes generates invalid lock files which fail `npm ci`.
 Try adding `"postUpdateOptions": ["npmInstallTwice"]` to tell Renovate run any `npm install` command (which is used to update lock files) twice.
 This is less efficient than running npm once, but has been known to fix most problems of this type.
+Renovate already runs `npm install` twice during lock file maintenance, because regenerating a lock file from scratch is known to need a second pass.
 
 If this npm bug remains unfixed, and it becomes too frequent for Renovate users, then we may need to modify Renovate to do this by default.
 Please post feedback to the Renovate repository "Discussions" if you're needing to use this feature frequently or widely.
