@@ -8,5 +8,10 @@ export const JuliaProject = Toml.pipe(
     weakdeps: LooseRecord(z.string()).optional().catch(undefined),
     extras: LooseRecord(z.string()).optional().catch(undefined),
     compat: LooseRecord(z.string()).optional().catch(undefined),
+    sources: LooseRecord(
+      z.object({ url: z.string().optional(), path: z.string().optional() }),
+    )
+      .optional()
+      .catch(undefined),
   }),
 );

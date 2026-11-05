@@ -13,7 +13,7 @@ export const knownDepTypes = [
   {
     depType: 'extras',
     description:
-      'A `[compat]` entry for a package in `[extras]`, such as a test-only dependency',
+      'A `[compat]` entry for a package in `[extras]`, which `[targets]` uses for tests or builds',
   },
   {
     depType: 'compat',

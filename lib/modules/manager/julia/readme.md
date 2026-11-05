@@ -16,6 +16,10 @@ To skip them, disable them with `packageRules`:
 }
 ```
 
+A `test/Project.toml` lists its test dependencies as `deps`; `matchFileNames` targets them.
+
+The manager skips a package that `[sources]` takes from a git repository or a local path.
+
 The `julia` entry constrains the Julia version itself, not a registered package, so the manager skips it.
 Raising its lower bound drops support for older Julia versions, which is the maintainer's decision.
 

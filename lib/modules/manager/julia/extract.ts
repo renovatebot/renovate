@@ -53,7 +53,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const { version, compat = {} } = parsed.data;
+  const { version, compat = {}, sources = {} } = parsed.data;
   // A package listed in several sections is a dependency of the first.
   const sections = (['deps', 'weakdeps', 'extras'] as const).map((depType) => ({
     depType,
@@ -78,7 +78,13 @@ export function extractPackageFile(
       // Another registry's package can have the name of a General package.
       dep.packageName = `${depName}=${uuid}`;
     }
-    if (unregisteredStdlibs.has(depName)) {
+    // `[sources]` takes the package from a git repository or a local path
+    // instead of a registry.
+    if (sources[depName]?.url) {
+      dep.skipReason = 'git-dependency';
+    } else if (sources[depName]?.path) {
+      dep.skipReason = 'path-dependency';
+    } else if (unregisteredStdlibs.has(depName)) {
       dep.skipReason = 'unsupported';
     }
     deps.push(dep);

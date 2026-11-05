@@ -169,6 +169,52 @@ describe('modules/manager/julia/extract', () => {
       });
     });
 
+    it('skips packages that [sources] takes from git or a path', () => {
+      const content = codeBlock`
+        [deps]
+        Example = "7876af07-990d-54b4-ab0e-23690620f79a"
+        JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+        Sample = "c2b9a2c5-1a5e-4f8f-9e57-8b5e8a6f2a3d"
+
+        [sources]
+        Example = {url = "https://github.com/JuliaLang/Example.jl", rev = "master"}
+        JSON = {path = "../JSON"}
+        Sample = {rev = "main"}
+
+        [compat]
+        Example = "0.5"
+        JSON = "1"
+        Sample = "0.1"
+      `;
+
+      expect(extractPackageFile(content, 'Project.toml')?.deps).toMatchObject([
+        { depName: 'Example', skipReason: 'git-dependency' },
+        { depName: 'JSON', skipReason: 'path-dependency' },
+        { depName: 'Sample' },
+      ]);
+      expect(
+        extractPackageFile(content, 'Project.toml')?.deps[2],
+      ).not.toHaveProperty('skipReason');
+    });
+
+    it('ignores a malformed [sources] section', () => {
+      const content = codeBlock`
+        sources = "Example"
+
+        [compat]
+        Example = "0.5"
+      `;
+
+      expect(extractPackageFile(content, 'Project.toml')?.deps).toEqual([
+        {
+          depName: 'Example',
+          depType: 'compat',
+          currentValue: '0.5',
+          datasource: 'julia-general-metadata',
+        },
+      ]);
+    });
+
     it('drops compat values that are not strings', () => {
       const content = codeBlock`
         [compat]
