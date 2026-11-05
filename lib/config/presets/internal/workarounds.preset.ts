@@ -64,15 +64,14 @@ export const presets: Record<string, Preset> = {
     ],
   },
   byteBuddyMavenArtifactVersioning: {
-    description: 'Use custom regex versioning for byte-buddy maven artifact',
+    description: 'Define versionCompatibility for byte-buddy maven artifact',
     packageRules: [
       {
         description:
           'byte-buddy artifact specifies compatibility in version string',
         matchDatasources: ['maven'],
         matchPackageNames: ['net.bytebuddy:byte-buddy'],
-        versioning:
-          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+))?$',
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
       },
     ],
   },
