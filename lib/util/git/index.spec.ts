@@ -217,7 +217,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
 
         git.createSimpleGit({
-          authentication: { hostTypes: ['git-refs'] },
+          authentication: {
+            hostTypes: ['git-refs'],
+            url: 'https://git.example.com/repo.git',
+          },
         });
 
         expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
@@ -227,6 +230,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             GIT_CONFIG_VALUE_0: 'existing-value',
           }),
           ['git-refs'],
+          'https://git.example.com/repo.git',
         );
         expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
       });
@@ -997,6 +1001,35 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
         await expect(
           fs.pathExists(`${tmpDir.path}/local_only_file`),
+        ).resolves.toBeTrue();
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(pushSpy).not.toHaveBeenCalled();
+      });
+
+      it('should merge a local branch without fetching from origin', async () => {
+        await git.prepareCommit({
+          branchName: 'renovate/unpushed_branch',
+          message: 'unpushed commit',
+          files: [
+            { type: 'addition', path: 'unpushed_file', contents: 'local' },
+          ],
+        });
+        // Reset working tree back to default branch so the file is not present yet
+        const local = simpleGit(tmpDir.path);
+        await local.checkout(defaultBranch);
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
+        ).resolves.toBeFalse();
+        const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+        await git.mergeToLocal('renovate/unpushed_branch', {
+          localBranch: true,
+        });
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
         ).resolves.toBeTrue();
         expect(fetchSpy).not.toHaveBeenCalled();
         expect(pushSpy).not.toHaveBeenCalled();

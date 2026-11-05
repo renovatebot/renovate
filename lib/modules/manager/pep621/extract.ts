@@ -80,7 +80,7 @@ function getUvRequiredVersionReplacement(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -145,6 +145,7 @@ export async function extractPackageFile(
       def,
       processedDeps,
       packageFile,
+      config,
     );
 
     const processedLockFiles = await processor.getLockfiles(def, packageFile);

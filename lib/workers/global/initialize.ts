@@ -1,4 +1,9 @@
 import os from 'node:os';
+import {
+  configure as configureContainerbase,
+  isContainerbase,
+  validateContainerbaseVersion,
+} from '@renovatebot/base-image';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
@@ -12,6 +17,7 @@ import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -50,11 +56,41 @@ function limitCommitsPerRun(config: RenovateConfig): void {
   setMaxLimit('Commits', typeof limit === 'number' && limit > 0 ? limit : null);
 }
 
+/**
+ * Checks that the Containerbase image version is compatible with Renovate.
+ *
+ * Can be skipped using `RENOVATE_X_IGNORE_CONTAINERBASE_VERSION`, which is
+ * read from the process environment only.
+ */
+async function checkContainerbaseVersion(): Promise<void> {
+  if (!isContainerbase()) {
+    return;
+  }
+  if (process.env.RENOVATE_X_IGNORE_CONTAINERBASE_VERSION) {
+    logger.info(
+      'Containerbase version check is skipped via RENOVATE_X_IGNORE_CONTAINERBASE_VERSION',
+    );
+    return;
+  }
+  try {
+    const version = await validateContainerbaseVersion();
+    logger.debug({ version }, 'Containerbase image version is compatible');
+  } catch (err) {
+    throw new Error(
+      `Init: containerbase image version check failed: ${err.message}. Upgrade your version of Containerbase, or set \`RENOVATE_X_IGNORE_CONTAINERBASE_VERSION\` to skip the check.`,
+    );
+  }
+}
+
+/**
+ * Checks the versions of the tools and the image Renovate depends on.
+ */
 async function checkVersions(): Promise<void> {
   const validGitVersion = await validateGitVersion();
   if (!validGitVersion) {
     throw new Error('Init: git version needs upgrading');
   }
+  await checkContainerbaseVersion();
 }
 
 function setGlobalHostRules(config: AllConfig): void {
@@ -86,6 +122,8 @@ export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
+  // containerbase and osv-offline log to Renovate's logger instead of `debug`
+  configureContainerbase({ logger });
   setHttpRateLimits();
   await checkVersions();
   setGlobalHostRules(config);
@@ -102,6 +140,7 @@ export async function globalInitialize(
 }
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await Vulnerabilities.cleanup();
   await packageCache.cleanup(config);
   resetGlobalLogLevelRemaps();
 }

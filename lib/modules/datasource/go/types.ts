@@ -14,3 +14,10 @@ export interface GoproxyItem {
   url: string;
   fallback: GoproxyFallback;
 }
+
+export interface GoEnv {
+  GOPROXY?: string;
+  GONOPROXY?: string;
+  GOPRIVATE?: string;
+  GONOSUMDB?: string;
+}

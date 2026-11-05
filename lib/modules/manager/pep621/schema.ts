@@ -1,4 +1,6 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -251,23 +253,119 @@ export const PdmLockfile = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
+export interface UvLockedPackage {
+  version: string;
+  /**
+   * Whether the lock file holds more than one entry for this package, as it
+   * does when resolution markers resolve to different versions. Such a package
+   * cannot be upgraded to a pinned version, because `uv` reads the pin as a
+   * constraint on every marker, and so may downgrade the other entries, or
+   * fail to resolve at all.
+   */
+  hasMultipleEntries?: boolean;
+  /**
+   * The index a package was resolved from, if any. Absent for the workspace
+   * root and for virtual/editable/path/git packages, which cannot be
+   * remediated by `uv lock --upgrade-package`.
+   */
+  registryUrl?: string;
+}
+
+export interface UvLockfileData {
+  packages: Record<string, UvLockedPackage>;
+  /**
+   * Every package name which a workspace member declares. A workspace shares
+   * one lock file between its members, so a package one member declares is not
+   * transitive just because another member doesn't declare it.
+   */
+  declaredNames: Set<string>;
+}
+
+const UvLockedDependencies = LooseArray(z.object({ name: z.string() }))
+  .optional()
+  .catch(undefined);
+const UvLockedDependencyGroups = z
+  .record(z.string(), LooseArray(z.object({ name: z.string() })))
+  .optional()
+  .catch(undefined);
+
+/**
+ * The source of a workspace member, as opposed to a package which was fetched:
+ * the workspace root is `virtual`, a member with a build backend `editable`.
+ */
+const UvWorkspaceMemberSource = z.object({
+  virtual: z.string().optional(),
+  editable: z.string().optional(),
+});
+
 export const UvLockfile = Toml.pipe(
   z.object({
+    manifest: z
+      .object({ members: LooseArray(z.string()) })
+      .partial()
+      .optional()
+      .catch(undefined),
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z
+          .object({ registry: z.string() })
+          .partial()
+          .and(UvWorkspaceMemberSource)
+          .optional(),
+        dependencies: UvLockedDependencies,
+        'optional-dependencies': UvLockedDependencyGroups,
+        'dev-dependencies': UvLockedDependencyGroups,
       }),
     ),
   }),
-).transform(({ package: pkgs }) => {
-  const pkgMap: Record<string, string> = {};
+).transform(({ manifest, package: pkgs }): UvLockfileData => {
+  const packages: Record<string, UvLockedPackage> = {};
+  const declaredNames = new Set<string>();
+  const members = new Set(coerceArray(manifest?.members));
 
-  for (const { name, version } of pkgs) {
-    if (!(name in pkgMap) || pep440.isGreaterThan(pkgMap[name], version)) {
-      pkgMap[name] = version;
+  for (const pkg of pkgs) {
+    const { name, version, source } = pkg;
+
+    // Only a workspace member declares its dependencies in a `pyproject.toml`
+    // of its own. A git, path or url package also has no registry, but what it
+    // depends on is as transitive as anything else in the lock file.
+    // A workspace names its members, and the root is the lock file's own
+    // directory. An editable path dependency outside the workspace carries a
+    // path of its own, and what it pulls in is as transitive as anything else.
+    const workspacePath = source?.virtual ?? source?.editable;
+    if (members.has(name) || workspacePath === '.') {
+      for (const group of [
+        pkg.dependencies,
+        ...Object.values(coerceObject(pkg['optional-dependencies'])),
+        ...Object.values(coerceObject(pkg['dev-dependencies'])),
+      ]) {
+        for (const dependency of coerceArray(group)) {
+          declaredNames.add(dependency.name);
+        }
+      }
+    }
+
+    const locked = packages[name];
+    // A package can be locked at several versions, e.g. for different Python
+    // versions or platforms. Use the lowest one, so updates are not missed.
+    if (!locked) {
+      packages[name] = { version, registryUrl: source?.registry };
+      continue;
+    }
+
+    locked.hasMultipleEntries = true;
+    // any entry of a package may be the one with a registry to look it up in
+    locked.registryUrl ??= source?.registry;
+    if (pep440.isGreaterThan(locked.version, version)) {
+      packages[name] = {
+        version,
+        registryUrl: source?.registry ?? locked.registryUrl,
+        hasMultipleEntries: true,
+      };
     }
   }
 
-  return pkgMap;
+  return { packages, declaredNames };
 });
