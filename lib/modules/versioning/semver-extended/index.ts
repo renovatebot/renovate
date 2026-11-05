@@ -113,7 +113,7 @@ class SemverExtendedVersioningApi extends GenericVersioningApi<SemverExtendedVer
     }
     return updateRange(alternatives, rangeStrategy, {
       parsed,
-      text: stripVersionPrefix(newVersion, true),
+      text: stripVersionPrefix(newVersion),
     });
   }
 

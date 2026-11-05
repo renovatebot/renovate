@@ -10,20 +10,17 @@ import {
 describe('util/string', () => {
   describe('stripVersionPrefix', () => {
     it.each`
-      version      | ignoreCase   | expected
-      ${'v1.2.3'}  | ${undefined} | ${'1.2.3'}
-      ${'V1.2.3'}  | ${undefined} | ${'V1.2.3'}
-      ${'1.2.3'}   | ${undefined} | ${'1.2.3'}
-      ${'vv1.2.3'} | ${undefined} | ${'v1.2.3'}
-      ${'1.2.3v'}  | ${undefined} | ${'1.2.3v'}
-      ${'v1.2.3'}  | ${true}      | ${'1.2.3'}
-      ${'V1.2.3'}  | ${true}      | ${'1.2.3'}
-      ${'1.2.3'}   | ${true}      | ${'1.2.3'}
-      ${''}        | ${true}      | ${''}
+      version      | expected
+      ${'v1.2.3'}  | ${'1.2.3'}
+      ${'V1.2.3'}  | ${'1.2.3'}
+      ${'1.2.3'}   | ${'1.2.3'}
+      ${'vv1.2.3'} | ${'v1.2.3'}
+      ${'1.2.3v'}  | ${'1.2.3v'}
+      ${''}        | ${''}
     `(
-      'stripVersionPrefix("$version", $ignoreCase) === "$expected"',
-      ({ version, ignoreCase, expected }) => {
-        expect(stripVersionPrefix(version, ignoreCase)).toBe(expected);
+      'stripVersionPrefix("$version") === "$expected"',
+      ({ version, expected }) => {
+        expect(stripVersionPrefix(version)).toBe(expected);
       },
     );
   });

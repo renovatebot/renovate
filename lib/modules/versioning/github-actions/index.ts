@@ -18,7 +18,7 @@ const floatingMinorTagRegex = regEx(/^\d+(?:\.\d+)?$/);
 const majorOnlyRegex = regEx(/^\d+$/);
 
 function massageValue(input: string): string {
-  return stripVersionPrefix(input.trim(), true);
+  return stripVersionPrefix(input.trim());
 }
 
 function parseVersion(input: string): SemVer | null {

@@ -12,7 +12,6 @@ ruleTester.run('prefer-strip-version-prefix', rule, {
   valid: [
     // already using the helper
     `const v = stripVersionPrefix(x);`,
-    `const v = stripVersionPrefix(x, true);`,
     // patterns that do more than remove the prefix
     `const v = x.replace(/^v\\??/, '');`,
     `const v = x.replace(regEx(/^v\\d+/), '');`,
@@ -60,19 +59,19 @@ ruleTester.run('prefer-strip-version-prefix', rule, {
     },
     {
       code: `const v = x.replace(/^v/i, '');`,
-      errors: [{ messageId: 'preferStripVersionPrefixIgnoreCase' }],
+      errors: [{ messageId: 'preferStripVersionPrefix' }],
     },
     {
       code: `const v = x.replace(regEx(/^v/i), '');`,
-      errors: [{ messageId: 'preferStripVersionPrefixIgnoreCase' }],
+      errors: [{ messageId: 'preferStripVersionPrefix' }],
     },
     {
       code: `const v = x.replace(/^[vV]/, '');`,
-      errors: [{ messageId: 'preferStripVersionPrefixIgnoreCase' }],
+      errors: [{ messageId: 'preferStripVersionPrefix' }],
     },
     {
       code: `const v = x.replace(regEx(/^[Vv]/), '');`,
-      errors: [{ messageId: 'preferStripVersionPrefixIgnoreCase' }],
+      errors: [{ messageId: 'preferStripVersionPrefix' }],
     },
   ],
 });

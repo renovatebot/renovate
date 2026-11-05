@@ -33,7 +33,7 @@ function equals(a: string, b: string): boolean {
 }
 
 function getMajor(version: string): number | null {
-  const tokens = parse(version && stripVersionPrefix(version, true));
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens?.[0];
     if (majorToken?.type === TokenType.Number) {
@@ -44,7 +44,7 @@ function getMajor(version: string): number | null {
 }
 
 function getMinor(version: string): number | null {
-  const tokens = parse(version && stripVersionPrefix(version, true));
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
@@ -60,7 +60,7 @@ function getMinor(version: string): number | null {
 }
 
 function getPatch(version: string): number | null {
-  const tokens = parse(version && stripVersionPrefix(version, true));
+  const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
     const majorToken = tokens[0];
     const minorToken = tokens[1];
@@ -85,7 +85,7 @@ function getExactSection(
   version: string,
   type: keyof typeof sectionIndexes,
 ): bigint | null {
-  const tokens = parse(stripVersionPrefix(version, true));
+  const tokens = parse(stripVersionPrefix(version));
   if (!tokens) {
     return null;
   }

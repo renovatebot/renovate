@@ -15,8 +15,6 @@ export default defineRule({
     messages: {
       preferStripVersionPrefix:
         'Use `stripVersionPrefix()` from `lib/util/string.ts` instead of removing the leading `v` with `replace()`.',
-      preferStripVersionPrefixIgnoreCase:
-        'Use `stripVersionPrefix(value, true)` from `lib/util/string.ts` instead of removing the leading `v` or `V` with `replace()`.',
     },
   },
   createOnce(context) {
@@ -60,17 +58,10 @@ export default defineRule({
         }
 
         const { pattern: source, flags } = literal.regex;
-        if (source === '^v' && flags === '') {
-          context.report({ node, messageId: 'preferStripVersionPrefix' });
-          return;
-        }
-        const isFlagged = source === '^v' && flags === 'i';
+        const isPlain = source === '^v' && ['', 'i'].includes(flags);
         const isCharClass = flags === '' && ['^[vV]', '^[Vv]'].includes(source);
-        if (isFlagged || isCharClass) {
-          context.report({
-            node,
-            messageId: 'preferStripVersionPrefixIgnoreCase',
-          });
+        if (isPlain || isCharClass) {
+          context.report({ node, messageId: 'preferStripVersionPrefix' });
         }
       },
     };

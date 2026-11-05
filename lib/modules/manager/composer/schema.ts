@@ -307,7 +307,7 @@ export const ComposerExtract = z
 
         const lockedDep = locked.find((item) => item.name === depName);
         if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-          dep.lockedVersion = stripVersionPrefix(lockedDep.version, true);
+          dep.lockedVersion = stripVersionPrefix(lockedDep.version);
         }
 
         const gitRepo = gitRepos[depName];
