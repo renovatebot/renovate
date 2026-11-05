@@ -110,7 +110,7 @@ Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#mi
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
-How Renovate does this depends on the package manager, for example pnpm excludes the updated versions, Poetry the updated packages, while npm gets the smaller value for that branch.
+How Renovate does this depends on the package manager, for example pnpm excludes the updated versions, Poetry the updated packages, while npm and cargo get the smaller value for that branch.
 It never wins over the minimum release age which your repository configures in the package manager itself.
 The package manager still applies that age, like for security updates, and refuses a younger release.
 Without `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of the update, including a value from `packageRules`, and `minimumReleaseAgePackageManager` has no effect.
@@ -321,6 +321,79 @@ For example, with this config:
 - With `boto3 = "1.35.50"` in the `pyproject.toml`, an update of `boto3` to a release which is 1 day old runs Poetry with `POETRY_SOLVER_MIN_RELEASE_AGE=3` and `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE=boto3`.
 - With `boto3 = "^1.35.50"`, Renovate sets no `POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE`, and Poetry refuses a release younger than 3 days.
 - With `solver.min-release-age = 5` in the `poetry.toml`, Renovate waits 5 days before it raises an update, also for `boto3`, and sets no variable, as Poetry applies its own 5 days.
+
+#### Cargo
+
+Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate passes no minimum release age to cargo, and cargo applies its own config.
+Renovate then does not read the publish ages of the cargo config when it looks up updates, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
+
+With `minimumReleaseAgePackageManagerSync`, when a minimum release age applies to the repository, Renovate sets the `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` environment variable when it runs `cargo update`.
+The age comes from the repository level `minimumReleaseAge`, or from the `minimumReleaseAge` of lock file maintenance, not from `packageRules`.
+A larger `minimumReleaseAgePackageManager` raises it.
+For security updates, Renovate sets nothing, and cargo applies the age of its own config.
+Renovate also sets `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny` with it, so that an `allow` in the cargo config does not turn off the check.
+Cargo respects these settings from Rust 1.100.0 on, and older versions ignore them.
+Renovate passes both variables in the environment of cargo, so a value which the environment of Renovate, `customEnvVariables` or `env` sets for one of them takes precedence.
+
+With `minimumReleaseAgePackageManagerSync`, Renovate reads `registry.global-min-publish-age` and `registries.<name>.min-publish-age` from the repository `.cargo/config`, or from `.cargo/config.toml` if it does not exist, like cargo.
+Renovate applies these ages per registry like cargo does: a crate gets the `min-publish-age` of its registry, and else the `global-min-publish-age`.
+`registries.crates-io.min-publish-age` sets the age of crates from crates.io.
+If another registry replaces crates.io, cargo applies the age of crates.io to its crates, and Renovate only applies a larger age of that registry to them.
+An age of `"0"` turns the setting off for that registry, and Renovate ignores ages which cargo rejects, like `3d`.
+Renovate uses the larger of the age of the registry of a crate and `minimumReleaseAge` when it looks up updates.
+Cargo only checks the age of versions which have a publish time in the index of their registry, but Renovate applies the age to all crates of the registry.
+Renovate gets no release timestamps for the crates of a registry which publishes no time, so their updates wait forever with the default `minimumReleaseAgeBehaviour`.
+For such a registry, set `minimumReleaseAgeBehaviour` to `timestamp-optional` in a `packageRules` entry with `matchRegistryUrls`.
+Renovate passes the larger of `registry.global-min-publish-age` and the age it applies to the repository to cargo, so that the environment variable does not weaken the cargo config.
+If that is `registry.global-min-publish-age`, Renovate sets neither variable, and cargo applies its own config, unless the cargo config sets `resolver.incompatible-publish-age = "allow"`, then Renovate passes that age with `deny`.
+The environment variable only replaces `registry.global-min-publish-age`, so a `registries.<name>.min-publish-age` takes precedence over the age which Renovate passes.
+Renovate does not change these per-registry values.
+Renovate does not read the cargo config in `$CARGO_HOME`, and the environment variable replaces a `registry.global-min-publish-age` from there as well.
+
+Cargo has no per-package exclude for the minimum release age.
+If a `minimumReleaseAge` from `packageRules` makes the age of an updated crate smaller than the age Renovate passes to cargo, and the release of that crate is younger than that or has no timestamp, Renovate passes that smaller age, but not less than `registry.global-min-publish-age`, and adds a notice to the pull request.
+The smaller age applies to all crates of the lock file whose registry has no `min-publish-age`.
+Renovate does not lower the age for a crate whose registry has its own `min-publish-age`, as cargo applies that one.
+
+Renovate passes the age in the largest unit which keeps it a whole number, for example `36 hours`.
+Renovate does not pass `minimumReleaseAgeBuffer` to cargo.
+
+Renovate takes the `rust` constraint from your config, or from the Rust version which another manager shares for the directory, like the `mise` or `rust-toolchain` manager, see [`constraints`](../configuration-options.md#constraints).
+Without such a version, Renovate still passes the ages to cargo, but lock file maintenance waits for release timestamps.
+
+With `minimumReleaseAgePackageManagerSync`, cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
+
+- the self-hosted Renovate sets the experimental [`RENOVATE_X_CARGO_MIN_PUBLISH_AGE`](../self-hosted-experimental.md#renovate_x_cargo_min_publish_age) environment variable,
+- the `rust` constraint only allows Rust 1.100.0 or later, for example `1.100.0` or `1.100`,
+- the lock file has no packages from git repositories, as cargo updates them without checking their age, and
+- no registry in the cargo config has a `min-publish-age` which is smaller than the `minimumReleaseAge` of lock file maintenance, invalid, or `"0"`, which turns the check off for that registry
+
+Cargo does not check the age of the crates of a registry which publishes no time, so lock file maintenance can update them to a younger release.
+
+For example, with this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "cargo": {
+    "minimumReleaseAge": "7 days"
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": ["cc"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+- Without a cargo config, Renovate runs `cargo update` with `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE=7 days` and `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny`.
+- If the self-hosted Renovate sets `RENOVATE_X_CARGO_MIN_PUBLISH_AGE` and a `rust-toolchain.toml` pins Rust `1.100.0`, lock file maintenance does not wait for release timestamps.
+- An update of `cc` to a release which is 2 days old sets neither variable, and the PR notes that cargo checked no publish age instead of 7 days.
+- With `registry.global-min-publish-age = "10 days"` in the `.cargo/config.toml`, Renovate waits 10 days before it raises an update, also for `cc`, and sets neither variable, as cargo applies its own 10 days.
+- With `registries.crates-io.min-publish-age = "2 days"` in the `.cargo/config.toml`, Renovate still waits 7 days and passes `7 days`, but cargo checks 2 days for crates from crates.io, as the registry value takes precedence.
+  Lock file maintenance waits for release timestamps, as 2 days is smaller than its `minimumReleaseAge`.
+- Without `minimumReleaseAgePackageManagerSync`, Renovate sets neither variable.
 
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
