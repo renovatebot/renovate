@@ -243,7 +243,12 @@ export class UvProcessor extends BasePyProjectProcessor {
       if (isLockFileMaintenance) {
         cmd = `${uvUpdateCMD} --upgrade`;
       } else {
-        cmd = generateCMD(updatedDeps);
+        const upgradeCmd = generateCMD(updatedDeps);
+        if (!upgradeCmd) {
+          logger.debug('No locked dependencies to update in uv.lock');
+          return null;
+        }
+        cmd = upgradeCmd;
       }
       return await updateLockFile({
         lockFileName,
@@ -260,7 +265,7 @@ export class UvProcessor extends BasePyProjectProcessor {
   }
 }
 
-function generateCMD(updatedDeps: Upgrade[]): string {
+function generateCMD(updatedDeps: Upgrade[]): string | null {
   const deps: string[] = [];
 
   for (const dep of updatedDeps) {
@@ -275,12 +280,17 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         break;
       }
       case depTypes.buildSystemRequires:
-        // build requirements are not locked in the lock files, no need to update.
+      case depTypes.uvRequiredVersion:
+        // not locked in the lock file, no need to update.
         break;
       default: {
         deps.push(dep.packageName!);
       }
     }
+  }
+
+  if (!deps.length) {
+    return null;
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
