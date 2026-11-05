@@ -47,6 +47,7 @@ async function resolveAndMerge(
   let result: RenovateConfig;
   ({ config: result } = await resolveConfigPresets(migratedConfig, config));
   result = mergeChildConfig(config, result);
+  // baseBranches value should be based off the default branch
   result.baseBranchPatterns = config.baseBranchPatterns;
   result.baseBranches = config.baseBranches;
   /* v8 ignore if -- TODO: add test #40625 */
