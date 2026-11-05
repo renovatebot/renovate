@@ -1916,8 +1916,7 @@ function getAutomergeCommit(
   platformPrOptions: PlatformPrOptions,
 ): AutomergeCommit {
   const configuredMergeMethod =
-    mapMergeStartegy(platformPrOptions.automergeStrategy) ??
-    config.mergeMethod;
+    mapMergeStartegy(platformPrOptions.automergeStrategy) ?? config.mergeMethod;
   const mergeMethod = configuredMergeMethod?.toUpperCase() || 'MERGE';
 
   // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
