@@ -1,9 +1,14 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
 import type { Http } from '../../../util/http/index.ts';
-import { HttpError } from '../../../util/http/index.ts';
+import {
+  isNotFound,
+  isOk,
+  isRangeNotSatisfiable,
+} from '../../../util/http/status.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { newlineRegex } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
@@ -43,7 +48,7 @@ function reconcilePackageVersions(
 ): PackageVersions {
   for (const line of versionLines) {
     const packageName = copystr(line.packageName);
-    let versions = packageVersions.get(packageName) ?? [];
+    let versions = coerceArray(packageVersions.get(packageName));
 
     const { deletedVersions, addedVersions } = line;
 
@@ -51,9 +56,11 @@ function reconcilePackageVersions(
       versions = versions.filter((v) => !deletedVersions.has(v));
     }
 
+    // v8 ignore else -- needs a delta that only removes versions
     if (addedVersions.length > 0) {
       const existingVersions = new Set(versions);
       for (const addedVersion of addedVersions) {
+        // v8 ignore else -- needs a delta re-adding a version already present
         if (!existingVersions.has(addedVersion)) {
           const version = copystr(addedVersion);
           versions.push(version);
@@ -93,6 +100,7 @@ function cacheResult(
   result: VersionsEndpointResult,
 ): void {
   const registryHostname = parseUrl(registryUrl)?.hostname;
+  // v8 ignore else -- needs a result cached for a non-rubygems.org host
   if (registryHostname === 'rubygems.org') {
     memCache.set(registryUrl, result);
   }
@@ -213,7 +221,7 @@ export class VersionsEndpointCache {
       const { body } = await this.http.getText(url, opts);
       return parseFullBody(body);
     } catch (err) {
-      if (err instanceof HttpError && err.response?.statusCode === 404) {
+      if (isNotFound(err)) {
         return Result.err('unsupported-api');
       }
 
@@ -240,7 +248,7 @@ export class VersionsEndpointCache {
        * Rubygems will return the full body instead of `416 Range Not Satisfiable`.
        * In this case, status code will be 200 instead of 206.
        */
-      if (statusCode === 200) {
+      if (isOk(statusCode)) {
         return parseFullBody(body);
       }
 
@@ -274,24 +282,20 @@ export class VersionsEndpointCache {
         contentTail,
       });
     } catch (err) {
-      if (err instanceof HttpError) {
-        const responseStatus = err.response?.statusCode;
+      /**
+       * In case of `416 Range Not Satisfiable` we do a full sync.
+       * This is unlikely to happen in real life, but anyway.
+       */
+      if (isRangeNotSatisfiable(err)) {
+        return this.fullSync(registryUrl);
+      }
 
-        /**
-         * In case of `416 Range Not Satisfiable` we do a full sync.
-         * This is unlikely to happen in real life, but anyway.
-         */
-        if (responseStatus === 416) {
-          return this.fullSync(registryUrl);
-        }
-
-        /**
-         * If the endpoint is not supported, we stop trying.
-         * This is unlikely to happen in real life, but still.
-         */
-        if (responseStatus === 404) {
-          return Result.err('unsupported-api');
-        }
+      /**
+       * If the endpoint is not supported, we stop trying.
+       * This is unlikely to happen in real life, but still.
+       */
+      if (isNotFound(err)) {
+        return Result.err('unsupported-api');
       }
 
       throw err;

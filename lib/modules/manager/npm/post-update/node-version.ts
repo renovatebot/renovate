@@ -1,3 +1,4 @@
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -5,6 +6,7 @@ import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import type { LazyPackageJson } from './types.ts';
 
 async function getNodeFile(filename: string): Promise<string | null> {
@@ -19,6 +21,21 @@ async function getNodeFile(filename: string): Promise<string | null> {
     }
   } catch {
     // do nothing
+  }
+  return null;
+}
+
+async function getDevEnginesConstraint(
+  pkg: LazyPackageJson,
+): Promise<string | null> {
+  const runtime = (await pkg.getValue()).devEngines?.runtime;
+  const runtimes = isArray(runtime) ? runtime : [runtime];
+  const constraint = runtimes.find((r) => r?.name === 'node')?.version;
+  if (constraint && semver.validRange(constraint)) {
+    logger.debug(
+      `Using node constraint "${constraint}" from package.json devEngines`,
+    );
+    return constraint;
   }
   return null;
 }
@@ -59,10 +76,16 @@ export async function getNodeConstraint(
 ): Promise<string | null> {
   const constraint =
     getNodeUpdate(upgrades) ??
-    config.constraints?.node ??
-    (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
-    (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
-    (await getPackageJsonConstraint(pkg));
+    (await resolveToolConstraint(
+      config,
+      'node',
+      async () =>
+        (await getDevEnginesConstraint(pkg)) ??
+        (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
+        (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
+        (await getPackageJsonConstraint(pkg)),
+    )) ??
+    null;
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }

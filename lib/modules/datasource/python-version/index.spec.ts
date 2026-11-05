@@ -2,6 +2,7 @@ import { satisfies } from '@renovatebot/pep440';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common.ts';
@@ -72,12 +73,12 @@ describe('modules/datasource/python-version/index', () => {
 
     it('returns null for error', async () => {
       httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('falls back to prebuild releases on 429', async () => {
@@ -105,22 +106,22 @@ describe('modules/datasource/python-version/index', () => {
         'getPrebuildReleases',
       ).mockResolvedValueOnce(null);
       httpMock.scope(defaultRegistryUrl).get('').reply(429);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
       httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           datasource,
           packageName: 'python',
         }),
-      ).toBeNull();
+      ).resolves.toBeNull();
     });
 
     describe('processes real data', () => {
@@ -150,7 +151,7 @@ describe('modules/datasource/python-version/index', () => {
           packageName: 'python',
         });
         expect(res?.releases).toHaveLength(2);
-        for (const release of res?.releases ?? []) {
+        for (const release of coerceArray(res?.releases)) {
           expect(release.isStable).toBeTrue();
         }
       });
@@ -173,7 +174,7 @@ describe('modules/datasource/python-version/index', () => {
           packageName: 'python',
         });
         expect(res?.releases).toHaveLength(2);
-        for (const release of res?.releases ?? []) {
+        for (const release of coerceArray(res?.releases)) {
           expect(release.isDeprecated).toBeBoolean();
         }
       });

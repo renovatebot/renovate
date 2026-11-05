@@ -17,4 +17,17 @@ describe('other/validate-docker', () => {
     expect(versions).toHaveLength(3);
     expect(new Set(versions)).toEqual(new Set(versions.slice(0, 1)));
   });
+
+  it('validate base image npm package matches the docker base image version', async () => {
+    const dockerfile = await fs.readFile('tools/docker/Dockerfile', 'utf8');
+    const { dependencies } = await fs.readJson('package.json');
+
+    const dockerVersion =
+      /ghcr\.io\/renovatebot\/base-image:(?<version>\d+\.\d+\.\d+)/.exec(
+        dockerfile,
+      )?.groups?.version;
+
+    expect(dockerVersion).toBeString();
+    expect(dependencies['@renovatebot/base-image']).toBe(dockerVersion);
+  });
 });

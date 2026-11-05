@@ -18,6 +18,11 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
+import {
+  artifactErrorResult,
+  resolveToolConstraint,
+  updateLockFile,
+} from '../../util.ts';
 import { PdmLockfile, type PyProject } from '../schema.ts';
 import type { Pep621ManagerData } from '../types.ts';
 import { depTypes } from '../utils.ts';
@@ -29,10 +34,7 @@ const gitExec = withGitEnvironment(['pep621']);
 export class PdmProcessor extends BasePyProjectProcessor {
   override lockfileName = 'pdm.lock';
 
-  process(
-    project: PyProject,
-    deps: PackageDependency[],
-  ): PackageDependency<Pep621ManagerData>[] {
+  process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const devDependencies = project.tool?.pdm?.devDependencies;
     if (devDependencies) {
       deps.push(...devDependencies);
@@ -82,7 +84,7 @@ export class PdmProcessor extends BasePyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact,
+    updateArtifact: UpdateArtifact<Pep621ManagerData>,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
@@ -100,12 +102,15 @@ export class PdmProcessor extends BasePyProjectProcessor {
 
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint:
-          config.constraints?.python ?? project.project?.['requires-python'],
+        constraint: await resolveToolConstraint(
+          config,
+          'python',
+          () => project.project?.['requires-python'],
+        ),
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
-        constraint: config.constraints?.pdm,
+        constraint: await resolveToolConstraint(config, 'pdm'),
       };
 
       const execOptions: ExecOptions = {
@@ -122,38 +127,17 @@ export class PdmProcessor extends BasePyProjectProcessor {
       } else {
         cmds.push(...generateCMDs(updatedDeps));
       }
-      await gitExec(cmds, execOptions);
-
-      // check for changes
-      const fileChanges: UpdateArtifactsResult[] = [];
-      const newLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newLockContent,
-          },
-        });
-      } else {
-        logger.debug('pdm.lock is unchanged');
-      }
-
-      return fileChanges.length ? fileChanges : null;
+      return await updateLockFile({
+        lockFileName,
+        existingLockFileContent,
+        run: () => gitExec(cmds, execOptions),
+      });
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
         throw err;
       }
       logger.debug({ err }, 'Failed to update PDM lock file');
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: err.message,
-          },
-        },
-      ];
+      return artifactErrorResult(lockFileName, err);
     }
   }
 }

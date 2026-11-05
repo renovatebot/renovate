@@ -80,17 +80,15 @@ const CargoDep = z.union([
         return dep;
       },
     ),
-  z.string().transform(
-    (version): PackageDependency<CargoManagerData> => ({
-      currentValue: version,
-      managerData: { nestedVersion: false },
-      datasource: CrateDatasource.id,
-    }),
-  ),
+  z.string().transform((version): PackageDependency<CargoManagerData> => ({
+    currentValue: version,
+    managerData: { nestedVersion: false },
+    datasource: CrateDatasource.id,
+  })),
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<CargoManagerData>[] = [];
 
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;

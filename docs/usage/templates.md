@@ -182,6 +182,12 @@ If you want to convert key-value pairs to an object, use `toObject`, e.g.,
 
 `{{{ toJSON (toObject 'key1' 'value1' 'key2' 'value2') }}}` will render `{"key1":"value1","key2":"value2"}`.
 
+### uppercase
+
+The `uppercase` helper converts a given string to upper case.
+
+`{{{ uppercase depName }}}`
+
 ## Environment variables
 
 By default, templates can only access [a subset of environment variables](./environment-variable-handling.md#with-child-processes) like `HOME` or `PATH`.

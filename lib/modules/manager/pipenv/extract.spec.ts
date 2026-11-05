@@ -44,11 +44,15 @@ describe('modules/manager/pipenv/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('[packages]\r\n', 'Pipfile')).toBeNull();
+      await expect(
+        extractPackageFile('[packages]\r\n', 'Pipfile'),
+      ).resolves.toBeNull();
     });
 
     it('returns null for invalid toml file', async () => {
-      expect(await extractPackageFile('nothing here', 'Pipfile')).toBeNull();
+      await expect(
+        extractPackageFile('nothing here', 'Pipfile'),
+      ).resolves.toBeNull();
     });
 
     it('extracts dependencies', async () => {

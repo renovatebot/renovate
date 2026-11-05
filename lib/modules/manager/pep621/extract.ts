@@ -33,7 +33,7 @@ export function parsePyProject(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig,
+  config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -63,10 +63,7 @@ export async function extractPackageFile(
     deps.push(...projectDependencies);
   }
 
-  const dependencyGroups = def['dependency-groups'];
-  if (dependencyGroups) {
-    deps.push(...dependencyGroups);
-  }
+  deps.push(...def['dependency-groups']);
 
   const projectOptionalDependencies = def.project?.['optional-dependencies'];
   if (projectOptionalDependencies) {
@@ -87,6 +84,7 @@ export async function extractPackageFile(
       def,
       processedDeps,
       packageFile,
+      config,
     );
 
     const processedLockFiles = await processor.getLockfiles(def, packageFile);

@@ -1,4 +1,6 @@
 import { z } from 'zod/v4';
+import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -6,10 +8,12 @@ import {
 } from '../../../util/schema-utils/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+import { api as pep440 } from '../../versioning/pep440/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { Pep621ManagerData } from './types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
-type Pep508Dependency = z.ZodType<PackageDependency>;
+type Pep508Dependency = z.ZodType<PackageDependency<Pep621ManagerData>>;
 
 function Pep508Dependency(depType: string): Pep508Dependency {
   return z.string().transform((x, ctx) => {
@@ -26,17 +30,18 @@ function Pep508Dependency(depType: string): Pep508Dependency {
     }
 
     return res;
-  }) as Pep508Dependency;
+  });
 }
 
-type DependencyGroup = z.ZodType<PackageDependency[]>;
+type DependencyGroup = z.ZodType<PackageDependency<Pep621ManagerData>[]>;
 
 export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
     (depGroups) => {
-      const deps: PackageDependency[] = [];
+      const deps: PackageDependency<Pep621ManagerData>[] = [];
       for (const [depGroup, groupDeps] of Object.entries(depGroups)) {
         for (const dep of groupDeps) {
+          // v8 ignore else -- the parser always sets a package name on a group dep
           if (dep.packageName) {
             dep.depName = dep.packageName;
           }
@@ -147,6 +152,14 @@ const UvSource = z.union([
   UvPathSource,
   UvWorkspaceSource,
 ]);
+export type UvSource = z.infer<typeof UvSource>;
+
+// A dependency can declare a single source or, when disambiguated by
+// environment markers, an array of sources. Normalize both to an array.
+// https://docs.astral.sh/uv/concepts/projects/dependencies/#multiple-sources
+const UvSources = z
+  .union([UvSource, z.array(UvSource).min(1)])
+  .transform((source) => (Array.isArray(source) ? source : [source]));
 
 const UvConfig = z.object({
   'dev-dependencies': LooseArray(
@@ -156,7 +169,7 @@ const UvConfig = z.object({
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
-    UvSource,
+    UvSources,
   ).optional(),
   index: z
     .array(
@@ -191,8 +204,10 @@ const PixiMinimalConfig = z
       .catch(undefined),
   })
   .transform((val) => ({
+    /* v8 ignore start: needs a pixi manifest declaring the requirement only under workspace */
     'requires-pixi':
       val.project?.['requires-pixi'] ?? val.workspace?.['requires-pixi'],
+    /* v8 ignore stop */
   }))
   .optional()
   .catch(undefined);
@@ -238,17 +253,119 @@ export const PdmLockfile = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
+export interface UvLockedPackage {
+  version: string;
+  /**
+   * Whether the lock file holds more than one entry for this package, as it
+   * does when resolution markers resolve to different versions. Such a package
+   * cannot be upgraded to a pinned version, because `uv` reads the pin as a
+   * constraint on every marker, and so may downgrade the other entries, or
+   * fail to resolve at all.
+   */
+  hasMultipleEntries?: boolean;
+  /**
+   * The index a package was resolved from, if any. Absent for the workspace
+   * root and for virtual/editable/path/git packages, which cannot be
+   * remediated by `uv lock --upgrade-package`.
+   */
+  registryUrl?: string;
+}
+
+export interface UvLockfileData {
+  packages: Record<string, UvLockedPackage>;
+  /**
+   * Every package name which a workspace member declares. A workspace shares
+   * one lock file between its members, so a package one member declares is not
+   * transitive just because another member doesn't declare it.
+   */
+  declaredNames: Set<string>;
+}
+
+const UvLockedDependencies = LooseArray(z.object({ name: z.string() }))
+  .optional()
+  .catch(undefined);
+const UvLockedDependencyGroups = z
+  .record(z.string(), LooseArray(z.object({ name: z.string() })))
+  .optional()
+  .catch(undefined);
+
+/**
+ * The source of a workspace member, as opposed to a package which was fetched:
+ * the workspace root is `virtual`, a member with a build backend `editable`.
+ */
+const UvWorkspaceMemberSource = z.object({
+  virtual: z.string().optional(),
+  editable: z.string().optional(),
+});
+
 export const UvLockfile = Toml.pipe(
   z.object({
+    manifest: z
+      .object({ members: LooseArray(z.string()) })
+      .partial()
+      .optional()
+      .catch(undefined),
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z
+          .object({ registry: z.string() })
+          .partial()
+          .and(UvWorkspaceMemberSource)
+          .optional(),
+        dependencies: UvLockedDependencies,
+        'optional-dependencies': UvLockedDependencyGroups,
+        'dev-dependencies': UvLockedDependencyGroups,
       }),
     ),
   }),
-).transform(({ package: pkg }) =>
-  Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
-  ),
-);
+).transform(({ manifest, package: pkgs }): UvLockfileData => {
+  const packages: Record<string, UvLockedPackage> = {};
+  const declaredNames = new Set<string>();
+  const members = new Set(coerceArray(manifest?.members));
+
+  for (const pkg of pkgs) {
+    const { name, version, source } = pkg;
+
+    // Only a workspace member declares its dependencies in a `pyproject.toml`
+    // of its own. A git, path or url package also has no registry, but what it
+    // depends on is as transitive as anything else in the lock file.
+    // A workspace names its members, and the root is the lock file's own
+    // directory. An editable path dependency outside the workspace carries a
+    // path of its own, and what it pulls in is as transitive as anything else.
+    const workspacePath = source?.virtual ?? source?.editable;
+    if (members.has(name) || workspacePath === '.') {
+      for (const group of [
+        pkg.dependencies,
+        ...Object.values(coerceObject(pkg['optional-dependencies'])),
+        ...Object.values(coerceObject(pkg['dev-dependencies'])),
+      ]) {
+        for (const dependency of coerceArray(group)) {
+          declaredNames.add(dependency.name);
+        }
+      }
+    }
+
+    const locked = packages[name];
+    // A package can be locked at several versions, e.g. for different Python
+    // versions or platforms. Use the lowest one, so updates are not missed.
+    if (!locked) {
+      packages[name] = { version, registryUrl: source?.registry };
+      continue;
+    }
+
+    locked.hasMultipleEntries = true;
+    // any entry of a package may be the one with a registry to look it up in
+    locked.registryUrl ??= source?.registry;
+    if (pep440.isGreaterThan(locked.version, version)) {
+      packages[name] = {
+        version,
+        registryUrl: source?.registry ?? locked.registryUrl,
+        hasMultipleEntries: true,
+      };
+    }
+  }
+
+  return { packages, declaredNames };
+});

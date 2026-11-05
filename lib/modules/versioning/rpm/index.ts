@@ -1,4 +1,5 @@
 import { isNumericString } from '@sindresorhus/is';
+import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type { VersioningApi } from '../types.ts';
@@ -13,7 +14,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
+const alphaNumPattern = regEx(/(?:[a-zA-Z]+)|(?:\d+)|(?:~)/g);
 const epochPattern = regEx(/^\d+$/);
 
 class RpmVersioningApi extends GenericVersioningApi {
@@ -106,12 +107,8 @@ class RpmVersioningApi extends GenericVersioningApi {
         continue;
       }
 
-      if (c1 > c2) {
-        return 1;
-      }
-      if (c1 < c2) {
-        return -1;
-      }
+      // the characters differ, so one of them compares greater
+      return c1 > c2 ? 1 : -1;
     }
 
     // Okay, they've been the exact same up until now, so return the longer one
@@ -126,8 +123,8 @@ class RpmVersioningApi extends GenericVersioningApi {
       return 0;
     }
 
-    const matchesv1 = v1.match(alphaNumPattern) ?? [];
-    const matchesv2 = v2.match(alphaNumPattern) ?? [];
+    const matchesv1 = coerceArray(v1.match(alphaNumPattern));
+    const matchesv2 = coerceArray(v2.match(alphaNumPattern));
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {

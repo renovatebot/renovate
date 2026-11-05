@@ -144,6 +144,7 @@
     "capacitor": "https://github.com/ionic-team/capacitor",
     "cedar": "https://github.com/cedarjs/cedar",
     "chakra-ui": "https://github.com/chakra-ui/chakra-ui",
+    "chat-sdk": "https://github.com/vercel/chat",
     "chromely": "https://github.com/chromelyapps/Chromely",
     "citation-js": "https://github.com/citation-js/citation-js",
     "ckeditor": [
@@ -155,10 +156,13 @@
       "https://github.com/microsoft/ClearScript",
       "https://github.com/Microsoft/ClearScript"
     ],
+    "cloudevents-sdk-csharp": "https://github.com/cloudevents/sdk-csharp",
+    "cloudevents-sdk-java": "https://github.com/cloudevents/sdk-java",
     "commitlint": "https://github.com/conventional-changelog/commitlint",
     "confect": "https://github.com/rjdellecese/confect",
     "conform": "https://github.com/edmundhung/conform",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
+    "convex": "https://github.com/get-convex/convex-backend",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
     "datafusion": "https://github.com/apache/datafusion",
@@ -392,6 +396,11 @@
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
+    "excel-dna": [
+      "https://github.com/Excel-DNA/ExcelDna",
+      "https://github.com/Excel-DNA/IntelliSense",
+      "https://github.com/Excel-DNA/Registration"
+    ],
     "expo": "https://github.com/expo/expo",
     "fabric-chaincode-node": "https://github.com/hyperledger/fabric-chaincode-node",
     "fabric8-kubernetes-client": "https://github.com/fabric8io/kubernetes-client",
@@ -422,6 +431,7 @@
       "https://github.com/uber/mock"
     ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
+    "google-cloud-rust": "https://github.com/googleapis/google-cloud-rust",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
@@ -549,6 +559,7 @@
     "linkifyjs": "https://github.com/nfrasser/linkifyjs",
     "log4j2": "https://github.com/apache/logging-log4j2",
     "logback": "https://github.com/qos-ch/logback",
+    "logtape": "https://github.com/dahlia/logtape",
     "loopback": [
       "https://github.com/strongloop/loopback-next",
       "https://github.com/loopbackio/loopback-next"
@@ -652,7 +663,11 @@
     "pothos": "https://github.com/hayes/pothos",
     "pouchdb": "https://github.com/pouchdb/pouchdb",
     "powermock": "https://github.com/powermock/powermock",
-    "prisma": "https://github.com/prisma/prisma",
+    "prisma": [
+      "https://github.com/prisma/orm",
+      "https://github.com/prisma/prisma",
+      "https://github.com/prisma/prisma-cli"
+    ],
     "prometheus-net": "https://github.com/prometheus-net/prometheus-net",
     "promster": "https://github.com/tdeekens/promster",
     "protobuf": "https://github.com/protocolbuffers/protobuf",
@@ -767,6 +782,7 @@
     "trpc": "https://github.com/trpc/trpc",
     "trust-dns": "https://github.com/bluejekyll/trust-dns",
     "tsoa": "https://github.com/lukeautry/tsoa",
+    "tunit": "https://github.com/thomhurst/TUnit",
     "turbo": [
       "https://github.com/vercel/turbo",
       "https://github.com/vercel/turborepo"
@@ -791,6 +807,7 @@
     "vaadinWebComponents": "https://github.com/vaadin/web-components",
     "vanilla-extract": "https://github.com/vanilla-extract-css/vanilla-extract",
     "visx": "https://github.com/airbnb/visx",
+    "vite-plus": "https://github.com/voidzero-dev/vite-plus",
     "vitest": "https://github.com/vitest-dev/vitest",
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],

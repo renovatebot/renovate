@@ -26,6 +26,27 @@ describe('modules/manager/npm/post-update/node-version', () => {
       expect(fs.readLocalFile).not.toHaveBeenCalled();
     });
 
+    it('falls back to the extracted constraints', async () => {
+      const res = await getNodeConstraint(
+        { extractedConstraints: { node: '^18.0.0' } },
+        [],
+        '',
+        new Lazy(() => Promise.resolve({})),
+      );
+      expect(res).toBe('^18.0.0');
+    });
+
+    it('prefers a derived constraint over the extracted constraints', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
+      const res = await getNodeConstraint(
+        { extractedConstraints: { node: '^18.0.0' } },
+        [],
+        '',
+        new Lazy(() => Promise.resolve({})),
+      );
+      expect(res).toBe('12.16.2');
+    });
+
     it('returns .node-version value', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce('12.16.1\n');
@@ -95,6 +116,129 @@ describe('modules/manager/npm/post-update/node-version', () => {
       );
       expect(res).toBe('14.17.0');
     });
+
+    it('returns from package.json devEngines runtime object', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
+
+    it('returns from package.json devEngines runtime array', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: {
+              runtime: [
+                { name: 'bun', version: '1.0.0' },
+                { name: 'node', version: '26.10.0' },
+              ],
+            },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
+
+    it('falls back to engines when devEngines runtime has no node entry', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'bun', version: '1.0.0' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.3');
+    });
+
+    it('prefers devEngines runtime over volta', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            volta: { node: '14.17.0' },
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
+
+    it('prefers devEngines runtime over .nvmrc', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('prefers user constraints over devEngines runtime', async () => {
+      const res = await getNodeConstraint(
+        config,
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.0');
+    });
+
+    it('ignores an invalid devEngines runtime version', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: 'latest' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('^12.16.3');
+    });
+
+    it('prefers devEngines runtime over engines', async () => {
+      const res = await getNodeConstraint(
+        {},
+        [],
+        '',
+        new Lazy(() =>
+          Promise.resolve({
+            devEngines: { runtime: { name: 'node', version: '26.10.0' } },
+            engines: { node: '^12.16.3' },
+          }),
+        ),
+      );
+      expect(res).toBe('26.10.0');
+    });
   });
 
   describe('getNodeUpdate()', () => {
@@ -111,28 +255,28 @@ describe('modules/manager/npm/post-update/node-version', () => {
 
   describe('getNodeToolConstraint()', () => {
     it('returns getNodeUpdate', async () => {
-      expect(
-        await getNodeToolConstraint(
+      await expect(
+        getNodeToolConstraint(
           config,
           [{ depName: 'node', newValue: '16.15.0' }],
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         toolName: 'node',
         constraint: '16.15.0',
       });
     });
 
     it('returns getNodeConstraint', async () => {
-      expect(
-        await getNodeToolConstraint(
+      await expect(
+        getNodeToolConstraint(
           config,
           [],
           '',
           new Lazy(() => Promise.resolve({})),
         ),
-      ).toEqual({
+      ).resolves.toEqual({
         toolName: 'node',
         constraint: '^12.16.0',
       });

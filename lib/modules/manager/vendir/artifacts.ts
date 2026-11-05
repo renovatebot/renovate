@@ -2,14 +2,20 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { withGitEnvironment } from '../../../util/git/exec.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import {
+  artifactErrorResult,
+  fileAddition,
+  fileChangesToArtifactResults,
+  resolveToolConstraint,
+} from '../util.ts';
 
 const gitExec = withGitEnvironment();
 
@@ -38,8 +44,14 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
-        { toolName: 'vendir', constraint: config.constraints?.vendir },
-        { toolName: 'helm', constraint: config.constraints?.helm },
+        {
+          toolName: 'vendir',
+          constraint: await resolveToolConstraint(config, 'vendir'),
+        },
+        {
+          toolName: 'helm',
+          constraint: await resolveToolConstraint(config, 'helm'),
+        },
       ],
     };
 
@@ -52,46 +64,16 @@ export async function updateArtifacts({
     const newVendirLockContent = await readLocalFile(lockFileName, 'utf8');
     const isLockFileChanged = existingLockFileContent !== newVendirLockContent;
     if (isLockFileChanged) {
-      fileChanges.push({
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newVendirLockContent,
-        },
-      });
+      fileChanges.push(fileAddition(lockFileName, newVendirLockContent));
     }
 
     // add modified vendir archives to artifacts
     logger.debug("Adding Sync'd files to git");
-    // Files must be in the vendor path to get added
-    const vendorDir = getParentDir(packageFileName);
     const status = await getRepoStatus();
     if (status) {
-      const modifiedFiles = status.modified ?? [];
-      const notAddedFiles = status.not_added;
-      const deletedFiles = status.deleted ?? [];
-
-      for (const f of modifiedFiles.concat(notAddedFiles)) {
-        const isFileInVendorDir = f.startsWith(vendorDir);
-        if (vendorDir || isFileInVendorDir) {
-          fileChanges.push({
-            file: {
-              type: 'addition',
-              path: f,
-              contents: await readLocalFile(f),
-            },
-          });
-        }
-      }
-
-      for (const f of deletedFiles) {
-        fileChanges.push({
-          file: {
-            type: 'deletion',
-            path: f,
-          },
-        });
-      }
+      fileChanges.push(
+        ...fileChangesToArtifactResults(await collectFileChanges(status)),
+      );
     } else {
       logger.error('Failed to get git status');
     }
@@ -102,13 +84,6 @@ export async function updateArtifacts({
       throw err;
     }
     logger.debug({ err }, 'Failed to update Vendir lock file');
-    return [
-      {
-        artifactError: {
-          fileName: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
+    return artifactErrorResult(lockFileName, err);
   }
 }

@@ -1,5 +1,4 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import ini from 'ini';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageRule } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -7,6 +6,7 @@ import type { HostRule } from '../../../types/index.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { Ini } from '../../../util/schema-utils/index.ts';
 import { fromBase64 } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
 import { defaultRegistryUrl } from './common.ts';
@@ -22,7 +22,7 @@ function envReplace(value: any, env = getEnv()): any {
     return value;
   }
 
-  const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
+  const ENV_EXPR = regEx(/(?<esc>\\*)\$\{(?<envVarName>[^}]+)\}/g);
 
   return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {
@@ -130,7 +130,7 @@ export function setNpmrc(input?: string): void {
     const existingNpmrc = npmrc;
     npmrcRaw = input;
     logger.debug('Setting npmrc');
-    npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
+    npmrc = Ini.parse(input.replace(regEx(/\\n/g), '\n'));
     const exposeAllEnv = GlobalConfig.get('exposeAllEnv');
     for (const [key, val] of Object.entries(npmrc)) {
       if (
@@ -157,7 +157,9 @@ export function setNpmrc(input?: string): void {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;
-  } else if (npmrc) {
+  } else {
+    // `npmrc` starts as an object and is only ever reassigned to one, so it is
+    // always truthy here
     logger.debug('Resetting npmrc');
     npmrc = {};
     npmrcRaw = '';

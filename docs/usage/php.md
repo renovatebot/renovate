@@ -41,7 +41,7 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 }
 ```
 
-This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository.
+This host rule is best added to the self-hosted `config.js` config so that it is not visible to users of the repository.
 If you are using the Mend Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
 Go to [https://app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt), paste in the secret string you wish to encrypt, select _Encrypt_, then copy the encrypted result.

@@ -159,14 +159,6 @@ describe('logger/pretty-stdout', () => {
   });
 
   describe('formatRecord(rec)', () => {
-    beforeEach(() => {
-      process.env.FORCE_COLOR = '1';
-    });
-
-    afterEach(() => {
-      delete process.env.FORCE_COLOR;
-    });
-
     it('formats record', () => {
       const rec: BunyanRecord = {
         level: 10,
@@ -177,9 +169,13 @@ describe('logger/pretty-stdout', () => {
           d: ['e', 'f'],
         },
       };
+      // The colorized level strings are built once, when the module is
+      // imported, so whether they carry ANSI codes depends on the colour
+      // support of the surrounding environment. Derive the expectation the
+      // same way instead of assuming an uncoloured terminal.
       expect(prettyStdout.formatRecord(rec)).toEqual(
         [
-          `TRACE: test message`,
+          `${util.styleText('gray', 'TRACE')}: test message`,
           `       "config": {"a": "b", "d": ["e", "f"]}`,
           ``,
         ].join('\n'),

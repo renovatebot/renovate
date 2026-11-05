@@ -9,6 +9,7 @@ import type {
   PackageFile,
   PackageFileContent,
   RangeConfig,
+  UpdateArtifactsConfig,
 } from './types.ts';
 
 export { hashMap } from './fingerprint.generated.ts';
@@ -106,6 +107,20 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   }
 
   return config.rangeStrategy!;
+}
+
+/**
+ * Whether the package manager of `manager` enforces the minimum release age itself when regenerating the lock file.
+ */
+export async function enforcesMinimumReleaseAge(
+  manager: string,
+  config: UpdateArtifactsConfig,
+): Promise<boolean> {
+  const enforces = get(manager, 'enforcesMinimumReleaseAge');
+  if (!enforces) {
+    return false;
+  }
+  return await enforces(config);
 }
 
 export function getPrettyDepType(

@@ -1,13 +1,24 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { XmlDocument } from 'xmldoc';
-import { HOST_DISABLED } from '../../../constants/error-messages.ts';
+import {
+  HOST_BLOCKED,
+  HOST_DISABLED,
+} from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-cache-provider.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import {
+  isForbidden,
+  isNotFound,
+  isRateLimited,
+  isRateLimitedOrServerError,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
+import { refusedHostMessage } from '../../../util/http/util.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
@@ -29,12 +40,7 @@ function isTemporaryError(err: HttpError): boolean {
     return true;
   }
 
-  if (err.response) {
-    const status = err.response.statusCode;
-    return status === 429 || (status >= 500 && status < 600);
-  }
-
-  return false;
+  return isRateLimitedOrServerError(err);
 }
 
 function isHostError(err: HttpError): boolean {
@@ -42,12 +48,11 @@ function isHostError(err: HttpError): boolean {
 }
 
 function isNotFoundError(err: HttpError): boolean {
-  return err.code === 'ENOTFOUND' || err.response?.statusCode === 404;
+  return err.code === 'ENOTFOUND' || isNotFound(err);
 }
 
 function isPermissionsIssue(err: HttpError): boolean {
-  const status = err.response?.statusCode;
-  return status === 401 || status === 403;
+  return isUnauthorized(err) || isForbidden(err);
 }
 
 function isConnectionError(err: HttpError): boolean {
@@ -146,8 +151,8 @@ export async function downloadHttpProtocol(
       }
 
       const failedUrl = url;
-      if (err.message === HOST_DISABLED) {
-        logger.trace({ failedUrl }, 'Host disabled');
+      if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
+        logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
       }
 
@@ -180,8 +185,7 @@ export async function downloadHttpProtocol(
         logger.debug({ failedUrl, err }, 'Temporary error');
 
         if (isMavenCentral(url)) {
-          const statusCode = err?.response?.statusCode;
-          if (statusCode === 429) {
+          if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
@@ -215,7 +219,7 @@ export async function downloadHttpProtocol(
 
   const { err } = fetchResult.unwrap();
   if (err?.type === 'maven-central-temporary-error') {
-    throw new ExternalHostError(err.err);
+    throw new ExternalHostError(err.err, undefined, true);
   }
 
   return fetchResult;
@@ -565,11 +569,8 @@ export async function getDependencyInfo(
       }
 
       const parent = pomContent.childNamed('parent');
-      if (
-        recursionLimit > 0 &&
-        parent &&
-        (!result.sourceUrl || !result.homepage)
-      ) {
+      const isMissingInfo = !result.sourceUrl || !result.homepage;
+      if (recursionLimit > 0 && parent && isMissingInfo) {
         // if we found a parent and are missing some information
         // trying to get the scm/homepage information from it
         const [parentGroupId, parentArtifactId, parentVersion] = [

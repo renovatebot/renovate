@@ -1,6 +1,7 @@
 import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
@@ -47,7 +48,7 @@ export function createDependency(
   packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
-  const dependency = dep ?? {};
+  const dependency = coerceObject(dep);
   const { groups, replaceString } = extractionTemplate;
   const { packageFileName, packageFileDir } = packageFileInfo;
 

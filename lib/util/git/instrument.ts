@@ -271,10 +271,6 @@ export class InstrumentedSimpleGit {
 
     await instrument(spanName, () => this.git.addRemote(name, repo), options);
   }
-  env(env: Record<string, string>): this {
-    this.git = this.git.env(env);
-    return this;
-  }
   async catFile(args: string[]): Promise<string> {
     const { spanName, options } = prepareInstrumentation('remote');
 
