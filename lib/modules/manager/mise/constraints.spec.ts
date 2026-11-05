@@ -75,7 +75,7 @@ describe('modules/manager/mise/constraints', () => {
       ${'node'}      | ${'prefix:20'}     | ${null}
       ${'node'}      | ${'sub-1:lts'}     | ${null}
       ${'java'}      | ${'temurin-21'}    | ${null}
-      ${'erlang'}    | ${'27'}            | ${null}
+      ${'erlang'}    | ${'27'}            | ${'27'}
       ${'erlang'}    | ${'prefix:27'}     | ${null}
       ${'erlang'}    | ${'sub-1:latest'}  | ${null}
       ${'rust'}      | ${'stable'}        | ${null}
