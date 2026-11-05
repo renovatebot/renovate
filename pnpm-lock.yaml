@@ -123,8 +123,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0(@opentelemetry/api@1.10.0)
       '@renovatebot/base-image':
-        specifier: 13.160.1
-        version: 13.160.1(zod@4.6.7)
+        specifier: 13.160.2
+        version: 13.160.2(zod@4.6.7)
       '@renovatebot/detect-tools':
         specifier: 5.0.0
         version: 5.0.0
@@ -899,8 +899,8 @@ packages:
     peerDependencies:
       commander: ~15.0.0
 
-  '@containerbase/base@14.66.0':
-    resolution: {integrity: sha512-UNlbRdFXKiGXhkh13p5hYT7N4BxS+5AdGxQzr1AokUOGLdEsPWW64y3SBxaGywHlYRy/MIXFsTbv0cye7fmGlQ==}
+  '@containerbase/base@14.66.1':
+    resolution: {integrity: sha512-r3kfjah4mjKE3a8nwBloI3U9Ah9/nld4SArVAUY+wcG4VJQGTiA+ufqMWPG5+OCmeqYVslmtLpxn3DIQXk+EMw==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -2032,8 +2032,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/base-image@13.160.1':
-    resolution: {integrity: sha512-Yh5Qj9PUhbSRqv4W+BiN0OEH8TzXaN03CwcN1Xc4HAGrqY7KbKNl39SUqKcxO8iqJeAaHnBidt29u9JrmT2aJw==}
+  '@renovatebot/base-image@13.160.2':
+    resolution: {integrity: sha512-z7sMhRWKaK6+yMeTTGVyk0XV18suCvVz8LXPOEDKvA7eBwp+CPanu6ZzU3g6cjHjf2+irYxwWcU1VgRYdEbplA==}
     engines: {node: '>=24.10.0'}
     peerDependencies:
       zod: ^4.0.0
@@ -6509,7 +6509,7 @@ snapshots:
     dependencies:
       commander: 15.0.0
 
-  '@containerbase/base@14.66.0(zod@4.6.7)':
+  '@containerbase/base@14.66.1(zod@4.6.7)':
     dependencies:
       semver: 7.8.5
     optionalDependencies:
@@ -7413,9 +7413,9 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.10.0
 
-  '@renovatebot/base-image@13.160.1(zod@4.6.7)':
+  '@renovatebot/base-image@13.160.2(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.66.0(zod@4.6.7)
+      '@containerbase/base': 14.66.1(zod@4.6.7)
     optionalDependencies:
       zod: 4.6.7
 
@@ -7435,7 +7435,7 @@ snapshots:
 
   '@renovatebot/osv-offline-db@4.5.10(supports-color@7.2.0)(zod@4.6.7)':
     dependencies:
-      '@containerbase/base': 14.66.0(zod@4.6.7)
+      '@containerbase/base': 14.66.1(zod@4.6.7)
       debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
