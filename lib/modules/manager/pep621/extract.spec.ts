@@ -918,6 +918,98 @@ describe('modules/manager/pep621/extract', () => {
       ).toMatchObject([{ packageName: 'urllib3', lockedVersion: '2.8.0' }]);
     });
 
+    it('should surface what a git dependency pulls in, and keep a registry entry of a package with mixed sources', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [manifest]
+          members = ["pep621-uv"]
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "some-git-pkg" },
+          ]
+
+          [[package]]
+          name = "some-git-pkg"
+          version = "1.0.0"
+          source = { git = "https://example.com/some-git-pkg" }
+          dependencies = [
+              { name = "idna" },
+          ]
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { git = "https://example.com/attrs" }
+
+          [[package]]
+          name = "attrs"
+          version = "24.3.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "zope-interface"
+          version = "7.2"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "zope-interface"
+          version = "7.1"
+          source = { git = "https://example.com/zope-interface" }
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["some-git-pkg"]
+          requires-python = ">=3.11"
+
+          [tool.uv.sources]
+          some-git-pkg = { git = "https://example.com/some-git-pkg" }
+        `,
+        'pyproject.toml',
+        { hasVulnerabilityAlertsRules: true },
+      );
+
+      // `idna` is only a git package's dependency, which declares nothing of
+      // its own, and `attrs` keeps the registry of its other entry
+      expect(
+        res?.deps.filter((dep) => dep.depType === 'uv.lock'),
+      ).toMatchObject([
+        { packageName: 'idna', lockedVersion: '3.10' },
+        {
+          packageName: 'attrs',
+          lockedVersion: '24.2.0',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+        // the lower entry has no registry of its own, so the other one's is
+        // what it can be looked up in
+        {
+          packageName: 'zope-interface',
+          lockedVersion: '7.1',
+          managerData: { hasMultipleLockedEntries: true },
+        },
+      ]);
+    });
+
     it('should not surface transitive deps from uv.lock by default', async () => {
       fs.readLocalFile.mockResolvedValue(
         codeBlock`

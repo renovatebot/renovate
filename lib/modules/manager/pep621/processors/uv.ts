@@ -15,7 +15,11 @@ import {
 import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
-import { parseUrl, stripUrlCredentials } from '../../../../util/url.ts';
+import {
+  parseUrl,
+  stripUrlCredentials,
+  trimTrailingSlash,
+} from '../../../../util/url.ts';
 import { findPypiIndexCredentials } from '../../../datasource/pypi/host-rules.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type {
@@ -52,10 +56,7 @@ function isUvIndexSource(
 
 // The public PyPI index, as recorded in `uv.lock` package sources. Transitive
 // deps resolved from it use the datasource default, so no `registryUrls` needed.
-const defaultPypiRegistries = new Set([
-  'https://pypi.org/simple',
-  'https://pypi.org/simple/',
-]);
+const defaultPypiRegistry = 'https://pypi.org/simple';
 
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
@@ -240,15 +241,14 @@ export class UvProcessor extends BasePyProjectProcessor {
       ...deps.map((dep) => dep.packageName).filter(isString),
     ]);
 
-    for (const [packageName, locked] of Object.entries(packages)) {
-      if (declaredPackageNames.has(packageName)) {
-        continue;
-      }
-      // Only registry-sourced packages can be remediated by name. Skip the
-      // workspace root and any virtual/editable/path/git packages.
-      if (!locked.registryUrl) {
-        continue;
-      }
+    const transitiveEntries = Object.entries(packages).filter(
+      // only a registry-sourced package can be remediated by name, which rules
+      // out the workspace root and any virtual/editable/path/git package
+      ([packageName, locked]) =>
+        !declaredPackageNames.has(packageName) && locked.registryUrl,
+    );
+
+    for (const [packageName, locked] of transitiveEntries) {
       const transitiveDep: PackageDependency = {
         packageName,
         depName: packageName,
@@ -261,8 +261,8 @@ export class UvProcessor extends BasePyProjectProcessor {
       if (locked.hasMultipleEntries) {
         transitiveDep.managerData = { hasMultipleLockedEntries: true };
       }
-      if (!defaultPypiRegistries.has(locked.registryUrl)) {
-        transitiveDep.registryUrls = [locked.registryUrl];
+      if (trimTrailingSlash(locked.registryUrl!) !== defaultPypiRegistry) {
+        transitiveDep.registryUrls = [locked.registryUrl!];
       }
       deps.push(transitiveDep);
     }
@@ -348,6 +348,14 @@ export class UvProcessor extends BasePyProjectProcessor {
  * looked up, or to whichever version `uv` resolves when it cannot be pinned.
  */
 function pinnedUpgrade(dep: Upgrade<Pep621ManagerData>): string {
+  // Only a vulnerability fix needs a version of its own, to honour
+  // `vulnerabilityFixStrategy`. A routine update has no reason to hold `uv` to
+  // one, and pinning could fail to resolve, or move a package which another
+  // dependency of the update constrains.
+  if (!dep.isVulnerabilityAlert) {
+    return dep.packageName!;
+  }
+
   // A package the lock file holds more than once, e.g. at a version per
   // resolution marker, can only be upgraded without a version: `uv` reads a
   // pinned one as a constraint on every marker, so it would downgrade the
@@ -416,11 +424,15 @@ async function getUvExtraIndexUrl(
   // compared without any userinfo, which the registry URLs of the deps may no longer carry
   const configuredIndexUrls = new Set(
     coerceArray(project.tool?.uv?.index).map(({ url }) =>
-      withoutAnyUserinfo(url),
+      trimTrailingSlash(withoutAnyUserinfo(url)),
     ),
   );
   const pyPiRegistryUrls = deps
     .filter((dep) => dep.datasource === PypiDatasource.id)
+    // a transitive dependency carries the index `uv.lock` recorded for it, which
+    // `uv` reads from the lock file itself - passing it as an extra index would
+    // instead rank it above the default for every package it resolves
+    .filter((dep) => dep.depType !== depTypes.uvTransitiveDependencies)
     .filter((dep) => {
       // Remove dependencies that are pinned to a specific index
       const sources = project.tool?.uv?.sources;
@@ -433,7 +445,9 @@ async function getUvExtraIndexUrl(
       // Check if the registry URL is not the default one and not already configured
       return (
         registryUrl !== PypiDatasource.defaultURL &&
-        !configuredIndexUrls.has(withoutAnyUserinfo(registryUrl))
+        !configuredIndexUrls.has(
+          trimTrailingSlash(withoutAnyUserinfo(registryUrl)),
+        )
       );
     });
 

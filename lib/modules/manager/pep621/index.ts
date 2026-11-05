@@ -1,3 +1,4 @@
+import type { VulnerabilityAlertSource } from '../../../config/types.ts';
 import type { Category } from '../../../constants/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { MinimumReleaseAgeSupport } from '../types.ts';
@@ -25,5 +26,16 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+// `uv` projects only: a `uv.lock` transitive dependency is extracted, and any
+// alert which matches it can clear its `lockfile-only` skip, whichever source
+// the alert came from
+export const supportsTransitiveRemediation: Partial<
+  Record<VulnerabilityAlertSource, true>
+> = {
+  $platform: true,
+  OSV: true,
+  packageRules: true,
+};
 
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

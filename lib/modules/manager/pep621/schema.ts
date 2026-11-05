@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { coerceArray } from '../../../util/array.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -281,34 +282,58 @@ export interface UvLockfileData {
   declaredNames: Set<string>;
 }
 
-const UvLockedDependencies = LooseArray(z.object({ name: z.string() }));
+const UvLockedDependencies = LooseArray(z.object({ name: z.string() }))
+  .optional()
+  .catch(undefined);
 const UvLockedDependencyGroups = z
-  .record(z.string(), UvLockedDependencies)
-  .optional();
+  .record(z.string(), LooseArray(z.object({ name: z.string() })))
+  .optional()
+  .catch(undefined);
+
+/**
+ * The source of a workspace member, as opposed to a package which was fetched:
+ * the workspace root is `virtual`, a member with a build backend `editable`.
+ */
+const UvWorkspaceMemberSource = z.object({
+  virtual: z.string().optional(),
+  editable: z.string().optional(),
+});
 
 export const UvLockfile = Toml.pipe(
   z.object({
+    manifest: z
+      .object({ members: LooseArray(z.string()) })
+      .partial()
+      .optional()
+      .catch(undefined),
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
-        source: z.object({ registry: z.string() }).partial().optional(),
-        dependencies: UvLockedDependencies.optional(),
+        source: z
+          .object({ registry: z.string() })
+          .partial()
+          .and(UvWorkspaceMemberSource)
+          .optional(),
+        dependencies: UvLockedDependencies,
         'optional-dependencies': UvLockedDependencyGroups,
         'dev-dependencies': UvLockedDependencyGroups,
       }),
     ),
   }),
-).transform(({ package: pkgs }): UvLockfileData => {
+).transform(({ manifest, package: pkgs }): UvLockfileData => {
   const packages: Record<string, UvLockedPackage> = {};
   const declaredNames = new Set<string>();
+  const members = new Set(coerceArray(manifest?.members));
 
   for (const pkg of pkgs) {
     const { name, version, source } = pkg;
 
-    // A package with no registry is a workspace member, or the root, so what
-    // it depends on is declared rather than transitive.
-    if (!source?.registry) {
+    // Only a workspace member declares its dependencies in a `pyproject.toml`
+    // of its own. A git, path or url package also has no registry, but what it
+    // depends on is as transitive as anything else in the lock file.
+    const workspacePath = source?.virtual ?? source?.editable;
+    if (members.has(name) || isNonEmptyString(workspacePath)) {
       for (const group of [
         pkg.dependencies,
         ...Object.values(coerceObject(pkg['optional-dependencies'])),
@@ -329,10 +354,12 @@ export const UvLockfile = Toml.pipe(
     }
 
     locked.hasMultipleEntries = true;
+    // any entry of a package may be the one with a registry to look it up in
+    locked.registryUrl ??= source?.registry;
     if (pep440.isGreaterThan(locked.version, version)) {
       packages[name] = {
         version,
-        registryUrl: source?.registry,
+        registryUrl: source?.registry ?? locked.registryUrl,
         hasMultipleEntries: true,
       };
     }

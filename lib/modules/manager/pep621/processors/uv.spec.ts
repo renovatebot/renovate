@@ -869,9 +869,14 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'dep1',
           depType: depTypes.uvTransitiveDependencies,
           newVersion: '3.15',
+          isVulnerabilityAlert: true,
         },
         // no version was determined, so let uv resolve it
-        { packageName: 'dep2', depType: depTypes.uvTransitiveDependencies },
+        {
+          packageName: 'dep2',
+          depType: depTypes.uvTransitiveDependencies,
+          isVulnerabilityAlert: true,
+        },
       ];
       const result = await processor.updateArtifacts(
         {
@@ -912,6 +917,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           depType: depTypes.buildSystemRequires,
           lockedVersion: '69.5.1',
           newVersion: '78.1.1',
+          isVulnerabilityAlert: true,
         },
         // a build requirement proper, which the lock file knows nothing about
         {
@@ -937,6 +943,37 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('does not pin a routine upgrade of a build requirement', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      // no vulnerability to fix, so `uv` is free to resolve the version
+      const updatedDeps = [
+        {
+          packageName: 'setuptools',
+          depType: depTypes.buildSystemRequires,
+          lockedVersion: '69.5.1',
+          newVersion: '78.1.1',
+        },
+      ];
+      await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'uv lock --upgrade-package setuptools' },
+      ]);
+    });
+
     it('does not pin the upgrade of a transitive dep locked at several versions', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);
@@ -949,6 +986,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageName: 'dep1',
           depType: depTypes.uvTransitiveDependencies,
           newVersion: '3.15',
+          isVulnerabilityAlert: true,
           managerData: { hasMultipleLockedEntries: true },
         },
       ];
