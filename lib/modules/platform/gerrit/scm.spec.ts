@@ -368,6 +368,17 @@ describe('modules/platform/gerrit/scm', () => {
     });
   });
 
+  describe('mergeToLocal()', () => {
+    it('merges the local branch if it is not a virtual branch', async () => {
+      await gerritScm.mergeToLocal('renovate/configure');
+
+      expect(git.mergeToLocal).toHaveBeenCalledExactlyOnceWith(
+        'renovate/configure',
+        { localBranch: true },
+      );
+    });
+  });
+
   describe('nextPatchSetRef()', () => {
     it('increments patchset 1', () => {
       expect(nextPatchSetRef('refs/changes/45/12345/1')).toBe(

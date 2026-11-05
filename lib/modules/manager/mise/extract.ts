@@ -1,11 +1,13 @@
 import {
   isArray,
   isFunction,
+  isNonEmptyObject,
   isNonEmptyString,
   isObject,
 } from '@sindresorhus/is';
 import javaLtsVersions from '../../../data/java-version-lts.json' with { type: 'json' };
 import { logger } from '../../../logger/index.ts';
+import type { ConstraintName, ToolName } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -13,7 +15,11 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import type { StaticTooling } from '../asdf/types.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type {
+  PackageDependency,
+  PackageFileContent,
+  SharedConstraint,
+} from '../types.ts';
 import {
   createAquaToolConfig,
   createCargoToolConfig,
@@ -29,6 +35,12 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import {
+  getConstraintName,
+  getConstraintValue,
+  getSharedConstraintsScope,
+  isLockedVersionOf,
+} from './constraints.ts';
 import { extractGitReference } from './git-reference.ts';
 import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
@@ -126,20 +138,79 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = [
-    ...toolEntries.map(([name, toolData, depType]) =>
-      extractToolEntry(name, toolData, depType, lockFileData),
-    ),
-    ...taskFileDeps,
-    ...includeDeps,
-  ];
+  const toolDeps = toolEntries.map(([name, toolData, depType]) =>
+    extractToolEntry(name, toolData, depType, lockFileData),
+  );
+  const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {
     result.lockFiles = [lockFileName];
   }
 
+  const scope = getSharedConstraintsScope(packageFile);
+  if (scope) {
+    const constraints = extractToolConstraints(
+      misefile.tools,
+      toolDeps,
+      lockFileData,
+    );
+    if (isNonEmptyObject(constraints)) {
+      result.sharedConstraintsScope = { ...scope, constraints };
+    }
+  }
+
   return result;
+}
+
+/**
+ * Returns the versions of the tools which are Containerbase tools, preferring the locked version, which is the one mise installs, or `null` for a version which is no constraint, like `lts`.
+ */
+function extractToolConstraints(
+  tools: Record<string, MiseTool>,
+  toolDeps: MiseDependency[],
+  lockFileData: MiseLockFile | undefined,
+): Partial<Record<ConstraintName, SharedConstraint>> {
+  const constraints: Partial<Record<ConstraintName, SharedConstraint>> = {};
+  // the top level tools come first in `toolDeps`
+  const constraintTools = Object.entries(tools).flatMap(
+    ([name, toolData], index) => {
+      const depName = optionInToolNameRegex.exec(name.trim())!.groups!.name;
+      const constraintName = getConstraintName(depName);
+      const dep = toolDeps[index];
+      return constraintName ? [{ depName, constraintName, toolData, dep }] : [];
+    },
+  );
+  for (const { depName, constraintName, toolData, dep } of constraintTools) {
+    constraints[constraintName] = {
+      depName: dep.depName,
+      value: getConstraintValue(
+        constraintName,
+        getInstalledVersion(lockFileData, depName, constraintName, toolData),
+      ),
+    };
+  }
+  return constraints;
+}
+
+/**
+ * Returns the version of a tool which mise installs, which is the locked version unless it does not match the configured version number.
+ */
+function getInstalledVersion(
+  lockFileData: MiseLockFile | undefined,
+  depName: string,
+  constraintName: ToolName,
+  toolData: MiseTool,
+): string | null {
+  const version = parseVersion(getPrimaryToolValue(toolData));
+  // mise locks an alias like `nodejs` under the name of the tool
+  const lockedVersion = lockFileData
+    ? (getLockedVersion(lockFileData, depName) ??
+      getLockedVersion(lockFileData, constraintName))
+    : undefined;
+  return lockedVersion && isLockedVersionOf(lockedVersion, version)
+    ? lockedVersion
+    : version;
 }
 
 /**
@@ -312,7 +383,8 @@ function getLtsDatasource(
   if (datasource) {
     return datasource;
   }
-  if ((backend === '' || backend === 'core') && toolName === 'java') {
+  const isCoreBackend = backend === '' || backend === 'core';
+  if (isCoreBackend && toolName === 'java') {
     return JavaVersionDatasource.id;
   }
   return undefined;
@@ -381,7 +453,7 @@ function extractSelectorLockedDependency(
   toolConfig: StaticTooling | BackendToolingConfig | null,
   lockedVersion: string,
   depType: string,
-): PackageDependency | null {
+): MiseDependency | null {
   const selectorConfig = getSelectorConfig(
     version,
     backend,
@@ -420,7 +492,7 @@ function extractToolEntry(
   toolData: MiseTool,
   depType: string,
   lockFileData?: MiseLockFile,
-): PackageDependency {
+): MiseDependency {
   const toolValue = getPrimaryToolValue(toolData);
   const version = parseVersion(toolValue);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(

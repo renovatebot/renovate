@@ -198,9 +198,11 @@ export async function hasPackageManager(
 
   const packageJsonResult = await loadPackageJson(packageJsonDir);
 
-  return (
-    (isNonEmptyString(packageJsonResult?.packageManager?.name) &&
-      isNonEmptyString(packageJsonResult?.packageManager?.version)) ||
-    hasDevEnginesPackageManager(packageJsonResult)
-  );
+  if (
+    isNonEmptyString(packageJsonResult?.packageManager?.name) &&
+    isNonEmptyString(packageJsonResult?.packageManager?.version)
+  ) {
+    return true;
+  }
+  return hasDevEnginesPackageManager(packageJsonResult);
 }

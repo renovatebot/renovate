@@ -1,6 +1,6 @@
-import ini from 'ini';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _sanitize from '../../../util/sanitize.ts';
+import { Ini } from '../../../util/schema-utils/index.ts';
 import { defaultRegistryUrl } from './common.ts';
 import {
   convertNpmrcToRules,
@@ -42,14 +42,14 @@ describe('modules/datasource/npm/npmrc', () => {
   describe('convertNpmrcToRules()', () => {
     it('rejects invalid registries', () => {
       const res = convertNpmrcToRules(
-        ini.parse('registry=1\n@scope:registry=2\n'),
+        Ini.parse('registry=1\n@scope:registry=2\n'),
       );
       expect(res.hostRules).toHaveLength(0);
       expect(res.packageRules).toHaveLength(0);
     });
 
     it('handles naked auth', () => {
-      expect(convertNpmrcToRules(ini.parse('_auth=abc123\n')))
+      expect(convertNpmrcToRules(Ini.parse('_auth=abc123\n')))
         .toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -66,7 +66,7 @@ describe('modules/datasource/npm/npmrc', () => {
 
     it('handles host, path and auth', () => {
       expect(
-        convertNpmrcToRules(ini.parse('//some.test/with/path:_auth=abc123')),
+        convertNpmrcToRules(Ini.parse('//some.test/with/path:_auth=abc123')),
       ).toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -85,7 +85,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles host, path, port and auth', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse('//some.test:8080/with/path:_authToken=abc123'),
+          Ini.parse('//some.test:8080/with/path:_authToken=abc123'),
         ),
       ).toMatchInlineSnapshot(`
         {
@@ -102,7 +102,7 @@ describe('modules/datasource/npm/npmrc', () => {
     });
 
     it('handles naked authToken', () => {
-      expect(convertNpmrcToRules(ini.parse('_authToken=abc123\n')))
+      expect(convertNpmrcToRules(Ini.parse('_authToken=abc123\n')))
         .toMatchInlineSnapshot(`
         {
           "hostRules": [
@@ -119,7 +119,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles host authToken', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse(
+          Ini.parse(
             '@fontawesome:registry=https://npm.fontawesome.com/\n//npm.fontawesome.com/:_authToken=abc123',
           ),
         ),
@@ -152,7 +152,7 @@ describe('modules/datasource/npm/npmrc', () => {
     it('handles username and _password', () => {
       expect(
         convertNpmrcToRules(
-          ini.parse(
+          Ini.parse(
             `//my-registry.example.com/npm-private/:_password=dGVzdA==\n//my-registry.example.com/npm-private/:username=bot\n//my-registry.example.com/npm-private/:always-auth=true`,
           ),
         ),

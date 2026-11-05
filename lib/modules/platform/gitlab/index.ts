@@ -28,6 +28,12 @@ import * as git from '../../../util/git/index.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
+import {
+  isForbidden,
+  isNotAcceptable,
+  isNotFound,
+  isUnauthorized,
+} from '../../../util/http/status.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseInteger } from '../../../util/number.ts';
 import * as p from '../../../util/promises.ts';
@@ -357,10 +363,10 @@ export async function initRepo({
     ) {
       throw err;
     }
-    if (err.statusCode === 403) {
+    if (isForbidden(err)) {
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_DISABLED) {
@@ -415,7 +421,7 @@ export async function isPrInMergeQueue(id: number): Promise<boolean> {
     );
     return status !== 'merged';
   } catch (err) {
-    if (err.statusCode !== 404) {
+    if (!isNotFound(err)) {
       logger.debug({ err }, 'Failed to fetch merge train status');
     }
     return false;
@@ -462,7 +468,7 @@ async function getStatus(
       .body;
   } catch (err) /* v8 ignore next -- commit status fetch failures map 404 to REPOSITORY_CHANGED, not mocked in specs */ {
     logger.debug({ err }, 'Error getting commit status');
-    if (err.response?.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
@@ -522,11 +528,10 @@ export async function getBranchStatus(
   }
   if (
     !internalChecksAsSuccess &&
-    branchStatuses.every(
-      (check) =>
-        check.name?.startsWith('renovate/') &&
-        gitlabToRenovateStatusMapping[check.status] === 'green',
-    )
+    branchStatuses.every((check) => {
+      const isGreen = gitlabToRenovateStatusMapping[check.status] === 'green';
+      return check.name?.startsWith('renovate/') && isGreen;
+    })
   ) {
     logger.debug(
       'Successful checks are all internal renovate/ checks, so returning "pending" branch status',
@@ -684,8 +689,10 @@ async function tryPrAutomerge(
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Only continue if the merge request can be merged and has a pipeline.
+        const merge_status_check =
+          detailed_merge_status_check || deprecated_merge_status_check;
         if (
-          (detailed_merge_status_check || deprecated_merge_status_check) &&
+          merge_status_check &&
           body.pipeline !== null &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
@@ -919,11 +926,11 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
     );
     return true;
   } catch (err) /* v8 ignore next -- merge rejection statuses (401/406) are mapped to false, not mocked in specs */ {
-    if (err.statusCode === 401) {
+    if (isUnauthorized(err)) {
       logger.debug('No permissions to merge PR');
       return false;
     }
-    if (err.statusCode === 406) {
+    if (isNotAcceptable(err)) {
       logger.debug({ err }, 'PR not acceptable for merging');
       return false;
     }
@@ -999,14 +1006,15 @@ export async function findPr({
   }
 
   const prList = await getPrList();
-  return (
-    prList.find(
-      (p: { sourceBranch: string; title: string; state: string }) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    ) ?? null
+  const pr = prList.find(
+    (p: { sourceBranch: string; title: string; state: string }) => {
+      if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+        return false;
+      }
+      return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+    },
   );
+  return pr ?? null;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
@@ -1627,7 +1635,7 @@ export async function expandGroupMembers(
       const members = await getMemberUsernames(reviewerOrAssignee);
       expandedReviewersOrAssignees.push(...members);
     } catch (err) {
-      if (err.statusCode !== 404) {
+      if (!isNotFound(err)) {
         logger.debug({ err, reviewerOrAssignee }, 'Unable to fetch group');
       }
       expandedReviewersOrAssignees.push(reviewerOrAssignee);

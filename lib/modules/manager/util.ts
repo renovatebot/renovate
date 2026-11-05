@@ -2,8 +2,9 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
 import type { MaybePromise } from '../../types/index.ts';
 import { detectPlatform } from '../../util/common.ts';
+import { getToolConfig } from '../../util/exec/containerbase.ts';
 import type { ExecError } from '../../util/exec/exec-error.ts';
-import type { ConstraintName } from '../../util/exec/types.ts';
+import { type ConstraintName, isToolName } from '../../util/exec/types.ts';
 import {
   deleteLocalFile,
   readLocalFile,
@@ -15,6 +16,7 @@ import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../datasource/gitlab-tags/index.ts';
+import { get as getVersioning } from '../versioning/index.ts';
 import type {
   PackageDependency,
   ToolConstraintsConfig,
@@ -101,14 +103,18 @@ export function fileChangesToArtifactResults(
  * 2. `derive`, because it reads the package files as the branch changed them,
  *    so it can be newer than what extraction saw
  * 3. `extractedConstraints`, as collected while extracting the base branch
+ * 4. `sharedConstraints`, the version which a version manager like `mise`
+ *    installs for the directory, which also wins over the constraint of step 2
+ *    or 3 if it is within it, like `20.11.0` within `>=18`
  *
  * Managers that have no way to derive the constraint at artifact time can omit
  * `derive`. An empty string counts as "not set" at every step, so it never
  * shadows a value further down the list.
  *
- * This is the only place that reads `constraints` and `extractedConstraints`
- * from the config; the `renovate/prefer-resolve-tool-constraint` lint rule
- * keeps managers from reading them directly.
+ * This is the only place that reads `constraints`, `extractedConstraints` and
+ * `sharedConstraints` from the config; the
+ * `renovate/prefer-resolve-tool-constraint` lint rule keeps managers from
+ * reading them directly.
  */
 export async function resolveToolConstraint(
   config: ToolConstraintsConfig,
@@ -119,12 +125,35 @@ export async function resolveToolConstraint(
   if (isNonEmptyString(configured)) {
     return configured;
   }
-  const derived = await derive?.();
-  if (isNonEmptyString(derived)) {
-    return derived;
+  const required = [
+    await derive?.(),
+    config.extractedConstraints?.[toolName],
+  ].find(isNonEmptyString);
+  const shared = config.sharedConstraints?.[toolName];
+  if (!isNonEmptyString(shared)) {
+    return required;
   }
-  const extracted = config.extractedConstraints?.[toolName];
-  return isNonEmptyString(extracted) ? extracted : undefined;
+  return !required || isWithin(toolName, shared, required) ? shared : required;
+}
+
+/**
+ * Whether the tool `constraint` is a version within `range`, or a range which is a subset of it.
+ */
+function isWithin(
+  toolName: ConstraintName,
+  constraint: string,
+  range: string,
+): boolean {
+  if (!isToolName(toolName)) {
+    return false;
+  }
+  const versioning = getVersioning(getToolConfig(toolName)?.versioning);
+  if (!versioning.isValid(constraint) || !versioning.isValid(range)) {
+    return false;
+  }
+  return versioning.isSingleVersion(constraint)
+    ? versioning.matches(constraint, range)
+    : versioning.subset?.(constraint, range) === true;
 }
 
 /**

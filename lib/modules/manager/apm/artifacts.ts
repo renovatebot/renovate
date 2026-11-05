@@ -4,7 +4,6 @@ import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
-  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -41,9 +40,6 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    if (isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
-    }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -55,9 +51,21 @@ export async function updateArtifacts({
         },
       ],
     };
-    await exec('apm install', execOptions);
+    // Plain `apm install` only syncs the lockfile to the manifest. For lock
+    // file maintenance, `--update` re-resolves each dependency to the latest
+    // ref `apm.yml` allows, without editing `apm.yml`. (`apm update` would also
+    // move full-SHA pins in `apm.yml`, which is for Renovate's own updates.)
+    //
+    // The lockfile stays in place. It is APM's record of which deployed files
+    // it owns, so without it `apm install` skips the committed files as
+    // unmanaged: the ownership ledger and file hashes are lost, and when a ref
+    // moves, the deployed files stay at the old version.
+    await exec(
+      isLockFileMaintenance ? 'apm install --update' : 'apm install',
+      execOptions,
+    );
 
-    // `apm install` regenerates the lockfile and re-deploys the harness
+    // The command regenerates the lockfile and re-deploys the harness
     // directories (`.github/`, `.claude/`, ...) that APM consumers commit, so
     // return every file it changed - not just the lockfile - or the committed
     // instruction files go stale after a bump. `apm_modules/` is the gitignored

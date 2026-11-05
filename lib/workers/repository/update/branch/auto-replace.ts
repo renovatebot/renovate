@@ -124,9 +124,11 @@ export async function confirmIfDepUpdated(
     }
   }
 
+  const isPinOrDigestUpdate =
+    upgrade.isPinDigest === true || upgrade.currentDigest;
   if (
     upgrade.newDigest &&
-    (upgrade.isPinDigest === true || upgrade.currentDigest) &&
+    isPinOrDigestUpdate &&
     upgrade.newDigest !== newUpgrade.currentDigest
   ) {
     logger.debug(
@@ -216,6 +218,13 @@ async function checkExistingBranch(
   return existingContent;
 }
 
+function isMissingDepName(
+  replaceString: string | undefined,
+  depName: string | undefined,
+): boolean {
+  return isUndefined(replaceString) || !replaceString.includes(depName!);
+}
+
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
@@ -253,8 +262,7 @@ export async function doAutoReplace(
   let replaceWithoutReplaceString =
     isString(newName) &&
     newName !== depName &&
-    (isUndefined(upgrade.replaceString) ||
-      !upgrade.replaceString?.includes(depName!));
+    isMissingDepName(upgrade.replaceString, depName);
   // fallback must contain the field being updated, else the replacement is
   // a no-op for managers where value and digest live in separate tokens
   let replaceString = upgrade.replaceString;

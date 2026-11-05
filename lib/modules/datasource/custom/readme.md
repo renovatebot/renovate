@@ -70,6 +70,7 @@ All available options:
       "version": "v1.0.0",
       "isDeprecated": true,
       "releaseTimestamp": "2022-12-24T18:21Z",
+      "changelogContent": "Release notes in Markdown.",
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
       "sourceDirectory": "monorepo/folder",
@@ -83,6 +84,14 @@ All available options:
   "homepage": "https://demo.org"
 }
 ```
+
+### Embedded release notes
+
+`changelogContent` is optional Markdown supplied for a release.
+Renovate can embed the selected release's content through its existing release-notes pipeline; it does not combine supplied notes from intermediate releases.
+Non-string content is discarded without removing the release from update consideration.
+Use `changelogUrl` to link to the full notes; providing a URL alone does not make Renovate fetch Markdown from that URL.
+Embedded notes respect [`fetchChangeLogs`](../../../configuration-options.md#fetchchangelogs) and use the existing Markdown sanitization and platform PR-body limits.
 
 ### Debugging
 

@@ -18,7 +18,7 @@ import {
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { mockClient } from 'aws-sdk-client-mock';
-import * as aws4 from 'aws4';
+import aws4 from 'aws4';
 import { git, logger } from '~test/util.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,

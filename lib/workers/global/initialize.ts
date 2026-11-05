@@ -1,5 +1,6 @@
 import os from 'node:os';
 import {
+  configure as configureContainerbase,
   isContainerbase,
   validateContainerbaseVersion,
 } from '@renovatebot/base-image';
@@ -16,6 +17,7 @@ import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -120,6 +122,8 @@ export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
   let config = config_;
+  // containerbase and osv-offline log to Renovate's logger instead of `debug`
+  configureContainerbase({ logger });
   setHttpRateLimits();
   await checkVersions();
   setGlobalHostRules(config);
@@ -136,6 +140,7 @@ export async function globalInitialize(
 }
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
+  await Vulnerabilities.cleanup();
   await packageCache.cleanup(config);
   resetGlobalLogLevelRemaps();
 }

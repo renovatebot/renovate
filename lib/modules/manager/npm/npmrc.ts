@@ -230,11 +230,11 @@ const npmrcCommentRegex = regEx(/[#;]/);
  * Whether the repository `.npmrc` has content `hasNpmrcCredentials()` does not read: a `#` or `;` anywhere, which may start a comment, or a non-blank line which is neither a setting nor a section.
  */
 function hasUnreadContent(repoNpmrc: SanitizedRepoNpmrc): boolean {
-  return (
-    npmrcCommentRegex.test(repoNpmrc.content) ||
-    parseNpmrc(repoNpmrc.content).lines.some(
-      (line) => line.type === 'other' && !!line.raw.trim(),
-    )
+  if (npmrcCommentRegex.test(repoNpmrc.content)) {
+    return true;
+  }
+  return parseNpmrc(repoNpmrc.content).lines.some(
+    (line) => line.type === 'other' && !!line.raw.trim(),
   );
 }
 

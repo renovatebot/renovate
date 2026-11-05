@@ -37,10 +37,10 @@ export class DebianVersioningApi extends GenericVersioningApi {
     let ver: string;
     ver = this._rollingReleases.getVersionByLts(version);
     ver = this._distroInfo.getVersionByCodename(ver);
-    return (
-      (isValid && this._distroInfo.isCreated(ver)) ||
-      isDatedCodeName(version, this._distroInfo)
-    );
+    if (isValid && this._distroInfo.isCreated(ver)) {
+      return true;
+    }
+    return isDatedCodeName(version, this._distroInfo);
   }
 
   override isStable(version: string): boolean {

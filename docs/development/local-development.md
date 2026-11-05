@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^24.11.0`
+- Node.js `^24.11.0 || ^26.13.0`
 - pnpm `^10.0.0`
 - C++ compiler
 
