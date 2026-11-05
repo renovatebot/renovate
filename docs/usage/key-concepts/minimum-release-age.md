@@ -324,9 +324,14 @@ For example, with this config:
 
 #### Cargo
 
-Without [`minimumReleaseAgePackageManagerSync`](../configuration-options.md#minimumreleaseagepackagemanagersync), Renovate passes nothing to cargo, does not read the cargo config, and lock file maintenance waits for `minimumReleaseAge`.
+##### Default Cargo behaviour
 
-With `minimumReleaseAgePackageManagerSync`, Renovate runs `cargo update` with `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` set to the repository level `minimumReleaseAge`, or the one of lock file maintenance, raised by a larger `minimumReleaseAgePackageManager`.
+Renovate passes nothing to cargo, does not read the cargo config, and lock file maintenance waits for `minimumReleaseAge`.
+Cargo applies its own config.
+
+##### Cargo with `minimumReleaseAgePackageManagerSync`
+
+Renovate runs `cargo update` with `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE` set to the repository level `minimumReleaseAge`, or the one of lock file maintenance, raised by a larger `minimumReleaseAgePackageManager`.
 It also sets `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=deny`, so that an `allow` in the cargo config does not turn off the check.
 Security updates get neither variable, and cargo before Rust 1.100.0 ignores both.
 A value for them from the environment of Renovate, `customEnvVariables` or `env` takes precedence.
@@ -349,7 +354,7 @@ Renovate passes the age in the largest unit which keeps it a whole number, for e
 
 Renovate takes the `rust` constraint from your config, or from the Rust version which another manager shares for the directory, like the `mise` or `rust-toolchain` manager, see [`constraints`](../configuration-options.md#constraints).
 
-With `minimumReleaseAgePackageManagerSync`, cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
+Cargo enforces the minimum release age during lock file maintenance, so Renovate creates the branch without waiting for release timestamps, if:
 
 - the self-hosted Renovate sets the experimental [`RENOVATE_X_CARGO_MIN_PUBLISH_AGE`](../self-hosted-experimental.md#renovate_x_cargo_min_publish_age) environment variable,
 - the `rust` constraint only allows Rust 1.100.0 or later, for example `1.100.0` or `1.100`,
