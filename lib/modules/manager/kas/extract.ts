@@ -1,4 +1,3 @@
-import type { Document } from 'yaml';
 import { YAMLMap } from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { parseSingleYamlDocument } from '../../../util/yaml.ts';
@@ -20,39 +19,20 @@ import {
 import type { KasConfig, KasRepo } from './schema.ts';
 import type { KasConfigFile } from './types.ts';
 
-function extractRepoStrings(
-  content: string,
-  packageFile: string,
-): Map<string, string> {
+function extractRepoStrings(content: string): Map<string, string> {
   const map = new Map<string, string>();
-  // istanbul ignore if
-  if (!isYamlFilePath(packageFile)) {
-    return map;
-  }
-  let rawYamlDocument: Document;
-  try {
-    rawYamlDocument = parseSingleYamlDocument(content);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ packageFile, err }, `Parsing KAS YAML file failed`);
-    return map;
-  }
-  let reposNode = rawYamlDocument.get('repos');
+  const rawYamlDocument = parseSingleYamlDocument(content);
+  const reposNode =
+    rawYamlDocument.get('repos') ??
+    rawYamlDocument.getIn(['overrides', 'repos']);
+  // v8 ignore if -- the caller already picked a repos map from the parsed config
   if (!(reposNode instanceof YAMLMap)) {
-    const overridesNode = rawYamlDocument.get('overrides');
-    // istanbul ignore else
-    if (overridesNode instanceof YAMLMap) {
-      reposNode = overridesNode.get('repos');
-    }
-  }
-  // istanbul ignore if
-  if (!(reposNode instanceof YAMLMap) || reposNode.items.length === 0) {
-    logger.debug({ packageFile }, 'no repos found in KAS file');
     return map;
   }
   for (const repoItem of reposNode.items) {
     const repoName = repoItem.key.toString();
     const repoNode = repoItem.value;
-    // istanbul ignore else
+    // v8 ignore else -- parsed nodes always carry a range
     if (repoItem.key.range && repoNode?.range) {
       const [keyStart] = repoItem.key.range;
       const [, valueEnd] = repoNode.range;
@@ -73,15 +53,14 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace(`kas.extractPackageFile ${packageFile}`);
   logger.trace({ content });
-  const isYamlFile = isYamlFilePath(packageFile);
   const repos: Record<string, Partial<KasRepo> | null | undefined> | undefined =
     isLockFile ? config.overrides?.repos : config.repos;
   if (!repos) {
     logger.debug({ packageFile }, 'no repos found in KAS file');
     return null;
   }
-  const repoStrings: Map<string, string> | null = isYamlFile
-    ? extractRepoStrings(content, packageFile)
+  const repoStrings = isYamlFilePath(packageFile)
+    ? extractRepoStrings(content)
     : null;
   const deps: PackageDependency[] = [];
   for (const repoName of Object.keys(repos)) {
@@ -149,25 +128,11 @@ export function extractPackageFile(
       continue;
     }
 
-    let replaceString: string | undefined = undefined;
-    if (isYamlFile) {
-      replaceString = repoStrings?.get(repoName);
-      // istanbul ignore if
-      if (!replaceString) {
-        logger.warn(
-          { packageFile, repoName },
-          'could not extract repo string from file, using entire file content',
-        );
-        replaceString = content;
-      }
-      logger.trace({ replaceString, repoName }, 'string to replace for repo');
-    }
-
     const packageDependency: PackageDependency = {
       depName: repoName,
       packageName: git,
       versioning: branch ? looseVersioning : undefined,
-      replaceString: replaceString,
+      replaceString: repoStrings?.get(repoName),
       currentDigest: commit,
     };
 

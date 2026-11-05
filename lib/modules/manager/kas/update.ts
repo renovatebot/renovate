@@ -44,7 +44,6 @@ export function updateDependency({
   }
   if (isYamlFilePath(packageFile)) {
     const replaceString = upgrade.replaceString;
-    /* istanbul ignore if */
     if (!isString(replaceString)) {
       logger.warn(
         { packageFile, depName, replaceString },
@@ -60,82 +59,76 @@ export function updateDependency({
       );
       return fileContent;
     }
-    try {
-      let newString = replaceString;
-      if (currentValue && newValue && currentValue !== newValue) {
-        newString = replaceFieldValue(newString, 'tag', currentValue, newValue);
-      }
-      if (currentDigest && newDigest && currentDigest !== newDigest) {
-        newString = replaceFieldValue(
-          newString,
-          'commit',
-          currentDigest,
-          newDigest,
-        );
-      }
-      logger.trace(
-        { packageFile, depName },
-        `Starting search at index ${searchIndex}`,
+    let newString = replaceString;
+    if (currentValue && newValue && currentValue !== newValue) {
+      newString = replaceFieldValue(newString, 'tag', currentValue, newValue);
+    }
+    if (currentDigest && newDigest && currentDigest !== newDigest) {
+      newString = replaceFieldValue(
+        newString,
+        'commit',
+        currentDigest,
+        newDigest,
       );
-      let newContent = fileContent;
-      newContent = replaceAt(newContent, searchIndex, replaceString, newString);
-      if (newContent === fileContent) {
-        logger.warn(
-          { packageFile, depName },
-          'Replacement did not change file content',
-        );
-        return fileContent;
-      }
-      return newContent;
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ packageFile, depName, err }, 'update Dependency error');
-      return fileContent;
     }
-  } else {
-    if (!depName) {
-      logger.warn({ packageFile }, 'Dependency name not provided for update.');
-      return fileContent;
-    }
-    let parsedContent;
-    try {
-      parsedContent = parse(fileContent);
-    } catch (err) {
-      logger.warn({ packageFile, depName, err }, 'Cannot parse json file.');
-      return fileContent;
-    }
-    const isLockFile = isLockFilePath(packageFile);
-    const repos: Record<string, KasRepo | null | undefined> | undefined =
-      isLockFile ? parsedContent?.overrides?.repos : parsedContent?.repos;
-    if (!repos) {
+    const newContent = replaceAt(
+      fileContent,
+      searchIndex,
+      replaceString,
+      newString,
+    );
+    if (newContent === fileContent) {
       logger.warn(
         { packageFile, depName },
-        'Parsed content or repos not found for non-yaml file.',
+        'Replacement did not change file content',
       );
       return fileContent;
     }
-    const repo = repos[depName];
-    if (!repo) {
-      logger.warn(
-        { packageFile, depName },
-        'Repo not found for given dependency name.',
-      );
-      return fileContent;
-    }
-    if (
-      newDigest &&
-      currentDigest === repo.commit &&
-      currentDigest !== newDigest
-    ) {
-      repo.commit = newDigest;
-    }
-    if (
-      !isLockFile &&
-      newValue &&
-      currentValue === repo.tag &&
-      currentValue !== newValue
-    ) {
-      repo.tag = newValue;
-    }
-    return weave(fileContent, parsedContent);
+    return newContent;
   }
+  if (!depName) {
+    logger.warn({ packageFile }, 'Dependency name not provided for update.');
+    return fileContent;
+  }
+  let parsedContent;
+  try {
+    parsedContent = parse(fileContent);
+  } catch (err) {
+    logger.warn({ packageFile, depName, err }, 'Cannot parse json file.');
+    return fileContent;
+  }
+  const isLockFile = isLockFilePath(packageFile);
+  const repos: Record<string, KasRepo | null | undefined> | undefined =
+    isLockFile ? parsedContent?.overrides?.repos : parsedContent?.repos;
+  if (!repos) {
+    logger.warn(
+      { packageFile, depName },
+      'Parsed content or repos not found for non-yaml file.',
+    );
+    return fileContent;
+  }
+  const repo = repos[depName];
+  if (!repo) {
+    logger.warn(
+      { packageFile, depName },
+      'Repo not found for given dependency name.',
+    );
+    return fileContent;
+  }
+  if (
+    newDigest &&
+    currentDigest === repo.commit &&
+    currentDigest !== newDigest
+  ) {
+    repo.commit = newDigest;
+  }
+  if (
+    !isLockFile &&
+    newValue &&
+    currentValue === repo.tag &&
+    currentValue !== newValue
+  ) {
+    repo.tag = newValue;
+  }
+  return weave(fileContent, parsedContent);
 }

@@ -177,6 +177,20 @@ describe('modules/manager/kas/update', () => {
       expect(result).toContain('tag: 1.1');
     });
 
+    it('returns original content when replaceString is missing', () => {
+      const result = updateDependency({
+        fileContent: kasFileYamlBranch,
+        packageFile: 'kas.yml',
+        upgrade: {
+          depName: 'isar',
+          datasource: 'git-refs',
+          currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+          newDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+        },
+      });
+      expect(result).toBe(kasFileYamlBranch);
+    });
+
     it('returning original content if replace string is not found', () => {
       const upgrade = {
         depName: 'isar',

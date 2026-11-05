@@ -278,8 +278,25 @@ describe('modules/manager/kas/extract', () => {
       expect(result).toMatchObject([
         {
           packageFile: 'kas.lock.yml',
-          deps: [{ depName: 'isar', currentDigest: 'bbbb' }],
+          deps: [
+            {
+              depName: 'isar',
+              currentDigest: 'bbbb',
+              replaceString: 'isar:\n      commit: bbbb',
+            },
+          ],
         },
+        emptyRoot,
+      ]);
+    });
+
+    it('extracts nothing from an empty repos map', async () => {
+      files['kas.yml'] = codeBlock`
+        header:
+          version: 22
+        repos: {}
+      `;
+      await expect(extractAllPackageFiles({}, ['kas.yml'])).resolves.toEqual([
         emptyRoot,
       ]);
     });
