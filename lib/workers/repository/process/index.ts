@@ -87,6 +87,10 @@ async function readBaseBranchConfig(
 
   const hasConfigFile = !!configFileName && configFileName !== 'package.json';
   if (mode === 'fallback' && !hasConfigFile) {
+    logger.debug(
+      { baseBranch, configFileName },
+      'Cannot read branch-specific config without a dedicated config file, using default branch config',
+    );
     return null;
   }
 

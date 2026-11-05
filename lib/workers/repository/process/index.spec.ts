@@ -536,6 +536,10 @@ describe('workers/repository/process/index', () => {
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
         expect(platform.getRawFile).not.toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { baseBranch: 'postgresql/v18/dev', configFileName: 'package.json' },
+          'Cannot read branch-specific config without a dedicated config file, using default branch config',
+        );
       });
 
       it('skips when configFileName is missing from cache', async () => {
@@ -543,6 +547,10 @@ describe('workers/repository/process/index', () => {
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
         expect(platform.getRawFile).not.toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { baseBranch: 'postgresql/v18/dev', configFileName: undefined },
+          'Cannot read branch-specific config without a dedicated config file, using default branch config',
+        );
       });
     });
   });
