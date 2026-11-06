@@ -126,7 +126,7 @@ async function readBaseBranchConfig(
     error.validationMessage = parseResult.validationMessage;
     throw error;
   }
-  const rawBranchConfig = parseResult.parsedContents as RenovateConfig;
+  const rawBranchConfig = parseResult.parsedContents as RenovateConfigFile;
   logger.debug({ config: rawBranchConfig }, 'Base branch config raw');
 
   const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
