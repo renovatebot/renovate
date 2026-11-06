@@ -856,6 +856,7 @@ const optionDefinitions = defineOptions([
     type: 'array',
     subType: 'string',
     default: [],
+    nullable: true,
   },
   {
     name: 'goGetDirs',

@@ -75,6 +75,7 @@ describe('config/defaults', () => {
 
       expect(defaultedWithoutValue).toEqual([]);
       expect(otherWithValue).toEqual([
+        'composerIgnorePlatformReqs',
         'semanticCommitScope',
         'minimumReleaseAgeBuffer',
       ]);
@@ -88,7 +89,6 @@ describe('config/defaults', () => {
         | 'automergeComment'
         | 'bbAutoResolvePrTasks'
         | 'bbUseDefaultReviewers'
-        | 'composerIgnorePlatformReqs'
         | 'excludeCommitPaths'
         | 'forkCreation'
         | 'gitLabIgnoreApprovals'
