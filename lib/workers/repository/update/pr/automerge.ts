@@ -81,7 +81,7 @@ export async function checkAutoMerge(
   }
   const branchStatus = await resolveBranchStatus(
     branchName,
-    !!config.internalChecksAsSuccess,
+    config.internalChecksAsSuccess,
     config.ignoreTests,
   );
   if (branchStatus !== 'green') {

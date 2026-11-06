@@ -39,6 +39,10 @@ const baseBranchSha = fakeSha('base_sha');
 const newBranchSha = fakeSha('new_sha');
 const newBaseBranchSha = fakeSha('new_base_sha');
 
+// the options of an upgrade which the commit fingerprint reads, with their defaults
+const { constraints, postUpgradeTasks } = getConfig();
+const upgradeDefaults = { constraints, postUpgradeTasks };
+
 beforeEach(() => {
   config = applyRepoConfigDefaults(getConfig());
   counts.clear();
@@ -149,14 +153,18 @@ describe('workers/repository/process/write', () => {
         {
           baseBranch: 'main',
           branchName: 'regular',
-          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          upgrades: partial<BranchUpgradeConfig>([
+            { ...upgradeDefaults, prConcurrentLimit: 10 },
+          ]),
           manager: 'npm',
         },
         {
           baseBranch: 'main',
           branchName: 'vulnerability',
           isVulnerabilityAlert: true,
-          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          upgrades: partial<BranchUpgradeConfig>([
+            { ...upgradeDefaults, prConcurrentLimit: 10 },
+          ]),
           manager: 'npm',
         },
       ]);
@@ -197,13 +205,17 @@ describe('workers/repository/process/write', () => {
         {
           baseBranch: 'main',
           branchName,
-          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          upgrades: partial<BranchUpgradeConfig>([
+            { ...upgradeDefaults, prConcurrentLimit: 10 },
+          ]),
           manager: 'npm',
         },
         {
           baseBranch: 'dev',
           branchName,
-          upgrades: partial<BranchUpgradeConfig>([{ prConcurrentLimit: 10 }]),
+          upgrades: partial<BranchUpgradeConfig>([
+            { ...upgradeDefaults, prConcurrentLimit: 10 },
+          ]),
           manager: 'npm',
         },
       ]);
@@ -240,6 +252,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             partial<BranchUpgradeConfig>({
+              ...upgradeDefaults,
               manager: 'npm',
             }),
           ],
@@ -269,6 +282,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             partial<BranchUpgradeConfig>({
+              ...upgradeDefaults,
               manager: 'unknown-manager',
             }),
           ],
@@ -312,6 +326,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             partial<BranchUpgradeConfig>({
+              ...upgradeDefaults,
               manager: 'unknown-manager',
             }),
           ],
@@ -357,6 +372,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             partial<BranchUpgradeConfig>({
+              ...upgradeDefaults,
               manager: 'unknown-manager',
             }),
           ],
@@ -399,6 +415,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [
             partial<BranchUpgradeConfig>({
+              ...upgradeDefaults,
               manager: 'npm',
             }),
           ],
@@ -432,18 +449,25 @@ describe('workers/repository/process/write', () => {
   });
 
   describe('generateCommitFingerprintConfig()', () => {
-    it('does not include postUpgradeTasks when not set', () => {
+    it('includes the default postUpgradeTasks', () => {
       const branch = partial<BranchConfig>({
-        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+        upgrades: [
+          partial<BranchUpgradeConfig>({ ...upgradeDefaults, manager: 'npm' }),
+        ],
       });
       const [res] = generateCommitFingerprintConfig(branch);
-      expect(res.postUpgradeTasks).toBeUndefined();
+      expect(res.postUpgradeTasks).toEqual({
+        commands: [],
+        fileFilters: [],
+        installTools: {},
+      });
     });
 
     it('includes postUpgradeTasks commands and fileFilters', () => {
       const branch = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'npm',
             postUpgradeTasks: {
               commands: ['echo hello'],
@@ -466,6 +490,7 @@ describe('workers/repository/process/write', () => {
       const branch = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'gomod',
             constraints: {
               golang: '1.27',
@@ -474,6 +499,7 @@ describe('workers/repository/process/write', () => {
             },
           }),
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'github-actions',
             constraints: { ghActionsLock: 'v0.3.0' },
           }),
@@ -488,6 +514,7 @@ describe('workers/repository/process/write', () => {
       const branch125 = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'gomod',
             constraints: { golang: '1.25' },
           }),
@@ -496,6 +523,7 @@ describe('workers/repository/process/write', () => {
       const branch127 = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'gomod',
             constraints: { golang: '1.27' },
           }),
@@ -510,6 +538,7 @@ describe('workers/repository/process/write', () => {
       const branchWithoutTools = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'npm',
             postUpgradeTasks: {
               commands: ['echo hello'],
@@ -521,6 +550,7 @@ describe('workers/repository/process/write', () => {
       const branchWithTools = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'npm',
             postUpgradeTasks: {
               commands: ['echo hello'],
@@ -537,11 +567,14 @@ describe('workers/repository/process/write', () => {
 
     it('changes fingerprint when postUpgradeTasks commands change', () => {
       const branchWithoutTasks = partial<BranchConfig>({
-        upgrades: [partial<BranchUpgradeConfig>({ manager: 'npm' })],
+        upgrades: [
+          partial<BranchUpgradeConfig>({ ...upgradeDefaults, manager: 'npm' }),
+        ],
       });
       const branchWithTasks = partial<BranchConfig>({
         upgrades: [
           partial<BranchUpgradeConfig>({
+            ...upgradeDefaults,
             manager: 'npm',
             postUpgradeTasks: {
               commands: ['echo hello'],

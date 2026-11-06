@@ -184,7 +184,7 @@ export async function ensurePr(
     hasAttestation: currentReleaseHasAttestation,
   } = config;
   const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests),
+    resolveBranchStatus(branchName, internalChecksAsSuccess, ignoreTests),
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -569,7 +569,7 @@ export async function ensurePr(
           prBody,
           labels: configuredLabels,
           platformPrOptions: getPlatformPrOptions(config),
-          draftPR: !!config.draftPR,
+          draftPR: config.draftPR,
           milestone: config.milestone,
         });
 

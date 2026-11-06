@@ -9,7 +9,6 @@ import {
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
-import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { calcLimit } from '../../../global/limits.ts';
 import type { BranchConfig } from '../../../types.ts';
@@ -103,7 +102,7 @@ function resolveVulnerabilityConcurrentLimit(
   const isBelowPrLimit =
     prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit;
   if (
-    typeof vulnerabilityAlerts?.branchConcurrentLimit === 'number' &&
+    typeof vulnerabilityAlerts.branchConcurrentLimit === 'number' &&
     branchConcurrentLimit > 0 &&
     isBelowPrLimit
   ) {
@@ -196,8 +195,8 @@ export function getExpectedPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
-  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const prHourlyLimit = config.prHourlyLimit;
+  const commitHourlyLimit = config.commitHourlyLimit;
   const securityBypassNote =
     securityBranchCount > 0
       ? ` Security update Pull Request${securityBranchCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
@@ -467,8 +466,8 @@ export function getExpectedPrListSummary(
   const sortedBases = sortBaseBranches(Object.keys(stats.prCountByBase));
   const hasMultipleBaseBranches = sortedBases.length > 1;
 
-  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
-  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const prHourlyLimit = config.prHourlyLimit;
+  const commitHourlyLimit = config.commitHourlyLimit;
   const concurrentLimit = resolveConcurrentLimit(config);
   const vulnerabilityLimit = resolveVulnerabilityConcurrentLimit(config);
   // Vulnerability alert branches bypass the repository-wide rate/concurrency limits, so they shouldn't

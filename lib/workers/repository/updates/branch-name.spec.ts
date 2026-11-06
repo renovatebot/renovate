@@ -374,6 +374,7 @@ describe('workers/repository/updates/branch-name', () => {
         hashedBranchLength: 3,
         branchPrefix: 'dep-',
         additionalBranchPrefix: '',
+        branchTopic: '',
         depNameSanitized: 'jest',
         newMajor: 42,
         groupName: 'some group name',

@@ -124,10 +124,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
       update,
     );
 
-    const branchTopic = template.compile(
-      String(update.branchTopic ?? ''),
-      update,
-    );
+    const branchTopic = template.compile(update.branchTopic, update);
 
     let hashInput = additionalBranchPrefix + branchTopic;
 

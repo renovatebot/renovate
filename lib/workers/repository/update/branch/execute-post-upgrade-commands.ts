@@ -190,7 +190,7 @@ export async function postUpgradeCommandsExecutor(
               execOpts.toolConstraints ??= [];
 
               for (const [tool] of Object.entries(
-                upgrade.postUpgradeTasks?.installTools,
+                upgrade.postUpgradeTasks.installTools,
               )) {
                 const validTool = isToolName(tool);
                 const validConstraint = isConstraintName(tool);

@@ -61,6 +61,7 @@ describe('workers/repository/updates/generate', () => {
       const { groupSingleUpdates } = getConfig();
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -87,6 +88,7 @@ describe('workers/repository/updates/generate', () => {
       const groupSingleUpdates = true;
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -103,6 +105,7 @@ describe('workers/repository/updates/generate', () => {
           packageFile: 'package.json',
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -129,6 +132,7 @@ describe('workers/repository/updates/generate', () => {
     it('does not group single upgrade when groupSingleUpdates is false', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -150,6 +154,7 @@ describe('workers/repository/updates/generate', () => {
     it('does not group single upgrade without groupName even with groupSingleUpdates', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -169,6 +174,7 @@ describe('workers/repository/updates/generate', () => {
     it('does not group single upgrade with sharedVariableName', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -195,6 +201,7 @@ describe('workers/repository/updates/generate', () => {
     it('handles lockFileMaintenance', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -221,6 +228,7 @@ describe('workers/repository/updates/generate', () => {
     it('sets minimumGroupSize based on upgrades', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -228,6 +236,7 @@ describe('workers/repository/updates/generate', () => {
           minimumGroupSize: 1,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -235,6 +244,7 @@ describe('workers/repository/updates/generate', () => {
           minimumGroupSize: 2,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -253,6 +263,7 @@ describe('workers/repository/updates/generate', () => {
     it('handles lockFileUpdate', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -295,6 +306,7 @@ describe('workers/repository/updates/generate', () => {
     it('does not group same upgrades', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -306,6 +318,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -329,6 +342,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'some-dep',
           excludeCommitPaths: [],
+          commitMessage: '',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -350,6 +364,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'some-other-dep',
           excludeCommitPaths: [],
+          commitMessage: '',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -371,6 +386,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'another-dep',
           excludeCommitPaths: [],
+          commitMessage: '',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -399,6 +415,7 @@ describe('workers/repository/updates/generate', () => {
     it('merges extractedConstraints of all upgrades', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -408,6 +425,7 @@ describe('workers/repository/updates/generate', () => {
           extractedConstraints: { python: '==3.11' },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-other-dep',
@@ -417,6 +435,7 @@ describe('workers/repository/updates/generate', () => {
           extractedConstraints: { poetry: '1.8.0' },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'another-dep',
@@ -443,6 +462,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'npm',
           packageFile: 'apps/web/package.json',
@@ -453,6 +473,7 @@ describe('workers/repository/updates/generate', () => {
           extractedConstraints: { node: '22', rust: '1.79.0' },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'tools',
           packageFile: 'tools.toml',
@@ -507,6 +528,7 @@ describe('workers/repository/updates/generate', () => {
           depName,
           branchName: 'some-branch',
           excludeCommitPaths: [],
+          commitMessage: '',
           currentValue,
           newValue,
           newVersion: newValue,
@@ -517,6 +539,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           branchName: 'some-branch',
           excludeCommitPaths: [],
+          commitMessage: '',
         });
 
         const grouped = generateBranchConfig(
@@ -543,6 +566,7 @@ describe('workers/repository/updates/generate', () => {
     it('uses the new value of a tool constraint which the branch updates', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'renovate-config',
           depName: 'golang',
@@ -553,6 +577,7 @@ describe('workers/repository/updates/generate', () => {
           constraints: { golang: '1.25', node: '22' },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'mise',
           depName: 'go',
@@ -572,6 +597,7 @@ describe('workers/repository/updates/generate', () => {
     it('keeps a different constraint value configured via `packageRules`', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'renovate-config',
           depName: 'golang',
@@ -582,6 +608,7 @@ describe('workers/repository/updates/generate', () => {
           constraints: { golang: '1.25' },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'gomod',
           depName: 'github.com/some/module',
@@ -600,6 +627,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups major updates with different versions but same newValue, no recreateWhen', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -614,6 +642,7 @@ describe('workers/repository/updates/generate', () => {
           newMajor: 5,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-other-dep',
@@ -636,6 +665,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups multiple digest updates immortally', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -648,6 +678,7 @@ describe('workers/repository/updates/generate', () => {
           isDigest: true,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-other-dep',
@@ -875,6 +906,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups multiple upgrades different version but same value', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depB',
@@ -891,6 +923,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depA',
@@ -917,6 +950,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups multiple upgrades different value but same version', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depB',
@@ -933,6 +967,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depA',
@@ -959,6 +994,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups multiple digest updates', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'foo/bar',
@@ -975,6 +1011,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'foo/baz',
@@ -1015,6 +1052,7 @@ describe('workers/repository/updates/generate', () => {
     it('fixes different messages', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depA',
@@ -1031,6 +1069,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'depA',
@@ -1496,6 +1535,7 @@ describe('workers/repository/updates/generate', () => {
     it('handles @types specially', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           commitBodyTable: true,
@@ -1511,6 +1551,7 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           datasource: NpmDatasource.id,
@@ -1523,6 +1564,7 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           datasource: NpmDatasource.id,
@@ -1566,6 +1608,7 @@ describe('workers/repository/updates/generate', () => {
     it('handles @types specially (reversed)', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1577,6 +1620,7 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           datasource: NpmDatasource.id,
@@ -1590,6 +1634,7 @@ describe('workers/repository/updates/generate', () => {
           group: {},
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: '@types/some-dep',
@@ -1632,6 +1677,7 @@ describe('workers/repository/updates/generate', () => {
     it('handles upgrades', () => {
       const baseBranchesUpdates = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1648,6 +1694,7 @@ describe('workers/repository/updates/generate', () => {
       });
       const separateMinorUpdates = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           commitMessageExtra: '',
@@ -1667,6 +1714,7 @@ describe('workers/repository/updates/generate', () => {
       });
       const separateMajorUpdates = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           commitMessageExtra: '',
@@ -1686,6 +1734,7 @@ describe('workers/repository/updates/generate', () => {
       });
       const separatePatchUpdates = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           commitMessageExtra: '',
@@ -1717,6 +1766,7 @@ describe('workers/repository/updates/generate', () => {
       // Does not append suffix when commitMessageExtra provides a version
       const majorWithVersionInTitle = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1739,6 +1789,7 @@ describe('workers/repository/updates/generate', () => {
       });
       const minorWithVersionInTitle = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1761,6 +1812,7 @@ describe('workers/repository/updates/generate', () => {
       // Appends suffix when commitMessageExtra is non-version text
       const majorWithNonVersionExtra = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           ...requiredDefaultOptions,
           manager: 'some-manager',
@@ -1786,12 +1838,14 @@ describe('workers/repository/updates/generate', () => {
     it('combines prBodyColumns', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
           prBodyColumns: ['column-a', 'column-b'],
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -1805,6 +1859,7 @@ describe('workers/repository/updates/generate', () => {
     it('sorts upgrades, without position first', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -1814,6 +1869,7 @@ describe('workers/repository/updates/generate', () => {
           fileReplacePosition: 1,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep2',
@@ -1823,6 +1879,7 @@ describe('workers/repository/updates/generate', () => {
           fileReplacePosition: undefined,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep3',
@@ -1832,6 +1889,7 @@ describe('workers/repository/updates/generate', () => {
           fileReplacePosition: 4,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep4',
@@ -1850,6 +1908,7 @@ describe('workers/repository/updates/generate', () => {
     it('passes through pendingChecks', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1859,6 +1918,7 @@ describe('workers/repository/updates/generate', () => {
           pendingChecks: true,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1876,6 +1936,7 @@ describe('workers/repository/updates/generate', () => {
     it('filters pendingChecks', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1885,6 +1946,7 @@ describe('workers/repository/updates/generate', () => {
           pendingChecks: true,
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1901,6 +1963,7 @@ describe('workers/repository/updates/generate', () => {
     it('displays pending versions', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1909,6 +1972,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'No pending version',
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1918,6 +1982,7 @@ describe('workers/repository/updates/generate', () => {
           pendingVersions: ['1.1.0'],
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1938,6 +2003,7 @@ describe('workers/repository/updates/generate', () => {
     it('merge excludeCommitPaths if appears in upgrade', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -1946,6 +2012,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
         },
         {
+          commitMessage: '',
           manager: 'some-other-manager',
           depName: 'some-dep2',
           branchName: 'some-branch',
@@ -1954,6 +2021,7 @@ describe('workers/repository/updates/generate', () => {
           excludeCommitPaths: ['some/path', 'some/other/path'],
         },
         {
+          commitMessage: '',
           manager: 'some-manager-3',
           depName: 'some-dep3',
           branchName: 'some-branch',
@@ -2030,6 +2098,7 @@ describe('workers/repository/updates/generate', () => {
     it('dedupes duplicate table rows', () => {
       const branch = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           manager: 'some-manager',
@@ -2043,6 +2112,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '5.1.2',
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           manager: 'some-manager',
@@ -2056,6 +2126,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '5.1.2',
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           manager: 'some-manager',
@@ -2069,6 +2140,7 @@ describe('workers/repository/updates/generate', () => {
           newVersion: '5.1.2',
         },
         {
+          commitMessage: '',
           excludeCommitPaths: [],
           commitBodyTable: true,
           manager: 'some-manager',

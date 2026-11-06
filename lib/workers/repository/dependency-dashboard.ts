@@ -3,7 +3,6 @@ import {
   isNonEmptyObject,
   isNonEmptyString,
   isNullOrUndefined,
-  isTruthy,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global.ts';
@@ -223,8 +222,7 @@ export async function readDashboardBody(
 
 function needsDashboardApproval(branch: BranchConfig): boolean {
   return (
-    !!branch.dependencyDashboardApproval ||
-    !!branch.dependencyDashboardPrApproval
+    branch.dependencyDashboardApproval || !!branch.dependencyDashboardPrApproval
   );
 }
 
@@ -817,7 +815,7 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += emojify('> :exclamation: **Important**\n> \n');
   result += `> \`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
-  if (isTruthy(config.osvVulnerabilityAlerts)) {
+  if (config.osvVulnerabilityAlerts) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;

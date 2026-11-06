@@ -91,10 +91,7 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   }
 
   // Compile a few times in case there are nested templates
-  upgrade.commitMessage = template.compile(
-    upgrade.commitMessage ?? '',
-    upgrade,
-  );
+  upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
   upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
   upgrade.commitMessage = withoutUrlCredentials(
     template.compile(upgrade.commitMessage, upgrade),
