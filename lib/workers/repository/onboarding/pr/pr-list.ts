@@ -5,6 +5,7 @@ import {
   type RenovateConfig,
   type UpdateType,
   UpdateTypesOptions,
+  type VulnerabilityAlertsConfig,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
@@ -81,21 +82,17 @@ function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
 function resolveVulnerabilityConcurrentLimit(
   config: RenovateConfig,
 ): ConcurrentLimit {
-  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
-  // `branchConcurrentLimit`, even though both are valid nested options (see docs for `vulnerabilityAlerts`).
-  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
-  const vulnerabilityAlerts = config.vulnerabilityAlerts as
-    RenovateConfig | undefined;
-  const vulnerabilityAlertsDefault = getDefault(
+  const { vulnerabilityAlerts } = config;
+  const vulnerabilityAlertsDefault: VulnerabilityAlertsConfig = getDefault(
     getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
-  ) as RenovateConfig;
+  );
   const configAsUpgrade = {
     prConcurrentLimit:
-      vulnerabilityAlerts?.prConcurrentLimit ??
+      vulnerabilityAlerts.prConcurrentLimit ??
       vulnerabilityAlertsDefault.prConcurrentLimit,
     // `undefined` and `null` are handled identically by `calcLimit()` (both inherit `prConcurrentLimit`),
     // so there's no default value to duplicate here - unlike `prConcurrentLimit` above.
-    branchConcurrentLimit: vulnerabilityAlerts?.branchConcurrentLimit,
+    branchConcurrentLimit: vulnerabilityAlerts.branchConcurrentLimit,
   };
   const prConcurrentLimit = calcLimit([configAsUpgrade], 'prConcurrentLimit');
   const branchConcurrentLimit = calcLimit(

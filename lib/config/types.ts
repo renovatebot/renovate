@@ -489,7 +489,7 @@ export interface RenovateConfigFile
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];
-  vulnerabilityAlerts?: RenovateSharedConfig;
+  vulnerabilityAlerts?: VulnerabilityAlertsConfig;
   osvVulnerabilityAlerts?: boolean;
   vulnerabilitySeverity?: string;
   customManagers?: CustomManager[];
@@ -525,6 +525,17 @@ export interface RenovateConfigFile
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   toolSettings?: RepoToolSettingsOptions;
+}
+
+/**
+ * The `vulnerabilityAlerts` config, which is applied to the updates which fix a vulnerability, and which sets the concurrent limits of their branches and PRs.
+ */
+export interface VulnerabilityAlertsConfig extends RenovateSharedConfig {
+  branchConcurrentLimit?: number | null;
+  branchTopic?: string;
+  commitMessageSuffix?: string;
+  prConcurrentLimit?: number;
+  vulnerabilityFixStrategy?: 'lowest' | 'highest';
 }
 
 /**

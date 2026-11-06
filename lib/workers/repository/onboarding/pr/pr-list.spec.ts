@@ -27,6 +27,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>({
         prHourlyLimit: 2, // default
+        vulnerabilityAlerts: {},
       });
     });
 
@@ -615,6 +616,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>({
         prHourlyLimit: 2, // default
+        vulnerabilityAlerts: {},
       });
     });
 
@@ -2185,9 +2187,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
       ]);
-      config.vulnerabilityAlerts = partial<RenovateConfig>({
+      config.vulnerabilityAlerts = {
         prConcurrentLimit: 1,
-      });
+      };
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
         'Renovate will only create 1 security update Pull Request at a time, up to a maximum of 2 over time, due to your [`vulnerabilityAlerts.prConcurrentLimit`]',
@@ -2243,9 +2245,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
       ]);
-      config.vulnerabilityAlerts = partial<RenovateConfig>({
+      config.vulnerabilityAlerts = {
         prConcurrentLimit: 2,
-      });
+      };
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
         'Renovate will only create 2 security update Pull Requests at a time, up to a maximum of 3 over time, due to your [`vulnerabilityAlerts.prConcurrentLimit`]',
@@ -2270,9 +2272,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
       ]);
-      config.vulnerabilityAlerts = partial<RenovateConfig>({
+      config.vulnerabilityAlerts = {
         prConcurrentLimit: 1,
-      });
+      };
       const res = getExpectedPrListSummary(config, branches);
       expect(res).not.toContain('vulnerabilityAlerts.prConcurrentLimit');
     });
@@ -2310,10 +2312,10 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ]),
         },
       ]);
-      config.vulnerabilityAlerts = partial<RenovateConfig>({
+      config.vulnerabilityAlerts = {
         prConcurrentLimit: 5,
         branchConcurrentLimit: 1,
-      });
+      };
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
         'Renovate will only create 1 security update Pull Request at a time, up to a maximum of 2 over time, due to your [`vulnerabilityAlerts.branchConcurrentLimit`]',
