@@ -2,6 +2,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { createOnboardingBranch } from './create.ts';
 
 vi.mock('./config.ts', () => ({
@@ -15,7 +16,7 @@ describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    config = getConfig();
+    config = applyRepoConfigDefaults(getConfig());
     GlobalConfig.set({
       onboardingBranch: config.onboardingBranch,
       onboardingConfigFileName: config.onboardingConfigFileName,

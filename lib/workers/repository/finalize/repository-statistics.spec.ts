@@ -96,7 +96,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
   describe('runBranchSummary', () => {
     const getCacheSpy = vi.spyOn(cache, 'getCache');
     const isCacheModifiedSpy = vi.spyOn(cache, 'isCacheModified');
-    const config: RenovateConfig = {};
+    const config: RenovateConfig = partial<RenovateConfig>();
 
     it('processes cache with baseBranches only', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
@@ -134,7 +134,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const baseBranchSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranch = 'base-branch';
       const defaultBranch = 'main';
-      const config: RenovateConfig = { defaultBranch };
+      const config: RenovateConfig = partial<RenovateConfig>({ defaultBranch });
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
         sha,

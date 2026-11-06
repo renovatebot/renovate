@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { fakeSha, fs, logger, partial, scm } from '~test/util.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { mergeChildConfig } from '../../../config/utils.ts';
 import { extractPackageFile as extractRegexPackageFile } from '../../../modules/manager/custom/regex/index.ts';
 import { hashMap } from '../../../modules/manager/index.ts';
@@ -78,9 +79,9 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('runs with no baseBranchPatterns', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         repoIsOnboarded: true,
-      };
+      });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const packageFiles = await extract(config);
@@ -100,7 +101,8 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('runs with baseBranchPatterns', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
+        // @ts-expect-error -- `javascript` is not a RenovateConfig option
         baseBranchPatterns: ['master', 'dev'],
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
@@ -111,7 +113,7 @@ describe('workers/repository/process/extract-update', () => {
         npm: {
           addLabels: 'npm',
         },
-      };
+      });
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
@@ -119,7 +121,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('leaves the cache alone when not overwriting it', async () => {
-      const config = { repoIsOnboarded: true };
+      const config = partial<RenovateConfig>({ repoIsOnboarded: true });
       const cache = { scan: {} };
       repositoryCache.getCache.mockReturnValueOnce(cache);
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
@@ -130,11 +132,11 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('keeps cached scans for branches that are still configured', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         baseBranch: 'master',
         baseBranches: ['master'],
         repoIsOnboarded: true,
-      };
+      });
       const cache = {
         scan: {
           master: { sha: 'old' },
@@ -150,7 +152,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('caches package files without URL credentials', async () => {
-      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const config = partial<RenovateConfig>({
+        baseBranch: 'master',
+        repoIsOnboarded: true,
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         regex: [
           {
@@ -188,7 +193,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('does not cache package files with URL credentials', async () => {
-      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const config = partial<RenovateConfig>({
+        baseBranch: 'master',
+        repoIsOnboarded: true,
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         regex: [
           {
@@ -224,7 +232,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('does not cache a regex manager extract with credentials in a matched URL', async () => {
-      const config = { baseBranch: 'master', repoIsOnboarded: true };
+      const config = partial<RenovateConfig>({
+        baseBranch: 'master',
+        repoIsOnboarded: true,
+      });
       const content = codeBlock`
         FROM alpine
         # renovate: registry=https://user:token@registry.example.com/
@@ -263,10 +274,10 @@ describe('workers/repository/process/extract-update', () => {
 
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
-      const config = {
+      const config = partial<RenovateConfig>({
         repoIsOnboarded: true,
         baseBranch: 'master',
-      };
+      });
       repositoryCache.getCache.mockReturnValueOnce({
         scan: {
           master: {
@@ -295,10 +306,10 @@ describe('workers/repository/process/extract-update', () => {
           },
         ],
       };
-      const config = {
+      const config = partial<RenovateConfig>({
         repoIsOnboarded: true,
         baseBranch: 'master',
-      };
+      });
       const cache: RepoCacheData = {
         scan: {
           master: {
@@ -370,10 +381,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      const res = await extract({
-        repoIsOnboarded: true,
-        baseBranch: 'master',
-      });
+      const res = await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       const stripped = 'https://reg.example.com/npm';
       expect(res).toEqual({
@@ -422,7 +435,10 @@ describe('workers/repository/process/extract-update', () => {
         packageFiles,
         extractionFingerprints: {},
       });
-      const config = { repoIsOnboarded: true, baseBranch: 'master' };
+      const config = partial<RenovateConfig>({
+        repoIsOnboarded: true,
+        baseBranch: 'master',
+      });
       const withoutNpmrc = vi.spyOn(npmrc, 'withoutNpmrc');
 
       await extract(config);
@@ -476,7 +492,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
       expect(hostRules.getAll()).toHaveLength(1);
@@ -541,7 +562,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
       expect(hostRules.getAll()).toMatchObject([
@@ -587,7 +613,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(JSON.stringify(packageFiles)).not.toContain('user:pass@');
       expect(
@@ -636,7 +667,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(packageFiles.gomod[0].deps[0].registryUrls).toEqual([
         'https://git.example.com/',
@@ -678,7 +714,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(packageFiles.npm[0].deps[0].registryUrls).toEqual([
         'https://reg.example.com/npm',
@@ -722,7 +763,12 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       expect(packageFiles.kustomize[0]).toMatchObject({
         registryUrls: [undefined],
@@ -750,7 +796,12 @@ describe('workers/repository/process/extract-update', () => {
       });
       const registryUrls = ['https://nuget.example.com/v3/index.json'];
 
-      await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+      await extract(
+        partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        }),
+      );
 
       const [file] = packageFiles.nuget;
       expect(Object.hasOwn(file, 'registryUrls')).toBeFalse();
@@ -764,7 +815,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     describe('cached package files', () => {
-      const config = { repoIsOnboarded: true, baseBranch: 'master' };
+      const config = partial<RenovateConfig>({
+        repoIsOnboarded: true,
+        baseBranch: 'master',
+      });
       let cache: { scan: Record<string, BaseBranchCache> };
 
       beforeEach(() => {
@@ -840,11 +894,11 @@ describe('workers/repository/process/extract-update', () => {
           packageFiles: { npm: [npmFile], gradle: [gradleFile] },
           extractionFingerprints: {},
         });
-        const config = {
+        const config = partial<RenovateConfig>({
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
-        };
+        });
 
         const res = await extract(config);
 
@@ -876,7 +930,12 @@ describe('workers/repository/process/extract-update', () => {
           extractionFingerprints: {},
         });
 
-        await extract({ repoIsOnboarded: true, baseBranch: 'master' });
+        await extract(
+          partial<RenovateConfig>({
+            repoIsOnboarded: true,
+            baseBranch: 'master',
+          }),
+        );
 
         expect(cache.scan.master.packageFiles.npm[0]).toEqual({
           packageFile: 'package.json',
@@ -902,12 +961,12 @@ describe('workers/repository/process/extract-update', () => {
           ],
           gradle: [{ packageFile: 'build.gradle', deps: [] }],
         };
-        const config = {
+        const config = partial<RenovateConfig>({
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
           npmrcMerge: true,
-        };
+        });
         repositoryCache.getCache.mockReturnValueOnce({
           scan: {
             master: {
@@ -958,7 +1017,10 @@ describe('workers/repository/process/extract-update', () => {
           packageFiles: { bun: [bunFile] },
           extractionFingerprints: {},
         });
-        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+        const config = partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        });
 
         const res = await extract(config);
 
@@ -996,7 +1058,10 @@ describe('workers/repository/process/extract-update', () => {
           packageFiles: { bun: [bunFile] },
           extractionFingerprints: {},
         });
-        const config = { repoIsOnboarded: true, baseBranch: 'master' };
+        const config = partial<RenovateConfig>({
+          repoIsOnboarded: true,
+          baseBranch: 'master',
+        });
 
         const res = await extract(config, false);
 
@@ -1018,12 +1083,12 @@ describe('workers/repository/process/extract-update', () => {
             },
           ],
         };
-        const config = {
+        const config = partial<RenovateConfig>({
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
           npmrcMerge: true,
-        };
+        });
         repositoryCache.getCache.mockReturnValueOnce({
           scan: {
             master: {
@@ -1053,10 +1118,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('fetches vulnerabilities', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
-      };
+      });
       const appendVulnerabilityPackageRulesMock = vi.fn();
       createVulnerabilitiesMock.mockResolvedValue({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
@@ -1072,10 +1137,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
-      const config = {
+      const config = partial<RenovateConfig>({
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
-      };
+      });
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
@@ -1124,11 +1189,11 @@ describe('workers/repository/process/extract-update', () => {
             ],
           };
 
-          const config = {
+          const config = partial<RenovateConfig>({
             repoIsOnboarded: true,
             baseBranch: 'main',
             osvVulnerabilityAlerts: true,
-          };
+          });
           const appendVulnerabilityPackageRulesMock = vi.fn();
           createVulnerabilitiesMock.mockResolvedValue({
             appendVulnerabilityPackageRules:
@@ -1224,10 +1289,10 @@ describe('workers/repository/process/extract-update', () => {
               ],
             };
 
-            const config = {
+            const config = partial<RenovateConfig>({
               repoIsOnboarded: true,
               baseBranch: 'main',
-            };
+            });
 
             await lookup(config, packageFiles);
 
@@ -1279,10 +1344,10 @@ describe('workers/repository/process/extract-update', () => {
               ],
             };
 
-            const config = {
+            const config = partial<RenovateConfig>({
               repoIsOnboarded: true,
               baseBranch: 'main',
-            };
+            });
 
             await lookup(config, packageFiles);
 
@@ -1343,10 +1408,10 @@ describe('workers/repository/process/extract-update', () => {
             ],
           };
 
-          const config = {
+          const config = partial<RenovateConfig>({
             repoIsOnboarded: true,
             baseBranch: 'main',
-          };
+          });
 
           await lookup(config, packageFiles);
 
@@ -1368,7 +1433,7 @@ describe('workers/repository/process/extract-update', () => {
 
   describe('update()', () => {
     it('writes the updates', async () => {
-      const config = {};
+      const config = partial<RenovateConfig>();
       const branches = [
         {
           manager: 'some-manager',

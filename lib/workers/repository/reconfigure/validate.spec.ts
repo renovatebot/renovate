@@ -10,18 +10,18 @@ vi.mock('../../../util/git/index.ts');
 vi.mock('../init/merge.ts');
 
 describe('workers/repository/reconfigure/validate', () => {
-  const config: RenovateConfig = {
+  const config: RenovateConfig = partial<RenovateConfig>({
     branchPrefix: 'prefix/',
     baseBranch: 'base',
     defaultBranch: 'base',
     statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
       configValidation: 'renovate/config-validation',
     }),
-  };
+  });
 
-  const reconfigureConfig = {
+  const reconfigureConfig = partial<RenovateConfig>({
     labels: ['foo'],
-  };
+  });
   const configFileName = 'renovate.json';
 
   beforeEach(() => {
@@ -34,7 +34,10 @@ describe('workers/repository/reconfigure/validate', () => {
   it('handles failed validation', async () => {
     await validateReconfigureBranch(
       config,
-      { ...reconfigureConfig, enabledManagers: ['docker'] },
+      partial<RenovateConfig>({
+        ...reconfigureConfig,
+        enabledManagers: ['docker'],
+      }),
       configFileName,
       null,
     );
@@ -54,7 +57,10 @@ describe('workers/repository/reconfigure/validate', () => {
   it('adds comment if reconfigure PR exists', async () => {
     await validateReconfigureBranch(
       config,
-      { ...reconfigureConfig, enabledManagers: ['docker'] },
+      partial<RenovateConfig>({
+        ...reconfigureConfig,
+        enabledManagers: ['docker'],
+      }),
       configFileName,
       mock<Pr>({ number: 1 }),
     );
@@ -137,7 +143,10 @@ describe('workers/repository/reconfigure/validate', () => {
   it('handles non-default config file', async () => {
     await validateReconfigureBranch(
       config,
-      { ...reconfigureConfig, enabledManagers: ['npm'] },
+      partial<RenovateConfig>({
+        ...reconfigureConfig,
+        enabledManagers: ['npm'],
+      }),
       configFileName,
       null,
     );
@@ -152,7 +161,7 @@ describe('workers/repository/reconfigure/validate', () => {
   it('migrates config before validating', async () => {
     await validateReconfigureBranch(
       config,
-      { ...reconfigureConfig, baseBranches: ['main'] },
+      partial<RenovateConfig>({ ...reconfigureConfig, baseBranches: ['main'] }),
       configFileName,
       null,
     );
@@ -167,7 +176,7 @@ describe('workers/repository/reconfigure/validate', () => {
   it('handles array fields which accept strings', async () => {
     await validateReconfigureBranch(
       config,
-      {
+      partial<RenovateConfig>({
         ...reconfigureConfig,
         packageRules: [
           {
@@ -176,7 +185,7 @@ describe('workers/repository/reconfigure/validate', () => {
             enabled: false,
           },
         ],
-      },
+      }),
       configFileName,
       null,
     );

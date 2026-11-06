@@ -102,12 +102,12 @@ describe('instrumentation/reporting', () => {
 
   it('adds repository metadata to the report', () => {
     GlobalConfig.set({ platform: 'github' });
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
       defaultBranch: 'main',
       dependencyDashboardIssue: 42,
-    };
+    });
 
     addRepositoryMetadata(config, '.github/renovate.json5', []);
 
@@ -129,11 +129,11 @@ describe('instrumentation/reporting', () => {
   });
 
   it('sets dependencyDashboardIssue to null when there is no dashboard', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
       defaultBranch: 'main',
-    };
+    });
 
     addRepositoryMetadata(config, undefined, []);
 
@@ -143,11 +143,11 @@ describe('instrumentation/reporting', () => {
   });
 
   it('omits configFileName when the repo has no in-repo config file', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
       defaultBranch: 'main',
-    };
+    });
 
     addRepositoryMetadata(config, '', []);
 
@@ -158,10 +158,10 @@ describe('instrumentation/reporting', () => {
 
   it('adds onboarding status with an open onboarding PR', () => {
     GlobalConfig.set({ onboardingBranch: 'renovate/configure' });
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
     const prList: Pr[] = [
       partial<Pr>({
         number: 7,
@@ -185,10 +185,10 @@ describe('instrumentation/reporting', () => {
 
   it('sets onboardingPrNumber to null when the onboarding PR is not open', () => {
     GlobalConfig.set({ onboardingBranch: 'renovate/configure' });
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
     const prList: Pr[] = [
       partial<Pr>({
         number: 7,
@@ -205,10 +205,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('adds the repository status to the report', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
 
     addRepositoryStatus(config, 'activated');
 
@@ -216,10 +216,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('return report if reportType is set to logging', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -228,10 +228,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('log report if reportType is set to logging', async () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -245,11 +245,11 @@ describe('instrumentation/reporting', () => {
   });
 
   it('write report if reportType is set to file', async () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'file',
       reportPath: './report.json',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -286,11 +286,11 @@ describe('instrumentation/reporting', () => {
     };
 
     it('writes the report file with URL credentials and npmrc masked', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         repository: 'myOrg/myRepo',
         reportType: 'file',
         reportPath: './report.json',
-      };
+      });
       addExtractionStats(config, {
         branchList: [],
         branches: [],
@@ -317,11 +317,11 @@ describe('instrumentation/reporting', () => {
         Key: 'key-name',
       });
       s3.getS3Client.mockReturnValue(mockClient);
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         repository: 'myOrg/myRepo',
         reportType: 's3',
         reportPath: 's3://bucket-name/key-name',
-      };
+      });
       addExtractionStats(config, {
         branchList: [],
         branches: [],
@@ -340,12 +340,12 @@ describe('instrumentation/reporting', () => {
   });
 
   it('write formatted report if reportFormatting is enabled', async () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'file',
       reportPath: './report.json',
       reportFormatting: true,
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -362,11 +362,11 @@ describe('instrumentation/reporting', () => {
     s3.parseS3Url.mockReturnValue({ Bucket: 'bucket-name', Key: 'key-name' });
     s3.getS3Client.mockReturnValue(mockClient);
 
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 's3',
       reportPath: 's3://bucket-name/key-name',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -382,11 +382,11 @@ describe('instrumentation/reporting', () => {
   it('handle failed parsing of S3 url', async () => {
     s3.parseS3Url.mockReturnValue(null);
 
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 's3',
       reportPath: 'aPath',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -400,11 +400,11 @@ describe('instrumentation/reporting', () => {
   });
 
   it('catch exception', async () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'file',
       reportPath: './report.json',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -414,10 +414,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('reports nothing when reportType=null', async () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: null,
-    };
+    });
 
     await exportStats(config);
 
@@ -427,10 +427,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('should add problems to report', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
     const expectedReport = {
       problems: [
         {
@@ -472,10 +472,10 @@ describe('instrumentation/reporting', () => {
   });
 
   it('should handle libyears addition', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       repository: 'myOrg/myRepo',
       reportType: 'logging',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });

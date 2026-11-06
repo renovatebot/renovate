@@ -4,6 +4,7 @@ import { extractPackageJson } from '../../../modules/manager/npm/extract/common/
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import * as _changelog from '../changelog/index.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { getUpdatedPackageFiles } from '../update/branch/get-updated.ts';
 import { branchifyUpgrades } from './branchify.ts';
 import * as _flatten from './flatten.ts';
@@ -17,7 +18,7 @@ vi.mock('../changelog/index.ts');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
   config.errors = [];
   config.warnings = [];
 });

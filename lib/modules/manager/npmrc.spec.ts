@@ -1,3 +1,5 @@
+import { partial } from '~test/util.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import { needsNpmrcFromDisk, withNpmrc, withoutNpmrc } from './npmrc.ts';
 import type { NpmrcPackageFile, PackageFile } from './types.ts';
 
@@ -39,10 +41,13 @@ describe('modules/manager/npmrc', () => {
 
   describe('withNpmrc', () => {
     it('rebuilds the npmrc of managers with supportsNpmrc only', async () => {
-      const result = await withNpmrc(withoutNpmrc(packageFiles), {
-        npmrc: 'config',
-        npmrcMerge: true,
-      });
+      const result = await withNpmrc(
+        withoutNpmrc(packageFiles),
+        partial<RenovateConfig>({
+          npmrc: 'config',
+          npmrcMerge: true,
+        }),
+      );
 
       expect((result.npm[0] as NpmrcPackageFile).npmrc).toBe(
         `config\n${repoNpmrc.content}`,

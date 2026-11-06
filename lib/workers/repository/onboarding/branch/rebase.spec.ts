@@ -1,5 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
-import { scm } from '~test/util.ts';
+import { partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
@@ -26,7 +26,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       memCache.init();
 
       // using default options
-      config = {
+      config = partial<RenovateConfig>({
         semanticCommits: 'auto',
         semanticCommitScope: 'deps',
         semanticCommitType: 'chore',
@@ -34,7 +34,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         },
         repository: 'some/repo',
-      };
+      });
       configModule.getOnboardingConfigContents.mockResolvedValue('');
     });
 

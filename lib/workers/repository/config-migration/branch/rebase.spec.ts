@@ -5,6 +5,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { git, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import type { MigratedData } from './migrated-data.ts';
 import { MigratedDataFactory } from './migrated-data.ts';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase.ts';
@@ -35,12 +36,12 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     };
 
     beforeEach(() => {
-      config = {
+      config = applyRepoConfigDefaults({
         ...getConfig(),
         repository: 'some/repo',
         baseBranch: 'dev',
         defaultBranch: 'master',
-      };
+      });
     });
 
     it.each([

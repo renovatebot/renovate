@@ -50,7 +50,7 @@ describe('workers/repository/reconfigure/index', () => {
     utils.getReconfigureConfig.mockResolvedValue({
       ok: true,
       configFileName: 'renovate.json',
-      config: { labels: ['label'] },
+      config: partial<RenovateConfig>({ labels: ['label'] }),
     });
     utils.getReconfigureBranchName.mockReturnValue('prefix/reconfigure');
     process.extractDependencies.mockResolvedValue({

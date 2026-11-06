@@ -135,7 +135,9 @@ describe('workers/repository/update/branch/check-existing', () => {
   });
 
   describe('rebaseCheck', () => {
-    const config: RenovateConfig = { rebaseLabel: 'rebase' };
+    const config: RenovateConfig = partial<RenovateConfig>({
+      rebaseLabel: 'rebase',
+    });
 
     beforeEach(() => {
       GlobalConfig.reset();

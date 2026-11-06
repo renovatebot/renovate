@@ -53,7 +53,9 @@ describe('workers/global/index', () => {
   });
 
   describe('getRepositoryConfig', () => {
-    const globalConfig: RenovateConfig = { baseDir: '/tmp/base' };
+    const globalConfig: RenovateConfig = partial<RenovateConfig>({
+      baseDir: '/tmp/base',
+    });
 
     GlobalConfig.set({ platform: 'gitlab' });
 

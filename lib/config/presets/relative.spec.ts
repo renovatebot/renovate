@@ -1,5 +1,5 @@
 import { logger } from '~test/util.ts';
-import type { RenovateConfig } from '../types.ts';
+import type { RenovateConfigFile } from '../types.ts';
 import { parsePreset } from './parse.ts';
 import { canonicalizeRelativePresets } from './relative.ts';
 
@@ -32,7 +32,7 @@ describe('config/presets/relative', () => {
     `(
       'resolves $input inside $parent',
       ({ parent, input, expected }: Record<string, string>) => {
-        const config: RenovateConfig = { extends: [input] };
+        const config: RenovateConfigFile = { extends: [input] };
 
         canonicalizeRelativePresets(config, parsePreset(parent));
 
@@ -53,7 +53,7 @@ describe('config/presets/relative', () => {
       'leaves $input unchanged inside $parent ($reason)',
       ({ parent, input }: Record<string, string>) => {
         const parsedParent = parsePreset(parent);
-        const config: RenovateConfig = { extends: [input] };
+        const config: RenovateConfigFile = { extends: [input] };
 
         canonicalizeRelativePresets(config, parsedParent);
 
@@ -72,7 +72,7 @@ describe('config/presets/relative', () => {
     const parent = parsePreset('github>some/repo//dir/base#v1.0.0');
 
     it('rewrites top-level extends', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         extends: ['./sibling', '/root/base', '../parent/base'],
       };
 
@@ -88,7 +88,7 @@ describe('config/presets/relative', () => {
     });
 
     it('rewrites ignorePresets', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         ignorePresets: ['./sibling', 'github>other/repo'],
       };
 
@@ -104,7 +104,7 @@ describe('config/presets/relative', () => {
 
     it('warns about broken ignorePresets entries', () => {
       const parsedParent = parsePreset('github>some/repo#v1');
-      const config: RenovateConfig = { ignorePresets: ['../oops'] };
+      const config: RenovateConfigFile = { ignorePresets: ['../oops'] };
 
       canonicalizeRelativePresets(config, parsedParent);
 
@@ -120,7 +120,7 @@ describe('config/presets/relative', () => {
     });
 
     it('rewrites extends and ignorePresets of the same object', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         extends: ['./optional'],
         ignorePresets: ['./optional'],
       };
@@ -134,7 +134,7 @@ describe('config/presets/relative', () => {
     });
 
     it('rewrites nested extends inside packageRules', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           {
             matchManagers: ['npm'],
@@ -174,7 +174,7 @@ describe('config/presets/relative', () => {
     });
 
     it('rewrites onboardingConfig extends', () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         onboardingConfig: {
           extends: ['./onboarding'],
         },

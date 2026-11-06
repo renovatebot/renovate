@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import * as fileMatch from './file-match.ts';
 
 describe('workers/repository/extract/file-match', () => {
@@ -43,12 +44,12 @@ describe('workers/repository/extract/file-match', () => {
   });
 
   describe('getMatchingFiles()', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfig = partial<RenovateConfig>({
       includePaths: [],
       ignorePaths: [],
       manager: 'npm',
       managerFilePatterns: ['/(^|/)package\\.json$/'],
-    };
+    });
 
     it('returns npm files', () => {
       fileList.push('Dockerfile');

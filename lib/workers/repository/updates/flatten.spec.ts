@@ -3,6 +3,7 @@ import { type RenovateConfig, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { SkipReason } from '../../../types/skip-reason.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
@@ -10,7 +11,7 @@ vi.mock('../../../util/git/semantic.ts');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
   config.errors = [];
   config.warnings = [];
 });
@@ -414,7 +415,7 @@ describe('workers/repository/updates/flatten', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',
         async (currentAttestation) => {
-          config = getConfig(); // HACK
+          config = applyRepoConfigDefaults(getConfig()); // HACK
           const packageFiles: Record<string, PackageFile[]> = {
             npm: [
               {

@@ -15,6 +15,7 @@ import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
 import type { FileAddition } from '../../../../util/git/types.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { OnboardingState } from '../common.ts';
 import * as _config from './config.ts';
 import { checkOnboardingBranch } from './index.ts';
@@ -43,7 +44,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
       config.repository = 'some/repo';
       GlobalConfig.set({
         onboarding: true,

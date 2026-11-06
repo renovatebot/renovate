@@ -2,7 +2,9 @@ import type { Indent } from 'detect-indent';
 import { Fixtures } from '~test/fixtures.ts';
 import { partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { checkConfigMigrationBranch } from './branch/index.ts';
 import { MigratedDataFactory } from './branch/migrated-data.ts';
 import { configMigration } from './index.ts';
@@ -15,10 +17,10 @@ vi.mock('./branch/migrated-data.ts');
 const content = Fixtures.getJson('./migrated-data.json', './branch');
 const filename = 'renovate.json';
 const branchName = 'renovate/config-migration';
-const config = {
+const config = applyRepoConfigDefaults({
   ...getConfig(),
   configMigration: true,
-};
+});
 
 describe('workers/repository/config-migration/index', () => {
   beforeEach(() => {
@@ -30,7 +32,10 @@ describe('workers/repository/config-migration/index', () => {
   });
 
   it('does nothing when in silent mode', async () => {
-    const res = await configMigration({ ...config, mode: 'silent' }, []);
+    const res = await configMigration(
+      partial<RenovateConfig>({ ...config, mode: 'silent' }),
+      [],
+    );
     expect(res).toMatchObject({ result: 'no-migration' });
     expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
     expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);

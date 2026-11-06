@@ -1,4 +1,5 @@
 import * as datasource from '../modules/datasource/index.ts';
+import { applyRepoConfigDefaults } from '../workers/repository/init/defaults.ts';
 import { getConfig } from './defaults.ts';
 import {
   applyDatasourceDefaultConfig,
@@ -7,7 +8,7 @@ import {
   mergeChildConfig,
   removeGlobalConfig,
 } from './index.ts';
-import type { RenovateConfig } from './types.ts';
+import type { RenovateConfigFile } from './types.ts';
 
 vi.mock('../modules/datasource/npm/index.ts');
 vi.mock('../../config.ts', () => ({ default: {} }));
@@ -131,7 +132,7 @@ describe('config/index', () => {
     });
 
     it('getManagerConfig()', () => {
-      const parentConfig = { ...defaultConfig };
+      const parentConfig = applyRepoConfigDefaults({ ...defaultConfig });
       const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         [
@@ -200,7 +201,7 @@ describe('config/index', () => {
 
     it('keeps the config as-is without a datasource', async () => {
       const getDefaultConfig = vi.spyOn(datasource, 'getDefaultConfig');
-      const config: RenovateConfig = { depName: 'dep' };
+      const config: RenovateConfigFile = { depName: 'dep' };
 
       const res = await applyDatasourceDefaultConfig(config);
 
