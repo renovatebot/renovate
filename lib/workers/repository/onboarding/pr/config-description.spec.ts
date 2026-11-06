@@ -11,7 +11,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      config = partial<RenovateConfig>();
+      config = partial<RenovateConfig>({ schedule: ['at any time'] });
     });
 
     it('returns empty', () => {

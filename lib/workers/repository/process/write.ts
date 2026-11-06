@@ -199,7 +199,7 @@ export async function writeUpdates(
       branchName,
       async () => {
         const meta: Record<string, string> = { branch: branchName };
-        if (config.baseBranchPatterns?.length && baseBranch) {
+        if (config.baseBranchPatterns.length && baseBranch) {
           meta.baseBranch = baseBranch;
         }
         addMeta(meta);

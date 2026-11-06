@@ -190,7 +190,9 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsDashboard()', () => {
     it('returns dependency dashboard warning text', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -240,7 +242,9 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('dependency dashboard warning returns empty string', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsDashboard(packageFiles, config);
       expect(res).toBe('');
@@ -293,7 +297,9 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsOnboardingPR()', () => {
     it('returns onboarding warning text', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -349,7 +355,9 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('handle empty package files', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config: RenovateConfig = partial<RenovateConfig>({
+        suppressNotifications: [],
+      });
       const packageFiles: Record<string, PackageFile[]> = {
         npm: undefined as never,
       };
@@ -371,7 +379,7 @@ describe('workers/repository/errors-warnings', () => {
     it('handles undefined', () => {
       const res = getDepWarningsOnboardingPR(
         undefined as never,
-        partial<RenovateConfig>(),
+        partial<RenovateConfig>({ suppressNotifications: [] }),
       );
       expect(res).toBe('');
     });

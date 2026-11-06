@@ -19,7 +19,7 @@ export async function validateReconfigureBranch(
 ): Promise<boolean> {
   logger.debug('validateReconfigureBranch()');
 
-  const context = config.statusCheckNames?.configValidation;
+  const context = config.statusCheckNames.configValidation;
   const branchName = getReconfigureBranchName(config.branchPrefix);
   const branchSha = getBranchCommit(branchName)!;
 

@@ -35,7 +35,7 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  const context = config.statusCheckNames?.configValidation;
+  const context = config.statusCheckNames.configValidation;
   const reconfigureBranch = getReconfigureBranchName(config.branchPrefix);
   const branchExists = await scm.branchExists(reconfigureBranch);
 

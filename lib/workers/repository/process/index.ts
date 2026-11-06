@@ -232,7 +232,7 @@ export async function extractDependencies(
   };
   if (
     GlobalConfig.get('platform') !== 'local' &&
-    config.baseBranchPatterns?.length
+    config.baseBranchPatterns.length
   ) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,

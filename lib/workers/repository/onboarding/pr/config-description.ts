@@ -7,7 +7,6 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
   logger.debug('getScheduleDesc()');
   logger.trace({ config });
   if (
-    !config.schedule ||
     (config.schedule as never) === 'at any time' ||
     config.schedule[0] === 'at any time'
   ) {

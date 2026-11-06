@@ -191,7 +191,7 @@ export async function readDashboardBody(
   if (config.mode === 'silent') {
     logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
   } else if (
-    config.dependencyDashboard === true ||
+    config.dependencyDashboard ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -373,8 +373,8 @@ export async function ensureDependencyDashboard(
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (!(
-    config.dependencyDashboard === true ||
-    config.dependencyDashboardApproval === true ||
+    config.dependencyDashboard ||
+    config.dependencyDashboardApproval ||
     config.packageRules.some((rule) => rule.dependencyDashboardApproval) ||
     branches.some(needsDashboardApproval)
   )) {
