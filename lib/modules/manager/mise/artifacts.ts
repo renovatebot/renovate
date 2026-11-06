@@ -73,10 +73,12 @@ async function detectMiseVersion(
 
 /** True when `version` is at or above the safe-mode / `--bump` release. */
 function versionSupportsSafeFeatures(version: string | null): boolean {
+  if (!version) {
+    return false;
+  }
   return (
-    !!version &&
-    (miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
-      miseVersioning.isGreaterThan(version, MISE_SAFE_MODE_MIN_VERSION))
+    miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
+    miseVersioning.isGreaterThan(version, MISE_SAFE_MODE_MIN_VERSION)
   );
 }
 

@@ -23,13 +23,13 @@ export function isValidDependency({
   datasource,
 }: PackageDependency): boolean {
   // check if all the fields are set
-  return (
-    (isNonEmptyStringAndNotWhitespace(depName) ||
-      isNonEmptyStringAndNotWhitespace(packageName)) &&
-    (isNonEmptyStringAndNotWhitespace(currentDigest) ||
-      isNonEmptyStringAndNotWhitespace(currentValue)) &&
-    isNonEmptyStringAndNotWhitespace(datasource)
-  );
+  const hasName =
+    isNonEmptyStringAndNotWhitespace(depName) ||
+    isNonEmptyStringAndNotWhitespace(packageName);
+  const hasVersion =
+    isNonEmptyStringAndNotWhitespace(currentDigest) ||
+    isNonEmptyStringAndNotWhitespace(currentValue);
+  return hasName && hasVersion && isNonEmptyStringAndNotWhitespace(datasource);
 }
 
 export function checkIsValidDependency(

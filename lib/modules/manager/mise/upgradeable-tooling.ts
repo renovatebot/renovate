@@ -19,7 +19,7 @@ import type { MiseRegistryData, ToolingDefinition } from './types.ts';
 export const asdfTooling = upgradeableTooling;
 
 function shortJavaVersioning(version: string): { versioning?: string } {
-  if (regEx(/^\d+(?:\.\d+)?$/).test(version)) {
+  if (semverPartialVersioning.isPartialVersion(version)) {
     return { versioning: semverPartialVersioning.id };
   }
   return {};

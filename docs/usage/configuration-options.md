@@ -376,11 +376,11 @@ Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. fo
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`:
 
-  ```json
-  {
-    "baseBranchPatterns": ["dev"]
-  }
-  ```
+```json
+{
+  "baseBranchPatterns": ["dev"]
+}
+```
 
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
 
@@ -743,6 +743,8 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
+
 To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
 ## `commitBodyTable`
@@ -846,6 +848,8 @@ If you want Renovate to sign off its commits, you can add the [`:gitSignOff` pre
 }
 ```
 
+Onboarding and config migration commits expose only `{{{gitAuthor}}}` from the repository config to this template.
+
 ## `composerIgnorePlatformReqs`
 
 By default, Renovate will ignore Composer platform requirements as the PHP platform used by Renovate most probably won't match the required PHP environment of your project as configured in your `composer.json` file.
@@ -917,6 +921,9 @@ The downside of this is that you may end up with a very old issue getting "recyc
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
+
+Tool versions in [mise](modules/manager/mise/index.md#tool-versions-as-constraints) config files or [`rust-toolchain`](modules/manager/rust-toolchain/index.md) files are also used for artifact updates of other managers in the same directory and below.
+A constraint which the manager detects itself, like `engines` in a `package.json` or the `lockfileVersion` of a `pnpm-lock.yaml`, takes precedence over these versions, unless they are within it.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -1613,6 +1620,7 @@ You can choose from:
 - `all` list all CVEs
 
 You will only get OSV-based vulnerability alerts for direct dependencies.
+The only exception today is the `pep621` manager, for `uv` projects.
 
 This feature is independent of the `osvVulnerabilityAlerts` option.
 
@@ -1855,6 +1863,31 @@ A similar one could strip leading `v` prefixes:
     {
       "matchPackageNames": ["baz"],
       "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
+
+Instead of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
+The supported group names are `major`, `minor`, `patch`, `prerelease`, and `build`.
+
+- `major` is required
+- `minor` and `patch` default to `0` if not captured
+- `prerelease` adds a `-{prerelease}` suffix
+- `build` adds a `+{build}` suffix
+
+If a `version` group is also present, it takes priority and the part groups are ignored.
+
+For example, Docker Hub tags for `eclipse-temurin` use `17.0.19_10` where `_` separates the patch from the build metadata.
+To extract this as `17.0.19+10`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["eclipse-temurin"],
+      "extractVersion": "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)"
     }
   ]
 }
@@ -3084,6 +3117,7 @@ Renovate integrates with [OSV](https://osv.dev/), an Open Source vulnerability d
 Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
+The only exception today is the `pep621` manager, for `uv` projects.
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
 - [`crate`](./modules/datasource/crate/index.md)
@@ -3101,11 +3135,13 @@ The entire database is downloaded locally by [osv-offline](https://github.com/re
 
 If you self-host Renovate, you can change how the database is downloaded with these osv-offline environment variables:
 
-- `OSV_OFFLINE_ROOT_DIR`: where the database is stored
+- `OSV_OFFLINE_ROOT_DIR`: where the database is stored (default: `osv-offline` inside the [`cacheDir`](./self-hosted-configuration.md#cachedir), or `<tmpdir>/osv-offline` if `OSV_OFFLINE_DISABLE_DOWNLOAD=true` is set)
 - `OSV_OFFLINE_MAX_AGE`: how old the database may be before it's downloaded again, as an [`ms`](https://github.com/vercel/ms) duration such as `30m`, `4h` or `7d` (default: `1d`)
 - `OSV_OFFLINE_DATABASE_FORMAT=split`: download the database of each ecosystem on its first use, instead of all of them at once
 - `OSV_OFFLINE_DATABASE_URL` and `OSV_OFFLINE_DATABASE_INDEX_URL`: download from an internal mirror
 - `OSV_OFFLINE_DISABLE_DOWNLOAD=true`: use a database you've put into `OSV_OFFLINE_ROOT_DIR` yourself, without internet access
+
+If you persist the `cacheDir`, the database (roughly 85 MB compressed) is kept as well.
 
 Read the [osv-offline readme](https://github.com/renovatebot/osv-offline/tree/main/packages/osv-offline#readme) for all options, mirrors, and which hosts to allow.
 
@@ -5199,7 +5235,16 @@ You can set this option to `false` if you wish to disable updating for pinned (s
 ## `useBaseBranchConfig`
 
 By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
-You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+
+Set `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+Renovate will error if the config file is not found on the branch.
+
+Set `useBaseBranchConfig=merge-if-present` to merge the config from each base branch in the same way, but only if the config file exists on the branch.
+If the config file does not exist on the branch, Renovate will use the default branch config instead.
+If the config file exists but is invalid or contains validation errors, Renovate will error.
+This is useful for repos with many branches where only some branches have branch-specific config, but [`baseBranchPatterns`](#basebranchpatterns) and `useBaseBranchConfig` are set in a shared preset.
+
+With both `merge` and `merge-if-present`, an empty config file on a branch is treated as an empty config (`{}`).
 
 The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
 This scenario may be useful for testing the config changes in base branches instantly.

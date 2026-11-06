@@ -1,31 +1,18 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
-import type { CommitMessage } from '../../model/commit-message.ts';
-import { CommitMessageFactory } from '../../model/commit-message-factory.ts';
+import { createConfigFileCommitMessage } from '../../model/commit-config-file.ts';
 
-export class OnboardingCommitMessageFactory {
-  private readonly config: RenovateConfig;
+export function getOnboardingCommitMessage(
+  config: RenovateConfig,
+  configFile: string,
+): string {
+  const onboardingCommitMessage = getInheritedOrGlobal(
+    'onboardingCommitMessage',
+  );
+  const subject = isNonEmptyString(onboardingCommitMessage)
+    ? onboardingCommitMessage
+    : `add ${configFile}`;
 
-  private readonly configFile: string;
-
-  constructor(config: RenovateConfig, configFile: string) {
-    this.config = config;
-    this.configFile = configFile;
-  }
-
-  create(): CommitMessage {
-    const onboardingCommitMessage = getInheritedOrGlobal(
-      'onboardingCommitMessage',
-    );
-    const commitMessageFactory = new CommitMessageFactory(this.config);
-    const commitMessage = commitMessageFactory.create();
-
-    if (onboardingCommitMessage) {
-      commitMessage.subject = onboardingCommitMessage;
-    } else {
-      commitMessage.subject = `add ${this.configFile}`;
-    }
-
-    return commitMessage;
-  }
+  return createConfigFileCommitMessage(config, subject);
 }

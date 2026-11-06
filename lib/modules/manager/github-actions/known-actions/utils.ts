@@ -51,16 +51,6 @@ export function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-const partialVersionRegex = regEx(/^v?\d+(?:\.\d+)?$/);
-
-/**
- * Whether the value is a whole major (`21`) or major.minor (`3.3`) version,
- * optionally `v`-prefixed (`v2.5`).
- */
-export function isPartialVersion(value: string): boolean {
-  return partialVersionRegex.test(value);
-}
-
 /**
  * As `parseValue`, for inputs where a partial version means "the latest
  * release of that line" rather than a pinned version.
@@ -75,7 +65,11 @@ export function parsePartialValue(
   isInvalid?: (val: string) => boolean,
 ): PackageDependency {
   const dep = parseValue(currentValue, isInvalid);
-  if (currentValue && !dep.skipReason && isPartialVersion(currentValue)) {
+  if (
+    currentValue &&
+    !dep.skipReason &&
+    semverPartialVersioning.isPartialVersion(currentValue)
+  ) {
     dep.versioning = semverPartialVersioning.id;
   }
   return dep;

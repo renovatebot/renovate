@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
@@ -236,9 +237,8 @@ export async function updateArtifacts({
         dep.currentValue &&
         swiftVersioning.isSingleVersion(dep.currentValue)
       ) {
-        const fromVersion = (dep.currentVersion ?? dep.currentValue).replace(
-          regEx(/^v/),
-          '',
+        const fromVersion = stripVersionPrefix(
+          dep.currentVersion ?? dep.currentValue,
         );
         if (pin.state.version !== fromVersion) {
           logger.debug(
@@ -253,7 +253,7 @@ export async function updateArtifacts({
         }
       }
 
-      const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
+      const resolvedVersion = stripVersionPrefix(dep.newVersion);
 
       // Skip if already up-to-date
       if (pin.state.version === resolvedVersion) {

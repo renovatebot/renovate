@@ -1,6 +1,12 @@
-import { isEmptyArray, isEmptyObject, isTruthy } from '@sindresorhus/is';
+import {
+  isEmptyArray,
+  isEmptyObject,
+  isNonEmptyArray,
+  isTruthy,
+} from '@sindresorhus/is';
 import { logger } from '../../logger/index.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
+import { coerceArray } from '../../util/array.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
 
@@ -21,6 +27,14 @@ export class PackageFiles {
   static clear(): void {
     logger.debug('PackageFiles.clear() - Package files deleted');
     this.data.clear();
+  }
+
+  /** Returns true if any dependency of any base branch failed its lookup. */
+  static hasLookupFailure(): boolean {
+    return [...this.data.values()]
+      .filter(isTruthy)
+      .flatMap((managers) => Object.values(managers).flat())
+      .some((file) => file.deps.some((dep) => dep.lookupFailed));
   }
 
   /**
@@ -49,11 +63,19 @@ export class PackageFiles {
 
     const data = new Map(clone(Array.from(this.data)));
 
-    // filter all deps with skip reason
+    // drop deps with skip reason, then package files and managers left empty
     for (const managers of [...data.values()].filter(isTruthy)) {
-      for (const files of Object.values(managers).filter(isTruthy)) {
-        for (const file of files.filter((f) => isTruthy(f.deps))) {
-          file.deps = file.deps.filter(isTruthy).filter((d) => !d.skipReason);
+      for (const [manager, files] of Object.entries(managers)) {
+        const listed = coerceArray(files).filter((file) => {
+          file.deps = coerceArray(file.deps)
+            .filter(isTruthy)
+            .filter((d) => !d.skipReason);
+          return isNonEmptyArray(file.deps);
+        });
+        if (isNonEmptyArray(listed)) {
+          managers[manager] = listed;
+        } else {
+          delete managers[manager];
         }
       }
     }

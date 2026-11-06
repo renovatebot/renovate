@@ -44,11 +44,10 @@ export default defineRule({
           isKnown &&= name !== undefined;
         }
 
-        if (
-          (callback?.type === 'ArrowFunctionExpression' ||
-            callback?.type === 'FunctionExpression') &&
-          callback.params[0]?.type === 'Identifier'
-        ) {
+        const isFunctionCallback =
+          callback?.type === 'ArrowFunctionExpression' ||
+          callback?.type === 'FunctionExpression';
+        if (isFunctionCallback && callback.params[0]?.type === 'Identifier') {
           const parameter = callback.params[0];
           const variable = context.sourceCode
             .getDeclaredVariables(callback)
