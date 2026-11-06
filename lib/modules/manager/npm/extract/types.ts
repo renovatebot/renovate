@@ -93,6 +93,40 @@ export interface PnpmMinimumReleaseAgeExclude {
 }
 
 /**
+ * The `npmMinimalAgeGate` settings of a `.yarnrc.yml` in minutes.
+ */
+export interface YarnMinimalAgeGateSettings {
+  npmMinimalAgeGate?: number;
+  /** The `npmMinimalAgeGate` of each scope of `npmScopes`, keyed by the scope without `@`, or `null` for a scope without one */
+  npmScopes?: Record<string, number | null>;
+}
+
+/**
+ * The minimum release age settings of a Yarn lock file which Renovate keeps in `managerData`, from its `.yarnrc.yml` and its root `package.json`, with the ages in minutes.
+ */
+export interface YarnManagerDataMinimalAgeGate extends YarnMinimalAgeGateSettings {
+  /** Whether `npmPreapprovedPackages` has entries, which Yarn installs without a minimum release age */
+  hasNpmPreapprovedPackages?: boolean;
+  /** The Yarn constraint of the root `package.json` of the lock file */
+  yarnConstraint?: string;
+}
+
+/**
+ * The minimum release age settings of a `.yarnrc.yml`, with the ages in minutes.
+ */
+export interface YarnrcMinimalAgeGateSettings extends YarnMinimalAgeGateSettings {
+  npmPreapprovedPackages?: string[];
+}
+
+/**
+ * An `npmPreapprovedPackages` entry, with the package name or glob and an optional semver range.
+ */
+export interface YarnPreapprovedPackage {
+  packageName: string;
+  range?: string;
+}
+
+/**
  * The package files of a lock file.
  */
 export interface LockFilePackageFiles<T> {
