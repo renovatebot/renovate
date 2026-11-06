@@ -6,6 +6,7 @@ import type { BranchConfig } from '../../../types.ts';
 export async function setArtifactErrorStatus(
   config: BranchConfig,
 ): Promise<void> {
+  // a `statusCheckWhen` in the `force` config replaces the merged object, so it can leave the key out
   const mode = config.statusCheckWhen.artifactError ?? 'failed';
   const hasErrors = !!config.artifactErrors?.length;
 

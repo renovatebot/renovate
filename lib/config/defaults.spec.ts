@@ -8,7 +8,14 @@ import {
   isRepoDefaultedOption,
 } from './defaults.ts';
 import { getOptions } from './options/index.ts';
-import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
+import type {
+  AllConfig,
+  RenovateConfig,
+  RenovateConfigFile,
+  RenovateOptions,
+  StatusCheckKey,
+  StatusCheckWhen,
+} from './types.ts';
 
 describe('config/defaults', () => {
   describe('getConfig()', () => {
@@ -150,6 +157,15 @@ describe('config/defaults', () => {
       >().toEqualTypeOf<string>();
       expectTypeOf<Config['dependencyDashboardFooter']>().toEqualTypeOf<
         string | undefined
+      >();
+    });
+
+    it('gives the merged defaults of statusCheckWhen all its keys', () => {
+      expectTypeOf<RenovateConfigFile['statusCheckWhen']>().toEqualTypeOf<
+        Partial<Record<StatusCheckKey, StatusCheckWhen>> | undefined
+      >();
+      expectTypeOf<RenovateConfig['statusCheckWhen']>().toExtend<
+        Record<StatusCheckKey, StatusCheckWhen>
       >();
     });
   });

@@ -92,7 +92,7 @@ export interface StabilityConfig extends StatusCheckConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
-  const mode = config.statusCheckWhen.minimumReleaseAge ?? 'always';
+  const mode = config.statusCheckWhen.minimumReleaseAge;
 
   if (mode === 'never') {
     if (config.stabilityStatus) {
@@ -144,7 +144,7 @@ export interface ConfidenceConfig extends StatusCheckConfig {
 }
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
-  const mode = config.statusCheckWhen.mergeConfidence ?? 'always';
+  const mode = config.statusCheckWhen.mergeConfidence;
 
   if (mode === 'never') {
     if (config.branchName && config.confidenceStatus) {

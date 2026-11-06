@@ -510,7 +510,7 @@ export interface RenovateConfigFile
 
   customizeDashboard?: Record<string, string>;
 
-  statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckNames?: Partial<Record<StatusCheckKey, string | null>>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands

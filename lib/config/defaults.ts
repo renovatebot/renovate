@@ -8,6 +8,8 @@ import type {
   AllConfig,
   RenovateOptions,
   RepoRemovedConfigKey,
+  StatusCheckKey,
+  StatusCheckWhen,
 } from './types.ts';
 
 // Use functions instead of direct values to avoid introducing global references.
@@ -135,8 +137,18 @@ type DefaultedOption<O> = O extends unknown
 export type DefaultedConfigKey = DefaultedOption<OptionDefinition>['name'];
 
 /**
+ * The values of the mergeable options whose default sets every key, so that a config with defaults applied has all the keys, which a configured value can leave out.
+ */
+export interface MergedDefaultValues {
+  statusCheckNames: Record<StatusCheckKey, string | null>;
+  statusCheckWhen: Record<StatusCheckKey, StatusCheckWhen>;
+}
+
+/**
  * A config in which the options with a default can't be missing.
  */
 export type WithDefaults<T, K extends PropertyKey = DefaultedConfigKey> = T & {
-  [P in K & keyof T]-?: NonNullable<T[P]>;
+  [P in K & keyof T]-?: P extends keyof MergedDefaultValues
+    ? MergedDefaultValues[P]
+    : NonNullable<T[P]>;
 };
