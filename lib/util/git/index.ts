@@ -20,7 +20,7 @@ import { ResetMode, simpleGit } from 'simple-git';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   INVALID_PATH,
@@ -418,7 +418,7 @@ export async function writeGitAuthor(): Promise<void> {
 export function setUserRepoConfig({
   gitIgnoredAuthors,
   gitAuthor,
-}: RenovateConfig): void {
+}: RenovateConfigFile): void {
   config.ignoredAuthors = coerceArray(gitIgnoredAuthors);
   setGitAuthor(gitAuthor);
 }

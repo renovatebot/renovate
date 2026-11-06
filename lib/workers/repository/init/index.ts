@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap.ts';
 import { platform } from '../../../modules/platform/index.ts';
@@ -19,7 +19,7 @@ import type { RepoConfig } from './defaults.ts';
 import { applyRepoConfigDefaults } from './defaults.ts';
 import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
-function initializeConfig(config: RenovateConfig): RenovateConfig {
+function initializeConfig(config: RenovateConfigFile): RenovateConfigFile {
   return {
     ...clone(config),
     errors: [],
@@ -28,7 +28,7 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
   };
 }
 
-function warnOnUnsupportedOptions(config: RenovateConfig): void {
+function warnOnUnsupportedOptions(config: RenovateConfigFile): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
     const platform = GlobalConfig.get('platform');
     logger.warn(
@@ -46,9 +46,11 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
   }
 }
 
-export async function initRepo(config_: RenovateConfig): Promise<RepoConfig> {
+export async function initRepo(
+  config_: RenovateConfigFile,
+): Promise<RepoConfig> {
   PackageFiles.clear();
-  let config: RenovateConfig = initializeConfig(config_);
+  let config: RenovateConfigFile = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
   memCache.init();

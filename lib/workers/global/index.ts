@@ -20,7 +20,7 @@ import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
   InternalGlobalConfigOptions,
-  RenovateConfig,
+  RenovateConfigFile,
   RenovateRepository,
   RepoGlobalConfig,
 } from '../../config/types.ts';
@@ -59,7 +59,7 @@ function applyGlobalOption<
 }
 
 export async function getRepositoryConfig(
-  globalConfig: RenovateConfig,
+  globalConfig: RenovateConfigFile,
   repository: RenovateRepository,
 ): Promise<RepositoryWorkerConfig> {
   const repoIsString = isString(repository);
@@ -104,7 +104,7 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
-function getGlobalConfig(): Promise<RenovateConfig> {
+function getGlobalConfig(): Promise<RenovateConfigFile> {
   return parseConfigs(getEnv(), process.argv);
 }
 

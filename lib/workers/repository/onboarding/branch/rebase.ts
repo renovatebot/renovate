@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { toSha256 } from '../../../../util/hash.ts';
@@ -9,7 +9,7 @@ import { getOnboardingCommitMessage } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
 export async function rebaseOnboardingBranch(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   previousConfigHash: string | undefined,
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');

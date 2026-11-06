@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../config/types.ts';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ensureComment } from '../../../modules/platform/comment.ts';
@@ -14,7 +14,7 @@ import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
 async function cleanUpBranches(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   remainingBranches: string[],
 ): Promise<void> {
   if (!config.pruneStaleBranches) {
@@ -144,7 +144,7 @@ async function cleanUpBranches(
  * Calculates a {RegExp} to extract the base branch from a branch name if base branch patterns is configured.
  * @param config Renovate configuration
  */
-function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
+function calculateBaseBranchRegex(config: RenovateConfigFile): RegExp | null {
   if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
     return null;
   }
@@ -168,7 +168,7 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
 }
 
 export async function pruneStaleBranches(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   branchList: string[] | null | undefined,
 ): Promise<void> {
   logger.debug('Removing any stale branches');

@@ -7,6 +7,7 @@ import type {
   AllConfig,
   ManagerConfig,
   RenovateConfig,
+  RenovateConfigFile,
   RenovateConfigStage,
 } from './types.ts';
 import { mergeChildConfig } from './utils.ts';
@@ -51,10 +52,10 @@ export async function applyDatasourceDefaultConfig<
 }
 
 export function removeGlobalConfig(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   keepInherited: boolean,
-): RenovateConfig {
-  const outputConfig: RenovateConfig = { ...config };
+): RenovateConfigFile {
+  const outputConfig: RenovateConfigFile = { ...config };
   for (const option of options.getOptions()) {
     if (keepInherited && option.inheritConfigSupport) {
       continue;

@@ -1,6 +1,6 @@
 // TODO #22198
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
@@ -94,7 +94,7 @@ export async function findClosedPrForModifiedBranch(
  * title, a PR label or the rebase checkbox in the PR body.
  */
 export async function rebaseCheck(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   branchPr: Pr,
 ): Promise<boolean> {
   const titleRebase = branchPr.title?.startsWith('rebase!');

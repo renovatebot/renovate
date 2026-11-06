@@ -1,12 +1,12 @@
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../config/types.ts';
 import { checkOnboardingBranch } from '../onboarding/branch/index.ts';
 import { mergeInheritedConfig } from './inherited.ts';
 import { mergeRenovateConfig } from './merge.ts';
 
 // istanbul ignore next
 export async function getRepoConfig(
-  config_: RenovateConfig,
-): Promise<RenovateConfig> {
+  config_: RenovateConfigFile,
+): Promise<RenovateConfigFile> {
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;
   config = await mergeInheritedConfig(config);

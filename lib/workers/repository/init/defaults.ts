@@ -1,21 +1,19 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import type {
-  DefaultedConfigKey,
-  WithDefaults,
-} from '../../../config/defaults.ts';
+import type { WithDefaults } from '../../../config/defaults.ts';
 import { getDefault, isDefaultedOption } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { getOptions } from '../../../config/options/index.ts';
-import type { FilteredConfigKey } from '../../../config/stages.ts';
 import { isFilteredOption } from '../../../config/stages.ts';
 import type {
   RenovateConfigFile,
   RenovateOptions,
+  RepoDefaultedConfigKey,
+  RepoRemovedConfigKey,
 } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 
 /**
- * The options with a default which a repository's config doesn't keep, as `GlobalConfig.set()` moves them out of it, or the repository worker deletes them once it has applied them.
+ * The {@link RepoRemovedConfigKey} options, other than those of the stages before `repository`.
  */
 const removedOptions = [
   ...GlobalConfig.OPTIONS,
@@ -24,7 +22,7 @@ const removedOptions = [
   'hostRules',
   'ignorePresets',
   'overrideDescription',
-] as const;
+] as const satisfies readonly RepoRemovedConfigKey[];
 
 const removedOptionNames = new Set<string>(removedOptions);
 
@@ -37,11 +35,6 @@ function isRemovedOption(option: RenovateOptions): boolean {
     isFilteredOption(option, 'repository')
   );
 }
-
-type RepoDefaultedConfigKey = Exclude<
-  DefaultedConfigKey,
-  (typeof removedOptions)[number] | FilteredConfigKey<'repository'>
->;
 
 /**
  * A repository's config, in which the options with a default have a value.

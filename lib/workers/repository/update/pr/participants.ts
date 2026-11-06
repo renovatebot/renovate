@@ -1,6 +1,6 @@
 import { isArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
@@ -10,7 +10,7 @@ import { sampleSize } from '../../../../util/sample.ts';
 import { codeOwnersForPr } from './code-owners.ts';
 
 async function addCodeOwners(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   assigneesOrReviewers: string[],
   pr: Pr,
 ): Promise<string[]> {
@@ -25,7 +25,7 @@ async function addCodeOwners(
 }
 
 function filterUnavailableUsers(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   users: string[],
 ): Promise<string[]> {
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
@@ -34,7 +34,7 @@ function filterUnavailableUsers(
 }
 
 function prepareParticipants(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   usernames: string[],
 ): Promise<string[]> {
   const normalizedUsernames = [
@@ -44,7 +44,7 @@ function prepareParticipants(
 }
 
 export async function addParticipants(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   pr: Pr,
 ): Promise<void> {
   let assignees = coerceArray(config.assignees);

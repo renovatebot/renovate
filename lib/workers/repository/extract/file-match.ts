@@ -1,4 +1,7 @@
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { minimatch } from '../../../util/minimatch.ts';
@@ -38,7 +41,7 @@ export function filterIgnoredFiles(
 }
 
 export function getFilteredFileList(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   fileList: string[],
 ): string[] {
   return instrument('getFilteredFileList', () => {

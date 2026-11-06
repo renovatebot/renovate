@@ -1,7 +1,7 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { type Pr, platform } from '../../../../modules/platform/index.ts';
@@ -12,6 +12,7 @@ import { getBranchCommit, setGitAuthor } from '../../../../util/git/index.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import { checkIfConfigured } from '../../configured.ts';
 import { extractAllDependencies } from '../../extract/index.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { mergeRenovateConfig } from '../../init/merge.ts';
 import { OnboardingState } from '../common.ts';
 import { getOnboardingPr, isOnboarded } from './check.ts';
@@ -27,8 +28,8 @@ import {
 import { rebaseOnboardingBranch } from './rebase.ts';
 
 export async function checkOnboardingBranch(
-  config: RenovateConfig,
-): Promise<RenovateConfig> {
+  config: RenovateConfigFile,
+): Promise<RenovateConfigFile> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
@@ -106,9 +107,12 @@ export async function checkOnboardingBranch(
     let mergedConfig = mergeChildConfig(config, onboardingConfig);
     mergedConfig = await mergeRenovateConfig(mergedConfig);
 
+    // extract with the defaults applied, like a repository run does, on a copy so that the onboarding branch is still created from the config as merged
+    const { packageFiles } = await extractAllDependencies(
+      applyRepoConfigDefaults({ ...mergedConfig }),
+    );
     if (
-      Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
-        .length === 0 &&
+      Object.entries(packageFiles).length === 0 &&
       getInheritedOrGlobal('onboardingNoDeps') !== 'enabled'
     ) {
       throw new Error(REPOSITORY_NO_PACKAGE_FILES);

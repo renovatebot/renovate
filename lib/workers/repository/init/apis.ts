@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -13,10 +13,10 @@ import { getDefaultConfigFileName } from '../onboarding/common.ts';
 
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
-  RenovateConfig &
+  RenovateConfigFile &
   Record<string, any>;
 
-async function getJsonFile(file: string): Promise<RenovateConfig | null> {
+async function getJsonFile(file: string): Promise<RenovateConfigFile | null> {
   try {
     return await platform.getJsonFile(file);
   } catch {
@@ -25,7 +25,7 @@ async function getJsonFile(file: string): Promise<RenovateConfig | null> {
 }
 
 async function validateOptimizeForDisabled(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
     const renovateConfig = await getJsonFile(getDefaultConfigFileName());
@@ -58,7 +58,7 @@ async function validateOptimizeForDisabled(
   }
 }
 
-async function validateIncludeForks(config: RenovateConfig): Promise<void> {
+async function validateIncludeForks(config: RenovateConfigFile): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
     const defaultConfigFile = getDefaultConfigFileName();
     const repoConfig = await getJsonFile(defaultConfigFile);
@@ -102,7 +102,7 @@ async function getPlatformConfig(
 
 // TODO: fix types (#22198)
 export async function initApis(
-  input: RenovateConfig,
+  input: RenovateConfigFile,
 ): Promise<WorkerPlatformConfig> {
   let config: WorkerPlatformConfig = { ...input } as never;
   config = await getPlatformConfig(config as never);

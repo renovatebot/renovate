@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 
 import {
   CONFIG_SECRETS_EXPOSED,
@@ -45,7 +45,7 @@ import {
 import type { RepositoryResult } from './result.ts';
 
 export default async function handleError(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   err: Error,
 ): Promise<RepositoryResult> {
   return instrument('handleError', async () => {

@@ -1,6 +1,6 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
@@ -46,7 +46,7 @@ async function packageJsonConfigExists(): Promise<boolean> {
   return false;
 }
 
-async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
+async function closedPrExists(config: RenovateConfigFile): Promise<Pr | null> {
   return (
     (await platform.findPr({
       branchName: getInheritedOrGlobal('onboardingBranch')!,
@@ -63,7 +63,9 @@ async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   );
 }
 
-export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
+export async function isOnboarded(
+  config: RenovateConfigFile,
+): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
 
@@ -197,7 +199,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 }
 
 export async function getOnboardingPr(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
     getInheritedOrGlobal('onboardingBranch')!,

@@ -4,7 +4,10 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   PlatformErrors,
@@ -207,7 +210,7 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
-export function isMultiBaseBranch(config: RenovateConfig): boolean {
+export function isMultiBaseBranch(config: RenovateConfigFile): boolean {
   if (!config.baseBranchPatterns?.length) {
     return false;
   }

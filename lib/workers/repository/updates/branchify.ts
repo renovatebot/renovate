@@ -2,6 +2,7 @@
 import type { Merge } from 'type-fest';
 import type {
   RenovateConfig,
+  RenovateConfigFile,
   ValidationMessage,
 } from '../../../config/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
@@ -12,7 +13,7 @@ import { flattenUpdates } from './flatten.ts';
 import { generateBranchConfig } from './generate.ts';
 
 export type BranchifiedConfig = Merge<
-  RenovateConfig,
+  RenovateConfigFile,
   {
     branches: BranchConfig[];
     branchList: string[];

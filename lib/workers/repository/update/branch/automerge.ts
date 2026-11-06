@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
@@ -19,7 +19,7 @@ export type AutomergeResult =
   | 'not ready';
 
 export async function tryBranchAutomerge(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   branchPr: Pr | null,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');

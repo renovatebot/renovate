@@ -4,13 +4,13 @@ import { logger } from '../logger/index.ts';
 import { coerceArray } from '../util/array.ts';
 import * as configMassage from './massage.ts';
 import * as configMigration from './migration.ts';
-import type { RenovateConfig, ValidationMessage } from './types.ts';
+import type { RenovateConfigFile, ValidationMessage } from './types.ts';
 import * as configValidation from './validation.ts';
 
 export async function migrateAndValidate(
-  config: RenovateConfig,
-  input: RenovateConfig,
-): Promise<RenovateConfig> {
+  config: RenovateConfigFile,
+  input: RenovateConfigFile,
+): Promise<RenovateConfigFile> {
   logger.debug('migrateAndValidate()');
   try {
     const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);

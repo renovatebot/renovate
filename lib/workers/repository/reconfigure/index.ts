@@ -6,6 +6,7 @@ import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { getBranchCommit } from '../../../util/git/index.ts';
+import type { RepoConfig } from '../init/defaults.ts';
 import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { mergeInheritedConfig } from '../init/inherited.ts';
 import { mergeRenovateConfig } from '../init/merge.ts';
@@ -99,6 +100,7 @@ export async function checkReconfigureBranch(
   }
 
   let extractResult: ExtractResult;
+  let reconfigureConfig: RepoConfig;
   // Recompute config similar to repo config processing
   // Get non-global config from file config
   // Merge it with inherited and static repo config
@@ -118,10 +120,8 @@ export async function checkReconfigureBranch(
     newConfig = await mergeInheritedConfig(newConfig);
     newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
     await scm.checkoutBranch(config.defaultBranch!);
-    extractResult = await extractDependencies(
-      applyRepoConfigDefaults(newConfig),
-      false,
-    );
+    reconfigureConfig = applyRepoConfigDefaults(newConfig);
+    extractResult = await extractDependencies(reconfigureConfig, false);
   } catch (err) {
     logger.debug(
       { err },
@@ -133,7 +133,7 @@ export async function checkReconfigureBranch(
   }
 
   const commentEnsured = await ensureReconfigurePrComment(
-    newConfig,
+    reconfigureConfig,
     extractResult.packageFiles,
     extractResult.branches,
     reconfigureBranch,

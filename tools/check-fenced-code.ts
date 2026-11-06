@@ -14,7 +14,7 @@ import { GlobalConfig } from '../lib/config/global.ts';
 import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
 import { presets as globalPresets } from '../lib/config/presets/internal/global.preset.ts';
-import type { RenovateConfig } from '../lib/config/types.ts';
+import type { RenovateConfigFile } from '../lib/config/types.ts';
 import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
 import { parseJsonc } from '../lib/util/common.ts';
@@ -153,7 +153,7 @@ function checkSchemaCompliantJson(
   file: string,
   token: Token,
   value: object,
-): RenovateConfig | undefined {
+): RenovateConfigFile | undefined {
   const isValid = validate(value);
   if (isValid) {
     return value;
@@ -166,7 +166,7 @@ function checkSchemaCompliantJson(
 function checkMigrationStatus(
   file: string,
   token: Token,
-  original: RenovateConfig,
+  original: RenovateConfigFile,
 ): void {
   const { isMigrated, migratedConfig } = migrateConfig(original);
   if (isMigrated) {

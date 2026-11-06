@@ -1,4 +1,4 @@
-import type { GlobalInheritableConfig, RenovateConfig } from './types.ts';
+import type { GlobalInheritableConfig, RenovateConfigFile } from './types.ts';
 
 export const NOT_PRESENT = Symbol('not-present');
 
@@ -29,7 +29,9 @@ export class InheritConfig {
     return NOT_PRESENT;
   }
 
-  static set(config: RenovateConfig & GlobalInheritableConfig): RenovateConfig {
+  static set(
+    config: RenovateConfigFile & GlobalInheritableConfig,
+  ): RenovateConfigFile {
     InheritConfig.reset();
 
     const result = { ...config };
