@@ -5,6 +5,7 @@ import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { isNotFound } from '../../../util/http/status.ts';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import {
   api as semver,
@@ -112,7 +113,7 @@ export class HexpmBobDatasource extends Datasource {
   ): string {
     switch (packageType) {
       case 'elixir':
-        return version.replace(regEx(/^v/), '');
+        return stripVersionPrefix(version);
       case 'erlang':
         return version.replace(regEx(/^OTP-/), '');
     }

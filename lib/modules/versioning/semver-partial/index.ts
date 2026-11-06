@@ -2,6 +2,7 @@ import { isUndefined } from '@sindresorhus/is';
 import type { SemVer } from 'semver';
 import semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-partial';
@@ -17,7 +18,7 @@ function isLatest(input: string): boolean {
 }
 
 function massageValue(input: string): string {
-  return input.trim().replace(regEx(/^v/i), '');
+  return stripVersionPrefix(input.trim());
 }
 
 function parseVersion(input: string): SemVer | null {

@@ -1,5 +1,5 @@
 import type { RangeStrategy } from '../../../types/versioning.ts';
-import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import { GenericVersioningApi } from '../generic.ts';
 import type {
   GenericVersion,
@@ -26,8 +26,6 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
   'widen',
 ];
-
-const prefixPattern = regEx(/^[vV]/);
 
 const sectionIndexes = {
   major: 0,
@@ -115,7 +113,7 @@ class SemverExtendedVersioningApi extends GenericVersioningApi<SemverExtendedVer
     }
     return updateRange(alternatives, rangeStrategy, {
       parsed,
-      text: newVersion.replace(prefixPattern, ''),
+      text: stripVersionPrefix(newVersion),
     });
   }
 

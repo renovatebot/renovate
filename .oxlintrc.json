@@ -231,7 +231,8 @@
         "renovate/prefer-coerce-array": "error",
         "renovate/prefer-coerce-object": "error",
         "renovate/prefer-is-helpers": "error",
-        "renovate/prefer-is-object": "error"
+        "renovate/prefer-is-object": "error",
+        "renovate/prefer-strip-version-prefix": "error"
       }
     },
     {
