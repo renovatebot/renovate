@@ -119,7 +119,7 @@ export async function flattenUpdates(
       const packageFileConfig: BranchUpgradeConfig = mergeChildConfig(
         managerConfig,
         packageFile,
-      ) as never;
+      );
       const packagePath = packageFile.packageFile?.split('/');
       // `split` always yields at least one element, so there is always a file
       // name to drop here

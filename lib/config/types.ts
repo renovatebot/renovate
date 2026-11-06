@@ -26,7 +26,7 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
-import type { DefaultedConfigKey } from './defaults.ts';
+import type { DefaultedConfigKey, WithDefaults } from './defaults.ts';
 import type { GlobalConfig } from './global.ts';
 import type { FilteredConfigKey } from './stages.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
@@ -531,11 +531,14 @@ export type RepoDefaultedConfigKey = Exclude<
 >;
 
 /**
- * The config a repository is processed with.
+ * The config a repository is processed with, once `applyRepoConfigDefaults` has given each option with a default its value.
  *
- * Temporarily the same as {@link RenovateConfigFile}, until it becomes the type in which the options with a default have a value.
+ * {@link RenovateConfigFile} is the config as written, before validation and defaults.
  */
-export type RenovateConfig = RenovateConfigFile;
+export type RenovateConfig = WithDefaults<
+  RenovateConfigFile,
+  RepoDefaultedConfigKey
+>;
 
 export const CustomDatasourceFormats = [
   'html',

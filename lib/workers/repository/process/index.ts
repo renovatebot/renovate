@@ -28,7 +28,6 @@ import { addSplit } from '../../../util/split.ts';
 import { getRegexPredicate } from '../../../util/string-match.ts';
 import type { BranchConfig } from '../../types.ts';
 import { readDashboardBody } from '../dependency-dashboard.ts';
-import type { RepoConfig } from '../init/defaults.ts';
 import type { ExtractResult } from './extract-update.ts';
 import { extract, lookup, update } from './extract-update.ts';
 import type { WriteUpdateResult } from './write.ts';
@@ -222,7 +221,7 @@ export function isMultiBaseBranch(config: RenovateConfigFile): boolean {
 }
 
 export async function extractDependencies(
-  config: RepoConfig,
+  config: RenovateConfig,
   overwriteCache = true,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);

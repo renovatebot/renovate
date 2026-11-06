@@ -12,7 +12,6 @@ import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
-import type { RepoConfig } from '../init/defaults.ts';
 import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
@@ -30,7 +29,7 @@ const notFoundError = Object.assign(new Error('Not Found'), {
   response: { statusCode: 404 },
 });
 
-let config: RepoConfig;
+let config: RenovateConfig;
 
 beforeEach(() => {
   config = applyRepoConfigDefaults(getConfig());

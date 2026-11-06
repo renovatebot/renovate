@@ -124,7 +124,7 @@ async function lookup(
     delete dep.skipStage;
   }
 
-  if (depConfig.ignoreDeps!.includes(depName!)) {
+  if (depConfig.ignoreDeps.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';

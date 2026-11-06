@@ -6,7 +6,6 @@ import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { getBranchCommit } from '../../../util/git/index.ts';
-import type { RepoConfig } from '../init/defaults.ts';
 import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { mergeInheritedConfig } from '../init/inherited.ts';
 import { mergeRenovateConfig } from '../init/merge.ts';
@@ -37,7 +36,7 @@ export async function checkReconfigureBranch(
   }
 
   const context = config.statusCheckNames?.configValidation;
-  const reconfigureBranch = getReconfigureBranchName(config.branchPrefix!);
+  const reconfigureBranch = getReconfigureBranchName(config.branchPrefix);
   const branchExists = await scm.branchExists(reconfigureBranch);
 
   // this is something the user initiates, skip if no branch exists
@@ -100,7 +99,7 @@ export async function checkReconfigureBranch(
   }
 
   let extractResult: ExtractResult;
-  let reconfigureConfig: RepoConfig;
+  let reconfigureConfig: RenovateConfig;
   // Recompute config similar to repo config processing
   // Get non-global config from file config
   // Merge it with inherited and static repo config

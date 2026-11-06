@@ -20,7 +20,7 @@ export async function validateReconfigureBranch(
   logger.debug('validateReconfigureBranch()');
 
   const context = config.statusCheckNames?.configValidation;
-  const branchName = getReconfigureBranchName(config.branchPrefix!);
+  const branchName = getReconfigureBranchName(config.branchPrefix);
   const branchSha = getBranchCommit(branchName)!;
 
   if (context) {

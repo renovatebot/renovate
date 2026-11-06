@@ -1,13 +1,12 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import type { WithDefaults } from '../../../config/defaults.ts';
 import { getDefault, isDefaultedOption } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { getOptions } from '../../../config/options/index.ts';
 import { isFilteredOption } from '../../../config/stages.ts';
 import type {
+  RenovateConfig,
   RenovateConfigFile,
   RenovateOptions,
-  RepoDefaultedConfigKey,
   RepoRemovedConfigKey,
 } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -37,17 +36,11 @@ function isRemovedOption(option: RenovateOptions): boolean {
 }
 
 /**
- * A repository's config, in which the options with a default have a value.
- */
-export type RepoConfig<T extends RenovateConfigFile = RenovateConfigFile> =
-  WithDefaults<T, RepoDefaultedConfigKey>;
-
-/**
  * Gives each option with a default its default value, where the config leaves it out or sets it to `null`, which the config validation doesn't reject.
  */
 export function applyRepoConfigDefaults(
   config: RenovateConfigFile,
-): RepoConfig {
+): RenovateConfig {
   const defaults: Record<string, unknown> = {};
   for (const option of getOptions().filter(isDefaultedOption)) {
     const value = config[option.name as keyof RenovateConfigFile];
@@ -61,5 +54,5 @@ export function applyRepoConfigDefaults(
     logger.debug(`Using the default value of ${names.join(', ')}`);
   }
 
-  return Object.assign(config, defaults) as RepoConfig;
+  return Object.assign(config, defaults) as RenovateConfig;
 }

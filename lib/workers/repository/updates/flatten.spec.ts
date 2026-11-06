@@ -50,7 +50,7 @@ describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       // TODO #22198
-      config.lockFileMaintenance!.enabled = true;
+      config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
           matchUpdateTypes: ['minor'],
@@ -341,7 +341,7 @@ describe('workers/repository/updates/flatten', () => {
 
     it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
       // TODO #22198
-      config.lockFileMaintenance!.enabled = true;
+      config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
           matchUpdateTypes: ['major', 'lockFileMaintenance'],
@@ -382,7 +382,7 @@ describe('workers/repository/updates/flatten', () => {
     });
 
     it('passes minimumReleaseAgeExtracted from the package file to all updates', async () => {
-      config.lockFileMaintenance!.enabled = true;
+      config.lockFileMaintenance.enabled = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
