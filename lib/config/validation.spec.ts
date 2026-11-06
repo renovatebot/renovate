@@ -1815,11 +1815,11 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('allows updateVersionLabels in the kubernetes manager config', async () => {
+    it('allows updateAppVersionLabel in the kubernetes manager config', async () => {
       const config: AllConfig & {
-        kubernetes: { updateVersionLabels: boolean };
+        kubernetes: { updateAppVersionLabel: boolean };
       } = {
-        kubernetes: { updateVersionLabels: false },
+        kubernetes: { updateAppVersionLabel: false },
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',

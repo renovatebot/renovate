@@ -39,7 +39,7 @@ export function extractPackageFile(
   // even when the manager option is not part of the upgrade config.
   const isVersionLabelReExtract = config.digestManagedExternally === true;
   const isVersionLabelUpdate =
-    config.updateVersionLabels === true || isVersionLabelReExtract;
+    config.updateAppVersionLabel === true || isVersionLabelReExtract;
   const deps: PackageDependency[] = [
     ...imageDeps,
     ...extractImageVolumes(manifests, config),

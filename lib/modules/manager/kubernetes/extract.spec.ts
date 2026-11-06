@@ -79,7 +79,7 @@ describe('modules/manager/kubernetes/extract', () => {
 
     it('extracts matching app version labels when enabled', () => {
       const res = extractPackageFile(versionLabelFile, 'file.yaml', {
-        updateVersionLabels: true,
+        updateAppVersionLabel: true,
       });
 
       expect(res?.deps).toContainEqual({
@@ -117,7 +117,7 @@ describe('modules/manager/kubernetes/extract', () => {
         'image: nginx:1.22.2',
       );
       const res = extractPackageFile(updatedContent, 'file.yaml', {
-        updateVersionLabels: true,
+        updateAppVersionLabel: true,
         depName: 'nginx',
         currentValue: '1.22.1',
       });
@@ -135,7 +135,7 @@ describe('modules/manager/kubernetes/extract', () => {
     it('keeps label extraction stable after the label is updated', () => {
       const updatedContent = versionLabelFile.replace('"1.22.1"', '"1.22.2"');
       const res = extractPackageFile(updatedContent, 'file.yaml', {
-        updateVersionLabels: true,
+        updateAppVersionLabel: true,
         depName: 'nginx',
         currentValue: '1.22.1',
         newValue: '1.22.2',
@@ -185,7 +185,7 @@ describe('modules/manager/kubernetes/extract', () => {
                     image: nginx:1.2.3
         `,
         'file.yaml',
-        { updateVersionLabels: true },
+        { updateAppVersionLabel: true },
       );
 
       expect(res?.deps).not.toContainEqual(
@@ -218,7 +218,7 @@ describe('modules/manager/kubernetes/extract', () => {
                       reference: busybox:1.0
         `,
         'file.yaml',
-        { updateVersionLabels: true },
+        { updateAppVersionLabel: true },
       );
 
       expect(res?.deps).toMatchObject([
@@ -272,7 +272,7 @@ describe('modules/manager/kubernetes/extract', () => {
                 image: myapp:2.0
         `,
         'file.yaml',
-        { updateVersionLabels: true },
+        { updateAppVersionLabel: true },
       );
 
       expect(
@@ -287,7 +287,7 @@ describe('modules/manager/kubernetes/extract', () => {
 
     it('can disable app version label extraction', () => {
       const res = extractPackageFile(versionLabelFile, 'file.yaml', {
-        updateVersionLabels: false,
+        updateAppVersionLabel: false,
       });
 
       expect(res?.deps).not.toContainEqual(

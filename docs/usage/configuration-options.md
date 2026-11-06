@@ -2885,12 +2885,6 @@ Alternatively, to limit major upgrades to within 10 versions:
 }
 ```
 
-## `kubernetes`
-
-### `kubernetes.updateVersionLabels`
-
-Set to `true` to update the standard `app.kubernetes.io/version` label. This is disabled by default.
-
 ## `managerFilePatterns`
 
 Formerly known as `fileMatch`, which supported regex-only.
@@ -5217,6 +5211,12 @@ Defaults to `jvmMaxMemory`.
 
 !!! note
   This does not apply to _every_ Node process created by Renovate, only the managers noted above.
+
+## `updateAppVersionLabel`
+
+Set to `true` to update the standard `app.kubernetes.io/version` label together with the image it belongs to.
+Renovate only updates a label when its value matches the tag of an image in the same manifest.
+This is disabled by default.
 
 ## `updateInternalDeps`
 

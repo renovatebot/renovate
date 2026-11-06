@@ -1697,6 +1697,16 @@ const options: Readonly<RenovateOptions>[] = [
     supportedManagers: ['npm'],
   },
   {
+    name: 'updateAppVersionLabel',
+    scopes: ['repo', 'manager'],
+    description:
+      'Update the `app.kubernetes.io/version` label when it matches an image tag.',
+    type: 'boolean',
+    default: false,
+    stage: 'package',
+    supportedManagers: ['kubernetes'],
+  },
+  {
     name: 'packageRules',
     scopes: [
       'repo',
@@ -3127,17 +3137,6 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
     scopes: ['manager'],
     parents: ['customManagers'],
-  },
-  {
-    name: 'updateVersionLabels',
-    parents: ['kubernetes'],
-    description:
-      'Update the standard Kubernetes app version label when it matches an image tag.',
-    type: 'boolean',
-    default: false,
-    stage: 'package',
-    cli: false,
-    env: false,
   },
   {
     name: 'postUpdateOptions',

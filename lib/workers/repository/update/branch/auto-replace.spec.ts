@@ -112,7 +112,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
                   image: nginx:1.2.3
       `;
       const deps = extractKubernetesPackageFile(content, 'deployment.yaml', {
-        updateVersionLabels: true,
+        updateAppVersionLabel: true,
       })!.deps;
 
       let updatedContent = content;

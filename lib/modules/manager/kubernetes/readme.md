@@ -36,7 +36,7 @@ The manager can update the standard `app.kubernetes.io/version` label when its v
 ```json
 {
   "kubernetes": {
-    "updateVersionLabels": true
+    "updateAppVersionLabel": true
   }
 }
 ```
