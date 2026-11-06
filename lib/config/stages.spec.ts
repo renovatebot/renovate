@@ -1,10 +1,14 @@
 import type { DefaultedConfigKey } from './defaults.ts';
-import { getConfig, isDefaultedOption } from './defaults.ts';
+import {
+  getConfig,
+  isDefaultedOption,
+  isRepoDefaultedOption,
+} from './defaults.ts';
 import { filterConfig } from './index.ts';
 import { getOptions } from './options/index.ts';
 import type { FilteredConfigKey } from './stages.ts';
 import { isFilteredOption } from './stages.ts';
-import type { RenovateOptions } from './types.ts';
+import type { RenovateOptions, RepoDefaultedConfigKey } from './types.ts';
 
 describe('config/stages', () => {
   describe('isFilteredOption()', () => {
@@ -59,6 +63,55 @@ describe('config/stages', () => {
       expect(deleted).toIncludeSameMembers([...expected]);
       expectTypeOf<
         Extract<FilteredConfigKey<'repository'>, DefaultedConfigKey>
+      >().toEqualTypeOf<(typeof expected)[number]>();
+    });
+
+    it('matches the options with a repository default which filterConfig() deletes for the branch stage', () => {
+      const expected = [
+        'baseBranchPatterns',
+        'configMigration',
+        'customManagers',
+        'description',
+        'digest',
+        'enabled',
+        'enabledManagers',
+        'forkCreation',
+        'forkProcessing',
+        'gitIgnoredAuthors',
+        'gitUrl',
+        'ignoreDeprecated',
+        'ignoreDeps',
+        'ignorePaths',
+        'ignoreUnstable',
+        'includePaths',
+        'logLevelRemap',
+        'major',
+        'maxMajorIncrement',
+        'minor',
+        'optimizeForDisabled',
+        'packageRules',
+        'patch',
+        'pin',
+        'pinDigest',
+        'replacement',
+        'repositoryCache',
+        'repositoryCacheType',
+        'respectLatest',
+        'rollback',
+        'separateMultipleMajor',
+        'separateMultipleMinor',
+        'updateInternalDeps',
+      ] as const;
+
+      const config = filterConfig(getConfig(), 'branch');
+      const deleted = getOptions()
+        .filter(isRepoDefaultedOption)
+        .map((option) => option.name)
+        .filter((name) => !(name in config));
+
+      expect(deleted).toIncludeSameMembers([...expected]);
+      expectTypeOf<
+        Extract<FilteredConfigKey<'branch'>, RepoDefaultedConfigKey>
       >().toEqualTypeOf<(typeof expected)[number]>();
     });
 

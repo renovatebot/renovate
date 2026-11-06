@@ -1,5 +1,6 @@
 import type { Merge } from 'type-fest';
 import type { WithDefaults } from '../config/defaults.ts';
+import type { FilteredConfigKey } from '../config/stages.ts';
 import type {
   GroupConfig,
   LegacyAdminConfig,
@@ -36,9 +37,10 @@ import type {
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 /**
- * The options with a default which `flattenUpdates()` and `generateBranchConfig()` delete from a branch upgrade, once they have applied them.
+ * The options with a default which `flattenUpdates()` and `generateBranchConfig()` delete from a branch upgrade, once they have applied them, and those of the stages before `branch`, which `flattenUpdates()` filters out.
  */
 type BranchUpgradeRemovedConfigKey =
+  | FilteredConfigKey<'branch'>
   | 'digest'
   | 'group'
   | 'lockFileMaintenance'

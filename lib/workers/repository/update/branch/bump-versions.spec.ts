@@ -11,23 +11,17 @@ describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
     it('should be noop if bumpVersions is empty array', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [],
       });
       await bumpVersions(config);
 
       expect(config).toEqual({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [],
       });
     });
 
     it('should be noop if no packageFiles or artifacts have been updated', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -51,8 +45,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
         throw new Error("Unexpected token '{'");
       });
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\^'],
@@ -90,8 +82,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
         throw new Error("Unexpected token '{'");
       });
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'bar',
@@ -128,8 +118,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       compile.mockReturnValueOnce('foo');
       compile.mockReturnValueOnce('^(?<version>.+)$');
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -170,8 +158,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should log debug if no matchString could be applied', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'ipsum',
@@ -214,8 +200,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
         throw new Error("Unexpected token '{'");
       });
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -248,8 +232,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump version in a non edited file and add to updatedArtifacts', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -282,8 +264,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump version with patch by default', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -315,8 +295,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump version in an already changed packageFiles', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -362,8 +340,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump version in an already changed artifact file', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -409,8 +385,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump version in deleted and recreated file changed artifact file', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -464,8 +438,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should ignore deleted file', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -495,8 +467,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should log if file is not readable', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'foo',
@@ -545,8 +515,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should ignore not matched strings', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['foo'],
@@ -597,8 +565,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump major version', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -631,8 +597,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump major/minor version', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -665,8 +629,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should bump minor version', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -706,8 +668,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
       'bumps $current with $bumpType to $expected',
       async ({ bumpType, current, expected }) => {
         const config = partial<BranchConfig>({
-          includePaths: [],
-          ignorePaths: [],
           bumpVersions: [
             {
               filePatterns: ['\\.release-version'],
@@ -737,8 +697,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('throws for minor bump of a major only version', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -767,8 +725,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('throws for invalid bump type and short version', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -801,8 +757,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should use matched version when bumpType is sync', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['\\.release-version'],
@@ -844,8 +798,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should log debug when no upgrades found for sync type', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'test',
@@ -876,8 +828,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should log debug when newVersion is not found in upgrades for sync type', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'test',
@@ -914,8 +864,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('reads from disk when the pending change carries no contents', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             filePatterns: ['first-file'],
@@ -945,8 +893,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should collect bumpVersions from all upgrades, not just the first', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         // top-level bumpVersions mirrors upgrades[0]'s value, as set by generateBranchConfig()
         bumpVersions: [
           {
@@ -1016,8 +962,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
         matchStrings: ['^(?<version>.+)$'],
       };
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         upgrades: partial<BranchUpgradeConfig>([
           {
             branchName: 'test-branch',
@@ -1056,8 +1000,6 @@ describe('workers/repository/update/branch/bump-versions', () => {
 
     it('should fall back to top-level bumpVersions when no upgrade defines any', async () => {
       const config = partial<BranchConfig>({
-        includePaths: [],
-        ignorePaths: [],
         bumpVersions: [
           {
             name: 'first',
