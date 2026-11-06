@@ -6,7 +6,9 @@ import type {
 import { getDefault, isDefaultedOption } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { getOptions } from '../../../config/options/index.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { FilteredConfigKey } from '../../../config/stages.ts';
+import { isFilteredOption } from '../../../config/stages.ts';
+import type { RenovateConfig, RenovateOptions } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 
 /**
@@ -23,9 +25,19 @@ const removedOptions = [
 
 const removedOptionNames = new Set<string>(removedOptions);
 
+/**
+ * Whether a repository's config doesn't keep an option, as it's one of the `removedOptions`, or of a stage before `repository`, which `getRepositoryConfig()` filters out.
+ */
+function isRemovedOption(option: RenovateOptions): boolean {
+  return (
+    removedOptionNames.has(option.name) ||
+    isFilteredOption(option, 'repository')
+  );
+}
+
 type RepoDefaultedConfigKey = Exclude<
   DefaultedConfigKey,
-  (typeof removedOptions)[number]
+  (typeof removedOptions)[number] | FilteredConfigKey<'repository'>
 >;
 
 /**
@@ -41,7 +53,7 @@ export function applyRepoConfigDefaults(config: RenovateConfig): RepoConfig {
   const defaults: Record<string, unknown> = {};
   for (const option of getOptions().filter(isDefaultedOption)) {
     const value = config[option.name as keyof RenovateConfig];
-    if (!removedOptionNames.has(option.name) && isNullOrUndefined(value)) {
+    if (!isRemovedOption(option) && isNullOrUndefined(value)) {
       defaults[option.name] = getDefault(option);
     }
   }
