@@ -155,7 +155,9 @@ describe('modules/manager/index', () => {
 
   describe('getEnabledManagersList()', () => {
     it('works', () => {
-      expect(manager.getEnabledManagersList()).toEqual(manager.allManagersList);
+      expect(manager.getEnabledManagersList([])).toEqual(
+        manager.allManagersList,
+      );
       expect(manager.getEnabledManagersList(['custom.regex', 'npm'])).toEqual([
         'npm',
         'regex',

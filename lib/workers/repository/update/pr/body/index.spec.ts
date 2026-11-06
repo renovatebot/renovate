@@ -36,6 +36,8 @@ const table = vi.mocked(_table);
 vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
+const repoConfig = { rebaseLabel: 'rebase', suppressNotifications: [] };
+
 describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {
     beforeEach(() => {
@@ -66,7 +68,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toBeEmptyString();
     });
@@ -94,7 +96,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -162,7 +164,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -238,7 +240,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -276,7 +278,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -305,7 +307,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toContain('PR BODY');
       expect(res).toContain(`<!--renovate-debug`);
@@ -330,7 +332,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
@@ -353,7 +355,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       const match = prDebugDataRe.exec(res);
@@ -403,7 +405,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       const expected =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +

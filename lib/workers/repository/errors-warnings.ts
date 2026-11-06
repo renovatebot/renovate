@@ -86,11 +86,14 @@ export function getDepWarningsOnboardingPR(
 
 export function getDepWarningsPR(
   packageFiles: Record<string, PackageFile[]>,
-  config: RenovateConfigFile,
+  config: Pick<
+    RenovateConfig,
+    'suppressNotifications' | 'dependencyDashboardIssue'
+  >,
   dependencyDashboard?: boolean,
 ): string {
   const { warnings } = getDepWarnings(packageFiles);
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   let warningText = '';

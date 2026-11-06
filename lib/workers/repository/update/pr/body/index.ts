@@ -1,4 +1,4 @@
-import type { RenovateConfigFile } from '../../../../../config/types.ts';
+import type { RenovateConfig } from '../../../../../config/types.ts';
 import { PLATFORM_FAMILIES } from '../../../../../constants/index.ts';
 import type { PrDebugData } from '../../../../../modules/platform/index.ts';
 import { platform } from '../../../../../modules/platform/index.ts';
@@ -99,7 +99,10 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
-  config: RenovateConfigFile,
+  config: Pick<
+    RenovateConfig,
+    'dependencyDashboardIssue' | 'rebaseLabel' | 'suppressNotifications'
+  >,
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
