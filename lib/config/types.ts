@@ -335,7 +335,7 @@ export interface PostUpgradeTasks {
   workingDirTemplate?: string;
   dataFileTemplate?: string;
   fileFilters?: string[];
-  executionMode: ExecutionMode;
+  executionMode?: ExecutionMode;
   installTools?: Partial<Record<ToolName, Record<never, never>>>;
 }
 
