@@ -106,7 +106,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return 'update-lockfile';
   }
 
-  return config.rangeStrategy!;
+  return rangeStrategy;
 }
 
 /**

@@ -103,7 +103,7 @@ export interface RangeConfig<T = unknown> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  rangeStrategy?: RangeStrategy;
+  rangeStrategy: RangeStrategy;
 }
 
 export interface PackageFileContent<T = unknown> extends ManagerData<T> {
