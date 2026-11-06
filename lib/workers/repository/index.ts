@@ -78,7 +78,7 @@ export async function renovateRepository(
       logger.trace({ config });
       queue.clear();
       throttle.clear();
-      const localDir = GlobalConfig.get('localDir');
+      const localDir = GlobalConfig.getRequired('localDir');
 
       try {
         await ensureDir(localDir);
@@ -246,7 +246,7 @@ function emptyExtract(): ExtractResult {
       addSplit('lookup');
       return {
         branches: [],
-        branchList: [getInheritedOrGlobal('onboardingBranch')!], // to prevent auto closing
+        branchList: [getInheritedOrGlobal('onboardingBranch')], // to prevent auto closing
         packageFiles: {},
       };
     },

@@ -1,12 +1,19 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { partial } from '../../test/util.ts';
-import type { DefaultedConfigKey, WithDefaults } from './defaults.ts';
+import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
+import type {
+  DefaultedConfigKey,
+  GlobalDefaultedConfigKey,
+  WithDefaults,
+} from './defaults.ts';
 import {
   getConfig,
   getDefault,
+  getGlobalConfigOptionDefaults,
   isDefaultedOption,
   isRepoDefaultedOption,
 } from './defaults.ts';
+import { globalConfigOptions } from './global-options.ts';
 import { getOptions } from './options/index.ts';
 import type {
   AllConfig,
@@ -145,6 +152,69 @@ describe('config/defaults', () => {
       expectTypeOf<
         Extract<DefaultedConfigKey, Defaulted | NotDefaulted>
       >().toEqualTypeOf<Defaulted>();
+    });
+  });
+
+  describe('GlobalDefaultedConfigKey', () => {
+    it('follows the global options which are defaulted', () => {
+      type Defaulted =
+        // a default value
+        | 'dockerChildPrefix'
+        // a boolean without a default value, which is missing from the generated table of defaults otherwise
+        | 'onboarding'
+        // a default value, of an option which isn't `globalOnly`
+        | 'toolSettings';
+      type NotDefaulted =
+        // a string without a default value
+        | 'endpoint'
+        | 'cacheDir'
+        | 'dockerCliOptions'
+        // not an option
+        | 'localDir'
+        // a `null` default value
+        | 'onboardingAutoCloseAge'
+        // not a global option
+        | 'dependencyDashboardTitle';
+
+      expectTypeOf<
+        Extract<GlobalDefaultedConfigKey, Defaulted | NotDefaulted>
+      >().toEqualTypeOf<Defaulted>();
+    });
+  });
+
+  describe('getGlobalConfigOptionDefaults()', () => {
+    it('has the defaults of the global options which are defaulted', () => {
+      const expected = Object.fromEntries(
+        getOptions()
+          .filter(
+            (option) =>
+              (globalConfigOptions as readonly string[]).includes(
+                option.name,
+              ) && isDefaultedOption(option),
+          )
+          .map((option) => [option.name, getDefault(option)]),
+      );
+
+      expect(getGlobalConfigOptionDefaults()).toEqual(expected);
+      expect(globalConfigOptionDefaults).toEqual(expected);
+    });
+
+    it('has the defaults which are not in the options of a global config', () => {
+      expect(getGlobalConfigOptionDefaults()).toMatchObject({
+        onboarding: true,
+        toolSettings: { jvmMaxMemory: 512, jvmMemory: 512 },
+      });
+    });
+
+    it.each`
+      name
+      ${'cacheDir'}
+      ${'endpoint'}
+      ${'localDir'}
+      ${'dryRun'}
+      ${'onboardingAutoCloseAge'}
+    `('leaves out $name, which has no default', ({ name }) => {
+      expect(getGlobalConfigOptionDefaults()).not.toHaveProperty(name);
     });
   });
 

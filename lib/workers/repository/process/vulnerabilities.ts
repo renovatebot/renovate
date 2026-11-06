@@ -66,7 +66,10 @@ export class Vulnerabilities {
           'OSV_OFFLINE_DISABLE_DOWNLOAD is set, using the osv-offline default directory',
         );
       } else {
-        const rootDir = upath.join(GlobalConfig.get('cacheDir'), 'osv-offline');
+        const rootDir = upath.join(
+          GlobalConfig.getRequired('cacheDir'),
+          'osv-offline',
+        );
         logger.debug(`Using osv-offline directory ${rootDir}`);
         process.env.OSV_OFFLINE_ROOT_DIR = rootDir;
       }

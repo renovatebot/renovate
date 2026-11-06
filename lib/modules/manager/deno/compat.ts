@@ -65,7 +65,7 @@ export async function detectNodeCompatWorkspaces({
     return { packagePaths: [] };
   }
 
-  const localDir = GlobalConfig.get('localDir');
+  const localDir = GlobalConfig.getRequired('localDir');
   const packages = await findPackages(
     upath.dirname(ensureLocalPath(packageFile)),
     {

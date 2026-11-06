@@ -1,5 +1,5 @@
 import { clone } from '../util/clone.ts';
-import { GlobalConfig } from './global.ts';
+import { globalConfigOptions } from './global-options.ts';
 import type { OptionDefinition } from './options/index.ts';
 import { getOptions } from './options/index.ts';
 import { getAllowedParents } from './options/scopes.ts';
@@ -69,7 +69,7 @@ export function isDefaultedOption(option: RenovateOptions): boolean {
  * The {@link RepoRemovedConfigKey} options, other than those of the stages before `repository`.
  */
 const repoRemovedOptions = [
-  ...GlobalConfig.OPTIONS,
+  ...globalConfigOptions,
   'env',
   'extends',
   'hostRules',
@@ -88,6 +88,25 @@ export function isRepoDefaultedOption(option: RenovateOptions): boolean {
     !repoRemovedOptionNames.has(option.name) &&
     !isFilteredOption(option, 'repository')
   );
+}
+
+const globalConfigOptionNames = new Set<string>(globalConfigOptions);
+
+/**
+ * The defaults of the {@link GlobalDefaultedConfigKey} options, which `GlobalConfig.get()` falls back to.
+ */
+export function getGlobalConfigOptionDefaults(): Record<string, unknown> {
+  const defaults: Record<string, unknown> = {};
+  const options = getOptions()
+    .filter(
+      (option) =>
+        globalConfigOptionNames.has(option.name) && isDefaultedOption(option),
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+  for (const option of options) {
+    defaults[option.name] = getDefault(option);
+  }
+  return defaults;
 }
 
 type DeclaredScope<O> = O extends { scopes: readonly (infer S)[] } ? S : never;
@@ -135,6 +154,14 @@ type DefaultedOption<O> = O extends unknown
  * The generated manager options aren't included, as their names aren't known to the type system, and they're read through the manager's config instead.
  */
 export type DefaultedConfigKey = DefaultedOption<OptionDefinition>['name'];
+
+/**
+ * The {@link DefaultedConfigKey} options which are global options, which `GlobalConfig.get()` always has a value for.
+ */
+export type GlobalDefaultedConfigKey = Extract<
+  DefaultedConfigKey,
+  (typeof globalConfigOptions)[number]
+>;
 
 /**
  * The values of the mergeable options whose default sets every key, so that a config with defaults applied has all the keys, which a configured value can leave out.
