@@ -7,6 +7,7 @@ import {
   minReleaseAgeNpmRange,
   minimumReleaseAgeEnforcedPnpmRange,
   minimumReleaseAgePnpmRange,
+  minimumReleaseAgeYarnRange,
 } from './minimum-release-age.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -47,7 +48,12 @@ export const minimumReleaseAgeSupport: MinimumReleaseAgeSupport = {
     enforcedInLockFile: minimumReleaseAgeEnforcedPnpmRange,
     note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `--config.minimum-release-age` and reads `pnpm-workspace.yaml`, see [pnpm](#pnpm).',
   },
-  yarn: {},
+  yarn: {
+    passesMinimumReleaseAge: minimumReleaseAgeYarnRange,
+    readsConfiguredAge: minimumReleaseAgeYarnRange,
+    enforcedInLockFile: minimumReleaseAgeYarnRange,
+    note: 'If `minimumReleaseAgePackageManagerSync` is enabled, passes `YARN_NPM_MINIMAL_AGE_GATE` and reads `.yarnrc.yml`, see [Yarn](#yarn).',
+  },
 };
 
 export const defaultConfig = {

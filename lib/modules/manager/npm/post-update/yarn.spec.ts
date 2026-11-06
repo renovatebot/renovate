@@ -7,10 +7,13 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as util from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as docker from '../../../../util/exec/docker/index.ts';
+import { ExecError } from '../../../../util/exec/exec-error.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
-import type { PostUpdateConfig } from '../../types.ts';
+import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
+import type { GenerateLockFileResult } from './types.ts';
 import * as yarnHelper from './yarn.ts';
 
 vi.mock('fs-extra', async () =>
@@ -1187,6 +1190,238 @@ describe('modules/manager/npm/post-update/yarn', () => {
         options: { ...options, cwd: 'some-dir' },
       },
     ]);
+  });
+
+  describe('minimumReleaseAge', () => {
+    const hourMs = 60 * 60 * 1000;
+    const young = new Date(Date.now() - hourMs).toISOString() as Timestamp;
+    const old = '2020-01-01T00:00:00.000Z' as Timestamp;
+    const update: Upgrade<NpmManagerData> = {
+      manager: 'npm',
+      depName: 'foo',
+      datasource: 'npm',
+      newVersion: '1.2.3',
+      releaseTimestamp: young,
+      minimumReleaseAgePackageManagerSync: true,
+      minimumReleaseAgeRepository: '3 days',
+    };
+
+    function mockYarnFiles(yarnrc?: string): void {
+      Fixtures.mock(
+        {
+          'yarn.lock': 'package-lock-contents',
+          ...(yarnrc && { '.yarnrc.yml': yarnrc }),
+        },
+        'some-dir',
+      );
+    }
+
+    async function generateLockFile(
+      upgrades: Upgrade<NpmManagerData>[],
+      yarn = '4.12.0',
+    ): Promise<{
+      res: GenerateLockFileResult;
+      env: Partial<Record<string, string>>;
+    }> {
+      const execSnapshots = mockExecAll();
+      const res = await yarnHelper.generateLockFile(
+        'some-dir',
+        {},
+        { constraints: { yarn } },
+        upgrades,
+      );
+      return { res, env: execSnapshots[0].options!.env! };
+    }
+
+    function quarantineError(stdout: string): ExecError {
+      return new ExecError('yarn failed', {
+        cmd: 'yarn install --mode=update-lockfile',
+        stdout,
+        stderr: '',
+        options: {},
+      });
+    }
+
+    it.each`
+      name                       | upgrade
+      ${'an update'}             | ${{}}
+      ${'lock file maintenance'} | ${{ isLockFileMaintenance: true }}
+    `(
+      'passes nothing without minimumReleaseAgePackageManagerSync for $name',
+      async ({ upgrade }) => {
+        mockYarnFiles('npmMinimalAgeGate: 3d\n');
+
+        const { res, env } = await generateLockFile([
+          {
+            ...update,
+            minimumReleaseAgePackageManagerSync: undefined,
+            minimumReleaseAge: '7 days',
+            ...upgrade,
+          },
+        ]);
+
+        expect(res.error).toBeUndefined();
+        expect(env).not.toHaveProperty('YARN_NPM_MINIMAL_AGE_GATE');
+        expect(env).not.toHaveProperty('YARN_NPM_PREAPPROVED_PACKAGES');
+      },
+    );
+
+    it.each`
+      yarn        | minimumReleaseAge | yarnrc                            | expected
+      ${'4.12.0'} | ${'7 days'}       | ${undefined}                      | ${'10080'}
+      ${'4.12.0'} | ${'1 day'}        | ${'npmMinimalAgeGate: 7d\n'}      | ${'10080'}
+      ${'4.12.0'} | ${'90 seconds'}   | ${undefined}                      | ${'2'}
+      ${'4.12.0'} | ${'1 hour'}       | ${'npmMinimalAgeGate: 61.5\n'}    | ${'62'}
+      ${'4.12.0'} | ${'1 hour'}       | ${undefined}                      | ${'60'}
+      ${'4.15.0'} | ${'1 hour'}       | ${undefined}                      | ${'1440'}
+      ${'4.15.0'} | ${'1 hour'}       | ${'npmMinimalAgeGate: 0\n'}       | ${'60'}
+      ${'4.15.0'} | ${'1 hour'}       | ${'npmMinimalAgeGate: bananas\n'} | ${'1440'}
+    `(
+      'passes $expected minutes for Yarn $yarn, minimumReleaseAge=$minimumReleaseAge and yarnrc=$yarnrc',
+      async ({ yarn, minimumReleaseAge, yarnrc, expected }) => {
+        mockYarnFiles(yarnrc);
+
+        const { res, env } = await generateLockFile(
+          [
+            {
+              manager: 'npm',
+              ...update,
+              depName: undefined,
+              minimumReleaseAgeRepository: minimumReleaseAge,
+            },
+          ],
+          yarn,
+        );
+
+        expect(res).toEqual({ lockFile: 'package-lock-contents' });
+        expect(env.YARN_NPM_MINIMAL_AGE_GATE).toBe(expected);
+        expect(env).not.toHaveProperty('YARN_NPM_PREAPPROVED_PACKAGES');
+      },
+    );
+
+    it.each`
+      yarn        | upgrade
+      ${'^4.0.0'} | ${{}}
+      ${'3.8.0'}  | ${{}}
+      ${'latest'} | ${{}}
+      ${'4.12.0'} | ${{ isVulnerabilityAlert: true }}
+      ${'4.12.0'} | ${{ minimumReleaseAgeRepository: null }}
+    `(
+      'passes nothing for Yarn $yarn and $upgrade',
+      async ({ yarn, upgrade }) => {
+        mockYarnFiles('npmMinimalAgeGate: 3d\n');
+
+        const { env } = await generateLockFile(
+          [{ ...update, ...upgrade }],
+          yarn,
+        );
+
+        expect(env).not.toHaveProperty('YARN_NPM_MINIMAL_AGE_GATE');
+        expect(env).not.toHaveProperty('YARN_NPM_PREAPPROVED_PACKAGES');
+      },
+    );
+
+    it('passes the minimumReleaseAge of lock file maintenance and preapproves nothing', async () => {
+      mockYarnFiles();
+
+      const { env } = await generateLockFile([
+        {
+          ...update,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '7 days',
+        },
+      ]);
+
+      expect(env.YARN_NPM_MINIMAL_AGE_GATE).toBe('10080');
+      expect(env).not.toHaveProperty('YARN_NPM_PREAPPROVED_PACKAGES');
+    });
+
+    it.each`
+      name                                       | yarnrc                                                 | updates                                                                 | expected
+      ${'the .yarnrc.yml entries first'}         | ${"npmPreapprovedPackages:\n  - '@types/*'\n"}         | ${[update]}                                                             | ${'@types/*,foo@1.2.3'}
+      ${'each update once'}                      | ${undefined}                                           | ${[update, update, { ...update, depName: 'bar', newVersion: '2.0.0' }]} | ${'foo@1.2.3,bar@2.0.0'}
+      ${'the packageName of aliases'}            | ${undefined}                                           | ${[{ ...update, depName: 'my-foo', packageName: 'foo' }]}               | ${'foo@1.2.3'}
+      ${'the newName of replacements'}           | ${undefined}                                           | ${[{ ...update, newName: 'bar', newVersion: '2.0.0' }]}                 | ${'bar@2.0.0'}
+      ${'updates without a timestamp'}           | ${undefined}                                           | ${[{ ...update, releaseTimestamp: undefined }]}                         | ${'foo@1.2.3'}
+      ${'packages of other scopes'}              | ${'npmScopes:\n  myorg:\n    npmMinimalAgeGate: 1h\n'} | ${[{ ...update, depName: '@other/foo' }]}                               | ${'@other/foo@1.2.3'}
+      ${'no packages of a scope with an age'}    | ${'npmScopes:\n  myorg:\n    npmMinimalAgeGate: 1h\n'} | ${[{ ...update, depName: '@myorg/foo' }]}                               | ${undefined}
+      ${'no old releases'}                       | ${undefined}                                           | ${[{ ...update, releaseTimestamp: old }]}                               | ${undefined}
+      ${'no releases younger than the Yarn age'} | ${'npmMinimalAgeGate: 2h\n'}                           | ${[update]}                                                             | ${undefined}
+      ${'no preapproved packages'}               | ${'npmPreapprovedPackages:\n  - foo\n'}                | ${[update]}                                                             | ${undefined}
+      ${'no preapproved versions'}               | ${"npmPreapprovedPackages:\n  - 'foo@^1.0.0'\n"}       | ${[update]}                                                             | ${undefined}
+      ${'no updates without a version'}          | ${undefined}                                           | ${[{ ...update, newVersion: undefined }]}                               | ${undefined}
+      ${'no updates without a name'}             | ${undefined}                                           | ${[{ ...update, depName: undefined }]}                                  | ${undefined}
+      ${'no other datasources'}                  | ${undefined}                                           | ${[{ ...update, datasource: 'node-version' }]}                          | ${undefined}
+    `('preapproves $name', async ({ yarnrc, updates, expected }) => {
+      mockYarnFiles(yarnrc);
+
+      const { res, env } = await generateLockFile(updates);
+
+      expect(res).toEqual({ lockFile: 'package-lock-contents' });
+      expect(env.YARN_NPM_MINIMAL_AGE_GATE).toBeDefined();
+      expect(env.YARN_NPM_PREAPPROVED_PACKAGES).toBe(expected);
+    });
+
+    it.each`
+      stdout                                                                                                                 | expected
+      ${'➤ YN0082: │ foo@npm:1.2.3: All versions satisfying "1.2.3" are quarantined'}                                        | ${'`foo@1.2.3`'}
+      ${'➤ YN0082: │ @scope/bar@npm:latest: The version for tag "latest" is quarantined, and no lower version is available'} | ${'`@scope/bar@latest`'}
+    `(
+      'reports the quarantined packages: $stdout',
+      async ({ stdout, expected }) => {
+        mockYarnFiles();
+        mockExecAll(quarantineError(stdout));
+
+        const res = await yarnHelper.generateLockFile(
+          'some-dir',
+          {},
+          { constraints: { yarn: '4.12.0' } },
+          [update],
+        );
+
+        expect(res).toEqual({
+          error: true,
+          stderr: `Yarn found no version old enough for the minimum release age: ${expected}\n\n${stdout}`,
+          stdout,
+        });
+      },
+    );
+
+    it('returns the Yarn error unchanged without minimumReleaseAgePackageManagerSync', async () => {
+      const stdout =
+        '➤ YN0082: │ foo@npm:1.2.3: All versions satisfying "1.2.3" are quarantined';
+      mockYarnFiles();
+      mockExecAll(quarantineError(stdout));
+
+      const res = await yarnHelper.generateLockFile(
+        'some-dir',
+        {},
+        { constraints: { yarn: '4.12.0' } },
+        [{ ...update, minimumReleaseAgePackageManagerSync: undefined }],
+      );
+
+      expect(res).toEqual({ error: true, stderr: '', stdout });
+    });
+  });
+
+  describe('getQuarantinedPackages()', () => {
+    it('returns each quarantined package once', () => {
+      expect(
+        yarnHelper.getQuarantinedPackages(codeBlock`
+          ➤ YN0082: │ foo@npm:^1.0.0: All versions satisfying "^1.0.0" are quarantined
+          ➤ YN0082: │ foo@npm:^1.0.0: All versions satisfying "^1.0.0" are quarantined
+          ➤ YN0082: │ bar@npm:latest: The version for tag "latest" is quarantined, and no lower version is available
+        `),
+      ).toEqual(['foo@^1.0.0', 'bar@latest']);
+    });
+
+    it('returns no packages for other errors', () => {
+      expect(
+        yarnHelper.getQuarantinedPackages(
+          '➤ YN0082: │ foo@npm:9.9.9: No candidates found',
+        ),
+      ).toEqual([]);
+    });
   });
 
   describe('checkYarnrc()', () => {

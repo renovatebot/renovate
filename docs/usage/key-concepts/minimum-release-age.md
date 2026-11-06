@@ -110,7 +110,7 @@ Renovate never passes [`minimumReleaseAgeBuffer`](../configuration-options.md#mi
 Set `minimumReleaseAgePackageManager` at the top level or in a manager's config to set a lower bound for the value which Renovate passes to these package managers.
 The `security:minimumReleaseAge*` presets set it for the manager of their datasource: `npm`, `cargo` or `poetry`.
 An update whose own `minimumReleaseAge` is smaller, for example from `packageRules`, wins over the repository value and `minimumReleaseAgePackageManager` for its branch.
-How Renovate does this depends on the package manager, for example pnpm excludes the updated versions, Poetry the updated packages, while npm and cargo get the smaller value for that branch.
+How Renovate does this depends on the package manager, for example pnpm excludes and Yarn preapproves the updated versions, Poetry excludes the updated packages, while npm and cargo get the smaller value for that branch.
 It never wins over the minimum release age which your repository configures in the package manager itself.
 The package manager still applies that age, like for security updates, and refuses a younger release.
 Without `minimumReleaseAgePackageManagerSync`, a package manager which receives the minimum release age from Renovate gets the `minimumReleaseAge` of the update, including a value from `packageRules`, and `minimumReleaseAgePackageManager` has no effect.
@@ -270,6 +270,92 @@ minimumReleaseAgeExclude:
 - An update of `semver` to `7.7.3` runs pnpm with `--config.minimum-release-age=14400 --config.minimum-release-age-exclude=@types/node --config.minimum-release-age-exclude=semver@7.7.3`.
 - An update of `@types/node` runs pnpm with `--config.minimum-release-age=14400` only, as the `pnpm-workspace.yaml` already excludes it.
 - Lock file maintenance runs pnpm with `--config.minimum-release-age=14400`, and Renovate creates the branch without waiting for release timestamps, unless the `pnpm-workspace.yaml` sets `minimumReleaseAgeStrict: false`.
+
+#### Yarn
+
+##### Default Yarn behaviour
+
+Renovate passes no minimum release age to Yarn, and Yarn applies its own config.
+Renovate does not read the `.yarnrc.yml` when it looks up updates, and does not use the Yarn v4.15.0 default of 1 day.
+If Yarn refuses a version because of its own config, it fails with `All versions satisfying "<range>" are quarantined`, and Renovate does not retry.
+Yarn 1 has no minimum release age.
+
+##### Yarn with `minimumReleaseAgePackageManagerSync`
+
+When `minimumReleaseAge` is configured, Renovate sets `YARN_NPM_MINIMAL_AGE_GATE=<minutes>` when it runs Yarn during lock file generation.
+Yarn then only resolves package versions that are at least as old as the cooldown threshold, including transitive dependencies.
+Yarn added `npmMinimalAgeGate` in v4.10.0, and older versions abort on the unknown setting, so Renovate only sets the variable if the Yarn version is v4.10.0 or later.
+Renovate does not set it for security updates, as they bypass `minimumReleaseAge`.
+
+Renovate passes the larger of `minimumReleaseAge`, rounded up to whole minutes, and the `npmMinimalAgeGate` of the project's `.yarnrc.yml`.
+If the `.yarnrc.yml` does not set it, Yarn v4.15.0 and later use their default of 1 day.
+The variable takes precedence over the `.yarnrc.yml`.
+Renovate does not change `npmScopes.<scope>.npmMinimalAgeGate`, so a scope can have a smaller age or `0`, which takes precedence over the value Renovate passes.
+Yarn v4.17.0 and later apply their default of 1 day to each scope of `npmScopes` which sets no `npmMinimalAgeGate` of its own.
+
+For dependency updates, Renovate passes the `minimumReleaseAge` of your repository or `npm` manager config, and not a `minimumReleaseAge` from `packageRules`, as Yarn applies the value to every package it resolves.
+A larger `minimumReleaseAgePackageManager` raises it.
+
+Renovate already applied its own `minimumReleaseAge` to the updated versions, so it also sets `YARN_NPM_PREAPPROVED_PACKAGES` to exempt each updated npm package as `<name>@<version>`, if its release is younger than the passed value or has no timestamp.
+Renovate does not exempt a release which is younger than the `.yarnrc.yml` value, a version which `npmPreapprovedPackages` already exempts, or a package of a scope with its own age.
+New transitive dependencies still get the passed value.
+The variable replaces the `npmPreapprovedPackages` list of the `.yarnrc.yml`, so Renovate passes those entries first.
+Lock file maintenance uses its own `minimumReleaseAge`, as it regenerates the whole `yarn.lock`, and exempts no packages.
+
+Renovate also uses the larger of the project's Yarn setting and `minimumReleaseAge` when it looks up updates.
+If the `.yarnrc.yml` does not set `npmMinimalAgeGate`, Renovate uses the Yarn default of 1 day, unless the Yarn version is older than v4.15.0.
+To get updates younger than 1 day, set `npmMinimalAgeGate` in the `.yarnrc.yml`.
+This applies per dependency to the npm packages of every `package.json` of the `npm` manager that belongs to a Yarn 2 or later `yarn.lock`.
+A package of a scope in `npmScopes` uses the age of that scope instead.
+Renovate honours the package names and globs of `npmPreapprovedPackages`, and then uses only `minimumReleaseAge` for those packages.
+Entries with a range, like `foo@^1.0.0`, exempt only those versions from Yarn's check, so Renovate does not use them when it looks up updates.
+
+If Yarn finds no version old enough, it fails with `All versions satisfying "<range>" are quarantined` or `The version for tag "<tag>" is quarantined`.
+Renovate does not retry, and reports an artifact error which names the rejected packages.
+
+Yarn enforces the minimum release age during lock file maintenance of a `yarn.lock`, so Renovate creates the branch without waiting for release timestamps, if:
+
+- `minimumReleaseAge` or the project's Yarn setting is set, and
+- no scope of `npmScopes` has an age which is `0` or smaller than the `minimumReleaseAge` of lock file maintenance, and
+- the Yarn version used is v4.10.0 or later
+
+Renovate reads the Yarn version from the `constraints` config, the `package.json` (`devEngines`, `volta`, `packageManager` or `engines`), or the extracted constraints of tool managers.
+
+For example, with Yarn v4.17.0 and this config:
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true,
+  "npm": {
+    "minimumReleaseAge": "7 days"
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": ["@types/node"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+- Without a Yarn setting, Renovate waits 7 days before it raises an update, and runs Yarn with `YARN_NPM_MINIMAL_AGE_GATE=10080`.
+- An update of `@types/node` still waits 1 day, the Yarn default.
+  If its release is 2 days old, Renovate also sets `YARN_NPM_PREAPPROVED_PACKAGES=@types/node@<version>`.
+
+With this `.yarnrc.yml` in addition:
+
+```yaml
+npmMinimalAgeGate: 10d
+npmPreapprovedPackages:
+  - '@types/*'
+npmScopes:
+  myorg:
+    npmMinimalAgeGate: 0
+```
+
+- Renovate waits 10 days before it raises an update, 7 days for `@myorg/utils`, and does not wait for `@types/node`.
+- Updates run Yarn with `YARN_NPM_MINIMAL_AGE_GATE=14400`, and need no exemption, as Renovate waited 10 days for them, or the `.yarnrc.yml` exempts them.
+- Lock file maintenance runs Yarn with `YARN_NPM_MINIMAL_AGE_GATE=14400`, and waits for release timestamps, as the `myorg` scope turns the check off.
 
 #### Poetry
 

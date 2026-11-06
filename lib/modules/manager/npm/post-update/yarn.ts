@@ -9,6 +9,8 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { getElapsedMs } from '../../../../util/date.ts';
 import { getEnv } from '../../../../util/env.ts';
 import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
@@ -22,13 +24,33 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
+import {
+  calculatePackageManagerMinimumReleaseAgeMs,
+  isPackageManagerSyncEnabled,
+} from '../../../../util/minimum-release-age.ts';
 import { coerceObject } from '../../../../util/object.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import { uniqueStrings } from '../../../../util/string.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import { intersectsWith, isSubsetOf } from '../../../versioning/common.ts';
+import { api as npmVersioning } from '../../../versioning/npm/index.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
-import { resolveToolConstraint } from '../../util.ts';
+import {
+  artifactErrorMessageFromExecError,
+  resolveToolConstraint,
+} from '../../util.ts';
+import type { YarnPreapprovedPackage } from '../extract/types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../extract/yarn.ts';
+import {
+  getYarnMinimalAgeGateMinutes,
+  getYarnScopeMinimalAgeGateMinutes,
+  isYarnPreapproved,
+  parseYarnPreapprovedPackages,
+  readYarnrcMinimalAgeGate,
+  yarnDefaultMinimalAgeGateRange,
+  yarnScopeMinimalAgeGateRange,
+} from '../extract/yarn-minimum-release-age.ts';
+import { minimumReleaseAgeYarnRange } from '../minimum-release-age.ts';
 import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult } from './types.ts';
@@ -105,6 +127,164 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
   return isPackageManagerDepType && upgrade.depName === 'yarn';
 }
 
+const minuteMs = 60 * 1000;
+
+const scopeRegex = regEx(/^@(?<scope>[^/]+)\//);
+
+/**
+ * The name of the npm package whose `newVersion` Yarn installs for `upgrade`.
+ */
+function getInstalledPackageName(upgrade: Upgrade): string | undefined {
+  // a replacement installs `newName`, and the packageName of an alias is the
+  // aliased package
+  return upgrade.newName ?? upgrade.packageName ?? upgrade.depName;
+}
+
+/**
+ * Whether the release of `upgrade` is at least `minutes` old, where a release without a timestamp only passes `0`.
+ */
+function isOldEnough(upgrade: Upgrade, minutes: number): boolean {
+  if (!minutes) {
+    return true;
+  }
+  return (
+    !!upgrade.releaseTimestamp &&
+    getElapsedMs(upgrade.releaseTimestamp) >= minutes * minuteMs
+  );
+}
+
+/**
+ * The `npmPreapprovedPackages` entries which exempt the updated versions of npm packages from the minimum release age which Renovate passes to Yarn, as Renovate already applied its own minimum release age to them.
+ *
+ * It exempts releases which are younger than that age or have no timestamp, but at least as old as the global age which Yarn configures itself.
+ * Yarn applies the age of `npmScopes` to the packages of a scope, so Renovate does not exempt them.
+ */
+function getPreapprovedUpdates(
+  upgrades: Upgrade[],
+  preapproved: YarnPreapprovedPackage[],
+  scopeMinutes: Record<string, number>,
+  minutes: number,
+  yarnMinutes: number,
+): string[] {
+  const updated: string[] = [];
+  for (const upgrade of upgrades) {
+    const packageName = getInstalledPackageName(upgrade);
+    if (
+      upgrade.datasource !== NpmDatasource.id ||
+      !packageName ||
+      !upgrade.newVersion
+    ) {
+      continue;
+    }
+    const scope = scopeRegex.exec(packageName)?.groups?.scope;
+    if (scope && Object.hasOwn(scopeMinutes, scope)) {
+      continue;
+    }
+    if (
+      !isYarnPreapproved(preapproved, packageName, upgrade.newVersion) &&
+      !isOldEnough(upgrade, minutes) &&
+      isOldEnough(upgrade, yarnMinutes)
+    ) {
+      updated.push(`${packageName}@${upgrade.newVersion}`);
+    }
+  }
+  return updated;
+}
+
+/**
+ * The environment which passes the larger of Renovate's minimum release age and the global Yarn value to Yarn, as `YARN_NPM_MINIMAL_AGE_GATE` in whole minutes.
+ *
+ * Renovate's value comes from `calculatePackageManagerMinimumReleaseAgeMs`.
+ * The Yarn value comes from the `.yarnrc.yml` `npmMinimalAgeGate`, or the default of Yarn v4.15.0 and later.
+ * Yarn reads the environment first, and the first source of a setting wins, so the variable takes precedence over the `.yarnrc.yml`.
+ * The `npmScopes` ages stay as configured.
+ *
+ * Except for lock file maintenance, `YARN_NPM_PREAPPROVED_PACKAGES` exempts the updated versions.
+ * Yarn splits the variable at commas, and it replaces the `.yarnrc.yml` list, so the entries start with the `.yarnrc.yml` ones.
+ */
+async function getMinimalAgeGateEnv(
+  lockFileDir: string,
+  config: Partial<PostUpdateConfig<NpmManagerData>>,
+  upgrades: Upgrade<NpmManagerData>[],
+  yarnConstraint: string | undefined,
+): Promise<ExtraEnv<string> | null> {
+  const minimumReleaseAgeMs = calculatePackageManagerMinimumReleaseAgeMs({
+    config,
+    manager: 'npm',
+    packageFile: upath.join(lockFileDir, 'package.json'),
+    upgrades,
+  });
+  if (!minimumReleaseAgeMs) {
+    return null;
+  }
+  const settings = await readYarnrcMinimalAgeGate(
+    upath.join(lockFileDir, 'yarn.lock'),
+  );
+  const yarnMinutes =
+    getYarnMinimalAgeGateMinutes(
+      settings,
+      intersectsWith(
+        npmVersioning,
+        yarnConstraint,
+        yarnDefaultMinimalAgeGateRange,
+      ),
+    ) ?? 0;
+  const minutes = Math.ceil(
+    Math.max(minimumReleaseAgeMs / minuteMs, yarnMinutes),
+  );
+  logger.debug(
+    { minimumReleaseAgeMs, yarnMinimalAgeGate: yarnMinutes },
+    `Passing a minimum release age of ${minutes} minutes to Yarn`,
+  );
+  const env: ExtraEnv<string> = { YARN_NPM_MINIMAL_AGE_GATE: `${minutes}` };
+
+  // lock file maintenance has no own updates which Yarn may reject
+  if (upgrades.some((upgrade) => upgrade.isLockFileMaintenance)) {
+    return env;
+  }
+  const updated = getPreapprovedUpdates(
+    upgrades,
+    parseYarnPreapprovedPackages(settings.npmPreapprovedPackages),
+    getYarnScopeMinimalAgeGateMinutes(
+      settings,
+      intersectsWith(
+        npmVersioning,
+        yarnConstraint,
+        yarnScopeMinimalAgeGateRange,
+      ),
+    ),
+    minutes,
+    yarnMinutes,
+  );
+  if (updated.length) {
+    logger.debug(
+      `Exempting ${updated.join(', ')} from the Yarn minimum release age`,
+    );
+    env.YARN_NPM_PREAPPROVED_PACKAGES = [
+      ...coerceArray(settings.npmPreapprovedPackages),
+      ...updated,
+    ]
+      .filter(uniqueStrings)
+      .join(',');
+  }
+  return env;
+}
+
+const quarantinedRegex = regEx(
+  /(?<pkg>\S+): (?:All versions satisfying "[^"]*" are quarantined|The version for tag "[^"]*" is quarantined)/g,
+);
+
+/**
+ * The packages which Yarn reports as quarantined by `npmMinimalAgeGate`, as `name@range` or `name@tag`.
+ */
+export function getQuarantinedPackages(output: string): string[] {
+  const packages: string[] = [];
+  for (const match of output.matchAll(quarantinedRegex)) {
+    packages.push(match.groups!.pkg.replace('@npm:', '@'));
+  }
+  return packages.filter(uniqueStrings);
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -114,6 +294,12 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile: string | null = null;
+  const isSyncEnabled = isPackageManagerSyncEnabled({
+    config,
+    manager: 'npm',
+    packageFile: upath.join(lockFileDir, 'package.json'),
+    upgrades,
+  });
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const toolConstraints: ToolConstraint[] = [
@@ -203,6 +389,21 @@ export async function generateLockFile(
         logger.debug('Enabling global cache as zero-install is not detected');
         extraEnv.YARN_ENABLE_GLOBAL_CACHE = '1';
       }
+    }
+    // without minimumReleaseAgePackageManagerSync, Yarn applies its own
+    // config, and Yarn before v4.10.0 aborts on the unknown settings
+    const minimalAgeGateEnv =
+      isSyncEnabled &&
+      isSubsetOf(npmVersioning, yarnCompatibility, minimumReleaseAgeYarnRange)
+        ? await getMinimalAgeGateEnv(
+            lockFileDir,
+            config,
+            upgrades,
+            yarnCompatibility,
+          )
+        : null;
+    if (minimalAgeGateEnv) {
+      Object.assign(extraEnv, minimalAgeGateEnv);
     }
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       if (isYarn1) {
@@ -363,6 +564,19 @@ export async function generateLockFile(
       stdouterr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
     ) {
       throw new ExternalHostError(err, NpmDatasource.id);
+    }
+    const quarantinedPackages = isSyncEnabled
+      ? getQuarantinedPackages(stdouterr)
+      : [];
+    if (quarantinedPackages.length) {
+      const packages = quarantinedPackages
+        .map((pkg) => `\`${pkg}\``)
+        .join(', ');
+      return {
+        error: true,
+        stderr: `Yarn found no version old enough for the minimum release age: ${packages}\n\n${artifactErrorMessageFromExecError(err, '')}`,
+        stdout: err.stdout,
+      };
     }
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }

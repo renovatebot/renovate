@@ -148,6 +148,28 @@ export type PnpmWorkspaceMinimumReleaseAge = z.infer<
   typeof PnpmWorkspaceMinimumReleaseAge
 >;
 
+/**
+ * The minimum release age settings of a `.yarnrc.yml`, with the ages as written in the file.
+ *
+ * Yarn splits a string of an array setting at commas.
+ */
+export const YarnrcMinimalAgeGate = Yaml.pipe(
+  z.object({
+    npmMinimalAgeGate: z.unknown().optional(),
+    npmPreapprovedPackages: z
+      .array(z.string())
+      .or(z.string().transform((entries) => entries.split(',')))
+      .optional()
+      .catch(undefined),
+    npmScopes: LooseRecord(
+      z.object({ npmMinimalAgeGate: z.unknown().optional() }).catch({}),
+    )
+      .optional()
+      .catch(undefined),
+  }),
+);
+export type YarnrcMinimalAgeGate = z.infer<typeof YarnrcMinimalAgeGate>;
+
 export const PackageManager = z
   .string()
   .transform((val) => val.split('@'))
