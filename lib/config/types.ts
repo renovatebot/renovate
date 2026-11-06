@@ -99,7 +99,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
-  commitTrailers?: string[];
+  commitTrailers?: string[] | null;
   composerIgnorePlatformReqs?: string[] | null;
   confidential?: boolean;
   configValidationError?: boolean;
@@ -119,10 +119,10 @@ export interface RenovateSharedConfig {
   gitLabIgnoreApprovals?: boolean;
   goGetDirs?: string[];
   group?: GroupConfig;
-  groupName?: string;
+  groupName?: string | null;
   groupSingleUpdates?: boolean;
-  groupSlug?: string;
-  hashedBranchLength?: number;
+  groupSlug?: string | null;
+  hashedBranchLength?: number | null;
   ignoreDeprecated?: boolean;
   ignoreDeps?: string[];
   ignorePaths?: string[];
@@ -137,7 +137,7 @@ export interface RenovateSharedConfig {
   labels?: string[];
   manager?: string;
   maxMajorIncrement?: number;
-  milestone?: number;
+  milestone?: number | null;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
   npmrc?: string;
@@ -454,7 +454,7 @@ export interface RenovateConfigFile
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
-  dependencyDashboardLabels?: string[];
+  dependencyDashboardLabels?: string[] | null;
   dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   dependencyDashboardReportAbandonment?: boolean;
   mode?: 'silent' | 'full';
@@ -471,7 +471,7 @@ export interface RenovateConfigFile
 
   pruneStaleBranches?: boolean;
 
-  defaultRegistryUrls?: string[];
+  defaultRegistryUrls?: string[] | null;
   registryUrls?: string[] | null;
   registryAliases?: Record<string, string>;
 
@@ -599,11 +599,11 @@ export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   expandCodeOwnersGroups?: boolean;
   assignees?: string[];
-  assigneesSampleSize?: number;
+  assigneesSampleSize?: number | null;
   ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
-  reviewersSampleSize?: number;
+  reviewersSampleSize?: number | null;
   additionalReviewers?: string[];
   filterUnavailableUsers?: boolean;
 }

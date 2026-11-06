@@ -102,7 +102,7 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string | string[];
   /** Structured git trailers (`Key: value` lines) to add in the final block of the commit message */
-  trailers?: string[];
+  trailers?: string[] | null;
   force?: boolean;
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */

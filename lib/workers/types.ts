@@ -94,8 +94,6 @@ interface BranchUpgradeFields
 
   githubName?: string;
   group?: GroupConfig;
-  groupName?: string;
-  groupSlug?: string;
 
   isDigest?: boolean;
   isGroup?: boolean;
