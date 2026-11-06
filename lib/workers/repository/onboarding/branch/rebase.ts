@@ -38,7 +38,7 @@ export async function rebaseOnboardingBranch(
 
   return await commitConfigFile({
     config,
-    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    branchName: getInheritedOrGlobal('onboardingBranch'),
     // TODO #22198
     getFiles: () => [{ type: 'addition', path: configFile, contents }],
     message: getOnboardingCommitMessage(config, configFile),

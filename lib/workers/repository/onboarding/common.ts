@@ -12,8 +12,7 @@ export function getOnboardingPrTitle(config: RenovateConfigFile): string {
   if (config.semanticCommits === 'enabled') {
     return getSemanticCommitPrTitle(config);
   }
-  // TODO #22198
-  return getInheritedOrGlobal('onboardingPrTitle')!;
+  return getInheritedOrGlobal('onboardingPrTitle');
 }
 
 export function getDefaultConfigFileName(): string {
@@ -21,8 +20,8 @@ export function getDefaultConfigFileName(): string {
   const onboardingConfigFileName = getInheritedOrGlobal(
     'onboardingConfigFileName',
   );
-  return configFileNames.includes(onboardingConfigFileName!)
-    ? onboardingConfigFileName!
+  return configFileNames.includes(onboardingConfigFileName)
+    ? onboardingConfigFileName
     : configFileNames[0];
 }
 
