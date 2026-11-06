@@ -11,8 +11,51 @@ const TemplateSpecVolumes = z.object({
   template: z.object({ spec: PodSpecVolumes }),
 });
 
-const PodTemplateLabels = z
+/**
+ * Reads the `app.kubernetes.io/version` value from a `metadata` object.
+ * Other labels are ignored, so values of any type never invalidate a manifest.
+ */
+const AppVersionLabel = z
+  .object({
+    labels: z.object({ 'app.kubernetes.io/version': z.string() }),
+  })
+  .transform(
+    ({ labels }): string | undefined => labels['app.kubernetes.io/version'],
+  )
+  .catch(undefined);
+
+const ContainerImages = LooseArray(z.object({ image: z.string() }))
+  .transform((containers) => containers.map(({ image }) => image))
+  .catch([]);
+
+const PodSpecImages = z
+  .object({ containers: ContainerImages, initContainers: ContainerImages })
+  .transform(({ containers, initContainers }) => [
+    ...initContainers,
+    ...containers,
+  ]);
+
+const PodTemplate = z
+  .object({ metadata: AppVersionLabel, spec: PodSpecImages })
+  .transform(({ metadata, spec }) => ({
+    versionLabel: metadata,
+    images: spec,
+  }));
+
+interface PodTemplateInfo {
+  versionLabel: string | undefined;
+  images: string[];
+}
+
+const WorkloadPodTemplate = z
   .discriminatedUnion('kind', [
+    z.object({
+      kind: z.literal('Pod'),
+      spec: PodSpecImages.transform((images): PodTemplateInfo => ({
+        versionLabel: undefined,
+        images,
+      })),
+    }),
     z.object({
       kind: z.enum([
         'DaemonSet',
@@ -22,36 +65,23 @@ const PodTemplateLabels = z
         'ReplicationController',
         'StatefulSet',
       ]),
-      spec: z.object({
-        template: z.object({
-          metadata: z.object({
-            labels: z.record(z.string(), z.string()).optional(),
-          }),
-        }),
-      }),
+      spec: z
+        .object({ template: PodTemplate })
+        .transform(({ template }): PodTemplateInfo => template),
     }),
     z.object({
       kind: z.literal('CronJob'),
-      spec: z.object({
-        jobTemplate: z.object({
-          spec: z.object({
-            template: z.object({
-              metadata: z.object({
-                labels: z.record(z.string(), z.string()).optional(),
-              }),
-            }),
-          }),
-        }),
-      }),
+      spec: z
+        .object({
+          jobTemplate: z.object({ spec: z.object({ template: PodTemplate }) }),
+        })
+        .transform(
+          ({ jobTemplate }): PodTemplateInfo => jobTemplate.spec.template,
+        ),
     }),
   ])
-  .transform(({ kind, spec }) =>
-    kind === 'CronJob'
-      ? spec.jobTemplate.spec.template.metadata.labels
-      : spec.template.metadata.labels,
-  )
-  .transform((labels) => (labels ? [labels] : []))
-  .catch([]);
+  .transform(({ spec }) => spec)
+  .catch({ versionLabel: undefined, images: [] });
 
 const ImageVolumeReferences = z
   .discriminatedUnion('kind', [
@@ -86,25 +116,30 @@ export const KubernetesResource = z.object({
   metadata: z.object({
     name: z.string(),
     namespace: z.string().optional(),
-    labels: z.record(z.string(), z.string()).optional(),
   }),
 });
 
 export const KubernetesManifest = KubernetesResource.extend({
-  spec: z.unknown().optional(),
-}).transform(({ spec, ...resource }) => ({
-  ...resource,
-  versionLabels: [
-    resource.metadata.labels?.['app.kubernetes.io/version'],
-    ...PodTemplateLabels.parse({ kind: resource.kind, spec }).map(
-      (labels) => labels['app.kubernetes.io/version'],
-    ),
-  ],
-  imageVolumeReferences: ImageVolumeReferences.parse({
-    kind: resource.kind,
-    spec,
+  metadata: KubernetesResource.shape.metadata.extend({
+    labels: z.unknown().optional(),
   }),
-}));
+  spec: z.unknown().optional(),
+}).transform(({ spec, metadata: { labels, ...metadata }, ...resource }) => {
+  const podTemplate = WorkloadPodTemplate.parse({ kind: resource.kind, spec });
+  return {
+    ...resource,
+    metadata,
+    versionLabels: [
+      AppVersionLabel.parse({ labels }),
+      podTemplate.versionLabel,
+    ].filter((label): label is string => !!label),
+    containerImages: podTemplate.images,
+    imageVolumeReferences: ImageVolumeReferences.parse({
+      kind: resource.kind,
+      spec,
+    }),
+  };
+});
 export type KubernetesManifest = z.infer<typeof KubernetesManifest>;
 
 export const KubernetesManifests = multidocYaml({

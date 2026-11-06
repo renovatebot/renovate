@@ -193,6 +193,98 @@ describe('modules/manager/kubernetes/extract', () => {
       );
     });
 
+    it('keeps manifests with non-string label values', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: test
+            labels:
+              tier: 1
+              app.kubernetes.io/version: 1.2
+          spec:
+            template:
+              metadata:
+                labels:
+                  replicas: 3
+              spec:
+                containers:
+                  - name: test
+                    image: nginx:1.2
+                volumes:
+                  - name: data
+                    image:
+                      reference: busybox:1.0
+        `,
+        'file.yaml',
+        { updateVersionLabels: true },
+      );
+
+      expect(res?.deps).toMatchObject([
+        { depName: 'nginx', currentValue: '1.2' },
+        { depName: 'busybox', currentValue: '1.0' },
+        { depName: 'Deployment', currentValue: 'apps/v1' },
+      ]);
+    });
+
+    it('only matches version labels to images of the same manifest', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: app
+            labels:
+              app.kubernetes.io/version: "1.0"
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: app
+                    image: myapp:2.0
+          ---
+          apiVersion: batch/v1
+          kind: CronJob
+          metadata:
+            name: cache
+          spec:
+            jobTemplate:
+              spec:
+                template:
+                  metadata:
+                    labels:
+                      app.kubernetes.io/version: "1.0"
+                  spec:
+                    initContainers:
+                      - name: init
+                        image: redis:1.0
+          ---
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: pod
+            labels:
+              app.kubernetes.io/version: "2.0"
+          spec:
+            containers:
+              - name: pod
+                image: myapp:2.0
+        `,
+        'file.yaml',
+        { updateVersionLabels: true },
+      );
+
+      expect(
+        res?.deps.filter(
+          (dep) => dep.autoReplaceStringTemplate === '{{newValue}}',
+        ),
+      ).toMatchObject([
+        { depName: 'redis', currentValue: '1.0', replaceString: '1.0' },
+        { depName: 'myapp', currentValue: '2.0', replaceString: '2.0' },
+      ]);
+    });
+
     it('can disable app version label extraction', () => {
       const res = extractPackageFile(versionLabelFile, 'file.yaml', {
         updateVersionLabels: false,

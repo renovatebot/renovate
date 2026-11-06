@@ -14,11 +14,12 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { type KubernetesManifest, KubernetesManifests } from './schema.ts';
+import type { KubernetesExtractConfig } from './types.ts';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: KubernetesExtractConfig,
 ): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -34,10 +35,11 @@ export function extractPackageFile(
   ).parse(content);
 
   const imageDeps = extractImages(content, config);
+  // Version label dependencies are re-extracted while their branch is updated,
+  // even when the manager option is not part of the upgrade config.
+  const isVersionLabelReExtract = config.digestManagedExternally === true;
   const isVersionLabelUpdate =
-    config.updateVersionLabels === true ||
-    ('digestManagedExternally' in config &&
-      config.digestManagedExternally === true);
+    config.updateVersionLabels === true || isVersionLabelReExtract;
   const deps: PackageDependency[] = [
     ...imageDeps,
     ...extractImageVolumes(manifests, config),
@@ -53,32 +55,26 @@ export function extractPackageFile(
 function extractVersionLabels(
   manifests: KubernetesManifest[],
   imageDeps: PackageDependency[],
-  config: ExtractConfig,
+  config: KubernetesExtractConfig,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  const currentDepName =
-    'depName' in config && isString(config.depName)
-      ? config.depName
-      : undefined;
-  const currentValue =
-    'currentValue' in config && isString(config.currentValue)
-      ? config.currentValue
-      : undefined;
-  const newValue =
-    'newValue' in config && isString(config.newValue)
-      ? config.newValue
-      : undefined;
+  const { depName, currentValue, newValue } = config;
 
   for (const manifest of manifests) {
-    for (const versionLabel of manifest.versionLabels) {
-      if (!versionLabel) {
-        continue;
-      }
+    // Only images of the same workload may own its version label
+    const manifestImageDeps = imageDeps.filter(
+      (dep) =>
+        isString(dep.replaceString) &&
+        manifest.containerImages.includes(dep.replaceString),
+    );
 
+    for (const versionLabel of manifest.versionLabels) {
+      const isUpdatedValue =
+        versionLabel === currentValue || versionLabel === newValue;
       const imageDep =
-        imageDeps.find((dep) => dep.currentValue === versionLabel) ??
-        (currentValue === versionLabel || newValue === versionLabel
-          ? imageDeps.find((dep) => dep.depName === currentDepName)
+        manifestImageDeps.find((dep) => dep.currentValue === versionLabel) ??
+        (isUpdatedValue
+          ? manifestImageDeps.find((dep) => dep.depName === depName)
           : undefined);
       if (imageDep) {
         deps.push({
