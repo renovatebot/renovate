@@ -32,6 +32,8 @@ import { getElapsedHours } from '../../../../util/date.ts';
 import { emojify, stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
 import { getBranchLastCommitTime } from '../../../../util/git/index.ts';
+import { isPrAlreadyExistsError } from '../../../../util/http/github.ts';
+import { isBadGateway } from '../../../../util/http/status.ts';
 import { memoize } from '../../../../util/memoize.ts';
 import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -58,10 +60,10 @@ import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions,
 ): PlatformPrOptions {
+  const isPrOrBranchAutomerge =
+    config.automergeType === 'pr' || config.automergeType === 'branch';
   const usePlatformAutomerge = Boolean(
-    config.automerge &&
-    (config.automergeType === 'pr' || config.automergeType === 'branch') &&
-    config.platformAutomerge,
+    config.automerge && isPrOrBranchAutomerge && config.platformAutomerge,
   );
 
   return {
@@ -132,8 +134,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
   upgrade: BranchUpgradeConfig,
   currentReleaseHasAttestation: boolean | undefined,
 ): void {
-  const { packageName, depName, currentVersion, newVersion } = upgrade;
-  const name = packageName ?? depName;
+  const { packageName, currentVersion, newVersion } = upgrade;
 
   const newRelease = upgrade.releases?.find(
     (release) => release.version === newVersion,
@@ -150,7 +151,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
         codeBlock`
           > :stop_sign: **Caution**
           >
-          > ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
+          > ${packageName} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
           > Verify that release ${newVersion} was published by the expected author.
         `,
       ),
@@ -263,12 +264,13 @@ export async function ensurePr(
         logger.debug(`Branch status is yellow - checking timeout`);
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const elapsedHours = getElapsedHours(lastCommitTime);
-        if (
-          !dependencyDashboardCheck &&
-          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-            (isNumber(config.prNotPendingHours) &&
-              elapsedHours < config.prNotPendingHours))
-        ) {
+        const isStabilityPending =
+          !!config.stabilityStatus && config.stabilityStatus !== 'yellow';
+        const isWithinNotPendingHours =
+          isNumber(config.prNotPendingHours) &&
+          elapsedHours < config.prNotPendingHours;
+        const isAwaitingTests = isStabilityPending || isWithinNotPendingHours;
+        if (!dependencyDashboardCheck && isAwaitingTests) {
           logger.debug(
             `Branch is ${elapsedHours} hours old - skipping PR creation as prNotPendingHours is set to ${config.prNotPendingHours}`,
           );
@@ -322,12 +324,18 @@ export async function ensurePr(
         }
         upgrade.hasReleaseNotes = false;
         upgrade.releases = [];
+        const shared = !logJSON.perDependencyNotes;
         if (
           logJSON.hasReleaseNotes &&
           upgrade.repoName &&
-          !commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
+          !(
+            shared &&
+            commitRepos.includes(getRepoNameWithSourceDirectory(upgrade))
+          )
         ) {
-          commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          if (shared) {
+            commitRepos.push(getRepoNameWithSourceDirectory(upgrade));
+          }
           upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
           if (logJSON.versions) {
             for (const version of logJSON.versions) {
@@ -344,7 +352,7 @@ export async function ensurePr(
               > :exclamation: **Important**
               >
               > Release Notes retrieval for this PR were skipped because no github.com credentials were available.
-              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/examples/self-hosting.md#githubcom-token-for-release-notes).
+              > If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/main/docs/usage/getting-started/running.md#githubcom-token-for-changelogs-and-tools).
             `,
           ),
         );
@@ -363,6 +371,10 @@ export async function ensurePr(
 
   const releaseNotesSources: string[] = [];
   for (const upgrade of config.upgrades) {
+    if (upgrade.logJSON?.perDependencyNotes) {
+      continue;
+    }
+
     let notesSourceUrl = upgrade.releases?.[0]?.releaseNotes?.notesSourceUrl;
     // TODO: types (#22198)
     notesSourceUrl ??= `${upgrade.sourceUrl!}${
@@ -382,12 +394,14 @@ export async function ensurePr(
     }
   }
 
+  const configuredLabels = prepareLabels(config);
+
   const prBody = getPrBody(
     config,
     {
       debugData: updatePrDebugData(
         config.baseBranch,
-        prepareLabels(config), // include labels in debug data
+        configuredLabels, // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
     },
@@ -416,7 +430,6 @@ export async function ensurePr(
 
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
-      const configuredLabels = prepareLabels(config);
 
       const labelsNeedUpdate = shouldUpdateLabels(
         prInitialLabels,
@@ -532,7 +545,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        { labels: prepareLabels(config) },
+        { labels: configuredLabels },
         `DRY-RUN: Would create PR: ${prTitle}`,
       );
       pr = { number: 0 } as never;
@@ -551,7 +564,7 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: prepareLabels(config),
+          labels: configuredLabels,
           platformPrOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
           milestone: config.milestone,
@@ -569,17 +582,11 @@ export async function ensurePr(
         );
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
-        if (
-          err.body?.message === 'Validation failed' &&
-          err.body.errors?.length &&
-          err.body.errors.some((error: { message?: string }) =>
-            error.message?.startsWith('A pull request already exists'),
-          )
-        ) {
+        if (isPrAlreadyExistsError(err)) {
           logger.warn('A pull requests already exists');
           return { type: 'without-pr', prBlockedBy: 'Error' };
         }
-        if (err.statusCode === 502) {
+        if (isBadGateway(err)) {
           logger.warn(
             { branch: branchName },
             'Deleting branch due to server error',

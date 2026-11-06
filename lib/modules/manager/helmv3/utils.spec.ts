@@ -1,7 +1,30 @@
 import { isOCIRegistry } from './oci.ts';
-import { isAlias, resolveAlias } from './utils.ts';
+import {
+  isAlias,
+  isLocalChartPath,
+  parseRepository,
+  resolveAlias,
+} from './utils.ts';
 
 describe('modules/manager/helmv3/utils', () => {
+  describe('.parseRepository()', () => {
+    it('applies registryAliases to OCI repositories', () => {
+      const dep = parseRepository(
+        'chart',
+        'oci://mirror.example.com/charts.example.com/org',
+        { 'mirror.example.com/charts.example.com': 'charts.example.com' },
+      );
+      expect(dep.packageName).toBe('charts.example.com/org/chart');
+    });
+
+    it('keeps OCI repositories without a matching registryAlias', () => {
+      const dep = parseRepository('chart', 'oci://registry.example.com/org', {
+        'mirror.example.com': 'charts.example.com',
+      });
+      expect(dep.packageName).toBe('registry.example.com/org/chart');
+    });
+  });
+
   describe('.resolveAlias()', () => {
     it('return alias with "alias:"', () => {
       const repoUrl = 'https://charts.helm.sh/stable';
@@ -69,6 +92,21 @@ describe('modules/manager/helmv3/utils', () => {
       // TODO #22198
       const repository = isAlias(undefined as never);
       expect(repository).toBeFalse();
+    });
+  });
+
+  describe('.isLocalChartPath()', () => {
+    it.each`
+      path                            | expected
+      ${'./x'}                        | ${true}
+      ${'../x'}                       | ${true}
+      ${'/x'}                         | ${true}
+      ${'bitnami/nginx'}              | ${false}
+      ${'nginx'}                      | ${false}
+      ${'oci://ghcr.io/x'}            | ${false}
+      ${'https://example.com/charts'} | ${false}
+    `('returns $expected for $path', ({ path, expected }) => {
+      expect(isLocalChartPath(path as string)).toBe(expected);
     });
   });
 

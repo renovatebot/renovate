@@ -22,7 +22,7 @@ import { scm } from '../../../platform/scm.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
-  PackageFile,
+  NpmrcPackageFile,
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
@@ -57,7 +57,7 @@ function getDirs(arr: (string | null | undefined)[]): string[] {
 }
 
 export function determineLockFileDirs(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
 ): DetermineLockFileDirsResult {
   const npmLockDirs: (string | undefined)[] = [];
@@ -93,7 +93,7 @@ export function determineLockFileDirs(
 
   function getPackageFile(
     fileName: string,
-  ): Partial<PackageFile<NpmManagerData>> {
+  ): Partial<NpmrcPackageFile<NpmManagerData>> {
     logger.trace(`Looking for packageFile: ${fileName}`);
 
     for (const packageFile of packageFiles.npm!) {
@@ -128,7 +128,7 @@ export function determineLockFileDirs(
 }
 
 export async function writeExistingFiles(
-  config: PostUpdateConfig,
+  config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
   originalNpmrcFiles = new Map<string, string>(),
 ): Promise<void> {
@@ -151,11 +151,10 @@ export async function writeExistingFiles(
     const npmrcFilename = upath.join(basedir, '.npmrc');
     // Write out the file unless the npmrc came from the workspace
     // npmrcFilename will be set whenever the file was read from disk during extract
-    if (
-      isString(npmrc) &&
-      (npmrcFilename === packageFile.managerData.npmrcFileName ||
-        !packageFile.managerData.npmrcFileName)
-    ) {
+    const isNpmrcOwnFile =
+      npmrcFilename === packageFile.managerData.npmrcFileName ||
+      !packageFile.managerData.npmrcFileName;
+    if (isString(npmrc) && isNpmrcOwnFile) {
       try {
         if (!originalNpmrcFiles.has(npmrcFilename)) {
           const originalNpmrc = await readLocalFile(npmrcFilename, 'utf8');
@@ -738,13 +737,14 @@ async function getAdditionalFilesInner(
 }
 
 export async function getAdditionalFiles(
-  config: PostUpdateConfig<NpmManagerData>,
+  config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles,
 ): Promise<WriteExistingFilesResult> {
   const originalNpmrcFiles = new Map<string, string>();
   try {
     return await getAdditionalFilesInner(
-      config,
+      // The branch config carries the manager data of every upgrade untyped; the npm post-update only reads the optional npm fields of it.
+      config as PostUpdateConfig<NpmManagerData>,
       packageFiles,
       originalNpmrcFiles,
     );

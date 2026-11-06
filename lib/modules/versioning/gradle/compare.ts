@@ -9,7 +9,7 @@ export const TokenType = {
 
 interface Token {
   type: number;
-  val: string | number;
+  val: string | bigint;
 }
 
 function iterateChars(
@@ -39,10 +39,10 @@ function isLetter(char: string): boolean {
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
-  return (
-    (isDigit(prevChar) && isLetter(nextChar)) ||
-    (isLetter(prevChar) && isDigit(nextChar))
-  );
+  if (isDigit(prevChar) && isLetter(nextChar)) {
+    return true;
+  }
+  return isLetter(prevChar) && isDigit(nextChar);
 }
 
 export function tokenize(versionStr: string): Token[] | null {
@@ -55,7 +55,7 @@ export function tokenize(versionStr: string): Token[] | null {
       if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
-          val: parseInt(val, 10),
+          val: BigInt(val),
         });
       } else {
         result.push({
@@ -280,10 +280,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
   const preferredVal = matchGroups.preferredVal || null;
   const isVersionLeft = isString(leftVal) && isVersion(leftVal);
   const isVersionRight = isString(rightVal) && isVersion(rightVal);
-  if (
-    (leftVal !== null && !isVersionLeft) ||
-    (rightVal !== null && !isVersionRight)
-  ) {
+  const isInvalidLeft = leftVal !== null && !isVersionLeft;
+  const isInvalidRight = rightVal !== null && !isVersionRight;
+  if (isInvalidLeft || isInvalidRight) {
     return null;
   }
 

@@ -1,6 +1,8 @@
 import { GlobalConfig } from '../../config/global.ts';
+import { applyConstraintsFiltering } from '../../modules/datasource/common.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
 import * as memCache from '../cache/memory/index.ts';
+import { setCustomEnv } from '../env.ts';
 import {
   generateInstallCommands,
   getToolConfig,
@@ -27,6 +29,13 @@ describe('util/exec/containerbase', () => {
     it('returns false if not containerbase', () => {
       GlobalConfig.set({ binarySource: 'install' });
       expect(isDynamicInstall()).toBeFalse();
+    });
+
+    it('ignores CONTAINERBASE from the custom env', () => {
+      GlobalConfig.set({ binarySource: 'install' });
+      setCustomEnv({ CONTAINERBASE: 'true' });
+      expect(isDynamicInstall()).toBeFalse();
+      setCustomEnv({});
     });
 
     it('returns false if any unsupported tools', () => {
@@ -194,6 +203,35 @@ describe('util/exec/containerbase', () => {
       },
     );
 
+    it.each`
+      toolName    | constraint      | expected
+      ${'jb'}     | ${'0.6.0.1'}    | ${'0.6.0.1'}
+      ${'jb'}     | ${'0.6'}        | ${'0.6.0.2'}
+      ${'erlang'} | ${'27.3.4.19'}  | ${'27.3.4.19'}
+      ${'erlang'} | ${'27'}         | ${'27.3.4.20'}
+      ${'erlang'} | ${'>=27.0 <28'} | ${'27.3.4.20'}
+    `(
+      'supports semver-extended "$toolName" constraint "$constraint" => "$expected"',
+      async ({ toolName, constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '0.6.0.0' },
+            { version: '0.6.0.1' },
+            { version: '0.6.0.2' },
+            { version: '0.7.0.0' },
+            { version: '26.2.5.6' },
+            { version: '27.3.4.19' },
+            { version: '27.3.4.20' },
+            { version: '28.0.0.1' },
+          ],
+        });
+
+        const result = await resolveConstraint({ toolName, constraint });
+
+        expect(result).toBe(expected);
+      },
+    );
+
     it('removes pep440 ==', async () => {
       await expect(
         resolveConstraint({
@@ -266,6 +304,51 @@ describe('util/exec/containerbase', () => {
     );
   });
 
+  describe('resolveConstraint() with resolved tools', () => {
+    // run the real constraints filtering against npm-like releases
+    function mockNpmReleases(...nodeConstraints: string[]): void {
+      datasource.getPkgReleases.mockImplementation((config) =>
+        Promise.resolve(
+          applyConstraintsFiltering(
+            {
+              releases: nodeConstraints.map((node, i) => ({
+                version: `${11 + i}.0.0`,
+                constraints: { node: [node] },
+              })),
+            },
+            config,
+          ),
+        ),
+      );
+    }
+
+    it('picks the newest release compatible with the parent version', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('11.0.0');
+    });
+
+    it('picks the newest release when the parent version supports it', async () => {
+      mockNpmReleases('^20.17.0 || >=22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '24.15.0' }),
+      ).resolves.toBe('12.0.0');
+    });
+
+    it('ignores the parent version when no release is compatible', async () => {
+      mockNpmReleases('^22.9.0', '^22.22.2 || >=24.15.0');
+      await expect(
+        resolveConstraint({ toolName: 'npm' }, { node: '20.17.0' }),
+      ).resolves.toBe('12.0.0');
+      expect(datasource.getPkgReleases).toHaveBeenLastCalledWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+      });
+    });
+  });
+
   describe('generateInstallCommands()', () => {
     beforeEach(() => {
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -288,6 +371,40 @@ describe('util/exec/containerbase', () => {
       await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
         'install-tool composer 2.1.0',
       ]);
+    });
+
+    it('only matches a tool against its own parent', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'composer' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool composer 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'github-releases',
+        packageName: 'containerbase/composer-prebuild',
+        versioning: 'composer',
+      });
+    });
+
+    it('filters tool releases by the resolved parent version', async () => {
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'node', constraint: '20.17.0' },
+        { toolName: 'npm', constraint: '>=1' },
+      ];
+      await expect(generateInstallCommands(toolConstraints)).resolves.toEqual([
+        'install-tool node 20.17.0',
+        'install-tool npm 2.1.0',
+      ]);
+      expect(datasource.getPkgReleases).toHaveBeenCalledExactlyOnceWith({
+        datasource: 'npm',
+        packageName: 'npm',
+        versioning: 'npm',
+        constraintsFiltering: 'strict',
+        constraints: { node: '20.17.0' },
+      });
     });
 
     it('repeats install commands when not memoizing', async () => {
@@ -336,6 +453,101 @@ describe('util/exec/containerbase', () => {
         await expect(
           generateInstallCommands(toolConstraints, true),
         ).resolves.toEqual(['install-tool composer 2.2.0']);
+      });
+
+      it('re-issues the install command when switching back to an earlier version', async () => {
+        const toolConstraints: ToolConstraint[] = [{ toolName: 'composer' }];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.2.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.2.0']);
+
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '2.1.0' }],
+        });
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual(['install-tool composer 2.1.0']);
+      });
+
+      it('skips a child tool when its parent version is unchanged', async () => {
+        const toolConstraints: ToolConstraint[] = [
+          { toolName: 'python', constraint: '3.13.5' },
+          { toolName: 'pip-tools', constraint: '7.6.2' },
+        ];
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual([
+          'install-tool python 3.13.5',
+          'install-tool pip-tools 7.6.2',
+        ]);
+
+        await expect(
+          generateInstallCommands(toolConstraints, true),
+        ).resolves.toEqual([]);
+      });
+
+      it('re-issues a child tool install when its parent version changes', async () => {
+        await expect(
+          generateInstallCommands(
+            [
+              { toolName: 'python', constraint: '3.13.5' },
+              { toolName: 'pip-tools', constraint: '7.6.2' },
+            ],
+            true,
+          ),
+        ).resolves.toEqual([
+          'install-tool python 3.13.5',
+          'install-tool pip-tools 7.6.2',
+        ]);
+
+        await expect(
+          generateInstallCommands(
+            [
+              { toolName: 'python', constraint: '3.14.0' },
+              { toolName: 'pip-tools', constraint: '7.6.2' },
+            ],
+            true,
+          ),
+        ).resolves.toEqual([
+          'install-tool python 3.14.0',
+          'install-tool pip-tools 7.6.2',
+        ]);
+      });
+
+      it('re-issues a child tool install when its parent changed in an earlier call', async () => {
+        await expect(
+          generateInstallCommands(
+            [
+              { toolName: 'python', constraint: '3.13.5' },
+              { toolName: 'pip-tools', constraint: '7.6.2' },
+            ],
+            true,
+          ),
+        ).resolves.toEqual([
+          'install-tool python 3.13.5',
+          'install-tool pip-tools 7.6.2',
+        ]);
+
+        await expect(
+          generateInstallCommands(
+            [{ toolName: 'python', constraint: '3.14.0' }],
+            true,
+          ),
+        ).resolves.toEqual(['install-tool python 3.14.0']);
+
+        await expect(
+          generateInstallCommands(
+            [{ toolName: 'pip-tools', constraint: '7.6.2' }],
+            true,
+          ),
+        ).resolves.toEqual(['install-tool pip-tools 7.6.2']);
       });
     });
   });

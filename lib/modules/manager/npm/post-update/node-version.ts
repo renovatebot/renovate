@@ -1,9 +1,11 @@
+import { isArray } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
-import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { newlineRegex } from '../../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../../util/string.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
 import type { LazyPackageJson } from './types.ts';
@@ -11,15 +13,30 @@ import type { LazyPackageJson } from './types.ts';
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
     // TODO #22198
-    const constraint = (await readLocalFile(filename, 'utf8'))!
-      .split(newlineRegex)[0]
-      .replace(regEx(/^v/), '');
+    const constraint = stripVersionPrefix(
+      (await readLocalFile(filename, 'utf8'))!.split(newlineRegex)[0],
+    );
     if (semver.validRange(constraint)) {
       logger.debug(`Using node constraint "${constraint}" from ${filename}`);
       return constraint;
     }
   } catch {
     // do nothing
+  }
+  return null;
+}
+
+async function getDevEnginesConstraint(
+  pkg: LazyPackageJson,
+): Promise<string | null> {
+  const runtime = (await pkg.getValue()).devEngines?.runtime;
+  const runtimes = isArray(runtime) ? runtime : [runtime];
+  const constraint = runtimes.find((r) => r?.name === 'node')?.version;
+  if (constraint && semver.validRange(constraint)) {
+    logger.debug(
+      `Using node constraint "${constraint}" from package.json devEngines`,
+    );
+    return constraint;
   }
   return null;
 }
@@ -64,6 +81,7 @@ export async function getNodeConstraint(
       config,
       'node',
       async () =>
+        (await getDevEnginesConstraint(pkg)) ??
         (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
         (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
         (await getPackageJsonConstraint(pkg)),

@@ -635,10 +635,10 @@ export async function ensureComment({
       continue;
     }
     const firstCommentContent = commentObj.comments[0].content;
-    if (
-      (topic && firstCommentContent?.startsWith(header)) === true ||
-      (!topic && firstCommentContent === body)
-    ) {
+    const isMatchingComment = topic
+      ? firstCommentContent?.startsWith(header) === true
+      : firstCommentContent === body;
+    if (isMatchingComment) {
       commentId = commentObj.comments[0].commentId;
       commentNeedsUpdating = firstCommentContent !== body;
       break;
@@ -714,14 +714,13 @@ export async function ensureCommentRemoval(
     }
 
     for (const comment of commentObj.comments) {
+      const isMatchingComment =
+        removeConfig.type === 'by-topic'
+          ? comment.content?.startsWith(`### ${removeConfig.topic}\n\n`) ===
+            true
+          : removeConfig.content === comment.content?.trim();
       // v8 ignore else -- TODO: add test #40625
-      if (
-        (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
-          true ||
-        (removeConfig.type === 'by-content' &&
-          removeConfig.content === comment.content?.trim())
-      ) {
+      if (isMatchingComment) {
         commentIdToRemove = comment.commentId;
         break;
       }

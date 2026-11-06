@@ -167,6 +167,35 @@ describe('modules/manager/helm-requirements/extract', () => {
       });
     });
 
+    it('treats an alias as unresolved when registryAliases is missing', () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - name: redis
+          version: 0.9.0
+          repository: '@placeholder'
+      `;
+      const fileName = 'requirements.yaml';
+      const result = extractPackageFile(content, fileName, {});
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['@placeholder'],
+            skipReason: 'placeholder-url',
+          },
+        ],
+      });
+    });
+
     it('skips local dependencies', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1

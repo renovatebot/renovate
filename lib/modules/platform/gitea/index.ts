@@ -16,9 +16,10 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
+import { isConflict, isNotFound } from '../../../util/http/status.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
 import { getPrBodyStruct, hashBody } from '../pr-body.ts';
 import type {
   AutodiscoverConfig,
@@ -42,6 +43,7 @@ import type {
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { getRepoFile } from './files.ts';
 import * as helper from './gitea-helper.ts';
 import { lookupLabelByName } from './labels.ts';
 import { GiteaPrCache } from './pr-cache.ts';
@@ -55,6 +57,7 @@ import type {
   PRUpdateParams,
 } from './types.ts';
 import {
+  API_PATH,
   DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
@@ -95,6 +98,16 @@ function toRenovateIssue(data: Issue): Issue {
     title: data.title,
     body: data.body,
   };
+}
+
+function haveLabelsChanged(
+  labels: number[],
+  existingLabelIds: number[],
+): boolean {
+  return (
+    labels.length !== existingLabelIds.length ||
+    labels.some((labelId) => !existingLabelIds.includes(labelId))
+  );
 }
 
 function matchesState(actual: string, expected: string): boolean {
@@ -254,12 +267,9 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
       branchOrTag?: string,
     ): Promise<string | null> {
       const repo = repoName ?? config.repository;
-      const contents = await helper.getRepoContents(
-        http,
-        repo,
-        fileName,
-        branchOrTag,
-      );
+      const contents = await getRepoFile(http, repo, fileName, branchOrTag, {
+        baseUrl: joinUrlParts(defaults.endpoint, API_PATH),
+      });
       if (contents.type !== 'file') {
         return null;
       }
@@ -478,7 +488,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
           branchName,
         );
       } catch (err) {
-        if (err.statusCode === 404) {
+        if (isNotFound(err)) {
           logger.debug(
             'Received 404 when checking branch status, assuming branch deletion',
           );
@@ -572,13 +582,16 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         return toRenovatePR(pr, null);
       }
       const prList = await platform.getPrList();
-      const pr = prList.find(
-        (p) =>
-          p.sourceRepo === config.repository &&
-          p.sourceBranch === branchName &&
-          matchesState(p.state, state) &&
-          (!title || p.title === title),
-      );
+      const pr = prList.find((p) => {
+        if (
+          p.sourceRepo !== config.repository ||
+          p.sourceBranch !== branchName ||
+          !matchesState(p.state, state)
+        ) {
+          return false;
+        }
+        return !title || p.title === title;
+      });
 
       if (pr) {
         logger.debug(`Found PR #${pr.number}`);
@@ -661,7 +674,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
         // the most recent versions of the platform, the PR gets automatically closed when that happens, but older versions
         // do not handle this properly and keep the PR open. As pushing a branch with the same name resurrects the PR, this
         // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
-        if (err.statusCode === 409) {
+        if (isConflict(err)) {
           logger.warn(
             { prTitle: title, sourceBranch },
             'Attempting to gracefully recover from 409 Conflict response in createPr()',
@@ -907,12 +920,7 @@ export function createPlatform(options: GiteaPlatformOptions): GiteaPlatform {
             const existingLabelIds = coerceArray(existingIssue.labels).map(
               (label) => label.id,
             );
-            if (
-              labels &&
-              (labels.length !== existingLabelIds.length ||
-                labels.filter((labelId) => !existingLabelIds.includes(labelId))
-                  .length !== 0)
-            ) {
+            if (labels && haveLabelsChanged(labels, existingLabelIds)) {
               await helper.updateIssueLabels(
                 http,
                 config.repository,

@@ -88,7 +88,7 @@ const CargoDep = z.union([
 ]);
 
 const CargoDeps = z.record(z.string(), CargoDep).transform((record) => {
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<CargoManagerData>[] = [];
 
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;

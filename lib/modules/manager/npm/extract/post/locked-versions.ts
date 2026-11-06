@@ -39,17 +39,22 @@ export async function getLockedVersions(
         packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
-        dep.lockedVersion =
-          lockFileCache[yarnLock].lockedVersions?.[
-            // TODO: types (#22198)
-            `${dep.depName}@${dep.currentValue}`
-          ];
         if (
-          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
-          dep.depName === 'yarn' &&
-          !isYarn1
+          dep.depType !== 'devEngines.runtime' &&
+          dep.depType !== 'devEngines.packageManager'
         ) {
-          dep.packageName = '@yarnpkg/cli';
+          dep.lockedVersion =
+            lockFileCache[yarnLock].lockedVersions?.[
+              // TODO: types (#22198)
+              `${dep.depName}@${dep.currentValue}`
+            ];
+        }
+        const isPackageManagerDepType =
+          dep.depType === 'engines' ||
+          dep.depType === 'packageManager' ||
+          dep.depType === 'devEngines.packageManager';
+        if (isPackageManagerDepType && dep.depName === 'yarn' && !isYarn1) {
+          dep.packageName = '@yarnpkg/cli-dist';
         }
       }
     } else if (npmLock) {
@@ -115,7 +120,9 @@ export async function getLockedVersions(
         if (
           dep.depType === 'engines' ||
           dep.depType === 'packageManager' ||
-          dep.depType === 'volta'
+          dep.depType === 'volta' ||
+          dep.depType === 'devEngines.runtime' ||
+          dep.depType === 'devEngines.packageManager'
         ) {
           continue;
         }

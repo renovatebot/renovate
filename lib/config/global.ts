@@ -8,7 +8,7 @@ import type {
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   static OPTIONS = [
-    'allowCustomCrateRegistries',
+    'allowCustomCrateGitRegistries',
     'allowPlugins',
     'allowScripts',
     'allowShellExecutorForPostUpgradeCommands',
@@ -40,6 +40,7 @@ export class GlobalConfig {
     'exposeAllEnv',
     'gitTimeout',
     'githubTokenWarn',
+    'goEnvFromHostRules',
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
@@ -114,4 +115,19 @@ export class GlobalConfig {
   static reset(): void {
     GlobalConfig.config = {};
   }
+}
+
+/**
+ * Sets the global options which HTTP requests consult, for the requests made before the full global config is set.
+ */
+export function setHttpGlobalConfig(
+  config: RenovateConfig & RepoGlobalConfig,
+): void {
+  GlobalConfig.set({
+    allowedHeaders: config.allowedHeaders,
+    endpoint: config.endpoint,
+    internalHostAccess: config.internalHostAccess,
+    platform: config.platform,
+    userAgent: config.userAgent,
+  });
 }

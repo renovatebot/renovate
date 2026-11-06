@@ -1,3 +1,29 @@
+/* Mend.io brand palette, used in place of Material's stock indigo theme */
+[data-md-color-primary='custom'] {
+  --md-primary-fg-color: #073c8c;
+  --md-primary-fg-color--light: #308be3;
+  --md-primary-fg-color--dark: #073c8c;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #e8effa;
+}
+
+[data-md-color-accent='custom'] {
+  --md-accent-fg-color: #308be3;
+  --md-accent-fg-color--transparent: #308be31a;
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: #e8effa;
+}
+
+/*
+ * Text links inherit --md-primary-fg-color (#073c8c), which is navy-on-white
+ * in light mode but reads as low-contrast navy-on-near-black in dark mode.
+ * Material does the same lightening for its own dark primaries (e.g. indigo),
+ * so mirror that here with a lighter brand blue for dark mode only.
+ */
+[data-md-color-scheme='slate'][data-md-color-primary='custom'] {
+  --md-typeset-a-color: #5aa9f5;
+}
+
 .md-header .md-header__button.md-logo {
   padding: 0;
 }
@@ -24,4 +50,20 @@
   max-width: 100%;
   height: auto;
   aspect-ratio: 756 / 250;
+}
+
+/*
+ * The banner is an <object> so its embedded links stay clickable, which
+ * rules out Material's img#only-light/#only-dark convention (that only
+ * targets <img> elements). Swap between two <object>s on the same
+ * data-md-color-scheme attribute that the rest of this file already uses.
+ */
+.md-typeset object.renovate-banner-dark {
+  display: none;
+}
+[data-md-color-scheme='slate'] .md-typeset object.renovate-banner-light {
+  display: none;
+}
+[data-md-color-scheme='slate'] .md-typeset object.renovate-banner-dark {
+  display: block;
 }

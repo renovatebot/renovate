@@ -230,6 +230,29 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toEqual(sample);
     });
 
+    it('should skip a chart without repo and version', () => {
+      const pkg = extractHelmChart({ name: 'renovate' });
+      expect(pkg).toEqual({
+        depName: 'renovate',
+        datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
+      });
+    });
+
+    it('should skip a chart with an empty repo', () => {
+      const pkg = extractHelmChart({
+        name: 'renovate',
+        version: '1.0.0',
+        repo: '',
+      });
+      expect(pkg).toEqual({
+        depName: 'renovate',
+        currentValue: '1.0.0',
+        datasource: HelmDatasource.id,
+        skipReason: 'local-chart',
+      });
+    });
+
     it('should correctly extract an OCI chart', () => {
       const sample = {
         depName: 'redis',
@@ -853,6 +876,33 @@ describe('modules/manager/kustomize/extract', () => {
             datasource: DockerDatasource.id,
             packageName: 'registry-1.docker.io/bitnamicharts/redis',
             pinDigests: false,
+          },
+        ],
+      });
+    });
+
+    it('parses helmChart field without repo', () => {
+      const content = codeBlock`
+      apiVersion: kustomize.config.k8s.io/v1beta1
+      kind: Kustomization
+      helmGlobals:
+        chartHome: charts
+      helmCharts:
+      - name: local-chart
+        releaseName: local
+        version: 1.0.0
+      `;
+
+      const res = extractPackageFile(content, 'kustomization.yaml', {});
+
+      expect(res).toEqual({
+        deps: [
+          {
+            depType: 'HelmChart',
+            depName: 'local-chart',
+            currentValue: '1.0.0',
+            datasource: HelmDatasource.id,
+            skipReason: 'local-chart',
           },
         ],
       });

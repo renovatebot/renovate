@@ -207,7 +207,10 @@ For example:
 
 <!-- prettier-ignore -->
 If a `github.com` token is found in `hostRules`, then it is written out to local [GIT_CONFIG_](https://git-scm.com/docs/git-config#Documentation/git-config.txt-GITCONFIGCOUNT) variables prior to running `go` commands.
-The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+The environment variables used are: `GIT_CONFIG_KEY_0=url.https://x-access-token:${token}@github.com/.insteadOf GIT_CONFIG_VALUE_0=https://github.com/ GIT_CONFIG_COUNT=1`.
+
+For git hosts that Renovate doesn't recognise, a token-only host rule is sent as the username without a password.
+Some git and curl versions don't send such credentials again after a redirect, so configure `username` and `password` instead.
 
 ### helm
 

@@ -1,6 +1,11 @@
 import { partial } from '~test/util.ts';
+import gradle from '../../../../modules/versioning/gradle/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
+import loose from '../../../../modules/versioning/loose/index.ts';
+import maven from '../../../../modules/versioning/maven/index.ts';
 import type { VersioningApi } from '../../../../modules/versioning/types.ts';
+import { generateUpdate } from './generate.ts';
+import type { LookupUpdateConfig } from './types.ts';
 import { classifyRelease } from './update-type.ts';
 
 const npmVersioning = allVersioning.get('npm');
@@ -52,5 +57,56 @@ describe('workers/repository/process/lookup/update-type', () => {
 
       expect(classifyRelease(versioningApi, '1.2.3', '1.3.4')).toBe('minor');
     });
+
+    it.each`
+      versioningApi | currentVersion                  | newVersion                      | expected
+      ${gradle}     | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${'major'}
+      ${maven}      | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${'major'}
+      ${loose}      | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${'major'}
+      ${gradle}     | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${'minor'}
+      ${maven}      | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${'minor'}
+      ${loose}      | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${'minor'}
+      ${gradle}     | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${'patch'}
+      ${maven}      | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${'patch'}
+      ${loose}      | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${'patch'}
+      ${loose}      | ${'1'}                          | ${'1.0.1'}                      | ${'patch'}
+      ${loose}      | ${'1.0.1'}                      | ${'1'}                          | ${'patch'}
+    `(
+      'classifies $currentVersion -> $newVersion as $expected beyond safe-integer precision',
+      ({ versioningApi, currentVersion, newVersion, expected }) => {
+        expect(classifyRelease(versioningApi, currentVersion, newVersion)).toBe(
+          expected,
+        );
+      },
+    );
   });
+
+  it.each`
+    versioningApi
+    ${gradle}
+    ${maven}
+    ${loose}
+  `(
+    'marks the unsafe-integer update as breaking',
+    async ({ versioningApi }) => {
+      const currentVersion = '2026051723231779060202';
+      const newVersion = '2026051723231779060208';
+
+      const update = await generateUpdate(
+        partial<LookupUpdateConfig>({}),
+        currentVersion,
+        versioningApi,
+        'replace',
+        currentVersion,
+        'latest',
+        { version: newVersion },
+        new Set([currentVersion, newVersion]),
+      );
+
+      expect(update).toMatchObject({
+        isBreaking: true,
+        updateType: 'major',
+      });
+    },
+  );
 });

@@ -22,5 +22,5 @@ export function getGitlabDep(
     dep.autoReplaceStringTemplate = `${match.groups.prefix}${dep.autoReplaceStringTemplate}`;
     return dep;
   }
-  return getDep(imageName, true, registryAliases);
+  return getDep(imageName, { registryAliases });
 }

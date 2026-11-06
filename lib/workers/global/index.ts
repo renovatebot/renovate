@@ -13,7 +13,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global.ts';
+import { GlobalConfig, setHttpGlobalConfig } from '../../config/global.ts';
 import * as configParser from '../../config/index.ts';
 import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
@@ -33,7 +33,6 @@ import {
 } from '../../instrumentation/reporting.ts';
 import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
-import type { HostRule } from '../../types/index.ts';
 import { getEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import * as queue from '../../util/http/queue.ts';
@@ -178,21 +177,13 @@ export async function start(): Promise<number> {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
-      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        userAgent: config.userAgent,
-      });
+      // set before `globalInitialize()`, so that `hostRules` headers from file config are checked against `allowedHeaders`, and the platform's own initialization requests are judged by the administrator's `internalHostAccess` setting and recognized as going to the platform endpoint
+      setHttpGlobalConfig(config);
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        platform: config.platform,
-        endpoint: config.endpoint,
-        userAgent: config.userAgent,
-      });
+      // set again in case local presets are used, now that platform initialization may have changed `platform` and `endpoint`
+      setHttpGlobalConfig(config);
 
       await validatePresets(config);
 
@@ -218,10 +209,6 @@ export async function start(): Promise<number> {
       return 0;
     }
 
-    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so we drop them here too, with a WARN, rather than leave them to be silently discarded at request time
-    // filtered once, outside the loop, rather than for every repository it processes
-    let filteredGlobalHostRules: HostRule[] | undefined;
-
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
@@ -239,29 +226,9 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            // `GlobalConfig` still reflects the previous repository at this point, so filter with this repository's own `allowedHeaders`: usually the global allowlist (filtered once, above), re-filtered only for a `repositories[]` entry carrying an override of its own
-            const rules =
-              // reuse the memo only for the exact global inputs it was computed from - today `repoConfig.hostRules` is always the global array, but nothing should break if that ever changes
-              repoConfig.hostRules === config.hostRules &&
-              repoConfig.allowedHeaders === config.allowedHeaders
-                ? (filteredGlobalHostRules ??= hostRules.filterAllowedHeaders(
-                    repoConfig.hostRules,
-                    config.allowedHeaders,
-                    // `globalInitialize` already registered these very rules against this very allowlist, and warned about whatever it dropped
-                    false,
-                  ))
-                : hostRules.filterAllowedHeaders(
-                    repoConfig.hostRules,
-                    repoConfig.allowedHeaders,
-                  );
-            for (const rule of rules) {
-              // already filtered: pass the same allowlist through so `add()` does not re-filter against a stale `GlobalConfig`
-              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
-              hostRules.add(rule, {
-                // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
-                allowedHeaders: repoConfig.allowedHeaders,
-                trusted: true,
-              });
+            for (const rule of repoConfig.hostRules) {
+              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host, and exempt from `allowedHeaders` altogether
+              hostRules.add(rule, { trusted: true });
             }
             repoConfig.hostRules = [];
           }

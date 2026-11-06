@@ -91,11 +91,12 @@ RUN apk add --no-cache \
       rsyslog=8.2412.0-r1
 ```
 
-Renovate does _not_ configure a `registryUrl` for you, because the package repository depends on the base image and you may prefer an internal mirror.
-Until you set one, the `apk` datasource falls back to its default registry, which may not match your base image.
-Set the `registryUrls` which match your base image with a `packageRules` entry:
+Renovate does _not_ work out which Alpine release your base image installs from, and the `apk` datasource's default registry may not match it, so a lookup against that default would offer versions your image cannot install.
+Renovate therefore skips these packages with `skipReason: unknown-registry` until you say which repositories to read.
 
 <!-- TODO: #45706 auto-detect `registryUrl` -->
+
+Give them a `registryUrls` with a `packageRules` entry to have them looked up:
 
 ```json title="Point apk lookups at the Alpine 3.21 repositories"
 {
@@ -125,6 +126,7 @@ Renovate skips packages which it cannot update, and says why in the `packageFile
 - packages without a version, e.g. `apk add bash`
 - packages whose version comes from a variable, e.g. `apk add "bash=$BASH_VERSION"`
 - packages constrained to an identity hash with `><`, which is not a version
+- every package, until you give it a `registryUrls` -- see above
 
 Renovate also proposes no new value for the `<`, `<=`, `>`, `>=`, `>~` and `<~` operators, as there is no single obvious new bound for them.
 
@@ -159,10 +161,12 @@ RUN apt-get update \
 ```
 
 The `deb` datasource needs a `registryUrl` which says which suite, components and architecture to look in, and Renovate does _not_ work that out from your base image.
-Until you set one, the `deb` datasource falls back to the Debian `stable` suite for `amd64`, which may not match your base image.
-Set the `registryUrls` which match your base image with a `packageRules` entry:
+Its default is the Debian `stable` suite for `amd64`, which may not match your base image, so a lookup against that default would offer versions your image cannot install.
+Renovate therefore skips these packages with `skipReason: unknown-registry` until you say which repositories to read.
 
 <!-- TODO: #45706 auto-detect `registryUrl` -->
+
+Give them a `registryUrls` with a `packageRules` entry to have them looked up:
 
 ```json title="Point deb lookups at the Debian trixie repositories"
 {
@@ -185,6 +189,7 @@ Renovate skips packages which it cannot update, and says why in the `packageFile
 - packages whose version comes from a variable, e.g. `apt-get install -y "curl=$CURL_VERSION"`
   This can be handled with a Custom Manager, instead.
 - packages given a wildcard version, e.g. `apt-get install -y 'curl=8.14.*'`
+- every package, until you give it a `registryUrls` -- see above
 
 Local or remote `.deb` files, removal markers like `vim-` and pattern matches like `^gnome` are ignored.
 `dpkg -i` is not supported, because it installs a local file rather than a package from a repository.

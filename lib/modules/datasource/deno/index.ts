@@ -2,6 +2,7 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -18,13 +19,15 @@ import {
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
 
-  override readonly customRegistrySupport = true;
-
-  override readonly registryStrategy = 'first';
+  override supportsCustomRegistry(_packageName: string): boolean {
+    return true;
+  }
 
   override readonly defaultVersioning = semanticVersioning.id;
 
-  override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];
+  override getDefaultRegistryUrls(_packageName: string): string[] {
+    return ['https://apiland.deno.dev'];
+  }
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
@@ -71,8 +74,11 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        // TODO: types (#22198)
-        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        key: buildCacheKey(
+          'getReleases',
+          config.registryUrl,
+          config.packageName,
+        ),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -82,7 +88,7 @@ export class DenoDatasource extends Datasource {
   private async _getReleaseResult(
     moduleAPIURL: string,
   ): Promise<ReleaseResult> {
-    const detailsCacheKey = `details:${moduleAPIURL}`;
+    const detailsCacheKey = buildCacheKey('details', moduleAPIURL);
     const releasesCache: Record<string, Release> = coerceObject(
       await packageCache.get(
         `datasource-${DenoDatasource.id}`,
@@ -144,7 +150,7 @@ export class DenoDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${DenoDatasource.id}`,
-        key: `getReleaseResult:${moduleAPIURL}`,
+        key: buildCacheKey('getReleaseResult', moduleAPIURL),
       },
       () => this._getReleaseResult(moduleAPIURL),
     );

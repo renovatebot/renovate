@@ -34,11 +34,8 @@ export function parseQuote(input: string): QuotedValue {
   const first = trimmed[0];
   const last = trimmed.at(-1);
 
-  if (
-    trimmed.length >= 2 &&
-    first === last &&
-    (first === '"' || first === "'")
-  ) {
+  const isQuote = first === '"' || first === "'";
+  if (trimmed.length >= 2 && first === last && isQuote) {
     return { value: trimmed.slice(1, -1), quote: first };
   }
 
@@ -56,7 +53,7 @@ export function isShortSha(str: string): boolean {
   return shaShortRe.test(str);
 }
 
-const DOCKER_PREFIX = 'docker://';
+export const DOCKER_PREFIX = 'docker://';
 
 function parseDockerReference(input: string): DockerReference | null {
   const originalRef = input.slice(DOCKER_PREFIX.length);
