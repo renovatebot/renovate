@@ -181,6 +181,9 @@ describe('util/url', () => {
       `${registryUrl}/api/foo/bar`,
     );
     expect(joinUrlParts('foo//////')).toBe('foo/');
+    expect(joinUrlParts(`${registryUrl}/foo/`, '')).toBe(`${registryUrl}/foo`);
+    expect(joinUrlParts(`${registryUrl}/foo`, '/')).toBe(`${registryUrl}/foo/`);
+    expect(joinUrlParts(registryUrl, 'foo/', '//')).toBe(`${registryUrl}/foo/`);
   });
 
   it('createURLFromHostOrURL', () => {

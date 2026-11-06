@@ -11,7 +11,17 @@ import urlJoin from 'url-join';
 import { logger } from '../logger/index.ts';
 import { regEx } from './regex.ts';
 
+/**
+ * Joins URL parts with `url-join`, where a trailing empty part strips the
+ * trailing slash and a trailing `/` part keeps it.
+ */
 export function joinUrlParts(...parts: string[]): string {
+  const prefix = parts.slice(0, -1);
+  const [last] = parts.slice(-1);
+  if (prefix.length && trimSlashes(last) === '') {
+    const joined = urlJoin(...prefix);
+    return last ? ensureTrailingSlash(joined) : trimTrailingSlash(joined);
+  }
   return urlJoin(...parts);
 }
 
@@ -57,7 +67,7 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
     pathname = inputString;
   }
 
-  return host ? inputString : urlJoin(baseUrl, pathname || '');
+  return host ? inputString : joinUrlParts(baseUrl, pathname || '');
 }
 
 /**
@@ -72,7 +82,7 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
   }
 
   const { origin } = isString(baseUrl) ? new URL(baseUrl) : baseUrl;
-  return urlJoin(origin, path);
+  return joinUrlParts(origin, path);
 }
 
 /**
