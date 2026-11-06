@@ -43,6 +43,7 @@ import { ensureDependencyDashboard } from './dependency-dashboard.ts';
 import handleError from './error.ts';
 import { finalizeRepo } from './finalize/index.ts';
 import { pruneStaleBranches } from './finalize/prune.ts';
+import type { RepoConfig } from './init/defaults.ts';
 import { initRepo } from './init/index.ts';
 import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
@@ -61,12 +62,11 @@ export async function renovateRepository(
   let repoResult: ProcessResult | undefined;
   const { config, localDir, error } = await instrument(
     'init',
-    async (): Promise<{
-      config: RenovateConfig;
-      localDir: string;
-      error?: Error;
-    }> => {
-      let config = GlobalConfig.set(
+    async (): Promise<
+      | { config: RepoConfig; localDir: string; error?: undefined }
+      | { config: RenovateConfig; localDir: string; error: Error }
+    > => {
+      const config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
           deleteVariables: false,
@@ -84,8 +84,9 @@ export async function renovateRepository(
       try {
         await ensureDir(localDir);
         logger.debug(`Using localDir: ${localDir}`);
-        config = await initRepo(config);
+        const initializedConfig = await initRepo(config);
         addSplit('init');
+        return { config: initializedConfig, localDir };
       } catch (err) /* istanbul ignore next */ {
         setMeta({ repository: config.repository });
         const errorRes = await handleError(config, err);
@@ -101,8 +102,6 @@ export async function renovateRepository(
 
         return { config, localDir, error: err };
       }
-
-      return { config, localDir };
     },
     {
       attributes: {

@@ -8,6 +8,7 @@ import { platform } from '../../../modules/platform/index.ts';
 import * as _onboarding from '../onboarding/branch/index.ts';
 import * as _apis from './apis.ts';
 import * as _config from './config.ts';
+import { applyRepoConfigDefaults } from './defaults.ts';
 import { initRepo } from './index.ts';
 import * as _merge from './merge.ts';
 
@@ -53,7 +54,7 @@ describe('workers/repository/init/index', () => {
         partial<RenovateConfig>(),
       );
       const renovateConfig = await initRepo({});
-      expect(renovateConfig).toEqual({});
+      expect(renovateConfig).toEqual(applyRepoConfigDefaults({}));
     });
 
     it('applies the repo config to the platform after reading it', async () => {

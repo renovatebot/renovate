@@ -1,4 +1,3 @@
-import type { RenovateConfig } from '~test/util.ts';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -12,6 +11,8 @@ import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
+import type { RepoConfig } from '../init/defaults.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
 import {
@@ -28,10 +29,10 @@ const notFoundError = Object.assign(new Error('Not Found'), {
   response: { statusCode: 404 },
 });
 
-let config: RenovateConfig;
+let config: RepoConfig;
 
 beforeEach(() => {
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
 });
 
 describe('workers/repository/process/index', () => {
