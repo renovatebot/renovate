@@ -70,8 +70,7 @@ export class GradleVersionDatasource extends Datasource {
     return withCache(
       {
         namespace: `datasource-${GradleVersionDatasource.id}`,
-        // TODO: types (#22198)
-        key: `${config.registryUrl}`,
+        key: config.registryUrl!,
         fallback: true,
       },
       () => this._getReleases(config),

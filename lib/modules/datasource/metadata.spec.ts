@@ -133,10 +133,12 @@ describe('modules/datasource/metadata', () => {
   );
 
   it.each`
-    sourceUrl                                      | expectedSourceUrl
-    ${'git@gitlab.com:group/sub-group/repo'}       | ${'https://gitlab.com/group/sub-group/repo'}
-    ${'git@gitlab.com:group/sub-group/repo.git'}   | ${'https://gitlab.com/group/sub-group/repo'}
-    ${'git@somehost.com:group/sub-group/repo.git'} | ${'https://somehost.com/group/sub-group/repo'}
+    sourceUrl                                            | expectedSourceUrl
+    ${'git@gitlab.com:group/sub-group/repo'}             | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@gitlab.com:group/sub-group/repo.git'}         | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git@somehost.com:group/sub-group/repo.git'}       | ${'https://somehost.com/group/sub-group/repo'}
+    ${'git+https://gitlab.com/group/sub-group/repo.git'} | ${'https://gitlab.com/group/sub-group/repo'}
+    ${'git+ssh://git@gitlab.com/group/sub/repo.git'}     | ${'https://gitlab.com/group/sub/repo'}
   `(
     'Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl',
     ({ sourceUrl, expectedSourceUrl }) => {
@@ -405,6 +407,9 @@ describe('modules/datasource/metadata', () => {
       ${'https+git://github.com/user/repo'}
       ${'ssh://git@github.com/user/repo'}
       ${'git://github.com/user/repo'}
+      ${'git+https://github.com/user/repo'}
+      ${'git+ssh://git@github.com/user/repo'}
+      ${'git+git@github.com:user/repo'}
       ${'https://www.github.com/user/repo'}
       ${'https://user.github.com/repo'}
     `('Should massage GitHub url $sourceUrl', ({ sourceUrl }) => {
@@ -419,8 +424,17 @@ describe('modules/datasource/metadata', () => {
       ${'http://gitlab.com/user/repo/'}
       ${'http://gitlab.com/user/repo.git'}
       ${'git@gitlab.com:user/repo.git'}
+      ${'ssh://git@gitlab.com/user/repo'}
+      ${'git+https://gitlab.com/user/repo.git'}
+      ${'git+https://gitlab.com/user/repo'}
     `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
       expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
+    });
+
+    it('Should massage a GitLab subgroup git+https url', () => {
+      expect(massageUrl('git+https://gitlab.com/group/subgroup/repo.git')).toBe(
+        'https://gitlab.com/group/subgroup/repo',
+      );
     });
 
     it.each`
@@ -644,6 +658,36 @@ describe('modules/datasource/metadata', () => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
     },
   );
+
+  it.each`
+    urlKey             | rawUrl                                           | expectedUrl
+    ${'sourceUrl'}     | ${'https://user:token@example.com/foo/bar'}      | ${'https://example.com/foo/bar'}
+    ${'homepage'}      | ${'https://user:token@example.com/'}             | ${'https://example.com/'}
+    ${'changelogUrl'}  | ${'https://user:token@example.com/CHANGELOG.md'} | ${'https://example.com/CHANGELOG.md'}
+    ${'dependencyUrl'} | ${'https://user:token@example.com/maven2/foo'}   | ${'https://example.com/maven2/foo'}
+  `(
+    'removes userinfo credentials from $urlKey',
+    ({ urlKey, rawUrl, expectedUrl }) => {
+      const dep: ReleaseResult = { releases: [], [urlKey]: rawUrl };
+
+      addMetaData(dep, MavenDatasource.id, 'foobar');
+      expect(dep).toMatchObject({ [urlKey]: expectedUrl });
+    },
+  );
+
+  it('keeps an ssh git@ source URL working', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'git@gitlab.com:group/sub-group/repo.git',
+      releases: [],
+    };
+    const datasource = GitTagsDatasource.id;
+    const packageName = 'some-dep';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://gitlab.com/group/sub-group/repo',
+    });
+  });
 
   // for coverage
   it('should handle dep with no releases', () => {

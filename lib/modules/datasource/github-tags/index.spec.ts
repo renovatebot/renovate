@@ -178,6 +178,33 @@ describe('modules/datasource/github-tags/index', () => {
       });
     });
 
+    it('returns tags from the default registry without a registry URL', async () => {
+      vi.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01' as Timestamp,
+          hash: '123',
+        },
+      ]);
+      vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+
+      const res = await github.getReleases({ packageName });
+
+      expect(res).toEqual({
+        registryUrl: 'https://github.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+            releaseTimestamp: '2021-01-01',
+            newDigest: '123',
+          },
+        ],
+        sourceUrl: 'https://github.com/some/dep2',
+      });
+    });
+
     describe('releaseTimestamp takes precedence from GitHub Release', () => {
       const packageName = 'some/dep3';
 

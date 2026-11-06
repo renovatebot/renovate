@@ -143,7 +143,7 @@ export class GolangVersionDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl}`,
+        key: config.registryUrl!,
         fallback: true,
       },
       () => this.fetchReleases(config),

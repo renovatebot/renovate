@@ -13,7 +13,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import semver from 'semver';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global.ts';
+import { GlobalConfig, setHttpGlobalConfig } from '../../config/global.ts';
 import * as configParser from '../../config/index.ts';
 import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
@@ -177,26 +177,13 @@ export async function start(): Promise<number> {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
 
-      // Set allowedHeaders and userAgent in case hostRules headers are configured in file config
-      // `platform`, `endpoint` and `internalHostAccess` are set here too, so that the platform's own initialization requests - which happen inside `globalInitialize()`, before the config below is set - are judged by the administrator's `internalHostAccess` setting, and are recognized as going to the platform endpoint
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        endpoint: config.endpoint,
-        internalHostAccess: config.internalHostAccess,
-        platform: config.platform,
-        userAgent: config.userAgent,
-      });
+      // set before `globalInitialize()`, so that `hostRules` headers from file config are checked against `allowedHeaders`, and the platform's own initialization requests are judged by the administrator's `internalHostAccess` setting and recognized as going to the platform endpoint
+      setHttpGlobalConfig(config);
       // initialize all submodules
       config = await globalInitialize(config);
 
-      // Set platform, endpoint, allowedHeaders and userAgent in case local presets are used, now that platform initialization may have changed them
-      GlobalConfig.set({
-        allowedHeaders: config.allowedHeaders,
-        platform: config.platform,
-        endpoint: config.endpoint,
-        internalHostAccess: config.internalHostAccess,
-        userAgent: config.userAgent,
-      });
+      // set again in case local presets are used, now that platform initialization may have changed `platform` and `endpoint`
+      setHttpGlobalConfig(config);
 
       await validatePresets(config);
 

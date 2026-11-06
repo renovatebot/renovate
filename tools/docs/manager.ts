@@ -53,6 +53,7 @@ export const CategoryNames: Record<Category, string> = {
   iac: 'Infrastructure as Code',
   java: 'Java',
   js: 'JavaScript',
+  julia: 'Julia',
   kubernetes: 'Kubernetes',
   node: 'Node.js',
   perl: 'Perl',
@@ -175,8 +176,10 @@ export async function generateManagers(
       if (definition.supportsDynamicDepTypesNote) {
         md += `${definition.supportsDynamicDepTypesNote}\n\n`;
       }
+      const hasNoKnownDepTypes =
+        !definition.knownDepTypes || definition.knownDepTypes.length === 0;
       if (
-        (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
+        hasNoKnownDepTypes &&
         definition.supportsDynamicDepTypesNote === undefined
       ) {
         md += 'This manager has no documented `depType` values.\n';

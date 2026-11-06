@@ -1,7 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
@@ -73,7 +75,7 @@ export class BazelDatasource extends Datasource {
       }
     } catch (err) {
       if (err instanceof HttpError) {
-        if (err.response?.statusCode === 404) {
+        if (isNotFound(err)) {
           return null;
         }
         throw new ExternalHostError(err);
@@ -87,7 +89,7 @@ export class BazelDatasource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `${config.registryUrl!}:${config.packageName}`,
+        key: buildCacheKey(config.registryUrl, config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),

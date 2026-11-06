@@ -17,8 +17,13 @@ export default defineRule({
           callee.computed ||
           callee.object.type !== 'Identifier' ||
           callee.object.name !== 'vi' ||
-          callee.property.type !== 'Identifier' ||
-          (callee.property.name !== 'mock' && callee.property.name !== 'doMock')
+          callee.property.type !== 'Identifier'
+        ) {
+          return;
+        }
+        if (
+          callee.property.name !== 'mock' &&
+          callee.property.name !== 'doMock'
         ) {
           return;
         }

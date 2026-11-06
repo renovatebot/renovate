@@ -62,10 +62,12 @@ function isValid(input: string): boolean {
 }
 
 function isSingleVersion(constraint: string): boolean {
+  if (npm.isVersion(constraint)) {
+    return true;
+  }
   return (
-    npm.isVersion(constraint) ||
-    (constraint?.startsWith('==') &&
-      npm.isVersion(constraint.substring(2).trim()))
+    constraint?.startsWith('==') &&
+    npm.isVersion(constraint.substring(2).trim())
   );
 }
 

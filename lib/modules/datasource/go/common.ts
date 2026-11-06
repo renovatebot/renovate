@@ -1,5 +1,8 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import type { HostRule } from '../../../types/index.ts';
 import { getSourceUrl as githubSourceUrl } from '../../../util/github/url.ts';
 import { getSourceUrl as gitlabSourceUrl } from '../../../util/gitlab/url.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
@@ -7,15 +10,9 @@ import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GitlabTagsDatasource } from '../gitlab-tags/index.ts';
 
+import { publicGoproxyUrl } from './env.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import type { DataSource, GoproxyItem } from './types.ts';
-
-/**
- * The Go module proxy which serves public modules only, and which the Go toolchain uses by default.
- *
- * @see https://go.dev/ref/mod#module-proxy
- */
-export const publicGoproxyUrl = 'https://proxy.golang.org';
 
 /**
  * Whether a module's data may be written to a package cache which is shared with others.
@@ -26,10 +23,28 @@ export const publicGoproxyUrl = 'https://proxy.golang.org';
  *
  * An unset `GOPROXY` is the default, so it is public too.
  *
+ * A `hostType: go` (or `go-proxy`) host rule with credentials for the module's host is also a declaration that the module is private, as it can't be read without them.
+ *
  * @see https://go.dev/ref/mod#private-modules
  */
 function isPublicProxy({ url }: GoproxyItem): boolean {
   return trimTrailingSlash(url) === publicGoproxyUrl;
+}
+
+function matchesRuleHost(rule: HostRule, url: string): boolean {
+  return !rule.matchHost || hostRules.matchesHost(url, rule.matchHost);
+}
+
+function hasGoHostRuleCredentials(packageName: string): boolean {
+  const url = `https://${packageName}`;
+  return [
+    ...hostRules.findAll({ hostType: 'go' }),
+    ...hostRules.findAll({ hostType: 'go-proxy' }),
+  ].some(
+    (rule) =>
+      matchesRuleHost(rule, url) &&
+      [rule.token, rule.password, rule.httpsPrivateKey].some(isNonEmptyString),
+  );
 }
 
 export function isPublicGoPackage(packageName: string): boolean {
@@ -37,14 +52,18 @@ export function isPublicGoPackage(packageName: string): boolean {
     return false;
   }
 
+  if (hasGoHostRuleCredentials(packageName)) {
+    return false;
+  }
+
   const proxies = parseGoproxy();
 
-  return proxies.every(
-    (proxy) =>
-      proxy.url === 'off' ||
-      isPublicProxy(proxy) ||
-      (proxy.url === 'direct' && proxies.some(isPublicProxy)),
-  );
+  return proxies.every((proxy) => {
+    if (proxy.url === 'off' || isPublicProxy(proxy)) {
+      return true;
+    }
+    return proxy.url === 'direct' && proxies.some(isPublicProxy);
+  });
 }
 
 export function getSourceUrl(

@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as memCache from '../../cache/memory/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
+import { buildCacheKey } from '../../cache/package/key.ts';
 import type { PackageCacheNamespace } from '../../cache/package/types.ts';
 import type {
   GithubGraphqlResponse,
@@ -108,7 +109,7 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   private getCacheKey(): string {
-    return [this.baseUrl, this.repoOwner, this.repoName].join(':');
+    return buildCacheKey(this.baseUrl, this.repoOwner, this.repoName);
   }
 
   private getRawQueryOptions(): GithubHttpOptions {
@@ -324,13 +325,13 @@ export class GithubGraphqlDatasourceFetcher<
 
   async loadPersistenceFlag(): Promise<void> {
     const ns = this.getCacheNs();
-    const key = `${this.getCacheKey()}:is-persistent`;
+    const key = buildCacheKey(this.getCacheKey(), 'is-persistent');
     this.isPersistent = await packageCache.get<true>(ns, key);
   }
 
   async storePersistenceFlag(minutes: number): Promise<void> {
     const ns = this.getCacheNs();
-    const key = `${this.getCacheKey()}:is-persistent`;
+    const key = buildCacheKey(this.getCacheKey(), 'is-persistent');
     await packageCache.set(ns, key, true, minutes);
   }
 
@@ -339,7 +340,11 @@ export class GithubGraphqlDatasourceFetcher<
    * to a particular package during single run.
    */
   private doUniqueQuery(): Promise<ResultItem[]> {
-    const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
+    const cacheKey = buildCacheKey(
+      'github-pending',
+      this.getCacheNs(),
+      this.getCacheKey(),
+    );
     let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
     resultPromise ??= this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);

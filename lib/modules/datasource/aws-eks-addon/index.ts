@@ -3,6 +3,7 @@ import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -68,7 +69,7 @@ export class AwsEKSAddonDataSource extends Datasource {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     return this.cached(
       {
-        key: `getReleases:${config.packageName}`,
+        key: buildCacheKey('getReleases', config.packageName),
         fallback: true,
       },
       () => this.fetchReleases(config),
@@ -76,12 +77,12 @@ export class AwsEKSAddonDataSource extends Datasource {
   }
 
   private getClient({ region, profile }: EksAddonsFilter): EKSClient {
-    const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
-    if (!(cacheKey in this.clients)) {
+    const clientKey = `${region ?? 'default'}#${profile ?? 'default'}`;
+    if (!(clientKey in this.clients)) {
       const { password, token, username } = hostRules.find({
         hostType: AwsEKSAddonDataSource.id,
       });
-      this.clients[cacheKey] = new EKSClient({
+      this.clients[clientKey] = new EKSClient({
         ...(region && { region }),
         credentials:
           username && password
@@ -93,6 +94,6 @@ export class AwsEKSAddonDataSource extends Datasource {
             : fromNodeProviderChain(profile ? { profile } : undefined),
       });
     }
-    return this.clients[cacheKey];
+    return this.clients[clientKey];
   }
 }

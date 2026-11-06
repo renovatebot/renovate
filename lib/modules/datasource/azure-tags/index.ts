@@ -11,7 +11,7 @@ export class AzureTagsDatasource extends GitHostTagsDatasource {
     super(AzureTagsDatasource.id);
   }
 
-  protected getRegistryUrl(registryUrl?: string): string {
+  protected override getRegistryUrl(registryUrl?: string): string {
     // the Azure DevOps organization URL is always known
     return registryUrl!;
   }

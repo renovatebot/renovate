@@ -4,9 +4,27 @@ import {
   looseEquals,
   replaceAt,
   stripTemplates,
+  stripVersionPrefix,
 } from './string.ts';
 
 describe('util/string', () => {
+  describe('stripVersionPrefix', () => {
+    it.each`
+      version      | expected
+      ${'v1.2.3'}  | ${'1.2.3'}
+      ${'V1.2.3'}  | ${'1.2.3'}
+      ${'1.2.3'}   | ${'1.2.3'}
+      ${'vv1.2.3'} | ${'v1.2.3'}
+      ${'1.2.3v'}  | ${'1.2.3v'}
+      ${''}        | ${''}
+    `(
+      'stripVersionPrefix("$version") === "$expected"',
+      ({ version, expected }) => {
+        expect(stripVersionPrefix(version)).toBe(expected);
+      },
+    );
+  });
+
   describe('replaceAt', () => {
     it('replaceAt inserts newString which is one char longer than oldString', () => {
       const content = 'I am a dog';

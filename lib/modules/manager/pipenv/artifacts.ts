@@ -19,7 +19,7 @@ import {
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { decodeUserinfo, parseUrl } from '../../../util/url.ts';
 import { findPypiIndexCredentials } from '../../datasource/pypi/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
@@ -40,14 +40,32 @@ async function findPipfileSourceUrlsWithCredentials(
 }
 
 /**
+ * Matches a whole `$NAME`, `${NAME}`, `${NAME-default}` or `${NAME:-default}` environment variable reference, the braced forms also in single quotes as pipenv accepts them.
+ */
+const environmentVariableReferenceRegex = regEx(
+  /^(?:'\$\{(?<quoted>[a-z_][a-z\d_]*)(?::?-[^{}]*)?\}'|\$(?:\{(?<braced>[a-z_][a-z\d_]*)(?::?-[^{}]*)?\}|(?<plain>[a-z_][a-z\d_]*)))$/i,
+);
+
+/**
  * This will extract the actual variable name from an environment-placeholder:
  * ${USERNAME:-defaultvalue} will yield 'USERNAME'
+ * @returns the variable name, or `null` when `credential` is not exactly one reference, such as a literal value
  */
 export function extractEnvironmentVariableName(
   credential: string,
 ): string | null {
-  const match = regEx('([a-z0-9_]+)', 'i').exec(decodeURI(credential));
-  return match?.length ? match[0] : null;
+  // the URL parser percent-encodes the braces, the quotes and the `:` of `${NAME:-default}`
+  const groups = environmentVariableReferenceRegex.exec(
+    decodeUserinfo(credential),
+  )?.groups;
+  return groups?.quoted ?? groups?.braced ?? groups?.plain ?? null;
+}
+
+/**
+ * Whether the userinfo of `url` holds a literal value rather than environment variable references as pipenv reads them: its password, or its username when it has no password, is not exactly one reference.
+ */
+function hasLiteralUserinfo(url: URL): boolean {
+  return !extractEnvironmentVariableName(url.password || url.username);
 }
 
 export function addExtraEnvVariable(
@@ -85,7 +103,11 @@ async function addCredentialsForSourceUrls(
     newPipfileContent,
     pipfileName,
   );
-  for (const parsedSourceUrl of sourceUrls) {
+  // a source URL with literal credentials carries them itself, and the host rule found for it may hold just those
+  const placeholderSourceUrls = sourceUrls.filter(
+    (url) => !hasLiteralUserinfo(url),
+  );
+  for (const parsedSourceUrl of placeholderSourceUrls) {
     logger.trace(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
     const credentials = await findPypiIndexCredentials(
       parsedSourceUrl.toString(),

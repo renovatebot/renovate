@@ -1,6 +1,7 @@
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -117,11 +118,13 @@ export class MavenDatasource extends Datasource {
     const dependency = getDependencyParts(packageName);
     const repoUrl = ensureTrailingSlash(registryUrl);
 
-    if (
+    const isGradlePlugin =
       // groupId
-      (packageName.includes('.gradle.plugin:') ||
-        // artifactId
-        packageName.endsWith('.gradle.plugin')) &&
+      packageName.includes('.gradle.plugin:') ||
+      // artifactId
+      packageName.endsWith('.gradle.plugin');
+    if (
+      isGradlePlugin &&
       MAVEN_CENTRAL_URLS.some((url) => repoUrl === ensureTrailingSlash(url))
     ) {
       logger.debug(
@@ -177,9 +180,13 @@ export class MavenDatasource extends Datasource {
     release: Release,
   ): Promise<PostprocessReleaseResult> {
     const { version, versionOrig } = release;
-    const cacheKey = versionOrig
-      ? `postprocessRelease:${registryUrl}:${packageName}:${versionOrig}:${version}`
-      : `postprocessRelease:${registryUrl}:${packageName}:${version}`;
+    const cacheKey = buildCacheKey(
+      'postprocessRelease',
+      registryUrl,
+      packageName,
+      versionOrig,
+      version,
+    );
     const cachedResult = await packageCache.get<PostprocessReleaseResult>(
       'datasource-maven:postprocess-reject',
       cacheKey,

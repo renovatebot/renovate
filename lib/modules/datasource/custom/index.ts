@@ -1,6 +1,7 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { getExpression } from '../../../util/jsonata.ts';
+import { withoutUrlCredentials } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
@@ -85,7 +86,14 @@ export class CustomDatasource extends Datasource {
 
     try {
       const parsed = ReleaseResultZod.parse(data);
-      return structuredClone(parsed);
+      const result: ReleaseResult = structuredClone(parsed);
+      const { registryUrl } = getReleasesConfig;
+      // a URL template keeps its credentials until it is compiled
+      // set only with releases, as `getRegistryReleases()` does, so that an empty result stays recognisable as one
+      if (registryUrl && result.releases.length) {
+        result.registryUrl = withoutUrlCredentials(registryUrl);
+      }
+      return result;
     } catch (err) {
       logger.debug({ err }, `Response has failed validation`);
       logger.trace({ data }, 'Response that has failed validation');
