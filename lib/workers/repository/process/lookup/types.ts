@@ -70,7 +70,7 @@ interface LookupUpdateFields
  */
 export type LookupUpdateConfig = WithDefaults<
   LookupUpdateFields,
-  Extract<RepoDefaultedConfigKey, keyof RenovateConfigFile>
+  RepoDefaultedConfigKey
 >;
 
 export interface UpdateResult {

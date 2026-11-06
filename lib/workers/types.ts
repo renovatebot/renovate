@@ -56,7 +56,7 @@ type BranchUpgradeRemovedConfigKey =
  * The options which have a value in a branch upgrade, as `flattenUpdates()` merges it from the {@link RenovateConfig}.
  */
 type BranchUpgradeDefaultedConfigKey = Exclude<
-  Extract<RepoDefaultedConfigKey, keyof RenovateConfigFile>,
+  RepoDefaultedConfigKey,
   BranchUpgradeRemovedConfigKey
 >;
 
@@ -92,7 +92,6 @@ interface BranchUpgradeFields
   displayPending?: string;
   displayTo?: string;
 
-  excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
   groupName?: string;
@@ -120,7 +119,6 @@ interface BranchUpgradeFields
   prHeader?: string;
   prFooter?: string;
   prBodyNotes?: string[];
-  prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
@@ -198,7 +196,6 @@ export type CacheFingerprintMatchResult =
 
 interface BranchConfigFields
   extends BranchUpgradeFields, LegacyAdminConfig, PlatformPrOptions {
-  automergeComment?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
@@ -236,7 +233,6 @@ interface BranchConfigFields
   isConflicted?: boolean;
   commitFingerprint?: string;
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
-  prNotPendingHours?: number;
 }
 
 export type BranchConfig = WithDefaults<

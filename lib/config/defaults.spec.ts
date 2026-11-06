@@ -106,28 +106,9 @@ describe('config/defaults', () => {
 
   describe('DefaultedConfigKey', () => {
     it('only contains keys of the config', () => {
-      // the options which are only declared on the types of the workers, managers and platforms which read them, so that adding to this list fails
-      type Undeclared =
-        | 'automergeComment'
-        | 'bbAutoResolvePrTasks'
-        | 'bbUseDefaultReviewers'
-        | 'excludeCommitPaths'
-        | 'forkCreation'
-        | 'gitLabIgnoreApprovals'
-        | 'goGetDirs'
-        | 'ignoreDeprecated'
-        | 'ignorePlugins'
-        | 'ignoreScripts'
-        | 'maxMajorIncrement'
-        | 'prBodyTemplate'
-        | 'prNotPendingHours'
-        | 'replacementApproach'
-        | 'updatePinnedDependencies'
-        | 'userStrings';
-
       expectTypeOf<
         Exclude<DefaultedConfigKey, keyof AllConfig>
-      >().toEqualTypeOf<Undeclared>();
+      >().toEqualTypeOf<never>();
     });
 
     it('follows the rules of getConfig() and getDefault()', () => {

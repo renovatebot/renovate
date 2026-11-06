@@ -724,7 +724,7 @@ export async function processBranch(
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content += ' related to this branch. ';
         content += template.compile(
-          config.userStrings!.artifactErrorWarning,
+          config.userStrings.artifactErrorWarning,
           config,
         );
         content += emojify(

@@ -459,16 +459,14 @@ export function generateBranchConfig(
   ].filter(isNonEmptyString);
   // combine excludeCommitPaths for multiple manager experience
   const hasExcludeCommitPaths = config.upgrades.some(
-    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0,
+    (u) => u.excludeCommitPaths.length > 0,
   );
   if (hasExcludeCommitPaths) {
     config.excludeCommitPaths = Object.keys(
       config.upgrades.reduce((acc: Record<string, boolean>, upgrade) => {
-        if (upgrade.excludeCommitPaths) {
-          upgrade.excludeCommitPaths.forEach((p) => {
-            acc[p] = true;
-          });
-        }
+        upgrade.excludeCommitPaths.forEach((p) => {
+          acc[p] = true;
+        });
 
         return acc;
       }, {}),

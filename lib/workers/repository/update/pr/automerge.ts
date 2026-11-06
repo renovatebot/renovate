@@ -101,8 +101,7 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    // TODO: types (#22198)
-    logger.debug(`Applying automerge comment: ${automergeComment!}`);
+    logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -117,13 +116,13 @@ export async function checkAutoMerge(
       await ensureCommentRemoval({
         type: 'by-content',
         number: pr.number,
-        content: automergeComment!,
+        content: automergeComment,
       });
     }
     await ensureComment({
       number: pr.number,
       topic: null,
-      content: automergeComment!,
+      content: automergeComment,
     });
     return { automerged: true, branchRemoved: false };
   }

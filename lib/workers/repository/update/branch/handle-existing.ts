@@ -16,8 +16,7 @@ export async function handleClosedPr(
 ): Promise<void> {
   if (pr.state === 'closed') {
     let content;
-    // TODO #22198
-    const userStrings = config.userStrings!;
+    const { userStrings } = config;
     if (config.updateType === 'major') {
       content = template.compile(userStrings.ignoreMajor, config);
     } else if (config.updateType === 'digest') {

@@ -80,7 +80,7 @@ export interface ToolConstraintsConfig {
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
-  composerIgnorePlatformReqs?: string[];
+  composerIgnorePlatformReqs?: string[] | null;
   goGetDirs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];

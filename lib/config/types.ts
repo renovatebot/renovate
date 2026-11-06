@@ -78,11 +78,14 @@ export interface RenovateSharedConfig {
   autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
+  automergeComment?: string;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
   azureWorkItemType?: string;
+  bbAutoResolvePrTasks?: boolean;
+  bbUseDefaultReviewers?: boolean;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -97,6 +100,7 @@ export interface RenovateSharedConfig {
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   commitTrailers?: string[];
+  composerIgnorePlatformReqs?: string[] | null;
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
@@ -105,19 +109,25 @@ export interface RenovateSharedConfig {
   enabled?: boolean;
   enabledManagers?: string[];
   encrypted?: Record<string, string>;
+  excludeCommitPaths?: string[];
   extends?: string[];
   extractVersion?: string;
   managerFilePatterns?: string[];
   followTag?: string;
   force?: RenovateConfigFile;
   gitIgnoredAuthors?: string[];
+  gitLabIgnoreApprovals?: boolean;
+  goGetDirs?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
+  ignoreDeprecated?: boolean;
   ignoreDeps?: string[];
   ignorePaths?: string[];
+  ignorePlugins?: boolean;
+  ignoreScripts?: boolean;
   ignoreTests?: boolean;
   ignoreUnstable?: boolean;
   includePaths?: string[];
@@ -126,6 +136,7 @@ export interface RenovateSharedConfig {
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
+  maxMajorIncrement?: number;
   milestone?: number;
   minimumReleaseAge?: Nullish<string>;
   minimumReleaseAgeBuffer?: Nullish<string>;
@@ -141,9 +152,11 @@ export interface RenovateSharedConfig {
   prBodyDefinitions?: Record<string, string>;
   prBodyHeadingDefinitions?: Record<string, string>;
   prBodyNotes?: string[];
+  prBodyTemplate?: string;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   prFooter?: string;
   prHeader?: string;
+  prNotPendingHours?: number;
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
@@ -153,6 +166,7 @@ export interface RenovateSharedConfig {
   rebaseWhen?: string;
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
+  replacementApproach?: 'replace' | 'alias';
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
@@ -172,6 +186,8 @@ export interface RenovateSharedConfig {
   timezone?: string;
   unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
+  updatePinnedDependencies?: boolean;
+  userStrings?: Record<string, string>;
   versioning?: string;
   versionCompatibility?: string;
 }
@@ -413,6 +429,7 @@ export interface RenovateConfigFile
   overrideDescription?: string | string[];
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
+  forkCreation?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
   forkToken?: string;
