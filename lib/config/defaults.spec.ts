@@ -1,7 +1,12 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { partial } from '../../test/util.ts';
 import type { DefaultedConfigKey, WithDefaults } from './defaults.ts';
-import { getConfig, getDefault, isDefaultedOption } from './defaults.ts';
+import {
+  getConfig,
+  getDefault,
+  isDefaultedOption,
+  isRepoDefaultedOption,
+} from './defaults.ts';
 import { getOptions } from './options/index.ts';
 import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
 
@@ -78,7 +83,24 @@ describe('config/defaults', () => {
         'composerIgnorePlatformReqs',
         'semanticCommitScope',
         'minimumReleaseAgeBuffer',
+        'commitMessageTopic',
+        'commitMessageExtra',
       ]);
+    });
+  });
+
+  describe('isRepoDefaultedOption()', () => {
+    it.each`
+      name                           | expected
+      ${'dependencyDashboardTitle'}  | ${true}
+      ${'onboarding'}                | ${false}
+      ${'extends'}                   | ${false}
+      ${'autodiscover'}              | ${false}
+      ${'dependencyDashboardFooter'} | ${false}
+    `('returns $expected for $name', ({ name, expected }) => {
+      const option = getOptions().find((o) => o.name === name)!;
+
+      expect(isRepoDefaultedOption(option)).toBe(expected);
     });
   });
 

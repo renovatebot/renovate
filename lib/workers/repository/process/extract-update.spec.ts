@@ -17,6 +17,7 @@ import type {
 import { fingerprint } from '../../../util/fingerprint.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _extractAll from '../extract/index.ts';
 import * as _branchify from '../updates/branchify.ts';
@@ -61,14 +62,14 @@ describe('workers/repository/process/extract-update', () => {
 
   beforeEach(() => {
     branchify.branchifyUpgrades.mockResolvedValue({
-      branches: [
+      branches: partial<BranchConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
         },
-      ],
+      ]),
       branchList: ['branchName'],
     });
   });
@@ -1434,14 +1435,14 @@ describe('workers/repository/process/extract-update', () => {
   describe('update()', () => {
     it('writes the updates', async () => {
       const config = partial<RenovateConfig>();
-      const branches = [
+      const branches = partial<BranchConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
         },
-      ];
+      ]);
       write.writeUpdates.mockResolvedValueOnce('automerged');
 
       const res = await update(config, branches);

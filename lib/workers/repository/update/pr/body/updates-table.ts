@@ -13,11 +13,9 @@ function getRowDefinition(
   upgrade: BranchUpgradeConfig,
 ): TableDefinition[] {
   const res: TableDefinition[] = [];
-  if (upgrade.prBodyDefinitions) {
-    for (const header of prBodyColumns) {
-      const value = upgrade.prBodyDefinitions[header];
-      res.push({ header, value });
-    }
+  for (const header of prBodyColumns) {
+    const value = upgrade.prBodyDefinitions[header];
+    res.push({ header, value });
   }
   return res;
 }
@@ -38,15 +36,10 @@ function getNonEmptyColumns(
 }
 
 function getHeaderLabel(header: string, config: BranchConfig): string {
-  return config.prBodyHeadingDefinitions?.[header] ?? header;
+  return config.prBodyHeadingDefinitions[header] ?? header;
 }
 
 export function getPrUpdatesTable(config: BranchConfig): string {
-  if (config.prBodyColumns === undefined) {
-    logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
-    return '';
-  }
-
   const tableKeyValuePairs: Record<string, Record<string, string>> = {};
   for (const upgrade of config.upgrades) {
     if (upgrade) {

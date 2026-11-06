@@ -1,9 +1,9 @@
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import type { BranchConfig } from '../../../types.ts';
 import { isScheduledNow } from './schedule.ts';
 import { resolveBranchStatus } from './status-checks.ts';
 
@@ -19,7 +19,7 @@ export type AutomergeResult =
   | 'not ready';
 
 export async function tryBranchAutomerge(
-  config: RenovateConfigFile,
+  config: BranchConfig,
   branchPr: Pr | null,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
@@ -33,8 +33,8 @@ export async function tryBranchAutomerge(
     return 'automerge aborted - PR exists';
   }
   const branchStatus = await resolveBranchStatus(
-    config.branchName!,
-    !!config.internalChecksAsSuccess,
+    config.branchName,
+    config.internalChecksAsSuccess,
     config.ignoreTests,
   );
   if (branchStatus === 'green') {
@@ -42,10 +42,10 @@ export async function tryBranchAutomerge(
     try {
       if (GlobalConfig.get('dryRun')) {
         // TODO: types (#22198)
-        logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
+        logger.info(`DRY-RUN: Would automerge branch ${config.branchName}`);
       } else {
-        await scm.checkoutBranch(config.baseBranch!);
-        await scm.mergeAndPush(config.branchName!);
+        await scm.checkoutBranch(config.baseBranch);
+        await scm.mergeAndPush(config.branchName);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists
@@ -71,7 +71,7 @@ export async function tryBranchAutomerge(
       // is allowed to bypass it, so the push is attempted first and a PR is
       // created only if it was refused. The rejection message is platform
       // specific, so the platform is asked instead of parsing it.
-      if (await platform.isBranchMergeQueueEnabled?.(config.baseBranch!)) {
+      if (await platform.isBranchMergeQueueEnabled?.(config.baseBranch)) {
         logger.warn(
           { baseBranch: config.baseBranch, err },
           'automergeType=branch is not possible because the base branch only accepts changes through its merge queue - falling back to creating a PR. Set automergeType=pr instead, or allow Renovate to bypass the merge queue.',

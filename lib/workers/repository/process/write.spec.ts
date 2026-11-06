@@ -52,7 +52,7 @@ beforeEach(() => {
 describe('workers/repository/process/write', () => {
   describe('writeUpdates()', () => {
     it('stops after automerge', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'test_branch',
           baseBranch: 'base',
@@ -85,7 +85,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [],
         },
-      ];
+      ]);
       scm.branchExists.mockResolvedValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -110,7 +110,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('leaves branches of groups with a failed lookup unchanged', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           baseBranch: 'main',
           branchName: 'group',
@@ -124,7 +124,7 @@ describe('workers/repository/process/write', () => {
           manager: 'npm',
           upgrades: [],
         },
-      ];
+      ]);
       scm.branchExists.mockResolvedValue(true);
       branchWorker.processBranch.mockResolvedValue({
         branchExists: true,
@@ -145,7 +145,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('counts vulnerability alert branches separately', async () => {
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           baseBranch: 'main',
           branchName: 'regular',
@@ -193,7 +193,7 @@ describe('workers/repository/process/write', () => {
 
     it('increments branch counter', async () => {
       const branchName = 'branchName';
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           baseBranch: 'main',
           branchName,
@@ -233,7 +233,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('return no-work if branch fingerprint is not different', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           baseBranch: 'base',
@@ -244,7 +244,7 @@ describe('workers/repository/process/write', () => {
             }),
           ],
         },
-      ];
+      ]);
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           partial<BranchCache>({
@@ -262,7 +262,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('updates branch fingerprint when new commit is made', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           baseBranch: 'base',
@@ -273,7 +273,7 @@ describe('workers/repository/process/write', () => {
             }),
           ],
         },
-      ];
+      ]);
       repoCache.getCache.mockReturnValueOnce({
         branches: [
           partial<BranchCache>({
@@ -305,7 +305,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('caches same fingerprint when no commit is made and branch cache existed', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -316,7 +316,7 @@ describe('workers/repository/process/write', () => {
             }),
           ],
         },
-      ];
+      ]);
       const branch = branches[0];
       const managers = [
         ...new Set(
@@ -350,7 +350,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('caches same fingerprint when no commit is made', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -361,7 +361,7 @@ describe('workers/repository/process/write', () => {
             }),
           ],
         },
-      ];
+      ]);
       const branch = branches[0];
       const managers = [
         ...new Set(
@@ -392,7 +392,7 @@ describe('workers/repository/process/write', () => {
     });
 
     it('creates new branchCache when cache is not enabled', async () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           branchName: 'new/some-branch',
           baseBranch: 'base_branch',
@@ -403,7 +403,7 @@ describe('workers/repository/process/write', () => {
             }),
           ],
         },
-      ];
+      ]);
       const repoCacheObj = partial<RepoCacheData>();
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({

@@ -27,7 +27,7 @@ export async function handleClosedPr(
     }
     content +=
       '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
-    if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
+    if (!config.suppressNotifications.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
           `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
@@ -54,7 +54,7 @@ export async function handleModifiedPr(
   config: BranchConfig,
   pr: Pr,
 ): Promise<void> {
-  if (config.suppressNotifications!.includes('prEditedNotification')) {
+  if (config.suppressNotifications.includes('prEditedNotification')) {
     return;
   }
 

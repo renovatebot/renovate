@@ -1,6 +1,5 @@
 // TODO #22198
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
@@ -30,8 +29,8 @@ export async function prAlreadyExisted(
   if (!pr && config.branchPrefix !== config.branchPrefixOld) {
     pr = await platform.findPr({
       branchName: config.branchName.replace(
-        config.branchPrefix!,
-        config.branchPrefixOld!,
+        config.branchPrefix,
+        config.branchPrefixOld,
       ),
       prTitle: config.prTitle,
       state: '!open',
@@ -94,7 +93,7 @@ export async function findClosedPrForModifiedBranch(
  * title, a PR label or the rebase checkbox in the PR body.
  */
 export async function rebaseCheck(
-  config: RenovateConfigFile,
+  config: Pick<BranchConfig, 'rebaseLabel'>,
   branchPr: Pr,
 ): Promise<boolean> {
   const titleRebase = branchPr.title?.startsWith('rebase!');
@@ -104,19 +103,19 @@ export async function rebaseCheck(
     );
     return true;
   }
-  const labelRebase = !!branchPr.labels?.includes(config.rebaseLabel!);
+  const labelRebase = !!branchPr.labels?.includes(config.rebaseLabel);
   if (labelRebase) {
     logger.debug(
       `Manual rebase requested via PR labels for #${branchPr.number}`,
     );
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+        `DRY-RUN: Would delete label ${config.rebaseLabel} from #${
           branchPr.number
         }`,
       );
     } else {
-      await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
+      await platform.deleteLabel(branchPr.number, config.rebaseLabel);
     }
     return true;
   }

@@ -134,7 +134,7 @@ export async function checkAutoMerge(
     logger.info(
       `DRY-RUN: Would merge PR #${
         pr.number
-      } with strategy "${automergeStrategy!}"`,
+      } with strategy "${automergeStrategy}"`,
     );
     return {
       automerged: false,
@@ -142,7 +142,7 @@ export async function checkAutoMerge(
     };
   }
   // TODO: types (#22198)
-  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
+  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
   const res = await platform.mergePr({
     branchName,
     id: pr.number,

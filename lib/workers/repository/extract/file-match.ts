@@ -1,7 +1,4 @@
-import type {
-  RenovateConfig,
-  RenovateConfigFile,
-} from '../../../config/types.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { minimatch } from '../../../util/minimatch.ts';
@@ -11,7 +8,7 @@ export function getIncludedFiles(
   fileList: string[],
   includePaths: string[],
 ): string[] {
-  if (!includePaths?.length) {
+  if (!includePaths.length) {
     return [...fileList];
   }
   return fileList.filter((file) =>
@@ -27,7 +24,7 @@ export function filterIgnoredFiles(
   fileList: string[],
   ignorePaths: string[],
 ): string[] {
-  if (!ignorePaths?.length) {
+  if (!ignorePaths.length) {
     return [...fileList];
   }
   return fileList.filter(
@@ -41,15 +38,13 @@ export function filterIgnoredFiles(
 }
 
 export function getFilteredFileList(
-  config: RenovateConfigFile,
+  config: Pick<RenovateConfig, 'includePaths' | 'ignorePaths'>,
   fileList: string[],
 ): string[] {
   return instrument('getFilteredFileList', () => {
     const { includePaths, ignorePaths } = config;
-    // TODO #22198
-
-    let filteredList = getIncludedFiles(fileList, includePaths!);
-    filteredList = filterIgnoredFiles(filteredList, ignorePaths!);
+    let filteredList = getIncludedFiles(fileList, includePaths);
+    filteredList = filterIgnoredFiles(filteredList, ignorePaths);
     return filteredList;
   });
 }

@@ -10,7 +10,7 @@ describe('workers/repository/update/branch/artifacts', () => {
 
   beforeEach(() => {
     GlobalConfig.set({});
-    config = {
+    config = partial<BranchConfig>({
       baseBranch: 'base-branch',
       manager: 'some-manager',
       branchName: 'renovate/pin',
@@ -19,7 +19,8 @@ describe('workers/repository/update/branch/artifacts', () => {
       statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         artifactError: 'renovate/artifact',
       }),
-    } satisfies BranchConfig;
+      statusCheckWhen: {},
+    });
   });
 
   describe('setArtifactsErrorStatus', () => {
@@ -60,18 +61,6 @@ describe('workers/repository/update/branch/artifacts', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           artifactError: '',
         }),
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
-    it('skips status if statusCheckNames is undefined', async () => {
-      await setArtifactErrorStatus({
-        ...config,
-        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(

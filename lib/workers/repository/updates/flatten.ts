@@ -116,7 +116,8 @@ export async function flattenUpdates(
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);
     for (const packageFile of files) {
-      const packageFileConfig: BranchUpgradeConfig = mergeChildConfig(
+      const packageFileConfig: BranchUpgradeConfig &
+        Pick<RenovateConfig, 'lockFileMaintenance'> = mergeChildConfig(
         managerConfig,
         packageFile,
       );
@@ -197,12 +198,12 @@ export async function flattenUpdates(
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
-        packageFileConfig.lockFileMaintenance!.enabled
+        packageFileConfig.lockFileMaintenance.enabled
       ) {
         // Apply lockFileMaintenance config before packageRules
         let lockFileConfig = mergeChildConfig(
           packageFileConfig,
-          packageFileConfig.lockFileMaintenance!,
+          packageFileConfig.lockFileMaintenance,
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
@@ -213,7 +214,7 @@ export async function flattenUpdates(
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,
-          lockFileConfig.lockFileMaintenance!,
+          lockFileConfig.lockFileMaintenance,
         );
         lockFileConfig = await applyPackageRules(
           lockFileConfig,
@@ -269,7 +270,7 @@ export async function flattenUpdates(
     }
   }
   const filteredUpdates = updates
-    .filter((update) => update.enabled !== false)
+    .filter((update) => update.enabled)
     .filter((update) => isUndefined(update.skipReason))
     .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));

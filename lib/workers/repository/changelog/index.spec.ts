@@ -55,7 +55,7 @@ describe('workers/repository/changelog/index', () => {
 
   it('only fetches changelogs for upgrades whose fetchChangeLogs matches the stage name', async () => {
     function freshUpgrades(): BranchUpgradeConfig[] {
-      return [
+      return partial<BranchUpgradeConfig>([
         {
           branchName: 'foo',
           manager: 'bar',
@@ -74,7 +74,7 @@ describe('workers/repository/changelog/index', () => {
           groupName: 'fetchChangeLogs is off',
           fetchChangeLogs: 'off',
         },
-      ];
+      ]);
     }
 
     await expect(

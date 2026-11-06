@@ -53,7 +53,7 @@ export function commitFilesToBranch(
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
-    message: config.commitMessage!,
+    message: config.commitMessage,
     trailers: config.commitTrailers,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,

@@ -6,7 +6,10 @@ import {
 } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfigFile } from '../../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -58,7 +61,12 @@ import {
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
-  config: RenovateConfigFile & PlatformPrOptions,
+  config: RenovateConfigFile &
+    PlatformPrOptions &
+    Pick<
+      RenovateConfig,
+      'autoApprove' | 'azureWorkItemId' | 'forkModeDisallowMaintainerEdits'
+    >,
 ): PlatformPrOptions {
   const isPrOrBranchAutomerge =
     config.automergeType === 'pr' || config.automergeType === 'branch';
@@ -67,14 +75,14 @@ export function getPlatformPrOptions(
   );
 
   return {
-    autoApprove: !!config.autoApprove,
+    autoApprove: config.autoApprove,
     automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
-    azureWorkItemId: config.azureWorkItemId ?? 0,
+    azureWorkItemId: config.azureWorkItemId,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
-    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
+    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -145,7 +153,6 @@ function addPullRequestNoteIfAttestationHasBeenLost(
     currentReleaseHasAttestation === true &&
     newRelease.attestation !== true
   ) {
-    upgrade.prBodyNotes ??= [];
     upgrade.prBodyNotes.push(
       emojify(
         codeBlock`
@@ -220,8 +227,8 @@ export async function ensurePr(
   if (!existingPr) {
     // Only create a PR if a branch automerge has failed
     if (
-      config.automerge === true &&
-      config.automergeType?.startsWith('branch') &&
+      config.automerge &&
+      config.automergeType.startsWith('branch') &&
       !config.forcePr
     ) {
       logger.debug(`Branch automerge is enabled`);
@@ -345,7 +352,6 @@ export async function ensurePr(
           }
         }
       } else if (logJSON.error === 'MissingGithubToken') {
-        upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes.push(
           emojify(
             codeBlock`
@@ -599,7 +605,7 @@ export async function ensurePr(
     if (
       pr &&
       config.branchAutomergeFailureMessage &&
-      !config.suppressNotifications?.includes('branchAutomergeFailure')
+      !config.suppressNotifications.includes('branchAutomergeFailure')
     ) {
       const topic = 'Branch automerge failure';
       let content =

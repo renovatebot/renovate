@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import * as _managers from '../../../../modules/manager/index.ts';
 import { resolveRangeStrategy } from './range-strategy.ts';
 import type { LookupUpdateConfig } from './types.ts';
@@ -5,13 +6,13 @@ import type { LookupUpdateConfig } from './types.ts';
 vi.mock('../../../../modules/manager/index.ts');
 const { getRangeStrategy } = vi.mocked(_managers);
 
-const config: LookupUpdateConfig = {
+const config = partial<LookupUpdateConfig>({
   datasource: 'npm',
   packageName: 'foo',
   currentValue: '1.0.0',
   versioning: 'npm',
   rangeStrategy: 'replace',
-};
+});
 
 describe('workers/repository/process/lookup/range-strategy', () => {
   describe('resolveRangeStrategy()', () => {

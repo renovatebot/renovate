@@ -154,8 +154,14 @@ function handleConcurrentLimits(
   return false;
 }
 
+/**
+ * The values of an upgrade which `calcLimit()` reads, of which the onboarding PR only has the concurrent limits.
+ */
+type UpgradeLimits = Pick<BranchUpgradeConfig, 'depName'> &
+  Partial<Pick<BranchUpgradeConfig, BranchLimitName>>;
+
 export function calcLimit(
-  upgrades: BranchUpgradeConfig[],
+  upgrades: UpgradeLimits[],
   limitName: BranchLimitName,
 ): number {
   const uniqueUpgrades = new Map(upgrades.map((u) => [u.depName, u]));
@@ -207,7 +213,7 @@ export function calcLimit(
 }
 
 export function hasMultipleLimits(
-  upgrades: BranchUpgradeConfig[],
+  upgrades: UpgradeLimits[],
   limitName: BranchLimitName,
 ): boolean {
   if (upgrades.length === 1) {

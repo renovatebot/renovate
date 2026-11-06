@@ -1843,14 +1843,14 @@ describe('util/git/index', { timeout: 30000 }, () => {
             },
           },
         ]);
-        const config: BranchConfig = {
+        const config = partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [],
           updatedArtifacts: [],
           upgrades: [],
           branchName: 'renovate/executable-post-upgrade',
           baseBranch: defaultBranch,
-        };
+        });
 
         const { updatedArtifacts } = await postUpgradeCommandsExecutor(
           commands,

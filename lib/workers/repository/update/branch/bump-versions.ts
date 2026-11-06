@@ -61,7 +61,7 @@ function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
   const seen = new Set<string>();
   const bumpVersions: BumpVersionConfig[] = [];
   for (const upgrade of coerceArray(config.upgrades)) {
-    for (const bumpVersionConfig of coerceArray(upgrade.bumpVersions)) {
+    for (const bumpVersionConfig of upgrade.bumpVersions) {
       const key = safeStringify(bumpVersionConfig);
       if (!seen.has(key)) {
         seen.add(key);
@@ -71,7 +71,7 @@ function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
   }
 
   if (!bumpVersions.length) {
-    bumpVersions.push(...coerceArray(config.bumpVersions));
+    bumpVersions.push(...config.bumpVersions);
   }
 
   return bumpVersions;

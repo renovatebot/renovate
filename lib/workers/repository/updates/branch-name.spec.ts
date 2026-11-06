@@ -316,6 +316,7 @@ describe('workers/repository/updates/branch-name', () => {
 
     it('hashedBranchLength hashing', () => {
       const upgrade = partial<BranchUpgradeConfig>({
+        additionalBranchPrefix: '',
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
@@ -332,6 +333,7 @@ describe('workers/repository/updates/branch-name', () => {
 
     it('hashedBranchLength hashing with group name', () => {
       const upgrade = partial<BranchUpgradeConfig>({
+        additionalBranchPrefix: '',
         hashedBranchLength: 20,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
@@ -350,6 +352,7 @@ describe('workers/repository/updates/branch-name', () => {
 
     it('hashedBranchLength too short', () => {
       const upgrade = partial<BranchUpgradeConfig>({
+        additionalBranchPrefix: '',
         hashedBranchLength: 3,
         branchPrefix: 'dep-',
         depNameSanitized: 'jest',
@@ -370,6 +373,7 @@ describe('workers/repository/updates/branch-name', () => {
       const upgrade = partial<BranchUpgradeConfig>({
         hashedBranchLength: 3,
         branchPrefix: 'dep-',
+        additionalBranchPrefix: '',
         depNameSanitized: 'jest',
         newMajor: 42,
         groupName: 'some group name',
@@ -386,6 +390,7 @@ describe('workers/repository/updates/branch-name', () => {
 
     it('hashedBranchLength separates minor when separateMultipleMinor=true', () => {
       const upgrade = partial<BranchUpgradeConfig>({
+        additionalBranchPrefix: '',
         branchName:
           '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
         branchTopic:
@@ -414,6 +419,7 @@ describe('workers/repository/updates/branch-name', () => {
       ): string | undefined {
         const upgrade = partial<BranchUpgradeConfig>({
           branchPrefix: 'renovate/',
+          additionalBranchPrefix: '',
           newMajor: 1,
           group: {},
           ...config,

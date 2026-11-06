@@ -34,6 +34,15 @@ import { sanitize } from '../../../../util/sanitize.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
+/**
+ * An upgrade whose `postUpgradeTasks` `postUpgradeCommandsExecutor()` runs, which the upgrade for the whole branch only has for the `branch` execution mode.
+ */
+type PostUpgradeCommandsUpgrade = Pick<
+  BranchUpgradeConfig,
+  'branchName' | 'constraints' | 'depName' | 'manager' | 'packageFile'
+> &
+  Partial<Pick<BranchUpgradeConfig, 'postUpgradeTasks'>>;
+
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
@@ -64,7 +73,7 @@ async function detectExecutable(
 }
 
 export async function postUpgradeCommandsExecutor(
-  filteredUpgradeCommands: BranchUpgradeConfig[],
+  filteredUpgradeCommands: PostUpgradeCommandsUpgrade[],
   config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...coerceArray(config.updatedArtifacts)];
@@ -199,7 +208,7 @@ export async function postUpgradeCommandsExecutor(
 
                 execOpts.toolConstraints.push({
                   toolName: tool,
-                  constraint: upgrade.constraints?.[tool],
+                  constraint: upgrade.constraints[tool],
                 });
               }
             }
@@ -385,14 +394,14 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
+  const branchUpgradeCommands: PostUpgradeCommandsUpgrade[] = [
     {
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
       constraints: config.constraints,
       postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
+        config.postUpgradeTasks.executionMode === 'branch'
           ? config.postUpgradeTasks
           : undefined,
     },
@@ -400,7 +409,7 @@ export default async function executePostUpgradeCommands(
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
-      !postUpgradeTasks?.executionMode ||
+      !postUpgradeTasks.executionMode ||
       postUpgradeTasks.executionMode === 'update',
   );
 

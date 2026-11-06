@@ -6,7 +6,6 @@ import { mergeChildConfig } from '../../../config/index.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { SharedConstraints } from '../../../modules/manager/types.ts';
-import { coerceArray } from '../../../util/array.ts';
 import { isConstraintName } from '../../../util/exec/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -85,10 +84,10 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
         upgrade,
       )})`;
     }
-    upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
+    upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix);
     upgrade.toLowerCase =
-      regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
-      !upgrade.semanticCommitType!.startsWith(':');
+      regEx(/[A-Z]/).exec(upgrade.semanticCommitType) === null &&
+      !upgrade.semanticCommitType.startsWith(':');
   }
 
   // Compile a few times in case there are nested templates
@@ -297,7 +296,7 @@ export function generateBranchConfig(
     hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
   logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
   const groupSingleUpdate =
-    singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true;
+    singleUpdateGroup && branchUpgrades[0].groupSingleUpdates;
   const isGroupUsable = groupEligible || groupSingleUpdate;
   const useGroupSettings = hasGroupName && isGroupUsable;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
@@ -453,8 +452,7 @@ export function generateBranchConfig(
   config.prBodyColumns = [
     ...new Set(
       config.upgrades.reduce(
-        (existing: string[], upgrade) =>
-          existing.concat(upgrade.prBodyColumns!),
+        (existing: string[], upgrade) => existing.concat(upgrade.prBodyColumns),
         [],
       ),
     ),
@@ -482,14 +480,14 @@ export function generateBranchConfig(
   config.labels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => coerceArray(upgrade.labels))
+        .map((upgrade) => upgrade.labels)
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
-        .map((upgrade) => coerceArray(upgrade.addLabels))
+        .map((upgrade) => upgrade.addLabels)
         .reduce((a, b) => a.concat(b), []),
     ),
   ];
@@ -524,7 +522,7 @@ export function generateBranchConfig(
   for (const upgrade of config.upgrades) {
     for (const { depName, currentValue, newValue } of constraintUpdates) {
       // only replace the constraint being updated, not a different value which may have been configured i.e. via `packageRules`
-      if (upgrade.constraints?.[depName] === currentValue) {
+      if (upgrade.constraints[depName] === currentValue) {
         upgrade.constraints = { ...upgrade.constraints, [depName]: newValue };
       }
     }
@@ -539,9 +537,7 @@ export function generateBranchConfig(
   config.extractedConstraints = {};
   config.sharedConstraints = {};
   for (const upgrade of config.upgrades) {
-    if (upgrade.constraints) {
-      config.constraints = { ...config.constraints, ...upgrade.constraints };
-    }
+    config.constraints = { ...config.constraints, ...upgrade.constraints };
     // the constraints which other managers share for the directory of the package file, also on the upgrade, which the branch worker reads on its own
     const shared = getSharedConstraints(
       branchSharedConstraints,

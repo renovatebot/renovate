@@ -1,23 +1,23 @@
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
 function createBranch(letter: string): BranchConfig {
-  return {
+  return partial<BranchConfig>({
     prTitle: `Update ${letter} to v1`,
     branchName: `renovate/${letter}-1.x`,
     baseBranch: 'base',
     manager: 'some-manager',
-    upgrades: [
+    upgrades: partial<BranchUpgradeConfig>([
       {
         manager: 'some-manager',
         depName: letter,
         newValue: '1.0.0',
         branchName: 'some-branch',
       },
-    ],
-  };
+    ]),
+  });
 }
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
@@ -43,22 +43,22 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('has special lock file maintenance description', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
           branchName: 'renovate/lock-file-maintenance',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'lockFileMaintenance',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       const res = getExpectedPrList(config, branches);
       expect(res).toMatchInlineSnapshot(`
         "
@@ -81,7 +81,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles multiple', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
@@ -109,7 +109,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/a-2.x',
           baseBranch: '', // handles case where baseBranch name is falsy
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -120,9 +120,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               isLockfileUpdate: true,
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -160,13 +160,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('deduplicates identical upgrade lines within a branch', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a',
           branchName: 'renovate/a',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'minor',
@@ -181,44 +181,44 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.1.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       const res = getExpectedPrList(config, branches);
       expect(res.match(/Upgrade a to/g)).toHaveLength(1);
     });
 
     it('shows commitHourlyLimit message when limit is low', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.commitHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -228,58 +228,58 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show commitHourlyLimit message when limit is high', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.commitHourlyLimit = 10;
       const res = getExpectedPrList(config, branches);
       expect(res).not.toContain('commitHourlyLimit');
     });
 
     it('shows only commitHourlyLimit message when both limits are set', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       config.commitHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
@@ -288,11 +288,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.branchConcurrentLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -302,11 +302,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.prConcurrentLimit = 2;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -324,11 +324,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('prioritizes branchConcurrentLimit over prConcurrentLimit when both restrict the count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.branchConcurrentLimit = 1;
       config.prConcurrentLimit = 2;
       const res = getExpectedPrList(config, branches);
@@ -340,48 +340,48 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not count security updates towards the concurrent limit, and notes they bypass it', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for d',
@@ -389,16 +389,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'd',
               newValue: '1.0.1',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prConcurrentLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -411,48 +411,48 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not count multiple security updates towards the concurrent limit, and notes they bypass it (plural)', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for d',
@@ -460,14 +460,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'd',
               newValue: '1.0.1',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for e',
@@ -475,16 +475,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'e',
               newValue: '1.0.1',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prConcurrentLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -499,34 +499,34 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not count security updates towards the hourly limit, and notes they bypass it (plural)', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for c',
@@ -534,14 +534,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.1',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for d',
@@ -549,16 +549,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'd',
               newValue: '1.0.1',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -570,36 +570,36 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show a security bypass note when there are no security updates', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'some-branch',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrList(config, branches);
       expect(res).toContain(
@@ -631,7 +631,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles different updateTypes', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: '',
@@ -659,7 +659,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               updateType: 'major',
               manager: 'some-manager',
@@ -671,14 +671,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               isLockfileUpdate: true,
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Replace node with nodejs',
           branchName: 'renovate/node-replacement',
           baseBranch: '',
           manager: 'dockerfile',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'dockerfile',
               updateType: 'replacement',
@@ -686,9 +686,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               currentValue: '^1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
 
       const res = getExpectedPrListSummary(config, branches);
 
@@ -714,7 +714,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles lockFileMaintenance', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
@@ -722,15 +722,15 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           packageFile: 'package.json',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'lockFileMaintenance',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toMatchInlineSnapshot(`
         "
@@ -749,20 +749,20 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show schedule information', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am on Monday'],
           branchName: 'renovate/lock-file-maintenance',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'lockFileMaintenance',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to v2',
@@ -770,7 +770,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'minor',
@@ -778,9 +778,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '2.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       const res = getExpectedPrListSummary(config, branches);
       expect(res).not.toContain('before 5am');
       expect(res).not.toContain('every weekend');
@@ -788,13 +788,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('includes the base branch if there are multiple being tracked', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -811,14 +811,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.5.3',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '', // the default branch
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -829,9 +829,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               isLockfileUpdate: true,
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
 
       const res = getExpectedPrListSummary(config, branches);
 
@@ -853,13 +853,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('includes the limits when using multiple base branches', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: 'base',
           branchName: 'renovate/pin-dependencies',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -876,14 +876,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.5.3',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v2',
           branchName: 'renovate/b-2.x',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'minor',
@@ -891,14 +891,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '2.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '', // the default branch
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -909,9 +909,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               isLockfileUpdate: true,
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
 
       config.commitHourlyLimit = 1;
       config.prHourlyLimit = 1;
@@ -940,13 +940,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('sorts multiple named base branches alphabetically after the default branch', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'minor',
@@ -954,14 +954,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '2.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Pin b',
           branchName: 'renovate/pin-b',
           baseBranch: 'beta-branch',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -969,14 +969,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Pin c',
           branchName: 'renovate/pin-c',
           baseBranch: 'alpha-branch',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -984,9 +984,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 10;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -1008,13 +1008,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('uses the plural form when a base branch has multiple PRs', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin a',
           branchName: 'renovate/pin-a',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1022,14 +1022,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Pin b',
           branchName: 'renovate/pin-b',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1037,14 +1037,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Pin c',
           branchName: 'renovate/pin-c',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1052,9 +1052,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
         '1 Pull Request to the default branch and 2 Pull Requests to the `base` branch',
@@ -1062,12 +1062,12 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('treats branches without a baseBranch as the default branch', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         partial<BranchConfig>({
           prTitle: 'Pin a',
           branchName: 'renovate/pin-a',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1075,9 +1075,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         }),
-      ];
+      ]);
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('1 Pull Request:');
       // single base => no per-branch column in the table
@@ -1085,13 +1085,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles uncommon types of updates as other', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'another-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -1113,9 +1113,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               branchName: 'ignored',
               updateType: 'bump',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -1135,13 +1135,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles updates with a different number of dependencies being updated', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: '',
           branchName: 'renovate/pin-dependencies',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1158,14 +1158,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.5.3',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'another-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               sourceUrl: 'https://a',
@@ -1186,9 +1186,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               branchName: 'ignored',
               isRemediation: true, // will get classified as 'other' update type
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -1213,13 +1213,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('handles many different updateTypes', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Pin dependencies',
           baseBranch: '',
           branchName: 'renovate/pin-dependencies',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'pin',
@@ -1234,14 +1234,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.2.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to v2',
           branchName: 'renovate/a-2.x',
           baseBranch: '',
           manager: 'another-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'major',
@@ -1249,14 +1249,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '2.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to 1.3.0',
           branchName: 'renovate/a-1.3',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'minor',
@@ -1264,14 +1264,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.3.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update a to 1.1.1',
           branchName: 'renovate/a-1.1',
           baseBranch: '',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               updateType: 'patch',
@@ -1279,9 +1279,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               newValue: '1.1.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toMatchInlineSnapshot(`
@@ -1307,7 +1307,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     describe('has special description when security update(s) exist', () => {
       it('and are split over multiple lines if there are multiple package files', () => {
-        const branches: BranchConfig[] = [
+        const branches = partial<BranchConfig>([
           {
             prTitle: 'Update a to v2',
             branchName: 'renovate/a-2.x',
@@ -1315,7 +1315,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'another-manager',
             packageFile: 'package.json',
             isVulnerabilityAlert: true,
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'major',
@@ -1323,7 +1323,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '2.0.1',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
           {
             prTitle: 'Update a to 1.3.0',
@@ -1332,7 +1332,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'some-manager',
             packageFile: 'packages/examples/foo.json',
             isVulnerabilityAlert: true,
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'minor',
@@ -1340,7 +1340,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '1.3.0',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
 
           // multiple updates to the same file are grouped
@@ -1351,7 +1351,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'some-manager',
             isVulnerabilityAlert: true,
             packageFile: 'packages/examples/blah.json',
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'patch',
@@ -1359,7 +1359,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '1.1.1',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
           {
             prTitle: 'Update a to 1.1.1',
@@ -1368,7 +1368,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'some-manager',
             isVulnerabilityAlert: true,
             packageFile: 'packages/examples/another.json',
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'patch',
@@ -1376,9 +1376,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '1.1.1',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
-        ];
+        ]);
         const res = getExpectedPrListSummary(config, branches);
         expect(res).toMatchInlineSnapshot(`
           "
@@ -1406,7 +1406,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       });
 
       it('when the same package is updated across different files with different managers', () => {
-        const branches: BranchConfig[] = [
+        const branches = partial<BranchConfig>([
           {
             prTitle: 'Update c to 1.1.1',
             branchName: 'renovate/c-1.1',
@@ -1414,7 +1414,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'pip_requirements',
             isVulnerabilityAlert: true,
             packageFile: 'requirements.txt',
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'pip_requirements',
                 updateType: 'patch',
@@ -1422,7 +1422,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '1.1.1',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
           {
             prTitle: 'Update c to 1.1.1',
@@ -1431,7 +1431,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'pep621',
             isVulnerabilityAlert: true,
             packageFile: 'pyproject.toml',
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'patch',
@@ -1439,9 +1439,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                 newValue: '1.1.1',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
-        ];
+        ]);
         const res = getExpectedPrListSummary(config, branches);
         expect(res).toMatchInlineSnapshot(`
           "
@@ -1467,7 +1467,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       });
 
       it('falls back to prTitle when the first upgrade has no depName', () => {
-        const branches: BranchConfig[] = [
+        const branches = partial<BranchConfig>([
           {
             prTitle: 'Update something',
             branchName: 'renovate/something',
@@ -1475,16 +1475,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'some-manager',
             packageFile: 'package.json',
             isVulnerabilityAlert: true,
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'patch',
                 newValue: '1.0.0',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
-        ];
+        ]);
         const res = getExpectedPrListSummary(config, branches);
         expect(res).toContain(
           '`Update something`, (some-manager, patch): `package.json`',
@@ -1492,7 +1492,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       });
 
       it('falls back to "unknown" when the first upgrade has no updateType', () => {
-        const branches: BranchConfig[] = [
+        const branches = partial<BranchConfig>([
           {
             prTitle: 'Update a',
             branchName: 'renovate/a',
@@ -1500,38 +1500,38 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             manager: 'some-manager',
             packageFile: 'package.json',
             isVulnerabilityAlert: true,
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 depName: 'a',
                 newValue: '1.0.0',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           },
-        ];
+        ]);
         const res = getExpectedPrListSummary(config, branches);
         expect(res).toContain('`a`, (some-manager, unknown): `package.json`');
       });
 
       it('falls back to empty when neither depName nor prTitle are set', () => {
-        const branches: BranchConfig[] = [
+        const branches = partial<BranchConfig>([
           partial<BranchConfig>({
             branchName: 'renovate/a',
             baseBranch: '',
             manager: 'some-manager',
             packageFile: 'package.json',
             isVulnerabilityAlert: true,
-            upgrades: [
+            upgrades: partial<BranchUpgradeConfig>([
               {
                 manager: 'some-manager',
                 updateType: 'patch',
                 newValue: '1.0.0',
                 branchName: 'ignored',
               },
-            ],
+            ]),
           }),
-        ];
+        ]);
         const res = getExpectedPrListSummary(config, branches);
         expect(res).toContain('``, (some-manager, patch): `package.json`');
       });
@@ -1539,7 +1539,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       // for instance, if a GitHub vulnerability alert is triggered, it's based on the datasource+packageName, not the packageFile
       describe('handles when the packageFile is not set', () => {
         it('on one upgrade', () => {
-          const branches: BranchConfig[] = [
+          const branches = partial<BranchConfig>([
             {
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
@@ -1547,7 +1547,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               manager: 'some-manager',
               // no packageFile
               isVulnerabilityAlert: true,
-              upgrades: [
+              upgrades: partial<BranchUpgradeConfig>([
                 {
                   manager: 'some-manager',
                   updateType: 'patch',
@@ -1555,9 +1555,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                   newValue: '1.1.1',
                   branchName: 'ignored',
                 },
-              ],
+              ]),
             },
-          ];
+          ]);
           const res = getExpectedPrListSummary(config, branches);
           expect(res).toMatchInlineSnapshot(`
             "
@@ -1580,7 +1580,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         });
 
         it('on one upgrade, and an upgrade with a packageFile', () => {
-          const branches: BranchConfig[] = [
+          const branches = partial<BranchConfig>([
             {
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
@@ -1588,7 +1588,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               manager: 'some-manager',
               // no packageFile
               isVulnerabilityAlert: true,
-              upgrades: [
+              upgrades: partial<BranchUpgradeConfig>([
                 {
                   manager: 'some-manager',
                   updateType: 'patch',
@@ -1596,7 +1596,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                   newValue: '1.1.1',
                   branchName: 'ignored',
                 },
-              ],
+              ]),
             },
             {
               prTitle: 'Update c to 1.1.1',
@@ -1605,7 +1605,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               manager: 'pep621',
               isVulnerabilityAlert: true,
               packageFile: 'pyproject.toml',
-              upgrades: [
+              upgrades: partial<BranchUpgradeConfig>([
                 {
                   manager: 'some-manager',
                   updateType: 'patch',
@@ -1613,9 +1613,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                   newValue: '1.1.1',
                   branchName: 'ignored',
                 },
-              ],
+              ]),
             },
-          ];
+          ]);
           const res = getExpectedPrListSummary(config, branches);
           expect(res).toMatchInlineSnapshot(`
             "
@@ -1640,14 +1640,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         });
 
         it('across multiple branches with different managers, lists all managers', () => {
-          const branches: BranchConfig[] = [
+          const branches = partial<BranchConfig>([
             {
               prTitle: 'Update a to 1.1.1',
               branchName: 'renovate/a-1.1',
               baseBranch: '',
               manager: 'some-manager',
               isVulnerabilityAlert: true,
-              upgrades: [
+              upgrades: partial<BranchUpgradeConfig>([
                 {
                   manager: 'some-manager',
                   updateType: 'patch',
@@ -1655,7 +1655,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                   newValue: '1.1.1',
                   branchName: 'some-branch',
                 },
-              ],
+              ]),
             },
             {
               prTitle: 'Update a to 1.1.1',
@@ -1663,7 +1663,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               baseBranch: '',
               manager: 'another-manager',
               isVulnerabilityAlert: true,
-              upgrades: [
+              upgrades: partial<BranchUpgradeConfig>([
                 {
                   manager: 'another-manager',
                   updateType: 'patch',
@@ -1671,9 +1671,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
                   newValue: '1.1.1',
                   branchName: 'some-branch',
                 },
-              ],
+              ]),
             },
-          ];
+          ]);
           const res = getExpectedPrListSummary(config, branches);
           expect(res).toMatchInlineSnapshot(`
             "
@@ -1699,36 +1699,36 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows commitHourlyLimit message when limit is low', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.commitHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
@@ -1738,58 +1738,58 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show commitHourlyLimit message when limit is high', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.commitHourlyLimit = 10;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).not.toContain('commitHourlyLimit');
     });
 
     it('shows only commitHourlyLimit message when both limits are set', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       config.commitHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
@@ -1798,50 +1798,50 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows commitHourlyLimit message with plurals when limit is greater than 1', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.commitHourlyLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('at a maximum of 2 PRs');
@@ -1849,36 +1849,36 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows there is no limit when both commitHourlyLimit and prHourlyLimit are set to 0 (unlimited)', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 0;
       config.commitHourlyLimit = 0;
       const res = getExpectedPrListSummary(config, branches);
@@ -1886,11 +1886,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.branchConcurrentLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('at a maximum of 1 branch open at a time');
@@ -1901,11 +1901,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.branchConcurrentLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('at a maximum of 2 branches open at a time');
@@ -1915,11 +1915,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.prConcurrentLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('at a maximum of 2 Pull Requests open at a time');
@@ -1939,11 +1939,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('combines the concurrent limit and hourly limit messages when both restrict the count', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         createBranch('a'),
         createBranch('b'),
         createBranch('c'),
-      ];
+      ]);
       config.prConcurrentLimit = 1;
       config.prHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
@@ -1953,50 +1953,50 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.branchConcurrentLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('at a maximum of 2 branches open at a time');
@@ -2004,48 +2004,48 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not count a single security update towards the concurrent limit, and notes it bypasses it', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update c to v1',
           branchName: 'renovate/c-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for d',
@@ -2053,16 +2053,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'd',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prConcurrentLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
@@ -2075,21 +2075,21 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('suggests vulnerabilityAlerts.prConcurrentLimit when security updates alone exceed prConcurrentLimit', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for b',
@@ -2097,16 +2097,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prConcurrentLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
@@ -2115,21 +2115,21 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not suggest vulnerabilityAlerts.prConcurrentLimit when prConcurrentLimit is unlimited', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for b',
@@ -2137,37 +2137,37 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prConcurrentLimit = 0;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).not.toContain('vulnerabilityAlerts.prConcurrentLimit');
     });
 
     it('notes when vulnerabilityAlerts.prConcurrentLimit is already configured and would throttle security updates', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for b',
@@ -2175,16 +2175,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.vulnerabilityAlerts = partial<RenovateConfig>({
         prConcurrentLimit: 1,
       });
@@ -2196,21 +2196,21 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('pluralises the vulnerabilityAlerts.prConcurrentLimit note when the limit is more than one', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for b',
@@ -2218,14 +2218,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for c',
@@ -2233,16 +2233,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.vulnerabilityAlerts = partial<RenovateConfig>({
         prConcurrentLimit: 2,
       });
@@ -2253,23 +2253,23 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not note vulnerabilityAlerts.prConcurrentLimit when it is configured but not exceeded', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.vulnerabilityAlerts = partial<RenovateConfig>({
         prConcurrentLimit: 1,
       });
@@ -2278,21 +2278,21 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('prefers vulnerabilityAlerts.branchConcurrentLimit over prConcurrentLimit when it is explicitly set and more restrictive', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'CVE fix for a',
           branchName: 'renovate/a-cve',
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for b',
@@ -2300,16 +2300,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.vulnerabilityAlerts = partial<RenovateConfig>({
         prConcurrentLimit: 5,
         branchConcurrentLimit: 1,
@@ -2321,34 +2321,34 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not count multiple security updates towards the hourly limit, and notes they bypass it (plural)', () => {
-      const branches: BranchConfig[] = [
+      const branches = partial<BranchConfig>([
         {
           prTitle: 'Update a to v1',
           branchName: 'renovate/a-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'a',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'Update b to v1',
           branchName: 'renovate/b-1.x',
           baseBranch: 'base',
           manager: 'some-manager',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'b',
               newValue: '1.0.0',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for c',
@@ -2356,14 +2356,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'c',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
         {
           prTitle: 'CVE fix for d',
@@ -2371,16 +2371,16 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           baseBranch: 'base',
           manager: 'some-manager',
           isVulnerabilityAlert: true,
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               depName: 'd',
               newValue: '1.0.1',
               branchName: 'ignored',
             },
-          ],
+          ]),
         },
-      ];
+      ]);
       config.prHourlyLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(

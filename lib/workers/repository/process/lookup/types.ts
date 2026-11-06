@@ -1,5 +1,7 @@
+import type { WithDefaults } from '../../../../config/defaults.ts';
 import type {
   RenovateConfigFile,
+  RepoDefaultedConfigKey,
   ValidationMessage,
 } from '../../../../config/types.ts';
 import type { DatasourceName } from '../../../../datasource-list.generated.ts';
@@ -32,7 +34,7 @@ export interface RollbackConfig {
   datasource: string;
 }
 
-export interface LookupUpdateConfig
+interface LookupUpdateFields
   extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfigFile {
   currentVersion?: string;
   /** Whether the dependency should only be updated in the lockfile. */
@@ -62,6 +64,14 @@ export interface LookupUpdateConfig
   vulnerabilityFixStrategy?: string;
   abandonmentThreshold?: string;
 }
+
+/**
+ * The config a dependency is looked up with, which `fetchUpdates()` merges from the `RenovateConfig`.
+ */
+export type LookupUpdateConfig = WithDefaults<
+  LookupUpdateFields,
+  Extract<RepoDefaultedConfigKey, keyof RenovateConfigFile>
+>;
 
 export interface UpdateResult {
   sourceDirectory?: string;

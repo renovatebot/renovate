@@ -1,4 +1,5 @@
 import type { Merge } from 'type-fest';
+import type { WithDefaults } from '../config/defaults.ts';
 import type {
   GroupConfig,
   LegacyAdminConfig,
@@ -6,6 +7,7 @@ import type {
   RenovateConfig,
   RenovateConfigFile,
   RenovateSharedConfig,
+  RepoDefaultedConfigKey,
   UpdateType,
   ValidationMessage,
 } from '../config/types.ts';
@@ -33,7 +35,30 @@ import type {
 
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
-export interface BranchUpgradeConfig
+/**
+ * The options with a default which `flattenUpdates()` and `generateBranchConfig()` delete from a branch upgrade, once they have applied them.
+ */
+type BranchUpgradeRemovedConfigKey =
+  | 'digest'
+  | 'group'
+  | 'lockFileMaintenance'
+  | 'major'
+  | 'minor'
+  | 'packageRules'
+  | 'patch'
+  | 'pin'
+  | 'replacement'
+  | 'vulnerabilityAlerts';
+
+/**
+ * The options which have a value in a branch upgrade, as `flattenUpdates()` merges it from the {@link RenovateConfig}.
+ */
+type BranchUpgradeDefaultedConfigKey = Exclude<
+  Extract<RepoDefaultedConfigKey, keyof RenovateConfigFile>,
+  BranchUpgradeRemovedConfigKey
+>;
+
+interface BranchUpgradeFields
   extends
     Merge<RenovateConfigFile, PackageDependency>,
     Partial<LookupUpdate>,
@@ -134,6 +159,11 @@ export interface BranchUpgradeConfig
   sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
+export type BranchUpgradeConfig = WithDefaults<
+  BranchUpgradeFields,
+  BranchUpgradeDefaultedConfigKey
+>;
+
 export type PrBlockedBy =
   | 'BranchAutomerge'
   | 'NeedsApproval'
@@ -164,8 +194,8 @@ export type BranchResult =
 export type CacheFingerprintMatchResult =
   'matched' | 'no-match' | 'no-fingerprint';
 
-export interface BranchConfig
-  extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
+interface BranchConfigFields
+  extends BranchUpgradeFields, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
   automergedPreviously?: boolean;
   baseBranch: string;
@@ -206,6 +236,11 @@ export interface BranchConfig
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
   prNotPendingHours?: number;
 }
+
+export type BranchConfig = WithDefaults<
+  BranchConfigFields,
+  BranchUpgradeDefaultedConfigKey
+>;
 
 export interface BranchMetadata {
   branchName: string;

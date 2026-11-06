@@ -11,7 +11,7 @@ import { emojify } from '../../../../util/emoji.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { calcLimit } from '../../../global/limits.ts';
-import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import type { BranchConfig } from '../../../types.ts';
 
 /**
  * The different categories of dependency updates to output, when providing the summary view.
@@ -47,9 +47,7 @@ interface ConcurrentLimit {
  * restrictive - otherwise we'd misattribute the limit to a setting the user never touched.
  */
 function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
-  const configAsUpgrade: BranchUpgradeConfig = {
-    branchName: '',
-    manager: '',
+  const configAsUpgrade = {
     prConcurrentLimit: config.prConcurrentLimit,
     branchConcurrentLimit: config.branchConcurrentLimit,
   };
@@ -91,9 +89,7 @@ function resolveVulnerabilityConcurrentLimit(
   const vulnerabilityAlertsDefault = getDefault(
     getOptions().find((option) => option.name === 'vulnerabilityAlerts')!,
   ) as RenovateConfig;
-  const configAsUpgrade: BranchUpgradeConfig = {
-    branchName: '',
-    manager: '',
+  const configAsUpgrade = {
     prConcurrentLimit:
       vulnerabilityAlerts?.prConcurrentLimit ??
       vulnerabilityAlertsDefault.prConcurrentLimit,

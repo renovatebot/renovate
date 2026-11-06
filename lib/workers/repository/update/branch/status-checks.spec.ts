@@ -39,6 +39,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           minimumReleaseAge: 'renovate/stability-days',
         }),
+        statusCheckWhen: {},
       });
       GlobalConfig.reset();
     });
@@ -123,19 +124,6 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
-    it('skips status if statusCheckNames is undefined', async () => {
-      config.stabilityStatus = 'green';
-      await setStability({
-        ...config,
-        statusCheckNames: undefined,
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
     it('does not set status in dry mode', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.stabilityStatus = 'green';
@@ -204,6 +192,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: 'renovate/merge-confidence',
         }),
+        statusCheckWhen: {},
       };
       GlobalConfig.reset();
     });
@@ -280,20 +269,6 @@ describe('workers/repository/update/branch/status-checks', () => {
         statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: '',
         }),
-      });
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
-      );
-      expect(platform.setBranchStatus).not.toHaveBeenCalled();
-    });
-
-    it('skips status if statusCheckNames is undefined', async () => {
-      config.minimumConfidence = 'high';
-      config.confidenceStatus = 'green';
-      await setConfidence({
-        ...config,
-        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -379,7 +354,12 @@ describe('workers/repository/update/branch/status-checks', () => {
     function branchConfig(upgrades: Partial<BranchUpgradeConfig>[]) {
       return partial<BranchConfig>({
         branchName: 'renovate/some-branch',
-        upgrades: partial<BranchUpgradeConfig>(upgrades),
+        upgrades: partial<BranchUpgradeConfig>(
+          upgrades.map((upgrade): Partial<BranchUpgradeConfig> => ({
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+            ...upgrade,
+          })),
+        ),
       });
     }
 
