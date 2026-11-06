@@ -12,17 +12,14 @@ import { logger } from '../logger/index.ts';
 import { regEx } from './regex.ts';
 
 /**
- * Joins URL parts with `url-join`, where a trailing empty part strips the
- * trailing slash and a trailing `/` part keeps it.
+ * Joins URL parts with `url-join`. The result ends with a slash only if the last
+ * part does.
  */
 export function joinUrlParts(...parts: string[]): string {
-  const prefix = parts.slice(0, -1);
-  const [last] = parts.slice(-1);
-  if (prefix.length && trimSlashes(last) === '') {
-    const joined = urlJoin(...prefix);
-    return last ? ensureTrailingSlash(joined) : trimTrailingSlash(joined);
-  }
-  return urlJoin(...parts);
+  const joined = urlJoin(...parts);
+  return parts.at(-1)?.endsWith('/')
+    ? ensureTrailingSlash(joined)
+    : trimTrailingSlash(joined);
 }
 
 export function ensurePathPrefix(url: string, prefix: string): string {

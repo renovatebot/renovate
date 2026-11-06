@@ -180,6 +180,7 @@ describe('util/url', () => {
     expect(joinUrlParts(`${registryUrl}/api/`, '/foo/bar')).toBe(
       `${registryUrl}/api/foo/bar`,
     );
+    expect(joinUrlParts()).toBe('');
     expect(joinUrlParts('foo//////')).toBe('foo/');
     expect(joinUrlParts(`${registryUrl}/foo/`, '')).toBe(`${registryUrl}/foo`);
     expect(joinUrlParts(`${registryUrl}/foo`, '/')).toBe(`${registryUrl}/foo/`);
