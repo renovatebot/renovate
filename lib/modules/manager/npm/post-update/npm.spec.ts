@@ -4,6 +4,8 @@ import { Fixtures } from '~test/fixtures.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExecError } from '../../../../util/exec/exec-error.ts';
+import type { PostUpdateConfig } from '../../types.ts';
+import type { NpmManagerData } from '../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as npmHelper from './npm.ts';
 
@@ -12,6 +14,14 @@ vi.mock('../../../../util/fs/index.ts');
 vi.mock('./node-version.ts');
 
 process.env.CONTAINERBASE = 'true';
+
+const postUpdateConfig: PostUpdateConfig<NpmManagerData> = {
+  branchName: 'renovate/some-branch',
+  upgrades: [],
+  postUpdateOptions: [],
+  skipArtifactsUpdate: false,
+  ignoreScripts: false,
+};
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
@@ -42,7 +52,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, postUpdateOptions },
+      { ...postUpdateConfig, skipInstalls, postUpdateOptions },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -76,7 +86,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, postUpdateOptions },
+      { ...postUpdateConfig, skipInstalls, postUpdateOptions },
       updates,
     );
     expect(execSnapshots).toMatchObject([
@@ -100,7 +110,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } },
+      { ...postUpdateConfig, skipInstalls, constraints: { npm: '^6.0.0' } },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -134,7 +144,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } },
+      { ...postUpdateConfig, skipInstalls, constraints: { npm: '^6.0.0' } },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -166,7 +176,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } },
+      { ...postUpdateConfig, skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.renameLocalFile).toHaveBeenCalledExactlyOnceWith(
@@ -193,7 +203,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { skipInstalls, constraints: { npm: '^6.0.0' } },
+      { ...postUpdateConfig, skipInstalls, constraints: { npm: '^6.0.0' } },
     );
     expect(fs.renameLocalFile).toHaveBeenCalledTimes(0);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -216,7 +226,12 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, binarySource, constraints: { npm: '^6.0.0' } },
+      {
+        ...postUpdateConfig,
+        skipInstalls,
+        binarySource,
+        constraints: { npm: '^6.0.0' },
+      },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
@@ -243,7 +258,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { postUpdateOptions },
+      { ...postUpdateConfig, postUpdateOptions },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -275,7 +290,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { postUpdateOptions },
+      { ...postUpdateConfig, postUpdateOptions },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -310,7 +325,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'npm-shrinkwrap.json',
-      { postUpdateOptions },
+      { ...postUpdateConfig, postUpdateOptions },
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -340,7 +355,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource, constraints: { npm: '^6.0.0' } },
+      { ...postUpdateConfig, binarySource, constraints: { npm: '^6.0.0' } },
       [{ isRemediation: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -358,6 +373,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
+      postUpdateConfig,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
@@ -377,7 +393,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      {},
+      postUpdateConfig,
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -397,7 +413,11 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: 'docker', constraints: { npm: '^6.0.0' } },
+      {
+        ...postUpdateConfig,
+        binarySource: 'docker',
+        constraints: { npm: '^6.0.0' },
+      },
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -414,7 +434,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      {},
+      postUpdateConfig,
       [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -439,7 +459,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { postUpdateOptions: ['npmInstallTwice'] },
+      { ...postUpdateConfig, postUpdateOptions: ['npmInstallTwice'] },
       [{ isLockFileMaintenance: true }],
     );
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
@@ -469,7 +489,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { constraints: { npm: '6.0.0' } },
+      { ...postUpdateConfig, constraints: { npm: '6.0.0' } },
       [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -510,7 +530,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { constraints: { npm: '6.0.0' } },
+      { ...postUpdateConfig, constraints: { npm: '6.0.0' } },
       [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -539,7 +559,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { constraints: {} },
+      { ...postUpdateConfig, constraints: {} },
       [{ isLockFileMaintenance: true }],
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -567,7 +587,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { extractedConstraints: { npm: '6.0.0' } },
+      { ...postUpdateConfig, extractedConstraints: { npm: '6.0.0' } },
       [{ isLockFileMaintenance: true }],
     );
     expect(execSnapshots).toMatchObject([
@@ -596,7 +616,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { extractedConstraints: { npm: '6.0.0' } },
+      { ...postUpdateConfig, extractedConstraints: { npm: '6.0.0' } },
       [{ isLockFileMaintenance: true }],
     );
     expect(execSnapshots).toMatchObject([
@@ -643,7 +663,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls },
+        { ...postUpdateConfig, skipInstalls },
         updates,
       );
       expect(execSnapshots).toMatchObject([
@@ -681,6 +701,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         {},
         'package-lock.json',
         {
+          ...postUpdateConfig,
           skipInstalls,
           toolSettings: {
             nodeMaxMemory: 3456,
@@ -824,7 +845,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls },
+        { ...postUpdateConfig, skipInstalls },
         updates,
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -862,7 +883,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         '.',
         {},
         'package-lock.json',
-        { skipInstalls },
+        { ...postUpdateConfig, skipInstalls },
         modifiedUpdates,
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
@@ -1012,7 +1033,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls },
+        { ...postUpdateConfig, skipInstalls },
         [
           {
             packageFile: 'some-dir/web/b/package.json',
@@ -1059,7 +1080,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        {},
+        postUpdateConfig,
         [
           {
             depName: 'uuid',
@@ -1104,7 +1125,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1128,7 +1153,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: 'invalid garbage' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: 'invalid garbage',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1151,7 +1180,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1175,7 +1208,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1198,7 +1235,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true },
+        { ...postUpdateConfig, skipInstalls: true },
         [
           {
             packageName: 'some-dep',
@@ -1221,7 +1258,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1263,7 +1304,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',
@@ -1299,7 +1344,11 @@ describe('modules/manager/npm/post-update/npm', () => {
         'some-dir',
         {},
         'package-lock.json',
-        { skipInstalls: true, minimumReleaseAge: '3 days' },
+        {
+          ...postUpdateConfig,
+          skipInstalls: true,
+          minimumReleaseAge: '3 days',
+        },
         [
           {
             packageName: 'some-dep',

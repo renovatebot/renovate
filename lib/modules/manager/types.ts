@@ -622,10 +622,10 @@ export interface PostUpdateConfig<T = unknown>
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
-  postUpdateOptions?: string[];
-  skipArtifactsUpdate?: boolean;
+  postUpdateOptions: string[];
+  skipArtifactsUpdate: boolean;
   skipInstalls?: boolean | null;
-  ignoreScripts?: boolean;
+  ignoreScripts: boolean;
 
   packageFile?: string;
 

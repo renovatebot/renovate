@@ -26,6 +26,14 @@ vi.mock('../../../datasource/index.ts', () => mockDeep());
 
 delete process.env.NPM_CONFIG_CACHE;
 
+const postUpdateConfig: PostUpdateConfig<NpmManagerData> = {
+  branchName: 'renovate/some-branch',
+  upgrades: [],
+  postUpdateOptions: [],
+  skipArtifactsUpdate: false,
+  ignoreScripts: false,
+};
+
 // TODO: figure out snapshot similarity for each CI platform (#9617)
 function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
   return snapshots.map((snapshot) => ({
@@ -108,6 +116,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stderr: '',
       });
       const config = {
+        ...postUpdateConfig,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -193,6 +202,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           stderr: '',
         });
         const config = {
+          ...postUpdateConfig,
           constraints: {
             yarn: yarnCompatibility,
           },
@@ -232,6 +242,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
           stderr: '',
         });
         const config = {
+          ...postUpdateConfig,
           constraints: {
             yarn: yarnCompatibility,
           },
@@ -270,6 +281,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
     const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '3.0.0',
       },
@@ -307,6 +319,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
     const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '3.0.0',
       },
@@ -342,6 +355,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
     const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '3.0.0',
       },
@@ -369,6 +383,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
     const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '>= 2.0.0',
       },
@@ -403,6 +418,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
     const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '>= 2.0.0',
       },
@@ -442,6 +458,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stderr: '',
       });
       const config = {
+        ...postUpdateConfig,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -502,12 +519,17 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
-        {
-          depName: 'some-dep',
-          isLockfileUpdate: true,
-        },
-      ]);
+      const res = await yarnHelper.generateLockFile(
+        'some-dir',
+        {},
+        postUpdateConfig,
+        [
+          {
+            depName: 'some-dep',
+            isLockfileUpdate: true,
+          },
+        ],
+      );
       expect(res.lockFile).toBe('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchObject(
         expectedExec(
@@ -540,6 +562,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stderr: '',
       });
       const config = {
+        ...postUpdateConfig,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -608,6 +631,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stderr: '',
       });
       const config = {
+        ...postUpdateConfig,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -687,6 +711,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         stderr: '',
       });
       const config = {
+        ...postUpdateConfig,
         constraints: {
           yarn: yarnCompatibility,
         },
@@ -711,7 +736,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
   it('catches errors', async () => {
     Fixtures.mock({});
     const execSnapshots = mockExecAll(new Error('some-error'));
-    const res = await yarnHelper.generateLockFile('some-dir', {});
+    const res = await yarnHelper.generateLockFile(
+      'some-dir',
+      {},
+      postUpdateConfig,
+    );
     expect(fs.readFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
@@ -741,12 +770,13 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
       constraints: {
         yarn: '^3.0.0',
       },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
@@ -793,9 +823,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
@@ -836,11 +867,12 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       constraints: {
         yarn: '^3.0.0',
       },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
       {
         managerData: { hasPackageManager: true },
@@ -894,13 +926,14 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
 
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
       constraints: {
         yarn: '^3.0.0',
         corepack: '^0.17.0',
       },
-    });
+    };
 
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
 
@@ -953,7 +986,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stderr: '',
     });
 
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
       // the yarn version from `package.json` wins over the extracted one, which
       // would otherwise select yarn 1
@@ -961,7 +995,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         yarn: '1.22.0',
         corepack: '^0.17.0',
       },
-    });
+    };
 
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
 
@@ -998,9 +1032,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     expect(execSnapshots).toMatchObject([
@@ -1037,9 +1072,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     expect(execSnapshots).toMatchObject([
@@ -1076,9 +1112,10 @@ describe('modules/manager/npm/post-update/yarn', () => {
       stdout: '2.1.0',
       stderr: '',
     });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+    const config = {
+      ...postUpdateConfig,
       managerData: { hasPackageManager: true },
-    });
+    };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     expect(execSnapshots).toMatchObject([
@@ -1117,7 +1154,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       { stdout: '', stderr: '' },
       { stdout: '', stderr: '' },
     ]);
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
+    const config = { ...postUpdateConfig };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = { cwd: 'some-dir' };
@@ -1164,7 +1201,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       releases: [{ version: '1.22.18' }],
     });
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
-    const config = util.partial<PostUpdateConfig<NpmManagerData>>({});
+    const config = { ...postUpdateConfig };
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe(plocktest1YarnLockV1);
     const options = {};

@@ -105,7 +105,7 @@ export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   filename: string,
-  config: Partial<PostUpdateConfig<NpmManagerData>> = {},
+  config: PostUpdateConfig<NpmManagerData>,
   upgrades: Upgrade<NpmManagerData>[] = [],
   npmrcContent: string | null = null,
 ): Promise<GenerateLockFileResult> {
@@ -136,8 +136,7 @@ export async function generateLockFile(
     let commands: string[] = [];
     let cmdOptions = '';
     const needsDedupeWithoutFlag =
-      postUpdateOptions?.includes('npmDedupe') === true &&
-      !supportsPreferDedupeFlag;
+      postUpdateOptions.includes('npmDedupe') && !supportsPreferDedupeFlag;
     if (needsDedupeWithoutFlag || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
@@ -146,7 +145,7 @@ export async function generateLockFile(
       cmdOptions += '--package-lock-only --no-audit';
     }
 
-    if (postUpdateOptions?.includes('npmDedupe') && supportsPreferDedupeFlag) {
+    if (postUpdateOptions.includes('npmDedupe') && supportsPreferDedupeFlag) {
       logger.debug('Deduplicate dependencies on installation');
       cmdOptions += ' --prefer-dedupe';
     }
@@ -285,16 +284,13 @@ export async function generateLockFile(
     // commands already.
     if (
       upgrades.some((upgrade) => upgrade.isLockFileMaintenance) &&
-      !postUpdateOptions?.includes('npmInstallTwice')
+      !postUpdateOptions.includes('npmInstallTwice')
     ) {
       commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
     }
 
     // postUpdateOptions
-    if (
-      config.postUpdateOptions?.includes('npmDedupe') &&
-      !supportsPreferDedupeFlag
-    ) {
+    if (postUpdateOptions.includes('npmDedupe') && !supportsPreferDedupeFlag) {
       logger.debug('Performing npm dedupe after installation');
       commands.push('npm dedupe');
     }
@@ -313,7 +309,7 @@ export async function generateLockFile(
       }
     }
 
-    if (postUpdateOptions?.includes('npmInstallTwice')) {
+    if (postUpdateOptions.includes('npmInstallTwice')) {
       logger.debug('Running npm install twice');
       // Run the install command twice to ensure the lock file is up to date
       // iterate through commands and if any command starts with `npm install`, add it again
