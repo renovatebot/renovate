@@ -298,8 +298,9 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   managerFilePatterns?: string[];
-  includePaths?: string[];
-  ignorePaths?: string[];
+  includePaths: string[];
+  ignorePaths: string[];
+  registryAliases: Record<string, string>;
   enabled?: boolean;
 }
 

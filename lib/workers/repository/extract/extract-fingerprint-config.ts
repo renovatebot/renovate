@@ -50,8 +50,8 @@ function getFilteredManagerConfig(
     ...(config.hasVulnerabilityAlertsRules && {
       hasVulnerabilityAlertsRules: true,
     }),
-    ignorePaths: coerceArray(config.ignorePaths),
-    includePaths: coerceArray(config.includePaths),
+    ignorePaths: config.ignorePaths,
+    includePaths: config.includePaths,
     skipInstalls: config.skipInstalls,
     registryAliases: config.registryAliases,
     fileList: [],
