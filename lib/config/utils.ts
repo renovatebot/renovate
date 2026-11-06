@@ -2,7 +2,7 @@ import { logger } from '../logger/index.ts';
 import { clone } from '../util/clone.ts';
 import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils.ts';
 import * as options from './options/index.ts';
-import type { RenovateConfig } from './types.ts';
+import type { RenovateConfigFile } from './types.ts';
 
 export function mergeChildConfig<
   T extends Record<string, any>,
@@ -46,8 +46,8 @@ export function mergeChildConfig<
         );
       } else {
         config[option.name] = mergeChildConfig(
-          parentConfig[option.name] as RenovateConfig,
-          childConfig[option.name] as RenovateConfig,
+          parentConfig[option.name] as RenovateConfigFile,
+          childConfig[option.name] as RenovateConfigFile,
         );
       }
       logger.trace(

@@ -1,8 +1,8 @@
 import type { MaybePromise, Nullish } from '../../types/index.ts';
-import type { RenovateConfig, RepoGlobalConfig } from '../types.ts';
+import type { RenovateConfigFile, RepoGlobalConfig } from '../types.ts';
 
 // TODO: Proper typing
-export type Preset = RenovateConfig & Record<string, unknown>;
+export type Preset = RenovateConfigFile & Record<string, unknown>;
 
 export type GlobalPreset = RepoGlobalConfig & Preset;
 

@@ -20,7 +20,7 @@ import * as template from '../../util/template/index.ts';
 import { GlobalConfig } from '../global.ts';
 import * as massage from '../massage.ts';
 import * as migration from '../migration.ts';
-import type { AllConfig, RenovateConfig } from '../types.ts';
+import type { AllConfig, RenovateConfigFile } from '../types.ts';
 import { mergeChildConfig } from '../utils.ts';
 import { removedPresets } from './common.ts';
 import * as internal from './internal/index.ts';
@@ -113,8 +113,8 @@ export function replaceArgs(
 
 export async function getPreset(
   preset: string,
-  baseConfig?: RenovateConfig,
-): Promise<RenovateConfig> {
+  baseConfig?: RenovateConfigFile,
+): Promise<RenovateConfigFile> {
   logger.trace(`getPreset(${preset})`);
   // Check if the preset has been removed or replaced
   const newPreset = removedPresets[preset];
@@ -233,7 +233,7 @@ export interface ResolveConfigPresetsResult {
  */
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
-  baseConfig?: RenovateConfig,
+  baseConfig?: RenovateConfigFile,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
   mergeInternalPresets = true,
@@ -331,7 +331,7 @@ export async function resolveConfigPresets(
               existingPresets,
               mergeInternalPresets,
             );
-          (config[key] as RenovateConfig[]).push(presetConfig);
+          (config[key] as RenovateConfigFile[]).push(presetConfig);
 
           // then also make sure we've noted any nested presets we've merged
           for (const mergedPreset of visited.merged) {
@@ -385,7 +385,7 @@ export async function resolveConfigPresets(
 
 async function fetchPreset(
   preset: string,
-  baseConfig: RenovateConfig | undefined,
+  baseConfig: RenovateConfigFile | undefined,
   inputConfig: AllConfig,
   existingPresets: string[],
 ): Promise<AllConfig> {

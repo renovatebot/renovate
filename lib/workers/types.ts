@@ -4,6 +4,7 @@ import type {
   LegacyAdminConfig,
   PostUpgradeTasks,
   RenovateConfig,
+  RenovateConfigFile,
   RenovateSharedConfig,
   UpdateType,
   ValidationMessage,
@@ -34,7 +35,7 @@ export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
 export interface BranchUpgradeConfig
   extends
-    Merge<RenovateConfig, PackageDependency>,
+    Merge<RenovateConfigFile, PackageDependency>,
     Partial<LookupUpdate>,
     Partial<RegexManagerConfig>,
     Partial<JSONataManagerConfig>,

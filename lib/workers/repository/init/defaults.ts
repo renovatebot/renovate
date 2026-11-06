@@ -8,7 +8,10 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { getOptions } from '../../../config/options/index.ts';
 import type { FilteredConfigKey } from '../../../config/stages.ts';
 import { isFilteredOption } from '../../../config/stages.ts';
-import type { RenovateConfig, RenovateOptions } from '../../../config/types.ts';
+import type {
+  RenovateConfigFile,
+  RenovateOptions,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 
 /**
@@ -43,16 +46,18 @@ type RepoDefaultedConfigKey = Exclude<
 /**
  * A repository's config, in which the options with a default have a value.
  */
-export type RepoConfig<T extends RenovateConfig = RenovateConfig> =
+export type RepoConfig<T extends RenovateConfigFile = RenovateConfigFile> =
   WithDefaults<T, RepoDefaultedConfigKey>;
 
 /**
  * Gives each option with a default its default value, where the config leaves it out or sets it to `null`, which the config validation doesn't reject.
  */
-export function applyRepoConfigDefaults(config: RenovateConfig): RepoConfig {
+export function applyRepoConfigDefaults(
+  config: RenovateConfigFile,
+): RepoConfig {
   const defaults: Record<string, unknown> = {};
   for (const option of getOptions().filter(isDefaultedOption)) {
-    const value = config[option.name as keyof RenovateConfig];
+    const value = config[option.name as keyof RenovateConfigFile];
     if (!isRemovedOption(option) && isNullOrUndefined(value)) {
       defaults[option.name] = getDefault(option);
     }

@@ -382,9 +382,9 @@ export interface RenovateInternalConfig {
 /**
  * Configuration that could be used either top-level in a repository config (or Global, Inherited or Shareable Preset configuration).
  *
- * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set.
+ * This is a superset of any configuration that a Renovate user (not self-hosted administrator) can set, as written before it is validated and its defaults are applied.
  */
-export interface RenovateConfig
+export interface RenovateConfigFile
   extends
     LegacyAdminConfig,
     RenovateSharedConfig,
@@ -507,6 +507,13 @@ export interface RenovateConfig
   toolSettings?: RepoToolSettingsOptions;
 }
 
+/**
+ * The config a repository is processed with.
+ *
+ * Temporarily the same as {@link RenovateConfigFile}, until it becomes the type in which the options with a default have a value.
+ */
+export type RenovateConfig = RenovateConfigFile;
+
 export const CustomDatasourceFormats = [
   'html',
   'json',
@@ -527,7 +534,7 @@ export interface CustomDatasourceConfig {
  *
  */
 export interface AllConfig
-  extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  extends RenovateConfigFile, GlobalOnlyConfigLegacy, RepoGlobalConfig {
   gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
@@ -873,7 +880,7 @@ type ConfigurableOption = { globalOnly?: false } & (
 export type RenovateOptions = RenovateOptionType &
   (SelfHostedOption | ConfigurableOption);
 
-export interface PackageRuleInputConfig extends RenovateConfig {
+export interface PackageRuleInputConfig extends RenovateConfigFile {
   versioning?: string;
   packageFile?: string;
   lockFiles?: string[];
