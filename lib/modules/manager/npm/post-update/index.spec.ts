@@ -747,6 +747,41 @@ describe('modules/manager/npm/post-update/index', () => {
       ]);
     });
 
+    it('generates the lock file for nested override upgrades', async () => {
+      spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+      const upgrade = {
+        depName: 'undici',
+        depType: 'overrides',
+        packageFile: 'package.json',
+        managerData: { parents: ['nx'] },
+      };
+      const config = partial<PostUpdateConfig<NpmManagerData>>({
+        upgrades: [upgrade],
+        updatedPackageFiles: [
+          { type: 'addition', path: 'package.json', contents: '{}' },
+        ],
+      });
+
+      await expect(
+        getAdditionalFiles(config, {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: { npmLock: 'package-lock.json' },
+            },
+          ],
+        }),
+      ).resolves.toStrictEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [
+          { type: 'addition', path: 'package-lock.json', contents: '{}' },
+        ],
+      });
+      expect(spyNpm).toHaveBeenCalledOnce();
+      expect(spyNpm.mock.calls[0][4]).toEqual([upgrade]);
+    });
+
     it('restores a nested repository .npmrc after generating artifacts', async () => {
       const npmrcFilename = 'packages/core/.npmrc';
       const originalNpmrc = 'package-lock=false\r\nkeep = true';

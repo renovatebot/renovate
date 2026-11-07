@@ -56,6 +56,23 @@ function getDirs(arr: (string | null | undefined)[]): string[] {
   return Array.from(new Set(arr.filter(isString)));
 }
 
+type LockFileKey = 'npmLock' | 'yarnLock' | 'pnpmLockFile';
+
+// Deps with their own managerData (e.g. nested overrides) don't inherit the
+// package file's lock file fields, so fall back to the package file.
+function getUpgradeLockFile(
+  upgrade: Upgrade<NpmManagerData>,
+  packageFiles: AdditionalPackageFiles,
+  key: LockFileKey,
+): string | undefined {
+  return (
+    upgrade.managerData?.[key] ??
+    packageFiles.npm?.find(
+      (packageFile) => packageFile.packageFile === upgrade.packageFile,
+    )?.managerData?.[key]
+  );
+}
+
 export function determineLockFileDirs(
   config: PostUpdateConfig<NpmManagerData>,
   packageFiles: AdditionalPackageFiles,
@@ -71,9 +88,11 @@ export function determineLockFileDirs(
       upgrade.isRemediation === true ||
       upgrade.isLockfileUpdate === true
     ) {
-      yarnLockDirs.push(upgrade.managerData?.yarnLock);
-      npmLockDirs.push(upgrade.managerData?.npmLock);
-      pnpmLockFileDirs.push(upgrade.managerData?.pnpmLockFile);
+      yarnLockDirs.push(getUpgradeLockFile(upgrade, packageFiles, 'yarnLock'));
+      npmLockDirs.push(getUpgradeLockFile(upgrade, packageFiles, 'npmLock'));
+      pnpmLockFileDirs.push(
+        getUpgradeLockFile(upgrade, packageFiles, 'pnpmLockFile'),
+      );
     }
   }
 
@@ -503,7 +522,8 @@ async function getAdditionalFilesInner(
         const fileName = upath.basename(npmLock);
         logger.debug(`Generating ${fileName} for ${lockFileDir}`);
         const upgrades = config.upgrades.filter(
-          (upgrade) => upgrade.managerData?.npmLock === npmLock,
+          (upgrade) =>
+            getUpgradeLockFile(upgrade, packageFiles, 'npmLock') === npmLock,
         );
         const res = await npm.generateLockFile(
           lockFileDir,
@@ -603,7 +623,8 @@ async function getAdditionalFilesInner(
       logger.debug(`Generating yarn.lock for ${lockFileDir}`);
       const lockFileName = upath.join(lockFileDir, 'yarn.lock');
       const upgrades = config.upgrades.filter(
-        (upgrade) => upgrade.managerData?.yarnLock === yarnLock,
+        (upgrade) =>
+          getUpgradeLockFile(upgrade, packageFiles, 'yarnLock') === yarnLock,
       );
       const res = await yarn.generateLockFile(
         lockFileDir,
@@ -678,7 +699,9 @@ async function getAdditionalFilesInner(
     await withNpmrcHostRules(lockFileDir, additionalNpmrcContent, async () => {
       logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
       const upgrades = config.upgrades.filter(
-        (upgrade) => upgrade.managerData?.pnpmLockFile === pnpmLockFile,
+        (upgrade) =>
+          getUpgradeLockFile(upgrade, packageFiles, 'pnpmLockFile') ===
+          pnpmLockFile,
       );
       const res = await pnpm.generateLockFile(
         lockFileDir,
