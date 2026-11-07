@@ -29,7 +29,7 @@ export function parsePEP508(
   }
 
   const regExpExec = pep508Regex.exec(value);
-  if (isNullOrUndefined(regExpExec) || isNullOrUndefined(regExpExec?.groups)) {
+  if (isNullOrUndefined(regExpExec) || isNullOrUndefined(regExpExec.groups)) {
     logger.trace(`Pep508 could not be extracted`);
     return null;
   }

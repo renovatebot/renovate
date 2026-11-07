@@ -40,6 +40,9 @@ describe('modules/manager/vendir/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: [] }),
+    );
   });
 
   it('returns null if no vendir.lock.yml found', async () => {

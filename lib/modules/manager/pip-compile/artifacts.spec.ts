@@ -83,6 +83,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({ modified: [] }),
+    );
   });
 
   it('returns if no requirements.txt found', async () => {

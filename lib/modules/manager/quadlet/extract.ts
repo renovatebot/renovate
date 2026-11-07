@@ -67,13 +67,13 @@ export function extractPackageFile(
   const quadletFile: QuadletFile = res.data;
 
   getQuadletImage(
-    quadletFile?.Container?.Image,
+    quadletFile.Container?.Image,
     ['.image', '.build'],
     deps,
     config,
   );
-  getQuadletImage(quadletFile?.Image?.Image, [], deps, config);
-  getQuadletImage(quadletFile?.Volume?.Image, ['.image'], deps, config);
+  getQuadletImage(quadletFile.Image?.Image, [], deps, config);
+  getQuadletImage(quadletFile.Volume?.Image, ['.image'], deps, config);
 
   if (deps.length) {
     return { deps };

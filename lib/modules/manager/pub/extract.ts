@@ -49,7 +49,7 @@ function extractFromSection(
       }
 
       if (isObject(git)) {
-        gitUrl = git?.url;
+        gitUrl = git.url;
       } else if (isString(git)) {
         gitUrl = git;
       }
@@ -59,9 +59,9 @@ function extractFromSection(
       } else if (path) {
         currentValue = '';
         skipReason = 'path-dependency';
-      } else if (isObject(git) && isString(git?.ref)) {
+      } else if (isObject(git) && isString(git.ref)) {
         currentValue = git.ref;
-      } else if (isObject(git) && !isString(git?.ref) && !isString(version)) {
+      } else if (isObject(git) && !isString(git.ref) && !isString(version)) {
         currentValue = '';
         skipReason = 'unspecified-version';
       } else {

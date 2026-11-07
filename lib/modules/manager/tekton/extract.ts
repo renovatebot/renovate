@@ -162,7 +162,10 @@ function getAnnotationDep(url: string): PackageDependency | null {
   return null;
 }
 
-function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
+function addDep(
+  ref: TektonBundle | undefined,
+  deps: PackageDependency[],
+): void {
   if (isFalsy(ref)) {
     return;
   }
@@ -212,7 +215,7 @@ function addStepImageSpec(
     if (isNullOrUndefined(step?.image)) {
       continue;
     }
-    const dep = getDep(step?.image);
+    const dep = getDep(step.image);
     dep.depType = 'tekton-step-image';
     logger.trace(
       {

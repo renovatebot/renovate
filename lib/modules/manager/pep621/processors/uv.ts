@@ -75,12 +75,9 @@ export class UvProcessor extends BasePyProjectProcessor {
     );
     const implicitIndexUrls = uv.index
       ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
-      ?.map(({ url }) => url);
+      .map(({ url }) => url);
 
-    const devDependencies = uv['dev-dependencies'];
-    if (devDependencies) {
-      deps.push(...devDependencies);
-    }
+    deps.push(...uv['dev-dependencies']);
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).

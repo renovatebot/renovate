@@ -43,7 +43,8 @@ export async function extractPackageFile(
         lineNumber += 1;
       } while (contentArr[lineNumber].trim() !== 'end');
       for (const depMatch of depBuffer.matchAll(depMatchRegExp)) {
-        const { app, requirement, opts } = depMatch.groups!;
+        const { app, opts } = depMatch.groups!;
+        const requirement = depMatch.groups!.requirement as string | undefined;
         const github = githubRegexp.exec(opts)?.groups?.value;
         const git = gitRegexp.exec(opts)?.groups?.value;
         const ref = refRegexp.exec(opts)?.groups?.value;
@@ -104,7 +105,7 @@ export async function extractPackageFile(
 
     for (const line of lockFileLines) {
       const groups = lockedVersionRegExp.exec(line)?.groups;
-      if (groups?.app && groups?.lockedVersion) {
+      if (groups?.app && groups.lockedVersion) {
         const dep = deps.get(groups.app);
         if (!dep) {
           continue;

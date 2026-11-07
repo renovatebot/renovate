@@ -15,5 +15,5 @@ export interface TravisMatrixItem {
 }
 
 export interface TravisMatrix {
-  include?: TravisMatrixItem[];
+  include?: (TravisMatrixItem | null)[];
 }
