@@ -7,6 +7,7 @@ import type { JavaVendor, PackageConfig } from './types.ts';
 export const pageSize = 50;
 
 export const defaultRegistryUrl = 'https://api.adoptium.net/';
+export const miseJavaRegistryUrl = 'https://mise-java.jdx.dev/';
 
 export const datasource = 'java-version';
 
@@ -34,6 +35,9 @@ export function parsePackage(packageName: string): PackageConfig {
 function getVendor(name: string): JavaVendor {
   if (name.includes('oracle-graalvm')) {
     return 'oracle-graalvm';
+  }
+  if (name.includes('openjdk')) {
+    return 'openjdk';
   }
   return 'adoptium'; // Default for backwards compatibility
 }

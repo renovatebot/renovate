@@ -1,6 +1,6 @@
 import type { Nullish } from '../../../types/index.ts';
 
-export type JavaVendor = 'adoptium' | 'oracle-graalvm';
+export type JavaVendor = 'adoptium' | 'openjdk' | 'oracle-graalvm';
 export type GraalvmReleaseType = 'ga' | 'ea';
 
 export interface PackageConfig {
