@@ -1,5 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
+import {
+  findLocalSiblingAndParents,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { YarnConfig } from '../schema.ts';
@@ -35,6 +39,48 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
       logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     })
     .unwrapOrNull();
+}
+
+export function mergeYarnConfigs(
+  parentConfig: YarnConfig | null,
+  childConfig: YarnConfig | null,
+): YarnConfig | null {
+  if (!parentConfig) {
+    return childConfig;
+  }
+  if (!childConfig) {
+    return parentConfig;
+  }
+
+  return {
+    ...childConfig,
+    npmRegistryServer:
+      childConfig.npmRegistryServer ?? parentConfig.npmRegistryServer,
+    npmScopes: {
+      ...parentConfig.npmScopes,
+      ...childConfig.npmScopes,
+    },
+  };
+}
+
+export async function loadConfigFromInheritedYarnrcYml(
+  packageFile: string,
+): Promise<YarnConfig | null> {
+  const yarnrcFileNames =
+    (await findLocalSiblingAndParents(packageFile, '.yarnrc.yml')) ?? [];
+
+  let yarnrcConfig: YarnConfig | null = null;
+  for (const yarnrcFileName of yarnrcFileNames.reverse()) {
+    const repoYarnrcYml = await readLocalFile(yarnrcFileName, 'utf8');
+    if (repoYarnrcYml?.trim().length) {
+      yarnrcConfig = mergeYarnConfigs(
+        yarnrcConfig,
+        loadConfigFromYarnrcYml(repoYarnrcYml),
+      );
+    }
+  }
+
+  return yarnrcConfig;
 }
 
 export function resolveRegistryUrl(
