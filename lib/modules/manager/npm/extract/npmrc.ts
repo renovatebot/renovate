@@ -1,4 +1,4 @@
-import { isNonEmptyString, isNumericString } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber, isNumericString } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { UtcDate } from '../../../../util/schema-utils/index.ts';
@@ -43,6 +43,30 @@ export function parseNpmrcCooldown(
     );
   }
 
+  return null;
+}
+
+/**
+ * Parses the `minimum-release-age` setting of an `.npmrc`, in minutes, which pnpm reads before v11.
+ */
+export function parseNpmrcPnpmMinimumReleaseAge(
+  npmrcContent: string | null | undefined,
+): number | null {
+  if (!npmrcContent) {
+    return null;
+  }
+  const minimumReleaseAge =
+    NpmrcCooldownSchema.parse(npmrcContent)['minimum-release-age'];
+  if (!isNonEmptyString(minimumReleaseAge)) {
+    return null;
+  }
+  const minutes = parseInt(minimumReleaseAge, 10);
+  if (isNumber(minutes) && minutes >= 0) {
+    return minutes;
+  }
+  logger.debug(
+    `Invalid minimum-release-age in .npmrc: ${minimumReleaseAge}, ignoring`,
+  );
   return null;
 }
 
