@@ -414,6 +414,108 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       ]);
     });
 
+    it('uses the nested lockfile entry for nested overrides', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          'brace-expansion': '5.0.12',
+          minimatch: '3.1.5',
+          'minimatch/node_modules/brace-expansion': '1.1.21',
+          '@scope/minimatch/node_modules/brace-expansion': '1.1.22',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles: PackageFile<NpmManagerData>[] = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            {
+              depName: 'brace-expansion',
+              currentValue: '5.0.12',
+              depType: 'dependencies',
+            },
+            {
+              depName: 'minimatch',
+              currentValue: '3.1.5',
+              depType: 'dependencies',
+            },
+            {
+              depName: 'brace-expansion',
+              currentValue: '1.1.21',
+              depType: 'overrides',
+              managerData: { parents: ['minimatch@3.1.5'] },
+            },
+            {
+              depName: 'brace-expansion',
+              currentValue: '1.1.22',
+              depType: 'overrides',
+              managerData: { parents: ['@scope/minimatch@3.1.5'] },
+            },
+            {
+              // a "." override targets the parent package itself
+              depName: 'minimatch',
+              currentValue: '4.0.0',
+              depType: 'overrides',
+              managerData: { parents: ['minimatch'] },
+            },
+            {
+              // no nested lockfile entry, so use the hoisted one
+              depName: 'brace-expansion',
+              currentValue: '1.1.23',
+              depType: 'overrides',
+              managerData: { parents: ['missing-parent'] },
+            },
+            {
+              // an unparsable parent selector is used as-is
+              depName: 'brace-expansion',
+              currentValue: '1.1.24',
+              depType: 'overrides',
+              managerData: { parents: ['missing parent@1'] },
+            },
+          ],
+          packageFile: 'package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles[0].deps.map((dep) => dep.lockedVersion)).toEqual([
+        '5.0.12',
+        '3.1.5',
+        '1.1.21',
+        '1.1.22',
+        '3.1.5',
+        '5.0.12',
+        '5.0.12',
+      ]);
+    });
+
+    it('uses the workspace nested lockfile entry for nested overrides', async () => {
+      npm.getNpmLock.mockResolvedValue({
+        lockedVersions: {
+          'brace-expansion': '5.0.12',
+          'workspace/node_modules/minimatch/node_modules/brace-expansion':
+            '1.1.21',
+        },
+        lockfileVersion: 3,
+      });
+      const packageFiles: PackageFile<NpmManagerData>[] = [
+        {
+          managerData: { npmLock: 'package-lock.json' },
+          extractedConstraints: {},
+          deps: [
+            {
+              depName: 'brace-expansion',
+              currentValue: '1.1.21',
+              depType: 'overrides',
+              managerData: { parents: ['minimatch@3.1.5'] },
+            },
+          ],
+          packageFile: 'workspace/package.json',
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles[0].deps[0].lockedVersion).toBe('1.1.21');
+    });
+
     it('does not set locked versions for engines, packageManager, volta, and devEngines deps', async () => {
       npm.getNpmLock.mockResolvedValue({
         lockedVersions: {
