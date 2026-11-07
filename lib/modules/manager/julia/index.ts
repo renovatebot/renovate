@@ -1,6 +1,7 @@
 import type { Category } from '../../../constants/index.ts';
 import { JuliaGeneralMetadataDatasource } from '../../datasource/julia-general-metadata/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
@@ -12,5 +13,9 @@ export const categories: Category[] = ['julia'];
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)(Julia)?Project\\.toml$/'],
 };
+
+export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Manifest.toml', 'JuliaManifest.toml'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const supportedDatasources = [JuliaGeneralMetadataDatasource.id];

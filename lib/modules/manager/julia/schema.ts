@@ -8,6 +8,7 @@ import {
 export const JuliaProject = Toml.pipe(
   z.object({
     version: z.string().optional().catch(undefined),
+    manifest: z.string().optional().catch(undefined),
     deps: LooseRecord(z.string()).optional().catch(undefined),
     weakdeps: LooseRecord(z.string()).optional().catch(undefined),
     extras: LooseRecord(z.string()).optional().catch(undefined),
@@ -19,4 +20,8 @@ export const JuliaProject = Toml.pipe(
       .optional()
       .catch(undefined),
   }),
+);
+
+export const JuliaManifest = Toml.pipe(
+  z.object({ julia_version: z.string().optional().catch(undefined) }),
 );
