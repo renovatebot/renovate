@@ -50,13 +50,16 @@ export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
     sourceBranch: pr.source?.branch?.name,
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
     // v8 ignore start -- TODO: add test #40625
-    state: prStates.closed?.includes(pr.state)
+    state: prStates.closed.includes(pr.state)
       ? 'closed'
-      : pr.state?.toLowerCase(),
+      : // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses may omit state
+        pr.state?.toLowerCase(),
     // v8 ignore stop
     createdAt: pr.created_on,
   };

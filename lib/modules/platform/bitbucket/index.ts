@@ -424,7 +424,7 @@ export async function findPr({
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
-    await bitbucketHttp.getJsonUnchecked<PrResponse>(
+    await bitbucketHttp.getJsonUnchecked<PrResponse | null>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
       { cacheProvider: aggressiveRepoCacheProvider },
     )
@@ -449,7 +449,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 function escapeHash(input: string): string {
-  return input?.replace(regEx(/#/g), '%23');
+  return input.replace(regEx(/#/g), '%23');
 }
 
 // Return the commit SHA for a branch
@@ -541,7 +541,7 @@ export async function getBranchStatus(
   return 'green';
 }
 
-const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
+const bbToRenovateStatusMapping: Partial<Record<string, BranchStatus>> = {
   SUCCESSFUL: 'green',
   INPROGRESS: 'yellow',
   FAILED: 'red',
@@ -554,7 +554,7 @@ export async function getBranchStatusCheck(
   const statuses = await getStatus(branchName);
   const bbState = statuses.find((status) => status.key === context)?.state;
   // TODO #22198
-  return bbToRenovateStatusMapping[bbState!] || null;
+  return bbToRenovateStatusMapping[bbState!] ?? null;
 }
 
 export async function setBranchStatus({
@@ -1110,7 +1110,7 @@ export async function updatePr({
     }
   }
 
-  if (state === 'closed' && pr) {
+  if (state === 'closed') {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`,
     );

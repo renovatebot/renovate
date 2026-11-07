@@ -36,7 +36,7 @@ export function prInfo(pr: BbsRestPr): BbsPr {
 }
 
 export function isInvalidReviewersResponse(err: BitbucketError): boolean {
-  const errors = coerceArray(err?.response?.body?.errors);
+  const errors = coerceArray(err.response.body?.errors);
   return (
     errors.length > 0 &&
     errors.every(
@@ -46,7 +46,7 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
 }
 
 export function getInvalidReviewers(err: BitbucketError): string[] {
-  const errors = coerceArray(err?.response?.body?.errors);
+  const errors = coerceArray(err.response.body?.errors);
   let invalidReviewers: string[] = [];
   for (const error of errors) {
     // v8 ignore else -- TODO: add test #40625
@@ -177,5 +177,5 @@ export function parseModifier(value: string): number | null {
   if (!match) {
     return null;
   }
-  return parseInt(match[1] ?? '1', 10);
+  return parseInt(match.at(1) ?? '1', 10);
 }
