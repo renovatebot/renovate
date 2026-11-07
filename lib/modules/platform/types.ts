@@ -106,6 +106,8 @@ export interface PlatformPrOptions {
   automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
+  azureBypassPolicyTypeIds?: string[];
+  azureBypassPolicyReason?: string;
   bbUseDefaultReviewers?: boolean;
   bbAutoResolvePrTasks?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -187,6 +189,7 @@ export interface MergePRConfig {
   branchName?: string;
   id: number;
   strategy?: MergeStrategy;
+  platformOptions?: PlatformPrOptions;
 }
 export interface EnsureCommentConfig {
   number: number;
