@@ -1,6 +1,7 @@
 import type {
   NpmPackage,
   PnpmWorkspaceMinimumReleaseAgeSettings,
+  YarnMinimalAgeGateSettings,
 } from './extract/types.ts';
 
 interface LockFilePackage {
@@ -101,6 +102,8 @@ export interface NpmManagerData extends NpmLockFiles {
   uncachedNpmrcFileName?: string;
   /** the minimum release age settings of the `pnpm-workspace.yaml` next to `pnpmLockFile`, kept from the extraction as the status checks run before the base branch is checked out */
   pnpmWorkspaceMinimumReleaseAge?: PnpmWorkspaceMinimumReleaseAgeSettings;
+  /** the `npmMinimalAgeGate` settings of the `.yarnrc.yml` next to `yarnLock`, kept from the extraction as the status checks run before the base branch is checked out */
+  yarnMinimalAgeGate?: YarnMinimalAgeGateSettings;
 }
 
 /** the repository `.npmrc` after sanitizing, from which `npmrc` can be rebuilt together with the configured one */

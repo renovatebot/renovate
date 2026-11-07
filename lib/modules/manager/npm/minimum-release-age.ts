@@ -1,13 +1,23 @@
+import { isTruthy } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { calculatePackageManagerMinimumReleaseAgeMs } from '../../../util/minimum-release-age.ts';
+import {
+  calculateMinimumReleaseAgeMs,
+  calculatePackageManagerMinimumReleaseAgeMs,
+} from '../../../util/minimum-release-age.ts';
 import { coerceObject } from '../../../util/object.ts';
-import { isSubsetOf } from '../../versioning/common.ts';
+import { intersectsWith, isSubsetOf } from '../../versioning/common.ts';
 import { api as npmVersioning } from '../../versioning/npm/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 import { parseNpmrcCooldown } from './extract/npmrc.ts';
 import { getPnpmMinimumReleaseAgeMinutes } from './extract/pnpm-minimum-release-age.ts';
+import {
+  getYarnMinimalAgeGateMinutes,
+  getYarnScopeMinimalAgeGateMinutes,
+  yarnDefaultMinimalAgeGateRange,
+  yarnScopeMinimalAgeGateRange,
+} from './extract/yarn-minimum-release-age.ts';
 import type { NpmManagerData } from './types.ts';
 
 // npm supports `min-release-age` since v11.10.0
@@ -28,6 +38,10 @@ export const minimumReleaseAgePnpmRange = '>=10.16.0';
 // again, fixed in v12.3.0.
 export const minimumReleaseAgeEnforcedPnpmRange =
   '>=10.17.0 <11.0.0 || >=11.0.4 <12.0.0 || >=12.3.0';
+
+// Yarn supports `npmMinimalAgeGate` and `npmPreapprovedPackages` since v4.10.0
+// https://github.com/yarnpkg/berry/releases/tag/%40yarnpkg%2Fcli%2F4.10.0
+export const minimumReleaseAgeYarnRange = '>=4.10.0';
 
 const dayMs = 24 * 60 * 60 * 1000;
 const minuteMs = 60 * 1000;
@@ -117,16 +131,66 @@ async function pnpmEnforcesMinimumReleaseAge(
   );
 }
 
+async function yarnEnforcesMinimumReleaseAge(
+  config: NpmEnforcesMinimumReleaseAgeConfig,
+  yarnLock: string,
+): Promise<boolean> {
+  const constraint = await resolveToolConstraint(config, 'yarn');
+  if (!isSubsetOf(npmVersioning, constraint, minimumReleaseAgeYarnRange)) {
+    return false;
+  }
+
+  // the status checks run before the base branch is checked out, so the
+  // .yarnrc.yml settings come from the extraction
+  const settings = coerceObject(config.managerData?.yarnMinimalAgeGate);
+  // the age which Renovate would wait for, `minimumReleaseAgePackageManager`
+  // only raises what it passes
+  const lockFileMaintenanceAgeMs = calculateMinimumReleaseAgeMs({
+    minimumReleaseAge: config.minimumReleaseAge,
+  });
+  // a scope without its own age may get the Yarn default
+  const scopeMinutes = getYarnScopeMinimalAgeGateMinutes(
+    settings,
+    intersectsWith(npmVersioning, constraint, yarnScopeMinimalAgeGateRange),
+  );
+  for (const [scope, minutes] of Object.entries(scopeMinutes)) {
+    if (!minutes || minutes * minuteMs < lockFileMaintenanceAgeMs) {
+      logger.debug(
+        `${yarnLock}: the npmMinimalAgeGate of scope ${scope} is 0 or smaller than the minimumReleaseAge of lock file maintenance, and takes precedence over the age which Renovate passes`,
+      );
+      return false;
+    }
+  }
+
+  // Renovate passes the larger of its own value and the Yarn value, otherwise
+  // Yarn applies its own value. The Yarn default counts only if every allowed
+  // Yarn version has it.
+  const yarnMinutes =
+    getYarnMinimalAgeGateMinutes(
+      settings,
+      isSubsetOf(npmVersioning, constraint, yarnDefaultMinimalAgeGateRange),
+    ) ?? 0;
+  return (
+    Math.max(
+      getPassedMinimumReleaseAgeMs(config, yarnLock),
+      yarnMinutes * minuteMs,
+    ) > 0
+  );
+}
+
 /**
- * Whether npm or pnpm enforces the minimum release age when it regenerates the lock file of the package file in `config`.
+ * Whether npm, pnpm or Yarn enforces the minimum release age when it regenerates the lock file of the package file in `config`.
  */
 export async function enforcesMinimumReleaseAge(
   config: NpmEnforcesMinimumReleaseAgeConfig,
 ): Promise<boolean> {
   const { npmLock, pnpmLockFile, yarnLock } = coerceObject(config.managerData);
-  const hasBothLockFiles = !!npmLock && !!pnpmLockFile;
-  if (yarnLock || hasBothLockFiles) {
+  const lockFiles = [npmLock, pnpmLockFile, yarnLock].filter(isTruthy);
+  if (lockFiles.length > 1) {
     return false;
+  }
+  if (yarnLock) {
+    return await yarnEnforcesMinimumReleaseAge(config, yarnLock);
   }
   if (npmLock) {
     return await npmEnforcesMinimumReleaseAge(config, npmLock);

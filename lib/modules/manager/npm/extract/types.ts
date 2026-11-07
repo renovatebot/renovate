@@ -85,3 +85,27 @@ export interface PnpmMinimumReleaseAgeExclude {
   /** The entries which exclude only some versions of a package */
   versions: { packageName: string; versions: string[] }[];
 }
+
+/**
+ * The `npmMinimalAgeGate` settings of a `.yarnrc.yml` in minutes.
+ */
+export interface YarnMinimalAgeGateSettings {
+  npmMinimalAgeGate?: number;
+  /** The `npmMinimalAgeGate` of each scope of `npmScopes`, keyed by the scope without `@`, or `null` for a scope without one */
+  npmScopes?: Record<string, number | null>;
+}
+
+/**
+ * The minimum release age settings of a `.yarnrc.yml`, with the ages in minutes.
+ */
+export interface YarnrcMinimalAgeGateSettings extends YarnMinimalAgeGateSettings {
+  npmPreapprovedPackages?: string[];
+}
+
+/**
+ * An `npmPreapprovedPackages` entry, with the package name or glob and an optional semver range.
+ */
+export interface YarnPreapprovedPackage {
+  packageName: string;
+  range?: string;
+}
