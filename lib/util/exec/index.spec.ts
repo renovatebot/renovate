@@ -17,6 +17,7 @@ import { setCustomEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import * as dockerModule from './docker/index.ts';
 import { hardcodedProcessEnv } from './env.ts';
+import { ExecError } from './exec-error.ts';
 import { getHermitEnvs } from './hermit.ts';
 import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
@@ -24,6 +25,7 @@ import type {
   ExecOptions,
   ExecResult,
   RawExecOptions,
+  ToolConstraint,
   VolumeOption,
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
@@ -687,6 +689,30 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit input',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          input: '{"request":true}',
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            input: '{"request":true}',
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+      },
+    ],
+
+    [
       'Custom environment variables for child',
       {
         processEnv: envMock.basic,
@@ -1177,6 +1203,107 @@ describe('util/exec/index', () => {
     );
   });
 
+  it('returns redacted command output without including it in completion logs', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(
+      exec(inCmd, { input: 'private input', redactOutput: true }),
+    ).resolves.toEqual({
+      stdout: 'private manifest',
+      stderr: 'private warning',
+    });
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        durationMs: expect.any(Number),
+        stdoutBytes: 16,
+        stderrBytes: 15,
+      },
+      'exec completed',
+    );
+    expect(cpExec.mock.calls[0][1]).toMatchObject({ redactOutput: true });
+    expect(logger.logger.trace).toHaveBeenCalledWith(
+      {
+        commandOptions: expect.not.objectContaining({
+          input: expect.anything(),
+        }),
+        hasInput: true,
+      },
+      'Command options',
+    );
+  });
+
+  it('omits redacted command errors from logs', async () => {
+    process.env = processEnv;
+    const error = new Error('private manifest');
+    cpExec.mockRejectedValue(error);
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await expect(exec(inCmd, { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number) },
+      'rawExec err',
+    );
+  });
+
+  it('does not send final input to Hermit environment discovery', async () => {
+    process.env = processEnv;
+    getHermitEnvsMock.mockResolvedValue({});
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'hermit' });
+
+    await exec('foobar', { input: 'private input', redactOutput: true });
+
+    expect(getHermitEnvsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ stdin: 'ignore', redactOutput: true }),
+    );
+    expect(getHermitEnvsMock.mock.calls[0][0]).not.toHaveProperty('input');
+    expect(cpExec).toHaveBeenCalledWith(
+      'foobar',
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    );
+  });
+
+  it('keeps exit metadata in redacted failure logs', async () => {
+    const error = new ExecError('private error', {
+      cmd: 'foobar',
+      stdout: 'private output',
+      stderr: 'private warning',
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockRejectedValue(error);
+
+    await expect(exec('foobar', { redactOutput: true })).rejects.toBe(error);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { durationMs: expect.any(Number), exitCode: 1, signal: undefined },
+      'rawExec err',
+    );
+  });
+
+  it('forwards input through the Docker invocation', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'docker' });
+
+    await exec('foobar', { docker, input: 'private input' });
+
+    const invocation = cpExec.mock.calls.find(([cmd]) =>
+      asRawCommand(cmd).startsWith('docker run'),
+    );
+    expect(invocation).toEqual([
+      expect.stringContaining('docker run --rm -i '),
+      expect.objectContaining({ input: 'private input', stdin: 'pipe' }),
+    ]);
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });
@@ -1202,6 +1329,30 @@ describe('util/exec/index', () => {
     expect(actualCmd).toEqual([`install-pip foobar`, `foobar`]);
   });
 
+  it('passes input only to the final command', async () => {
+    process.env = processEnv;
+    const calls: { command: string; input: unknown }[] = [];
+    cpExec.mockImplementation((execCmd, options) => {
+      calls.push({
+        command: asRawCommand(execCmd),
+        input: options.input,
+      });
+      return Promise.resolve({ stdout: '', stderr: '' });
+    });
+
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    await exec('foobar', {
+      input: 'private manifest',
+      preCommands: ['prepare'],
+    });
+
+    expect(calls).toEqual([
+      { command: 'prepare', input: undefined },
+      { command: 'foobar', input: 'private manifest' },
+    ]);
+  });
+
   it('only installs a tool once per run for binarySource=install', async () => {
     process.env = processEnv;
     memCache.init();
@@ -1221,6 +1372,181 @@ describe('util/exec/index', () => {
     await exec('foobar', { toolConstraints });
 
     expect(actualCmds).toEqual([`install-tool npm 1.2.3`, `foobar`, `foobar`]);
+  });
+
+  it('retries a failed tool installation before reusing a successful install', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+
+    await expect(exec('npm --version', { toolConstraints })).rejects.toThrow(
+      'installation failed',
+    );
+    await exec('npm --version', { toolConstraints });
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.1.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+      'npm --version',
+    ]);
+  });
+
+  it('retries a rejected installation in each workspace', async () => {
+    process.env = processEnv;
+    memCache.init();
+    const marker = 'TOOL_INSTALLATION_FAILED:1.0.0';
+    const error = new ExecError('installation failed', {
+      cmd: 'install-tool npm 1.0.0',
+      stdout: '',
+      stderr: marker,
+      options: {},
+      exitCode: 1,
+    });
+    cpExec.mockImplementation((cmd) => {
+      if (asRawCommand(cmd) === 'install-tool npm 1.0.0') {
+        return Promise.reject(error);
+      }
+      return Promise.reject(new Error('npm is not installed'));
+    });
+    GlobalConfig.set({
+      ...globalConfig,
+      binarySource: 'install',
+      localDir: cwd,
+    });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.0.0' },
+    ];
+
+    for (const cwdFile of ['apps/a/package.json', 'apps/b/package.json']) {
+      await expect(
+        exec('npm --version', {
+          cwdFile,
+          toolConstraints,
+          redactOutput: true,
+        }),
+      ).rejects.toBe(error);
+    }
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.0.0',
+      'install-tool npm 1.0.0',
+    ]);
+  });
+
+  it.each`
+    preCommands    | failedCommand
+    ${[]}          | ${'foobar'}
+    ${['prepare']} | ${'prepare'}
+  `(
+    'keeps installed tools active after $failedCommand fails',
+    async ({ preCommands, failedCommand }) => {
+      process.env = processEnv;
+      memCache.init();
+      cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+      cpExec.mockRejectedValueOnce(new Error('command failed'));
+      cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+      GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+      process.env.CONTAINERBASE = 'true';
+      const toolConstraints: ToolConstraint[] = [
+        { toolName: 'npm', constraint: '1.1.0' },
+      ];
+
+      await expect(
+        exec('foobar', { toolConstraints, preCommands }),
+      ).rejects.toThrow('command failed');
+      await exec('foobar', { toolConstraints });
+
+      expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+        'install-tool npm 1.1.0',
+        failedCommand,
+        'foobar',
+      ]);
+    },
+  );
+
+  it('does not skip an uninstalled tool after another constraint fails to resolve', async () => {
+    process.env = processEnv;
+    memCache.init();
+    datasource.getPkgReleases.mockRejectedValueOnce(new Error('lookup failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const npm: ToolConstraint = { toolName: 'npm', constraint: '1.2.3' };
+
+    await expect(
+      exec('foobar', { toolConstraints: [npm, { toolName: 'yarn' }] }),
+    ).rejects.toThrow('lookup failed');
+    expect(cpExec).not.toHaveBeenCalled();
+    await exec('foobar', { toolConstraints: [npm] });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.2.3',
+      'foobar',
+    ]);
+  });
+
+  it('retries every requested tool after a partial installation fails', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValueOnce({ stdout: '', stderr: '' });
+    cpExec.mockRejectedValueOnce(new Error('npm installation failed'));
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'node', constraint: '24.21.0' },
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+
+    await expect(exec('npm --version', { toolConstraints })).rejects.toThrow(
+      'npm installation failed',
+    );
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool node 24.21.0',
+      'install-tool npm 1.1.0',
+      'install-tool node 24.21.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+    ]);
+  });
+
+  it('reactivates an earlier version after a failed version switch', async () => {
+    process.env = processEnv;
+    memCache.init();
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'install' });
+    process.env.CONTAINERBASE = 'true';
+    const toolConstraints: ToolConstraint[] = [
+      { toolName: 'npm', constraint: '1.1.0' },
+    ];
+    await exec('npm --version', { toolConstraints });
+    cpExec.mockRejectedValueOnce(new Error('installation failed'));
+
+    await expect(
+      exec('npm --version', {
+        toolConstraints: [{ toolName: 'npm', constraint: '1.2.0' }],
+      }),
+    ).rejects.toThrow('installation failed');
+    await exec('npm --version', { toolConstraints });
+
+    expect(cpExec.mock.calls.map(([cmd]) => asRawCommand(cmd))).toEqual([
+      'install-tool npm 1.1.0',
+      'npm --version',
+      'install-tool npm 1.2.0',
+      'install-tool npm 1.1.0',
+      'npm --version',
+    ]);
   });
 
   it('installs a tool on every exec for binarySource=docker', async () => {
@@ -1294,23 +1620,26 @@ describe('util/exec/index', () => {
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('converts to TEMPORARY_ERROR', async () => {
-    cpExec.mockImplementation(() => {
-      class ErrorSignal extends Error {
-        signal?: string;
-      }
-      const error = new ErrorSignal();
-      error.signal = 'SIGTERM';
-      throw error;
-    });
-    const removeDockerContainerSpy = vi.spyOn(
-      dockerModule,
-      'removeDockerContainer',
-    );
-    const promise = exec('foobar', {});
-    await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
-    expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
-  });
+  it.each([false, true])(
+    'converts to TEMPORARY_ERROR with redactOutput=%s',
+    async (redactOutput) => {
+      cpExec.mockImplementation(() => {
+        class ErrorSignal extends Error {
+          signal?: string;
+        }
+        const error = new ErrorSignal();
+        error.signal = 'SIGTERM';
+        throw error;
+      });
+      const removeDockerContainerSpy = vi.spyOn(
+        dockerModule,
+        'removeDockerContainer',
+      );
+      const promise = exec('foobar', { redactOutput });
+      await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
+      expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+    },
+  );
 
   describe('getToolSettingsOptions()', () => {
     const config: UpdateArtifactsConfig = {
