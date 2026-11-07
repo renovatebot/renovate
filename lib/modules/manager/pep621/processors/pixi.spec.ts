@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type {
@@ -8,7 +9,6 @@ import type {
 } from '../../../../config/types.ts';
 import * as docker from '../../../../util/exec/docker/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { PixiProcessor } from './pixi.ts';
 
@@ -17,7 +17,7 @@ vi.mock('../../../datasource/index.ts');
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -156,7 +156,7 @@ requires-pixi = ">=0.40,<0.41"
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: { constraints: {} },
+          config: updateArtifactsConfig({ constraints: {} }),
           updatedDeps: [{ depName: 'dep1' }],
         },
         project!,
@@ -226,7 +226,9 @@ requires-pixi = ">=0.38,<0.39"
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: { constraints: { pixi: '>=0.40,<0.41' } },
+          config: updateArtifactsConfig({
+            constraints: { pixi: '>=0.40,<0.41' },
+          }),
           updatedDeps: [{ depName: 'dep1' }],
         },
         project!,
@@ -289,10 +291,10 @@ requires-pixi = ">=0.38,<0.39"
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             constraints: {},
             extractedConstraints: { pixi: '>=0.40,<0.41' },
-          },
+          }),
           updatedDeps: [{ depName: 'dep1' }],
         },
         parsePyProject('')!,
@@ -333,10 +335,10 @@ requires-pixi = ">=0.40,<0.41"
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             constraints: {},
             extractedConstraints: { pixi: '>=0.38,<0.39' },
-          },
+          }),
           updatedDeps: [{ depName: 'dep1' }],
         },
         project!,

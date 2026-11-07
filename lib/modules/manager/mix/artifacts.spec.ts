@@ -2,6 +2,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -10,7 +11,6 @@ import type {
 } from '../../../config/types.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -30,7 +30,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 // support install mode
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const constraints: Partial<Record<ConstraintName, string>> = {
   erlang: '25.0.0.0',
   elixir: 'v1.13.4',

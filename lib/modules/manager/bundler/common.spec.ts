@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -33,9 +34,9 @@ describe('modules/manager/bundler/common', () => {
   describe('getBundlerConstraint', () => {
     it('uses existing constraint', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {
+        config: updateArtifactsConfig({
           constraints: { bundler: '2.1.0' },
-        },
+        }),
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('2.1.0');
@@ -43,7 +44,7 @@ describe('modules/manager/bundler/common', () => {
 
     it('extracts from lockfile', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {},
+        config: updateArtifactsConfig(),
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
@@ -51,9 +52,9 @@ describe('modules/manager/bundler/common', () => {
 
     it('prefers the lockfile over the extracted constraint', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {
+        config: updateArtifactsConfig({
           extractedConstraints: { bundler: '2.4.0' },
-        },
+        }),
       };
       const version = await getBundlerConstraint(config, lockedContent);
       expect(version).toBe('1.17.3');
@@ -61,9 +62,9 @@ describe('modules/manager/bundler/common', () => {
 
     it('falls back to the extracted constraint', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {
+        config: updateArtifactsConfig({
           extractedConstraints: { bundler: '2.4.0' },
-        },
+        }),
       };
       const version = await getBundlerConstraint(config, '');
       expect(version).toBe('2.4.0');
@@ -71,7 +72,7 @@ describe('modules/manager/bundler/common', () => {
 
     it('returns undefined', async () => {
       const config: Pick<UpdateArtifact, 'config'> = {
-        config: {},
+        config: updateArtifactsConfig(),
       };
       const version = await getBundlerConstraint(config, '');
       expect(version).toBeUndefined();
@@ -83,9 +84,9 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: gemfile,
-        config: {
+        config: updateArtifactsConfig({
           constraints: { ruby: '2.1.0' },
-        },
+        }),
       });
       const version = await getRubyConstraint(config);
       expect(version).toBe('2.1.0');
@@ -95,7 +96,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: gemfile,
-        config: {},
+        config: updateArtifactsConfig(),
       });
       const version = await getRubyConstraint(config);
       expect(version).toBe('~> 1.5.3');
@@ -105,7 +106,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
       fs.readLocalFile.mockResolvedValueOnce('2.7.8');
       const version = await getRubyConstraint(config);
@@ -116,7 +117,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
       fs.readLocalFile
         .mockResolvedValueOnce(null)
@@ -129,7 +130,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile
@@ -144,9 +145,9 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: gemfile,
-        config: {
+        config: updateArtifactsConfig({
           extractedConstraints: { ruby: '3.1.0' },
-        },
+        }),
       });
       const version = await getRubyConstraint(config);
       expect(version).toBe('~> 1.5.3');
@@ -156,9 +157,9 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
-        config: {
+        config: updateArtifactsConfig({
           extractedConstraints: { ruby: '3.1.0' },
-        },
+        }),
       });
       const version = await getRubyConstraint(config);
       expect(version).toBe('3.1.0');
@@ -168,7 +169,7 @@ describe('modules/manager/bundler/common', () => {
       const config = partial<UpdateArtifact>({
         packageFileName: 'Gemfile',
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
       const version = await getRubyConstraint(config);
       expect(version).toBeUndefined();

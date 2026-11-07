@@ -2,6 +2,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -12,7 +13,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as vendir from './index.ts';
 
 process.env.CONTAINERBASE = 'true';
@@ -31,7 +31,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const vendirLockFile1 = Fixtures.get('vendir_1.lock');
 const vendirLockFile2 = Fixtures.get('vendir_2.lock');
 const vendirFile = Fixtures.get('vendir.yml');

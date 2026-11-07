@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -32,7 +33,7 @@ describe('modules/manager/devbox/artifacts', () => {
     beforeEach(() => {
       GlobalConfig.set(globalConfig);
       updateArtifact = {
-        config: {},
+        config: updateArtifactsConfig(),
         newPackageFileContent: '',
         packageFileName: '',
         updatedDeps: [],
@@ -74,7 +75,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toEqual([
         {
@@ -120,11 +121,11 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {
+          config: updateArtifactsConfig({
             constraints: {
               devbox: '0.13.0',
             },
-          },
+          }),
         }),
       ).resolves.toEqual([
         {
@@ -172,11 +173,11 @@ describe('modules/manager/devbox/artifacts', () => {
             depName: 'nodejs',
           },
         ],
-        config: {
+        config: updateArtifactsConfig({
           extractedConstraints: {
             devbox: '0.13.0',
           },
-        },
+        }),
       });
 
       // the extracted constraint decides that `--no-install` is unsupported
@@ -207,7 +208,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'ruby',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toEqual([
         {
@@ -258,7 +259,7 @@ describe('modules/manager/devbox/artifacts', () => {
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -280,7 +281,7 @@ describe('modules/manager/devbox/artifacts', () => {
               lockFiles: ['devbox.lock'],
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -303,9 +304,9 @@ describe('modules/manager/devbox/artifacts', () => {
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
-          config: {
+          config: updateArtifactsConfig({
             isLockFileMaintenance: true,
-          },
+          }),
         }),
       ).resolves.toEqual([
         {
@@ -350,12 +351,12 @@ describe('modules/manager/devbox/artifacts', () => {
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [{}],
-          config: {
+          config: updateArtifactsConfig({
             isLockFileMaintenance: true,
             constraints: {
               devbox: '< 0.14.0',
             },
-          },
+          }),
         }),
       ).resolves.toEqual([
         {
@@ -396,7 +397,7 @@ describe('modules/manager/devbox/artifacts', () => {
           packageFileName: 'devbox.json',
           newPackageFileContent: devboxJson,
           updatedDeps: [],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -423,7 +424,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -449,7 +450,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -477,7 +478,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
     });
@@ -499,7 +500,7 @@ describe('modules/manager/devbox/artifacts', () => {
               depName: 'nodejs',
             },
           ],
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toEqual([
         {

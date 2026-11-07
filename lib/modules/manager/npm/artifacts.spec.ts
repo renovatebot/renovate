@@ -1,9 +1,10 @@
 import { codeBlock } from 'common-tags';
 import * as httpMock from '~test/http-mock.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
-import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
+import type { Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -19,7 +20,7 @@ function sriDigest(algo: string, hexDigest: string): string {
   return `${algo}-${Buffer.from(hexDigest, 'hex').toString('base64')}`;
 }
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const validDepUpdate = {
   depName: 'pnpm',
   depType: 'packageManager',

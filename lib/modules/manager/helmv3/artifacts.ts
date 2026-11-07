@@ -77,7 +77,7 @@ export async function updateArtifacts({
   logger.debug(`helmv3.updateArtifacts(${packageFileName})`);
 
   const { isLockFileMaintenance } = config;
-  const isUpdateOptionAddChartArchives = config.postUpdateOptions?.includes(
+  const isUpdateOptionAddChartArchives = config.postUpdateOptions.includes(
     'helmUpdateSubChartArchives',
   );
 
@@ -102,14 +102,12 @@ export async function updateArtifacts({
       ? yaml.parseSingleYaml<ChartDefinition>(existingLockFileContent)
       : { dependencies: [] };
 
-    const chartDefinitions: ChartDefinition[] = [];
-    // prioritize registryAlias naming for Helm repositories
-    if (config.registryAliases) {
-      chartDefinitions.push({
-        dependencies: aliasRecordToRepositories(config.registryAliases),
-      });
-    }
-    chartDefinitions.push(packages, locks);
+    const chartDefinitions: ChartDefinition[] = [
+      // prioritize registryAlias naming for Helm repositories
+      { dependencies: aliasRecordToRepositories(config.registryAliases) },
+      packages,
+      locks,
+    ];
 
     const repositories = getRepositories(chartDefinitions);
 

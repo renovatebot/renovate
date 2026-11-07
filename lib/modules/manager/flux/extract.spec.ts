@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { extractConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { compile } from '../../../util/template/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
@@ -8,12 +9,11 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts', () => ({ readLocalFile: vi.fn() }));
 
-const config: ExtractConfig = {};
+const config = extractConfig();
 const fixtureHelmSource = codeBlock`
   apiVersion: source.toolkit.fluxcd.io/v1beta1
   kind: HelmRepository
@@ -149,6 +149,7 @@ describe('modules/manager/flux/extract', () => {
           ${fixtureOciSource}
         `,
         'multidoc.yaml',
+        extractConfig(),
       );
 
       expect(result).toEqual({
@@ -233,6 +234,7 @@ describe('modules/manager/flux/extract', () => {
                 tag: v1.2.3
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result?.deps).toContainEqual(
         expect.objectContaining({
@@ -265,7 +267,11 @@ describe('modules/manager/flux/extract', () => {
     `(
       'extracts version and components from system manifest at $filepath',
       ({ filepath }) => {
-        const result = extractPackageFile(fixtureSystemManifest, filepath);
+        const result = extractPackageFile(
+          fixtureSystemManifest,
+          filepath,
+          extractConfig(),
+        );
         expect(result).toEqual({
           deps: [
             {
@@ -286,6 +292,7 @@ describe('modules/manager/flux/extract', () => {
       const result = extractPackageFile(
         `# Flux Version: v0.27.0`,
         'clusters/my-cluster/flux-system/gotk-components.yaml',
+        extractConfig(),
       );
       expect(result).not.toBeNull();
       expect(result?.deps[0].managerData?.components).toBeUndefined();
@@ -295,12 +302,17 @@ describe('modules/manager/flux/extract', () => {
       const result = extractPackageFile(
         'not actually a system manifest!',
         'clusters/my-cluster/flux-system/gotk-components.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
 
     it('extracts releases without repositories', () => {
-      const result = extractPackageFile(fixtureHelmRelease, 'helmRelease.yaml');
+      const result = extractPackageFile(
+        fixtureHelmRelease,
+        'helmRelease.yaml',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -385,12 +397,20 @@ describe('modules/manager/flux/extract', () => {
     });
 
     it('ignores HelmRelease resources without an apiVersion', () => {
-      const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
+      const result = extractPackageFile(
+        'kind: HelmRelease',
+        'test.yaml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
     it('ignores HelmRepository resources without an apiVersion', () => {
-      const result = extractPackageFile('kind: HelmRepository', 'test.yaml');
+      const result = extractPackageFile(
+        'kind: HelmRepository',
+        'test.yaml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
@@ -403,6 +423,7 @@ describe('modules/manager/flux/extract', () => {
           kind: HelmRepository
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -429,6 +450,7 @@ describe('modules/manager/flux/extract', () => {
             interval: 10m
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -450,6 +472,7 @@ describe('modules/manager/flux/extract', () => {
                 version: "2.0.2"
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -471,6 +494,7 @@ describe('modules/manager/flux/extract', () => {
                   name: chart-repo
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -500,6 +524,7 @@ describe('modules/manager/flux/extract', () => {
                   name: chart-repo
         `,
         'test.yaml',
+        extractConfig(),
       );
 
       expect(result).toEqual({
@@ -535,6 +560,7 @@ describe('modules/manager/flux/extract', () => {
                 version: "2.0.2"
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -556,6 +582,7 @@ describe('modules/manager/flux/extract', () => {
                 version: "2.0.2"
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -587,6 +614,7 @@ describe('modules/manager/flux/extract', () => {
                 version: "2.0.2"
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -602,6 +630,7 @@ describe('modules/manager/flux/extract', () => {
             name: test
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -628,6 +657,7 @@ describe('modules/manager/flux/extract', () => {
             namespace: kube-system
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -646,6 +676,7 @@ describe('modules/manager/flux/extract', () => {
       const result = extractPackageFile(
         fixtureHelmChartRefRelease,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -660,6 +691,7 @@ describe('modules/manager/flux/extract', () => {
           ${fixtureHelmSource}
         `,
         'test.yaml',
+        extractConfig(),
       );
       // HelmRelease is ignored, only HelmChart itself is processed (-> no duplicates expected)
       expect(result).toEqual({
@@ -692,6 +724,7 @@ describe('modules/manager/flux/extract', () => {
               namespace: kube-system
         `,
         'test.yaml',
+        extractConfig(),
       );
       // HelmRelease is ignored, only OCIRepository itself is processed (-> no duplicates expected)
       expect(result).toEqual({
@@ -718,6 +751,7 @@ describe('modules/manager/flux/extract', () => {
           ${fixtureHelmChart}
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -750,6 +784,7 @@ describe('modules/manager/flux/extract', () => {
             version: "2.0.2"
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -818,6 +853,7 @@ describe('modules/manager/flux/extract', () => {
               name: sealed-secrets
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -848,6 +884,7 @@ describe('modules/manager/flux/extract', () => {
               name: sealed-secrets
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -872,6 +909,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://github.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -894,6 +932,7 @@ describe('modules/manager/flux/extract', () => {
               tag: v1.0.0
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result?.deps).toMatchObject([
         { depName: 'renovate-repo', currentValue: 'v1.0.0' },
@@ -915,6 +954,7 @@ describe('modules/manager/flux/extract', () => {
               commit: c93b2ec7a1d2bc4e0b4b8a5e9dd9d0f3f5a0c111
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result?.deps[0].sourceUrl).toBeUndefined();
     });
@@ -933,6 +973,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://github.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -963,6 +1004,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://github.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -993,6 +1035,7 @@ describe('modules/manager/flux/extract', () => {
             url: git@github.com:renovatebot/renovate.git
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1021,6 +1064,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://github.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1049,6 +1093,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://gitlab.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1077,6 +1122,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://bitbucket.org/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1105,6 +1151,7 @@ describe('modules/manager/flux/extract', () => {
             url: https://example.com/renovatebot/renovate
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1131,6 +1178,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1196,6 +1244,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1227,6 +1276,7 @@ describe('modules/manager/flux/extract', () => {
             url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1258,6 +1308,7 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.8.2
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1289,6 +1340,7 @@ describe('modules/manager/flux/extract', () => {
           '',
         ].join('\r\n'),
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1320,6 +1372,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1348,6 +1401,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1382,6 +1436,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1418,6 +1473,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1453,6 +1509,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1486,6 +1543,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1522,6 +1580,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1573,6 +1632,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1629,6 +1689,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1673,6 +1734,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1708,6 +1770,7 @@ describe('modules/manager/flux/extract', () => {
             tag: *mytag
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1741,6 +1804,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1779,6 +1843,7 @@ describe('modules/manager/flux/extract', () => {
             tag: 6.5.4
         `,
         'test.yaml',
+        extractConfig(),
       );
 
       expect(result).toEqual({
@@ -1837,6 +1902,7 @@ describe('modules/manager/flux/extract', () => {
           url: oci://ghcr.io/stefanprodan/charts/podinfo
         `,
         'test.yaml',
+        extractConfig(),
       );
 
       expect(result?.deps).toMatchObject([
@@ -1874,6 +1940,7 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.0.0
         `,
         'test.yaml',
+        extractConfig(),
       );
 
       expect(result).toEqual({
@@ -1907,6 +1974,7 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.8.2
         `,
         'test.yaml',
+        extractConfig(),
       );
 
       expect(result).toEqual({
@@ -1946,6 +2014,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3
       `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -1998,6 +2067,7 @@ describe('modules/manager/flux/extract', () => {
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
         `,
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -2006,17 +2076,22 @@ describe('modules/manager/flux/extract', () => {
       const result = extractPackageFile(
         'apiVersion: helm.toolkit.fluxcd.io/v2beta1',
         'test.yaml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
 
     it('ignores bad manifests', () => {
-      const result = extractPackageFile('"bad YAML', 'test.yaml');
+      const result = extractPackageFile(
+        '"bad YAML',
+        'test.yaml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
     it('ignores null resources', () => {
-      const result = extractPackageFile('null', 'test.yaml');
+      const result = extractPackageFile('null', 'test.yaml', extractConfig());
       expect(result).toBeNull();
     });
   });

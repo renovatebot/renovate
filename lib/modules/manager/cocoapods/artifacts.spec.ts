@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -10,7 +11,6 @@ import type {
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -22,7 +22,7 @@ const datasource = vi.mocked(_datasource);
 delete process.env.CP_HOME_DIR;
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
@@ -92,7 +92,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         packageFileName: 'Podfile',
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       }),
     ).resolves.toBeNull();
     expect(execSnapshots).toEqual([]);

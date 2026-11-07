@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractConfig } from '~test/manager-config.ts';
 import { fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages.ts';
@@ -190,7 +191,11 @@ describe('modules/manager/helmfile/extract', () => {
           chart: ""
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(
+        content,
+        fileName,
+        extractConfig(),
+      );
       expect(result?.deps).toMatchObject([
         { depName: '', skipReason: 'unsupported-chart-type' },
       ]);
@@ -439,7 +444,11 @@ describe('modules/manager/helmfile/extract', () => {
           chart: oci-repo/nested/path/chart
       `;
       const fileName = 'helmfile.yaml';
-      const result = await extractPackageFile(content, fileName, {});
+      const result = await extractPackageFile(
+        content,
+        fileName,
+        extractConfig(),
+      );
       expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
@@ -616,7 +625,11 @@ describe('modules/manager/helmfile/extract', () => {
             chart: gitops-external-cluster/csdp-add-cluster
             version: 0.4.0
       `;
-      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+      const result = await extractPackageFile(
+        content,
+        'helmfile.yaml',
+        extractConfig(),
+      );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         {
@@ -661,7 +674,11 @@ describe('modules/manager/helmfile/extract', () => {
             version: 3.0.0
             chart: kiwigrid/my-chart
       `;
-      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+      const result = await extractPackageFile(
+        content,
+        'helmfile.yaml',
+        extractConfig(),
+      );
 
       expect(result).toMatchObject({
         datasource: 'helm',

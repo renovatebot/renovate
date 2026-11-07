@@ -31,7 +31,7 @@ import {
 import { isLocalChartPath } from '../helmv3/utils.ts';
 import { extractImage } from '../kustomize/extract.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
@@ -130,7 +130,7 @@ function resolveGitRepositoryPerSourceTag(
 function resolveHelmRepository(
   dep: PackageDependency<FluxManagerData>,
   matchingRepositories: HelmRepository[],
-  registryAliases: Record<string, string> | undefined,
+  registryAliases: Record<string, string>,
   sourceRefName?: string,
 ): void {
   if (matchingRepositories.length) {
@@ -154,7 +154,7 @@ function resolveHelmRepository(
     return;
   }
 
-  if (sourceRefName && registryAliases) {
+  if (sourceRefName) {
     const aliasUrl = registryAliases[sourceRefName];
     if (aliasUrl) {
       if (isOCIRegistry(aliasUrl)) {
@@ -300,7 +300,7 @@ function extractOCIRefTagRange(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
-  registryAliases: Record<string, string> | undefined,
+  registryAliases: Record<string, string>,
   content: string,
 ): PackageDependency<FluxManagerData>[] {
   let docs: Document.Parsed[] | undefined;
@@ -520,7 +520,7 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
@@ -536,7 +536,7 @@ export function extractPackageFile(
       deps = resolveResourceManifest(
         manifest,
         helmRepositories,
-        config?.registryAliases,
+        config.registryAliases,
         content,
       );
       break;
@@ -546,7 +546,7 @@ export function extractPackageFile(
 }
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];

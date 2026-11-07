@@ -1,4 +1,5 @@
 import { exec, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
@@ -554,7 +555,7 @@ describe('modules/manager/hermit/artifacts', () => {
         ],
         packageFileName: './bin/hermit',
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
       expect(execSnapshots).toMatchObject([
         {

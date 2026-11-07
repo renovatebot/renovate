@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -10,7 +11,7 @@ import type {
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../types.ts';
+import type { UpdateArtifact } from '../types.ts';
 import * as pub from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -36,7 +37,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',

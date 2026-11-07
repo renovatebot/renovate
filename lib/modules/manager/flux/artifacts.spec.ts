@@ -1,4 +1,5 @@
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { updateArtifacts } from './index.ts';
@@ -29,7 +30,7 @@ describe('modules/manager/flux/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toEqual([
@@ -77,7 +78,7 @@ describe('modules/manager/flux/artifacts', () => {
         },
       ],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toEqual([
@@ -109,7 +110,7 @@ describe('modules/manager/flux/artifacts', () => {
       packageFileName: 'not-a-system-manifest.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toBeNull();
@@ -122,7 +123,7 @@ describe('modules/manager/flux/artifacts', () => {
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toBeNull();
@@ -138,7 +139,7 @@ describe('modules/manager/flux/artifacts', () => {
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: undefined }],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toBeNull();
@@ -150,7 +151,7 @@ describe('modules/manager/flux/artifacts', () => {
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toStrictEqual([
@@ -170,7 +171,7 @@ describe('modules/manager/flux/artifacts', () => {
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
       newPackageFileContent: '',
-      config: {},
+      config: updateArtifactsConfig(),
     });
 
     expect(res).toStrictEqual([

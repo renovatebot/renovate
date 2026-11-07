@@ -1,14 +1,15 @@
 import { codeBlock } from 'common-tags';
+import { extractConfig } from '~test/manager-config.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
-import type { ExtractConfig, PackageDependency } from '../types.ts';
+import type { PackageDependency } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
-const config: ExtractConfig = {};
+const config = extractConfig();
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
@@ -25,7 +26,7 @@ describe('modules/manager/gitlabci/extract', () => {
 
   describe('extractAllPackageFile()', () => {
     it('extracts from empty file', () => {
-      expect(extractPackageFile('', '', {})).toBeNull();
+      expect(extractPackageFile('', '', extractConfig())).toBeNull();
     });
   });
 
@@ -348,7 +349,7 @@ describe('modules/manager/gitlabci/extract', () => {
             alias: imagealias1
       `,
         '',
-        {},
+        extractConfig(),
       );
       expect(res?.deps).toEqual([
         {
@@ -560,7 +561,7 @@ describe('modules/manager/gitlabci/extract', () => {
           - component: gitlab.example.com/an-org/a-component@1.0
           - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
       `;
-      const res = extractPackageFile(content, '', {});
+      const res = extractPackageFile(content, '', extractConfig());
       expect(res?.deps).toMatchObject([
         {
           currentValue: '1.0',

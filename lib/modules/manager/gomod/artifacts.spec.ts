@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -13,7 +14,6 @@ import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { deriveGoToolchainConstraints } from './artifacts.ts';
 import * as _artifactsExtra from './artifacts-extra.ts';
 import * as gomod from './index.ts';
@@ -67,10 +67,10 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {
+const config = updateArtifactsConfig({
   constraints: { go: '1.14' },
   postUpdateOptions: ['gomodMassage'],
-};
+});
 
 const goEnv = {
   GONOSUMDB: '1',
@@ -2442,10 +2442,10 @@ describe('modules/manager/gomod/artifacts', () => {
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
       newPackageFileContent: gomod1,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
-      },
+      }),
     });
     expect(res).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
@@ -2501,10 +2501,10 @@ describe('modules/manager/gomod/artifacts', () => {
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
       newPackageFileContent: `someText\n\ngo 1.17\n\n${gomod1}`,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
-      },
+      }),
     });
 
     expect(res).toEqual([
@@ -2570,9 +2570,9 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
       newPackageFileContent: `someText\n\ngo 1.13\n\ntoolchain go1.23.6\n\n${gomod1}`,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'minor',
-      },
+      }),
     });
 
     expect(res).toEqual([
@@ -2611,9 +2611,9 @@ describe('modules/manager/gomod/artifacts', () => {
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'golang.org/x/crypto', newVersion: '0.35.0' }],
       newPackageFileContent: `someText\n\ngo 1.23.5\n\n${gomod1}`,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'minor',
-      },
+      }),
     });
 
     expect(res).toEqual([
@@ -2658,10 +2658,10 @@ describe('modules/manager/gomod/artifacts', () => {
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
       newPackageFileContent: `someText\n\ngo 1.17\n\n${gomod1}`,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
-      },
+      }),
     });
 
     expect(res).toEqual([
@@ -2698,13 +2698,13 @@ describe('modules/manager/gomod/artifacts', () => {
         { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
       ],
       newPackageFileContent: gomod1,
-      config: {
+      config: updateArtifactsConfig({
         updateType: 'major',
         postUpdateOptions: ['gomodUpdateImportPaths'],
         constraints: {
           go: '1.14',
         },
-      },
+      }),
     });
     expect(res).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
@@ -3007,14 +3007,17 @@ describe('modules/manager/gomod/artifacts', () => {
   describe('deriveGoToolchainConstraints', () => {
     it('returns config constraint when set', async () => {
       await expect(
-        deriveGoToolchainConstraints({ constraints: { go: '1.21' } }, ''),
+        deriveGoToolchainConstraints(
+          updateArtifactsConfig({ constraints: { go: '1.21' } }),
+          '',
+        ),
       ).resolves.toBe('1.21');
     });
 
     it('config constraint takes precedence over go.mod content', async () => {
       await expect(
         deriveGoToolchainConstraints(
-          { constraints: { go: '1.20' } },
+          updateArtifactsConfig({ constraints: { go: '1.20' } }),
           'go 1.23.5',
         ),
       ).resolves.toBe('1.20');
@@ -3022,32 +3025,38 @@ describe('modules/manager/gomod/artifacts', () => {
 
     it('returns toolchain version when toolchain directive is present', async () => {
       await expect(
-        deriveGoToolchainConstraints({}, 'go 1.13\ntoolchain go1.23.6'),
+        deriveGoToolchainConstraints(
+          updateArtifactsConfig(),
+          'go 1.13\ntoolchain go1.23.6',
+        ),
       ).resolves.toBe('1.23.6');
     });
 
     it('returns full go version when only full go directive is present (no toolchain)', async () => {
-      await expect(deriveGoToolchainConstraints({}, 'go 1.23.5')).resolves.toBe(
-        '1.23.5',
-      );
+      await expect(
+        deriveGoToolchainConstraints(updateArtifactsConfig(), 'go 1.23.5'),
+      ).resolves.toBe('1.23.5');
     });
 
     it('returns range constraint for major.minor go directive', async () => {
-      await expect(deriveGoToolchainConstraints({}, 'go 1.17')).resolves.toBe(
-        '^1.17',
-      );
+      await expect(
+        deriveGoToolchainConstraints(updateArtifactsConfig(), 'go 1.17'),
+      ).resolves.toBe('^1.17');
     });
 
     it('returns undefined when no go version in content and no config constraint', async () => {
       await expect(
-        deriveGoToolchainConstraints({}, 'module example.com/foo'),
+        deriveGoToolchainConstraints(
+          updateArtifactsConfig(),
+          'module example.com/foo',
+        ),
       ).resolves.toBeUndefined();
     });
 
     it('falls back to the extracted constraint when go.mod has no go version', async () => {
       await expect(
         deriveGoToolchainConstraints(
-          { extractedConstraints: { go: '1.22' } },
+          updateArtifactsConfig({ extractedConstraints: { go: '1.22' } }),
           'module example.com/foo',
         ),
       ).resolves.toBe('1.22');
@@ -3056,7 +3065,7 @@ describe('modules/manager/gomod/artifacts', () => {
     it('prefers the go.mod content over the extracted constraint', async () => {
       await expect(
         deriveGoToolchainConstraints(
-          { extractedConstraints: { go: '1.22' } },
+          updateArtifactsConfig({ extractedConstraints: { go: '1.22' } }),
           'go 1.23.5',
         ),
       ).resolves.toBe('1.23.5');
@@ -3066,7 +3075,7 @@ describe('modules/manager/gomod/artifacts', () => {
     it('ignores constraints.golang and falls back to go.mod content', async () => {
       await expect(
         deriveGoToolchainConstraints(
-          { constraints: { golang: '1.21' } },
+          updateArtifactsConfig({ constraints: { golang: '1.21' } }),
           'go 1.23.5',
         ),
       ).resolves.toBe('1.23.5');

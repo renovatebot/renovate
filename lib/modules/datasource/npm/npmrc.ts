@@ -82,7 +82,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     if (matchHost) {
       hostRule.matchHost = matchHost;
     }
-    rules.hostRules?.push(hostRule);
+    rules.hostRules.push(hostRule);
   }
   // Generate packageRules
   const matchDatasources = ['npm'];
@@ -153,7 +153,7 @@ export function setNpmrc(input?: string): void {
       }
     }
     const npmrcRules = convertNpmrcToRules(npmrc);
-    if (npmrcRules.hostRules?.length) {
+    if (npmrcRules.hostRules.length) {
       npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
     }
     packageRules = npmrcRules.packageRules;

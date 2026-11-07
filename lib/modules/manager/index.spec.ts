@@ -1,5 +1,6 @@
 import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import { extractConfig, updateArtifactsConfig } from '~test/manager-config.ts';
 import { partial } from '~test/util.ts';
 import { getToolConfig } from '../../util/exec/containerbase.ts';
 import type { ToolName } from '../../util/exec/types.ts';
@@ -112,13 +113,19 @@ describe('modules/manager/index', () => {
 
     it('returns false for a manager which does not implement it', async () => {
       await expect(
-        manager.enforcesMinimumReleaseAge('dockerfile', {}),
+        manager.enforcesMinimumReleaseAge(
+          'dockerfile',
+          updateArtifactsConfig(),
+        ),
       ).resolves.toBe(false);
     });
 
     it('returns false for an unknown manager', async () => {
       await expect(
-        manager.enforcesMinimumReleaseAge('unknown-manager', {}),
+        manager.enforcesMinimumReleaseAge(
+          'unknown-manager',
+          updateArtifactsConfig(),
+        ),
       ).resolves.toBe(false);
     });
 
@@ -134,7 +141,9 @@ describe('modules/manager/index', () => {
             enforcesMinimumReleaseAge,
           }),
         );
-        const config = { minimumReleaseAgeExtracted: '3 days' };
+        const config = updateArtifactsConfig({
+          minimumReleaseAgeExtracted: '3 days',
+        });
 
         const res = await manager.enforcesMinimumReleaseAge(
           'stub-manager',
@@ -225,10 +234,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       await expect(
-        manager.extractAllPackageFiles('unknown', {}, []),
+        manager.extractAllPackageFiles('unknown', extractConfig(), []),
       ).resolves.toBeNull();
       await expect(
-        manager.extractAllPackageFiles('dummy', {}, []),
+        manager.extractAllPackageFiles('dummy', extractConfig(), []),
       ).resolves.toBeNull();
     });
 
@@ -239,7 +248,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       await expect(
-        manager.extractAllPackageFiles('dummy', {}, []),
+        manager.extractAllPackageFiles('dummy', extractConfig(), []),
       ).resolves.not.toBeNull();
     });
 
@@ -255,10 +264,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.extractPackageFile('unknown', '', 'filename', {}),
+        manager.extractPackageFile('unknown', '', 'filename', extractConfig()),
       ).toBeNull();
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).toBeNull();
     });
 
@@ -269,7 +278,7 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).not.toBeNull();
     });
 
@@ -281,7 +290,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).not.toBeNull();
     });
 

@@ -116,7 +116,7 @@ export async function updateArtifacts(
           .filter(isString)
           .filter((dep) => dep !== 'ruby' && dep !== 'bundler');
         let additionalArgs = '';
-        if (config.postUpdateOptions?.includes('bundlerConservative')) {
+        if (config.postUpdateOptions.includes('bundlerConservative')) {
           additionalArgs = '--conservative ';
         }
         if (deps.length) {
