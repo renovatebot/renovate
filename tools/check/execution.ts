@@ -23,7 +23,7 @@ export async function runCommand(
 
   const result = await subprocess;
   processManager.subprocesses.delete(subprocess);
-  return { success: result.exitCode === 0, output: result.all ?? '' };
+  return { success: result.exitCode === 0, output: result.all };
 }
 
 export async function runChecksParallel(

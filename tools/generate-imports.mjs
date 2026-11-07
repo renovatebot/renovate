@@ -183,12 +183,10 @@ async function generateManagerDefaultConfigs() {
   /** @type {Record<string, { displayName: string, defaultConfig: Record<string, unknown> }>} */
   const managerDefaultConfigs = {};
   for (const [name, manager] of allManagers) {
-    if (manager.defaultConfig) {
-      managerDefaultConfigs[name] = {
-        displayName: getDisplayName(name, manager),
-        defaultConfig: manager.defaultConfig,
-      };
-    }
+    managerDefaultConfigs[name] = {
+      displayName: getDisplayName(name, manager),
+      defaultConfig: manager.defaultConfig,
+    };
   }
 
   const content = `

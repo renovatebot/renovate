@@ -263,7 +263,7 @@ function generateLockFileTable(): string {
   for (const [name, definition] of allManagers) {
     if (
       definition.supportsLockFileMaintenance &&
-      definition.lockFileNames?.length
+      definition.lockFileNames.length
     ) {
       rows.push({ name, lockFiles: definition.lockFileNames });
     }
@@ -364,7 +364,7 @@ function generateToolsForConstraints(): string {
     }
     const def = toolDefinitionDocumentation.find((t) => t.name === toolName);
     // Newlines in the Markdown-rendered table will break table rendering
-    const desc = def?.description?.replaceAll('\n', '<br>') ?? '';
+    const desc = def?.description.replaceAll('\n', '<br>') ?? '';
     output += `| \`${toolName}\` | ${desc} | [${toolConfig.versioning}](./modules/versioning/${toolConfig.versioning}/index.md) | [${toolConfig.datasource}](./modules/datasource/${toolConfig.datasource}/index.md) |\n`;
   }
 
@@ -448,7 +448,7 @@ export async function generateConfig(
       stringifyArrays(el);
 
       for (const key of lookupKeys) {
-        const [headerIndex] = indexed[key];
+        const [headerIndex] = indexed[key]!;
         let sectionContent = `\n${option.description}\n\n${genTable(Object.entries(el), option.type, option.default)}`;
 
         if (el.supportsTemplating) {

@@ -9,7 +9,7 @@ export interface ItemsEntity {
   number: number;
   title: string;
   labels: LabelsEntity[];
-  issueType: 'Bug' | 'Feature';
+  issueType?: 'Bug' | 'Feature';
 }
 
 export interface LabelsEntity {

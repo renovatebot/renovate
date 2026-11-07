@@ -9,7 +9,10 @@ export const newFiles = new Set();
  * @param {string} code
  * @returns {Promise<void>}
  */
-export async function updateFile(file: string, code: string): Promise<void> {
+export async function updateFile(
+  file: string,
+  code: string | undefined,
+): Promise<void> {
   const oldCode = (await fs.pathExists(file))
     ? await fs.readFile(file, 'utf8')
     : null;

@@ -182,7 +182,7 @@ export default defineRule({
 
     return {
       before() {
-        const filename = context.physicalFilename ?? context.filename;
+        const filename = context.physicalFilename;
         if (filename.endsWith('.spec.ts')) {
           return false;
         }

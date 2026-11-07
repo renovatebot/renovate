@@ -93,6 +93,7 @@ program
       logger.info('* running mkdocs serve');
       activeChild = spawnServe();
       const res = await activeChild;
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- reassigned by the file watcher callback while awaiting
       if (!shouldRestart) {
         checkResult(res);
         break;

@@ -41,7 +41,7 @@ describe('docs/documentation', () => {
       );
       if (subHeadersMatch) {
         for (const subHeaderStr of subHeadersMatch) {
-          if (subHeaderStr?.groups?.child) {
+          if (subHeaderStr.groups?.child) {
             subHeadings.push(subHeaderStr.groups.child);
           }
         }

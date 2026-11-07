@@ -121,7 +121,6 @@ export default defineRule({
           refTypeName.type !== 'TSQualifiedName' ||
           refTypeName.left.type !== 'Identifier' ||
           refTypeName.left.name !== zodBinding ||
-          refTypeName.right.type !== 'Identifier' ||
           refTypeName.right.name !== 'infer'
         ) {
           return;
@@ -134,7 +133,7 @@ export default defineRule({
         }
 
         const [typeArg] = typeArgs.params;
-        if (typeArg.type !== 'TSTypeQuery' || !typeArg.exprName) {
+        if (typeArg.type !== 'TSTypeQuery') {
           return;
         }
         const { exprName } = typeArg;

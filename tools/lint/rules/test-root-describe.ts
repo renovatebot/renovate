@@ -23,11 +23,11 @@ export default defineRule({
         if (callee.type !== 'Identifier' || callee.name !== 'describe') {
           return;
         }
-        if (node.parent?.parent?.type !== 'Program') {
+        if (node.parent.parent?.type !== 'Program') {
           return;
         }
 
-        const [descr] = node.arguments;
+        const descr = node.arguments.at(0);
         if (!descr) {
           context.report({
             node,

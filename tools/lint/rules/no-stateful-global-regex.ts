@@ -29,7 +29,8 @@ function isStatefulRegexInit(init: ESTree.Expression): boolean {
     init.callee.type === 'Identifier' &&
     init.callee.name === 'regEx'
   ) {
-    const [pattern, flags] = init.arguments;
+    const pattern = init.arguments.at(0);
+    const flags = init.arguments.at(1);
     if (flags) {
       return (
         flags.type === 'Literal' &&

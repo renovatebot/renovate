@@ -157,7 +157,7 @@ export default defineRule({
   createOnce(context) {
     return {
       before() {
-        const filename = context.filename ?? context.physicalFilename ?? '';
+        const filename = context.filename;
         return filename.endsWith('.spec.ts');
       },
       VariableDeclaration(node) {
