@@ -12,9 +12,9 @@ function repoName(value: string | { repository: string }): string {
   return String(isString(value) ? value : value.repository).toLowerCase();
 }
 
-export async function autodiscoverRepositories(
-  config: AllConfig,
-): Promise<AllConfig> {
+export async function autodiscoverRepositories<T extends AllConfig>(
+  config: T,
+): Promise<T> {
   const { autodiscoverFilter } = config;
   if (config.platform === 'local') {
     if (config.repositories?.length) {

@@ -9,6 +9,7 @@ import * as hostRules from '../../util/host-rules.ts';
 import * as secrets from '../../util/sanitize.ts';
 import * as repositoryWorker from '../repository/index.ts';
 import type { ProcessResult } from '../repository/result.ts';
+import { applyGlobalConfigDefaults } from './config/defaults.ts';
 import * as configParser from './config/parse/index.ts';
 import * as globalWorker from './index.ts';
 import * as limits from './limits.ts';
@@ -151,12 +152,14 @@ describe('workers/global/index', () => {
   });
 
   it('handles config warnings and errors', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      repositories: [],
-      // @ts-expect-error -- testing
-      maintainYarnLock: true,
-      foo: 1,
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        repositories: [],
+        // @ts-expect-error -- testing
+        maintainYarnLock: true,
+        foo: 1,
+      }),
+    );
     vi.stubEnv('AWS_SECRET_ACCESS_KEY', 'key');
     vi.stubEnv('AWS_SESSION_TOKEN', 'token');
     vi.stubEnv('COREPACK_NPM_TOKEN', 'corepack-token');
@@ -166,49 +169,57 @@ describe('workers/global/index', () => {
   });
 
   it('handles zero repos', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      baseDir: '/tmp/base',
-      cacheDir: '/tmp/cache',
-      repositories: [],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        baseDir: '/tmp/base',
+        cacheDir: '/tmp/cache',
+        repositories: [],
+      }),
+    );
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).not.toHaveBeenCalled();
   });
 
   it('handles local', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      platform: 'local',
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        platform: 'local',
+      }),
+    );
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
   });
 
   it('processes repositories', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      gitAuthor: 'a@b.com',
-      enabled: true,
-      repositories: ['a', 'b'],
-      hostRules: [
-        {
-          hostType: DockerDatasource.id,
-          username: 'some-user',
-          password: 'some-password',
-        },
-      ],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        gitAuthor: 'a@b.com',
+        enabled: true,
+        repositories: ['a', 'b'],
+        hostRules: [
+          {
+            hostType: DockerDatasource.id,
+            username: 'some-user',
+            password: 'some-password',
+          },
+        ],
+      }),
+    );
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
   });
 
   it('returns the exit code of the first errored repository when exitCodeForErrors is enabled', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      exitCodeForErrors: true,
-      repositories: ['a', 'b', 'c'],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        enabled: true,
+        exitCodeForErrors: true,
+        repositories: ['a', 'b', 'c'],
+      }),
+    );
     vi.mocked(repositoryWorker.renovateRepository)
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce(partial<ProcessResult>({ exitCode: 5 }))
@@ -219,10 +230,12 @@ describe('workers/global/index', () => {
   });
 
   it('ignores repository exit codes when exitCodeForErrors is disabled', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      repositories: ['a'],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        enabled: true,
+        repositories: ['a'],
+      }),
+    );
     vi.mocked(repositoryWorker.renovateRepository).mockResolvedValueOnce(
       partial<ProcessResult>({ exitCode: 5 }),
     );
@@ -237,13 +250,15 @@ describe('workers/global/index', () => {
       globalConfigDuringInit = { ...GlobalConfig.get() };
       return Promise.resolve(input);
     });
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      repositories: [],
-      platform: 'gitea',
-      endpoint: 'https://gitea.internal/',
-      internalHostAccess: 'block',
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        enabled: true,
+        repositories: [],
+        platform: 'gitea',
+        endpoint: 'https://gitea.internal/',
+        internalHostAccess: 'block',
+      }),
+    );
 
     await expect(globalWorker.start()).resolves.toBe(0);
 
@@ -258,17 +273,19 @@ describe('workers/global/index', () => {
 
   it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
     // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      repositories: ['a'],
-      allowedHeaders: ['X-*'],
-      hostRules: [
-        {
-          matchHost: 'registry.example.com',
-          headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
-        },
-      ],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        enabled: true,
+        repositories: ['a'],
+        allowedHeaders: ['X-*'],
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
+          },
+        ],
+      }),
+    );
 
     await expect(globalWorker.start()).resolves.toBe(0);
 
@@ -295,20 +312,22 @@ describe('workers/global/index', () => {
       );
       return Promise.resolve(undefined);
     });
-    parseConfigs.mockResolvedValueOnce({
-      enabled: true,
-      allowedHeaders: ['X-*'],
-      repositories: [
-        { repository: 'a', allowedHeaders: ['Authorization'] },
-        'b',
-      ],
-      hostRules: [
-        {
-          matchHost: 'registry.example.com',
-          headers: { Authorization: 'from-admin' },
-        },
-      ],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        enabled: true,
+        allowedHeaders: ['X-*'],
+        repositories: [
+          { repository: 'a', allowedHeaders: ['Authorization'] },
+          'b',
+        ],
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { Authorization: 'from-admin' },
+          },
+        ],
+      }),
+    );
 
     await expect(globalWorker.start()).resolves.toBe(0);
 
@@ -318,18 +337,20 @@ describe('workers/global/index', () => {
   it('processes repositories break', async () => {
     const isLimitReached = vi.spyOn(limits, 'isLimitReached');
     isLimitReached.mockReturnValue(true);
-    parseConfigs.mockResolvedValueOnce({
-      gitAuthor: 'a@b.com',
-      enabled: true,
-      repositories: ['a', 'b'],
-      hostRules: [
-        {
-          hostType: DockerDatasource.id,
-          username: 'some-user',
-          password: 'some-password',
-        },
-      ],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        gitAuthor: 'a@b.com',
+        enabled: true,
+        repositories: ['a', 'b'],
+        hostRules: [
+          {
+            hostType: DockerDatasource.id,
+            username: 'some-user',
+            password: 'some-password',
+          },
+        ],
+      }),
+    );
     await globalWorker.start();
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
@@ -337,11 +358,13 @@ describe('workers/global/index', () => {
   });
 
   it('exits with non-zero when errors are logged', async () => {
-    parseConfigs.mockResolvedValueOnce({
-      baseDir: '/tmp/base',
-      cacheDir: '/tmp/cache',
-      repositories: [],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        baseDir: '/tmp/base',
+        cacheDir: '/tmp/cache',
+        repositories: [],
+      }),
+    );
     logger.getProblems.mockReset();
     logger.getProblems.mockImplementation(() => [
       {
@@ -354,11 +377,13 @@ describe('workers/global/index', () => {
 
   it('exits with zero when warnings are logged', async () => {
     vi.stubEnv('LOG_LEVEL', undefined);
-    parseConfigs.mockResolvedValueOnce({
-      baseDir: '/tmp/base',
-      cacheDir: '/tmp/cache',
-      repositories: [],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        baseDir: '/tmp/base',
+        cacheDir: '/tmp/cache',
+        repositories: [],
+      }),
+    );
     logger.getProblems.mockReset();
     logger.getProblems.mockImplementation(() => [
       {
@@ -371,11 +396,13 @@ describe('workers/global/index', () => {
 
   it('does not log info message when log level is not info', async () => {
     logger.logLevel.mockImplementation(() => 'debug');
-    parseConfigs.mockResolvedValueOnce({
-      baseDir: '/tmp/base',
-      cacheDir: '/tmp/cache',
-      repositories: [],
-    });
+    parseConfigs.mockResolvedValueOnce(
+      applyGlobalConfigDefaults({
+        baseDir: '/tmp/base',
+        cacheDir: '/tmp/cache',
+        repositories: [],
+      }),
+    );
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(logger.logger.info).not.toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining('Set LOG_LEVEL=debug'),
@@ -384,22 +411,26 @@ describe('workers/global/index', () => {
 
   describe('processes platforms', () => {
     it('github', async () => {
-      parseConfigs.mockResolvedValueOnce({
-        repositories: ['a'],
-        platform: 'github',
-        endpoint: 'https://github.com/',
-      });
+      parseConfigs.mockResolvedValueOnce(
+        applyGlobalConfigDefaults({
+          repositories: ['a'],
+          platform: 'github',
+          endpoint: 'https://github.com/',
+        }),
+      );
       await globalWorker.start();
       expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
 
     it('gitlab', async () => {
-      parseConfigs.mockResolvedValueOnce({
-        repositories: [{ repository: 'a' }],
-        platform: 'gitlab',
-        endpoint: 'https://my.gitlab.com/',
-      });
+      parseConfigs.mockResolvedValueOnce(
+        applyGlobalConfigDefaults({
+          repositories: [{ repository: 'a' }],
+          platform: 'gitlab',
+          endpoint: 'https://my.gitlab.com/',
+        }),
+      );
       await globalWorker.start();
       expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
@@ -408,12 +439,14 @@ describe('workers/global/index', () => {
 
   describe('write repositories to file', () => {
     it('successfully write file', async () => {
-      parseConfigs.mockResolvedValueOnce({
-        repositories: ['myOrg/myRepo'],
-        platform: 'github',
-        endpoint: 'https://github.com/',
-        writeDiscoveredRepos: '/tmp/renovate-output.json',
-      });
+      parseConfigs.mockResolvedValueOnce(
+        applyGlobalConfigDefaults({
+          repositories: ['myOrg/myRepo'],
+          platform: 'github',
+          endpoint: 'https://github.com/',
+          writeDiscoveredRepos: '/tmp/renovate-output.json',
+        }),
+      );
 
       await expect(globalWorker.start()).resolves.toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);

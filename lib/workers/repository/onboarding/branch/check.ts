@@ -1,6 +1,6 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
-import type { RenovateConfigFile } from '../../../../config/types.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
   REPOSITORY_NO_CONFIG,
@@ -46,7 +46,7 @@ async function packageJsonConfigExists(): Promise<boolean> {
   return false;
 }
 
-async function closedPrExists(config: RenovateConfigFile): Promise<Pr | null> {
+async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return (
     (await platform.findPr({
       branchName: getInheritedOrGlobal('onboardingBranch'),
@@ -63,9 +63,7 @@ async function closedPrExists(config: RenovateConfigFile): Promise<Pr | null> {
   );
 }
 
-export async function isOnboarded(
-  config: RenovateConfigFile,
-): Promise<boolean> {
+export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
 
@@ -163,7 +161,7 @@ export async function isOnboarded(
     return true;
   }
   logger.debug('Repo is not onboarded and no merged PRs exist');
-  if (!config.suppressNotifications!.includes('onboardingClose')) {
+  if (!config.suppressNotifications.includes('onboardingClose')) {
     const ageOfOnboardingPr = getElapsedDays(
       closedOnboardingPr.createdAt!,
       false,
@@ -199,7 +197,7 @@ export async function isOnboarded(
 }
 
 export async function getOnboardingPr(
-  config: RenovateConfigFile,
+  config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
     getInheritedOrGlobal('onboardingBranch'),

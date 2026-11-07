@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { supportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import type { HostRule } from '../../types/index.ts';
@@ -19,6 +20,13 @@ describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
   const defaultApiBaseUrl = 'https://developer.mend.io/';
   const userSupportedDatasources = ['go'];
+
+  function getConfig(mergeConfidenceEndpoint = defaultApiBaseUrl) {
+    return {
+      mergeConfidenceEndpoint,
+      mergeConfidenceDatasources: supportedDatasources,
+    };
+  }
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
@@ -60,7 +68,7 @@ describe('util/merge-confidence/index', () => {
 
     beforeEach(() => {
       hostRules.add(hostRule);
-      initConfig({ mergeConfidenceEndpoint: apiBaseUrl });
+      initConfig(getConfig(apiBaseUrl));
       memCache.reset();
     });
 
@@ -375,7 +383,7 @@ describe('util/merge-confidence/index', () => {
           .get(`/api/mc/availability`)
           .reply(200);
 
-        await expect(initMergeConfidence({})).toResolve();
+        await expect(initMergeConfidence(getConfig())).toResolve();
 
         expect(logger.debug).toHaveBeenCalledWith(
           {
@@ -400,7 +408,7 @@ describe('util/merge-confidence/index', () => {
           .reply(200);
 
         await expect(
-          initMergeConfidence({ mergeConfidenceEndpoint: 'invalid-url.com' }),
+          initMergeConfidence(getConfig('invalid-url.com')),
         ).toResolve();
 
         expect(logger.warn).toHaveBeenCalledWith(
@@ -441,7 +449,7 @@ describe('util/merge-confidence/index', () => {
       it('resolves if no token', async () => {
         hostRules.clear();
 
-        await expect(initMergeConfidence({})).toResolve();
+        await expect(initMergeConfidence(getConfig())).toResolve();
 
         expect(logger.trace).toHaveBeenCalledWith(
           'merge confidence API usage is disabled',
@@ -451,9 +459,7 @@ describe('util/merge-confidence/index', () => {
       it('resolves when token is valid', async () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(200);
 
-        await expect(
-          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
-        ).toResolve();
+        await expect(initMergeConfidence(getConfig(apiBaseUrl))).toResolve();
 
         expect(logger.debug).toHaveBeenCalledWith(
           expect.anything(),
@@ -465,7 +471,7 @@ describe('util/merge-confidence/index', () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(403);
 
         await expect(
-          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+          initMergeConfidence(getConfig(apiBaseUrl)),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
 
         expect(logger.error).toHaveBeenCalledWith(
@@ -478,7 +484,7 @@ describe('util/merge-confidence/index', () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(503);
 
         await expect(
-          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+          initMergeConfidence(getConfig(apiBaseUrl)),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
 
         expect(logger.error).toHaveBeenCalledWith(
@@ -494,7 +500,7 @@ describe('util/merge-confidence/index', () => {
           .replyWithError(httpMock.error({ code: 'ECONNRESET' }));
 
         await expect(
-          initMergeConfidence({ mergeConfidenceEndpoint: apiBaseUrl }),
+          initMergeConfidence(getConfig(apiBaseUrl)),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
 
         expect(logger.error).toHaveBeenCalledWith(

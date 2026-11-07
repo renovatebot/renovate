@@ -1,11 +1,11 @@
-import type { RenovateSharedConfig } from '../../../config/types.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { coerceString } from '../../../util/string.ts';
 import type { CommitMessage } from './commit-message.ts';
 import { CustomCommitMessage } from './custom-commit-message.ts';
 import { SemanticCommitMessage } from './semantic-commit-message.ts';
 
 export type CommitMessageConfig = Pick<
-  RenovateSharedConfig,
+  RenovateConfig,
   | 'commitMessagePrefix'
   | 'semanticCommits'
   | 'semanticCommitScope'
@@ -30,7 +30,7 @@ export class CommitMessageFactory {
   private createSemanticCommitMessage(): SemanticCommitMessage {
     const message = new SemanticCommitMessage();
 
-    message.type = coerceString(this._config.semanticCommitType);
+    message.type = this._config.semanticCommitType;
     message.scope = coerceString(this._config.semanticCommitScope);
 
     return message;

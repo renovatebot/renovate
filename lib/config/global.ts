@@ -48,9 +48,14 @@ export class GlobalConfig {
     return value;
   }
 
-  static set(
-    config: RenovateConfigFile & RepoGlobalConfig & InternalGlobalConfigOptions,
-  ): RenovateConfigFile {
+  /**
+   * Sets the global options of `config`, and gives the config without them.
+   */
+  static set<
+    T extends RenovateConfigFile &
+      RepoGlobalConfig &
+      InternalGlobalConfigOptions,
+  >(config: T): Omit<T, (typeof globalConfigOptions)[number]> {
     GlobalConfig.reset();
 
     const result = { ...config };

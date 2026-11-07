@@ -8,7 +8,10 @@ import {
 } from '../../../../config/global.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
-import type { AllConfig } from '../../../../config/types.ts';
+import type {
+  AllConfig,
+  GlobalWorkerConfig,
+} from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
@@ -23,6 +26,7 @@ import {
 } from '../../../../util/host-rules.ts';
 import { addSecretForSanitizing } from '../../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../../util/url.ts';
+import { applyGlobalConfigDefaults } from '../defaults.ts';
 import * as additionalConfigFileParser from './additional-config-file.ts';
 import * as cliParser from './cli.ts';
 import * as codespaces from './codespaces.ts';
@@ -101,7 +105,7 @@ async function resolveGlobalExtendsAsAdmin(
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[],
-): Promise<AllConfig> {
+): Promise<GlobalWorkerConfig> {
   logger.debug('Parsing configs');
 
   // Get configs
@@ -138,42 +142,47 @@ export async function parseConfigs(
 
   const combinedConfig = config;
 
-  config = mergeChildConfig(defaultConfig, config);
+  let globalConfig = applyGlobalConfigDefaults(
+    mergeChildConfig(defaultConfig, config),
+  );
 
-  if (config.forceCli) {
+  if (globalConfig.forceCli) {
     const forcedCli = { ...cliConfig };
     delete forcedCli.token;
     delete forcedCli.hostRules;
-    if (config.force) {
-      config.force = { ...config.force, ...forcedCli };
+    if (globalConfig.force) {
+      globalConfig.force = { ...globalConfig.force, ...forcedCli };
     } else {
-      config.force = forcedCli;
+      globalConfig.force = forcedCli;
     }
   }
 
-  if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readSystemFile(config.privateKeyPath, 'utf8');
-    delete config.privateKeyPath;
-  }
-
-  if (!config.privateKeyOld && config.privateKeyPathOld) {
-    config.privateKeyOld = await readSystemFile(
-      config.privateKeyPathOld,
+  if (!globalConfig.privateKey && globalConfig.privateKeyPath) {
+    globalConfig.privateKey = await readSystemFile(
+      globalConfig.privateKeyPath,
       'utf8',
     );
-    delete config.privateKeyPathOld;
+    delete globalConfig.privateKeyPath;
+  }
+
+  if (!globalConfig.privateKeyOld && globalConfig.privateKeyPathOld) {
+    globalConfig.privateKeyOld = await readSystemFile(
+      globalConfig.privateKeyPathOld,
+      'utf8',
+    );
+    delete globalConfig.privateKeyPathOld;
   }
 
   // Add private keys for sanitizing then set and delete them
-  addSecretForSanitizing(config.privateKey, 'global');
-  addSecretForSanitizing(config.privateKeyOld, 'global');
-  setPrivateKeys(config.privateKey, config.privateKeyOld);
-  delete config.privateKey;
-  delete config.privateKeyOld;
+  addSecretForSanitizing(globalConfig.privateKey, 'global');
+  addSecretForSanitizing(globalConfig.privateKeyOld, 'global');
+  setPrivateKeys(globalConfig.privateKey, globalConfig.privateKeyOld);
+  delete globalConfig.privateKey;
+  delete globalConfig.privateKeyOld;
 
-  if (config.logContext) {
+  if (globalConfig.logContext) {
     // This only has an effect if logContext was defined via file or CLI, otherwise it would already have been detected in env
-    setContext(config.logContext);
+    setContext(globalConfig.logContext);
   }
 
   logger.trace({ config: defaultConfig }, 'Default config');
@@ -216,78 +225,90 @@ export async function parseConfigs(
     }
   }
 
-  if (config.detectGlobalManagerConfig) {
+  if (globalConfig.detectGlobalManagerConfig) {
     logger.debug('Detecting global manager config');
     const { detectAllGlobalConfig } =
       await import('../../../../modules/manager/index.ts');
     const globalManagerConfig = await detectAllGlobalConfig();
     logger.debug({ config: globalManagerConfig }, 'Global manager config');
-    config = mergeChildConfig(config, globalManagerConfig);
+    globalConfig = mergeChildConfig(globalConfig, globalManagerConfig);
   }
 
-  if (config.detectHostRulesFromEnv) {
+  if (globalConfig.detectHostRulesFromEnv) {
     const { hostRulesFromEnv } = await import('./host-rules-from-env.ts');
     const hostRules = hostRulesFromEnv(env);
-    config.hostRules = [...coerceArray(config.hostRules), ...hostRules];
+    globalConfig.hostRules = [
+      ...coerceArray(globalConfig.hostRules),
+      ...hostRules,
+    ];
   }
   // Get global config
-  logger.trace({ config }, 'Full config');
+  logger.trace({ config: globalConfig }, 'Full config');
 
   // Massage endpoint to have a trailing slash
-  if (config.endpoint) {
+  if (globalConfig.endpoint) {
     logger.debug('Adding trailing slash to endpoint');
-    config.endpoint = ensureTrailingSlash(config.endpoint);
+    globalConfig.endpoint = ensureTrailingSlash(globalConfig.endpoint);
   }
 
   // Massage forkProcessing
-  if (!config.autodiscover && config.forkProcessing !== 'disabled') {
+  if (
+    !globalConfig.autodiscover &&
+    globalConfig.forkProcessing !== 'disabled'
+  ) {
     logger.debug('Enabling forkProcessing while in non-autodiscover mode');
-    config.forkProcessing = 'enabled';
+    globalConfig.forkProcessing = 'enabled';
   }
 
   // Only try deletion if RENOVATE_CONFIG_FILE is set
-  await fileParser.deleteNonDefaultConfig(env, !!config.deleteConfigFile);
+  await fileParser.deleteNonDefaultConfig(env, globalConfig.deleteConfigFile);
 
   // Only try deletion if RENOVATE_ADDITIONAL_CONFIG_FILE is set
   await additionalConfigFileParser.deleteNonDefaultConfig(
     env,
-    !!config.deleteAdditionalConfigFile,
+    globalConfig.deleteAdditionalConfigFile,
   );
 
   // Massage onboardingNoDeps
-  if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
+  if (
+    !globalConfig.autodiscover &&
+    globalConfig.onboardingNoDeps !== 'disabled'
+  ) {
     logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
-    config.onboardingNoDeps = 'enabled';
+    globalConfig.onboardingNoDeps = 'enabled';
   }
 
   // do not add these secrets to repoSecrets and,
   //  do not delete the secrets/variables object after applying on global config as it needs to be re-used for repo config
-  if (isNonEmptyObject(config.secrets) || isNonEmptyObject(config.variables)) {
-    config = applySecretsAndVariablesToConfig({
-      config,
-      secrets: config.secrets,
-      variables: config.variables,
+  if (
+    isNonEmptyObject(globalConfig.secrets) ||
+    isNonEmptyObject(globalConfig.variables)
+  ) {
+    globalConfig = applySecretsAndVariablesToConfig({
+      config: globalConfig,
+      secrets: globalConfig.secrets,
+      variables: globalConfig.variables,
       deleteSecrets: false,
       deleteVariables: false,
     });
     // adding these secrets to the globalSecrets set so that they can be redacted from logs
-    for (const secret of Object.values(config.secrets!)) {
+    for (const secret of Object.values(globalConfig.secrets)) {
       addSecretForSanitizing(secret, 'global');
     }
   }
 
-  if (isNonEmptyObject(config.customEnvVariables)) {
-    setCustomEnv(config.customEnvVariables);
+  if (isNonEmptyObject(globalConfig.customEnvVariables)) {
+    setCustomEnv(globalConfig.customEnvVariables);
   }
 
-  if (isNonEmptyArray(config.configFileNames)) {
+  if (isNonEmptyArray(globalConfig.configFileNames)) {
     logger.debug(
-      { configFileNames: config.configFileNames },
+      { configFileNames: globalConfig.configFileNames },
       'Updated the config filenames list',
     );
-    setUserConfigFileNames(config.configFileNames);
-    delete config.configFileNames;
+    setUserConfigFileNames(globalConfig.configFileNames);
+    delete globalConfig.configFileNames;
   }
 
-  return config;
+  return globalConfig;
 }

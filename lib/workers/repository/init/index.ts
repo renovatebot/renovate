@@ -21,7 +21,7 @@ import { getRepoConfig } from './config.ts';
 import { applyRepoConfigDefaults } from './defaults.ts';
 import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
-function initializeConfig(config: RenovateConfigFile): RenovateConfigFile {
+function initializeConfig(config: RenovateConfig): RenovateConfig {
   return {
     ...clone(config),
     errors: [],
@@ -49,32 +49,33 @@ function warnOnUnsupportedOptions(config: RenovateConfigFile): void {
 }
 
 export async function initRepo(
-  config_: RenovateConfigFile,
+  config_: RenovateConfig,
 ): Promise<RenovateConfig> {
   PackageFiles.clear();
-  let config: RenovateConfigFile = initializeConfig(config_);
+  const initialConfig = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
   memCache.init();
   initMutexes();
-  config = await initApis(config);
-  await initializeCaches(config as WorkerPlatformConfig);
-  config = await getRepoConfig(config);
-  platform.applyRepoConfig?.(config);
-  setRepositoryLogLevelRemaps(config.logLevelRemap);
-  if (config.mode === 'silent') {
+  const platformConfig = await initApis(initialConfig);
+  await initializeCaches(platformConfig as WorkerPlatformConfig);
+  const mergedConfig = await getRepoConfig(platformConfig);
+  platform.applyRepoConfig?.(mergedConfig);
+  setRepositoryLogLevelRemaps(mergedConfig.logLevelRemap);
+  if (mergedConfig.mode === 'silent') {
     logger.info(
       'Repository is running with mode=silent and will not make Issues or PRs by default',
     );
   }
-  checkIfConfigured(config);
-  warnOnUnsupportedOptions(config);
-  config = applySecretsAndVariablesToConfig({
-    config,
+  checkIfConfigured(mergedConfig);
+  warnOnUnsupportedOptions(mergedConfig);
+  const config = applySecretsAndVariablesToConfig({
+    config: mergedConfig,
   });
   setUserRepoConfig(config);
-  config = await detectVulnerabilityAlerts(config);
-  const repoConfig = applyRepoConfigDefaults(config);
+  const repoConfig = applyRepoConfigDefaults(
+    await detectVulnerabilityAlerts(config),
+  );
   // istanbul ignore if
   if (repoConfig.printConfig) {
     logger.info(

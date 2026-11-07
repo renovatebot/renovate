@@ -18,6 +18,7 @@ import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type {
   AllConfig,
   MigratedConfig,
+  RenovateConfig,
   RenovateConfigFile,
   ValidationMessage,
 } from '../../../config/types.ts';
@@ -491,6 +492,19 @@ function withoutAdminSuppliedValues(
 }
 
 // Check for repository config
+/**
+ * Merges the repository's config file and the `repositories[]` entry config over `config`.
+ *
+ * A config with its defaults keeps them, as `mergeChildConfig()` restores an option which the merged config sets to `null`, and `resolveConfigPresets()` keeps the values of the config over those of its presets.
+ */
+export function mergeRenovateConfig(
+  config: RenovateConfig & RepositoryWorkerConfig,
+  branchName?: string,
+): Promise<RenovateConfig>;
+export function mergeRenovateConfig(
+  config: RepositoryWorkerConfig,
+  branchName?: string,
+): Promise<RenovateConfigFile>;
 export async function mergeRenovateConfig(
   config: RepositoryWorkerConfig,
   branchName?: string,

@@ -1,7 +1,7 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { RenovateConfigFile } from '../../../../config/types.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import { REPOSITORY_NO_PACKAGE_FILES } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { type Pr, platform } from '../../../../modules/platform/index.ts';
@@ -28,8 +28,8 @@ import {
 import { rebaseOnboardingBranch } from './rebase.ts';
 
 export async function checkOnboardingBranch(
-  config: RenovateConfigFile,
-): Promise<RenovateConfigFile> {
+  config: RenovateConfig,
+): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
@@ -104,8 +104,9 @@ export async function checkOnboardingBranch(
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
-    let mergedConfig = mergeChildConfig(config, onboardingConfig);
-    mergedConfig = await mergeRenovateConfig(mergedConfig);
+    const mergedConfig = await mergeRenovateConfig(
+      mergeChildConfig(config, onboardingConfig),
+    );
 
     // extract with the defaults applied, like a repository run does, on a copy so that the onboarding branch is still created from the config as merged
     const { packageFiles } = await extractAllDependencies(

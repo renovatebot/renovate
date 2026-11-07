@@ -57,9 +57,9 @@ function inheritedHostRuleOptions(): AddHostRuleOptions | undefined {
   return { inherited: true };
 }
 
-export async function mergeInheritedConfig(
-  config: RenovateConfigFile,
-): Promise<RenovateConfigFile> {
+export async function mergeInheritedConfig<T extends RenovateConfigFile>(
+  config: T,
+): Promise<T> {
   // typescript doesn't know that repo is defined
   if (!config.repository || !config.inheritConfig) {
     return config;

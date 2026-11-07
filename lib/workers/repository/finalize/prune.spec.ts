@@ -12,6 +12,7 @@ beforeEach(() => {
   config = partial<RenovateConfig>({
     repoIsOnboarded: true,
     defaultBranch: 'main',
+    baseBranchPatterns: [],
     branchPrefix: `renovate/`,
     pruneStaleBranches: true,
   });

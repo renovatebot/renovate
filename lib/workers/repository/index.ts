@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
-import type { RenovateConfig, RenovateConfigFile } from '../../config/types.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -44,6 +44,7 @@ import handleError from './error.ts';
 import { finalizeRepo } from './finalize/index.ts';
 import { pruneStaleBranches } from './finalize/prune.ts';
 import { initRepo } from './init/index.ts';
+import type { ResolvedRepositoryWorkerConfig } from './init/types.ts';
 import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
@@ -53,7 +54,7 @@ import { processResult } from './result.ts';
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfigFile,
+  repoConfig: ResolvedRepositoryWorkerConfig,
   canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
@@ -61,10 +62,11 @@ export async function renovateRepository(
   let repoResult: ProcessResult | undefined;
   const { config, localDir, error } = await instrument(
     'init',
-    async (): Promise<
-      | { config: RenovateConfig; localDir: string; error?: undefined }
-      | { config: RenovateConfigFile; localDir: string; error: Error }
-    > => {
+    async (): Promise<{
+      config: RenovateConfig;
+      localDir: string;
+      error?: Error;
+    }> => {
       const config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,

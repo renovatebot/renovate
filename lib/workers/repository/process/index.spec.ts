@@ -408,14 +408,11 @@ describe('workers/repository/process/index', () => {
       expect(res.branchPrefix).toBe('renovate/');
     });
 
-    it('does not add base branch name to branchPrefix if multiple base branches are not expected - baseBranchPatterns undefined', async () => {
-      const res = await getBaseBranchConfig(
-        'main',
-        partial<RenovateConfig>({
-          ...config,
-          baseBranchPatterns: undefined,
-        }),
-      );
+    it('does not add base branch name to branchPrefix if multiple base branches are not expected - no baseBranchPatterns', async () => {
+      const res = await getBaseBranchConfig('main', {
+        ...config,
+        baseBranchPatterns: [],
+      });
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeUndefined();
       expect(res.branchPrefix).toBe('renovate/');

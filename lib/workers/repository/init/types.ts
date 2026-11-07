@@ -1,5 +1,7 @@
+import type { WithDefaults } from '../../../config/defaults.ts';
 import type {
   RenovateConfigFile,
+  RepoDefaultedConfigKey,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 
@@ -15,6 +17,14 @@ export interface RepositoryWorkerConfig
   extends RenovateConfigFile, RepoGlobalConfig {
   repositoryEntryConfig?: RenovateConfigFile;
 }
+
+/**
+ * The {@link RepositoryWorkerConfig} which `getRepositoryConfig()` gives the repository worker, which keeps the defaults that `parseConfigs()` gave the global config.
+ */
+export type ResolvedRepositoryWorkerConfig = WithDefaults<
+  RepositoryWorkerConfig,
+  RepoDefaultedConfigKey
+>;
 
 export interface RepoConfigError {
   validationError: string;

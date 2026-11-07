@@ -209,8 +209,10 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
-export function isMultiBaseBranch(config: RenovateConfigFile): boolean {
-  if (!config.baseBranchPatterns?.length) {
+export function isMultiBaseBranch(
+  config: Pick<RenovateConfig, 'baseBranchPatterns'>,
+): boolean {
+  if (!config.baseBranchPatterns.length) {
     return false;
   }
 

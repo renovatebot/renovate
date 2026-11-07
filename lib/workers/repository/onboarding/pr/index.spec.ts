@@ -191,11 +191,7 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates semantic PR', async () => {
       const res = await ensureOnboardingPr(
-        partial<RenovateConfig>({
-          ...config,
-          semanticCommitType: undefined, // should default to "chore"
-          semanticCommits: 'enabled',
-        }),
+        { ...config, semanticCommits: 'enabled' },
         packageFiles,
         branches,
       );

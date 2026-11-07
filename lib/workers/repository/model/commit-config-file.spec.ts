@@ -32,7 +32,11 @@ describe('workers/repository/model/commit-config-file', () => {
 
     it('creates a prefixed commit message', () => {
       const res = createConfigFileCommitMessage(
-        { commitMessagePrefix: 'RENOV-123' },
+        {
+          commitMessagePrefix: 'RENOV-123',
+          semanticCommits: 'auto',
+          semanticCommitType: 'chore',
+        },
         'add renovate.json',
       );
 

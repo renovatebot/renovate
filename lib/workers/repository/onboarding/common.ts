@@ -1,14 +1,14 @@
 import { getConfigFileNames } from '../../../config/app-strings.ts';
-import type { RenovateConfigFile } from '../../../config/types.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getInheritedOrGlobal } from '../../../util/common.ts';
 
-export function getSemanticCommitPrTitle(config: RenovateConfigFile): string {
-  return `${config.semanticCommitType ?? 'chore'}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
+export function getSemanticCommitPrTitle(config: RenovateConfig): string {
+  return `${config.semanticCommitType}: ${getInheritedOrGlobal('onboardingPrTitle')}`;
 }
 
-export function getOnboardingPrTitle(config: RenovateConfigFile): string {
+export function getOnboardingPrTitle(config: RenovateConfig): string {
   if (config.semanticCommits === 'enabled') {
     return getSemanticCommitPrTitle(config);
   }

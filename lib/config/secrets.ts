@@ -51,8 +51,10 @@ export function validateConfigSecretsAndVariables(
   validateNestedInterpolatedValues(config, 'variables');
 }
 
-interface ApplySecretsAndVariablesConfig {
-  config: RenovateConfigFile;
+interface ApplySecretsAndVariablesConfig<
+  T extends RenovateConfigFile = RenovateConfigFile,
+> {
+  config: T;
   secrets?: RenovateConfigFile['secrets'];
   variables?: RenovateConfigFile['variables'];
   deleteSecrets?: boolean;
@@ -61,7 +63,24 @@ interface ApplySecretsAndVariablesConfig {
 
 /**
  * Applies both variables and secrets to the Renovate config by interpolating values
+ *
+ * The config keeps its type other than the secrets and variables it deletes, as interpolating only replaces strings.
  */
+export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
+  applyConfig: ApplySecretsAndVariablesConfig<T> & {
+    deleteSecrets: false;
+    deleteVariables: false;
+  },
+): T;
+export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
+  applyConfig: ApplySecretsAndVariablesConfig<T> & {
+    deleteSecrets?: true;
+    deleteVariables?: true;
+  },
+): Omit<T, 'secrets' | 'variables'>;
+export function applySecretsAndVariablesToConfig(
+  applyConfig: ApplySecretsAndVariablesConfig,
+): RenovateConfigFile;
 export function applySecretsAndVariablesToConfig(
   applyConfig: ApplySecretsAndVariablesConfig,
 ): RenovateConfigFile {
