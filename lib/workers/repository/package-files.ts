@@ -150,7 +150,10 @@ export class PackageFiles {
             let updates = '';
             const uniqueUpdates = [
               ...new Set(
-                dep.updates?.map((update) => `\`${update.newValue}\``),
+                // A lock file only dep has no value to update, only a version
+                dep.updates?.map(
+                  (update) => `\`${update.newValue ?? update.newVersion}\``,
+                ),
               ),
             ];
             if (uniqueUpdates.length > 0) {
