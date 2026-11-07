@@ -185,6 +185,7 @@ export interface FindPRConfig {
 }
 export interface MergePRConfig {
   branchName?: string;
+  bypassRules?: boolean;
   id: number;
   strategy?: MergeStrategy;
 }

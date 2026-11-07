@@ -75,6 +75,7 @@ export interface RenovateSharedConfig {
   autoApprove?: boolean;
   autoReplaceGlobalMatch?: boolean;
   automerge?: boolean;
+  automergeBypassRules?: boolean;
   automergeSchedule?: string[];
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;

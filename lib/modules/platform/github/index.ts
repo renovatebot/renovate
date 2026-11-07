@@ -2233,6 +2233,7 @@ function cacheMergedPrFromList(prNo: number): void {
 
 export async function mergePr({
   branchName,
+  bypassRules = true,
   id: prNo,
   strategy,
 }: MergePRConfig): Promise<boolean> {
@@ -2252,6 +2253,7 @@ export async function mergePr({
       mergeMethod: config.mergeMethod,
       prNo,
       strategy,
+      bypassRules,
       queueEnabled,
       isGhes: isGithubEnterpriseServer(platformConfig.host),
       cacheMergedPr: cacheMergedPrFromList,
@@ -2260,6 +2262,11 @@ export async function mergePr({
       return merged;
     }
     platformConfig.asyncMergeSupported = false;
+  }
+  if (!bypassRules) {
+    logger.debug(
+      'The classic merge endpoint cannot honour automergeBypassRules=false',
+    );
   }
   if (await directMergePr(prNo, strategy)) {
     return true;
