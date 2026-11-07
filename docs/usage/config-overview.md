@@ -221,6 +221,14 @@ If Renovate finds more than one configuration file in the same repository, then 
 Once Repository config is loaded, it is merged over the top of the previously loaded Global and Inherited config, meaning it takes precedence over them.
 Presets referenced with an "extends" config are resolved first and take lower precedence over regular/raw config in the same file or config object.
 
+### Setting an option to `null`
+
+If you set an option to `null`, Renovate uses the default value of that option instead of a value from config with lower precedence.
+This works the same in the Global config, Inherited config, presets, Repository config, `packageRules` and `force`.
+Options which document their own meaning for `null`, like `semanticCommitScope` or `composerIgnorePlatformReqs`, keep that meaning.
+
+Within an object like `major` or `lockFileMaintenance`, Renovate keeps the `null`, and uses the default value once it applies that object to an update.
+
 ## Onboarding
 
 When Renovate processes a repository, one of the first decisions it makes is "Does this repository need to be onboarded?".

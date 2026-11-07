@@ -380,6 +380,23 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
     });
 
+    it('keeps the null commit message topic and extra of lock file maintenance', async () => {
+      config.lockFileMaintenance!.enabled = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [{ packageFile: 'package.json', deps: [] }],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        {
+          updateType: 'lockFileMaintenance',
+          commitMessageTopic: null,
+          commitMessageExtra: null,
+        },
+      ]);
+    });
+
     it('passes minimumReleaseAgeExtracted from the package file to all updates', async () => {
       config.lockFileMaintenance!.enabled = true;
       const packageFiles: Record<string, PackageFile[]> = {

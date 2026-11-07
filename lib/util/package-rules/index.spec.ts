@@ -186,6 +186,29 @@ describe('util/package-rules/index', () => {
     expect(res.skipStage).toBe('datasource-merge');
   });
 
+  it('gives an option set to null its default', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      rangeStrategy: 'pin',
+      composerIgnorePlatformReqs: ['ext-zip'],
+      packageRules: [
+        {
+          enabled: null,
+          rangeStrategy: null,
+          composerIgnorePlatformReqs: null,
+        },
+      ],
+    };
+
+    const res = await applyPackageRules(dep);
+
+    expect(res.enabled).toBeTrue();
+    expect(res.rangeStrategy).toBe('auto');
+    expect(res.composerIgnorePlatformReqs).toBeNull();
+    expect(res.skipReason).toBeUndefined();
+  });
+
   it('unsets skipReason=package-rules if enabled=true', async () => {
     const dep: any = {
       depName: 'foo',

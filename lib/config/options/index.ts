@@ -849,6 +849,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    nullable: true,
   },
   {
     name: 'goGetDirs',
@@ -2830,6 +2831,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The upgrade topic/noun used in commit messages and PR titles.',
     type: 'string',
     default: 'dependency {{depName}}',
+    nullable: true,
     cli: false,
     advancedUse: true,
     supportsTemplating: true,
@@ -2842,6 +2844,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default:
       'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+    nullable: true,
     cli: false,
     advancedUse: true,
     supportsTemplating: true,
