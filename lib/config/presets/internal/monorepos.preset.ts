@@ -24,3 +24,18 @@ for (const [name, value] of Object.entries(monorepoGroups.patternGroups)) {
     matchPackageNames: toArray(value),
   };
 }
+
+presets.ckeditor = {
+  description: 'ckeditor monorepo',
+  packageRules: [
+    {
+      description: 'Group ckeditor5 monorepo packages by source URL.',
+      matchSourceUrls: ['https://github.com/ckeditor/ckeditor5'],
+    },
+    {
+      description:
+        'Group ckeditor5-premium-features by name; it ships no repository field.',
+      matchPackageNames: ['ckeditor5-premium-features'],
+    },
+  ],
+};
