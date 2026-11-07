@@ -1,25 +1,40 @@
 import { z } from 'zod/v4';
 import { KubernetesResource } from '../kubernetes/schema.ts';
 
+const OCIRef = z.object({
+  tag: z.string().optional(),
+  digest: z.string().optional(),
+});
+export type OCIRef = z.infer<typeof OCIRef>;
+
+const HelmChartTemplate = z.object({
+  kind: z.literal('HelmChart').optional(),
+  spec: z.object({
+    chart: z.string(),
+    version: z.string().optional(),
+    sourceRef: z
+      .object({
+        kind: z.string().optional(),
+        name: z.string().optional(),
+        namespace: z.string().optional(),
+      })
+      .optional(),
+  }),
+});
+
+const OCIRepositoryTemplate = z.object({
+  kind: z.literal('OCIRepository'),
+  spec: z.object({
+    url: z.string(),
+    ref: OCIRef.optional(),
+  }),
+});
+
 export const HelmRelease = KubernetesResource.extend({
   apiVersion: z.string().startsWith('helm.toolkit.fluxcd.io/'),
   kind: z.literal('HelmRelease'),
   spec: z.object({
-    chart: z
-      .object({
-        spec: z.object({
-          chart: z.string(),
-          version: z.string().optional(),
-          sourceRef: z
-            .object({
-              kind: z.string().optional(),
-              name: z.string().optional(),
-              namespace: z.string().optional(),
-            })
-            .optional(),
-        }),
-      })
-      .optional(),
+    chart: HelmChartTemplate.or(OCIRepositoryTemplate).optional(),
     chartRef: z
       .object({
         kind: z.string().optional(),
@@ -76,12 +91,7 @@ export const OCIRepository = KubernetesResource.extend({
   kind: z.literal('OCIRepository'),
   spec: z.object({
     url: z.string(),
-    ref: z
-      .object({
-        tag: z.string().optional(),
-        digest: z.string().optional(),
-      })
-      .optional(),
+    ref: OCIRef.optional(),
     layerSelector: z
       .object({
         mediaType: z.string().optional(),
