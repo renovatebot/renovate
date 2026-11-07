@@ -3076,6 +3076,7 @@ This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minim
 Renovate passes the value to these package managers:
 
 - Poetry, as `POETRY_SOLVER_MIN_RELEASE_AGE`
+- npm, as `--before`
 
 Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
 

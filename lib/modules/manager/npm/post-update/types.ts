@@ -30,6 +30,8 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
+  /** Tells about the minimum release age which Renovate passed to the package manager for some updates of the branch */
+  minimumReleaseAgeNotice?: string;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions

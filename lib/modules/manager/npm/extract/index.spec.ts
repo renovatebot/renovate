@@ -2,8 +2,9 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { ExtractConfig } from '../../types.ts';
+import type { ExtractConfig, PackageFile } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
+import type { NpmManagerData } from '../types.ts';
 import * as npmExtract from './index.ts';
 import { postExtract } from './post/index.ts';
 
@@ -2054,6 +2055,30 @@ describe('modules/manager/npm/extract/index', () => {
   describe('.postExtract()', () => {
     it('runs', async () => {
       await expect(postExtract([])).resolves.not.toThrow();
+    });
+
+    it('adds the minimum release age of the repository .npmrc', async () => {
+      const packageFiles: PackageFile<NpmManagerData>[] = [
+        {
+          packageFile: 'package.json',
+          deps: [],
+          managerData: {
+            repoNpmrc: {
+              fileName: '.npmrc',
+              content: 'min-release-age=3\n',
+              detectedLineEnding: '\n',
+            },
+          },
+        },
+      ];
+
+      await postExtract(packageFiles);
+
+      expect(packageFiles[0]).toMatchObject({
+        packageRules: [
+          { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '3 days' },
+        ],
+      });
     });
   });
 });

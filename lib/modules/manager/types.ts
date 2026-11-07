@@ -96,6 +96,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: Nullish<string>;
   /**
    * The `minimumReleaseAge` of the repository and manager config, before `packageRules` apply.
@@ -157,8 +158,9 @@ export interface ExtractedPackageRule extends Pick<
   Extract<keyof PackageRule, `match${string}`>
 > {
   /**
-   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`, or `null` for packages it excludes.
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days` or an ISO 8601 date, or `null` for packages it excludes.
    *
+   * A date counts as the time elapsed since that date, so that the age stays correct when Renovate reuses a cached extract result.
    * Renovate uses the larger of this and `minimumReleaseAge`.
    */
   minimumReleaseAgeExtracted: string | null;
@@ -354,6 +356,7 @@ export interface Upgrade<
   isLockFileMaintenance?: boolean;
   minimumReleaseAge?: string | null;
   minimumReleaseAgeBuffer?: string | null;
+  /** @see ExtractedPackageRule.minimumReleaseAgeExtracted */
   minimumReleaseAgeExtracted?: string | null;
   /** @see UpdateArtifactsConfig.minimumReleaseAgeRepository */
   minimumReleaseAgeRepository?: string | null;
@@ -520,7 +523,7 @@ export interface SharedConstraints extends SharedConstraintsScope {
 export type MinimumReleaseAgeToolCapability = boolean | string;
 
 export interface MinimumReleaseAgeToolSupport {
-  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  /** Renovate passes the repository or manager `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
   passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
   /** Renovate reads the package manager's own minimum release age setting */
   readsConfiguredAge?: MinimumReleaseAgeToolCapability;
