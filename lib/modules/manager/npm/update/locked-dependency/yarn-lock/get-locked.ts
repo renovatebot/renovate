@@ -35,7 +35,7 @@ export function getYarn1LockedDependencies(
         continue;
       }
       const { entryName, constraint } = parsed;
-      if (entryName === depName && entry?.version === currentVersion) {
+      if (entryName === depName && entry.version === currentVersion) {
         res.push({ entry, depNameConstraint, depName, constraint });
       }
     }
@@ -65,7 +65,7 @@ export function getYarn2LockedDependencies(
         }
         const { entryName } = parsed;
         const constraint = parsed.constraint.replace(regEx(/^npm:/), '');
-        if (entryName === depName && entry?.version === currentVersion) {
+        if (entryName === depName && entry.version === currentVersion) {
           res.push({ entry, depNameConstraint, depName, constraint });
         }
       }

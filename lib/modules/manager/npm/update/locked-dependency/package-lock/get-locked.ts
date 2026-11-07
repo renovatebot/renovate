@@ -14,7 +14,7 @@ export function getLockedDependencies(
     if (!dependencies) {
       return [];
     }
-    const dep = dependencies[depName];
+    const dep = dependencies[depName] as PackageLockDependency | undefined;
     const isVersionMatch =
       currentVersion === null || dep?.version === currentVersion;
     if (dep && isVersionMatch) {

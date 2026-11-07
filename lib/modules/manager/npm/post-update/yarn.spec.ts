@@ -1354,10 +1354,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
         additionalRegistry,
         existingRegistry,
         expectedRegistry,
-      }: Record<
-        'additionalRegistry' | 'existingRegistry' | 'expectedRegistry',
-        string[]
-      >) => {
+      }: Record<'additionalRegistry' | 'existingRegistry', string[] | null> &
+        Record<'expectedRegistry', string[]>) => {
         expect(
           yarnHelper.fuzzyMatchAdditionalYarnrcYml(
             {

@@ -15,7 +15,7 @@ const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
 ): Promise<void> {
-  const lockFileCache: Record<string, LockFile> = {};
+  const lockFileCache: Partial<Record<string, LockFile>> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { managerData = {} } = packageFile;
@@ -62,13 +62,7 @@ export async function getLockedVersions(
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace(`Retrieving/parsing ${npmLock}`);
-        const cache = await getNpmLock(npmLock);
-        /* v8 ignore next -- needs test */
-        if (!cache) {
-          logger.warn({ npmLock }, 'Npm: unable to get lockfile');
-          return;
-        }
-        lockFileCache[npmLock] = cache;
+        lockFileCache[npmLock] = await getNpmLock(npmLock);
       }
 
       const { lockfileVersion } = lockFileCache[npmLock];

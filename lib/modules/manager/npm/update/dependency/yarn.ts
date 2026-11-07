@@ -54,7 +54,7 @@ export function updateYarnrcCatalogDependency({
     isObject(parsedContents.catalogs?.[catalogName]) &&
     isString(depName)
   ) {
-    oldVersion = parsedContents.catalogs?.[catalogName][depName];
+    oldVersion = parsedContents.catalogs[catalogName][depName];
   }
 
   if (oldVersion === newValue) {
