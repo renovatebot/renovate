@@ -1,13 +1,13 @@
-Renovate can update Puppetfiles.
+Renovate can update Puppetfiles and the `dependencies` of a Puppet module's `metadata.json`.
 
 ### How it works
 
 Renovate:
 
-1. Searches each repository for any `Puppetfile` files
-1. Extracts dependencies from the relevant sections of the `Puppetfile`
+1. Searches each repository for any `Puppetfile` and `metadata.json` files
+1. Extracts dependencies from the relevant sections of the `Puppetfile`, or from the `dependencies` array of the `metadata.json`
 1. Resolves the dependency on the default forge: `https://forgeapi.puppetlabs.com`, or on a user-defined forge
-1. Creates a PR that updates the `Puppetfile`
+1. Creates a PR that updates the `Puppetfile` or `metadata.json`
 
 Finally, if the source repository has a "changelog" file _or_ uses GitHub releases, then Renovate puts the changelogs for each version in its PR.
 
@@ -73,3 +73,35 @@ mod 'example/samba',
     :git => 'https://github.com/example/puppet-samba',
     :ref => 'stable_version'
 ```
+
+### Supported `metadata.json` formats
+
+Renovate reads the `dependencies` array of a Puppet module's `metadata.json`:
+
+<!-- schema-validation-disable-next-block -->
+
+```json title="metadata.json"
+{
+  "name": "example-mymodule",
+  "version": "1.2.3",
+  "dependencies": [
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 9.0.0 < 10.0.0"
+    },
+    {
+      "name": "puppetlabs-concat",
+      "version_requirement": "9.x"
+    }
+  ]
+}
+```
+
+- `name` may use either the `author/module` or the `author-module` form
+- `version_requirement` is compared using the `npm` versioning, which supports the version range syntax used by Puppet
+- dependencies without a `version_requirement` are skipped
+
+The module's own top-level `version` field is not updated.
+
+By default (`rangeStrategy=auto`) Renovate _widens_ `metadata.json` ranges, so `>= 9.0.0 < 10.0.0` becomes `>= 9.0.0 < 11.0.0` when a new major version is released.
+Set `rangeStrategy` to `bump`, `replace` or `pin` if you want different behavior.

@@ -1,3 +1,4 @@
+import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -5,6 +6,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { isGithubUrl, parseGitOwnerRepo } from './common.ts';
+import { extractMetadataJson } from './metadata.ts';
 import { parsePuppetfile } from './puppetfile-parser.ts';
 import type { PuppetfileModule } from './types.ts';
 
@@ -85,8 +87,15 @@ function isGitModule(module: PuppetfileModule): boolean {
   return module.tags?.has('git') ?? false;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
   logger.trace('puppet.extractPackageFile()');
+
+  if (packageFile && upath.basename(packageFile) === 'metadata.json') {
+    return extractMetadataJson(content, packageFile);
+  }
 
   const puppetFile = parsePuppetfile(content);
   const deps: PackageDependency[] = [];
