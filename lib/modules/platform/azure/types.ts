@@ -21,7 +21,7 @@ export interface Config {
   repoId: string;
   project: string;
   projectId: string;
-  prList: AzurePr[];
+  prList?: AzurePr[];
   fileList: null;
   repository: string;
   defaultBranch: string;
