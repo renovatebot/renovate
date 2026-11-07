@@ -4380,6 +4380,8 @@ describe('config/validation', () => {
               matchUrlPrefix: 'https://repo.example.com/maven2/',
               replaceUrlPrefix: 'http://mirror.example.com/maven-public/',
               matchHostTypes: ['maven'],
+              public: true,
+              fallback: true,
             },
           ],
         };
