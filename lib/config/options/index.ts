@@ -1101,6 +1101,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: null,
+    supportsTemplating: true,
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',

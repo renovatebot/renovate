@@ -1653,6 +1653,22 @@ None detected
       await dryRun(branches, platform, 0, 1);
     });
 
+    it('compiles templates in configured labels', async () => {
+      config.dependencyDashboard = true;
+      config.repository = 'some/repo';
+      config.dependencyDashboardLabels = ['Renovate', 'repo:{{repository}}'];
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        [],
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].labels).toStrictEqual([
+        'Renovate',
+        'repo:some/repo',
+      ]);
+    });
+
     describe('checks detected dependencies section', () => {
       const packageFiles = Fixtures.getJson('./package-files.json');
       const packageFilesWithDigest = Fixtures.getJson(
