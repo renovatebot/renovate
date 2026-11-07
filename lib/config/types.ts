@@ -545,6 +545,7 @@ export interface AssigneesAndReviewersConfig {
   reviewersSampleSize?: number;
   additionalReviewers?: string[];
   filterUnavailableUsers?: boolean;
+  reRequestApprovedReviews?: boolean;
 }
 
 export type UpdateType =
