@@ -340,6 +340,7 @@ export interface ArtifactNotice {
 export interface ArtifactError {
   fileName?: string;
   stderr?: string;
+  timedOut?: boolean;
 }
 
 export type UpdateArtifactsResult =
