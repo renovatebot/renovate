@@ -58,7 +58,7 @@ function extractYaml(
 
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<JenkinsPlugins>(content);
+    const doc = parseSingleYaml<JenkinsPlugins | null | undefined>(content);
     if (isNonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {

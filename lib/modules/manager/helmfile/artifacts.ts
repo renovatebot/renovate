@@ -35,7 +35,7 @@ export async function updateArtifacts({
   logger.trace(`helmfile.updateArtifacts(${packageFileName})`);
 
   const { isLockFileMaintenance } = config;
-  if (!isLockFileMaintenance && !updatedDeps?.length) {
+  if (!isLockFileMaintenance && !updatedDeps.length) {
     logger.debug('No updated helmfile deps - returning null');
     return null;
   }

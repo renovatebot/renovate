@@ -56,6 +56,7 @@ export function extractPackageFile(
     // since docker-compose spec version 1.27, the 'version' key has
     // become optional and can no longer be used to differentiate
     // between v1 and v2.
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- v1 files have no services key, the union type hides that
     const services = config.services ?? config;
     const extensions = coerceObject(config.extensions);
 

@@ -22,7 +22,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   // Validate SHA256
   // oxlint-disable-next-line typescript/prefer-optional-chain
-  if (!sha256 || sha256?.length !== 64) {
+  if (!sha256 || sha256.length !== 64) {
     logger.debug('Error: Invalid sha256 field');
     return {
       deps: [{ depName: className, skipReason: 'invalid-sha256' }],

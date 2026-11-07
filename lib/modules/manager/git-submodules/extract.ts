@@ -23,8 +23,8 @@ async function getUrl(
       '--get',
       `submodule.${submoduleName}.url`,
     ])
-  )?.trim();
-  if (!path?.startsWith('../') && !path?.startsWith('./')) {
+  ).trim();
+  if (!path.startsWith('../') && !path.startsWith('./')) {
     return path;
   }
   const remoteUrl = (

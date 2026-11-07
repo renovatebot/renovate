@@ -42,8 +42,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           const matches = regex.exec(line.trim());
           if (matches?.groups) {
             let dep: PackageDependency = {};
-            const depName = matches.groups?.name;
-            const currentValue = matches.groups?.version.trim();
+            const depName = matches.groups.name;
+            const currentValue = matches.groups.version.trim();
 
             let replaceString = `${depName}/${currentValue}`;
             // conan uses @_/_ as a placeholder for no userChannel

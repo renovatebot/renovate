@@ -79,7 +79,7 @@ export const DenoDependency = z
     // other datasources
 
     const match = depValueRegex.exec(depValue);
-    if (match?.groups?.datasource && match?.groups.depName) {
+    if (match?.groups?.datasource && match.groups.depName) {
       const datasource = match.groups.datasource;
       const depName = match.groups.depName;
       const currentValue = match.groups.currentValue;

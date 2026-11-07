@@ -56,7 +56,7 @@ export function handleCombination(
     .map((match) => ({
       groups: coerceObject(match.groups),
       replaceString:
-        (match?.groups?.currentValue ?? match?.groups?.currentDigest)
+        (match.groups?.currentValue ?? match.groups?.currentDigest)
           ? match[0]
           : undefined,
     }))

@@ -10,7 +10,7 @@ export async function updateArtifacts({
   packageFileName,
   updatedDeps,
 }: UpdateArtifact<FluxManagerData>): Promise<UpdateArtifactsResult[] | null> {
-  const systemDep = updatedDeps[0];
+  const systemDep = updatedDeps.at(0);
   if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
     return null;
   }
