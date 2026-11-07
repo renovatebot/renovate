@@ -454,6 +454,28 @@ describe('modules/datasource/docker/schema', () => {
     ).toMatchObject({ token: 'abc' });
   });
 
+  it('parses RegistryAuthToken with expires_in', () => {
+    expect(RegistryAuthToken.parse({ token: 'abc', expires_in: 300 })).toEqual({
+      token: 'abc',
+      expires_in: 300,
+    });
+  });
+
+  it.each`
+    expiresIn
+    ${'300'}
+    ${0}
+    ${-1}
+    ${1.5}
+  `(
+    'ignores RegistryAuthToken expires_in of $expiresIn',
+    ({ expiresIn }: { expiresIn: unknown }) => {
+      expect(
+        RegistryAuthToken.parse({ token: 'abc', expires_in: expiresIn }),
+      ).toEqual({ token: 'abc' });
+    },
+  );
+
   it('parses RegistryTagsList', () => {
     expect(RegistryTagsList.parse({ tags: ['1.0', '2.0', 'latest'] })).toEqual({
       tags: ['1.0', '2.0', 'latest'],

@@ -208,6 +208,7 @@ export const DockerHubTagsPage = z.object({
 export const RegistryAuthToken = z.object({
   token: z.string().optional(),
   access_token: z.string().optional(),
+  expires_in: z.number().int().positive().optional().catch(undefined),
 });
 export type RegistryAuthToken = z.infer<typeof RegistryAuthToken>;
 
