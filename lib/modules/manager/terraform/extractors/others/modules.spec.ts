@@ -1,3 +1,9 @@
+import { codeBlock } from 'common-tags';
+import upath from 'upath';
+import { fs, partial } from '~test/util.ts';
+import { doAutoReplace } from '../../../../../workers/repository/update/branch/auto-replace.ts';
+import type { BranchUpgradeConfig } from '../../../../../workers/types.ts';
+import { extractPackageFile } from '../../index.ts';
 import {
   ModuleExtractor,
   azureDevOpsSshRefMatchRegex,
@@ -6,6 +12,8 @@ import {
   githubRefMatchRegex,
   hostnameMatchRegex,
 } from './modules.ts';
+
+vi.mock('../../../../../util/fs/index.ts');
 
 describe('modules/manager/terraform/extractors/others/modules', () => {
   const extractor = new ModuleExtractor();
@@ -336,6 +344,769 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       });
       expect(host2).toEqual({
         hostname: 'example.com',
+      });
+    });
+  });
+
+  describe('extract modules using local/variable refs', () => {
+    it('resolves a local value used as a github ref', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+      ]);
+    });
+
+    it('resolves a const variable default used as a module version', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          variable "ver" {
+            type    = string
+            const   = true
+            default = "1.0.0"
+          }
+
+          module "foo" {
+            source  = "hashicorp/consul/aws"
+            version = "${'$'}{var.ver}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'hashicorp/consul/aws',
+          currentValue: '1.0.0',
+          datasource: 'terraform-module',
+        },
+      ]);
+    });
+
+    it('skips when the reference cannot be resolved', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
+
+    it('skips when the variable has no default', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          variable "tag" {
+            const = true
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{var.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([{ skipReason: 'contains-variable' }]);
+    });
+
+    it('skips a chained local', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            base = "v1.0.0"
+            tag  = local.base
+          }
+
+          module "foo" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([{ skipReason: 'contains-variable' }]);
+    });
+
+    it('allows a shared local for modules of the same package', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "a" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+
+          module "b" {
+            source = "github.com/hashicorp/example//sub?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        { currentValue: 'v1.0.0' },
+        { currentValue: 'v1.0.0' },
+      ]);
+      expect(res?.deps.some((d) => d.skipReason)).toBeFalse();
+    });
+
+    it('allows a shared local for git modules of the same repository', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "a" {
+            source = "git::https://example.com/org/repo.git//a?ref=${'$'}{local.tag}"
+          }
+
+          module "b" {
+            source = "git::https://example.com/org/repo.git//b?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        { currentValue: 'v1.0.0', datasource: 'git-tags' },
+        { currentValue: 'v1.0.0', datasource: 'git-tags' },
+      ]);
+      expect(res?.deps.some((d) => d.skipReason)).toBeFalse();
+    });
+
+    it('skips a shared local used by modules of different packages', async () => {
+      const res = await extractPackageFile(
+        codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          module "a" {
+            source = "github.com/hashicorp/example?ref=${'$'}{local.tag}"
+          }
+
+          module "b" {
+            source = "github.com/hashicorp/other?ref=${'$'}{local.tag}"
+          }
+        `,
+        'main.tf',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        { skipReason: 'contains-variable' },
+        { skipReason: 'contains-variable' },
+      ]);
+    });
+
+    it.each`
+      declaration                                                      | expected
+      ${'locals {\n  tag = "v1.0.0"\n}'}                               | ${'locals {\n  tag = "v2.0.0"\n}'}
+      ${'variable "tag" {\n  const   = true\n  default = "v1.0.0"\n}'} | ${'variable "tag" {\n  const   = true\n  default = "v2.0.0"\n}'}
+    `(
+      'updates the declaration and not the source line',
+      async ({ declaration, expected }) => {
+        const ref = declaration.startsWith('locals') ? 'local' : 'var';
+        const module = `module "foo" {\n  source = "github.com/hashicorp/example?ref=\${${ref}.tag}"\n}`;
+        const content = `${declaration}\n\n${module}`;
+        const res = await extractPackageFile(content, 'main.tf', {});
+        const dep = res!.deps[0];
+        const updated = await doAutoReplace(
+          partial<BranchUpgradeConfig>({
+            depName: dep.depName,
+            currentValue: dep.currentValue ?? undefined,
+            manager: 'terraform',
+            packageFile: 'main.tf',
+            depIndex: 0,
+            newValue: 'v2.0.0',
+          }),
+          content,
+          false,
+        );
+        expect(updated).toBe(`${expected}\n\n${module}`);
+      },
+    );
+  });
+
+  describe('extract modules using local/variable refs declared in other files', () => {
+    function ghRef(repo: string, ref: string): string {
+      return `module "${repo.replace('/', '_')}" {\n  source = "github.com/${repo}?ref=${ref}"\n}`;
+    }
+
+    let files: Record<string, string>;
+
+    function mockFiles(newFiles: Record<string, string>): void {
+      files = newFiles;
+      fs.readLocalDirectory.mockImplementation((dir: string) =>
+        Promise.resolve(
+          Object.keys(files)
+            .filter((f) => upath.dirname(f) === upath.normalize(dir))
+            .map((f) => upath.basename(f)),
+        ),
+      );
+      fs.readLocalFile.mockImplementation((name: string) =>
+        Promise.resolve(files[name] ?? null),
+      );
+    }
+
+    function extractFile(name: string) {
+      return extractPackageFile(files[name], name, {});
+    }
+
+    it('reports a variable of another file against the declaring file', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            type    = string
+            const   = true
+            default = "v1.0.0"
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${var.tag}'),
+      });
+
+      const declaration = await extractFile('variables.tf');
+      expect(declaration?.deps).toEqual([
+        {
+          depName: 'github.com/hashicorp/example',
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+      ]);
+
+      const usage = await extractFile('main.tf');
+      expect(usage?.deps).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
+
+    it('reports a local of another file against the declaring file', async () => {
+      mockFiles({
+        'locals.tf': codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${local.tag}'),
+      });
+
+      const declaration = await extractFile('locals.tf');
+      expect(declaration?.deps).toMatchObject([
+        { depName: 'github.com/hashicorp/example', currentValue: 'v1.0.0' },
+      ]);
+    });
+
+    it('resolves a version attribute of a registry module', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "ver" {
+            const   = true
+            default = "1.0.0"
+          }
+        `,
+        'main.tf': codeBlock`
+          module "consul" {
+            source  = "hashicorp/consul/aws"
+            version = var.ver
+          }
+        `,
+      });
+
+      const declaration = await extractFile('variables.tf');
+      expect(declaration?.deps).toMatchObject([
+        {
+          depName: 'hashicorp/consul/aws',
+          currentValue: '1.0.0',
+          datasource: 'terraform-module',
+        },
+      ]);
+    });
+
+    it('supports .tofu files', async () => {
+      mockFiles({
+        'variables.tofu': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'main.tofu': ghRef('hashicorp/example', '${var.tag}'),
+      });
+
+      const declaration = await extractFile('variables.tofu');
+      expect(declaration?.deps).toMatchObject([{ currentValue: 'v1.0.0' }]);
+    });
+
+    it('reports the modules of several files in file name order', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'z.tf': ghRef('hashicorp/example', '${var.tag}'),
+        'a.tf': `module "sub" {\n  source = "github.com/hashicorp/example//sub?ref=\${var.tag}"\n}`,
+      });
+
+      const declaration = await extractFile('variables.tf');
+      expect(declaration?.deps).toHaveLength(2);
+      expect(declaration?.deps.map((d) => d.skipReason)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(declaration?.deps.map((d) => d.depName)).toEqual([
+        'github.com/hashicorp/example',
+        'github.com/hashicorp/example',
+      ]);
+    });
+
+    it('skips all modules of different repositories sharing a declaration', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'a.tf': ghRef('hashicorp/example', '${var.tag}'),
+        'b.tf': ghRef('hashicorp/other', '${var.tag}'),
+      });
+
+      const declaration = await extractFile('variables.tf');
+      expect(declaration?.deps).toMatchObject([
+        { skipReason: 'contains-variable' },
+        { skipReason: 'contains-variable' },
+      ]);
+    });
+
+    it('skips a module of the declaring file and a sibling for different repositories', async () => {
+      mockFiles({
+        'main.tf': codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+
+          ${ghRef('hashicorp/example', '${local.tag}')}
+        `,
+        'other.tf': ghRef('hashicorp/other', '${local.tag}'),
+      });
+
+      const declaration = await extractFile('main.tf');
+      expect(declaration?.deps).toMatchObject([
+        {
+          depName: 'github.com/hashicorp/example',
+          skipReason: 'contains-variable',
+        },
+        {
+          depName: 'github.com/hashicorp/other',
+          skipReason: 'contains-variable',
+        },
+      ]);
+    });
+
+    it('does not mix references of different declarations', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "a" {
+            default = "v1.0.0"
+          }
+
+          variable "b" {
+            default = "v2.0.0"
+          }
+        `,
+        'main.tf': `${ghRef('hashicorp/example', '${var.a}')}\n\n${ghRef('hashicorp/other', '${var.b}')}`,
+      });
+
+      const declaration = await extractFile('variables.tf');
+      expect(declaration?.deps).toMatchObject([
+        { depName: 'github.com/hashicorp/example', currentValue: 'v1.0.0' },
+        { depName: 'github.com/hashicorp/other', currentValue: 'v2.0.0' },
+      ]);
+      expect(declaration?.deps.some((d) => d.skipReason)).toBeFalse();
+    });
+
+    it('does not report modules which do not use a reference', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', 'v3.0.0'),
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not report modules which use a reference declared nowhere', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${var.other}'),
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not report a variable without default', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            const = true
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${var.tag}'),
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not report a chained local', async () => {
+      mockFiles({
+        'locals.tf': codeBlock`
+          locals {
+            base = "v1.0.0"
+            tag  = local.base
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${local.tag}'),
+      });
+
+      const declaration = await extractFile('locals.tf');
+      expect(declaration?.deps).toBeUndefined();
+    });
+
+    it('does not report a local which is not a string', async () => {
+      mockFiles({
+        'locals.tf': codeBlock`
+          locals {
+            tag = 1
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${local.tag}'),
+      });
+
+      await expect(extractFile('locals.tf')).resolves.toBeNull();
+    });
+
+    it('does not treat a local and a variable of the same name as equal', async () => {
+      mockFiles({
+        'locals.tf': codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+        `,
+        'main.tf': ghRef('hashicorp/example', '${var.tag}'),
+      });
+
+      await expect(extractFile('locals.tf')).resolves.toBeNull();
+    });
+
+    it('lets a sibling which declares the name itself resolve it on its own', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'main.tf': codeBlock`
+          variable "tag" {
+            default = "v2.0.0"
+          }
+
+          ${ghRef('hashicorp/example', '${var.tag}')}
+        `,
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+      const own = await extractFile('main.tf');
+      expect(own?.deps).toMatchObject([{ currentValue: 'v2.0.0' }]);
+    });
+
+    it('lets a sibling which declares a local of the name itself resolve it on its own', async () => {
+      mockFiles({
+        'locals.tf': codeBlock`
+          locals {
+            tag = "v1.0.0"
+          }
+        `,
+        'main.tf': codeBlock`
+          locals {
+            tag = "v2.0.0"
+          }
+
+          ${ghRef('hashicorp/example', '${local.tag}')}
+        `,
+      });
+
+      await expect(extractFile('locals.tf')).resolves.toBeNull();
+    });
+
+    it('only considers files of the same directory', async () => {
+      mockFiles({
+        'infra/variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'infra/main.tf': ghRef('hashicorp/example', '${var.tag}'),
+        'other/main.tf': ghRef('hashicorp/other', '${var.tag}'),
+        'main.tf': ghRef('hashicorp/root', '${var.tag}'),
+      });
+
+      const declaration = await extractFile('infra/variables.tf');
+      expect(declaration?.deps).toMatchObject([
+        { depName: 'github.com/hashicorp/example' },
+      ]);
+      expect(fs.readLocalDirectory).toHaveBeenCalledWith('infra');
+    });
+
+    it('ignores files which are not terraform files', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'README.md': ghRef('hashicorp/example', '${var.tag}'),
+        'main.tf.json': ghRef('hashicorp/example', '${var.tag}'),
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('ignores siblings which cannot be used', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'broken.tf': 'module "a" { source = ${var.tag',
+        'noref.tf': 'module "a" {\n  source = "hashicorp/consul/aws"\n}',
+        'nomodule.tf': 'resource "a" "b" {\n  name = var.tag\n}',
+        'empty.tf': '',
+      });
+      files['gone.tf'] = 'module "a" {}';
+      fs.readLocalDirectory.mockResolvedValue([
+        'broken.tf',
+        'noref.tf',
+        'nomodule.tf',
+        'empty.tf',
+        'gone.tf',
+        'variables.tf',
+      ]);
+      fs.readLocalFile.mockImplementation((name: string) =>
+        Promise.resolve(name === 'gone.tf' ? null : (files[name] ?? null)),
+      );
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('ignores siblings with a skipped or non-versioned module', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+        'main.tf': codeBlock`
+          module "local" {
+            source  = "./modules/local"
+            version = var.tag
+          }
+
+          module "nosource" {
+            version = var.tag
+          }
+        `,
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not resolve a reference of an OCI module', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "1.0.0"
+          }
+        `,
+        'main.tf': codeBlock`
+          module "oci" {
+            source = "oci://example.com/org/mod?tag=${'$'}{var.tag}"
+          }
+        `,
+      });
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not fail when the directory cannot be read', async () => {
+      mockFiles({
+        'variables.tf': codeBlock`
+          variable "tag" {
+            default = "v1.0.0"
+          }
+        `,
+      });
+      fs.readLocalDirectory.mockRejectedValue(new Error('ENOENT'));
+
+      await expect(extractFile('variables.tf')).resolves.toBeNull();
+    });
+
+    it('does not read the directory for files without declarations', async () => {
+      mockFiles({
+        'main.tf': ghRef('hashicorp/example', 'v1.0.0'),
+      });
+
+      const res = await extractFile('main.tf');
+      expect(res?.deps).toMatchObject([{ currentValue: 'v1.0.0' }]);
+      expect(fs.readLocalDirectory).not.toHaveBeenCalled();
+    });
+
+    describe('updates', () => {
+      async function update(
+        file: string,
+        index: number,
+        newValue: string,
+        content = files[file],
+        firstUpdate = true,
+      ): Promise<string | null> {
+        const extracted = await extractPackageFile(content, file, {});
+        return doAutoReplace(
+          partial<BranchUpgradeConfig>({
+            depName: extracted!.deps[index].depName,
+            currentValue: extracted!.deps[index].currentValue ?? undefined,
+            manager: 'terraform',
+            packageFile: file,
+            depIndex: index,
+            newValue,
+          }),
+          content,
+          false,
+          firstUpdate,
+        );
+      }
+
+      it('updates the declaring file and not the module file', async () => {
+        mockFiles({
+          'variables.tf': codeBlock`
+            variable "tag" {
+              const   = true
+              default = "v1.0.0"
+            }
+          `,
+          'main.tf': ghRef('hashicorp/example', '${var.tag}'),
+        });
+
+        await expect(update('variables.tf', 0, 'v2.0.0')).resolves.toBe(
+          codeBlock`
+            variable "tag" {
+              const   = true
+              default = "v2.0.0"
+            }
+          `,
+        );
+      });
+
+      it('updates a local of another file', async () => {
+        mockFiles({
+          'locals.tf': codeBlock`
+            locals {
+              tag = "v1.0.0"
+            }
+          `,
+          'main.tf': ghRef('hashicorp/example', '${local.tag}'),
+        });
+
+        await expect(update('locals.tf', 0, 'v2.0.0')).resolves.toBe(
+          codeBlock`
+            locals {
+              tag = "v2.0.0"
+            }
+          `,
+        );
+      });
+
+      it('updates the declaration which shares its value with another text', async () => {
+        mockFiles({
+          'variables.tf': codeBlock`
+            variable "other" {
+              description = "pinned to v1.0.0 for legacy reasons"
+              default     = "v0.1.0"
+            }
+
+            variable "tag" {
+              default = "v1.0.0"
+            }
+          `,
+          'main.tf': ghRef('hashicorp/example', '${var.tag}'),
+        });
+
+        await expect(update('variables.tf', 0, 'v2.0.0')).resolves.toBe(
+          codeBlock`
+            variable "other" {
+              description = "pinned to v1.0.0 for legacy reasons"
+              default     = "v0.1.0"
+            }
+
+            variable "tag" {
+              default = "v2.0.0"
+            }
+          `,
+        );
+      });
+
+      it('updates once when several modules of other files share a declaration', async () => {
+        mockFiles({
+          'variables.tf': codeBlock`
+            variable "tag" {
+              default = "v1.0.0"
+            }
+          `,
+          'a.tf': ghRef('hashicorp/example', '${var.tag}'),
+          'b.tf': `module "sub" {\n  source = "github.com/hashicorp/example//sub?ref=\${var.tag}"\n}`,
+        });
+
+        const first = await update('variables.tf', 0, 'v2.0.0');
+        expect(first).toContain('default = "v2.0.0"');
+        await expect(
+          update('variables.tf', 1, 'v2.0.0', first!, false),
+        ).resolves.toBe(first);
       });
     });
   });
