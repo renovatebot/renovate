@@ -552,24 +552,27 @@ jobs:
   coverage-threshold:
     needs:
       - test
-      - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: success() && github.event.pull_request.draft != true
     steps:
-      - name: Checkout code
+      - name: Checkout package manifest
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           filter: blob:none # we don't need all blobs
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          sparse-checkout: package.json
           show-progress: false
 
-      - name: Setup Node.js
-        uses: $/.github/actions/setup-node
+      - name: Setup pnpm
+        uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
-          node-version: ${{ needs.setup-build.outputs.node-version }}
-          os: ${{ runner.os }}
+          install: false
+          runtime: node@${{ env.NODE_VERSION }}
+
+      - name: Read nyc version
+        run: |
+          jq -er '.devDependencies.nyc | select(test("^[0-9]+[.][0-9]+[.][0-9]+$")) | "NYC_VERSION=\(.)"' package.json >> "$GITHUB_ENV"
 
       - name: Download coverage reports
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -579,14 +582,14 @@ jobs:
           merge-multiple: true
 
       - name: Merge coverage reports
-        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
+        run: pnpm dlx "nyc@${NYC_VERSION}" merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Report coverage
-        run: pnpm nyc report -t ./coverage/nyc --skip-full -r text -r text-summary
+        run: pnpm dlx "nyc@${NYC_VERSION}" report -t ./coverage/nyc --skip-full -r text -r text-summary
 
       - name: Check coverage threshold
         run: |
-          pnpm nyc check-coverage -t ./coverage/nyc \
+          pnpm dlx "nyc@${NYC_VERSION}" check-coverage -t ./coverage/nyc \
             --statements 100 \
             --branches 100 \
             --functions 100 \
