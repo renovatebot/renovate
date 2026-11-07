@@ -3067,6 +3067,27 @@ For example, with the following configuration Renovate waits 3 days plus 1 hour 
 
 This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
+## `minimumReleaseAgePackageManagerSync`
+
+This is a feature flag to opt early into the new `minimumReleaseAge` behaviour, which aligns the minimum release age of Renovate with the minimum release age of your package managers.
+The behaviour is experimental and may change while the integration with each package manager is completed.
+You can set it at the top level of a config or in a manager's config, not in `packageRules`.
+
+With `minimumReleaseAgePackageManagerSync=true`, Renovate:
+
+- applies the minimum release age which a manager reads from the configuration of your package manager, if it is larger than [`minimumReleaseAge`](#minimumreleaseage)
+- does not hold back lock file maintenance if the package manager enforces the minimum release age itself
+
+Without it, Renovate does not read the minimum release age from the configuration of your package manager, and lock file maintenance waits for `minimumReleaseAge` like any other update without a release timestamp.
+
+The [table of package managers](./key-concepts/minimum-release-age.md#my-package-manager-has-support-for-minimum-release-age-how-does-renovate-work-with-that-do-i-need-to-set-it-in-both) lists which managers integrate with the minimum release age of their package manager, and what they read and pass with this option.
+
+```json
+{
+  "minimumReleaseAgePackageManagerSync": true
+}
+```
+
 ## `minor`
 
 Add to this object if you wish to define rules that apply only to minor updates.
