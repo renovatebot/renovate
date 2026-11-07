@@ -16,6 +16,7 @@ describe('workers/global/autodiscover', () => {
 
   beforeEach(async () => {
     config = {};
+    ghApi.initPlatform.mockResolvedValue({ endpoint: 'endpoint' });
     await platform.initPlatform({
       platform: 'github',
       token: '123test',

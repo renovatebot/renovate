@@ -34,7 +34,7 @@ function configureShardingOrFallbackTo(
     return fallback;
   }
 
-  if (!testShards[shardKey]) {
+  if (!Object.hasOwn(testShards, shardKey)) {
     const keys = Object.keys(testShards).join(', ');
     throw new Error(
       `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`,

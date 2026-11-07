@@ -83,6 +83,7 @@ describe('workers/repository/reconfigure/comment', () => {
             branchName: 'renovate/foo-2.x',
             baseBranch: 'base',
             manager: 'npm',
+            schedule: [],
             upgrades: [
               partial<BranchUpgradeConfig>({
                 manager: 'npm',
