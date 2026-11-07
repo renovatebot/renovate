@@ -37,6 +37,9 @@ describe('config/presets/relative', () => {
         canonicalizeRelativePresets(config, parsePreset(parent));
 
         expect(config).toEqual({ extends: [expected] });
+        // the resolved preset string must itself remain parseable, since parsePreset()
+        // rejects any `.`/`..` segment left over in `repo`/`presetPath`/`tag`
+        expect(() => parsePreset(expected)).not.toThrow();
       },
     );
 
