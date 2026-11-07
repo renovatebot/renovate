@@ -95,6 +95,7 @@ export function updatePrDebugData(
   targetBranch: string,
   labels: string[],
   debugData: PrDebugData | undefined,
+  upgradesFingerprint?: string,
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
   const updatedByRenovateVersion = pkg.version;
@@ -111,6 +112,10 @@ export function updatePrDebugData(
   // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
   if (!debugData || isArray(debugData.labels)) {
     updatedPrDebugData.labels = labels;
+  }
+
+  if (upgradesFingerprint) {
+    updatedPrDebugData.upgradesFingerprint = upgradesFingerprint;
   }
 
   return updatedPrDebugData;
@@ -403,6 +408,7 @@ export async function ensurePr(
         config.baseBranch,
         configuredLabels, // include labels in debug data
         existingPr?.bodyStruct?.debugData,
+        config.upgradesFingerprint,
       ),
     },
     config,
@@ -437,10 +443,17 @@ export async function ensurePr(
         configuredLabels,
       );
 
+      // the body hash ignores the debug data, so check the upgrades fingerprint separately, unless the platform strips the debug data
+      const existingDebugData = existingPr.bodyStruct?.debugData;
+      const upgradesFingerprintNeedsUpdate =
+        !!existingDebugData &&
+        existingDebugData.upgradesFingerprint !== config.upgradesFingerprint;
+
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash &&
+        !upgradesFingerprintNeedsUpdate &&
         !labelsNeedUpdate &&
         !config.autoApprove
       ) {

@@ -301,6 +301,10 @@ describe('workers/repository/process/write', () => {
       });
       await expect(writeUpdates(config, branches)).resolves.toBe('done');
       expect(branch.commitFingerprint).toBe(commitFingerprint);
+      expect(branch.upgradesFingerprint).toBe(
+        fingerprint(generateCommitFingerprintConfig(branch)),
+      );
+      expect(branch.upgradesFingerprint).not.toBe(commitFingerprint);
     });
 
     it('caches same fingerprint when no commit is made and branch cache existed', async () => {

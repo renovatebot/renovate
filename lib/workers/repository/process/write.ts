@@ -213,10 +213,13 @@ export async function writeUpdates(
               .filter(isString),
           ),
         ].sort();
+        const commitFingerprintConfig = generateCommitFingerprintConfig(branch);
         const commitFingerprint = fingerprint({
-          commitFingerprintConfig: generateCommitFingerprintConfig(branch),
+          commitFingerprintConfig,
           managers,
         });
+        // excludes the manager code hashes, so a Renovate upgrade alone does not change it
+        branch.upgradesFingerprint = fingerprint(commitFingerprintConfig);
         branch.cacheFingerprintMatch = compareCacheFingerprint(
           branchState,
           commitFingerprint,
