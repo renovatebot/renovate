@@ -73,6 +73,16 @@ export async function getRepositoryConfig(
   if (!repoIsString) {
     const { repository: _repository, ...repositoryEntryConfig } = repository;
 
+    for (const option of GlobalConfig.NON_REPOSITORY_OPTIONS) {
+      if (option in repositoryEntryConfig) {
+        logger.warn(
+          { repository: repoName, option },
+          'Ignoring a global option which a repositories[] entry cannot override',
+        );
+        delete repositoryEntryConfig[option];
+      }
+    }
+
     // Promote GlobalConfig.OPTIONS keys into repoConfig directly so that
     // GlobalConfig.set(repoConfig) in the repository worker picks them up
     // with per-repo overrides before onboarding checks run.

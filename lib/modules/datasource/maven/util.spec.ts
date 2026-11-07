@@ -255,6 +255,29 @@ describe('modules/datasource/maven/util', () => {
         );
       });
 
+      it('does not report Maven Central rate limiting for a request sent to a mirror', async () => {
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({
+                code: 'ECONNRESET',
+                request: {
+                  url: 'https://mirror.example.com/maven-public/some/path',
+                },
+                response: { statusCode: 429 },
+              }),
+            ),
+        });
+
+        const res = await downloadHttpProtocol(http, `${MAVEN_REPO}/some/path`);
+
+        expect(res.unwrap()).toEqual({
+          ok: false,
+          err: { type: 'temporary-error' } satisfies MavenFetchError,
+        });
+        expect(logger.logger.once.warn).not.toHaveBeenCalled();
+      });
+
       it('throws ExternalHostError for non-429 temporary error on maven central', async () => {
         const http = partial<Http>({
           getText: () => Promise.reject(httpError({ code: 'ECONNRESET' })),
@@ -326,6 +349,39 @@ describe('modules/datasource/maven/util', () => {
           err: { type: 'not-found' } satisfies MavenFetchError,
         });
         expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:metadata-not-found',
+          metadataUrl,
+          true,
+          expect.toBeNumber(),
+        );
+      });
+
+      it('caches a 404 from a mirror under the requested url', async () => {
+        const mirrorUrl =
+          'https://mirror.example.com/maven-public/com/example/lib/maven-metadata.xml';
+        const setSpy = vi
+          .spyOn(packageCache, 'set')
+          .mockResolvedValue(undefined);
+        vi.spyOn(packageCache, 'get').mockResolvedValue(null);
+        const http = partial<Http>({
+          getText: () =>
+            Promise.reject(
+              httpError({
+                request: { url: mirrorUrl },
+                response: { statusCode: 404 },
+              }),
+            ),
+        });
+
+        await downloadHttpProtocol(http, metadataUrl);
+
+        expect(setSpy).toHaveBeenCalledWith(
+          'datasource-maven:metadata-not-found',
+          mirrorUrl,
+          true,
+          expect.toBeNumber(),
+        );
+        expect(setSpy).not.toHaveBeenCalledWith(
           'datasource-maven:metadata-not-found',
           metadataUrl,
           true,

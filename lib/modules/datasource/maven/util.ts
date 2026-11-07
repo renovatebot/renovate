@@ -151,6 +151,8 @@ export async function downloadHttpProtocol(
       }
 
       const failedUrl = url;
+      // the requested url, which differs from `url` when `urlReplacements` sent the request to a mirror
+      const requestedUrl = err.options.url?.toString() ?? url;
       if ([HOST_BLOCKED, HOST_DISABLED].includes(err.message)) {
         logger.trace({ failedUrl }, refusedHostMessage(err));
         return Result.err({ type: 'host-disabled' });
@@ -161,7 +163,7 @@ export async function downloadHttpProtocol(
         if (isMetadataUrl(failedUrl)) {
           await packageCache.set(
             METADATA_NOT_FOUND_NAMESPACE,
-            failedUrl,
+            requestedUrl,
             true,
             getMetadataNotFoundTtl(),
           );
@@ -184,7 +186,7 @@ export async function downloadHttpProtocol(
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
 
-        if (isMavenCentral(url)) {
+        if (isMavenCentral(requestedUrl)) {
           if (isRateLimited(err)) {
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
