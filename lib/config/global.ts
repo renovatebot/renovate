@@ -1,7 +1,7 @@
 import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
 import type {
   InternalGlobalConfigOptions,
-  RenovateConfig,
+  RenovateConfigFile,
   RepoGlobalConfig,
 } from './types.ts';
 
@@ -99,8 +99,8 @@ export class GlobalConfig {
   }
 
   static set(
-    config: RenovateConfig & RepoGlobalConfig & InternalGlobalConfigOptions,
-  ): RenovateConfig {
+    config: RenovateConfigFile & RepoGlobalConfig & InternalGlobalConfigOptions,
+  ): RenovateConfigFile {
     GlobalConfig.reset();
 
     const result = { ...config };
@@ -121,7 +121,7 @@ export class GlobalConfig {
  * Sets the global options which HTTP requests consult, for the requests made before the full global config is set.
  */
 export function setHttpGlobalConfig(
-  config: RenovateConfig & RepoGlobalConfig,
+  config: RenovateConfigFile & RepoGlobalConfig,
 ): void {
   GlobalConfig.set({
     allowedHeaders: config.allowedHeaders,

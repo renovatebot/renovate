@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -54,7 +54,7 @@ import { processResult } from './result.ts';
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig,
+  repoConfig: RenovateConfigFile,
   canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
@@ -64,7 +64,7 @@ export async function renovateRepository(
     'init',
     async (): Promise<
       | { config: RepoConfig; localDir: string; error?: undefined }
-      | { config: RenovateConfig; localDir: string; error: Error }
+      | { config: RenovateConfigFile; localDir: string; error: Error }
     > => {
       const config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({

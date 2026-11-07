@@ -1,13 +1,13 @@
 // TODO #22198
 import { GlobalConfig } from '../../config/global.ts';
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import type { Pr } from '../../modules/platform/index.ts';
 import { platform } from '../../modules/platform/index.ts';
 import { getInheritedOrGlobal } from '../../util/common.ts';
 
 export function raiseConfigWarningIssue(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   error: Error,
 ): Promise<void> {
   logger.debug('raiseConfigWarningIssue()');
@@ -18,7 +18,7 @@ export function raiseConfigWarningIssue(
 }
 
 export function raiseCredentialsWarningIssue(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   error: Error,
 ): Promise<void> {
   logger.debug('raiseCredentialsWarningIssue()');
@@ -29,7 +29,7 @@ export function raiseCredentialsWarningIssue(
 }
 
 async function raiseWarningIssue(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   notificationName: string,
   title: string,
   initialBody: string,

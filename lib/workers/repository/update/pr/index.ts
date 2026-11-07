@@ -6,7 +6,7 @@ import {
 } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -58,7 +58,7 @@ import {
 import { tryReuseAutoclosedPr } from './pr-reuse.ts';
 
 export function getPlatformPrOptions(
-  config: RenovateConfig & PlatformPrOptions,
+  config: RenovateConfigFile & PlatformPrOptions,
 ): PlatformPrOptions {
   const isPrOrBranchAutomerge =
     config.automergeType === 'pr' || config.automergeType === 'branch';

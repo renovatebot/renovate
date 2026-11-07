@@ -1,6 +1,6 @@
 import { isArray, isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
@@ -18,7 +18,7 @@ function trimLabel(label: string, limit: number): string {
   return trimmed.slice(0, limit).trim();
 }
 
-export function prepareLabels(config: RenovateConfig): string[] {
+export function prepareLabels(config: RenovateConfigFile): string[] {
   const labelCharLimit = platform.labelCharLimit?.() ?? 50;
   const labels = coerceArray(config.labels);
   const addLabels = coerceArray(config.addLabels);

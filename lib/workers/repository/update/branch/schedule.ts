@@ -4,7 +4,7 @@ import { Cron, CronPattern } from 'croner';
 import cronstrue from 'cronstrue';
 import { DateTime } from 'luxon';
 import { fixShortHours } from '../../../../config/migration.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 
 const scheduleMappings: Record<string, string> = {
@@ -125,7 +125,7 @@ export function cronMatches(
 }
 
 export function isScheduledNow(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule',
 ): boolean {
   let configSchedule = config[scheduleKey];

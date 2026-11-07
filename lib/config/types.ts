@@ -26,6 +26,9 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { DefaultedConfigKey } from './defaults.ts';
+import type { GlobalConfig } from './global.ts';
+import type { FilteredConfigKey } from './stages.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
@@ -106,7 +109,7 @@ export interface RenovateSharedConfig {
   extractVersion?: string;
   managerFilePatterns?: string[];
   followTag?: string;
-  force?: RenovateConfig;
+  force?: RenovateConfigFile;
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -183,7 +186,7 @@ export interface GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
-  onboardingConfig?: RenovateConfig;
+  onboardingConfig?: RenovateConfigFile;
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
@@ -309,7 +312,7 @@ export interface LegacyAdminConfig {
   onboardingBranch?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
-  onboardingConfig?: RenovateConfig;
+  onboardingConfig?: RenovateConfigFile;
   onboardingConfigFileName?: string;
 
   optimizeForDisabled?: boolean;
@@ -506,6 +509,26 @@ export interface RenovateConfigFile
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   toolSettings?: RepoToolSettingsOptions;
 }
+
+/**
+ * The options with a default which a repository's config doesn't keep, as `getRepositoryConfig()` filters out the options of the stages before `repository`, `GlobalConfig.set()` moves them out of it, or the repository worker deletes them once it has applied them.
+ */
+export type RepoRemovedConfigKey =
+  | FilteredConfigKey<'repository'>
+  | (typeof GlobalConfig.OPTIONS)[number]
+  | 'env'
+  | 'extends'
+  | 'hostRules'
+  | 'ignorePresets'
+  | 'overrideDescription';
+
+/**
+ * The options which have a value in a repository's config once its defaults are applied.
+ */
+export type RepoDefaultedConfigKey = Exclude<
+  DefaultedConfigKey,
+  RepoRemovedConfigKey
+>;
 
 /**
  * The config a repository is processed with.
@@ -925,17 +948,17 @@ export interface MigratedConfig {
    * `true` if the configuration was migrated, and if so, `migratedConfig` should be used instead of the provided config
    */
   isMigrated: boolean;
-  migratedConfig: RenovateConfig;
+  migratedConfig: RenovateConfigFile;
 }
 
-export interface MigratedRenovateConfig extends RenovateConfig {
+export interface MigratedRenovateConfig extends RenovateConfigFile {
   endpoints?: HostRule[];
   pathRules: PackageRule[];
   packages: PackageRule[];
 
-  node?: RenovateConfig;
-  travis?: RenovateConfig;
-  gradle?: RenovateConfig;
+  node?: RenovateConfigFile;
+  travis?: RenovateConfigFile;
+  gradle?: RenovateConfigFile;
 }
 
 export interface ManagerConfig extends RenovateConfig {

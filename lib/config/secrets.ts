@@ -7,7 +7,7 @@ import {
 import { coerceObject } from '../util/object.ts';
 import { regEx } from '../util/regex.ts';
 import { addSecretForSanitizing } from '../util/sanitize.ts';
-import type { AllConfig, RenovateConfig } from './types.ts';
+import type { AllConfig, RenovateConfigFile } from './types.ts';
 
 const namePattern = '[A-Za-z][A-Za-z0-9_]*';
 const nameRegex = regEx(`^${namePattern}$`);
@@ -45,16 +45,16 @@ function validateNestedInterpolatedValues<T extends 'secrets' | 'variables'>(
 }
 
 export function validateConfigSecretsAndVariables(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
 ): void {
   validateNestedInterpolatedValues(config, 'secrets');
   validateNestedInterpolatedValues(config, 'variables');
 }
 
 interface ApplySecretsAndVariablesConfig {
-  config: RenovateConfig;
-  secrets?: RenovateConfig['secrets'];
-  variables?: RenovateConfig['variables'];
+  config: RenovateConfigFile;
+  secrets?: RenovateConfigFile['secrets'];
+  variables?: RenovateConfigFile['variables'];
   deleteSecrets?: boolean;
   deleteVariables?: boolean;
 }
@@ -64,7 +64,7 @@ interface ApplySecretsAndVariablesConfig {
  */
 export function applySecretsAndVariablesToConfig(
   applyConfig: ApplySecretsAndVariablesConfig,
-): RenovateConfig {
+): RenovateConfigFile {
   const { config, deleteSecrets, deleteVariables } = applyConfig;
   const secrets = applyConfig.secrets ?? config.secrets;
   const variables = applyConfig.variables ?? config.variables;

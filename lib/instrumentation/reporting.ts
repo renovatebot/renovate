@@ -2,7 +2,7 @@ import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
 import { GlobalConfig } from '../config/global.ts';
-import type { RenovateConfig } from '../config/types.ts';
+import type { RenovateConfigFile } from '../config/types.ts';
 import { prettier } from '../expose.ts';
 import { getProblems, logger } from '../logger/index.ts';
 import { sanitizeValue } from '../logger/utils.ts';
@@ -30,7 +30,7 @@ export function resetReport(): void {
 }
 
 export function addBranchStats(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   branchesInformation: Partial<BranchCache>[],
 ): void {
   if (isNullOrUndefined(config.reportType)) {
@@ -42,7 +42,7 @@ export function addBranchStats(
 }
 
 export function addRepositoryMetadata(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   configFileName: string | undefined,
   prList: Pr[],
 ): void {
@@ -68,7 +68,7 @@ export function addRepositoryMetadata(
 }
 
 export function addRepositoryStatus(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   status: ProcessStatus,
 ): void {
   if (isNullOrUndefined(config.reportType)) {
@@ -80,7 +80,7 @@ export function addRepositoryStatus(
 }
 
 export function addExtractionStats(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   extractResult: ExtractResult,
 ): void {
   if (isNullOrUndefined(config.reportType)) {
@@ -93,7 +93,7 @@ export function addExtractionStats(
 }
 
 export function addLibYears(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   libYearsWithDepCount: LibYearsWithStatus,
 ): void {
   if (isNullOrUndefined(config.reportType)) {
@@ -124,7 +124,7 @@ export function finalizeReport(): void {
 /**
  * Returns the report as JSON, sanitized like a log record.
  */
-async function getReportBody(config: RenovateConfig): Promise<string> {
+async function getReportBody(config: RenovateConfigFile): Promise<string> {
   const json = JSON.stringify(sanitizeValue(report));
   if (!config.reportFormatting) {
     return json;
@@ -132,7 +132,7 @@ async function getReportBody(config: RenovateConfig): Promise<string> {
   return prettier().format(json, { parser: 'json' });
 }
 
-export async function exportStats(config: RenovateConfig): Promise<void> {
+export async function exportStats(config: RenovateConfigFile): Promise<void> {
   try {
     if (isNullOrUndefined(config.reportType)) {
       return;

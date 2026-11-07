@@ -1,5 +1,5 @@
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import type { FileChange } from '../../../util/git/types.ts';
@@ -22,7 +22,7 @@ export function createConfigFileCommitMessage(
 
 export interface CommitConfigFileConfig {
   /** Supplies `baseBranch`, `platformCommit`, `commitBody`, `commitTrailers` and `gitAuthor` */
-  config: Partial<RenovateConfig>;
+  config: RenovateConfigFile;
   branchName: string;
   /** Called after the dry run check */
   getFiles: () => FileChange[] | Promise<FileChange[]>;

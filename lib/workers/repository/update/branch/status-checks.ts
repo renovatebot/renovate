@@ -2,7 +2,7 @@ import { isNonEmptyString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type {
   MinimumReleaseAgeBehaviour,
-  RenovateConfig,
+  RenovateConfigFile,
   UpdateType,
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -76,7 +76,7 @@ async function setStatusCheck({
   }
 }
 
-export interface StabilityConfig extends RenovateConfig {
+export interface StabilityConfig extends RenovateConfigFile {
   stabilityStatus?: BranchStatus;
   branchName: string;
 }
@@ -128,7 +128,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   });
 }
 
-export interface ConfidenceConfig extends RenovateConfig {
+export interface ConfidenceConfig extends RenovateConfigFile {
   confidenceStatus?: BranchStatus;
   minimumConfidence?: MergeConfidence | undefined;
 }

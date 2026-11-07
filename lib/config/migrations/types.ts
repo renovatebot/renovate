@@ -1,7 +1,7 @@
-import type { AllConfig, RenovateConfig } from './../types.ts';
+import type { AllConfig, RenovateConfigFile } from './../types.ts';
 export type MigrationConstructor = new (
   originalConfig: MigratableConfig,
-  migratedConfig: RenovateConfig,
+  migratedConfig: RenovateConfigFile,
 ) => Migration;
 
 export interface Migration {
@@ -11,11 +11,11 @@ export interface Migration {
 }
 
 // TODO: add migrated properties used by migrations
-export type MigratableConfig<T extends RenovateConfig = AllConfig> = T & {
+export type MigratableConfig<T extends RenovateConfigFile = AllConfig> = T & {
   exposeEnv?: unknown;
-  node?: RenovateConfig;
+  node?: RenovateConfigFile;
   packageNames?: unknown[];
   packagePatterns?: unknown[];
   rebaseConflictedPrs?: unknown;
-  travis?: RenovateConfig;
+  travis?: RenovateConfigFile;
 };

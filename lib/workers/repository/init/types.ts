@@ -1,5 +1,4 @@
 import type {
-  RenovateConfig,
   RenovateConfigFile,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
@@ -10,11 +9,11 @@ import type {
  * resolution happens in the correct order.
  *
  * Also extends `RepoGlobalConfig` directly to carry fields like `allowedCommands`,
- * `binarySource`, and `dryRun` that `RenovateConfig` does not include.
+ * `binarySource`, and `dryRun` that `RenovateConfigFile` does not include.
  */
 export interface RepositoryWorkerConfig
-  extends RenovateConfig, RepoGlobalConfig {
-  repositoryEntryConfig?: RenovateConfig;
+  extends RenovateConfigFile, RepoGlobalConfig {
+  repositoryEntryConfig?: RenovateConfigFile;
 }
 
 export interface RepoConfigError {

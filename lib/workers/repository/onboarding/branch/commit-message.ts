@@ -1,10 +1,10 @@
 import { isNonEmptyString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type { RenovateConfigFile } from '../../../../config/types.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { createConfigFileCommitMessage } from '../../model/commit-config-file.ts';
 
 export function getOnboardingCommitMessage(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   configFile: string,
 ): string {
   const onboardingCommitMessage = getInheritedOrGlobal(

@@ -1,4 +1,4 @@
-import type { RenovateConfig } from '../../types.ts';
+import type { RenovateConfigFile } from '../../types.ts';
 import { AbstractMigration } from './abstract-migration.ts';
 
 export class RemovePropertyMigration extends AbstractMigration {
@@ -6,8 +6,8 @@ export class RemovePropertyMigration extends AbstractMigration {
 
   constructor(
     propertyName: string,
-    originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig,
+    originalConfig: RenovateConfigFile,
+    migratedConfig: RenovateConfigFile,
   ) {
     super(originalConfig, migratedConfig);
     this.propertyName = propertyName;

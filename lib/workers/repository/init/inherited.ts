@@ -10,7 +10,7 @@ import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
 import type {
-  RenovateConfig,
+  RenovateConfigFile,
   ValidationMessage,
 } from '../../../config/types.ts';
 import { validateConfig } from '../../../config/validation.ts';
@@ -58,8 +58,8 @@ function inheritedHostRuleOptions(): AddHostRuleOptions | undefined {
 }
 
 export async function mergeInheritedConfig(
-  config: RenovateConfig,
-): Promise<RenovateConfig> {
+  config: RenovateConfigFile,
+): Promise<RenovateConfigFile> {
   // typescript doesn't know that repo is defined
   if (!config.repository || !config.inheritConfig) {
     return config;
@@ -121,7 +121,7 @@ export async function mergeInheritedConfig(
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
   const inheritedConfigSource = `Inherited config (\`${config.inheritConfigFileName}\` in \`${inheritConfigRepoName}\`)`;
-  const inheritedConfig = parseResult.parsedContents as RenovateConfig;
+  const inheritedConfig = parseResult.parsedContents as RenovateConfigFile;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
   // `validateConfig` expects massaged input
   const res = await validateConfig('inherit', massageConfig(inheritedConfig));
