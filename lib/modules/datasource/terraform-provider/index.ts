@@ -257,12 +257,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     // check public or private Terraform registry
     const serviceDiscovery =
       await this.getTerraformServiceDiscoveryResult(registryURL);
-    if (!serviceDiscovery) {
-      // throw an error to disable caching
-      throw new ExternalHostError(
-        new Error(`Service discovery not found for ${registryURL}`),
-      );
-    }
     const backendURL = createSDBackendURL(
       registryURL,
       'providers.v1',
@@ -395,7 +389,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
     const platform = versionsResponse.versions?.find(
       (entry) => entry.version === version,
-    )?.platforms?.[0];
+    )?.platforms[0];
     if (!platform) {
       return null;
     }

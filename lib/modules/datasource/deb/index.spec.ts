@@ -308,7 +308,7 @@ describe('modules/datasource/deb/index', () => {
       );
 
       for (const result of results) {
-        expect(result?.releases?.length).toBe(1);
+        expect(result?.releases.length).toBe(1);
       }
     });
   });

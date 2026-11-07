@@ -75,8 +75,8 @@ export class NugetV3Api {
       const services = servicesIndexRaw.resources
         .map(({ '@id': serviceId, '@type': t }) => ({
           serviceId,
-          type: t?.split('/')?.shift(),
-          version: t?.split('/')?.pop(),
+          type: t.split('/').shift(),
+          version: t.split('/').pop(),
         }))
         .filter(
           ({ type, version }) => type === resourceType && semver.valid(version),
@@ -172,36 +172,35 @@ export class NugetV3Api {
     let homepage: string | null = null;
     let latestStable: string | null = null;
     let nupkgUrl: string | null = null;
-    const releases = catalogEntries.map(
-      ({
-        version,
-        published,
-        projectUrl,
-        listed,
-        packageContent,
-        deprecation,
-      }) => {
-        const release: Release = { version: removeBuildMeta(version) };
-        const releaseTimestamp = asTimestamp(published);
-        if (releaseTimestamp) {
-          release.releaseTimestamp = releaseTimestamp;
-        }
-        if (
-          versioning.isValid(version) &&
-          versioning.isStable(version) &&
-          listed
-        ) {
-          latestStable = removeBuildMeta(version);
-          homepage = projectUrl ? massageUrl(projectUrl) : homepage;
-          nupkgUrl = massageUrl(packageContent);
-        }
+    const releases: Release[] = [];
+    for (const {
+      version,
+      published,
+      projectUrl,
+      listed,
+      packageContent,
+      deprecation,
+    } of catalogEntries) {
+      const release: Release = { version: removeBuildMeta(version) };
+      const releaseTimestamp = asTimestamp(published);
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      if (
+        versioning.isValid(version) &&
+        versioning.isStable(version) &&
+        listed
+      ) {
+        latestStable = removeBuildMeta(version);
+        homepage = projectUrl ? massageUrl(projectUrl) : homepage;
+        nupkgUrl = massageUrl(packageContent);
+      }
 
-        if (listed === false || deprecation) {
-          release.isDeprecated = true;
-        }
-        return release;
-      },
-    );
+      if (listed === false || deprecation) {
+        release.isDeprecated = true;
+      }
+      releases.push(release);
+    }
 
     if (!releases.length) {
       return null;

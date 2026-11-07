@@ -60,9 +60,9 @@ export class AzurePipelinesTasksDatasource extends Datasource {
           const matchers = [
             task.id === packageName,
             task.name === packageName,
-            task.contributionIdentifier !== null &&
+            task.contributionIdentifier !== undefined &&
               `${task.contributionIdentifier}.${task.id}` === packageName,
-            task.contributionIdentifier !== null &&
+            task.contributionIdentifier !== undefined &&
               `${task.contributionIdentifier}.${task.name}` === packageName,
           ];
           return matchers.some((match) => match);

@@ -2010,7 +2010,7 @@ describe('modules/datasource/docker/index', () => {
         registryUrls: ['https://registry.access.redhat.com'],
       });
 
-      expect(res?.releases?.map((release) => release.version)).toEqual([
+      expect(res?.releases.map((release) => release.version)).toEqual([
         '0.1.0',
         '0.2.0',
         '9.9.9',

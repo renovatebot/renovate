@@ -84,10 +84,11 @@ export class DebDatasource extends Datasource {
         // All information of the package are available, add to the list of packages
         // v8 ignore else -- needs a package index block missing a required key
         if (requiredPackageKeys.every((key) => key in currentPackage)) {
-          if (!allPackages[currentPackage.Package!]) {
-            allPackages[currentPackage.Package!] = [];
+          const packageName = currentPackage.Package!;
+          if (!(packageName in allPackages)) {
+            allPackages[packageName] = [];
           }
-          allPackages[currentPackage.Package!].push(currentPackage);
+          allPackages[packageName].push(currentPackage);
           currentPackage = {};
         }
       } else {
@@ -102,11 +103,12 @@ export class DebDatasource extends Datasource {
 
     // Check the last package after file reading is complete
     if (requiredPackageKeys.every((key) => key in currentPackage)) {
+      const packageName = currentPackage.Package!;
       // v8 ignore else -- needs the final block to repeat an earlier package
-      if (!allPackages[currentPackage.Package!]) {
-        allPackages[currentPackage.Package!] = [];
+      if (!(packageName in allPackages)) {
+        allPackages[packageName] = [];
       }
-      allPackages[currentPackage.Package!].push(currentPackage);
+      allPackages[packageName].push(currentPackage);
     }
 
     return allPackages;
@@ -166,7 +168,8 @@ export class DebDatasource extends Datasource {
 
     for (const componentUrl of componentUrls) {
       try {
-        const packageIndex = await this.getPackageIndex(componentUrl);
+        const packageIndex: Partial<Record<string, PackageDescription[]>> =
+          await this.getPackageIndex(componentUrl);
         const parsedPackages = packageIndex[packageName];
 
         if (parsedPackages) {

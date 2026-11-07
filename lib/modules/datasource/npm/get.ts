@@ -16,6 +16,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrl } from './common.ts';
+import type { NpmResponseVersion } from './schema.ts';
 import { CachedPackument, NpmResponse } from './schema.ts';
 
 const SHORT_REPO_REGEX = regEx(
@@ -93,7 +94,7 @@ export async function getDependency(
     // set abortOnError for registry.npmjs.org if no hostRule with explicit abortOnError exists
     if (
       registryUrl === defaultRegistryUrl &&
-      hostRules.find({ url: defaultRegistryUrl })?.abortOnError === undefined
+      hostRules.find({ url: defaultRegistryUrl }).abortOnError === undefined
     ) {
       logger.trace(
         { packageName, registry: defaultRegistryUrl },
@@ -113,7 +114,8 @@ export async function getDependency(
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
+    const versions: Partial<Record<string, NpmResponseVersion>> = res.versions;
+    const latestVersion = versions[res['dist-tags']?.latest ?? ''];
     res.repository ??= latestVersion?.repository;
     res.homepage ??= latestVersion?.homepage;
 
@@ -181,10 +183,10 @@ export async function getDependency(
       return release;
     });
 
-    const isPublic = resp.headers?.['cache-control']
+    const isPublic = resp.headers['cache-control']
       ?.toLocaleLowerCase()
-      ?.split(regEx(/\s*,\s*/))
-      ?.includes('public');
+      .split(regEx(/\s*,\s*/))
+      .includes('public');
     if (!isPublic) {
       dep.isPrivate = true;
     }

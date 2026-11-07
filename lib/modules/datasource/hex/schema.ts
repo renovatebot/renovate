@@ -66,7 +66,7 @@ export const HexRelease = z
       releaseResult.homepage = hexResponse.html_url;
     }
 
-    if (hexResponse.meta?.links?.github) {
+    if (hexResponse.meta?.links.github) {
       releaseResult.sourceUrl = hexResponse.meta.links.github;
     }
 

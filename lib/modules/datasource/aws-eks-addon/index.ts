@@ -59,7 +59,7 @@ export class AwsEKSAddonDataSource extends Datasource {
         .filter((release) => release.version && release.version !== '')
         .filter((release) => {
           if (filter.default) {
-            return release.default && release.default === filter.default;
+            return release.default;
           }
           return true;
         }),

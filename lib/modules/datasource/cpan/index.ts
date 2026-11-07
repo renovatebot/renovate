@@ -76,16 +76,10 @@ export class CpanDatasource extends Datasource {
 
     let latestDistribution: string | null = null;
     let latestVersion: string | null = null;
-    // `releases` is only still null if the request above threw, and
-    // `handleGenericErrors()` always rethrows - the `releases.length` below
-    // would dereference null if the else were ever taken
-    // v8 ignore else -- unreachable
-    if (releases) {
-      for (const release of releases) {
-        latestDistribution ??= release.distribution;
-        if (!latestVersion && release.isLatest) {
-          latestVersion = release.version;
-        }
+    for (const release of releases) {
+      latestDistribution ??= release.distribution;
+      if (!latestVersion && release.isLatest) {
+        latestVersion = release.version;
       }
     }
     if (releases.length > 0 && latestDistribution) {

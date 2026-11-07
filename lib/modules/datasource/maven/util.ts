@@ -137,7 +137,7 @@ export async function downloadHttpProtocol(
         result.isCacheable = true;
       }
 
-      const lastModified = asTimestamp(res?.headers?.['last-modified']);
+      const lastModified = asTimestamp(res.headers['last-modified']);
       if (lastModified) {
         result.lastModified = lastModified;
       }
@@ -430,7 +430,7 @@ function extractSnapshotVersion(metadata: XmlDocument): string | null {
   // so for example 1.0.0-SNAPSHOT will become 1.0.0-<timestamp>-<buildNumber>
   const version = metadata
     .descendantWithPath('version')
-    ?.val?.replace('-SNAPSHOT', '');
+    ?.val.replace('-SNAPSHOT', '');
 
   const snapshot = metadata.descendantWithPath('versioning.snapshot');
   const timestamp = snapshot?.childNamed('timestamp')?.val;
