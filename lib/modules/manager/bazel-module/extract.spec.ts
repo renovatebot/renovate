@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractConfig } from '~test/manager-config.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -29,6 +30,7 @@ describe('modules/manager/bazel-module/extract', () => {
       const result = await extractPackageFile(
         'blahhhhh:foo:@what\n',
         'MODULE.bazel',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -37,12 +39,20 @@ describe('modules/manager/bazel-module/extract', () => {
       vi.spyOn(parser, 'parse').mockImplementationOnce(() => {
         throw new Error('Test error');
       });
-      const result = await extractPackageFile('content', 'MODULE.bazel');
+      const result = await extractPackageFile(
+        'content',
+        'MODULE.bazel',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
     it('returns null if file is empty', async () => {
-      const result = await extractPackageFile('', 'MODULE.bazel');
+      const result = await extractPackageFile(
+        '',
+        'MODULE.bazel',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
@@ -50,7 +60,11 @@ describe('modules/manager/bazel-module/extract', () => {
       const input = codeBlock`
         ignore_me(name = "rules_foo", version = "1.2.3")
       `;
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
@@ -67,7 +81,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
         `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -105,7 +123,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
         `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -129,7 +151,11 @@ describe('modules/manager/bazel-module/extract', () => {
       const packageFile = 'extract/multiple-bazelrcs/MODULE.bazel';
       const input = Fixtures.get(packageFile);
 
-      const result = await extractPackageFile(input, packageFile);
+      const result = await extractPackageFile(
+        input,
+        packageFile,
+        extractConfig(),
+      );
       expect(result).toEqual({
         registryUrls: [
           'https://example.com/custom_registry.git',
@@ -159,7 +185,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -190,7 +220,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -218,7 +252,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -247,7 +285,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -276,7 +318,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -309,7 +355,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -340,7 +390,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -363,7 +417,11 @@ describe('modules/manager/bazel-module/extract', () => {
           registry = "https://example.com/custom_registry",
         )
       `;
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -404,7 +462,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -475,7 +537,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -518,7 +584,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -554,7 +624,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -588,7 +662,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -620,7 +698,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -742,7 +824,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -781,7 +867,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -805,7 +895,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -830,7 +924,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
         `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -861,7 +959,11 @@ describe('modules/manager/bazel-module/extract', () => {
         register_toolchains("@local_posix_config//...")
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -954,7 +1056,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -1018,7 +1124,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -1062,7 +1172,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -1102,7 +1216,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -1156,7 +1274,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toBeNull();
     });
@@ -1171,7 +1293,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [
@@ -1205,7 +1331,11 @@ describe('modules/manager/bazel-module/extract', () => {
         )
       `;
 
-      const result = await extractPackageFile(input, 'MODULE.bazel');
+      const result = await extractPackageFile(
+        input,
+        'MODULE.bazel',
+        extractConfig(),
+      );
 
       expect(result).toEqual({
         deps: [

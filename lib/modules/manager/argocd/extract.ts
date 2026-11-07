@@ -13,7 +13,7 @@ import {
   removeOCIPrefix,
 } from '../helmv3/oci.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -30,7 +30,7 @@ const kustomizeImageRe = regEx(/=(?<image>.+)$/);
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config?: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
@@ -45,7 +45,7 @@ export function extractPackageFile(
   ).parse(content);
 
   const deps = definitions.flatMap((definition) =>
-    processAppSpec(definition, config?.registryAliases),
+    processAppSpec(definition, config.registryAliases),
   );
 
   return deps.length ? { deps } : null;

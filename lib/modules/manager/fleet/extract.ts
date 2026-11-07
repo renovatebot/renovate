@@ -10,7 +10,7 @@ import {
 } from '../helmv3/oci.ts';
 import { isLocalChartPath } from '../helmv3/utils.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -48,7 +48,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
 
 function extractFleetHelmBlock(
   doc: FleetHelmBlock,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageDependency {
   const dep: PackageDependency = {
     depType: 'fleet',
@@ -96,7 +96,7 @@ function extractFleetHelmBlock(
     };
   }
 
-  const alias = config.registryAliases?.[doc.repo];
+  const alias = config.registryAliases[doc.repo];
   if (alias) {
     dep.registryUrls = [alias];
   } else {
@@ -119,7 +119,7 @@ function extractFleetHelmBlock(
 
 function extractFleetFile(
   doc: FleetFile,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageDependency[] {
   const result: PackageDependency[] = [];
 
@@ -153,7 +153,7 @@ function extractFleetFile(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   if (!content) {
     return null;

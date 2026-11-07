@@ -4,7 +4,7 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -13,7 +13,7 @@ import { parseRepository, resolveAlias } from './utils.ts';
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): Promise<PackageFileContent | null> {
   let chart: {
     apiVersion: string;
@@ -74,7 +74,7 @@ export async function extractPackageFile(
       return res;
     }
 
-    const repository = resolveAlias(dep.repository, config.registryAliases!);
+    const repository = resolveAlias(dep.repository, config.registryAliases);
     if (!repository) {
       res.skipReason = 'placeholder-url';
       return res;
