@@ -3567,6 +3567,34 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('finds preset arguments left unrendered in options with allowedValues', () => {
+      const config: AllConfig = {
+        env: { mode: '{{arg0}}' },
+        packageRules: [
+          {
+            // @ts-expect-error: a preset argument is only a valid value once substituted
+            matchUpdateTypes: ['minor', '{{args}}'],
+            groupName: '{{arg1}}',
+            unknownKey: '{{arg2}}',
+          },
+        ],
+        // @ts-expect-error: a preset argument is only a valid value once substituted
+        minor: { rangeStrategy: '{{arg0}}' },
+      };
+      expect(configValidation.findUnrenderedPresetArgs(config)).toMatchObject([
+        {
+          message: expect.stringContaining(
+            'Invalid packageRules[0].matchUpdateTypes[1]: matchUpdateTypes had a preset argument `{{args}}`',
+          ),
+        },
+        {
+          message: expect.stringContaining(
+            'Invalid minor.rangeStrategy: rangeStrategy had a preset argument `{{arg0}}`',
+          ),
+        },
+      ]);
+    });
+
     it('allows negation, globs and regexes for pattern matching options with allowedValues', async () => {
       const config: Record<string, unknown> = {
         packageRules: [
