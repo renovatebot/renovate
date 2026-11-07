@@ -101,6 +101,18 @@ entries:
       urls:
         - https://charts.example.com/private-chart-1.2.3.tgz
       version: 1.2.3
+  ascending-releases:
+  - created: "2021-01-01T00:00:00.000000000Z"
+    urls:
+    - https://charts.example.com/ascending-releases-1.0.0.tgz
+    version: 1.0.0
+  - created: "2021-06-01T00:00:00.000000000Z"
+    home: https://github.com/some-org/helm-charts
+    sources:
+    - https://github.com/some-org/helm-charts
+    urls:
+    - https://charts.example.com/ascending-releases-2.0.0.tgz
+    version: 2.0.0
   dummy:
   - home:
     urls:
