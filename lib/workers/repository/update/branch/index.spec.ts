@@ -2694,12 +2694,13 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValue(false);
       scm.isBranchAncestorOfBase.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(null);
-      const inconfig = {
-        ...config,
-        reuseExistingBranch: true,
-        cacheFingerprintMatch: 'matched',
-      };
-      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'matched',
+        }),
+      ).resolves.toEqual({
         branchExists: false,
         result: 'no-work',
         commitSha: null,
