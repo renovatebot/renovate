@@ -1,5 +1,6 @@
 import { regEx } from '../../../util/regex.ts';
 import { CdnjsDatasource } from '../../datasource/cdnjs/index.ts';
+import { UnpkgDatasource } from '../../datasource/unpkg/index.ts';
 import { cloudflareUrlRegex } from '../cdnurl/extract.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
@@ -9,19 +10,34 @@ const integrityRegex = regEx(
   /\s+integrity\s*=\s*(?:"|')(?<currentDigest>[^"']+)/,
 );
 
+const unpkgUrlRegex = regEx(
+  /\/\/unpkg\.com\/(?<depName>(?:@[^/]+\/)?[^/@]+)@(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/,
+);
+
 export function extractDep(tag: string): PackageDependency | null {
-  const match = cloudflareUrlRegex.exec(tag);
-  if (!match?.groups) {
-    return null;
-  }
-  const { depName, currentValue, asset } = match.groups;
   const dep: PackageDependency = {
-    datasource: CdnjsDatasource.id,
-    depName,
-    packageName: `${depName}/${asset}`,
-    currentValue,
     replaceString: tag,
   };
+
+  if (cloudflareUrlRegex.test(tag)) {
+    const { groups } = cloudflareUrlRegex.exec(tag)!;
+    const { depName, currentValue, asset } = groups!;
+    dep.datasource = CdnjsDatasource.id;
+    dep.depName = depName;
+    dep.packageName = `${depName}/${asset}`;
+    dep.currentValue = currentValue;
+  } else if (unpkgUrlRegex.test(tag)) {
+    const { groups } = unpkgUrlRegex.exec(tag)!;
+    const { depName, currentValue } = groups!;
+    dep.datasource = UnpkgDatasource.id;
+    dep.depName = depName;
+    dep.packageName = depName;
+    dep.currentValue = currentValue;
+  } else {
+    dep.skipReason = 'unsupported-datasource';
+    return dep;
+  }
+
   const integrityMatch = integrityRegex.exec(tag);
   if (integrityMatch?.groups) {
     dep.currentDigest = integrityMatch.groups.currentDigest;
