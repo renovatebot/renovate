@@ -443,6 +443,39 @@ describe('workers/repository/updates/flatten', () => {
       );
     });
 
+    it('merges dependency managerData into package file managerData', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            managerData: {
+              hasPackageManager: true,
+              yarnLock: 'yarn.lock',
+            },
+            deps: [
+              {
+                depName: 'axios',
+                depType: 'resolutions',
+                managerData: { key: 'axios@0.22.0' },
+                updates: [{ newValue: '1.0.0' }],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(res[0].managerData).toEqual({
+        hasPackageManager: true,
+        yarnLock: 'yarn.lock',
+        key: 'axios@0.22.0',
+      });
+      expect(packageFiles.npm[0].managerData).toEqual({
+        hasPackageManager: true,
+        yarnLock: 'yarn.lock',
+      });
+    });
+
     it('skips replacement update when replacement already exists as sibling dep', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
