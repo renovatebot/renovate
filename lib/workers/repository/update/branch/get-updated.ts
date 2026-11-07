@@ -634,9 +634,11 @@ function processUpdateArtifactResults(
     for (const res of results) {
       const { file, notice, artifactError } = res;
       if (file) {
-        // several updateArtifacts() calls can return the same file, keep only the latest
+        // several updateArtifacts() calls can return the same file, keep only the latest,
+        // but keep a deletion that precedes an addition of the same path (e.g. a symlink)
         const existingIndex = updatedArtifacts.findIndex(
-          (artifact) => artifact.path === file.path,
+          (artifact) =>
+            artifact.path === file.path && artifact.type === file.type,
         );
         if (existingIndex === -1) {
           updatedArtifacts.push(file);

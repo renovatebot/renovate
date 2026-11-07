@@ -561,6 +561,38 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
     });
 
+    it('keeps a deletion followed by an addition of the same path', async () => {
+      config.upgrades.push({
+        packageFile: 'go.mod',
+        manager: 'gomod',
+        branchName: 'foo/bar',
+      });
+      gomod.updateDependency.mockReturnValue('some new content');
+      gomod.updateArtifacts.mockResolvedValueOnce([
+        { file: { type: 'deletion', path: 'bin/tool' } },
+        {
+          file: {
+            type: 'addition',
+            path: 'bin/tool',
+            contents: '.tool-2.0.0.pkg',
+            isSymlink: true,
+          },
+        },
+      ]);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedArtifacts).toEqual([
+        { type: 'deletion', path: 'bin/tool' },
+        {
+          type: 'addition',
+          path: 'bin/tool',
+          contents: '.tool-2.0.0.pkg',
+          isSymlink: true,
+        },
+      ]);
+    });
+
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
