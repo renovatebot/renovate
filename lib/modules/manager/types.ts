@@ -81,17 +81,17 @@ export interface ToolConstraintsConfig {
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
   composerIgnorePlatformReqs?: string[] | null;
-  goGetDirs?: string[];
+  goGetDirs: string[];
   currentValue?: string;
-  postUpdateOptions?: string[];
-  ignorePlugins?: boolean;
-  ignoreScripts?: boolean;
+  postUpdateOptions: string[];
+  ignorePlugins: boolean;
+  ignoreScripts: boolean;
   updateType?: UpdateType;
   newValue?: string;
   newVersion?: string;
   newMajor?: number;
-  registryAliases?: Record<string, string>;
-  skipArtifactsUpdate?: boolean;
+  registryAliases: Record<string, string>;
+  skipArtifactsUpdate: boolean;
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;

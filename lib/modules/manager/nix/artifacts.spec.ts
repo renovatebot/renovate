@@ -2,6 +2,7 @@ import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -9,7 +10,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -30,7 +30,7 @@ const dockerAdminConfig = {
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const updateInputCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \

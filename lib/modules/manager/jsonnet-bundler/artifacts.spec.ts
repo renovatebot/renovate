@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -7,7 +8,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -20,7 +20,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   binarySource: 'global',
 };
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 describe('modules/manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {

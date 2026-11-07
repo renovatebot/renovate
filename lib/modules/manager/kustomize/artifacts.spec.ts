@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { envMock, mockExecAll } from '../../../../test/exec-util.ts';
 import { env, fs, git, partial } from '../../../../test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -13,7 +14,6 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as kustomize from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -31,9 +31,9 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {
+const config = updateArtifactsConfig({
   postUpdateOptions: ['kustomizeInflateHelmCharts'],
-};
+});
 
 const packageFileName = 'kustomization.yaml';
 const newPackageFileContent = 'kind: Kustomization';

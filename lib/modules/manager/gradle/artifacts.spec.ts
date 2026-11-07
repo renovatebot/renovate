@@ -2,6 +2,7 @@ import os from 'node:os';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -149,7 +150,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
 
@@ -168,7 +169,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
 
@@ -194,7 +195,7 @@ describe('modules/manager/gradle/artifacts', () => {
             { depName: 'org.junit.jupiter:junit-jupiter-engine' },
           ],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
 
@@ -218,7 +219,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -259,7 +260,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -302,7 +303,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -349,7 +350,7 @@ describe('modules/manager/gradle/artifacts', () => {
           },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -386,7 +387,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'somedir/settings.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
-          config: { isLockFileMaintenance: true },
+          config: updateArtifactsConfig({ isLockFileMaintenance: true }),
         }),
       ).resolves.toBeNull();
 
@@ -402,7 +403,7 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
       });
 
       expect(res).toEqual([
@@ -441,7 +442,7 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
       });
 
       expect(res).toEqual([
@@ -507,7 +508,7 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
       });
 
       expect(res).toEqual([
@@ -546,10 +547,10 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: {
+        config: updateArtifactsConfig({
           isLockFileMaintenance: true,
           extractedConstraints: { java: '8.0.1' },
-        },
+        }),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -577,7 +578,7 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
       });
 
       expect(res).toEqual([
@@ -617,7 +618,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
-          config: { isLockFileMaintenance: true },
+          config: updateArtifactsConfig({ isLockFileMaintenance: true }),
         }),
       ).resolves.toBeNull();
     });
@@ -630,7 +631,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '',
-          config: { isLockFileMaintenance: true },
+          config: updateArtifactsConfig({ isLockFileMaintenance: true }),
         }),
       ).resolves.toEqual([
         {
@@ -665,7 +666,7 @@ describe('modules/manager/gradle/artifacts', () => {
           packageFileName: 'build.gradle',
           updatedDeps: [],
           newPackageFileContent: '{}',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).rejects.toThrow(TEMPORARY_ERROR);
     });
@@ -681,7 +682,7 @@ describe('modules/manager/gradle/artifacts', () => {
         packageFileName: 'build.gradle',
         updatedDeps: [],
         newPackageFileContent: '',
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
       });
 
       expect(res).toEqual([
@@ -735,7 +736,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -788,7 +789,7 @@ describe('modules/manager/gradle/artifacts', () => {
             { depName: 'org.junit.jupiter:junit-jupiter-engine' },
           ],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).resolves.toBeNull();
 
@@ -824,7 +825,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -876,7 +877,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(res).toEqual([
@@ -953,7 +954,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -997,7 +998,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -1042,7 +1043,7 @@ describe('modules/manager/gradle/artifacts', () => {
           { depName: 'org.junit.jupiter:junit-jupiter-engine' },
         ],
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toBeEmptyArray();

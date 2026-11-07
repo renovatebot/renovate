@@ -1,5 +1,6 @@
 import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { partial } from '~test/util.ts';
 import { getToolConfig } from '../../util/exec/containerbase.ts';
 import type { ToolName } from '../../util/exec/types.ts';
@@ -112,13 +113,19 @@ describe('modules/manager/index', () => {
 
     it('returns false for a manager which does not implement it', async () => {
       await expect(
-        manager.enforcesMinimumReleaseAge('dockerfile', {}),
+        manager.enforcesMinimumReleaseAge(
+          'dockerfile',
+          updateArtifactsConfig(),
+        ),
       ).resolves.toBe(false);
     });
 
     it('returns false for an unknown manager', async () => {
       await expect(
-        manager.enforcesMinimumReleaseAge('unknown-manager', {}),
+        manager.enforcesMinimumReleaseAge(
+          'unknown-manager',
+          updateArtifactsConfig(),
+        ),
       ).resolves.toBe(false);
     });
 
@@ -134,7 +141,9 @@ describe('modules/manager/index', () => {
             enforcesMinimumReleaseAge,
           }),
         );
-        const config = { minimumReleaseAgeExtracted: '3 days' };
+        const config = updateArtifactsConfig({
+          minimumReleaseAgeExtracted: '3 days',
+        });
 
         const res = await manager.enforcesMinimumReleaseAge(
           'stub-manager',

@@ -1,11 +1,11 @@
 import upath from 'upath';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -18,7 +18,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 describe('modules/manager/bazelisk/artifacts', () => {
   beforeEach(() => {

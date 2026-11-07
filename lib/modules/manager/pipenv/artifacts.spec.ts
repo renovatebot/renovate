@@ -8,6 +8,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -19,7 +20,6 @@ import * as docker from '../../../util/exec/docker/index.ts';
 import type { ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import {
   addExtraEnvVariable,
   extractEnvironmentVariableName,
@@ -66,7 +66,7 @@ const dockerAdminConfig = {
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
 } satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const pipenvCacheDir = upath.join('/tmp/renovate/cache/others/pipenv');
 const pipCacheDir = upath.join('/tmp/renovate/cache/others/pip');

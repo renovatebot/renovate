@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -11,7 +12,6 @@ import type {
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as helmfile from './index.ts';
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
@@ -31,7 +31,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 const helmfileYaml = codeBlock`
 repositories:

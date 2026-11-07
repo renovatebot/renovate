@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -11,7 +12,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as lockfile from './lockfile.ts';
 import { updateLockedDependency } from './update-locked.ts';
@@ -34,7 +34,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 const trustCmd = 'mise trust mise.toml';
 const updateToolCmd = 'mise lock node';
@@ -532,9 +532,7 @@ describe('modules/manager/mise/artifacts', () => {
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
       newPackageFileContent: '',
-      config: {
-        // no constraints
-      },
+      config: updateArtifactsConfig(),
     });
 
     expect(execSnapshots).toMatchObject([
@@ -559,7 +557,7 @@ describe('modules/manager/mise/artifacts', () => {
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
       newPackageFileContent: '',
-      config: {
+      config: updateArtifactsConfig({
         constraints: {
           mise: '2026.6.12',
           node: '24.16.0',
@@ -567,7 +565,7 @@ describe('modules/manager/mise/artifacts', () => {
           go: '1.24.4',
           ruby: '3.4.3',
         },
-      },
+      }),
     });
 
     expect(execSnapshots).toMatchObject([
@@ -592,7 +590,7 @@ describe('modules/manager/mise/artifacts', () => {
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
       newPackageFileContent: '',
-      config: {
+      config: updateArtifactsConfig({
         extractedConstraints: {
           mise: '2026.6.12',
           node: '24.16.0',
@@ -600,7 +598,7 @@ describe('modules/manager/mise/artifacts', () => {
           go: '1.24.4',
           ruby: '3.4.3',
         },
-      },
+      }),
     });
 
     expect(execSnapshots).toMatchObject([

@@ -6,12 +6,12 @@
 // so the two styles are not mixed.
 import { mockDeep } from 'vitest-mock-extended';
 import { exec as cpExec, envMock } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { setCustomEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
@@ -1313,9 +1313,9 @@ describe('util/exec/index', () => {
   });
 
   describe('getToolSettingsOptions()', () => {
-    const config: UpdateArtifactsConfig = {
+    const config = updateArtifactsConfig({
       newValue: '5.6.4',
-    };
+    });
 
     describe('for JVM settings', () => {
       beforeEach(() => {
