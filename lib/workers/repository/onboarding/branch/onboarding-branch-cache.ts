@@ -40,7 +40,7 @@ export function setOnboardingCache(
 export function deleteOnboardingCache(): void {
   const cache = getCache();
 
-  if (cache?.onboardingBranchCache) {
+  if (cache.onboardingBranchCache) {
     logger.debug('Delete Onboarding Cache');
     delete cache.onboardingBranchCache;
   }

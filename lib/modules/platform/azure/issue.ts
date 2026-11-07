@@ -97,10 +97,11 @@ export class IssueService {
 
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
-      const stateColors = await azureApiWit.getWorkItemTypeStates(
+      // the Azure client resolves a 404 response with null
+      const stateColors = (await azureApiWit.getWorkItemTypeStates(
         this.config.project,
         this.config.workItemType,
-      );
+      )) as WorkItemStateColor[] | null;
 
       if (stateColors?.length) {
         const openNames = namesByCategory(stateColors, openCategories);
@@ -116,7 +117,7 @@ export class IssueService {
         // process somehow exposes only closed states, this falls back to a
         // closed state name; that is intentional (there is no better reopen
         // target) rather than a bug.
-        states.open = openNames[0] ?? stateColors[0].name ?? states.open;
+        states.open = openNames.at(0) ?? stateColors[0].name ?? states.open;
         if (closedNames.length) {
           // Prefer a `Completed` state as the close target so processes that
           // order `Resolved` before `Closed` (e.g. some custom Agile
@@ -274,7 +275,7 @@ export class IssueService {
       }
 
       const existingIssue =
-        openIssues[0] ?? issues.find((issue) => issue.state === 'closed');
+        openIssues.at(0) ?? issues.find((issue) => issue.state === 'closed');
 
       if (existingIssue) {
         if (existingIssue.state === 'closed' && once) {
@@ -369,7 +370,7 @@ export class IssueService {
         return null;
       }
 
-      const newWorkItem = await azureApiWit.createWorkItem(
+      const newWorkItem = (await azureApiWit.createWorkItem(
         undefined,
         [
           {
@@ -387,7 +388,7 @@ export class IssueService {
         ],
         this.config.project,
         this.config.workItemType,
-      );
+      )) as WorkItem | null;
 
       // Azure DevOps normally returns the created work item, but the
       // underlying REST client resolves to `null` instead of throwing for

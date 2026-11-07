@@ -115,7 +115,7 @@ export async function initRepo({
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
-  if (!repo?.repositoryMetadata) {
+  if (!repo.repositoryMetadata) {
     logger.error({ repository }, 'Could not find repository');
     throw new Error(REPOSITORY_NOT_FOUND);
   }
@@ -161,7 +161,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
   const listPrsResponse = await client.listPullRequests(config.repository!);
   const fetchedPrs: CodeCommitPr[] = [];
 
-  if (listPrsResponse && !listPrsResponse.pullRequestIds) {
+  if (!listPrsResponse.pullRequestIds) {
     return fetchedPrs;
   }
 
@@ -293,7 +293,7 @@ export async function getRepos(): Promise<string[]> {
 
   const res: string[] = [];
 
-  const repoNames = coerceArray(reposRes?.repositories);
+  const repoNames = coerceArray(reposRes.repositories);
 
   for (const repo of repoNames) {
     // v8 ignore else -- TODO: add test #40625
@@ -353,7 +353,7 @@ export async function getRawFile(
     fileName,
     branchOrTag,
   );
-  if (!fileRes?.fileContent) {
+  if (!fileRes.fileContent) {
     return null;
   }
   const buf = Buffer.from(fileRes.fileContent);
@@ -380,9 +380,9 @@ export async function createPr({
 
   if (
     !prCreateRes.pullRequest?.title ||
-    !prCreateRes.pullRequest?.pullRequestId ||
-    !prCreateRes.pullRequest?.description ||
-    !prCreateRes.pullRequest?.pullRequestTargets?.length
+    !prCreateRes.pullRequest.pullRequestId ||
+    !prCreateRes.pullRequest.description ||
+    !prCreateRes.pullRequest.pullRequestTargets?.length
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -533,11 +533,8 @@ export async function addReviewers(
     `${prNo}`,
     approvalRuleContents,
   );
-  // v8 ignore else -- TODO: add test #40625
-  if (res) {
-    const approvalRule = res.approvalRule;
-    logger.debug({ approvalRule }, `Approval Rule Added to PR #${prNo}:`);
-  }
+  const approvalRule = res.approvalRule;
+  logger.debug({ approvalRule }, `Approval Rule Added to PR #${prNo}:`);
 }
 
 /* v8 ignore next -- no-op stub: CodeCommit does not support adding assignees */
@@ -626,12 +623,12 @@ export async function ensureComment({
   let commentId: string | undefined = undefined;
   let commentNeedsUpdating = false;
 
-  if (!prCommentsResponse?.commentsForPullRequestData) {
+  if (!prCommentsResponse.commentsForPullRequestData) {
     return false;
   }
 
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
-    if (!commentObj?.comments) {
+    if (!commentObj.comments) {
       continue;
     }
     const firstCommentContent = commentObj.comments[0].content;
@@ -699,14 +696,14 @@ export async function ensureCommentRemoval(
     return;
   }
 
-  if (!prCommentsResponse?.commentsForPullRequestData) {
+  if (!prCommentsResponse.commentsForPullRequestData) {
     logger.debug('commentsForPullRequestData not found');
     return;
   }
 
   let commentIdToRemove: string | undefined;
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
-    if (!commentObj?.comments) {
+    if (!commentObj.comments) {
       logger.debug(
         'comments object not found under commentsForPullRequestData',
       );

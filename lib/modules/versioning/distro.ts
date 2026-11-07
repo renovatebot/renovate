@@ -85,7 +85,8 @@ export class DistroInfo {
    * @returns A codename if exists, otherwise input string is returned
    */
   public getCodenameByVersion(input: string): string {
-    const di = this._distroInfo[input];
+    const distroInfo: Partial<DistroInfoRecord> = this._distroInfo;
+    const di = distroInfo[input];
     if (di) {
       return di.series;
     }

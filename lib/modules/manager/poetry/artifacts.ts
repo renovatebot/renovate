@@ -102,7 +102,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
     return [];
   }
 
-  const sources = coerceArray(pyprojectFile.tool?.poetry?.source);
+  const sources = coerceArray(pyprojectFile.tool.poetry.source);
   const sourceArray: PoetrySource[] = [];
   for (const source of sources) {
     if (source.name && source.url) {

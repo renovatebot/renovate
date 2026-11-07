@@ -28,9 +28,9 @@ describe('modules/manager/index', () => {
 
       it(`has valid supportedDatasources for ${m}`, () => {
         expect(supportedDatasources).toBeNonEmptyArray();
-        supportedDatasources!.every((d) => {
+        for (const d of supportedDatasources!) {
           expect(datasources.includes(d)).toBeTrue();
-        });
+        }
       });
     }
   });
@@ -180,6 +180,7 @@ describe('modules/manager/index', () => {
       if (moduleName === 'custom') {
         return true;
       }
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- validates modules loaded at runtime
       if (!module.defaultConfig) {
         return false;
       }

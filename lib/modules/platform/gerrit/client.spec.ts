@@ -176,7 +176,7 @@ describe('modules/platform/gerrit/client', () => {
         httpMock
           .scope(gerritEndpointUrl)
           .get('/a/changes/')
-          .query((query) => query?.q?.includes(expectedQueryPart) ?? false)
+          .query((query) => query.q?.includes(expectedQueryPart) ?? false)
           .reply(
             200,
             gerritRestResponse([

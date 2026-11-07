@@ -20,7 +20,7 @@ import type {
 } from './types.ts';
 
 export function getDatasourceFor(datasource: string): DatasourceApi | null {
-  if (datasource?.startsWith('custom.')) {
+  if (datasource.startsWith('custom.')) {
     return getDatasourceFor(CustomDatasource.id);
   }
   return datasources.get(datasource) ?? null;
@@ -98,7 +98,7 @@ export function applyVersionCompatibility(
       );
       return null;
     }
-    if (regexResult?.groups?.compatibility !== currentCompatibility) {
+    if (regexResult.groups.compatibility !== currentCompatibility) {
       logger.trace(
         { releaseVersion: release.version, versionCompatibility },
         'versionCompatibility: Does not match compatibility',
@@ -131,7 +131,7 @@ export function applyVersionCompatibility(
  *    assembled into `MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD]`.
  */
 export function extractVersionFromGroups(
-  groups: Record<string, string> | undefined,
+  groups: Partial<Record<string, string>> | undefined,
 ): string | undefined {
   if (!groups) {
     return undefined;
@@ -228,7 +228,7 @@ export function applyConstraintsFiltering<
     | 'packageName'
   >,
 >(releaseResult: ReleaseResult, config: Config): ReleaseResult {
-  if (config?.constraintsFiltering !== 'strict') {
+  if (config.constraintsFiltering !== 'strict') {
     for (const release of releaseResult.releases) {
       delete release.constraints;
     }

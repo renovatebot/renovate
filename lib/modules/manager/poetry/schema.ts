@@ -402,13 +402,13 @@ export const PoetryPyProject = Toml.pipe(
         deps.push(...buildSystem.requires);
       }
 
-      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
+      const poetryDependencies = coerceArray(tool?.poetry.dependencies);
 
       const poetryDevDependencies = coerceArray(
-        tool?.poetry?.['dev-dependencies'],
+        tool?.poetry['dev-dependencies'],
       );
 
-      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
+      const poetryGroupDependencies = coerceArray(tool?.poetry.group);
 
       for (const poetryDep of [
         ...poetryDependencies,
@@ -447,13 +447,13 @@ export const PoetryPyProject = Toml.pipe(
 
       deps.push(...Object.values(projectDepsByName));
 
-      const packageFileVersion = tool?.poetry?.version;
+      const packageFileVersion = tool?.poetry.version;
       const packageFileContent: PackageFileContent<PoetryManagerData> = {
         deps,
         packageFileVersion,
       };
 
-      const sourceUrls = tool?.poetry?.source;
+      const sourceUrls = tool?.poetry.source;
       if (sourceUrls) {
         for (const dep of deps) {
           if (dep.managerData?.sourceName) {

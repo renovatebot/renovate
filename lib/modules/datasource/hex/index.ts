@@ -37,13 +37,13 @@ interface ParsedPackageName {
 }
 
 function parsePackageName(packageName: string): ParsedPackageName {
-  const [hexPackageName, organizationName] = packageName.split(':');
+  const [hexPackageName, organizationName = null] = packageName.split(':');
   const organizationUrlPrefix = organizationName
     ? `repos/${organizationName}/`
     : '';
   return {
     hexPackageName,
-    organizationName: organizationName ?? null,
+    organizationName,
     organizationUrlPrefix,
   };
 }

@@ -33,13 +33,18 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   config = applyRepoConfigDefaults(getConfig());
+  vi.mocked(lookup).mockResolvedValue({
+    branches: [],
+    branchList: [],
+    packageFiles: {},
+  });
 });
 
 describe('workers/repository/process/index', () => {
   describe('processRepo()', () => {
     it('processes single branches', async () => {
       const res = await extractDependencies(config);
-      expect(res).toBeUndefined();
+      expect(res).toEqual({ branches: [], branchList: [], packageFiles: {} });
     });
 
     it('processes baseBranchPatterns', async () => {
@@ -52,9 +57,9 @@ describe('workers/repository/process/index', () => {
       const res = await extractDependencies(config);
       await updateRepo(config, res.branches);
       expect(res).toEqual({
-        branchList: [undefined],
-        branches: [undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
     });
 
@@ -91,9 +96,9 @@ describe('workers/repository/process/index', () => {
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
       expect(platform.getRawFile).not.toHaveBeenCalledExactlyOnceWith(
         'renovate.json',
@@ -112,9 +117,9 @@ describe('workers/repository/process/index', () => {
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
       expect(platform.getRawFile).not.toHaveBeenCalledWith(
         'renovate.json',
@@ -150,9 +155,9 @@ describe('workers/repository/process/index', () => {
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
       expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
@@ -180,9 +185,9 @@ describe('workers/repository/process/index', () => {
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
       expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
 
       expect(platform.getRawFile).toHaveBeenCalledWith(
@@ -239,9 +244,9 @@ describe('workers/repository/process/index', () => {
       config.useBaseBranchConfig = 'merge';
       const res = await extractDependencies(config);
       expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
     });
 
@@ -324,9 +329,9 @@ describe('workers/repository/process/index', () => {
       scm.branchExists.mockResolvedValue(true);
       const res = await extractDependencies(config);
       expect(res).toStrictEqual({
-        branchList: [undefined, undefined, undefined, undefined, undefined],
-        branches: [undefined, undefined, undefined, undefined, undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -365,9 +370,9 @@ describe('workers/repository/process/index', () => {
       scm.branchExists.mockResolvedValue(true);
       const res = await extractDependencies(config);
       expect(res).toStrictEqual({
-        branchList: [undefined],
-        branches: [undefined],
-        packageFiles: undefined,
+        branchList: [],
+        branches: [],
+        packageFiles: {},
       });
 
       // one for baseBranches and one for extract

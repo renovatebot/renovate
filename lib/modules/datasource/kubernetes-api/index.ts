@@ -4,7 +4,7 @@ import * as kubernetesApiVersioning from '../../versioning/kubernetes-api/index.
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 
-const apiData: Record<string, string[]> = JSON5.parse(
+const apiData: Partial<Record<string, string[]>> = JSON5.parse(
   dataFiles.get('data/kubernetes-api.json5')!,
 );
 

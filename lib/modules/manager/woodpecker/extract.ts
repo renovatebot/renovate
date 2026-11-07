@@ -21,7 +21,7 @@ export function extractPackageFile(
   extractConfig: ExtractConfig,
 ): PackageFileContent | null {
   logger.debug('woodpecker.extractPackageFile()');
-  let config: WoodpeckerConfig;
+  let config: WoodpeckerConfig | null;
   try {
     // TODO: use schema (#9610)
     config = parseSingleYaml(content);
@@ -60,7 +60,7 @@ export function extractPackageFile(
     Object.values(coerceObject(config[pipelineKey]))
       .filter((step) => isString(step?.image))
       .map((step) =>
-        getDep(step.image, { registryAliases: extractConfig.registryAliases }),
+        getDep(step?.image, { registryAliases: extractConfig.registryAliases }),
       ),
   );
 

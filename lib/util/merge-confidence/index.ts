@@ -106,7 +106,7 @@ export async function getMergeConfidenceLevel(
   packageName: string,
   currentVersion: string,
   newVersion: string,
-  updateType: UpdateType,
+  updateType: UpdateType | undefined,
 ): Promise<MergeConfidence | undefined> {
   return await instrument(
     'getMergeConfidenceLevel',
@@ -276,7 +276,7 @@ export function getApiToken(): string | undefined {
   return hostRules.find({
     url: apiBaseUrl,
     hostType,
-  })?.token;
+  }).token;
 }
 
 /**

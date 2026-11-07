@@ -106,8 +106,8 @@ export function formatCell(row: string[], colIndex: number): string {
  */
 export function indexMarkdown(
   lines: string[],
-): Record<string, [number, number]> {
-  const indexed: Record<string, [number, number]> = {};
+): Partial<Record<string, [number, number]>> {
+  const indexed: Partial<Record<string, [number, number]>> = {};
 
   let optionName = '';
   let start = 0;

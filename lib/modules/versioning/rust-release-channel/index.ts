@@ -321,7 +321,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
       // Both have prerelease with numbers, they must match exactly
       return (
         !!versionChannel.prerelease &&
-        versionChannel.prerelease?.number === rangeChannel.prerelease.number
+        versionChannel.prerelease.number === rangeChannel.prerelease.number
       );
     }
 

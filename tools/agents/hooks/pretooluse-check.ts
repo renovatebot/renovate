@@ -14,13 +14,11 @@ const result = PreToolUseHookInput.safeParse(JSON.parse(raw));
 if (result.success) {
   const parsed = result.data;
 
-  if (parsed.tool_name === 'Bash') {
-    const { command } = parsed.tool_input;
-    if (forbiddenToolRegex.test(command)) {
-      deny('Use pnpm instead of npm/npx/yarn');
-    }
-    if (/(?:^|\s)pnpm\s+(?:run\s+|exec\s+)?jest(?:\s|$)/.test(command)) {
-      deny('Use pnpm vitest instead of pnpm jest');
-    }
+  const { command } = parsed.tool_input;
+  if (forbiddenToolRegex.test(command)) {
+    deny('Use pnpm instead of npm/npx/yarn');
+  }
+  if (/(?:^|\s)pnpm\s+(?:run\s+|exec\s+)?jest(?:\s|$)/.test(command)) {
+    deny('Use pnpm vitest instead of pnpm jest');
   }
 }

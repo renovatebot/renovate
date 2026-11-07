@@ -81,7 +81,7 @@ async function bumpVersion(
   config: BumpVersionConfig,
   branchConfig: BranchConfig,
   fileList: string[],
-  packageFiles: Record<string, FileChange[]>,
+  packageFiles: Partial<Record<string, FileChange[]>>,
   artifactFiles: Record<string, FileChange[]>,
 ): Promise<void> {
   const rawBumpType = config.bumpType ?? 'patch';
@@ -175,7 +175,7 @@ async function bumpVersion(
 
         // Handle 'sync' type - use version from branch upgrades
         if (bumpType === 'sync') {
-          if (branchConfig.upgrades?.length) {
+          if (branchConfig.upgrades.length) {
             // Use the newVersion from the first upgrade
             newVersion = branchConfig.upgrades[0].newVersion ?? null;
             if (!newVersion) {
@@ -320,7 +320,7 @@ function addArtifactError(
 async function getFileContent(
   bumpVersionsDescr: string,
   filePath: string,
-  packageFiles: Record<string, FileChange[]>,
+  packageFiles: Partial<Record<string, FileChange[]>>,
   artifactFiles: Record<string, FileChange[]>,
 ): Promise<string | null> {
   const packageFileChanges = parseFileChanges(filePath, packageFiles);
@@ -360,7 +360,7 @@ async function getFileContent(
 
 function parseFileChanges(
   filePath: string,
-  changeRecord: Record<string, FileChange[]>,
+  changeRecord: Partial<Record<string, FileChange[]>>,
 ): ParseFileChangesResult {
   const changes = coerceArray(changeRecord[filePath]);
 

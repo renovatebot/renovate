@@ -92,7 +92,7 @@ function getMajor(version: string): number | null {
 function getMinor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
-    const minorToken = tokens[1];
+    const minorToken = tokens.at(1);
     if (minorToken?.type === TYPE_NUMBER) {
       return parseInt(minorToken.val.toString(), 10);
     }
@@ -105,7 +105,7 @@ function getPatch(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
-    const patchToken = tokens[2];
+    const patchToken = tokens.at(2);
     if (
       patchToken &&
       minorToken.type === TYPE_NUMBER &&
@@ -128,7 +128,7 @@ function getExactSection(
 ): bigint | null {
   const tokens = tokenize(version);
   const sectionIndex = sectionIndexes[type];
-  const token = tokens[sectionIndex];
+  const token = tokens.at(sectionIndex);
 
   if (sectionIndex === 0) {
     return token?.type === TYPE_NUMBER ? token.val : null;
@@ -137,7 +137,7 @@ function getExactSection(
     return token?.type === TYPE_NUMBER ? token.val : 0n;
   }
 
-  const minorToken = tokens[1];
+  const minorToken = tokens.at(1);
   return minorToken?.type === TYPE_NUMBER && token?.type === TYPE_NUMBER
     ? token.val
     : 0n;

@@ -179,7 +179,7 @@ export class PypiDatasource extends Datasource {
       { headers },
       PypiResponse,
     );
-    const dep = rep?.body;
+    const dep = rep.body;
     if (rep.authorization) {
       dependency.isPrivate = true;
     }
@@ -303,7 +303,7 @@ export class PypiDatasource extends Datasource {
     const releases: Releases = {};
     for (const link of Array.from(links)) {
       const version = PypiDatasource.extractVersionFromLinkText(
-        link.text?.trim(),
+        link.text.trim(),
         packageName,
       );
       if (version) {
@@ -387,7 +387,7 @@ export class PypiDatasource extends Datasource {
         headers: authHeaders,
       });
     }
-    const dep = response?.body;
+    const dep = response.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
       return null;

@@ -11,7 +11,7 @@ export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
   override extract(hclMap: TerraformDefinitionFile): PackageDependency[] {
     const dependencies = [];
 
-    const workspaces = hclMap?.resource?.tfe_workspace;
+    const workspaces = hclMap.resource?.tfe_workspace;
     if (isNullOrUndefined(workspaces)) {
       return [];
     }

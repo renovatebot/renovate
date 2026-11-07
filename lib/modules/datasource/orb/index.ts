@@ -39,7 +39,7 @@ export class OrbDatasource extends Datasource {
       'api/v3/orb/packages',
     )}?${getQueryString({ 'filter[name]': packageName })}`;
     const body = await this.fetchJson(url, OrbPackagesResponse);
-    const pkg = body.data[0];
+    const pkg = body.data.at(0);
     if (!pkg) {
       logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
       return null;

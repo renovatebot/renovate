@@ -11,7 +11,7 @@ export class TerraformVersionExtractor extends DependencyExtractor {
   }
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
-    const terraformBlocks = hclRoot?.terraform;
+    const terraformBlocks = hclRoot.terraform;
     if (isNullOrUndefined(terraformBlocks)) {
       return [];
     }

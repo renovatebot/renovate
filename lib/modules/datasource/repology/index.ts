@@ -141,15 +141,12 @@ export class RepologyDatasource extends Datasource {
           pkgType,
         );
 
-        // v8 ignore else -- the resolver either returns a body or throws
-        if (response) {
-          const pkg = findPackageInResponse(response, repoName, pkgName, [
-            pkgType,
-          ]);
-          if (isNonEmptyArray(pkg)) {
-            // exit immediately if package found
-            return pkg;
-          }
+        const pkg = findPackageInResponse(response, repoName, pkgName, [
+          pkgType,
+        ]);
+        if (isNonEmptyArray(pkg)) {
+          // exit immediately if package found
+          return pkg;
         }
       }
     } catch (err) {

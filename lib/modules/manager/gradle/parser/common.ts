@@ -139,8 +139,9 @@ export function findVariableInKotlinImport(
         const identifier = `${prefix}.${name}`;
 
         // v8 ignore else -- needs a kotlin import whose prefix resolves to nothing
-        if (variables[identifier]) {
-          return variables[identifier];
+        const variable = variables[identifier] as VariableData | undefined;
+        if (variable) {
+          return variable;
         }
       }
     }
@@ -160,14 +161,16 @@ export function findVariable(
       const prefix = prefixParts.slice(0, idx).join('.');
       const identifier = `${prefix}.${name}`;
 
-      if (variables[identifier]) {
-        return variables[identifier];
+      const variable = variables[identifier] as VariableData | undefined;
+      if (variable) {
+        return variable;
       }
     }
   }
 
-  if (variables[name]) {
-    return variables[name];
+  const variable = variables[name] as VariableData | undefined;
+  if (variable) {
+    return variable;
   }
 
   return findVariableInKotlinImport(name, ctx, variables);
@@ -297,7 +300,7 @@ export const qTemplateString = q
     search: q
       .alt(qStringValue, qPropertyAccessIdentifier, qVariableAccessIdentifier)
       .handler((ctx) => {
-        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
+        ctx.tmpTokenStore.templateTokens.push(...ctx.varTokens);
         ctx.varTokens = [];
         return ctx;
       }),

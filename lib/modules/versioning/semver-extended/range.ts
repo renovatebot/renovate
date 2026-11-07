@@ -34,7 +34,9 @@ function parsePartial(input: string): PartialVersion | null {
   if (!matches) {
     return null;
   }
-  const { prefix, release, prerelease, build } = matches.groups!;
+  const groups: Partial<Record<string, string>> = matches.groups!;
+  const { prefix, release } = matches.groups!;
+  const { prerelease, build } = groups;
   const identifiers = release.split('.');
   const wildcardIndex = identifiers.findIndex((identifier) =>
     wildcardPattern.test(identifier),

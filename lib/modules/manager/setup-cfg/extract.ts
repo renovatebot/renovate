@@ -76,7 +76,7 @@ function parseDep(
   }
 
   const [, depName, , currVal] = packageMatches;
-  const currentValue = currVal?.trim();
+  const currentValue = (currVal as string | undefined)?.trim();
 
   const dep: PackageDependency = {
     depName,

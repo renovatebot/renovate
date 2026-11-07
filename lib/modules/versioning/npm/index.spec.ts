@@ -92,6 +92,7 @@ describe('modules/versioning/npm/index', () => {
     ${'=1.2.3'}        | ${true}
     ${'= 1.2.3'}       | ${true}
     ${'1.x'}           | ${false}
+    ${undefined}       | ${false}
   `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
     const res = !!semver.isSingleVersion(version);
     expect(res).toBe(isSingle);

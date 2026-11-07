@@ -12,7 +12,7 @@ export function findCodeFragment(
   }
 
   const [ruleIndex, ...restPath] = path;
-  let fragment: Fragment | undefined = parsed[ruleIndex];
+  let fragment = parsed[ruleIndex] as Fragment | undefined;
   for (const key of restPath) {
     if (!fragment) {
       break;

@@ -149,7 +149,7 @@ function commonOrder(token: Token): number {
   if (token.type === TYPE_QUALIFIER) {
     return 1;
   }
-  if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_NUMBER) {
+  if (token.prefix === PREFIX_HYPHEN) {
     return 2;
   }
   return 3;
@@ -312,9 +312,9 @@ function parseRange(rangeStr: string): Range[] | null {
   let ranges: Range[] | null = [];
   let interval = emptyInterval();
 
-  commaSplit.forEach((subStr) => {
+  for (const subStr of commaSplit) {
     if (!ranges) {
-      return;
+      break;
     }
     if (interval.leftType === null) {
       if (regEx(/^\[.*]$/).test(subStr)) {
@@ -358,7 +358,7 @@ function parseRange(rangeStr: string): Range[] | null {
     } else {
       ranges = null;
     }
-  });
+  }
 
   if (interval.leftType) {
     return null;

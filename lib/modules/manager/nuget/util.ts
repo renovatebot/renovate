@@ -20,7 +20,7 @@ export async function readFileAsXmlDocument(
     // TODO #22198
     const doc = new XmlDocument((await readLocalFile(file, 'utf8'))!);
     // don't return empty documents
-    return doc?.firstChild ? doc : undefined;
+    return doc.firstChild ? doc : undefined;
   } catch (err) {
     logger.debug({ err, file }, `failed to parse file as XML document`);
     return undefined;

@@ -42,7 +42,7 @@ export async function updateBazelLockfile(
     const status = await getRepoStatus();
     if (
       !status.modified.includes(lockFileName) &&
-      !status.not_added?.includes(lockFileName)
+      !status.not_added.includes(lockFileName)
     ) {
       return null;
     }

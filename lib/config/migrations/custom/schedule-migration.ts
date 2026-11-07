@@ -30,10 +30,12 @@ export class ScheduleMigration extends AbstractMigration {
           schedules[i].includes('before ') &&
           schedules[i].includes('after ')
         ) {
-          const parsedSchedule = later.parse.text(
-            // We need to massage short hours first before we can parse it
-            schedules[i].replace(shortHoursRegex, '$<hours>:00$<meridiem>'),
-          ).schedules[0];
+          const parsedSchedule = later.parse
+            .text(
+              // We need to massage short hours first before we can parse it
+              schedules[i].replace(shortHoursRegex, '$<hours>:00$<meridiem>'),
+            )
+            .schedules.at(0);
           // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
           if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
             continue;

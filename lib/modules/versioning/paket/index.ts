@@ -189,7 +189,8 @@ function pessimisticWithFloor(range: PaketRange, v: NugetVersion): PaketRange {
 }
 
 function replaceRange(range: PaketRange, v: NugetVersion): PaketRange {
-  const [first, second] = range.constraints;
+  const [first] = range.constraints;
+  const second = range.constraints.at(1);
   const hasFloor = second?.operator === '>' || second?.operator === '>=';
   if (first.operator === '~>' && hasFloor) {
     return pessimisticWithFloor(range, v);
@@ -224,7 +225,8 @@ function bumpConstraint(
 }
 
 function bumpRange(range: PaketRange, v: NugetVersion): PaketRange {
-  const [first, second] = range.constraints;
+  const [first] = range.constraints;
+  const second = range.constraints.at(1);
   if (
     first.operator === '~>' &&
     second?.operator !== '<' &&

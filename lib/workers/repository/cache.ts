@@ -120,9 +120,9 @@ async function generateBranchCache(
     }
 
     const automerge = !!branch.automerge;
-    const upgrades: BranchUpgradeCache[] = branch.upgrades
-      ? branch.upgrades.map(generateBranchUpgradeCache)
-      : [];
+    const upgrades: BranchUpgradeCache[] = branch.upgrades.map(
+      generateBranchUpgradeCache,
+    );
     const commitFingerprint = branch.commitFingerprint;
     const prCache = getPrCache(branchName);
 

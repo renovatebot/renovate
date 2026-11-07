@@ -45,7 +45,7 @@ export class DartDatasource extends Datasource {
     const { versions, latest } = await this.fetchJson(pkgUrl, DartResult);
     const releases = versions
       ?.filter(({ retracted }) => !retracted)
-      ?.map(({ version, published, pubspec }) => {
+      .map(({ version, published, pubspec }) => {
         const release: Release = {
           version,
           releaseTimestamp: asTimestamp(published),

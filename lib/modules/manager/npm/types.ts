@@ -49,14 +49,14 @@ interface LockFile1 extends LockFileBase {
 // https://docs.npmjs.com/cli/v8/configuring-npm/package-lock-json#file-format
 interface LockFile2 extends LockFileBase {
   lockfileVersion: 2;
-  packages: Record<string, LockFilePackage>;
+  packages: Partial<Record<string, LockFilePackage>>;
   dependencies?: Record<string, LockFileDependency>;
 }
 
 // currently only hinted in the npm v7 and v8 docs
 interface LockFile3 extends LockFileBase {
   lockfileVersion: 3;
-  packages: Record<string, LockFilePackage>;
+  packages: Partial<Record<string, LockFilePackage>>;
 }
 
 export type LockFile = LockFile1 | LockFile2 | LockFile3;

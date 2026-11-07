@@ -177,7 +177,7 @@ describe('modules/versioning/conda/index', () => {
   });
 
   it('returns a pinned value', () => {
-    expect(api.getPinnedValue?.('1.2.3')).toBe('==1.2.3');
+    expect(api.getPinnedValue('1.2.3')).toBe('==1.2.3');
   });
 
   it.each`

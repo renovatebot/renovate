@@ -105,7 +105,10 @@ describe('util/http/cache/repository-http-cache-provider', () => {
 
     scope
       .get('/foo/bar')
-      .matchHeader('if-none-match', (value) => value === undefined)
+      .matchHeader(
+        'if-none-match',
+        (value: string | undefined) => value === undefined,
+      )
       .reply(200, { msg: 'New response' });
     const res = await http.getJsonUnchecked('https://example.com/foo/bar');
     expect(res).toMatchObject({

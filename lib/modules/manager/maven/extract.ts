@@ -233,8 +233,10 @@ function deepExtract(
   if (dep && !isRoot) {
     result.push(dep);
   }
-  if (node.children) {
-    for (const child of node.children) {
+  // text nodes are cast to elements, but carry no children
+  const children = node.children as XmlElement['children'] | undefined;
+  if (children) {
+    for (const child of children) {
       deepExtract(
         child as XmlElement,
         result,
@@ -296,7 +298,7 @@ function applyPropsInternal(
     return str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
-      const propValue = (props as any)[propKey] as MavenProp;
+      const propValue = (props as any)[propKey] as MavenProp | undefined;
       if (propValue) {
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
@@ -320,7 +322,7 @@ function applyPropsInternal(
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = dep.propSource;
-  let sharedVariableName: string | null = null;
+  let sharedVariableName = null as string | null;
   let currentValue: string | null = null;
 
   // v8 ignore else -- the extractor always populates this field
@@ -328,7 +330,7 @@ function applyPropsInternal(
     currentValue = dep.currentValue.replace(regEx(/^\${[^}]*?}$/), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
-      const propValue = (props as any)[propKey] as MavenProp;
+      const propValue = (props as any)[propKey] as MavenProp | undefined;
       if (propValue) {
         sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
@@ -417,7 +419,7 @@ export function extractPackage(
   if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
-      const val = propNode?.val?.trim();
+      const val = (propNode.val as string | undefined)?.trim();
       if (key && val && propNode.position) {
         const fileReplacePosition = propNode.position;
         props[key] = { val, fileReplacePosition, packageFile };
@@ -536,17 +538,14 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
 
-      // v8 ignore else -- the extractor always populates this field
-      if (pkg.deps) {
-        pkg.deps.forEach((dep) => {
-          // v8 ignore else -- the extractor always populates this field
-          if (dep.registryUrls) {
-            dep.registryUrls.forEach((url) => {
-              registryUrls[name].add(url);
-            });
-          }
-        });
-      }
+      pkg.deps.forEach((dep) => {
+        // v8 ignore else -- the extractor always populates this field
+        if (dep.registryUrls) {
+          dep.registryUrls.forEach((url) => {
+            registryUrls[name].add(url);
+          });
+        }
+      });
 
       if (pkg.parent && !visitedPackages.has(pkg.parent)) {
         visitedPackages.add(pkg.parent);
@@ -578,7 +577,8 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
       if (dep.depType === 'parent') {
-        const parentPkg = extractedPackages[pkg.parent!];
+        const parentPkg = extractedPackages[pkg.parent!] as
+          MavenInterimPackageFile | undefined;
         const hasParentWithNoParent = parentPkg && !parentPkg.parent;
         const hasParentWithExternalParent =
           parentPkg && !packageFileNames.includes(parentPkg.parent!);
@@ -660,14 +660,11 @@ export async function extractAllPackageFiles(
     }
     if (packageFile.endsWith('settings.xml')) {
       const registries = extractRegistries(content);
-      // v8 ignore else -- needs a settings.xml carrying no registries
-      if (registries) {
-        logger.debug(
-          { registries, packageFile },
-          'Found registryUrls in settings.xml',
-        );
-        additionalRegistryUrls.push(...registries);
-      }
+      logger.debug(
+        { registries, packageFile },
+        'Found registryUrls in settings.xml',
+      );
+      additionalRegistryUrls.push(...registries);
     } else if (packageFile.endsWith('.mvn/extensions.xml')) {
       const extensions = extractExtensions(content, packageFile);
       if (extensions) {
@@ -684,14 +681,11 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  // v8 ignore else -- the array is always defined, so this is never falsy
-  if (additionalRegistryUrls) {
-    for (const pkgFile of packages) {
-      for (const dep of pkgFile.deps) {
-        // v8 ignore else -- the extractor always populates this field
-        if (dep.registryUrls) {
-          dep.registryUrls.unshift(...additionalRegistryUrls);
-        }
+  for (const pkgFile of packages) {
+    for (const dep of pkgFile.deps) {
+      // v8 ignore else -- the extractor always populates this field
+      if (dep.registryUrls) {
+        dep.registryUrls.unshift(...additionalRegistryUrls);
       }
     }
   }

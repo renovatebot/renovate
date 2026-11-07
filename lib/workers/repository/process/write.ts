@@ -220,14 +220,14 @@ export async function writeUpdates(
         );
 
         const res = await processBranch(branch);
-        branch.prBlockedBy = res?.prBlockedBy;
-        branch.prNo = res?.prNo;
-        branch.result = res?.result;
-        branch.commitFingerprint = res?.updatesVerified
+        branch.prBlockedBy = res.prBlockedBy;
+        branch.prNo = res.prNo;
+        branch.result = res.result;
+        branch.commitFingerprint = res.updatesVerified
           ? commitFingerprint
           : branchState.commitFingerprint;
 
-        if (res?.commitSha) {
+        if (res.commitSha) {
           // Get the commit timestamp for the new commit
           const commitDate = await scm.getBranchUpdateDate(branchName);
           setBranchNewCommit(branchName, baseBranch, res.commitSha, commitDate);

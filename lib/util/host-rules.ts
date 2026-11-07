@@ -395,7 +395,7 @@ function hasConfiguredCredentials(
  */
 function withoutLeadingUserinfo(text: string): string {
   // only a userinfo at the start of `text` belongs to that URL, a later one is part of its path or query
-  const [match] = text.matchAll(urlUserinfoRegex);
+  const match = [...text.matchAll(urlUserinfoRegex)].at(0);
   if (match?.index !== 0) {
     return text;
   }
@@ -410,8 +410,8 @@ function withoutUserinfo(url: string, parsed: URL): string {
   const reparsed = parseUrl(stripped);
   if (
     reparsed?.host !== parsed.host ||
-    reparsed?.username ||
-    reparsed?.password
+    reparsed.username ||
+    reparsed.password
   ) {
     return stripUrlCredentials(parsed);
   }

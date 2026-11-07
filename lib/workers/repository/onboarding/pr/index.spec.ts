@@ -120,6 +120,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         branches = [
           partial<BranchConfig>({
             prTitle: 'Update dependency foo to v2',
+            schedule: [],
             branchName: 'renovate/foo-2.x',
             baseBranch: 'base',
             manager: 'npm',

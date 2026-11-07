@@ -7,7 +7,7 @@ import type { PackageDependency } from '../types.ts';
 
 const Requirement = z.string().transform((requirement): PackageDependency => {
   const pipResult = extractPipRequirements(requirement);
-  const dep = pipResult?.deps?.[0];
+  const dep = pipResult?.deps[0];
   if (dep) {
     if (!dep.currentValue && !dep.skipReason) {
       dep.skipReason = 'unspecified-version';

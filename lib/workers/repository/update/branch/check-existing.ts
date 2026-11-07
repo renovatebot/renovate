@@ -96,7 +96,7 @@ export async function rebaseCheck(
   config: Pick<BranchConfig, 'rebaseLabel'>,
   branchPr: Pr,
 ): Promise<boolean> {
-  const titleRebase = branchPr.title?.startsWith('rebase!');
+  const titleRebase = branchPr.title.startsWith('rebase!');
   if (titleRebase) {
     logger.debug(
       `Manual rebase requested via PR title for #${branchPr.number}`,

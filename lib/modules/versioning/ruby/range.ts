@@ -1,7 +1,6 @@
 import { satisfies } from '@renovatebot/ruby-semver';
 import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement.js';
-import type { Version } from '@renovatebot/ruby-semver/dist/ruby/version.js';
-import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import { Version } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator.ts';
@@ -82,7 +81,7 @@ export function stringifyRanges(ranges: Range[]): string {
 type GemRequirement = [string, Version];
 
 function ltr(version: string, range: string): boolean {
-  const gemVersion = create(version);
+  const gemVersion = Version.create(version);
   if (!gemVersion) {
     logger.warn({ version }, `Invalid ruby version`);
     return false;

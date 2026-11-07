@@ -24,7 +24,7 @@ const WRAPPER_VERSION_MVNW_REGEX = regEx(
 );
 
 function extractVersions(fileContent: string): MavenVersionExtract {
-  const lines = coerceArray(fileContent?.split(newlineRegex));
+  const lines = coerceArray(fileContent.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
   const wrapper =
     extractLineInfo(
@@ -62,8 +62,8 @@ export function extractPackageFile(
     const maven: PackageDependency = {
       depName: 'maven',
       packageName: 'org.apache.maven:apache-maven',
-      currentValue: extractResult.maven?.version,
-      replaceString: extractResult.maven?.replaceString,
+      currentValue: extractResult.maven.version,
+      replaceString: extractResult.maven.replaceString,
       datasource: MavenDatasource.id,
     };
     deps.push(maven);
@@ -73,8 +73,8 @@ export function extractPackageFile(
     const wrapper: PackageDependency = {
       depName: 'maven-wrapper',
       packageName: 'org.apache.maven.wrapper:maven-wrapper',
-      currentValue: extractResult.wrapper?.version,
-      replaceString: extractResult.wrapper?.replaceString,
+      currentValue: extractResult.wrapper.version,
+      replaceString: extractResult.wrapper.replaceString,
       datasource: MavenDatasource.id,
     };
     deps.push(wrapper);

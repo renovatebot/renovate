@@ -693,7 +693,7 @@ describe('modules/manager/deno/post', () => {
 
       normalizeWorkspace(packageFiles);
       // Verify that workspace is removed from nested package
-      expect(packageFiles[1].managerData?.workspaces).toBeUndefined();
+      expect(packageFiles[1].managerData.workspaces).toBeUndefined();
     });
 
     it('invalidPackageFiles entry not found in packageMap', () => {

@@ -78,7 +78,7 @@ export function extractPackageFile(
 
       // validated above
       const [, depName, , currVal] = packageMatches!;
-      const currentValue = currVal?.trim();
+      const currentValue = (currVal as string | undefined)?.trim();
       dep = {
         ...dep,
         depName,

@@ -230,7 +230,7 @@ describe('logger/index', () => {
       'handles log file stream $logFileLevel level',
       ({ logFileLevel, expectedLogLevel }) => {
         if (logFileLevel !== null) {
-          vi.stubEnv('LOG_FILE_LEVEL', logFileLevel?.toString());
+          vi.stubEnv('LOG_FILE_LEVEL', logFileLevel.toString());
         }
 
         const streams = createDefaultStreams(

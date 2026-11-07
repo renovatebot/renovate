@@ -82,7 +82,7 @@ export class GithubIssueCache {
   }
 
   private static reconcile(cacheData: CacheData): CacheData | null {
-    const issuesToReconcile = memCache.get<GithubIssue[]>(
+    const issuesToReconcile = memCache.get<GithubIssue[] | undefined>(
       'github-issues-reconcile-queue',
     );
     if (!issuesToReconcile) {
@@ -90,9 +90,10 @@ export class GithubIssueCache {
     }
 
     let isReconciled = false;
+    const cachedIssues: Partial<CacheData> = cacheData;
 
     for (const issue of issuesToReconcile) {
-      const cachedIssue = cacheData[issue.number];
+      const cachedIssue = cachedIssues[issue.number];
 
       // If we reached the item which is already in the cache,
       // it means sync is done.

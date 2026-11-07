@@ -19,6 +19,7 @@ import {
 } from './common.ts';
 import type {
   BazelManagerData,
+  Fragment,
   RecordFragment,
   StringFragment,
 } from './types.ts';
@@ -28,12 +29,12 @@ const http = new Http('bazel');
 function getUrlFragments(rule: RecordFragment): StringFragment[] {
   const urls: StringFragment[] = [];
 
-  const urlRecord = rule.children.url;
+  const urlRecord = rule.children.url as Fragment | undefined;
   if (urlRecord?.type === 'string') {
     urls.push(urlRecord);
   }
 
-  const urlsRecord = rule.children.urls;
+  const urlsRecord = rule.children.urls as Fragment | undefined;
   if (urlsRecord?.type === 'array') {
     for (const urlRecord of urlsRecord.children) {
       // v8 ignore else -- type narrowing only
@@ -160,7 +161,7 @@ export async function updateArtifacts(
       }
 
       const urlFragments = getUrlFragments(rule);
-      if (!urlFragments?.length) {
+      if (!urlFragments.length) {
         logger.debug(`def: ${rule.value}, urls is empty`);
         continue;
       }

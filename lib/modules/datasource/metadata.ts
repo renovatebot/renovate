@@ -78,7 +78,7 @@ function massageGitPrefixes(url: string): string {
 }
 
 function massageTimestamps(dep: ReleaseResult): void {
-  for (const release of dep.releases || []) {
+  for (const release of dep.releases) {
     let { releaseTimestamp } = release;
     delete release.releaseTimestamp;
     releaseTimestamp = asTimestamp(releaseTimestamp);

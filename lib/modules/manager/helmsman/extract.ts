@@ -9,7 +9,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import type { HelmsmanDocument } from './types.ts';
+import type { HelmsmanApp, HelmsmanDocument } from './types.ts';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
@@ -22,7 +22,7 @@ function createDep(
     depName: key,
     datasource: HelmDatasource.id,
   };
-  const anApp = doc.apps[key];
+  const anApp = doc.apps[key] as HelmsmanApp | undefined;
   if (!anApp) {
     return null;
   }
@@ -70,14 +70,16 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml<HelmsmanDocument>(content);
+    const doc = parseSingleYaml<Partial<HelmsmanDocument>>(content);
     if (!doc.apps) {
       logger.debug({ packageFile }, `Missing apps keys`);
       return null;
     }
 
     const deps = Object.keys(doc.apps)
-      .map((key) => createDep(key, doc, config.registryAliases))
+      .map((key) =>
+        createDep(key, doc as HelmsmanDocument, config.registryAliases),
+      )
       .filter(isTruthy); // filter null values
 
     if (deps.length === 0) {

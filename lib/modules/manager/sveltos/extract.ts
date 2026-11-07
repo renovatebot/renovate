@@ -75,8 +75,8 @@ function processAppSpec(
 
   const helmCharts =
     definition.kind === 'ClusterPromotion'
-      ? definition.spec?.profileSpec?.helmCharts
-      : definition.spec?.helmCharts;
+      ? definition.spec.profileSpec?.helmCharts
+      : definition.spec.helmCharts;
 
   for (const source of coerceArray(helmCharts)) {
     const dep = processHelmCharts(source, config.registryAliases);

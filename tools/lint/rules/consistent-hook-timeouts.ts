@@ -25,7 +25,7 @@ export default defineRule({
         if (callee.type !== 'Identifier' || !hookNames.has(callee.name)) {
           return;
         }
-        const timeoutArg = node.arguments[1];
+        const timeoutArg = node.arguments.at(1);
         hooks.push({
           node,
           name: callee.name,

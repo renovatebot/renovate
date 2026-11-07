@@ -1,7 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { coerceObject } from '../../../../util/object.ts';
 import * as p from '../../../../util/promises.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
@@ -37,7 +36,7 @@ async function updateAllLocks(
         packageName: lock.packageName,
         registryUrls: [lock.registryUrl],
       };
-      const { releases } = coerceObject(await getPkgReleases(updateConfig));
+      const releases = (await getPkgReleases(updateConfig))?.releases;
       if (!releases) {
         return null;
       }
@@ -224,7 +223,7 @@ export async function updateArtifacts({
     // if no updates have been found or there are failed hashes abort
     if (
       updates.length === 0 ||
-      updates.some((value) => !value.newHashes?.length)
+      updates.some((value) => !value.newHashes.length)
     ) {
       logger.debug('No updates found or hash creation failed');
       return null;

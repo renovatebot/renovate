@@ -36,9 +36,9 @@ export class Unity3dPackagesDatasource extends Datasource {
 
     const result: ReleaseResult = {
       releases: [],
-      homepage: versions?.[0]?.documentationUrl,
+      homepage: versions.at(0)?.documentationUrl,
       registryUrl,
-      sourceUrl: versions?.[0]?.repository?.url,
+      sourceUrl: versions.at(0)?.repository?.url,
     };
 
     for (const release of versions) {

@@ -57,15 +57,15 @@ export async function initPlatform<T extends AllConfig>(config: T): Promise<T> {
     ...config,
     ...platformInfo,
     hostRules: [
-      ...coerceArray(platformInfo?.hostRules),
+      ...coerceArray(platformInfo.hostRules),
       ...coerceArray(config.hostRules),
     ],
   };
   // v8 ignore else -- TODO: add test #40625
-  if (config?.gitAuthor) {
+  if (config.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;
-  } else if (platformInfo?.gitAuthor) {
+  } else if (platformInfo.gitAuthor) {
     logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     returnConfig.gitAuthor = platformInfo.gitAuthor;
   }

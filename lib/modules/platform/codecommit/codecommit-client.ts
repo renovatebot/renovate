@@ -57,13 +57,9 @@ import { regEx } from '../../../util/regex.ts';
 let codeCommitClient: CodeCommitClient;
 
 export function buildCodeCommitClient(): void {
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- unset until the first call
   if (!codeCommitClient) {
     codeCommitClient = new CodeCommitClient({});
-  }
-
-  /* v8 ignore next -- unreachable: the client was just constructed above */
-  if (!codeCommitClient) {
-    throw new Error('Failed to initialize codecommit client');
   }
 }
 

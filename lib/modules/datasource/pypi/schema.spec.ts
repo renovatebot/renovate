@@ -29,9 +29,9 @@ describe('modules/datasource/pypi/schema', () => {
         },
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.name).toBe('requests');
-      expect(result?.releases?.['2.28.0']?.[0].requires_python).toBe('>=3.7');
-      expect(result?.releases?.['2.27.0']?.[0].requires_python).toBeUndefined();
+      expect(result.info?.name).toBe('requests');
+      expect(result.releases?.['2.28.0']?.[0].requires_python).toBe('>=3.7');
+      expect(result.releases?.['2.27.0']?.[0].requires_python).toBeUndefined();
     });
 
     it('normalizes null home_page to undefined', () => {
@@ -40,7 +40,7 @@ describe('modules/datasource/pypi/schema', () => {
         releases: {},
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.home_page).toBeUndefined();
+      expect(result.info?.home_page).toBeUndefined();
     });
 
     it('parses a PyPI JSON response with a null home_page', () => {
@@ -55,8 +55,8 @@ describe('modules/datasource/pypi/schema', () => {
         releases: {},
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.home_page).toBeUndefined();
-      expect(result?.info?.project_urls?.Repository).toBe(
+      expect(result.info?.home_page).toBeUndefined();
+      expect(result.info?.project_urls?.Repository).toBe(
         input.info.project_urls.Repository,
       );
     });
@@ -69,8 +69,8 @@ describe('modules/datasource/pypi/schema', () => {
         releases: {},
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.home_page).toBeUndefined();
-      expect(result?.info?.name).toBe(input.info.name);
+      expect(result.info?.home_page).toBeUndefined();
+      expect(result.info?.name).toBe(input.info.name);
     });
 
     it('throws for genuinely invalid input (no error swallowing)', () => {
@@ -90,7 +90,7 @@ describe('modules/datasource/pypi/schema', () => {
         releases: {},
       };
       const result = PypiResponse.parse(input);
-      expect(result?.info?.name).toBe('mypackage');
+      expect(result.info?.name).toBe('mypackage');
     });
   });
 

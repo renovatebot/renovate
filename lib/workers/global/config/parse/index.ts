@@ -130,7 +130,7 @@ export async function parseConfigs(
 
   let resolvedGlobalExtends: AllConfig | undefined;
 
-  if (isNonEmptyArray(config?.globalExtends)) {
+  if (isNonEmptyArray(config.globalExtends)) {
     // resolve global presets immediately
     resolvedGlobalExtends = await resolveGlobalExtendsAsAdmin(
       config.globalExtends,

@@ -88,6 +88,7 @@ function isSingleVersion(constraint: string): boolean {
     return true;
   }
   return (
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- the lookup passes an undefined value for a dependency without a currentValue
     constraint?.startsWith('=') && isVersion(constraint.substring(1).trim())
   );
 }

@@ -147,7 +147,7 @@ export async function extractPackageFile(
   }
   const res: PackageFileContent = { deps: [] };
 
-  const sources = pipfile?.source;
+  const sources = pipfile.source;
 
   if (sources) {
     res.registryUrls = sources.map((source) => source.url);

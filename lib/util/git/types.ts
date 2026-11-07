@@ -48,7 +48,7 @@ export interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, LongCommitSha>;
   /** Single registry of virtual branches, always initialized in initRepo. Keyed by branch name. */
   virtualBranches: Record<string, VirtualBranch>;
-  branchIsModified: Record<string, boolean>;
+  branchIsModified: Partial<Record<string, boolean>>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;

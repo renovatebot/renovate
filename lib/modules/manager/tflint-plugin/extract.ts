@@ -6,7 +6,6 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractTFLintPlugin } from './plugins.ts';
-import type { ExtractionResult } from './types.ts';
 import { checkFileContainsPlugins } from './util.ts';
 
 const dependencyBlockExtractionRegex = regEx(
@@ -37,18 +36,13 @@ export function extractPackageFile(
       const tfLintPlugin = dependencyBlockExtractionRegex.exec(line);
       if (tfLintPlugin?.groups) {
         logger.trace(`Matched TFLint plugin on line ${lineNumber}`);
-        let result: ExtractionResult | null = null;
-        result = extractTFLintPlugin(
+        const result = extractTFLintPlugin(
           lineNumber,
           lines,
           tfLintPlugin.groups.pluginName,
         );
-        // v8 ignore else -- `extractTFLintPlugin()` always returns a result
-        if (result) {
-          lineNumber = result.lineNumber;
-          deps = deps.concat(result.dependencies);
-          result = null;
-        }
+        lineNumber = result.lineNumber;
+        deps = deps.concat(result.dependencies);
       }
     }
   } catch (err) /* istanbul ignore next */ {

@@ -17,8 +17,7 @@ function get(
   packageName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource, packageName };
-  return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
+  return getPkgReleases({ versioning, datasource, packageName, registryUrls });
 }
 
 const meta = Readable.from(Fixtures.getBinary('metadata-s3.xml'));

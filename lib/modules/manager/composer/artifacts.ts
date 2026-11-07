@@ -87,7 +87,7 @@ function getAuthJson(): string | null {
     }
 
     // v8 ignore else -- a rule without a token does not pass the check above
-    if (gitlabHostRule?.token) {
+    if (gitlabHostRule.token) {
       const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = coerceObject(authJson['gitlab-token']);
       authJson['gitlab-token'][host] = gitlabHostRule.token;

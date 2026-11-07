@@ -24,7 +24,7 @@ function parseLetterTag(letter?: string, number?: string): LetterTag | null {
       number: number ?? '0',
     };
   }
-  if (letter === undefined && number !== undefined) {
+  if (number !== undefined) {
     return { letter: 'post', number };
   }
   return null;

@@ -105,7 +105,8 @@ function extractFileCoverage(
       continue;
     }
 
-    const stmt = statementMap[stmtId];
+    const stmt = statementMap[stmtId] as
+      (typeof statementMap)[string] | undefined;
     if (!stmt) {
       continue;
     }

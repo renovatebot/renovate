@@ -1,5 +1,5 @@
 export interface PreCommitConfig {
-  repos: PreCommitDependency[];
+  repos?: PreCommitDependency[];
 }
 
 export interface PreCommitHook {

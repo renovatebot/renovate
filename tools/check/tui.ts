@@ -24,7 +24,7 @@ const ICONS = {
   SPINNER: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'] as const,
 } as const;
 
-export const isTTY = process.stdout.isTTY ?? false;
+export const isTTY = Boolean(process.stdout.isTTY);
 
 export function formatCompletedLine(
   name: string,

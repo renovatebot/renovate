@@ -4,7 +4,7 @@ import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PrMergeMethod, Repo } from './schema.ts';
+import type { Links, PrMergeMethod, Repo } from './schema.ts';
 import type { PrFilterByState } from './types.ts';
 
 export function mapPrState(
@@ -42,7 +42,8 @@ export function getRepoUrl(
   gitUrl: GitUrlOption | undefined,
   endpoint: string,
 ): string {
-  const protocolLinks = repo._links.protocol;
+  const links: Partial<Links> = repo._links;
+  const protocolLinks = links.protocol;
 
   if (!protocolLinks) {
     throw new Error('Missing protocol links.');

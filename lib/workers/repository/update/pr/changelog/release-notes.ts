@@ -73,7 +73,9 @@ export function getCachedReleaseList(
 ): Promise<ChangeLogNotes[]> {
   const { repository, apiBaseUrl } = project;
   const cacheKey = buildCacheKey('getReleaseList', apiBaseUrl, repository);
-  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogNotes[]> | undefined>(
+    cacheKey,
+  );
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
@@ -343,7 +345,9 @@ export function getReleaseNotesMdFile(
     sourceDirectory,
     apiBaseUrl,
   );
-  const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogFile | null> | undefined>(
+    cacheKey,
+  );
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
@@ -582,7 +586,7 @@ async function linkifyBody(
   bodyStr: string,
 ): Promise<string> {
   const body = massageBody(bodyStr, baseUrl);
-  if (body?.length) {
+  if (body.length) {
     try {
       return await linkify(body, {
         repository: `${baseUrl}${repository}`,

@@ -53,7 +53,8 @@ export default defineRule({
           return;
         }
 
-        const [first, second] = node.arguments;
+        const first = node.arguments.at(0);
+        const second = node.arguments.at(1);
         if (!first) {
           return;
         }

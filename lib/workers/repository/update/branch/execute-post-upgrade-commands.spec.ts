@@ -71,6 +71,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -121,6 +122,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -176,6 +178,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -233,6 +236,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -291,6 +295,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -347,6 +352,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -404,6 +410,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -456,6 +463,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: ['not-a-txt-file'],
           not_added: [],
           deleted: [],
@@ -511,6 +519,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: ['.npmrc', 'other-file.txt'],
           deleted: [],
@@ -570,6 +579,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       }: RepositoryChanges): void {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             not_added: created,
             modified,
             deleted: [],
@@ -797,6 +807,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -954,6 +965,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           not_added: ['dependencies/charts/ingress-nginx-4.12.2.tgz'],
           conflicted: [],
           created: [],
@@ -1035,6 +1047,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -1087,6 +1100,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -1135,6 +1149,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
+          renamed: [],
           modified: [],
           not_added: [],
           deleted: [],
@@ -1250,6 +1265,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         });
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             modified: [],
             not_added: [],
             deleted: [],
@@ -1301,7 +1317,12 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         });
         exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
         git.getRepoStatus.mockResolvedValueOnce(
-          partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
+          partial<StatusResult>({
+            renamed: [],
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
         );
         GlobalConfig.set({
           localDir: upath.join(tmpDir.path, 'local'),
@@ -1365,6 +1386,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         });
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             modified: [],
             not_added: [],
             deleted: [],
@@ -1439,6 +1461,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         });
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
+            renamed: [],
             modified: [],
             not_added: [],
             deleted: [],

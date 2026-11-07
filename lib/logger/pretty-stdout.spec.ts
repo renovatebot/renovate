@@ -6,10 +6,6 @@ import type { BunyanRecord } from './types.ts';
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
-    it('returns empty string if null rec', () => {
-      expect(prettyStdout.getMeta(null as any)).toBeEmptyString();
-    });
-
     it('returns empty string if empty rec', () => {
       expect(prettyStdout.getMeta(partial<BunyanRecord>())).toBeEmptyString();
     });
@@ -68,10 +64,6 @@ describe('logger/pretty-stdout', () => {
   });
 
   describe('getDetails(rec)', () => {
-    it('returns empty string if null rec', () => {
-      expect(prettyStdout.getDetails(null as any)).toBeEmptyString();
-    });
-
     it('returns empty string if empty rec', () => {
       expect(
         prettyStdout.getDetails(partial<BunyanRecord>()),

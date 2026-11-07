@@ -7,6 +7,8 @@ import type {
 } from '../../../config/types.ts';
 import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import { collectSharedConstraints } from '../extract/shared-constraints.ts';
 import { flattenUpdates } from './flatten.ts';
@@ -45,9 +47,8 @@ export async function branchifyUpgrades(
   const branches: BranchConfig[] = [];
   for (const u of updates) {
     const update: BranchUpgradeConfig = { ...u };
-    branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
-      branchUpgrades[update.branchName],
+      coerceArray(branchUpgrades[update.branchName]),
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
@@ -112,7 +113,7 @@ export async function branchifyUpgrades(
       const { sourceUrl, branchName, depName, newVersion } = branch;
       if (sourceUrl && newVersion) {
         const key = `${sourceUrl}|${newVersion}`;
-        branchUpdates[key] = branchUpdates[key] || {};
+        branchUpdates[key] = coerceObject(branchUpdates[key]);
         if (!branchUpdates[key][branchName]) {
           branchUpdates[key][branchName] = depName!;
         }

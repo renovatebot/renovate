@@ -447,7 +447,7 @@ export async function buildSchema({
       return true;
     }
 
-    if (o.globalOnly && o.inheritConfigSupport) {
+    if (o.inheritConfigSupport) {
       const allowed = isInherit || isGlobal;
       if (!allowed) {
         schema.not ??= {

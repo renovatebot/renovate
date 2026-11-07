@@ -1,8 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { extractConfig } from '~test/manager-config.ts';
-import { extractDefinition } from './extract.ts';
 import { extractPackageFile } from './index.ts';
-import type { ProfileDefinition } from './schema.ts';
 
 const malformedProfiles = codeBlock`
 ---
@@ -58,15 +56,6 @@ spec:
 `;
 describe('modules/manager/sveltos/extract', () => {
   describe('extractDefinition()', () => {
-    it('returns an empty array when parsing fails', () => {
-      const invalidDefinition = {};
-      const result = extractDefinition(
-        invalidDefinition as ProfileDefinition,
-        extractConfig(),
-      );
-      expect(result).toEqual([]);
-    });
-
     it('returns null if extractDefinition returns an empty array', () => {
       const validYAML = codeBlock`
         apiVersion: "config.projectsveltos.io/v1beta1"

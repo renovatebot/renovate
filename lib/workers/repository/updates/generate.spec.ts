@@ -2155,21 +2155,17 @@ describe('workers/repository/updates/generate', () => {
         },
       ]);
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage?.trim()).toBe(codeBlock`
+      expect(res.commitMessage.trim()).toBe(codeBlock`
         | datasource | package     | from  | to    |
         | ---------- | ----------- | ----- | ----- |
         | npm        | another-dep | 5.1.1 | 5.1.2 |
         | npm        | some-dep    | 5.1.0 | 5.1.2 |
         | docker     | some-dep    | 5.1.0 | 5.1.2 |
       `);
-      expect([
-        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
-        ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
-      ]).toBeArrayOfSize(1);
-      expect([
-        // oxlint-disable-next-line renovate/prefer-coerce-array -- matchAll() yields an iterator, which coerceArray() does not accept
-        ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
-      ]).toBeArrayOfSize(2);
+      expect([...res.commitMessage.matchAll(/another-dep/g)]).toBeArrayOfSize(
+        1,
+      );
+      expect([...res.commitMessage.matchAll(/some-dep/g)]).toBeArrayOfSize(2);
     });
 
     it('using commitMessagePrefix without separator', () => {
