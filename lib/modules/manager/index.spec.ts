@@ -1,6 +1,6 @@
 import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
-import { updateArtifactsConfig } from '~test/manager-config.ts';
+import { extractConfig, updateArtifactsConfig } from '~test/manager-config.ts';
 import { partial } from '~test/util.ts';
 import { getToolConfig } from '../../util/exec/containerbase.ts';
 import type { ToolName } from '../../util/exec/types.ts';
@@ -234,10 +234,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       await expect(
-        manager.extractAllPackageFiles('unknown', {}, []),
+        manager.extractAllPackageFiles('unknown', extractConfig(), []),
       ).resolves.toBeNull();
       await expect(
-        manager.extractAllPackageFiles('dummy', {}, []),
+        manager.extractAllPackageFiles('dummy', extractConfig(), []),
       ).resolves.toBeNull();
     });
 
@@ -248,7 +248,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       await expect(
-        manager.extractAllPackageFiles('dummy', {}, []),
+        manager.extractAllPackageFiles('dummy', extractConfig(), []),
       ).resolves.not.toBeNull();
     });
 
@@ -264,10 +264,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.extractPackageFile('unknown', '', 'filename', {}),
+        manager.extractPackageFile('unknown', '', 'filename', extractConfig()),
       ).toBeNull();
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).toBeNull();
     });
 
@@ -278,7 +278,7 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).not.toBeNull();
     });
 
@@ -290,7 +290,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {}),
+        manager.extractPackageFile('dummy', '', 'filename', extractConfig()),
       ).not.toBeNull();
     });
 

@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { extractConfig } from '~test/manager-config.ts';
 import { extractPackageFile } from '../../../modules/manager/index.ts';
 import { matchRegexOrGlobList } from '../../../util/string-match.ts';
 import { presets } from './custom-managers.preset.ts';
@@ -43,7 +44,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'azure-pipelines.yaml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -155,7 +156,7 @@ describe('config/presets/internal/custom-managers', () => {
         'jsonata',
         fileContent,
         'biome.json',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -221,7 +222,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'bitbucket-pipelines.yml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -341,7 +342,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'Dockerfile',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -457,7 +458,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'github-workflow.yaml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -570,7 +571,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'gitlab-ci.yml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -649,7 +650,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'Chart.yaml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -714,7 +715,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'gitlab-ci.yml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -789,7 +790,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         '.vale.ini',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -852,7 +853,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'pom.xml',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -897,7 +898,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'terraform.tfvars',
-        customManager!,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -931,7 +932,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([
@@ -955,7 +956,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        presets.tsconfigNodeVersions.customManagers![1],
+        extractConfig(presets.tsconfigNodeVersions.customManagers![1]),
       );
 
       expect(res?.deps).toMatchObject([
@@ -982,7 +983,7 @@ describe('config/presets/internal/custom-managers', () => {
         'regex',
         fileContent,
         'tsconfig.json',
-        customManager,
+        extractConfig(customManager),
       );
 
       expect(res?.deps).toMatchObject([

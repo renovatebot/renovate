@@ -3,7 +3,7 @@ import managers from './api.ts';
 import customManagers from './custom/api.ts';
 import { customManagerList, isCustomManager } from './custom/index.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
   PackageFile,
@@ -47,7 +47,7 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
 
 export async function extractAllPackageFiles(
   manager: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
   files: string[],
 ): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
@@ -69,7 +69,7 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): MaybePromise<PackageFileContent | null> {
   const m = managers.get(manager)! ?? customManagers.get(manager)!;
   if (!m) {

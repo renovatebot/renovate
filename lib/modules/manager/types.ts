@@ -50,6 +50,13 @@ export interface ExtractConfig extends CustomExtractConfig {
 }
 
 /**
+ * The {@link ExtractConfig} which Renovate extracts the package files with, which has the `registryAliases` of the repository config.
+ */
+export interface DefaultedExtractConfig extends ExtractConfig {
+  registryAliases: Record<string, string>;
+}
+
+/**
  * The part of a manager config that `resolveToolConstraint()` reads. Managers
  * must not read these properties directly (enforced by the
  * `renovate/prefer-resolve-tool-constraint` lint rule), so that user config, a
@@ -539,14 +546,14 @@ export interface ManagerApiBase extends ModuleApi {
   detectGlobalConfig?(): MaybePromise<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
-    config: ExtractConfig,
+    config: DefaultedExtractConfig,
     files: string[],
   ): MaybePromise<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
-    packageFile?: string,
-    config?: ExtractConfig,
+    packageFile: string,
+    config: DefaultedExtractConfig,
   ): MaybePromise<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
@@ -593,25 +600,25 @@ export type ManagerApi = ManagerApiBase &
     | {
         supportsNpmrc: true;
         extractAllPackageFiles?(
-          config: ExtractConfig,
+          config: DefaultedExtractConfig,
           files: string[],
         ): MaybePromise<NpmrcPackageFile[] | null>;
         extractPackageFile?(
           content: string,
-          packageFile?: string,
-          config?: ExtractConfig,
+          packageFile: string,
+          config: DefaultedExtractConfig,
         ): MaybePromise<NpmrcPackageFileContent | null>;
       }
     | {
         supportsNpmrc?: false;
         extractAllPackageFiles?(
-          config: ExtractConfig,
+          config: DefaultedExtractConfig,
           files: string[],
         ): MaybePromise<(PackageFile & { npmrc?: never })[] | null>;
         extractPackageFile?(
           content: string,
-          packageFile?: string,
-          config?: ExtractConfig,
+          packageFile: string,
+          config: DefaultedExtractConfig,
         ): MaybePromise<(PackageFileContent & { npmrc?: never }) | null>;
       }
   );
