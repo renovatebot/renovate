@@ -114,6 +114,118 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
+  it('updates transitive dependencies by name, after declared ones', async () => {
+    const execSnapshots = mockExecAll();
+    const lockFile = JSON.stringify({
+      lockfileVersion: 3,
+      packages: {
+        '': { dependencies: { 'some-dep': '^1.0.0' } },
+        'node_modules/some-dep': { version: '1.0.1' },
+        'node_modules/braces': { version: '3.0.3' },
+        'node_modules/semver': { version: '6.3.2' },
+        'node_modules/node-abi/node_modules/semver': { version: '7.8.6' },
+      },
+    });
+    fs.readLocalFile.mockResolvedValueOnce(lockFile);
+    const transitive = {
+      depType: 'package-lock.json',
+      isLockfileUpdate: true,
+    };
+    const updates = [
+      {
+        ...transitive,
+        depName: 'semver',
+        packageName: 'semver',
+        currentVersion: '6.3.0',
+        newVersion: '6.3.1',
+      },
+      {
+        ...transitive,
+        depName: 'semver',
+        packageName: 'semver',
+        currentVersion: '7.5.1',
+        newVersion: '7.5.2',
+      },
+      {
+        ...transitive,
+        depName: 'braces',
+        packageName: 'braces',
+        currentVersion: '3.0.2',
+        newVersion: '3.0.3',
+      },
+      {
+        packageName: 'some-dep',
+        depType: 'dependencies',
+        newVersion: '1.0.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+      },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls: true, constraints: { npm: '^10.0.0' } },
+      updates,
+    );
+    expect(res.error).toBeFalse();
+    expect(JSON.parse(res.lockFile!)).toEqual(JSON.parse(lockFile));
+    expect(res.notice).toBe(
+      [
+        'Transitive dependencies are updated with `npm update`, within the ranges the packages which depend on them allow:',
+        '',
+        '- `semver` is now locked at `6.3.2` and `7.8.6`, the newest versions the packages which depend on it allow.',
+      ].join('\n'),
+    );
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1',
+      },
+      {
+        cmd: 'npm update --package-lock-only --no-audit --ignore-scripts semver braces',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
+  });
+
+  it('updates a transitive dependency under the name it is installed as', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(
+      JSON.stringify({
+        lockfileVersion: 3,
+        packages: {
+          'node_modules/string-width-cjs': {
+            name: 'string-width',
+            version: '4.2.3',
+          },
+        },
+      }),
+    );
+    const updates = [
+      {
+        depName: 'string-width-cjs',
+        packageName: 'string-width',
+        depType: 'package-lock.json',
+        currentVersion: '4.2.0',
+        newVersion: '4.2.3',
+        isLockfileUpdate: true,
+      },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls: true, constraints: { npm: '^10.0.0' } },
+      updates,
+    );
+    expect(res.notice).toBeUndefined();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm update --package-lock-only --no-audit --ignore-scripts string-width-cjs',
+      },
+    ]);
+  });
+
   it('performs lock file updates retaining the package.json counterparts', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(

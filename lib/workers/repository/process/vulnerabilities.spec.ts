@@ -1572,6 +1572,81 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('matches a dependency with only a locked version to its own fix', async () => {
+      const semver = {
+        depName: 'semver',
+        packageName: 'semver',
+        depType: 'package-lock.json',
+        datasource: 'npm',
+        skipReason: 'lockfile-only' as const,
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { ...semver, lockedVersion: '5.7.1' },
+              { ...semver, lockedVersion: '7.5.1' },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValue([
+        {
+          id: 'GHSA-c2qf-rxjj-qqgw',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '5.7.2' }],
+                },
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '7.0.0' }, { fixed: '7.5.2' }],
+                },
+              ],
+              package: { name: 'semver', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toMatchObject([
+        {
+          matchPackageNames: ['semver'],
+          matchCurrentVersion: '/^\\x35\\.7\\.1$/',
+          allowedVersions: '>= 5.7.2',
+        },
+        {
+          matchPackageNames: ['semver'],
+          matchCurrentVersion: '/^\\x37\\.5\\.1$/',
+          allowedVersions: '>= 7.5.2',
+        },
+      ]);
+
+      // each locked version takes only the fix for its own version
+      for (const [lockedVersion, allowedVersions] of [
+        ['5.7.1', '>= 5.7.2'],
+        ['7.5.1', '>= 7.5.2'],
+      ]) {
+        const dep: PackageRuleInputConfig & { allowedVersions?: string } =
+          await applyPackageRules({
+            packageRules: config.packageRules,
+            ...semver,
+            lockedVersion,
+            versioning: 'npm',
+          });
+        expect(dep.allowedVersions).toBe(allowedVersions);
+      }
+    });
+
     it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         gomod: [
