@@ -46,9 +46,11 @@ async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
   updatedDeps: Upgrade[],
+  config?: UpdateArtifactsConfig,
 ): Promise<string> {
   const registries =
-    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName, config)) ??
+    getDefaultRegistries();
 
   const updatedDepsRegistries: Registry[] = Array.from(
     new Set(
@@ -82,6 +84,7 @@ async function runDotnetRestore(
     nugetCacheDir,
     packageFileName,
     updatedDeps,
+    config,
   );
 
   const dotnetVersion = await resolveToolConstraint(

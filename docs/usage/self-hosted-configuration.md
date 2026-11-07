@@ -546,8 +546,10 @@ The purpose of this config option is to allow you (as an administrator) to confi
 
 This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
 
-Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
-If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
+Currently this config option is supported for:
+
+- `npm` manager - specifically the `~/.npmrc` file. If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
+- `nuget` manager - `nuget.config` / `NuGet.Config` file in the user's home directory or NuGet user profile directory. If found, it will be imported into `config.nugetConfig` with `config.nugetConfigMerge` set to `true`.
 
 ## `detectHostRulesFromEnv`
 

@@ -36,3 +36,7 @@ export interface PackageSourceMap {
 export interface NugetPackageDependency extends PackageDependency {
   depName: string;
 }
+
+export interface ApplyNuGetConfigOptions {
+  isFromRepo?: boolean;
+}

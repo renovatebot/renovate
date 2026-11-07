@@ -66,6 +66,7 @@ export interface GetPkgReleasesConfig
   extends GetReleasesConfig, RegistryUrlsConfig {
   datasource: string;
   npmrc?: string;
+  nugetConfig?: string;
   versioning?: string;
   extractVersion?: string;
   versionCompatibility?: string;
