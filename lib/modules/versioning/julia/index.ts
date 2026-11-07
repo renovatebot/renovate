@@ -111,8 +111,8 @@ function componentCount(value: string): number {
   return lastSpecifier(value).split('.').length;
 }
 
-// dependabot's `simplified_version_spec`: `major.minor` above 1.0, `0.minor`
-// for 0.x, `0.0.patch` for 0.0.x, always written plain.
+// `major.minor` above 1.0, `0.minor` for 0.x, `0.0.patch` for 0.0.x, always
+// written plain.
 function simplifiedSpec(version: string): string {
   /* v8 ignore next -- newVersion is always a full release */
   const major = npm.getMajor(version) ?? 0;
@@ -161,16 +161,17 @@ function widen(currentValue: string, newVersion: string): string {
   // so next to `~1.2` or `=1.2.5` it would let in all of 1.x.
   const last = lastSpecifier(currentValue);
   const operator = regEx(/^(?:[~^]|=\s*)/).exec(last)?.[0] ?? '';
-  // Next to a bare major such as `5`, write `6`, not `6.0`: the entry's own
-  // style, and CompatHelper's.
+  // From 1.0 on, write the bare major, as CompatHelper's
+  // `compat_version_number` does: `6` rather than `6.2`. A `~` keeps the minor,
+  // since `~6` would let in all of 6.x, unless it is next to a bare major.
   const major = npm.getMajor(newVersion)!;
+  const keepsMinor =
+    operator === '~' &&
+    !regEx(/^\d+$/).test(last.slice(operator.length).trim());
   let newSpec: string;
   if (operator.startsWith('=')) {
     newSpec = operator + newVersion;
-  } else if (
-    major > 0 &&
-    regEx(/^\d+$/).test(last.slice(operator.length).trim())
-  ) {
+  } else if (major > 0 && !keepsMinor) {
     newSpec = `${operator}${major}`;
   } else {
     newSpec = operator + simplifiedSpec(newVersion);
