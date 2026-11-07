@@ -4,6 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
@@ -30,6 +31,36 @@ import {
   getPackageManagerVersion,
   lazyLoadPackageJson,
 } from './utils.ts';
+
+function formatLockUpdates(upgrades: Upgrade[]): string {
+  // TODO: types (#22198)
+  return upgrades
+    .map((update) => `${update.packageName!}@${update.newVersion!}`)
+    .filter(uniqueStrings)
+    .map(quote)
+    .join(' ');
+}
+
+function groupLockUpdatesByImporter(
+  lockFileDir: string,
+  upgrades: Upgrade[],
+): Map<string, Upgrade[]> | null {
+  const byImporter = new Map<string, Upgrade[]>();
+  for (const upgrade of upgrades) {
+    if (!upgrade.packageFile) {
+      return null;
+    }
+    const importer = upath.relative(
+      lockFileDir,
+      upath.dirname(upgrade.packageFile),
+    );
+    byImporter.set(importer, [
+      ...coerceArray(byImporter.get(importer)),
+      upgrade,
+    ]);
+  }
+  return byImporter;
+}
 
 function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   for (const upgrade of upgrades) {
@@ -105,6 +136,7 @@ export async function generateLockFile(
     );
 
     let args = '--lockfile-only';
+    let isWorkspace = false;
 
     // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
     // `--recursive` will install un-wanted project.
@@ -119,6 +151,7 @@ export async function generateLockFile(
         );
         // we are in a monorepo, 'pnpm update' needs the '--recursive' flag contrary to 'pnpm install'
         args += ' --recursive';
+        isWorkspace = true;
       }
     }
     if (!GlobalConfig.get('allowScripts')) {
@@ -143,14 +176,22 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (pnpm)');
-      commands.push(
-        `pnpm update --no-save ${lockUpdates
-          // TODO: types (#22198)
-          .map((update) => `${update.packageName!}@${update.newVersion!}`)
-          .filter(uniqueStrings)
-          .map(quote)
-          .join(' ')} ${args}`,
-      );
+      const byImporter = isWorkspace
+        ? groupLockUpdatesByImporter(lockFileDir, lockUpdates)
+        : null;
+      if (byImporter) {
+        const importerArgs = args.replace(' --recursive', '');
+        for (const [importer, updates] of byImporter) {
+          const dirArg = importer ? ` --dir ${quote(importer)}` : '';
+          commands.push(
+            `pnpm update --no-save ${formatLockUpdates(updates)} ${importerArgs}${dirArg}`,
+          );
+        }
+      } else {
+        commands.push(
+          `pnpm update --no-save ${formatLockUpdates(lockUpdates)} ${args}`,
+        );
+      }
     }
 
     // postUpdateOptions
