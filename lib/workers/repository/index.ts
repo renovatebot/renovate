@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
-import type { RenovateConfigFile } from '../../config/types.ts';
+import type { RenovateConfig, RenovateConfigFile } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
@@ -43,7 +43,6 @@ import { ensureDependencyDashboard } from './dependency-dashboard.ts';
 import handleError from './error.ts';
 import { finalizeRepo } from './finalize/index.ts';
 import { pruneStaleBranches } from './finalize/prune.ts';
-import type { RepoConfig } from './init/defaults.ts';
 import { initRepo } from './init/index.ts';
 import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
@@ -63,7 +62,7 @@ export async function renovateRepository(
   const { config, localDir, error } = await instrument(
     'init',
     async (): Promise<
-      | { config: RepoConfig; localDir: string; error?: undefined }
+      | { config: RenovateConfig; localDir: string; error?: undefined }
       | { config: RenovateConfigFile; localDir: string; error: Error }
     > => {
       const config = GlobalConfig.set(

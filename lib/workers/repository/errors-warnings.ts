@@ -68,7 +68,7 @@ export function getDepWarningsOnboardingPR(
   config: RenovateConfig,
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   let warningText = '';
@@ -114,7 +114,7 @@ export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>,
   config: RenovateConfig,
 ): string {
-  if (config.suppressNotifications?.includes('dependencyLookupWarnings')) {
+  if (config.suppressNotifications.includes('dependencyLookupWarnings')) {
     return '';
   }
   const { warnings, warningFiles } = getDepWarnings(packageFiles);

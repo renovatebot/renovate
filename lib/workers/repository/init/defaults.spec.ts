@@ -1,5 +1,5 @@
 import { logger } from '~test/util.ts';
-import type { RepoConfig } from './defaults.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { applyRepoConfigDefaults } from './defaults.ts';
 
 describe('workers/repository/init/defaults', () => {
@@ -42,7 +42,7 @@ describe('workers/repository/init/defaults', () => {
       expect(config).not.toHaveProperty('gitNoVerify');
       expect(config).not.toHaveProperty('repositories');
       expect(config).not.toHaveProperty('prCommitsPerRunLimit');
-      expectTypeOf<RepoConfig['prCommitsPerRunLimit']>().toEqualTypeOf<
+      expectTypeOf<RenovateConfig['prCommitsPerRunLimit']>().toEqualTypeOf<
         number | undefined
       >();
     });

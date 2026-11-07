@@ -20,7 +20,6 @@ import type { BranchConfig, SelectAllConfig } from '../types.ts';
 import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
-import type { RepoConfig } from './init/defaults.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
@@ -178,7 +177,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 }
 
 export async function readDashboardBody(
-  config: RepoConfig<SelectAllConfig>,
+  config: SelectAllConfig,
 ): Promise<void> {
   let dashboardChecks: DependencyDashboard = {
     dependencyDashboardChecks: {},
@@ -192,7 +191,7 @@ export async function readDashboardBody(
   if (config.mode === 'silent') {
     logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
   } else if (
-    config.dependencyDashboard === true ||
+    config.dependencyDashboard ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
@@ -335,7 +334,7 @@ function getBranchesListMd(
   return `${result.trimEnd()}\n\n`;
 }
 
-function appendRepoProblems(config: RepoConfig, issueBody: string): string {
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
@@ -354,7 +353,7 @@ function appendRepoProblems(config: RepoConfig, issueBody: string): string {
 }
 
 export async function ensureDependencyDashboard(
-  config: RepoConfig<SelectAllConfig>,
+  config: SelectAllConfig,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
   configMigrationRes: ConfigMigrationResult,
@@ -374,8 +373,8 @@ export async function ensureDependencyDashboard(
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (!(
-    config.dependencyDashboard === true ||
-    config.dependencyDashboardApproval === true ||
+    config.dependencyDashboard ||
+    config.dependencyDashboardApproval ||
     config.packageRules.some((rule) => rule.dependencyDashboardApproval) ||
     branches.some(needsDashboardApproval)
   )) {
@@ -779,7 +778,7 @@ function getFooter(config: RenovateConfig): string {
 }
 
 export async function getDashboardMarkdownVulnerabilities(
-  config: RepoConfig,
+  config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<string> {
   let result = '';

@@ -23,7 +23,7 @@ export async function getPrHourlyCount(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== getInheritedOrGlobal('onboardingBranch') &&
-          pr.sourceBranch.startsWith(config.branchPrefix!) &&
+          pr.sourceBranch.startsWith(config.branchPrefix) &&
           DateTime.fromISO(pr.createdAt!).toUTC() > currentHourStart,
       );
       logger.debug(

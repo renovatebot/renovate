@@ -19,6 +19,9 @@ describe('workers/repository/reconfigure/comment', () => {
         errors: [],
         warnings: [],
         description: [],
+        baseBranchPatterns: [],
+        schedule: ['at any time'],
+        suppressNotifications: [],
       });
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
@@ -159,7 +162,10 @@ describe('workers/repository/reconfigure/comment', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = partial<RenovateConfig>();
+      config = partial<RenovateConfig>({
+        schedule: ['at any time'],
+        suppressNotifications: [],
+      });
     });
 
     it('returns empty', () => {

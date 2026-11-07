@@ -101,7 +101,6 @@ export class Vulnerabilities {
       packageFiles,
     );
 
-    config.packageRules ??= [];
     for (const {
       vulnerabilities,
       versioningApi,

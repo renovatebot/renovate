@@ -124,7 +124,7 @@ async function lookup(
     delete dep.skipStage;
   }
 
-  if (depConfig.ignoreDeps!.includes(depName!)) {
+  if (depConfig.ignoreDeps.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
@@ -146,6 +146,7 @@ async function lookup(
     dep.enabled = true;
   }
 
+  // package rules can set `enabled` to `null`, which doesn't disable a dependency
   if (depConfig.enabled === false) {
     logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';

@@ -7,6 +7,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { logger, partial, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import { pkg } from '../../expose.ts';
 import type {
   PackageDependency,
@@ -24,7 +25,6 @@ import type {
 } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
-import type { RepoConfig } from './init/defaults.ts';
 import { applyRepoConfigDefaults } from './init/defaults.ts';
 import { PackageFiles } from './package-files.ts';
 
@@ -45,21 +45,21 @@ type PrUpgrade = BranchUpgradeConfig;
 const massageMdSpy = platform.massageMarkdown;
 const getIssueSpy = platform.getIssue;
 
-let config: RepoConfig<BranchConfig>;
+let config: BranchConfig & RenovateConfig;
 
 beforeEach(() => {
   GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
-  config = getConfig() as RepoConfig<BranchConfig>;
+  config = getConfig() as BranchConfig & RenovateConfig;
   config.errors = [];
   config.warnings = [];
 });
 
 function dashboardConfig(
-  config: Partial<RepoConfig<SelectAllConfig>> = {},
-): RepoConfig<SelectAllConfig> {
-  return partial<RepoConfig<SelectAllConfig>>({
+  config: Partial<SelectAllConfig> = {},
+): SelectAllConfig {
+  return partial<SelectAllConfig>({
     dependencyDashboardTitle: 'Dependency Dashboard',
     ...config,
   });
@@ -1675,7 +1675,7 @@ None detected
       const packageFilesWithDigest = Fixtures.getJson(
         './package-files-digest.json',
       );
-      let config: RepoConfig;
+      let config: RenovateConfig;
 
       beforeAll(() => {
         GlobalConfig.reset();
