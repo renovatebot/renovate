@@ -59,6 +59,7 @@ export interface LookupUpdateConfig
   replacementVersionTemplate?: string;
   extractVersion?: string;
   vulnerabilityFixVersion?: string;
+  vulnerabilityFixVersions?: string[];
   vulnerabilityFixStrategy?: string;
   abandonmentThreshold?: string;
 }
