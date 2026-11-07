@@ -134,8 +134,9 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`kustomize.updateArtifacts(${packageFileName})`);
   const project = parseKustomize(newPackageFileContent);
-  const isUpdateOptionInflateChartArchives =
-    config.postUpdateOptions?.includes('kustomizeInflateHelmCharts') === true;
+  const isUpdateOptionInflateChartArchives = config.postUpdateOptions.includes(
+    'kustomizeInflateHelmCharts',
+  );
   if (isNullOrUndefined(project)) {
     return [
       artifactError(undefined, 'Failed to parse new package file content'),
