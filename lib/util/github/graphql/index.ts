@@ -10,6 +10,8 @@ import type {
   GithubTagItem,
 } from './types.ts';
 
+export { queryTagsByName } from './tags-by-name.ts';
+
 export async function queryTags(
   config: GithubPackageConfig,
   http: GithubHttp,
