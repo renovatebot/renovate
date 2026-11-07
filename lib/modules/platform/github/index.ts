@@ -172,7 +172,7 @@ export function resetConfigs(): void {
 resetConfigs();
 
 function escapeHash(input: string): string {
-  return input?.replace(regEx(/#/g), '%23');
+  return input.replace(regEx(/#/g), '%23');
 }
 
 export function isGHApp(): boolean {
@@ -196,7 +196,7 @@ async function detectGithubHost(
 
   const gheHeaderKey = 'x-github-enterprise-version';
   const gheQueryRes = await githubApi.headJson('/', { token });
-  const gheHeaders = coerceObject(gheQueryRes?.headers);
+  const gheHeaders = coerceObject(gheQueryRes.headers);
   const gheVersionHeader = Object.entries(gheHeaders).find(
     ([k]) => k.toLowerCase() === gheHeaderKey,
   );
@@ -383,7 +383,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
 
   logger.debug({ topics: config.topics }, 'Filtering by topics');
   const topicRepositories = nonArchivedRepositories.filter((repo) =>
-    repo.topics?.some((topic) => config?.topics?.includes(topic)),
+    repo.topics?.some((topic) => config.topics?.includes(topic)),
   );
 
   // v8 ignore else -- TODO: add test #40625
@@ -444,7 +444,7 @@ export async function getRawFile(
 
   // only use cache for the same org
   const httpOptions: GithubHttpOptions = {};
-  const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
+  const isSameOrg = repo?.split('/')[0] === config.repositoryOwner;
   // v8 ignore else -- TODO: add test #40625
   if (isSameOrg) {
     httpOptions.cacheProvider = repoCacheProvider;
@@ -584,7 +584,7 @@ export async function initRepo({
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let repo: GhRepo | undefined;
+  let repo: GhRepo | null | undefined;
   let forkSshUrl: string | null = null;
   try {
     let infoQuery = repoInfoQuery;
@@ -613,7 +613,7 @@ export async function initRepo({
     }
 
     const res = await githubApi.requestGraphql<{
-      repository: GhRepo;
+      repository: GhRepo | null;
     }>(infoQuery, {
       variables: {
         owner: config.repositoryOwner,
@@ -629,7 +629,7 @@ export async function initRepo({
       throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
-    repo = res?.data?.repository;
+    repo = res?.data.repository;
     /* v8 ignore next -- defensive: GraphQL errors are handled above, a null repository is not mocked in specs */
     if (!repo) {
       logger.debug({ res }, 'No repository returned');
@@ -683,7 +683,7 @@ export async function initRepo({
 
     const recentIssues = Issue.array()
       .catch([])
-      .parse(res?.data?.repository?.issues?.nodes);
+      .parse(res?.data.repository?.issues?.nodes);
     GithubIssueCache.addIssuesToReconcile(recentIssues);
   } catch (err) /* v8 ignore next -- initRepo error mapping needs failure shapes not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
@@ -854,7 +854,7 @@ async function checkRulesetsForForceRebase(
     return rulesets.some((rule) => {
       if (
         rule.type === 'required_status_checks' &&
-        rule.parameters?.strict_required_status_checks_policy === true
+        rule.parameters.strict_required_status_checks_policy === true
       ) {
         logger.debug(
           `Ruleset: strict required status checks found for ${branchName}`,
@@ -877,7 +877,7 @@ async function checkBranchProtectionForForceRebase(
     const branchProtection = await getBranchProtection(branchName);
     logger.trace(`Found branch protection for branch ${branchName}`);
 
-    const strictStatusChecks = branchProtection?.required_status_checks?.strict;
+    const strictStatusChecks = branchProtection.required_status_checks?.strict;
     if (strictStatusChecks) {
       logger.debug(
         `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
@@ -1218,7 +1218,7 @@ export async function getBranchStatus(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result',
   );
-  if (commitStatus.statuses && !internalChecksAsSuccess) {
+  if (!internalChecksAsSuccess) {
     commitStatus.statuses = commitStatus.statuses.filter(
       (status) =>
         status.state !== 'success' || !status.context?.startsWith('renovate/'),
@@ -1247,7 +1247,7 @@ export async function getBranchStatus(
     };
     const checkRunsRaw = (
       await githubApi.getJsonUnchecked<{
-        check_runs: { name: string; status: string; conclusion: string }[];
+        check_runs?: { name: string; status: string; conclusion: string }[];
       }>(checkRunsUrl, opts)
     ).body;
     if (checkRunsRaw.check_runs?.length) {
@@ -1313,7 +1313,7 @@ async function getStatusCheck(
   return (await githubApi.getJsonUnchecked<GhBranchStatus[]>(url, opts)).body;
 }
 
-type GithubToRenovateStatusMapping = Record<string, BranchStatus>;
+type GithubToRenovateStatusMapping = Partial<Record<string, BranchStatus>>;
 const githubToRenovateStatusMapping: GithubToRenovateStatusMapping = {
   success: 'green',
   error: 'red',
@@ -1329,7 +1329,7 @@ export async function getBranchStatusCheck(
     const res = await getStatusCheck(branchName);
     for (const check of res) {
       if (check.context === context) {
-        return githubToRenovateStatusMapping[check.state] || 'yellow';
+        return githubToRenovateStatusMapping[check.state] ?? 'yellow';
       }
     }
     return null;
@@ -1450,7 +1450,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
 
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
-  const [issue] = (await getIssueList()).filter(
+  const issue = (await getIssueList()).find(
     (i) => i.state === 'open' && i.title === title,
   );
   if (!issue) {
@@ -1805,22 +1805,22 @@ export async function ensureComment({
     if (topic) {
       logger.debug(`Ensuring comment "${topic}" in #${number}`);
       body = `### ${topic}\n\n${sanitizedContent}`;
-      comments.forEach((comment) => {
+      for (const comment of comments) {
         if (comment.body.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.body !== body;
         }
-      });
+      }
     } else {
       logger.debug(`Ensuring content-only comment in #${number}`);
       body = `${sanitizedContent}`;
-      comments.forEach((comment) => {
+      for (const comment of comments) {
         // v8 ignore else -- TODO: add test #40625
         if (comment.body === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
         }
-      });
+      }
     }
     if (!commentId) {
       await addComment(number, body);
@@ -1871,11 +1871,10 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
-  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const topic = deleteConfig.topic;
     commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-  } else if (deleteConfig.type === 'by-content') {
+  } else {
     const content = deleteConfig.content;
     commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
@@ -1924,14 +1923,14 @@ async function tryPrAutomerge(
     const configuredMergeMethod =
       mapMergeStartegy(platformPrOptions.automergeStrategy) ??
       config.mergeMethod;
-    const mergeMethod = configuredMergeMethod?.toUpperCase() || 'MERGE';
+    const mergeMethod = configuredMergeMethod?.toUpperCase() ?? 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
     // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
     // GitHub using the PR description as the commit body when "Use PR title and
     // body as commit message" is enabled in repository settings.
-    const automergeCommitMessage = platformPrOptions?.automergeCommitMessage;
+    const automergeCommitMessage = platformPrOptions.automergeCommitMessage;
     if (mergeMethod !== 'REBASE' && automergeCommitMessage) {
       const newlineIndex = automergeCommitMessage.indexOf('\n');
       if (newlineIndex === -1) {
@@ -2052,7 +2051,7 @@ export async function isBranchMergeQueueEnabled(
   let result = true;
   try {
     const res = await githubApi.requestGraphql<{
-      repository: { mergeQueue: { id: string } | null };
+      repository: { mergeQueue: { id: string } | null } | null;
     }>(repoMergeQueueQuery, {
       variables: {
         owner: config.repositoryOwner,
@@ -2068,7 +2067,7 @@ export async function isBranchMergeQueueEnabled(
         'Failed to fetch merge queue status - assuming merge queue is enabled',
       );
     } else {
-      result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
+      result = isNonEmptyObject(res?.data.repository?.mergeQueue);
     }
   } catch (err) {
     if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
@@ -2406,7 +2405,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
   }
   try {
     if (vulnerabilityAlerts?.length) {
-      const shortAlerts: AggregatedVulnerabilities = {};
+      const shortAlerts: Partial<AggregatedVulnerabilities> = {};
       logger.trace(
         { alerts: vulnerabilityAlerts },
         'GitHub vulnerability details',
@@ -2431,7 +2430,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
-        const elem = shortAlerts[key] || {};
+        const elem = coerceObject(shortAlerts[key]);
         elem[range] = coerceToNull(patch);
         shortAlerts[key] = elem;
       }
