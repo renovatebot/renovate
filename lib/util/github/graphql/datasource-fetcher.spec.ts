@@ -80,7 +80,7 @@ function resp(
   };
 
   if (cursor) {
-    data.repository.payload.pageInfo = {
+    data.repository!.payload!.pageInfo = {
       endCursor: cursor,
       hasNextPage: true,
     };
@@ -335,7 +335,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         const pages = partitions.map((nodes, idx) =>
           resp(false, nodes, `page-${idx + 2}`),
         );
-        delete pages.at(-1)!.data?.repository.payload.pageInfo;
+        delete pages.at(-1)!.data?.repository!.payload!.pageInfo;
         return pages;
       }
 

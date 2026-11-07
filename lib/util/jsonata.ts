@@ -37,7 +37,9 @@ export function matchRegexOrGlob(input: unknown, patterns: unknown): boolean {
 
 export function getExpression(input: string): JsonataExpression | Error {
   const cacheKey = buildCacheKey('jsonata', toSha256(input));
-  const cachedExpression = memCache.get<jsonata.Expression | Error>(cacheKey);
+  const cachedExpression = memCache.get<jsonata.Expression | Error | undefined>(
+    cacheKey,
+  );
   // istanbul ignore if: cannot test
   if (cachedExpression) {
     return cachedExpression;

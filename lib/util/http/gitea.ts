@@ -18,7 +18,7 @@ function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
     return body as T[];
   }
 
-  if (isPlainObject(body) && isArray(body?.data) && body.data.length) {
+  if (isPlainObject(body) && isArray(body.data) && body.data.length) {
     return body.data as T[];
   }
 

@@ -77,7 +77,7 @@ function replaceInterpolatedValuesInString(
     throw error;
   }
   return value.replace(templateRegex, (_, key) => {
-    if (input?.[key]) {
+    if (input[key]) {
       return input[key];
     }
     const error = new Error(CONFIG_VALIDATION);
