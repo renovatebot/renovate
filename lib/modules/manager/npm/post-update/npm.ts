@@ -21,7 +21,6 @@ import {
   localPathExists,
   readLocalFile,
   renameLocalFile,
-  writeLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
@@ -34,6 +33,7 @@ import { NpmrcCooldown, PackageLock } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { composeLockFile, parseLockFile } from '../utils.ts';
 import { getNodeToolConstraint } from './node-version.ts';
+import { getTransitiveUpdateNotice, isTransitiveUpdate } from './transitive.ts';
 import type { GenerateLockFileResult, NpmrcCooldownResult } from './types.ts';
 import {
   getNodeOptions,
@@ -118,6 +118,7 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   let beforeFallback = false;
+  let notice: string | null = null;
   try {
     const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
@@ -241,48 +242,16 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
+    // a transitive dependency is not declared anywhere, so it is updated by
+    // name, within the ranges the packages which depend on it allow
+    const transitiveUpdates = lockUpdates.filter(isTransitiveUpdate);
+    const declaredLockUpdates = lockUpdates.filter(
+      (upgrade) => !isTransitiveUpdate(upgrade),
+    );
+
     // divide the deps in two categories: workspace and root
     const { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps } =
-      divideWorkspaceAndRootDeps(
-        lockFileDir,
-        lockUpdates.filter((u) => u.depType !== 'transitive'),
-      );
-
-    // PROTOTYPE: transitive (lockfile-only) updates
-    const transitiveUpdates = lockUpdates.filter(
-      (u) => u.depType === 'transitive',
-    );
-    if (transitiveUpdates.length) {
-      const mode = process.env.RENOVATE_X_NPM_TRANSITIVE_MODE ?? 'update';
-      logger.debug(
-        { mode, deps: transitiveUpdates.map((u) => u.packageName) },
-        'PROTOTYPE: npm transitive lockfile update',
-      );
-      if (mode === 'pin') {
-        // install name@version (which also adds it to package.json and the
-        // lock root), restore package.json, then let `npm install` prune the
-        // root entry while keeping the pinned version which satisfies the
-        // parents' ranges
-        const pkgJsonFile = upath.join(lockFileDir, 'package.json');
-        const pkgJson = await readLocalFile(pkgJsonFile, 'utf8');
-        await exec(
-          [
-            `npm install ${cmdOptions}${beforeFlag} ${transitiveUpdates
-              .map((u) => quote(`${u.packageName!}@${u.newVersion!}`))
-              .join(' ')}`,
-          ],
-          execOptions,
-        );
-        await writeLocalFile(pkgJsonFile, pkgJson!);
-        commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
-      } else {
-        commands.push(
-          `npm update ${cmdOptions}${beforeFlag} ${transitiveUpdates
-            .map((u) => quote(u.packageName!))
-            .join(' ')}`,
-        );
-      }
-    }
+      divideWorkspaceAndRootDeps(lockFileDir, declaredLockUpdates);
 
     if (workspaces.size && lockWorkspacesUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm-workspaces)');
@@ -311,6 +280,16 @@ export async function generateLockFile(
         .map(quote)
         .join(' ')}`;
       commands.push(updateCmd);
+    }
+
+    if (transitiveUpdates.length) {
+      logger.debug('Performing lockfileUpdate (npm transitive)');
+      const names = [
+        ...new Set(transitiveUpdates.map((update) => update.depName!)),
+      ];
+      commands.push(
+        `npm update ${cmdOptions}${beforeFlag} ${names.map(quote).join(' ')}`,
+      );
     }
 
     if (upgrades.some((upgrade) => upgrade.isRemediation)) {
@@ -401,13 +380,13 @@ export async function generateLockFile(
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
-    if (lockUpdates.length) {
+    if (declaredLockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       if (
         lockFileParsed?.lockfileVersion === 2 ||
         lockFileParsed?.lockfileVersion === 3
       ) {
-        lockUpdates.forEach((lockUpdate) => {
+        declaredLockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
             'dependencies' | 'optionalDependencies';
 
@@ -422,6 +401,10 @@ export async function generateLockFile(
         });
         lockFile = composeLockFile(lockFileParsed, detectedIndent);
       }
+    }
+
+    if (transitiveUpdates.length) {
+      notice = getTransitiveUpdateNotice(lockFile, transitiveUpdates);
     }
   } catch (err) {
     // v8 ignore if -- TODO: add test #40625
@@ -441,7 +424,12 @@ export async function generateLockFile(
     }
     return { error: true, stderr: err.stderr };
   }
-  return { error: !lockFile, lockFile, beforeFallback };
+  return {
+    error: !lockFile,
+    lockFile,
+    beforeFallback,
+    ...(notice && { notice }),
+  };
 }
 
 export function divideWorkspaceAndRootDeps(

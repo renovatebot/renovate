@@ -1,3 +1,4 @@
+import type { VulnerabilityAlertSource } from '../../../config/types.ts';
 import type { Category } from '../../../constants/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -53,6 +54,17 @@ export const defaultConfig = {
     Change:
       "[{{#if displayFrom}}`{{{displayFrom}}}` → {{else}}{{#if currentValue}}`{{{currentValue}}}` → {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if packageName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' packageName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
   },
+};
+
+// `package-lock.json` only: a transitive dependency is extracted, and any alert
+// which matches it clears its `lockfile-only` skip, whichever source the alert
+// came from - they are all `packageRules` by the time it is looked up
+export const supportsTransitiveRemediation: Partial<
+  Record<VulnerabilityAlertSource, true>
+> = {
+  $platform: true,
+  OSV: true,
+  packageRules: true,
 };
 
 export const supportedDatasources = [

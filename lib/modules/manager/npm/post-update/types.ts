@@ -30,6 +30,8 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
+  /** what the lock file holds, where a transitive update did not go to plan */
+  notice?: string;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions

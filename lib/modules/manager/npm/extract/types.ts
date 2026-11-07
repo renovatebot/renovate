@@ -41,6 +41,14 @@ export interface LockFile {
   isYarn1?: boolean;
 }
 
+export interface LockedPackage {
+  /** the name it is installed under, which is the alias for an aliased package */
+  name: string;
+  /** the name it is published under */
+  packageName: string;
+  version: string;
+}
+
 export interface PnpmWorkspaceFile {
   packages: string[];
   catalog?: Record<string, string>;

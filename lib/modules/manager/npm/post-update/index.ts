@@ -43,6 +43,7 @@ import {
 import * as npm from './npm.ts';
 import * as pnpm from './pnpm.ts';
 import { processHostRules } from './rules.ts';
+import { isTransitiveUpdate } from './transitive.ts';
 import type {
   AdditionalPackageFiles,
   DetermineLockFileDirsResult,
@@ -192,6 +193,12 @@ export async function writeExistingFiles(
             continue;
           }
           if (!upgrade.managerData) {
+            continue;
+          }
+          // `npm update` updates a transitive dependency where the lock file
+          // holds it, so removing it would leave `npm update` nothing to
+          // update - and in a workspace, nothing to restore it from
+          if (isTransitiveUpdate(upgrade)) {
             continue;
           }
           if (
@@ -544,6 +551,9 @@ async function getAdditionalFilesInner(
               'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.';
             logger.warn({ npmLock }, message);
             artifactNotices.push({ file: npmLock, message });
+          }
+          if (res.notice) {
+            artifactNotices.push({ file: npmLock, message: res.notice });
           }
           const existingContent = await getFile(
             npmLock,
