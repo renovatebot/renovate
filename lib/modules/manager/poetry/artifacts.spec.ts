@@ -973,6 +973,41 @@ describe('modules/manager/poetry/artifacts', () => {
         ]);
       });
 
+      it('ignores minimumReleaseAgePackageManager', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAge: '3 days',
+              minimumReleaseAgePackageManager: '7 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: {
+            ...config,
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgePackageManager: '7 days',
+          },
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '3',
+              }),
+            },
+          },
+        ]);
+      });
+
       it('passes minimumReleaseAge of the config for security updates', async () => {
         const execSnapshots = mockExecAll();
         fs.ensureCacheDir.mockResolvedValueOnce(
@@ -1066,6 +1101,41 @@ describe('modules/manager/poetry/artifacts', () => {
             options: {
               env: expect.objectContaining({
                 POETRY_SOLVER_MIN_RELEASE_AGE: '3',
+              }),
+            },
+          },
+        ]);
+      });
+
+      it('raises POETRY_SOLVER_MIN_RELEASE_AGE to minimumReleaseAgePackageManager', async () => {
+        const execSnapshots = mockExecAll();
+        fs.ensureCacheDir.mockResolvedValueOnce(
+          '/tmp/renovate/cache/others/pip',
+        );
+        fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
+        // poetry.toml
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [
+            {
+              depName: 'dep1',
+              manager: 'poetry',
+              minimumReleaseAgePackageManagerSync: true,
+              minimumReleaseAge: '5 days',
+              minimumReleaseAgePackageManager: '5 days',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          newPackageFileContent: '',
+          config: syncConfig,
+        });
+        expect(execSnapshots).toMatchObject([
+          {
+            options: {
+              env: expect.objectContaining({
+                POETRY_SOLVER_MIN_RELEASE_AGE: '5',
               }),
             },
           },
@@ -1540,7 +1610,8 @@ describe('modules/manager/poetry/artifacts', () => {
               manager: 'poetry',
               minimumReleaseAgePackageManagerSync: true,
               minimumReleaseAge: '5 days',
-              minimumReleaseAgeRepository: '5 days',
+              minimumReleaseAgePackageManager: '5 days',
+              minimumReleaseAgeRepository: '3 days',
             },
           ],
           newPackageFileContent: '',
@@ -1573,20 +1644,20 @@ describe('modules/manager/poetry/artifacts', () => {
           config: {
             ...syncConfig,
             isLockFileMaintenance: true,
-            minimumReleaseAge: '3 days',
+            minimumReleaseAgePackageManager: '3 days',
             upgrades: [
               {
                 isLockFileMaintenance: true,
                 manager: 'npm',
                 packageFile: 'package.json',
-                minimumReleaseAge: '3 days',
+                minimumReleaseAgePackageManager: '3 days',
               },
               {
                 isLockFileMaintenance: true,
                 manager: 'poetry',
                 minimumReleaseAgePackageManagerSync: true,
                 packageFile: 'pyproject.toml',
-                minimumReleaseAge: '5 days',
+                minimumReleaseAgePackageManager: '5 days',
               },
             ],
           },

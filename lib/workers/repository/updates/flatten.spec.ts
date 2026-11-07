@@ -509,6 +509,45 @@ describe('workers/repository/updates/flatten', () => {
       ]);
     });
 
+    it('passes minimumReleaseAgePackageManager of the manager config', async () => {
+      config.minimumReleaseAgePackageManager = '1 day';
+      // @ts-expect-error -- managers are not defined on RenovateConfig
+      config.npm = { minimumReleaseAgePackageManager: '7 days' };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+        cargo: [
+          {
+            packageFile: 'Cargo.toml',
+            deps: [
+              {
+                depName: 'bar',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgePackageManager: '7 days' },
+        { depName: 'bar', minimumReleaseAgePackageManager: '1 day' },
+      ]);
+    });
+
     describe('hasAttestation is taken from the current value', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',
