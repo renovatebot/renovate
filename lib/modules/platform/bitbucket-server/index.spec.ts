@@ -1989,6 +1989,46 @@ describe('modules/platform/bitbucket-server/index', () => {
         );
       });
 
+      it('should use automergeStrategy for platform automerge', async () => {
+        const scope = await initRepo();
+        scope
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100&role.1=AUTHOR&username.1=abc`,
+          )
+          .reply(200, {
+            isLastPage: true,
+            values: [],
+          })
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            { autoMerge: true, strategyId: 'rebase-ff-only' },
+          )
+          .reply(200);
+
+        // Simulate version >= 8.15.0
+        vi.spyOn(semver, 'lt').mockReturnValue(false);
+
+        await bitbucket.createPr({
+          sourceBranch: 'branch',
+          targetBranch: 'master',
+          prTitle: 'title',
+          prBody: 'body',
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeStrategy: 'rebase',
+          },
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prNumber: 5 },
+          expect.stringContaining('automerge: success'),
+        );
+      });
+
       it('platform-native automerge returns early if usePlatformAutomerge is false', async () => {
         const scope = await initRepo();
         scope
@@ -2484,6 +2524,28 @@ describe('modules/platform/bitbucket-server/index', () => {
           bitbucket.mergePr({
             branchName: 'branch',
             id: 5,
+          }),
+        ).resolves.toBeTrue();
+      });
+
+      it('posts Merge with the configured merge strategy', async () => {
+        const scope = await initRepo();
+        scope
+          .get(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+          )
+          .reply(200, prMock(url, 'SOME', 'repo'))
+          .post(
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
+            { strategyId: 'squash' },
+          )
+          .reply(200);
+
+        await expect(
+          bitbucket.mergePr({
+            branchName: 'branch',
+            id: 5,
+            strategy: 'squash',
           }),
         ).resolves.toBeTrue();
       });

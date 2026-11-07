@@ -1,5 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import { isNonEmptyString } from '@sindresorhus/is';
+import type { MergeStrategy } from '../../../config/types.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions, GitProtocol } from '../../../types/git.ts';
@@ -14,6 +15,24 @@ import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types.ts';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
+
+// https://confluence.atlassian.com/bitbucketserver/pull-request-merge-strategies-844499235.html
+const mergeStrategyIds = new Map<MergeStrategy, string>([
+  ['fast-forward', 'ff-only'],
+  ['merge-commit', 'no-ff'],
+  ['rebase', 'rebase-ff-only'],
+  ['rebase-merge', 'rebase-no-ff'],
+  ['squash', 'squash'],
+]);
+
+/**
+ * Returns the Bitbucket Server merge strategy id for a Renovate merge strategy, or `undefined` for `auto`.
+ */
+export function getMergeStrategyId(
+  strategy: MergeStrategy | undefined,
+): string | undefined {
+  return strategy && mergeStrategyIds.get(strategy);
+}
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {

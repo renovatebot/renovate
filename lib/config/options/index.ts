@@ -2657,7 +2657,14 @@ const options: Readonly<RenovateOptions>[] = [
       'squash',
     ],
     default: 'auto',
-    supportedPlatforms: ['azure', 'bitbucket', 'forgejo', 'gitea', 'github'],
+    supportedPlatforms: [
+      'azure',
+      'bitbucket',
+      'bitbucket-server',
+      'forgejo',
+      'gitea',
+      'github',
+    ],
   },
   {
     name: 'automergeComment',
