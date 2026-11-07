@@ -115,7 +115,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   }
 
   // handle rawExec error
-  if (err instanceof ExecError && isNonEmptyObject(err.options?.env)) {
+  if (err instanceof ExecError && isNonEmptyObject(err.options.env)) {
     const env = Object.keys(err.options.env);
     response.options = { ...err.options, env };
   }
