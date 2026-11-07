@@ -2639,7 +2639,7 @@ const options: Readonly<RenovateOptions>[] = [
     scopes: sharedScopes,
     description: 'How to automerge, if enabled.',
     type: 'string',
-    allowedValues: ['branch', 'pr', 'pr-comment'],
+    allowedValues: ['branch', 'pr', 'pr-comment', 'label'],
     default: 'pr',
   },
   {
@@ -2666,6 +2666,14 @@ const options: Readonly<RenovateOptions>[] = [
       'PR comment to add to trigger automerge. Only used if `automergeType=pr-comment`.',
     type: 'string',
     default: 'automergeComment',
+  },
+  {
+    name: 'automergeLabel',
+    scopes: sharedScopes,
+    description:
+      'Label to add to the PR to trigger automerge. Only used if `automergeType=label`.',
+    type: 'string',
+    default: 'automerge',
   },
   {
     name: 'ignoreTests',
