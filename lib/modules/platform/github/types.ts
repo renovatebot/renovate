@@ -1,3 +1,4 @@
+import type { MergeStrategy } from '../../../config/types.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import type { Pr, PrBodyStruct } from '../types.ts';
@@ -113,6 +114,8 @@ export interface PlatformConfig {
   existingRepos?: string[];
   userDetails?: UserDetails;
   userEmail?: EmailAddress | null;
+  /** `false` once the async merge endpoint turned out to be missing */
+  asyncMergeSupported?: boolean;
 }
 
 export interface LocalRepoConfig {
@@ -187,4 +190,22 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
+}
+
+export interface AsyncMergeParams {
+  /** The repository to merge in, which is the parent repository of a fork */
+  repository: string;
+  owner: string;
+  name: string;
+  token?: string;
+  /** The merge method configured for the repository */
+  mergeMethod: string;
+  prNo: number;
+  strategy?: MergeStrategy;
+  /** Whether the base branch of the PR has a merge queue */
+  queueEnabled: boolean;
+  /** Whether the host is a GitHub Enterprise Server */
+  isGhes: boolean;
+  /** Caches the PR with the state merged */
+  cacheMergedPr: (prNo: number) => void;
 }
