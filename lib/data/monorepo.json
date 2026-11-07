@@ -23,6 +23,7 @@
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
+    "fumadocs": ["fumadocs-core", "fumadocs-ui"],
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
