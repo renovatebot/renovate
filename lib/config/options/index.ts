@@ -2473,6 +2473,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: true,
   },
   {
+    name: 'dependencyDashboardPinned',
+    scopes: ['repo'],
+    description: 'Controls whether the dependency dashboard is pinned.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'internalChecksAsSuccess',
     scopes: sharedScopes,
     description:
