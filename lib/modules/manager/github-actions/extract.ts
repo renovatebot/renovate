@@ -233,7 +233,45 @@ const runnerVersionRegex = regEx(
   /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,
 );
 
+const blacksmithRunnerVersionRegex = regEx(
+  /^\s*(?<prefix>blacksmith-\d+vcpu-)(?<depName>ubuntu)-(?<currentValue>\d{2})(?<minor>\d{2})(?<suffix>-arm)?\s*$/,
+);
+
+function extractBlacksmithRunner(runner: string): PackageDependency | null {
+  const runnerVersionGroups = blacksmithRunnerVersionRegex.exec(runner)?.groups;
+  if (!runnerVersionGroups) {
+    return null;
+  }
+
+  const {
+    depName,
+    currentValue,
+    minor,
+    prefix,
+    suffix = '',
+  } = runnerVersionGroups;
+  const version = `${currentValue}.${minor}${suffix}`;
+
+  if (!GithubRunnersDatasource.isValidRunner(depName, version)) {
+    return null;
+  }
+
+  return {
+    depName,
+    currentValue: version,
+    replaceString: `${prefix}${depName}-${currentValue}${minor}${suffix}`,
+    depType: 'github-runner',
+    datasource: GithubRunnersDatasource.id,
+    autoReplaceStringTemplate: `${prefix}${depName}-{{replace "[.]" "" newValue}}`,
+  };
+}
+
 function extractRunner(runner: string): PackageDependency | null {
+  const blacksmithRunner = extractBlacksmithRunner(runner);
+  if (blacksmithRunner) {
+    return blacksmithRunner;
+  }
+
   const runnerVersionGroups = runnerVersionRegex.exec(runner)?.groups;
   if (!runnerVersionGroups) {
     return null;
