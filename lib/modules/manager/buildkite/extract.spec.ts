@@ -141,6 +141,46 @@ describe('modules/manager/buildkite/extract', () => {
       ]);
     });
 
+    it('extracts a plugin written as a bare array string with no config', () => {
+      // Valid per Buildkite's own pipeline schema (`pluginsList` is
+      // `oneOf: [string, object(maxProperties: 1)]`) - a plugin with no
+      // config can be a plain array entry rather than a single-key map.
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              - docker-login#v2.0.1
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.1',
+          datasource: 'github-tags',
+          depName: 'docker-login',
+          packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
+        },
+      ]);
+    });
+
+    it("extracts a known plugin's embedded image for a bare array string, from the enclosing config", () => {
+      // A bare string has no config of its own, so a known plugin's
+      // `extract` is still called (with `undefined` config) but can't find
+      // anything to report - this just checks it doesn't throw.
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              - docker#v5.14.0
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+      ]);
+    });
+
     it('extracts git-based plugins', () => {
       const fileContent = codeBlock`
         steps:
@@ -573,6 +613,34 @@ describe('modules/manager/buildkite/extract', () => {
       ]);
     });
 
+    it('recognises a known official plugin referenced with an explicit buildkite-plugins/ prefix', () => {
+      const fileContent = codeBlock`
+        steps:
+          - plugins:
+              buildkite-plugins/docker#v5.14.0:
+                image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'buildkite-plugins/docker',
+          packageName: 'buildkite-plugins/docker-buildkite-plugin',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
     it('does not look up a known plugin for an empty depName from a malformed git plugin', () => {
       const fileContent = codeBlock`
         steps:
@@ -585,6 +653,50 @@ describe('modules/manager/buildkite/extract', () => {
           currentValue: 'v3.2.7',
           datasource: 'github-tags',
           depName: '',
+          registryUrls: ['https://github.company.com'],
+        },
+      ]);
+    });
+
+    it('recognises a known official plugin referenced via a git URL', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.com/buildkite-plugins/docker-buildkite-plugin#v5.14.0:
+              image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v5.14.0',
+          datasource: 'github-tags',
+          depName: 'buildkite-plugins/docker-buildkite-plugin',
+          registryUrls: ['https://github.com'],
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.2.3',
+          datasource: 'docker',
+          depName: 'myorg/myapp',
+          packageName: 'myorg/myapp',
+          depType: 'docker',
+          replaceString: 'myorg/myapp:1.2.3',
+        },
+      ]);
+    });
+
+    it('does not look up a known plugin for a git URL not ending in the conventional repo suffix', () => {
+      const fileContent = codeBlock`
+        steps:
+          - ssh://git@github.company.com/some-org/some-plugin#v3.2.7:
+              image: "myorg/myapp:1.2.3"
+      `;
+      const res = extractPackageFile(fileContent)?.deps;
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.2.7',
+          datasource: 'github-tags',
+          depName: 'some-org/some-plugin',
           registryUrls: ['https://github.company.com'],
         },
       ]);
