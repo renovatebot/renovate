@@ -49,13 +49,13 @@ async function packageJsonConfigExists(): Promise<boolean> {
 async function closedPrExists(config: RenovateConfigFile): Promise<Pr | null> {
   return (
     (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
+      branchName: getInheritedOrGlobal('onboardingBranch'),
       prTitle: getInheritedOrGlobal('onboardingPrTitle'),
       state: '!open',
       targetBranch: config.baseBranch,
     })) ??
     (await platform.findPr({
-      branchName: getInheritedOrGlobal('onboardingBranch')!,
+      branchName: getInheritedOrGlobal('onboardingBranch'),
       prTitle: getSemanticCommitPrTitle(config),
       state: '!open',
       targetBranch: config.baseBranch,
@@ -202,7 +202,7 @@ export async function getOnboardingPr(
   config: RenovateConfigFile,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
-    getInheritedOrGlobal('onboardingBranch')!,
+    getInheritedOrGlobal('onboardingBranch'),
     config.baseBranch,
   );
 }

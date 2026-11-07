@@ -197,8 +197,7 @@ export async function ensureOnboardingPr(
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
-  // TODO #22198
-  const onboardingBranch = getInheritedOrGlobal('onboardingBranch')!;
+  const onboardingBranch = getInheritedOrGlobal('onboardingBranch');
   const existingPr = await platform.getBranchPr(
     onboardingBranch,
     config.defaultBranch,

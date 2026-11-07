@@ -1,101 +1,51 @@
 import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
+import type { GlobalDefaultedConfigKey } from './defaults.ts';
+import { globalConfigOptions } from './global-options.ts';
 import type {
   InternalGlobalConfigOptions,
   RenovateConfigFile,
   RepoGlobalConfig,
 } from './types.ts';
 
+type GlobalConfigValues = RepoGlobalConfig & InternalGlobalConfigOptions;
+
+export type GlobalConfigKey = keyof GlobalConfigValues;
+
+/**
+ * The value `GlobalConfig.get()` gives for an option, which is only missing for an option without a default.
+ */
+export type GlobalConfigValue<Key extends GlobalConfigKey> =
+  Key extends GlobalDefaultedConfigKey
+    ? NonNullable<GlobalConfigValues[Key]>
+    : GlobalConfigValues[Key];
+
 export class GlobalConfig {
-  // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
-  static OPTIONS = [
-    'allowCustomCrateGitRegistries',
-    'allowPlugins',
-    'allowScripts',
-    'allowShellExecutorForPostUpgradeCommands',
-    'allowedCommands',
-    'allowedEnv',
-    'allowedHeaders',
-    'allowedUnsafeExecutions',
-    'autodiscoverRepoOrder',
-    'autodiscoverRepoSort',
-    'bbUseDevelopmentBranch',
-    'binarySource',
-    'cacheDir',
-    'cacheHardTtlMinutes',
-    'cachePrivatePackages',
-    'cacheTtlOverride',
-    'checkedBranches',
-    'configFileNames',
-    'containerbaseDir',
-    'customEnvVariables',
-    'dockerChildPrefix',
-    'dockerCliOptions',
-    'dockerMaxPages',
-    'dockerSidecarImage',
-    'dockerUser',
-    'dryRun',
-    'encryptedWarning',
-    'endpoint',
-    'executionTimeout',
-    'exposeAllEnv',
-    'gitTimeout',
-    'githubTokenWarn',
-    'goEnvFromHostRules',
-    'httpCacheTtlDays',
-    'ignorePrAuthor',
-    'includeMirrors',
-    'inheritConfigTrusted',
-    'internalHostAccess',
-    /** NOTE that this is not a config option, but an internal variable **/
-    'localDir',
-    'migratePresets',
-    'onboarding',
-    'onboardingAutoCloseAge',
-    'onboardingBranch',
-    'onboardingCommitMessage',
-    'onboardingConfig',
-    'onboardingConfigFileName',
-    'onboardingNoDeps',
-    'onboardingPrTitle',
-    'platform',
-    'prCacheSyncMaxPages',
-    'presetCachePersistence',
-    'productLinks',
-    'rebaseAllOpenBranches',
-    'repositoryCacheForceLocal',
-    'requireConfig',
-    's3Endpoint',
-    's3PathStyle',
-    'toolSettings',
-    'userAgent',
-  ] as const satisfies readonly (
-    keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions
-  )[];
+  static OPTIONS = globalConfigOptions;
 
-  private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
+  private static config: GlobalConfigValues = {};
 
-  static get(): RepoGlobalConfig & InternalGlobalConfigOptions;
-  static get<
-    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
-  >(key: Key): Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key];
-  static get<
-    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
-  >(
-    key?: Key,
-  ):
-    | (RepoGlobalConfig & InternalGlobalConfigOptions)
-    | Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key] {
-    const defaultValue = key
-      ? (globalConfigOptionDefaults[key] as Required<
-          RepoGlobalConfig & InternalGlobalConfigOptions
-        >[Key])
-      : undefined;
+  /**
+   * Without a key, gives the config as it was set, without the defaults of the options.
+   */
+  static get(): GlobalConfigValues;
+  static get<Key extends GlobalConfigKey>(key: Key): GlobalConfigValue<Key>;
+  static get(key?: GlobalConfigKey): unknown {
+    if (key) {
+      return GlobalConfig.config[key] ?? globalConfigOptionDefaults[key];
+    }
 
-    return key
-      ? ((GlobalConfig.config[key] ?? defaultValue) as Required<
-          RepoGlobalConfig & InternalGlobalConfigOptions
-        >[Key])
-      : GlobalConfig.config;
+    return GlobalConfig.config;
+  }
+
+  /**
+   * Gives a directory which the global worker sets before it processes a repository.
+   */
+  static getRequired(key: 'cacheDir' | 'localDir'): string {
+    const value = GlobalConfig.get(key);
+    if (value === undefined) {
+      throw new Error(`Global config ${key} is not set`);
+    }
+    return value;
   }
 
   static set(
