@@ -1,4 +1,5 @@
 import type { Stats } from 'node:fs';
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
@@ -19,6 +20,18 @@ vi.mock('../../../util/http/index.ts');
 vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
+
+/** Returns `lockFiles` in order, and `cargoConfig` for the cargo config. */
+function mockReadLocalFile(
+  lockFiles: string[],
+  cargoConfig: string | null = null,
+): void {
+  fs.readLocalFile.mockImplementation((file): Promise<any> =>
+    Promise.resolve(
+      file.startsWith('.cargo/') ? cargoConfig : (lockFiles.shift() ?? null),
+    ),
+  );
+}
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
@@ -562,6 +575,445 @@ describe('modules/manager/cargo/artifacts', () => {
         cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
       },
     ]);
+  });
+
+  describe('with minimumReleaseAgePackageManagerSync', () => {
+    it('passes the larger minimum release age to cargo for lockfile maintenance', async () => {
+      fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+      git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+      const execSnapshots = mockExecAll();
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+      mockReadLocalFile(
+        ['Old Cargo.lock', 'New Cargo.lock'],
+        '[registry]\nglobal-min-publish-age = "1 week"\n',
+      );
+      await expect(
+        cargo.updateArtifacts({
+          packageFileName: 'Cargo.toml',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '2 weeks',
+            minimumReleaseAgePackageManagerSync: true,
+          },
+        }),
+      ).resolves.not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+          options: {
+            env: {
+              CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: '14 days',
+              CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE: 'deny',
+            },
+          },
+        },
+      ]);
+    });
+
+    describe('precise updates', () => {
+      const updatedDeps = [
+        {
+          manager: 'cargo',
+          depName: 'dep1',
+          packageName: 'dep1',
+          lockedVersion: '1.0.0',
+          newVersion: '1.0.1',
+          datasource: CrateDatasource.id,
+          minimumReleaseAgePackageManagerSync: true,
+        },
+      ];
+
+      async function run(
+        deps: Record<string, unknown>[],
+        cargoConfig: string | null = null,
+      ): Promise<ReturnType<typeof mockExecAll>> {
+        fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+        git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+        const execSnapshots = mockExecAll();
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+        mockReadLocalFile(['Old Cargo.lock', 'New Cargo.lock'], cargoConfig);
+        await expect(
+          cargo.updateArtifacts({
+            packageFileName: 'Cargo.toml',
+            updatedDeps: deps,
+            newPackageFileContent: '{}',
+            config,
+          }),
+        ).resolves.not.toBeNull();
+        return execSnapshots;
+      }
+
+      it.each`
+        minimumReleaseAgeRepository | expected
+        ${'36 hours'}               | ${'36 hours'}
+        ${'90 minutes'}             | ${'90 minutes'}
+        ${'90 seconds'}             | ${'90 seconds'}
+        ${'1500 ms'}                | ${'2 seconds'}
+        ${'1.1 hours'}              | ${'66 minutes'}
+        ${'2.2 days'}               | ${'3168 minutes'}
+      `(
+        'passes minimumReleaseAgeRepository $minimumReleaseAgeRepository as $expected',
+        async ({ minimumReleaseAgeRepository, expected }) => {
+          const execSnapshots = await run([
+            {
+              ...updatedDeps[0],
+              minimumReleaseAge: minimumReleaseAgeRepository,
+              minimumReleaseAgeRepository,
+            },
+          ]);
+          const env = {
+            CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: expected,
+            CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE: 'deny',
+          };
+          expect(execSnapshots).toMatchObject([
+            {
+              cmd: expect.stringContaining('--precise 1.0.1'),
+              options: { env },
+            },
+            { cmd: expect.stringContaining('--workspace'), options: { env } },
+          ]);
+        },
+      );
+
+      it('ignores a larger minimumReleaseAge from packageRules', async () => {
+        const execSnapshots = await run([
+          {
+            ...updatedDeps[0],
+            minimumReleaseAge: '2 weeks',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]);
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: '3 days',
+        });
+      });
+
+      it('leaves a larger global-min-publish-age of the cargo config to cargo', async () => {
+        const execSnapshots = await run(
+          [
+            {
+              ...updatedDeps[0],
+              minimumReleaseAge: '1 week',
+              minimumReleaseAgeExtracted: '1 week',
+              minimumReleaseAgeRepository: '3 days',
+            },
+          ],
+          '[registry]\nglobal-min-publish-age = "1 week"\n',
+        );
+        const env = execSnapshots[0].options?.env;
+        expect(env).not.toHaveProperty('CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE');
+        expect(env).not.toHaveProperty(
+          'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+        );
+        expect(fs.readLocalFile).toHaveBeenCalledWith('.cargo/config', 'utf8');
+      });
+
+      it('ignores the minimumReleaseAgeExtracted of the update', async () => {
+        const execSnapshots = await run([
+          {
+            ...updatedDeps[0],
+            minimumReleaseAgeExtracted: '1 week',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]);
+        expect(execSnapshots[0].options?.env).toMatchObject({
+          CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE: '3 days',
+        });
+      });
+
+      it('passes nothing without minimumReleaseAgeRepository', async () => {
+        const execSnapshots = await run([
+          {
+            ...updatedDeps[0],
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeExtracted: '1 week',
+          },
+        ]);
+        expect(execSnapshots[0].options?.env).not.toHaveProperty(
+          'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+        );
+      });
+
+      describe('crates with a smaller minimumReleaseAge', () => {
+        const deps = [
+          {
+            ...updatedDeps[0],
+            minimumReleaseAge: null,
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ];
+
+        it('lowers the publish age and returns a notice', async () => {
+          fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+          git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+          const execSnapshots = mockExecAll();
+          fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+          mockReadLocalFile(['Old Cargo.lock', 'New Cargo.lock']);
+
+          await expect(
+            cargo.updateArtifacts({
+              packageFileName: 'Cargo.toml',
+              updatedDeps: deps,
+              newPackageFileContent: '{}',
+              config,
+            }),
+          ).resolves.toEqual([
+            {
+              file: {
+                type: 'addition',
+                path: 'Cargo.lock',
+                contents: 'New Cargo.lock',
+              },
+              notice: {
+                file: 'Cargo.lock',
+                message: expect.stringContaining(
+                  'Cargo checked no publish age instead of 7 days for this update, because the `minimumReleaseAge` of `dep1` is smaller.',
+                ),
+              },
+            },
+          ]);
+          const env = execSnapshots[0].options?.env;
+          expect(env).not.toHaveProperty(
+            'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+          );
+          expect(env).not.toHaveProperty(
+            'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+          );
+        });
+
+        it('returns null for an unchanged lock file', async () => {
+          fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+          git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+          mockExecAll();
+          fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+          mockReadLocalFile(['Old Cargo.lock', 'Old Cargo.lock']);
+
+          await expect(
+            cargo.updateArtifacts({
+              packageFileName: 'Cargo.toml',
+              updatedDeps: deps,
+              newPackageFileContent: '{}',
+              config,
+            }),
+          ).resolves.toBeNull();
+        });
+
+        it('keeps the notice when it retries after a crate updated another one', async () => {
+          const lockFileAfterFirstAttempt = codeBlock`
+            [[package]]
+            name = "dep1"
+            version = "1.0.1"
+
+            [[package]]
+            name = "dep2"
+            version = "1.0.2"
+          `;
+          fs.findLocalSiblingOrParent.mockResolvedValue('Cargo.lock');
+          mockReadLocalFile([
+            'Old Cargo.lock',
+            lockFileAfterFirstAttempt,
+            lockFileAfterFirstAttempt,
+          ]);
+          mockExecSequence([
+            { stdout: '', stderr: '' },
+            new ExecError('Exec error', {
+              cmd: '',
+              stdout: '',
+              stderr: '... error: package ID specification ...',
+              options: {},
+            }),
+          ]);
+
+          const res = await cargo.updateArtifacts({
+            packageFileName: 'Cargo.toml',
+            updatedDeps: [
+              ...deps,
+              {
+                ...deps[0],
+                depName: 'dep2',
+                packageName: 'dep2',
+                newVersion: '1.0.2',
+                minimumReleaseAge: '7 days',
+              },
+            ],
+            newPackageFileContent: '{}',
+            config,
+          });
+
+          expect(res).toEqual([
+            {
+              file: {
+                type: 'addition',
+                path: 'Cargo.lock',
+                contents: lockFileAfterFirstAttempt,
+              },
+              notice: {
+                file: 'Cargo.lock',
+                message: expect.stringContaining(
+                  'Cargo checked no publish age instead of 7 days for this update',
+                ),
+              },
+            },
+          ]);
+        });
+      });
+
+      it('passes nothing for security updates', async () => {
+        const execSnapshots = await run([
+          {
+            ...updatedDeps[0],
+            isVulnerabilityAlert: true,
+            minimumReleaseAgeExtracted: '1 week',
+            minimumReleaseAgeRepository: '3 days',
+          },
+        ]);
+        expect(execSnapshots[0].options?.env).not.toHaveProperty(
+          'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+        );
+        expect(execSnapshots[0].options?.env).not.toHaveProperty(
+          'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+        );
+      });
+    });
+
+    it('does not pass a minimum release age to cargo when none is configured', async () => {
+      fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+      git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+      const execSnapshots = mockExecAll();
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old Cargo.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+      await expect(
+        cargo.updateArtifacts({
+          packageFileName: 'Cargo.toml',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+            minimumReleaseAgePackageManagerSync: true,
+          },
+        }),
+      ).resolves.not.toBeNull();
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+      );
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+      );
+    });
+  });
+
+  describe('without minimumReleaseAgePackageManagerSync', () => {
+    const ages = {
+      minimumReleaseAge: '2 weeks',
+      minimumReleaseAgeExtracted: '1 week',
+      minimumReleaseAgePackageManager: '3 days',
+      minimumReleaseAgeRepository: '3 days',
+    };
+
+    it('passes no minimum release age to cargo for updates', async () => {
+      fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+      git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+      const execSnapshots = mockExecAll();
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+      mockReadLocalFile(
+        ['Old Cargo.lock', 'New Cargo.lock'],
+        '[registry]\nglobal-min-publish-age = "1 day"\n',
+      );
+
+      await expect(
+        cargo.updateArtifacts({
+          packageFileName: 'Cargo.toml',
+          updatedDeps: [
+            {
+              ...ages,
+              manager: 'cargo',
+              depName: 'dep1',
+              packageName: 'dep1',
+              lockedVersion: '1.0.0',
+              newVersion: '1.0.1',
+              datasource: CrateDatasource.id,
+              minimumReleaseAge: null,
+            },
+          ],
+          newPackageFileContent: '{}',
+          config: { ...config, ...ages },
+        }),
+      ).resolves.toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'Cargo.lock',
+            contents: 'New Cargo.lock',
+          },
+        },
+      ]);
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: expect.stringContaining('--precise 1.0.1') },
+        { cmd: expect.stringContaining('--workspace') },
+      ]);
+      for (const { options } of execSnapshots) {
+        expect(options?.env).not.toHaveProperty(
+          'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+        );
+        expect(options?.env).not.toHaveProperty(
+          'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+        );
+      }
+      expect(fs.readLocalFile).not.toHaveBeenCalledWith(
+        '.cargo/config',
+        'utf8',
+      );
+    });
+
+    it('passes no minimum release age to cargo for lockfile maintenance', async () => {
+      fs.statLocalFile.mockResolvedValueOnce(partial<Stats>());
+      git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+      const execSnapshots = mockExecAll();
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+      mockReadLocalFile(
+        ['Old Cargo.lock', 'New Cargo.lock'],
+        '[registry]\nglobal-min-publish-age = "1 day"\n',
+      );
+
+      await expect(
+        cargo.updateArtifacts({
+          packageFileName: 'Cargo.toml',
+          updatedDeps: [],
+          newPackageFileContent: '{}',
+          config: { ...config, ...ages, isLockFileMaintenance: true },
+        }),
+      ).resolves.toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'Cargo.lock',
+            contents: 'New Cargo.lock',
+          },
+        },
+      ]);
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+        },
+      ]);
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE',
+      );
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE',
+      );
+      expect(fs.readLocalFile).not.toHaveBeenCalledWith(
+        '.cargo/config',
+        'utf8',
+      );
+    });
   });
 
   it('supports docker mode', async () => {

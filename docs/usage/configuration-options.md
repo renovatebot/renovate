@@ -3078,6 +3078,7 @@ Renovate passes the value to these package managers:
 - Poetry, as `POETRY_SOLVER_MIN_RELEASE_AGE`
 - npm, as `--before`
 - pnpm, as `--config.minimum-release-age`
+- Cargo, as `CARGO_REGISTRY_GLOBAL_MIN_PUBLISH_AGE`
 
 Read [Minimum Release Age](./key-concepts/minimum-release-age.md) to learn more.
 
