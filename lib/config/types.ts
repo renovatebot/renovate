@@ -595,6 +595,23 @@ export interface AllConfig
   username?: string;
 }
 
+/**
+ * The global options with a default which `mergeChildConfig()` leaves at `null` where the global config sets them to `null`, and which the global worker treats as their default when they are `null`.
+ */
+export type GlobalWorkerNullDefaultedConfigKey =
+  | 'deleteAdditionalConfigFile'
+  | 'deleteConfigFile'
+  | 'mergeConfidenceDatasources'
+  | 'mergeConfidenceEndpoint';
+
+/**
+ * The global config once `parseConfigs()` has merged it over the defaults, in which the {@link RepoDefaultedConfigKey} and {@link GlobalWorkerNullDefaultedConfigKey} options have a value.
+ */
+export type GlobalWorkerConfig = WithDefaults<
+  AllConfig,
+  RepoDefaultedConfigKey | GlobalWorkerNullDefaultedConfigKey
+>;
+
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   expandCodeOwnersGroups?: boolean;

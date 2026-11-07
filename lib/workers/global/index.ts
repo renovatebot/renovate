@@ -19,6 +19,7 @@ import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
+  GlobalWorkerConfig,
   InternalGlobalConfigOptions,
   RenovateConfigFile,
   RenovateRepository,
@@ -104,7 +105,7 @@ export async function getRepositoryConfig(
   return configParser.filterConfig(repoConfig, 'repository');
 }
 
-function getGlobalConfig(): Promise<RenovateConfigFile> {
+function getGlobalConfig(): Promise<GlobalWorkerConfig> {
   return parseConfigs(getEnv(), process.argv);
 }
 
@@ -156,7 +157,7 @@ export async function start(): Promise<number> {
     logger.debug('RE2 regex engine is ignored via RENOVATE_X_IGNORE_RE2');
   }
 
-  let config: AllConfig;
+  let config: GlobalWorkerConfig;
   let repoExitCode = 0;
   const env = getEnv();
   try {

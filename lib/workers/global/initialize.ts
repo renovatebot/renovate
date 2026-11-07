@@ -7,7 +7,11 @@ import {
 import fs from 'fs-extra';
 import upath from 'upath';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
-import type { AllConfig, RenovateConfigFile } from '../../config/types.ts';
+import type {
+  AllConfig,
+  GlobalWorkerConfig,
+  RenovateConfigFile,
+} from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
 import { resetGlobalLogLevelRemaps } from '../../logger/remap.ts';
 import { initPlatform } from '../../modules/platform/index.ts';
@@ -20,8 +24,8 @@ import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
 import { Vulnerabilities } from '../repository/process/vulnerabilities.ts';
 import { setMaxLimit } from './limits.ts';
 
-async function setDirectories(input: AllConfig): Promise<AllConfig> {
-  const config: AllConfig = { ...input };
+async function setDirectories<T extends AllConfig>(input: T): Promise<T> {
+  const config: T = { ...input };
   process.env.TMPDIR = process.env.RENOVATE_TMPDIR ?? os.tmpdir();
   if (config.baseDir) {
     logger.debug(`Using configured baseDir: ${config.baseDir}`);
@@ -119,8 +123,8 @@ function configureThirdPartyLibraries(config: AllConfig): void {
 }
 
 export async function globalInitialize(
-  config_: AllConfig,
-): Promise<RenovateConfigFile> {
+  config_: GlobalWorkerConfig,
+): Promise<GlobalWorkerConfig> {
   let config = config_;
   // containerbase and osv-offline log to Renovate's logger instead of `debug`
   configureContainerbase({ logger });
