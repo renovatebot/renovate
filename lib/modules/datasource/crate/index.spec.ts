@@ -1,5 +1,6 @@
 import { setTimeout } from 'node:timers/promises';
 import { isUndefined } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
@@ -21,10 +22,12 @@ import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
+import { getPathInVcs } from './crate-zip.ts';
 import { CrateDatasource } from './index.ts';
 import type { RegistryConfig } from './schema.ts';
 
 vi.unmock('../../../util/mutex.ts');
+vi.mock('./crate-zip.ts', () => ({ getPathInVcs: vi.fn() }));
 const createSimpleGit = vi.mocked(git.createSimpleGit);
 
 const API_BASE_URL = 'https://crates.io';
@@ -412,6 +415,40 @@ describe('modules/datasource/crate/index', () => {
           { version: '0.1.2', releaseTimestamp: '2016-05-29T18:29:40.000Z' },
         ],
       });
+    });
+
+    it('reads sourceDirectory of the most recently published version', async () => {
+      vi.mocked(getPathInVcs).mockResolvedValueOnce('crates/toml');
+      mockCratesIoConfig();
+      mockCratesApiCallFor('TOML', {
+        crate: { repository: 'https://github.com/toml-rs/toml' },
+      });
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/to/ml/toml')
+        .reply(
+          200,
+          codeBlock`
+            {"name":"toml","vers":"1.2.0+spec-1.1.0","yanked":false}
+            {"name":"toml","vers":"1.1.9+spec-1.1.0","yanked":false}
+          `,
+        );
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'TOML',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/toml-rs/toml',
+        sourceDirectory: 'crates/toml',
+      });
+      expect(getPathInVcs).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        'toml',
+        '1.1.9+spec-1.1.0',
+      );
     });
 
     it('uses cached registry config for subsequent packages', async () => {
@@ -868,6 +905,7 @@ describe('modules/datasource/crate/index', () => {
           sourceUrl: 'https://github.com/example/mypkg',
           releases: mypkgReleases,
         });
+        expect(getPathInVcs).not.toHaveBeenCalled();
       });
 
       it('probes the web API once and remembers registries answering 404', async () => {
