@@ -443,6 +443,32 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
     });
 
+    describe('isBranchAncestorOfBase()', () => {
+      it('returns true when every commit on the branch is already in the base', async () => {
+        await expect(
+          git.isBranchAncestorOfBase('renovate/past_branch', defaultBranch),
+        ).resolves.toBeTrue();
+      });
+
+      it('returns true when the branch head equals the base head', async () => {
+        await expect(
+          git.isBranchAncestorOfBase('renovate/equal_branch', defaultBranch),
+        ).resolves.toBeTrue();
+      });
+
+      it('returns false when the branch still has commits of its own', async () => {
+        await expect(
+          git.isBranchAncestorOfBase('renovate/future_branch', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+
+      it('returns false when the branch does not exist', async () => {
+        await expect(
+          git.isBranchAncestorOfBase('renovate/not_found', defaultBranch),
+        ).resolves.toBeFalse();
+      });
+    });
+
     describe('getBranchCommit(branchName)', () => {
       it('should return same value for equal refs', () => {
         const hex = git.getBranchCommit('renovate/equal_branch');

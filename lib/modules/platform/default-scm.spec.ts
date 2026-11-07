@@ -48,6 +48,15 @@ describe('modules/platform/default-scm', () => {
     expect(git.isBranchBehindBase).toHaveBeenCalledTimes(1);
   });
 
+  it('delegate isBranchAncestorOfBase to util/git', async () => {
+    git.isBranchAncestorOfBase.mockResolvedValueOnce(true);
+    await defaultGitScm.isBranchAncestorOfBase('abc', 'main');
+    expect(git.isBranchAncestorOfBase).toHaveBeenCalledExactlyOnceWith(
+      'abc',
+      'main',
+    );
+  });
+
   it('delegate isBranchConflicted to util/git', async () => {
     git.isBranchConflicted.mockResolvedValueOnce(true);
     await defaultGitScm.isBranchConflicted('main', 'abc');

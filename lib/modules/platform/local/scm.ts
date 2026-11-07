@@ -14,6 +14,12 @@ export class LocalFs implements PlatformScm {
   ): Promise<boolean> {
     return Promise.resolve(false);
   }
+  isBranchAncestorOfBase(
+    _branchName: string,
+    _baseBranch: string,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
   isBranchModified(_branchName: string, _baseBranch: string): Promise<boolean> {
     return Promise.resolve(false);
   }

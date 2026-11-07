@@ -22,6 +22,10 @@ describe('modules/platform/local/scm', () => {
       await expect(localFs.isBranchBehindBase('', '')).resolves.toBe(false);
     });
 
+    it('isBranchAncestorOfBase', async () => {
+      await expect(localFs.isBranchAncestorOfBase('', '')).resolves.toBe(false);
+    });
+
     it('isBranchModified', async () => {
       await expect(localFs.isBranchModified('', '')).resolves.toBe(false);
     });

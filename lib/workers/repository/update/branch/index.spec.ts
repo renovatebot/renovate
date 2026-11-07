@@ -2689,6 +2689,98 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
+    it('deletes a reused branch that is already in the base instead of opening an empty PR', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValue(false);
+      scm.isBranchAncestorOfBase.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      const inconfig = {
+        ...config,
+        reuseExistingBranch: true,
+        cacheFingerprintMatch: 'matched',
+      };
+      await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
+        branchExists: false,
+        result: 'no-work',
+        commitSha: null,
+      });
+      expect(scm.deleteBranch).toHaveBeenCalledExactlyOnceWith(
+        'renovate/some-branch',
+      );
+      expect(prWorker.ensurePr).not.toHaveBeenCalled();
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it('does not delete a branch that is already in the base during dry run', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValue(false);
+      scm.isBranchAncestorOfBase.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'matched',
+        }),
+      ).resolves.toEqual({
+        branchExists: false,
+        result: 'no-work',
+        commitSha: null,
+      });
+      expect(scm.deleteBranch).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would delete branch renovate/some-branch because its commits are already in the base branch',
+      );
+    });
+
+    it('still opens a PR when the reused branch has commits the base does not', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValue(false);
+      scm.isBranchAncestorOfBase.mockResolvedValueOnce(false);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'matched',
+        }),
+      ).resolves.toEqual({
+        branchExists: true,
+        updatesVerified: false,
+        prNo: 5,
+        result: 'done',
+        commitSha: null,
+      });
+      expect(scm.deleteBranch).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+    });
+
+    it('still opens a PR when the contained-in-base check fails', async () => {
+      const gitError = new Error('git failed');
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValue(false);
+      scm.isBranchAncestorOfBase.mockRejectedValueOnce(gitError);
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      await expect(
+        branchWorker.processBranch({
+          ...config,
+          reuseExistingBranch: true,
+          cacheFingerprintMatch: 'matched',
+        }),
+      ).resolves.toMatchObject({ result: 'done', commitSha: null });
+      expect(scm.deleteBranch).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          err: gitError,
+          branchName: 'renovate/some-branch',
+        },
+        'Failed to check whether the branch is already contained in the base branch',
+      );
+    });
+
     it('skips branch update if same updates', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValue(fakeSha('111')); //TODO:not needed?
