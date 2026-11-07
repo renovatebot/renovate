@@ -6,6 +6,7 @@ import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { getBranchCommit } from '../../../util/git/index.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { mergeInheritedConfig } from '../init/inherited.ts';
 import { mergeRenovateConfig } from '../init/merge.ts';
 import type { ExtractResult } from '../process/extract-update.ts';
@@ -117,7 +118,10 @@ export async function checkReconfigureBranch(
     newConfig = await mergeInheritedConfig(newConfig);
     newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
     await scm.checkoutBranch(config.defaultBranch!);
-    extractResult = await extractDependencies(newConfig, false);
+    extractResult = await extractDependencies(
+      applyRepoConfigDefaults(newConfig),
+      false,
+    );
   } catch (err) {
     logger.debug(
       { err },

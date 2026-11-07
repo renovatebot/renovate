@@ -20,6 +20,7 @@ import type { BranchConfig, SelectAllConfig } from '../types.ts';
 import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
+import type { RepoConfig } from './init/defaults.ts';
 import { PackageFiles } from './package-files.ts';
 import type { Vulnerability } from './process/types.ts';
 import { Vulnerabilities } from './process/vulnerabilities.ts';
@@ -177,7 +178,7 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 }
 
 export async function readDashboardBody(
-  config: SelectAllConfig,
+  config: RepoConfig<SelectAllConfig>,
 ): Promise<void> {
   let dashboardChecks: DependencyDashboard = {
     dependencyDashboardChecks: {},
@@ -195,8 +196,6 @@ export async function readDashboardBody(
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
-    config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
@@ -336,13 +335,13 @@ function getBranchesListMd(
   return `${result.trimEnd()}\n\n`;
 }
 
-function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+function appendRepoProblems(config: RepoConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = extractRepoProblems(config.repository);
   if (repoProblems.size) {
     newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
-      config.customizeDashboard?.repoProblemsHeader ??
+      config.customizeDashboard.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
     newIssueBody += `${template.compile(repoProblemsHeader, config)}\n\n`;
 
@@ -355,7 +354,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
 }
 
 export async function ensureDependencyDashboard(
-  config: SelectAllConfig,
+  config: RepoConfig<SelectAllConfig>,
   allBranches: BranchConfig[],
   packageFiles: Record<string, PackageFile[]> = {},
   configMigrationRes: ConfigMigrationResult,
@@ -377,8 +376,7 @@ export async function ensureDependencyDashboard(
   if (!(
     config.dependencyDashboard === true ||
     config.dependencyDashboardApproval === true ||
-    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-      true ||
+    config.packageRules.some((rule) => rule.dependencyDashboardApproval) ||
     branches.some(needsDashboardApproval)
   )) {
     if (GlobalConfig.get('dryRun')) {
@@ -388,7 +386,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       delete config.dependencyDashboardIssue;
     }
     return;
@@ -457,14 +455,14 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       delete config.dependencyDashboardIssue;
     }
     return;
   }
   let issueBody = '';
 
-  if (config.dependencyDashboardHeader?.length) {
+  if (config.dependencyDashboardHeader.length) {
     issueBody += `${template.compile(config.dependencyDashboardHeader, config)}\n\n`;
   }
 
@@ -690,7 +688,7 @@ export async function ensureDependencyDashboard(
     );
   } else {
     const result = await platform.ensureIssue({
-      title: config.dependencyDashboardTitle!,
+      title: config.dependencyDashboardTitle,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
@@ -699,7 +697,7 @@ export async function ensureDependencyDashboard(
     // ensureIssue doesn't return the issue, so a newly created (or renamed)
     // dashboard needs a lookup to record its number
     if (result && !config.dependencyDashboardIssue) {
-      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      const issue = await platform.findIssue(config.dependencyDashboardTitle);
       config.dependencyDashboardIssue = issue?.number;
     }
   }
@@ -781,15 +779,12 @@ function getFooter(config: RenovateConfig): string {
 }
 
 export async function getDashboardMarkdownVulnerabilities(
-  config: RenovateConfig,
+  config: RepoConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): Promise<string> {
   let result = '';
 
-  if (
-    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
-    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
-  ) {
+  if (config.dependencyDashboardOSVVulnerabilitySummary === 'none') {
     return result;
   }
 

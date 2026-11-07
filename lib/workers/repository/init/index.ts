@@ -15,6 +15,8 @@ import type { WorkerPlatformConfig } from './apis.ts';
 import { initApis } from './apis.ts';
 import { initializeCaches, resetCaches } from './cache.ts';
 import { getRepoConfig } from './config.ts';
+import type { RepoConfig } from './defaults.ts';
+import { applyRepoConfigDefaults } from './defaults.ts';
 import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
@@ -44,9 +46,7 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
   }
 }
 
-export async function initRepo(
-  config_: RenovateConfig,
-): Promise<RenovateConfig> {
+export async function initRepo(config_: RenovateConfig): Promise<RepoConfig> {
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
@@ -70,13 +70,17 @@ export async function initRepo(
   });
   setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
+  const repoConfig = applyRepoConfigDefaults(config);
   // istanbul ignore if
-  if (config.printConfig) {
+  if (repoConfig.printConfig) {
     logger.info(
-      { config, hostRules: getAll() },
+      { config: repoConfig, hostRules: getAll() },
       'Full resolved config and hostRules including presets',
     );
   }
-  await cloneSubmodules(!!config.cloneSubmodules, config.cloneSubmodulesFilter);
-  return config;
+  await cloneSubmodules(
+    repoConfig.cloneSubmodules,
+    repoConfig.cloneSubmodulesFilter,
+  );
+  return repoConfig;
 }
