@@ -481,6 +481,27 @@ describe('modules/datasource/common', () => {
         }),
       ).toEqual({ releases: [] });
     });
+
+    it('should use the constraintsVersioning given for a tool constraint', () => {
+      const releaseResult = {
+        releases: [
+          { version: '9.1.1', constraints: { python: ['>=3.12'] } },
+          { version: '9.2.0', constraints: { python: ['>=3.13'] } },
+        ],
+      };
+      const config: GetPkgReleasesConfig = {
+        datasource: 'pypi',
+        packageName: 'sphinx',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict',
+        constraints: { python: '>=3.12,<3.13' },
+        constraintsVersioning: { python: 'python' },
+      };
+
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '9.1.1' }],
+      });
+    });
   });
 
   describe('applyVersionCompatibility', () => {

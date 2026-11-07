@@ -36,6 +36,7 @@ describe('modules/manager/pep621/extract', () => {
         extractedConstraints: {
           python: '>=3.7',
         },
+        constraintsVersioning: { python: 'python' },
       });
       const dependencies = result?.deps.filter(
         (dep) => dep.depType === 'project.dependencies',
