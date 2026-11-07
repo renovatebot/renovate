@@ -216,6 +216,7 @@ describe('modules/manager/github-actions/parse', () => {
         index: 0,
         matchedString: 'ratchet:actions/checkout@v4',
         pinnedVersion: 'v4',
+        ratchetPrefix: 'ratchet:actions/checkout@',
       });
     });
 
@@ -225,6 +226,17 @@ describe('modules/manager/github-actions/parse', () => {
         index: 0,
         matchedString: 'ratchet:actions/cache/restore@v4',
         pinnedVersion: 'v4',
+        ratchetPrefix: 'ratchet:actions/cache/restore@',
+      });
+    });
+
+    it('parses ratchet pinned version with leading whitespace', () => {
+      const result = parseComment('  ratchet:actions/setup-java@v4.1.0');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: '  ratchet:actions/setup-java@v4.1.0',
+        pinnedVersion: 'v4.1.0',
+        ratchetPrefix: 'ratchet:actions/setup-java@',
       });
     });
 
