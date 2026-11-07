@@ -5,6 +5,7 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { isValid, matches } from '../../versioning/ruby/index.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { resolveToolConstraint } from '../util.ts';
 
@@ -79,13 +80,30 @@ function getBundlerConstraintFromLockFile(
 }
 
 export async function getBundlerConstraint(
-  updateArtifact: Pick<UpdateArtifact, 'config'>,
+  updateArtifact: Pick<UpdateArtifact, 'config' | 'updatedDeps'>,
   existingLockFileContent: string,
 ): Promise<string | undefined> {
-  const { config } = updateArtifact;
-  return await resolveToolConstraint(config, 'bundler', () =>
-    getBundlerConstraintFromLockFile(existingLockFileContent),
-  );
+  const { config, updatedDeps } = updateArtifact;
+  const newVersion = updatedDeps.find(
+    (dep) => dep.depName === 'bundler',
+  )?.newVersion;
+  const constraint = await resolveToolConstraint(config, 'bundler', () => {
+    if (newVersion) {
+      return newVersion;
+    }
+    return getBundlerConstraintFromLockFile(existingLockFileContent);
+  });
+  if (newVersion) {
+    // The target version provides a fallback when no explicit constraint is set.
+    if (!isValid(constraint!) || !matches(newVersion, constraint!)) {
+      throw new Error(
+        `Cannot update Bundler to ${newVersion}: it does not satisfy constraints.bundler "${constraint}". Update or remove this constraint.`,
+      );
+    }
+    logger.debug('Using target bundler version for artifact generation');
+    return newVersion;
+  }
+  return constraint;
 }
 
 export async function getLockFilePath(
