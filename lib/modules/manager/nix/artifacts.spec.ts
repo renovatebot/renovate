@@ -50,6 +50,9 @@ flake update nixpkgs`;
 
 describe('modules/manager/nix/artifacts', () => {
   beforeEach(() => {
+    fs.getSiblingFileName.mockImplementation(
+      (fileName, siblingName) => siblingName,
+    );
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -69,6 +72,22 @@ describe('modules/manager/nix/artifacts', () => {
     });
 
     expect(res).toBeNull();
+    expect(execSnapshots).toEqual([]);
+  });
+
+  it('returns if there are no named inputs to update', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('content');
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: undefined }, { depName: ' ' }],
+      newPackageFileContent: 'some new content',
+      config,
+    });
+
+    expect(res).toBeNull();
+    expect(fs.writeLocalFile).not.toHaveBeenCalled();
     expect(execSnapshots).toEqual([]);
   });
 
@@ -210,6 +229,7 @@ describe('modules/manager/nix/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -228,6 +248,7 @@ describe('modules/manager/nix/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
+          contents: 'new flake.lock',
           path: 'flake.lock',
           type: 'addition',
         },
@@ -242,8 +263,90 @@ describe('modules/manager/nix/artifacts', () => {
     ]);
   });
 
+  it('writes newPackageFileContent', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('old flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+
+    const newContent = 'updated flake.nix content';
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: newContent,
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+      'flake.nix',
+      newContent,
+    );
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
+  });
+
+  it.each`
+    binarySource
+    ${'global'}
+    ${'docker'}
+  `(
+    'forwards runtime Git configuration in $binarySource mode',
+    async ({ binarySource }) => {
+      GlobalConfig.set(
+        binarySource === 'docker' ? dockerAdminConfig : adminConfig,
+      );
+      const gitConfig = {
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'url.https://git.example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
+      };
+      env.getChildProcessEnv.mockReturnValue({
+        ...envMock.basic,
+        ...gitConfig,
+      });
+      fs.readLocalFile.mockResolvedValueOnce('old flake.lock');
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({ modified: [] }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'flake.nix',
+        updatedDeps: [{ depName: 'nixpkgs' }],
+        newPackageFileContent: '{}',
+        config: { constraints: { nix: '2.10.0' } },
+      });
+
+      const flakeExec = execSnapshots.at(-1)!;
+      expect(flakeExec.options?.env).toMatchObject(gitConfig);
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_COUNT')).toBe(
+        binarySource === 'docker',
+      );
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_KEY_0')).toBe(
+        binarySource === 'docker',
+      );
+      expect(flakeExec.cmd.includes('-e GIT_CONFIG_VALUE_0')).toBe(
+        binarySource === 'docker',
+      );
+    },
+  );
+
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -262,6 +365,7 @@ describe('modules/manager/nix/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
+          contents: 'new flake.lock',
           path: 'flake.lock',
           type: 'addition',
         },
@@ -349,6 +453,7 @@ describe('modules/manager/nix/artifacts', () => {
 
   it('uses nix from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -370,6 +475,7 @@ describe('modules/manager/nix/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
+          contents: 'new lock',
           path: 'flake.lock',
           type: 'addition',
         },
