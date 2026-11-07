@@ -16,6 +16,7 @@ const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
 const providers = Fixtures.get('providers.tf');
 const docker = Fixtures.get('docker.tf');
 const kubernetes = Fixtures.get('kubernetes.tf');
+const google = Fixtures.get('google.tf');
 
 const helm = Fixtures.get('helm.tf');
 const lockedVersion = Fixtures.get('lockedVersion.tf');
@@ -754,6 +755,167 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'prom/prometheus',
           currentValue: 'v2.2.2',
           depType: 'kubernetes_stateful_set_v1',
+        },
+      ]);
+    });
+
+    it('extracts google resources', async () => {
+      const res = await extractPackageFile(google, 'google.tf', {});
+      expect(res?.deps).toHaveLength(31);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          depName: 'us-docker.pkg.dev/project/repo/image',
+          currentValue: '1.2.3',
+          depType: 'google_cloud_run_service',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/other',
+          currentValue: '2.0.0',
+          depType: 'google_cloud_run_service',
+        },
+        {
+          depType: 'google_cloud_run_service',
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          depType: 'google_cloud_run_service',
+          skipReason: 'contains-variable',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/v2',
+          currentValue: '3.4.5',
+          depType: 'google_cloud_run_v2_service',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/sandbox',
+          currentValue: '0.1.0',
+          depType: 'google_cloud_run_v2_service',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/worker',
+          currentValue: '1.0.0',
+          depType: 'google_cloud_run_v2_worker_pool',
+        },
+        {
+          depName: 'gcr.io/project/job',
+          currentValue: '2.1.0',
+          depType: 'google_cloud_run_v2_job',
+        },
+        {
+          depName: 'gcr.io/project/appengine',
+          currentValue: '1.5.0',
+          depType: 'google_app_engine_flexible_app_version',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/workstation',
+          currentValue: '1.1.0',
+          depType: 'google_workstations_workstation_config',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/dataproc',
+          currentValue: '2.2.0',
+          depType: 'google_dataproc_batch',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/session',
+          currentValue: '2.3.0',
+          depType: 'google_dataproc_session_template',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/dataplex-spark',
+          currentValue: '1.0.0',
+          depType: 'google_dataplex_task',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/dataplex-notebook',
+          currentValue: '1.1.0',
+          depType: 'google_dataplex_task',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/reasoning',
+          currentValue: '3.0.0',
+          depType: 'google_vertex_ai_reasoning_engine',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/model-garden',
+          currentValue: '4.0.0',
+          depType: 'google_vertex_ai_endpoint_with_model_garden_deployment',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/firebase',
+          currentValue: '5.0.0',
+          depType: 'google_firebase_app_hosting_build',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/bigquery',
+          currentValue: '6.0.0',
+          depType: 'google_bigquery_routine',
+        },
+        {
+          depName: 'gcr.io/cloud-builders/docker',
+          currentValue: '5.0.0',
+          depType: 'google_cloudbuild_trigger',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/builders/go',
+          currentValue: '1.21',
+          depType: 'google_cloudbuild_trigger',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/wasm',
+          currentValue: '7.0.0',
+          depType: 'google_network_services_wasm_plugin',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/wasm',
+          currentValue: '7.1.0',
+          depType: 'google_network_services_wasm_plugin',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/dep-a',
+          currentValue: '1.0.0',
+          depType: 'google_dataproc_gdc_spark_application',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/repo/dep-b',
+          currentValue: '2.0.0',
+          depType: 'google_dataproc_gdc_spark_application',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/deployers/custom',
+          currentValue: '1.0.0',
+          depType: 'google_clouddeploy_custom_target_type',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/renderers/custom',
+          currentValue: '1.1.0',
+          depType: 'google_clouddeploy_custom_target_type',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/verifiers/canary',
+          currentValue: '1.0.0',
+          depType: 'google_clouddeploy_delivery_pipeline',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/verifiers/phase',
+          currentValue: '3.0.0',
+          depType: 'google_clouddeploy_delivery_pipeline',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/deploys/standard',
+          currentValue: '2.0.0',
+          depType: 'google_clouddeploy_delivery_pipeline',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/deploys/standard-post',
+          currentValue: '2.1.0',
+          depType: 'google_clouddeploy_delivery_pipeline',
+        },
+        {
+          depName: 'us-docker.pkg.dev/project/verifiers/standard',
+          currentValue: '2.2.0',
+          depType: 'google_clouddeploy_delivery_pipeline',
         },
       ]);
     });
