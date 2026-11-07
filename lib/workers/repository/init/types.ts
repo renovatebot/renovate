@@ -1,5 +1,6 @@
 import type {
   RenovateConfig,
+  RenovateConfigFile,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 
@@ -23,7 +24,7 @@ export interface RepoConfigError {
 
 export interface RepoFileConfig {
   configFileName?: string;
-  configFileParsed?: any;
+  configFileParsed?: RenovateConfigFile;
   configFileParseError?: RepoConfigError;
 }
 

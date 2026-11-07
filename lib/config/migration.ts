@@ -17,7 +17,7 @@ import type {
   MigratedConfig,
   MigratedRenovateConfig,
   PackageRule,
-  RenovateConfig,
+  RenovateConfigFile,
   RenovateOptions,
 } from './types.ts';
 import { mergeChildConfig } from './utils.ts';
@@ -33,7 +33,7 @@ export function fixShortHours(input: string): string {
 let optionTypes: Record<string, RenovateOptions['type']>;
 // Returns a migrated config
 export function migrateConfig(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   parentKey?: string,
 ): MigratedConfig {
   try {
@@ -109,7 +109,7 @@ export function migrateConfig(
       } else if (isObject(val)) {
         const subMigrate = migrateConfig(
           // @ts-expect-error -- TODO: fix me
-          migratedConfig[key] as RenovateConfig,
+          migratedConfig[key] as RenovateConfigFile,
           key,
         );
         if (subMigrate.isMigrated) {

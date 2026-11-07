@@ -1,5 +1,5 @@
 import type {
-  RenovateConfig,
+  RenovateConfigFile,
   ValidationMessage,
 } from '../../../../config/types.ts';
 import type { DatasourceName } from '../../../../datasource-list.generated.ts';
@@ -33,7 +33,7 @@ export interface RollbackConfig {
 }
 
 export interface LookupUpdateConfig
-  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
+  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfigFile {
   currentVersion?: string;
   /** Whether the dependency should only be updated in the lockfile. */
   isLockfileOnly?: boolean;
