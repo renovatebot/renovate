@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/swift/extract', () => {
@@ -420,6 +422,207 @@ describe('modules/manager/swift/extract', () => {
       expect(result?.deps[0].datasource).toBe('github-tags');
       expect(result?.deps[1].datasource).toBe('gitlab-tags');
       expect(result?.deps[2].datasource).toBe('git-tags');
+    });
+
+    describe('SE-0292 .package(id:) registry form', () => {
+      it('extracts an id-form dep with from:', () => {
+        const content = codeBlock`
+          let package = Package(
+            name: "MyPackage",
+            dependencies: [
+              .package(id: "acme.somelib", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('extracts an id-form dep with a range', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib", "1.0.0"..<"2.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: '"1.0.0"..<"2.0.0"',
+          },
+        ]);
+      });
+
+      it('extracts an id-form dep with .exact(...)', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib", .exact("1.2.3")),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: '1.2.3',
+          },
+        ]);
+      });
+
+      it('extracts an id-form dep with exact: label', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib", exact: "1.2.3"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: '1.2.3',
+          },
+        ]);
+      });
+
+      it('recovers when an id-form entry is immediately followed by another .package(', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id .package(id: "acme.somelib", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('emits id-form deps without registryUrls (those are attached upstream)', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(url: "https://github.com/example/repo", from: "1.0.0"),
+              .package(id: "acme.somelib", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: 'from: "1.0.0"',
+          },
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('extracts mixed url and id forms in the same dependencies block', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib", from: "1.0.0"),
+              .package(url: "https://github.com/example/repo", "2.0.0"..<"3.0.0"),
+              .package(id: "acme.other", .exact("4.5.6")),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toHaveLength(3);
+        expect(result?.deps).toMatchObject([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+          {
+            datasource: 'github-tags',
+            depName: 'example/repo',
+            currentValue: '"2.0.0"..<"3.0.0"',
+          },
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.other',
+            currentValue: '4.5.6',
+          },
+        ]);
+      });
+
+      it('handles an id-form dep with a trailing traits: argument', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib", from: "1.0.0", traits: [.defaults]),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toMatchObject([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('does not treat "id" inside a package name as an id-form dep', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(name: "Rapid", url: "https://github.com/acme/rapid", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toMatchObject([
+          {
+            datasource: GithubTagsDatasource.id,
+            depName: 'acme/rapid',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
+      it('ignores an id-form dep that has no version requirement', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id: "acme.somelib"),
+            ]
+          )
+        `;
+        expect(extractPackageFile(content)).toBeNull();
+      });
     });
 
     it('extracts multiple dependencies with traits arguments', () => {
