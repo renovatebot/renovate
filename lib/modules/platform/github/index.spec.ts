@@ -2992,6 +2992,107 @@ describe('modules/platform/github/index', () => {
         lastModified: '2023-01-01T00:00:00Z',
       });
     });
+
+    describe('issue author', () => {
+      const issuesResponse = {
+        data: {
+          repository: {
+            issues: {
+              pageInfo: {
+                startCursor: null,
+                hasNextPage: false,
+                endCursor: null,
+              },
+              nodes: [
+                {
+                  number: 3,
+                  state: 'open',
+                  title: 'title-2',
+                  body: 'body-3',
+                  updatedAt: '2023-01-01T00:00:00Z',
+                  author: { login: 'someone-else' },
+                },
+                {
+                  number: 2,
+                  state: 'open',
+                  title: 'title-2',
+                  body: 'body-2',
+                  updatedAt: '2022-01-01T00:00:00Z',
+                  author: { login: 'my-app[bot]' },
+                },
+                {
+                  number: 1,
+                  state: 'open',
+                  title: 'title-2',
+                  body: 'body-1',
+                  updatedAt: '2021-01-01T00:00:00Z',
+                  author: null,
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      it('filters issues by the renovate username in code', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post(
+            '/graphql',
+            (body: { query: string; variables: Record<string, unknown> }) =>
+              !body.query.includes('createdBy') && !('user' in body.variables),
+          )
+          .reply(200, issuesResponse)
+          .get('/repos/some/repo/issues/2')
+          .reply(200, {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: 'body-2',
+            updated_at: '2022-01-01T00:00:00Z',
+          });
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toEqual({
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'body-2',
+          lastModified: '2022-01-01T00:00:00Z',
+        });
+      });
+
+      it('keeps issues of every author when ignorePrAuthor is set', async () => {
+        GlobalConfig.set({ ignorePrAuthor: true });
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        await github.initRepo({
+          repository: 'some/repo',
+          renovateUsername: 'my-app[bot]',
+        });
+        scope
+          .post('/graphql')
+          .reply(200, issuesResponse)
+          .get('/repos/some/repo/issues/3')
+          .reply(200, {
+            number: 3,
+            state: 'open',
+            title: 'title-2',
+            body: 'body-3',
+            updated_at: '2023-01-01T00:00:00Z',
+          });
+
+        const res = await github.findIssue('title-2');
+
+        expect(res).toMatchObject({ number: 3, body: 'body-3' });
+      });
+    });
   });
 
   describe('ensureIssue()', () => {
