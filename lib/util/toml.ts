@@ -11,5 +11,40 @@ export function parse(input: string): unknown {
 }
 
 export function massage(input: string): string {
-  return stripTemplates(input.replace(regEx(/^\s*{{.+?}}\s*=.*$/gm), ''));
+  return massageWithSourceMap(input).content;
+}
+
+export function massageWithSourceMap(input: string): {
+  content: string;
+  toOriginalOffset: (offset: number) => number;
+} {
+  const keys: [number, number][] = [];
+  const templates: [number, number][] = [];
+  const withoutKeys = input.replace(
+    regEx(/^\s*{{.+?}}\s*=.*$/gm),
+    (match, offset: number) => {
+      keys.push([offset, offset + match.length]);
+      return '';
+    },
+  );
+  const content = stripTemplates(withoutKeys, (start, end) => {
+    templates.push([start, end]);
+  });
+
+  return {
+    content,
+    toOriginalOffset: (offset) =>
+      restoreOffset(restoreOffset(offset, templates), keys),
+  };
+}
+
+function restoreOffset(offset: number, removed: [number, number][]): number {
+  let result = offset;
+  for (const [start, end] of removed) {
+    if (result < start) {
+      break;
+    }
+    result += end - start;
+  }
+  return result;
 }
