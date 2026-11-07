@@ -282,7 +282,7 @@ export class Vulnerabilities {
           logger.debug(
             `Vulnerability ${osvVulnerability.id} affects ${packageName} ${depVersion}`,
           );
-          const fixedVersion = this.getFixedVersion(
+          const { fixedVersion, lastAffectedVersion } = this.getFixedVersion(
             ecosystem,
             depVersion,
             affected,
@@ -298,6 +298,7 @@ export class Vulnerabilities {
             depVersion,
             versioning: dep.versioning,
             fixedVersion,
+            lastAffectedVersion,
             datasource: dep.datasource!,
             packageFileConfig,
           });
@@ -527,7 +528,7 @@ export class Vulnerabilities {
     depVersion: string,
     affected: Osv.Affected,
     versioningApi: VersioningApi,
-  ): string | null {
+  ): Pick<Vulnerability, 'fixedVersion' | 'lastAffectedVersion'> {
     const fixedVersions: string[] = [];
     const lastAffectedVersions: string[] = [];
 
@@ -556,7 +557,9 @@ export class Vulnerabilities {
       this.isVersionGt(version, depVersion, versioningApi),
     );
     if (fixedVersion) {
-      return this.getFixedVersionByEcosystem(fixedVersion, ecosystem);
+      return {
+        fixedVersion: this.getFixedVersionByEcosystem(fixedVersion, ecosystem),
+      };
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
@@ -564,10 +567,13 @@ export class Vulnerabilities {
       this.isVersionGtOrEq(version, depVersion, versioningApi),
     );
     if (lastAffected) {
-      return this.getLastAffectedByEcosystem(lastAffected, ecosystem);
+      return {
+        fixedVersion: this.getLastAffectedByEcosystem(lastAffected, ecosystem),
+        lastAffectedVersion: lastAffected,
+      };
     }
 
-    return null;
+    return { fixedVersion: null };
   }
 
   private getFixedVersionByEcosystem(
