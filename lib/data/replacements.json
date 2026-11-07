@@ -23,6 +23,7 @@
       "replacements:fakerjs-to-scoped",
       "replacements:fastify-to-scoped",
       "replacements:framer-motion-to-motion",
+      "replacements:fseehawer-react-circular-slider-to-fiojs",
       "replacements:google-github-action-release-please-to-googleapis",
       "replacements:grafana-oss-to-grafana",
       "replacements:hapi-to-scoped",
@@ -810,6 +811,18 @@
         "matchDatasources": ["npm"],
         "matchPackageNames": ["framer-motion"],
         "replacementName": "motion"
+      }
+    ]
+  },
+  "fseehawer-react-circular-slider-to-fiojs": {
+    "description": "`@fseehawer/react-circular-slider` moved to `@fiojs/react-circular-slider`. Version 3.3.8 under the new name is identical in API and behavior to version 3.3.7, the last one published under the old name.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@fseehawer/react-circular-slider"],
+        "replacementName": "@fiojs/react-circular-slider",
+        "replacementVersion": "3.3.8"
       }
     ]
   },
