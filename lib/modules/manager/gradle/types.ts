@@ -20,7 +20,7 @@ export interface VariableData extends GradleManagerData {
 }
 
 export type PackageVariables = Record<string, VariableData>;
-export type VariableRegistry = Record<string, PackageVariables>;
+export type VariableRegistry = Partial<Record<string, PackageVariables>>;
 
 export interface ParseGradleResult {
   deps: PackageDependency<GradleManagerData>[];
@@ -108,7 +108,7 @@ export interface Ctx {
   tmpNestingDepth: lexer.Token[];
   tmpRegistryContent: ContentDescriptorSpec[];
   tmpTokenStore: Record<string, lexer.Token[]>;
-  tokenMap: Record<string, lexer.Token[]>;
+  tokenMap: Partial<Record<string, lexer.Token[]>>;
 }
 
 export type NonEmptyArray<T> = T[] & { 0: T };

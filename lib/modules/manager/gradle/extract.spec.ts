@@ -13,7 +13,7 @@ function mockFs(files: Record<string, string>): void {
     (fileNames: string[]): Promise<Record<string, string | null>> => {
       const fileContentMap: Record<string, string | null> = {};
       for (const fileName of fileNames) {
-        fileContentMap[fileName] = files?.[fileName];
+        fileContentMap[fileName] = files[fileName];
       }
 
       return Promise.resolve(fileContentMap);

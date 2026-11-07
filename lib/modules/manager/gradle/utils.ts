@@ -6,6 +6,7 @@ import type { PackageDependency } from '../types.ts';
 import type {
   GradleManagerData,
   PackageVariables,
+  VariableData,
   VariableRegistry,
 } from './types.ts';
 
@@ -24,7 +25,7 @@ export function versionLikeSubstring(
   }
 
   const match = versionLikeRegex.exec(input);
-  const version = match?.groups?.version?.trim();
+  const version = match?.groups?.version.trim();
   if (!version || !regEx(/\d/).test(version)) {
     return null;
   }
@@ -199,14 +200,14 @@ export function reorderFiles(packageFiles: string[]): string[] {
 export function getVars(
   registry: VariableRegistry,
   dir: string,
-  vars: PackageVariables = registry[dir] || {},
+  vars: PackageVariables = coerceObject(registry[dir]),
 ): PackageVariables {
   const dirAbs = toAbsolutePath(dir);
   const parentDir = upath.dirname(dirAbs);
   if (parentDir === dirAbs) {
     return vars;
   }
-  const parentVars = registry[parentDir] || {};
+  const parentVars = coerceObject(registry[parentDir]);
   return getVars(registry, parentDir, { ...parentVars, ...vars });
 }
 
@@ -232,11 +233,13 @@ export function updateVarsFromDefaultCatalog(
   const rootDir = upath.dirname(dir);
   const oldVars = coerceObject(registry[rootDir]);
   let defaultLibsExtName = 'libs';
+  const defaultLibsExt = oldVars.defaultLibrariesExtensionName as
+    VariableData | undefined;
   if (
-    oldVars.defaultLibrariesExtensionName?.packageFile &&
-    isGradleSettingsFile(oldVars.defaultLibrariesExtensionName.packageFile)
+    defaultLibsExt?.packageFile &&
+    isGradleSettingsFile(defaultLibsExt.packageFile)
   ) {
-    defaultLibsExtName = oldVars.defaultLibrariesExtensionName.value;
+    defaultLibsExtName = defaultLibsExt.value;
   }
 
   const newVarsRemapped: PackageVariables = {};
