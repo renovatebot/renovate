@@ -3,6 +3,7 @@ import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
+import type { Preset } from './presets/types.ts';
 import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
 import * as configValidation from './validation.ts';
 
@@ -3398,6 +3399,65 @@ describe('config/validation', () => {
             message: expect.toStartWith(
               `"managerFilePatterns" can't be used at the top level of a config, as it can only be used `,
             ),
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('customPresets', async () => {
+        const customPresets: Record<string, Preset> = {};
+        Object.assign(
+          customPresets,
+          {
+            customPresets: {
+              myPreset: {
+                description: 'My custom preset', // requires migration to an array
+                labels: ['custom-label'],
+              },
+              badPreset: {
+                matchPackageNames: ['foo'], // invalid outside of packageRules
+              },
+              invalidPreset: 'not an object',
+            },
+          }.customPresets,
+        );
+        const config = partial<AllConfig>({ customPresets });
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid `customPresets.invalidPreset` configuration: preset must be an object.',
+          },
+          {
+            topic: 'Configuration Error',
+            message:
+              'customPresets.badPreset.matchPackageNames: matchPackageNames should be inside a `packageRule` only',
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('warns when customPresets is configured in inherited config', async () => {
+        const config = {
+          customPresets: {
+            myPreset: {
+              labels: ['custom-label'],
+            },
+          },
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          'inherit',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'The "customPresets" option is a global option reserved only for Renovate\'s global configuration and cannot be configured within a repository\'s config file.',
           },
         ]);
         expect(errors).toBeEmptyArray();

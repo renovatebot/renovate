@@ -26,6 +26,7 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type { Preset } from './presets/types.ts';
 import type { ConfigValidationTopic } from './validation-helpers/types.ts';
 
 export type RenovateConfigStage =
@@ -250,6 +251,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
+  customPresets?: Record<string, Preset>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
   dockerSidecarImage?: string;
