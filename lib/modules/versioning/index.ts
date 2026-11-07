@@ -25,7 +25,7 @@ export function get(versioning: string | null | undefined): VersioningApi {
   const res = Versioning.safeParse(versioning ?? defaultVersioning.id);
 
   if (!res.success) {
-    const [issue] = res.error.issues;
+    const issue = res.error.issues.at(0);
     // v8 ignore else -- a string input can only fail with the custom issue
     if (issue?.code === 'custom' && issue.params?.error) {
       throw issue.params.error;

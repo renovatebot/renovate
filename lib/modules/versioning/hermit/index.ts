@@ -26,7 +26,7 @@ export class HermitVersioning extends RegExpVersioningApi {
   }
 
   private _parseHermitVersioning(version: string): RegExpVersion | null {
-    const groups = this._config?.exec(version)?.groups;
+    const groups = this._config.exec(version)?.groups;
     if (!groups) {
       return null;
     }
@@ -65,7 +65,7 @@ export class HermitVersioning extends RegExpVersioningApi {
     }
     const channelVer = HermitVersioning._getChannel(version);
 
-    const groups = this._config?.exec(channelVer)?.groups;
+    const groups = this._config.exec(channelVer)?.groups;
 
     if (!groups) {
       return null;
@@ -153,8 +153,8 @@ export class HermitVersioning extends RegExpVersioningApi {
         : otherReleases.length;
 
     for (let i = 0; i < maxLength; i++) {
-      const verVal = versionReleases[i];
-      const otherVal = otherReleases[i];
+      const verVal = versionReleases.at(i);
+      const otherVal = otherReleases.at(i);
 
       if (
         verVal !== undefined &&

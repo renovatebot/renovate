@@ -12,7 +12,7 @@ const versionRegex = regEx(
 );
 
 export function parseVersion(input: string): NugetVersion | null {
-  const groups = versionRegex.exec(input?.trim())?.groups;
+  const groups = versionRegex.exec(input.trim())?.groups;
   if (!groups) {
     return null;
   }

@@ -59,9 +59,11 @@ export function parsePartialVersion(
     return null;
   }
   const major = parseInt(groups.major, 10);
-  return groups.minor === undefined
+  const optionalGroups: Partial<Record<string, string>> = groups;
+  const { minor } = optionalGroups;
+  return minor === undefined
     ? { major }
-    : { major, minor: parseInt(groups.minor, 10) };
+    : { major, minor: parseInt(minor, 10) };
 }
 
 /**

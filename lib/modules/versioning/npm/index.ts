@@ -88,7 +88,7 @@ function isSingleVersion(constraint: string): boolean {
     return true;
   }
   return (
-    constraint?.startsWith('=') && isVersion(constraint.substring(1).trim())
+    constraint.startsWith('=') && isVersion(constraint.substring(1).trim())
   );
 }
 

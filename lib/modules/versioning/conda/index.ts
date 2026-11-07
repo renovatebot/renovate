@@ -131,10 +131,10 @@ function isCompatible(_version: string, _current?: string): boolean {
 }
 
 function getMajor(version: string | SemVer): null | number {
-  return parse(version as string)?.asMajorMinor?.()?.[0] ?? null;
+  return parse(version as string)?.asMajorMinor()?.[0] ?? null;
 }
 function getMinor(version: string | SemVer): null | number {
-  return parse(version as string)?.asMajorMinor?.()?.[1] ?? null;
+  return parse(version as string)?.asMajorMinor()?.[1] ?? null;
 }
 
 function getPatch(version: string | SemVer): null | number {

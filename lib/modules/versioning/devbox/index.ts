@@ -56,8 +56,8 @@ class DevboxVersioningApi extends GenericVersioningApi {
     const length = Math.max(parsed1.release.length, parsed2.release.length);
     for (let i = 0; i < length; i += 1) {
       // 2.1 and 2.1.0 are equivalent
-      const part1 = parsed1.release[i];
-      const part2 = parsed2.release[i];
+      const part1 = parsed1.release.at(i);
+      const part2 = parsed2.release.at(i);
       // if part1 or part2 is undefined, we should treat them as equal
       // e.g. 1.0.0 === 1.0
       if (part1 !== undefined && part2 !== undefined && part1 !== part2) {

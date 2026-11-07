@@ -35,7 +35,7 @@ function equals(a: string, b: string): boolean {
 function getMajor(version: string): number | null {
   const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
-    const majorToken = tokens?.[0];
+    const majorToken = tokens.at(0);
     if (majorToken?.type === TokenType.Number) {
       return parseInt(majorToken.val.toString(), 10);
     }
@@ -46,8 +46,8 @@ function getMajor(version: string): number | null {
 function getMinor(version: string): number | null {
   const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
-    const majorToken = tokens[0];
-    const minorToken = tokens[1];
+    const majorToken = tokens.at(0);
+    const minorToken = tokens.at(1);
     if (
       majorToken?.type === TokenType.Number &&
       minorToken?.type === TokenType.Number
@@ -62,9 +62,9 @@ function getMinor(version: string): number | null {
 function getPatch(version: string): number | null {
   const tokens = parse(version && stripVersionPrefix(version));
   if (tokens) {
-    const majorToken = tokens[0];
-    const minorToken = tokens[1];
-    const patchToken = tokens[2];
+    const majorToken = tokens.at(0);
+    const minorToken = tokens.at(1);
+    const patchToken = tokens.at(2);
     if (
       majorToken?.type === TokenType.Number &&
       minorToken?.type === TokenType.Number &&
@@ -91,7 +91,7 @@ function getExactSection(
   }
   const sectionIndex = sectionIndexes[type];
   if (sectionIndex === 0) {
-    const token = tokens[sectionIndex];
+    const token = tokens.at(sectionIndex);
     return token?.type === TokenType.Number && isBigint(token.val)
       ? token.val
       : null;

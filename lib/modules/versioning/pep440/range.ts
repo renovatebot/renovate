@@ -1,11 +1,14 @@
 import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
-import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
+import { parse as parseSpecifier } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig } from '../types.ts';
+
+// The typings of `parse` omit the `null` it returns for an invalid range.
+const parseRange: (ranges: string) => Range[] | null = parseSpecifier;
 
 const UserPolicyPrecisionMap = {
   Major: 0,
@@ -230,26 +233,27 @@ export function isLessThanRange(input: string, range: string): boolean {
   try {
     let invertResult = true;
 
-    const results = range
-      .split(',')
-      .map((x) =>
-        x
-          .replace(regEx(/\s*/g), '')
-          .split(regEx(/(?<op>~=|==|!=|<=|>=|<|>|===)/))
-          .slice(1),
-      )
-      .map(([op, version]) => {
-        if (['!=', '<=', '<'].includes(op)) {
-          return true;
-        }
-        invertResult = false;
-        if (['~=', '==', '>=', '==='].includes(op)) {
-          return lt(input, version);
-        }
-        // the split regex only yields pep440 operators, and `>` is the one
-        // left unhandled above
-        return lte(input, version);
-      });
+    const constraints = range.split(',').map((x) =>
+      x
+        .replace(regEx(/\s*/g), '')
+        .split(regEx(/(?<op>~=|==|!=|<=|>=|<|>|===)/))
+        .slice(1),
+    );
+    const results: boolean[] = [];
+    for (const [op, version] of constraints) {
+      if (['!=', '<=', '<'].includes(op)) {
+        results.push(true);
+        continue;
+      }
+      invertResult = false;
+      if (['~=', '==', '>=', '==='].includes(op)) {
+        results.push(lt(input, version));
+        continue;
+      }
+      // the split regex only yields pep440 operators, and `>` is the one
+      // left unhandled above
+      results.push(lte(input, version));
+    }
 
     const result = results.every((res) => res === true);
 
@@ -260,7 +264,7 @@ export function isLessThanRange(input: string, range: string): boolean {
 }
 
 function parseCurrentRange(currentValue: string): Range[] {
-  const ranges: Range[] = parseRange(currentValue);
+  const ranges = parseRange(currentValue);
   if (!ranges) {
     throw new TypeError('Invalid pep440 currentValue');
   }
