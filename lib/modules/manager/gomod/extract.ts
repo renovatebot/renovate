@@ -129,7 +129,7 @@ export function convertGoDirectiveToSemVerRange(
 
   const parts = goDirective.split('.');
   return {
-    version: `~${parts[0]}.${parts[1]}.x`,
+    version: `<=${parts[0]}.${parts[1]}.x`,
     versioning: 'semver-coerced',
   };
 }

@@ -3,9 +3,9 @@ import { logger } from '../../../logger/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { getEnv } from '../../../util/env.ts';
-import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { parseUrl } from '../../../util/url.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { id as semverId } from '../../versioning/semver/index.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -52,11 +52,6 @@ export class GoDatasource extends Datasource {
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
-  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
-  static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
-  );
-
   private _getReleases(
     config: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
@@ -74,7 +69,7 @@ export class GoDatasource extends Datasource {
           config.packageName,
           constraintsFilteringKey,
         ),
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getReleases(config),
@@ -110,9 +105,7 @@ export class GoDatasource extends Datasource {
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      newValue &&
-      !GoDatasource.pversionRegexp.test(newValue) &&
-      newValue !== 'v0.0.0'
+      newValue && !parseVersionCommit(newValue) && newValue !== 'v0.0.0'
         ? newValue
         : undefined;
 
@@ -150,7 +143,7 @@ export class GoDatasource extends Datasource {
       {
         namespace: `datasource-${GoDatasource.id}`,
         key: buildCacheKey('getDigest', config.packageName, newValue),
-        cacheable: isPublicGoPackage(config.packageName),
+        public: isPublicGoPackage(config.packageName),
         fallback: true,
       },
       () => this._getDigest(config, newValue),

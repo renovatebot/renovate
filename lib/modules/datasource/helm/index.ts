@@ -9,6 +9,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { isForbidden } from '../../../util/http/status.ts';
 import type { S3UrlParts } from '../../../util/s3.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
@@ -146,7 +147,7 @@ function classifyS3Error(
 
   if (
     err.name === 'CredentialsProviderError' ||
-    err.$metadata?.httpStatusCode === 403
+    isForbidden(err.$metadata?.httpStatusCode)
   ) {
     logger.debug(
       { indexUrl, err },

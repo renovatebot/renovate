@@ -147,7 +147,7 @@ async function prepareRawExec(
   ) {
     logger.once.debug(
       { toolConstraints: opts.toolConstraints },
-      'Ignoring tool contraints because of `binarySource=global`',
+      'Ignoring tool constraints because of `binarySource=global`',
     );
   }
 

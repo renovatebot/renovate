@@ -14,7 +14,7 @@ import { detectSemanticCommits } from '../../../util/git/semantic.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
-import { parseUrl } from '../../../util/url.ts';
+import { parseUrl, withoutUrlCredentials } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
@@ -24,7 +24,7 @@ function upper(str: string): string {
 }
 
 export function sanitizeDepName(depName: string): string {
-  return depName
+  return withoutUrlCredentials(depName)
     .replace(regEx(/\$\{[^}]+\}\/?/g), '')
     .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
@@ -75,6 +75,28 @@ export function applyUpdateConfig(input: BranchUpgradeConfig): any {
   }
   generateBranchName(updateConfig);
   return updateConfig;
+}
+
+// packageRules can set `isVulnerabilityAlert` without forcing `vulnerabilityAlerts`,
+// so the security concurrency limits are applied here
+function applyVulnerabilityConcurrentLimits(
+  updateConfig: BranchUpgradeConfig,
+): void {
+  if (!updateConfig.isVulnerabilityAlert) {
+    return;
+  }
+  // `vulnerabilityAlerts` is typed as `RenovateSharedConfig`, which doesn't declare `prConcurrentLimit`/
+  // `branchConcurrentLimit`, even though both are valid nested options
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  const vulnerabilityAlerts = updateConfig.vulnerabilityAlerts as
+    RenovateConfig | undefined;
+  if (!isUndefined(vulnerabilityAlerts?.prConcurrentLimit)) {
+    updateConfig.prConcurrentLimit = vulnerabilityAlerts.prConcurrentLimit;
+  }
+  if (!isUndefined(vulnerabilityAlerts?.branchConcurrentLimit)) {
+    updateConfig.branchConcurrentLimit =
+      vulnerabilityAlerts.branchConcurrentLimit;
+  }
 }
 
 export async function flattenUpdates(
@@ -160,6 +182,7 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
+            applyVulnerabilityConcurrentLimits(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;

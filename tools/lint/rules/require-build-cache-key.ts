@@ -112,11 +112,9 @@ function getCacheKeyArgument(
  */
 function getFunctionNames(node: ESTree.Node): (string | undefined)[] {
   const names: (string | undefined)[] = [];
-  if (
-    (node.type === 'FunctionDeclaration' ||
-      node.type === 'FunctionExpression') &&
-    node.id
-  ) {
+  const isFunctionNode =
+    node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression';
+  if (isFunctionNode && node.id) {
     names.push(node.id.name);
   }
 

@@ -34,6 +34,7 @@ describe('modules/manager/mise/extract', () => {
       [tools]
       erlang = '23.3'
       node = '16'
+      swift = '6.3.3'
     `;
       const result = await extractPackageFile(content, miseFilename);
       expect(result).toMatchObject({
@@ -49,6 +50,14 @@ describe('modules/manager/mise/extract', () => {
             depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
+          },
+          {
+            depName: 'swift',
+            depType: 'tools',
+            currentValue: '6.3.3',
+            datasource: 'github-releases',
+            packageName: 'swiftlang/swift',
+            extractVersion: '^swift-(?<version>.+)-RELEASE$',
           },
         ],
       });
@@ -1364,6 +1373,116 @@ describe('modules/manager/mise/extract', () => {
         ],
         lockFiles: ['mise.lock'],
       });
+    });
+
+    it('extracts tool versions as constraints, preferring the locked version', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        python = "3.10"
+        "npm:pnpm" = "10.16.1"
+        "aqua:astral-sh/uv[bin=uv]" = "latest"
+        rust = "stable"
+        terraform = "1.9.0"
+
+        [tasks.build]
+        tools = { java = "21" }
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.sharedConstraintsScope).toEqual({
+        directory: '',
+        precedence: expect.any(Number),
+        constraints: {
+          node: { depName: 'node', value: '20.11.0' },
+          python: { depName: 'python', value: '3.10.17' },
+          pnpm: { depName: 'npm:pnpm', value: '10.16.1' },
+          uv: { depName: 'aqua:astral-sh/uv', value: null },
+          rust: { depName: 'rust', value: null },
+        },
+      });
+      expect(result).not.toHaveProperty('extractedConstraints');
+    });
+
+    it('shares the locked version of a tool alias, a selector and a tool without a version', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        nodejs = "lts"
+        python = { virtualenv = ".venv" }
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.sharedConstraintsScope?.constraints).toEqual({
+        node: { depName: 'node', value: '20.11.0' },
+        python: { depName: 'python', value: '3.10.17' },
+      });
+    });
+
+    it('shares the configured version if the locked version does not start with it', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "22.1.0"
+        python = "3"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.sharedConstraintsScope?.constraints).toEqual({
+        node: { depName: 'node', value: '22.1.0' },
+        python: { depName: 'python', value: '3.10.17' },
+      });
+    });
+
+    it('does not share the constraints of an environment config file', async () => {
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.production.toml');
+
+      expect(result).not.toHaveProperty('sharedConstraintsScope');
+      expect(result).not.toHaveProperty('extractedConstraints');
+    });
+
+    it('shares no value for tool versions which are no constraint', async () => {
+      const content = codeBlock`
+        [tools]
+        node = "lts"
+        python = "3.10"
+        elixir = "1.17.3-otp-27"
+        "npm:pnpm" = "ref:main"
+        terraform = "1.9.0"
+      `;
+
+      const result = await extractPackageFile(content, 'apps/web/mise.toml');
+
+      expect(result?.sharedConstraintsScope).toEqual({
+        directory: 'apps/web',
+        precedence: expect.any(Number),
+        constraints: {
+          node: { depName: 'node', value: null },
+          python: { depName: 'python', value: null },
+          elixir: { depName: 'elixir', value: null },
+          pnpm: { depName: 'npm:pnpm', value: null },
+        },
+      });
+    });
+
+    it('does not share constraints of tools which are no Containerbase tools', async () => {
+      const content = codeBlock`
+        [tools]
+        terraform = "1.9.0"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result).not.toHaveProperty('sharedConstraintsScope');
     });
 
     it('sets lockFiles array when lock file present', async () => {

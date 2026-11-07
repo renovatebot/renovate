@@ -1187,6 +1187,142 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
+  it.each`
+    userinfo                         | unexpected
+    ${'bob:secretpassword123456'}    | ${['bob', 'secretpassword123456']}
+    ${'$USER:literalpassword123456'} | ${['USER', 'literalpassword123456']}
+    ${'bob:${PASSWORD}'}             | ${['bob']}
+    ${'secrettoken1234567890'}       | ${['secrettoken1234567890']}
+    ${"user:'${PYPI_PASS}"}          | ${['user', 'PYPI_PASS']}
+    ${"user:${PYPI_PASS}'"}          | ${['user', 'PYPI_PASS']}
+  `(
+    'does not pass environment vars named after the literal userinfo of $userinfo',
+    async ({ userinfo, unexpected }) => {
+      fsExtra.ensureDir.mockResolvedValue(undefined);
+      statMock.mockResolvedValueOnce(partial<Stats>());
+      mockFiles({
+        '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
+      });
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['Pipfile.lock'],
+        }),
+      );
+      hostRules.add({
+        matchHost: 'mypypi.example.com',
+        username: 'usernameOne',
+        password: 'passwordTwo',
+      });
+
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: codeBlock`
+          [[source]]
+          url = "https://${userinfo}@mypypi.example.com/simple"
+          verify_ssl = true
+          name = "private"
+
+          [packages]
+          requests = {version = "==0.21.0", index = "private"}
+        `,
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      });
+
+      const env = execSnapshots[0].options!.env!;
+      for (const name of unexpected) {
+        expect(env).not.toHaveProperty(name);
+      }
+      expect(JSON.stringify(env)).not.toContain('usernameOne');
+    },
+  );
+
+  it.each`
+    userinfo                 | env
+    ${'bob:${PASSWORD}'}     | ${{ PASSWORD: 'passwordTwo' }}
+    ${'$user:$pass'}         | ${{ user: 'usernameOne', pass: 'passwordTwo' }}
+    ${'$USER:${PASS:-x}'}    | ${{ USER: 'usernameOne', PASS: 'passwordTwo' }}
+    ${'$USER:${PASS-x}'}     | ${{ USER: 'usernameOne', PASS: 'passwordTwo' }}
+    ${'$TOKEN'}              | ${{ TOKEN: 'usernameOne' }}
+    ${"user:'${PYPI_PASS}'"} | ${{ PYPI_PASS: 'passwordTwo' }}
+  `(
+    'passes the environment vars of the references in $userinfo',
+    async ({ userinfo, env }) => {
+      fsExtra.ensureDir.mockResolvedValue(undefined);
+      statMock.mockResolvedValueOnce(partial<Stats>());
+      mockFiles({
+        '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
+      });
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['Pipfile.lock'],
+        }),
+      );
+      hostRules.add({
+        matchHost: 'mypypi.example.com',
+        username: 'usernameOne',
+        password: 'passwordTwo',
+      });
+
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: codeBlock`
+          [[source]]
+          url = "https://${userinfo}@mypypi.example.com/simple"
+          verify_ssl = true
+          name = "private"
+
+          [packages]
+          requests = {version = "==0.21.0", index = "private"}
+        `,
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      });
+
+      expect(execSnapshots).toMatchObject([{ options: { env } }]);
+    },
+  );
+
+  it('passes the environment var of the placeholder password next to a literal username', async () => {
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
+    mockFiles({
+      '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
+    });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+    hostRules.add({
+      matchHost: 'mypypi.example.com',
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
+
+    await updateArtifacts({
+      packageFileName: 'Pipfile',
+      updatedDeps: [],
+      newPackageFileContent: codeBlock`
+        [[source]]
+        url = "https://bob:\${PASSWORD}@mypypi.example.com/simple"
+        verify_ssl = true
+        name = "private"
+
+        [packages]
+        requests = {version = "==0.21.0", index = "private"}
+      `,
+      config: { ...config, constraints: { python: '== 3.8.*' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { options: { env: { PASSWORD: 'passwordTwo' } } },
+    ]);
+  });
+
   it('passes Google Artifact Registry credential environment vars', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
     statMock.mockResolvedValueOnce(partial<Stats>());
@@ -1256,6 +1392,20 @@ describe('modules/manager/pipenv/artifacts', () => {
     ${'${USERNAME}'}                | ${'USERNAME'}
     ${'${USERNAME:-default}'}       | ${'USERNAME'}
     ${'${COMPLEX_NAME_1:-default}'} | ${'COMPLEX_NAME_1'}
+    ${'${NAME-default}'}            | ${'NAME'}
+    ${'$lower_name'}                | ${'lower_name'}
+    ${'bob'}                        | ${null}
+    ${'secretpassword123456'}       | ${null}
+    ${'$1ABC'}                      | ${null}
+    ${'${USER}extra'}               | ${null}
+    ${'pa$$word'}                   | ${null}
+    ${"'${PYPI_PASS}'"}             | ${'PYPI_PASS'}
+    ${'%27%24%7BPYPI_PASS%7D%27'}   | ${'PYPI_PASS'}
+    ${"'${PYPI_PASS:-x}'"}          | ${'PYPI_PASS'}
+    ${"'${X}"}                      | ${null}
+    ${"${X}'"}                      | ${null}
+    ${"'$X'"}                       | ${null}
+    ${'${}'}                        | ${null}
   `('extractEnvironmentVariableName($credential)', ({ credential, result }) => {
     expect(extractEnvironmentVariableName(credential)).toEqual(result);
   });
