@@ -1,5 +1,9 @@
 import * as httpMock from '~test/http-mock.ts';
-import type { GithubDigestFile } from '../../../util/github/types.ts';
+import { partial } from '~test/util.ts';
+import type {
+  GithubDigestFile,
+  GithubRestRelease,
+} from '../../../util/github/types.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { GithubReleaseAttachmentsDatasource } from './index.ts';
 import { GitHubReleaseAttachmentMocker } from './test/index.ts';
@@ -13,6 +17,62 @@ describe('modules/datasource/github-release-attachments/digest', () => {
   const githubReleaseAttachments = new GithubReleaseAttachmentsDatasource();
 
   describe('findDigestAsset', () => {
+    it.each`
+      name
+      ${'SHASUMS.txt'}
+      ${'SHA512-SUMS.txt'}
+      ${'SHASUMS256.txt'}
+      ${'SHA256SUMS'}
+      ${'SHA384SUMS'}
+      ${'actionlint_1.7.12_checksums.txt'}
+      ${'sha256.sum'}
+      ${'uv-x86_64-unknown-linux-gnu.tar.gz.sha256'}
+      ${'release.tar.gz.sha512'}
+    `('reads $name when it is larger than a small asset', async ({ name }) => {
+      const padding = `${'0'.repeat(64)} `;
+      const lines = Array.from(
+        { length: 80 },
+        (_, i) => `${padding}other-asset-${i}.tar.gz`,
+      );
+      lines.push('test-digest    linux-amd64.tar.gz');
+      const manifest = lines.join('\n');
+      expect(manifest.length).toBeGreaterThan(5 * 1024);
+      const release = releaseMock.withAssets('v1.0.0', { [name]: manifest });
+
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
+        release,
+        'test-digest',
+      );
+      expect(digestAsset?.assetName).toBe(name);
+      expect(digestAsset?.digestedFileName).toBe('linux-amd64.tar.gz');
+    });
+
+    it.each`
+      name                   | size
+      ${'anything.zip'}      | ${6 * 1024}
+      ${'checksums.txt.asc'} | ${6 * 1024}
+      ${'SHA1SUMS.txt'}      | ${6 * 1024}
+      ${'SHASUMS.txt'}       | ${65 * 1024}
+    `('does not read $name at $size bytes', async ({ name, size }) => {
+      const release = partial<GithubRestRelease>({
+        tag_name: 'v1.0.0',
+        assets: [
+          {
+            name,
+            size,
+            url: 'https://api.github.com/unused',
+            browser_download_url: 'https://api.github.com/unused',
+          },
+        ],
+      });
+
+      const digestFile = await githubReleaseAttachments.findDigestFile(
+        release,
+        'test-digest',
+      );
+      expect(digestFile).toBeNull();
+    });
+
     it('finds SHASUMS.txt file containing digest', async () => {
       const release = releaseMock.withDigestFileAsset(
         'v1.0.0',
