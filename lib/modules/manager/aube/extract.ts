@@ -1,0 +1,116 @@
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import {
+  getParentDir,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs/index.ts';
+import { extractPackageJson } from '../npm/extract/common/package-file.ts';
+import type { NpmPackage } from '../npm/extract/types.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
+import type { NpmManagerData } from '../npm/types.ts';
+import { filesMatchingWorkspaces } from '../npm/workspaces.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
+
+const lockFileName = 'aube-lock.yaml';
+
+function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
+  return (
+    fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
+  );
+}
+
+export async function processPackageFile(
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<NpmrcPackageFile<NpmManagerData> | null> {
+  const fileContent = await readLocalFile(packageFile, 'utf8');
+  if (!fileContent) {
+    logger.warn({ fileName: packageFile }, 'Could not read file content');
+    return null;
+  }
+  let packageJson: NpmPackage;
+  try {
+    packageJson = JSON.parse(fileContent);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing package.json');
+    return null;
+  }
+  const result = extractPackageJson(packageJson, packageFile);
+  if (!result) {
+    logger.debug({ packageFile }, 'No dependencies found');
+    return null;
+  }
+
+  const { npmrc, npmrcFileName, repoNpmrc } = await resolveNpmrc(
+    packageFile,
+    config,
+  );
+
+  return {
+    ...result,
+    packageFile,
+    ...(isString(npmrc) && { npmrc }),
+    managerData: {
+      ...result.managerData,
+      // store npmrc file name so that a repository `.npmrc` which is not cached is read from disk again
+      npmrcFileName,
+      // stored instead of `npmrc` in the repository cache, from which `npmrc` is rebuilt
+      ...(repoNpmrc && { repoNpmrc }),
+    },
+  };
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  matchedFiles: string[],
+): Promise<NpmrcPackageFile<NpmManagerData>[]> {
+  const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [];
+  const allLockFiles = matchedFiles.filter((file) =>
+    matchesFileName(file, lockFileName),
+  );
+  if (allLockFiles.length === 0) {
+    logger.debug('No aube lockfiles found');
+    return packageFiles;
+  }
+  const allPackageJson = matchedFiles.filter((file) =>
+    matchesFileName(file, 'package.json'),
+  );
+  for (const lockFile of allLockFiles) {
+    const packageFile = getSiblingFileName(lockFile, 'package.json');
+    const res = await processPackageFile(packageFile, config);
+    if (res) {
+      packageFiles.push({ ...res, lockFiles: [lockFile] });
+    }
+    // Check if package.json contains workspaces
+    let workspaces = res?.managerData?.workspaces;
+
+    // Support the nested packages property shape
+    if (isPlainObject(workspaces) && 'packages' in workspaces) {
+      workspaces = workspaces.packages;
+    }
+
+    if (!isArray(workspaces, isString)) {
+      continue;
+    }
+
+    logger.debug(`Found aube workspaces in ${packageFile}`);
+    const pwd = getParentDir(packageFile);
+    const workspacePackageFiles = filesMatchingWorkspaces(
+      pwd,
+      allPackageJson,
+      workspaces,
+    );
+    if (workspacePackageFiles.length) {
+      logger.debug({ workspacePackageFiles }, 'Found aube workspace files');
+      for (const workspaceFile of workspacePackageFiles) {
+        const workspaceRes = await processPackageFile(workspaceFile, config);
+        if (workspaceRes) {
+          packageFiles.push({ ...workspaceRes, lockFiles: [lockFile] });
+        }
+      }
+    }
+  }
+
+  return packageFiles;
+}

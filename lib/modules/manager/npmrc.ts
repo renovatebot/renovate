@@ -9,7 +9,7 @@ import type { NpmrcPackageFile, PackageFile } from './types.ts';
 function asNpmrcPackageFiles(
   files: PackageFile[],
 ): NpmrcPackageFile<NpmManagerData>[] {
-  // the managers with `supportsNpmrc` (npm and bun) extract their package files with npm manager data
+  // the managers with `supportsNpmrc` (npm, aube and bun) extract their package files with npm manager data
   return files as NpmrcPackageFile<NpmManagerData>[];
 }
 

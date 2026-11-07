@@ -10,8 +10,8 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
+import { filesMatchingWorkspaces } from '../npm/workspaces.ts';
 import type { ExtractConfig, NpmrcPackageFile } from '../types.ts';
-import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
