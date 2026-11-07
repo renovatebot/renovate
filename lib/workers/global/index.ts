@@ -30,6 +30,7 @@ import { instrument } from '../../instrumentation/index.ts';
 import {
   exportStats,
   finalizeReport,
+  startReport,
 } from '../../instrumentation/reporting.ts';
 import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
@@ -144,6 +145,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 
 export async function start(): Promise<number> {
   logger.info({ renovateVersion: pkg.version }, 'Renovate started');
+  startReport();
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
     logger.debug('Using RE2 regex engine');

@@ -47,11 +47,20 @@ export interface SpanParameters {
 }
 
 export interface Report {
+  renovateVersion: string;
+  /** ISO timestamp of when the Renovate run started */
+  startedAt?: string;
+  /** ISO timestamp of when the Renovate run finished */
+  finishedAt?: string;
   problems: BunyanRecord[];
   repositories: Record<string, RepoReport>;
 }
 
 interface RepoReport {
+  /** ISO timestamp of when processing of the repository started */
+  startedAt?: string;
+  /** ISO timestamp of when processing of the repository finished */
+  finishedAt?: string;
   problems: BunyanRecord[];
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
