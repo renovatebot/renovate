@@ -42,6 +42,7 @@ export class GlobalConfig {
     'githubTokenWarn',
     'goEnvFromHostRules',
     'httpCacheTtlDays',
+    'ignoreHiddenUnicodeCharacters',
     'ignorePrAuthor',
     'includeMirrors',
     'inheritConfigTrusted',
