@@ -810,6 +810,39 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
   Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
+## `gitCredentialPassing`
+
+Controls how Renovate passes the platform credentials to Git.
+
+Possible values:
+
+- `url` (default): embed the credentials in the Git remote URL
+- `store`: keep the credentials out of the Git remote URL and pass them via the [Git credential store](https://git-scm.com/docs/git-credential-store)
+
+Use `store` if your GitLab instance has Kerberos authentication enabled.
+When the credentials are part of the URL, Git tries Kerberos (`Negotiate`) authentication and can not fall back to Basic authentication with the token, so Git operations fail with `HTTP Basic: Access denied`.
+Read the [GitLab docs about HTTP Git access with Kerberos](https://docs.gitlab.com/integration/kerberos/#http-git-access) to learn more.
+
+When set to `store`, Renovate will, during platform initialization:
+
+1. Set the `credential.<endpoint>.helper` setting in the global Git configuration (`~/.gitconfig`, or the file in `GIT_CONFIG_GLOBAL`) to an empty value followed by `store`, so that Git uses only the credential store for the GitLab endpoint
+1. Create or update the entry for the GitLab endpoint in the `~/.git-credentials` file, if the file does not already have the current username and token
+
+Both files must be writable by Renovate.
+Renovate does not revert these changes when it finishes.
+
+The empty value makes Git ignore credential helpers for the GitLab endpoint which were configured before.
+Renovate also passes these settings, and the username, to its own Git processes as `GIT_CONFIG_*` environment variables, which take precedence over all Git config files.
+This matters when Renovate runs in a GitLab CI job with `FF_GIT_URLS_WITHOUT_TOKENS` enabled: the GitLab Runner configures a credential helper that returns the CI job token, and Git would use this token instead of Renovate's token, for example when the `baseDir` is inside the job's project directory.
+
+!!! note
+  The credential store only has an entry for the host of your `endpoint`.
+  If GitLab returns repository URLs with a different host, also set `gitUrl` to `endpoint`.
+
+!!! warning
+  The Git credential store saves the token unencrypted in `~/.git-credentials`.
+  Make sure that only Renovate can read the home directory.
+
 ## `gitNoVerify`
 
 Controls when Renovate passes the `--no-verify` flag to `git`.
