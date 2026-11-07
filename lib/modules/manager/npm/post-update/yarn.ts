@@ -99,11 +99,10 @@ export function getOptimizeCommand(fileName: string): string[] {
 }
 
 export function isYarnUpdate(upgrade: Upgrade): boolean {
-  return (
-    (upgrade.depType === 'packageManager' ||
-      upgrade.depType === 'devEngines.packageManager') &&
-    upgrade.depName === 'yarn'
-  );
+  const isPackageManagerDepType =
+    upgrade.depType === 'packageManager' ||
+    upgrade.depType === 'devEngines.packageManager';
+  return isPackageManagerDepType && upgrade.depName === 'yarn';
 }
 
 export async function generateLockFile(

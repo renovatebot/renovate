@@ -224,12 +224,11 @@ export async function resolveUpdateDigests(
   res: UpdateResult,
   dependency: ReleaseResult | null,
 ): Promise<void> {
+  const isPinnedByUs =
+    config.pinDigests === true && !config.digestManagedExternally;
   for (const update of res.updates) {
     // only update the digest in the package file if it's managed by us
-    if (
-      (config.pinDigests === true && !config.digestManagedExternally) ||
-      config.currentDigest
-    ) {
+    if (isPinnedByUs || config.currentDigest) {
       await resolveUpdateDigest(config, res, dependency, update);
     } else {
       delete update.newDigest;

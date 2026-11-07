@@ -817,7 +817,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         datasource: GitRefsDatasource.id,
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+        updatedOutOfBand: true,
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
         updatedPackageFiles: [
@@ -828,6 +831,20 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('drops unchanged package file if not updated out of band', async () => {
+      config.upgrades.push({
+        packageFile: '.gitmodules',
+        manager: 'git-submodules',
+        datasource: GitRefsDatasource.id,
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      gitSubmodules.updateDependency.mockResolvedValueOnce({
+        content: 'existing content',
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({ updatedPackageFiles: [] });
     });
 
     /*

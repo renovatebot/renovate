@@ -49,13 +49,15 @@ export function isDependencyString(input: string): boolean {
 
   const [groupId, artifactId, version, classifier] = parts;
 
+  const isValidClassifier = !classifier || artifactRegex.test(classifier);
+
   return !!(
     groupId &&
     artifactId &&
     version &&
     artifactRegex.test(groupId) &&
     artifactRegex.test(artifactId) &&
-    (!classifier || artifactRegex.test(classifier)) &&
+    isValidClassifier &&
     version === versionLikeSubstring(version)
   );
 }

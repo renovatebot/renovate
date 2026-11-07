@@ -3,7 +3,7 @@ import type {
   ReadableSpan,
   Span,
   SpanProcessor,
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace';
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import {
   ATTR_RENOVATE_DATASOURCE,

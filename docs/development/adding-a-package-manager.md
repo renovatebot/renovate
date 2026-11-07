@@ -133,12 +133,20 @@ The helper applies, in this order:
 1. the user's `constraints` config
 2. a value your manager derives from the updated package files, if you pass a callback
 3. the `extractedConstraints` that `extractPackageFile` collected on the base branch
+4. the `sharedConstraints` that other managers share for the package file's directory, which also win over step 2 or 3 if they are within that constraint, like `20.11.0` within `>=18`
 
 The third step matters during `lockFileMaintenance`.
 Managers like `pipenv` delete the lock file before they run the tool, so a callback that reads the lock file at that point finds nothing.
 The value collected during extraction keeps the tool version constrained in that case.
 
-The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints` or `config.extractedConstraints` in managers.
+A manager whose files set tool versions for a whole directory tree, like `mise`, can share them with the package files of other managers by returning a `sharedConstraintsScope` from `extractPackageFile`.
+Renovate passes them as `sharedConstraints` to the package files of other managers in that directory and below.
+They are the versions which a version manager installs, so they win over a range which the package files only require, but not over a version the package files pin, or one outside of the required range.
+Within a manager, the nearest directory wins, then the higher `precedence`.
+Between managers, the order in `lib/workers/repository/extract/shared-constraints.ts` decides.
+Share a `null` value for a tool version which is no constraint, like the Rust channel `stable`, so that it hides the version of a parent directory.
+
+The `renovate/prefer-resolve-tool-constraint` lint rule reports direct reads of `config.constraints`, `config.extractedConstraints` or `config.sharedConstraints` in managers.
 
 ### `updateDependency` (optional)
 
@@ -146,6 +154,11 @@ Use `updateDependency` if _both_ conditions apply:
 
 - the manager can't be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
+
+It returns the new package file content, or `null` on failure.
+If the update is also applied outside the package file, for example by modifying the checkout on disk, return `{ content, updatedOutOfBand: true }` instead.
+Renovate then treats the package file as updated even if `content` is unchanged, so that `updateArtifacts` still runs for it.
+The `git-submodules` manager uses this.
 
 ### `updateLockedDependency` (optional)
 

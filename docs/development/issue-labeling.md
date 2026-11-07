@@ -296,14 +296,16 @@ Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/P
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
+Don't use it for long-standing or contentious issues, or for areas where we'd expect someone familiar with Renovate to contribute.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
+However, this is not a case of "we'll definitely merge the first PR that solves this", considering the barrier to contribute is considerably lower with widespread access to Large Language Models (LLMs) and AI Agents.
 
 Add a label `auto:bad-vibes` to any discussion containing rude comments such as excessive criticism or ungratefulness.
 
 Add a label `auto:discussion-closed` to close a discussion which had persistent or very bad vibes.
 
-Add a label `auto:discussion-first` to any PR which needs discussing first.
+Add a label `auto:discussion-first` to any PR which needs discussing first, such as when the requirements are unclear, or the scope and intent of the linked issue haven't yet been agreed with a maintainer.
 
 Add a label `auto:format-code` to any Discussion which needs code formatting.
 
