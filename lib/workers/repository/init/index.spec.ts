@@ -50,7 +50,9 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce(
         applyRepoConfigDefaults({}),
       );
-      config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
+      config.getRepoConfig.mockResolvedValueOnce(
+        applyRepoConfigDefaults({ mode: 'silent' }),
+      );
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
@@ -66,18 +68,18 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce(
         applyRepoConfigDefaults({}),
       );
-      config.getRepoConfig.mockResolvedValueOnce({
-        azureWorkItemType: 'Task',
-      });
+      config.getRepoConfig.mockResolvedValueOnce(
+        applyRepoConfigDefaults({ azureWorkItemType: 'Task' }),
+      );
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
       await initRepo(applyRepoConfigDefaults({}));
 
-      expect(applyRepoConfig).toHaveBeenCalledExactlyOnceWith({
-        azureWorkItemType: 'Task',
-      });
+      expect(applyRepoConfig).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ azureWorkItemType: 'Task' }),
+      );
       expect(applyRepoConfig.mock.invocationCallOrder[0]).toBeGreaterThan(
         config.getRepoConfig.mock.invocationCallOrder[0],
       );
@@ -89,10 +91,12 @@ describe('workers/repository/init/index', () => {
       onboarding.checkOnboardingBranch.mockResolvedValueOnce(
         applyRepoConfigDefaults({}),
       );
-      config.getRepoConfig.mockResolvedValueOnce({
-        filterUnavailableUsers: true,
-        expandCodeOwnersGroups: true,
-      });
+      config.getRepoConfig.mockResolvedValueOnce(
+        applyRepoConfigDefaults({
+          filterUnavailableUsers: true,
+          expandCodeOwnersGroups: true,
+        }),
+      );
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),

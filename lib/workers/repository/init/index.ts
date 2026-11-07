@@ -59,22 +59,23 @@ export async function initRepo(
   initMutexes();
   const platformConfig = await initApis(initialConfig);
   await initializeCaches(platformConfig as WorkerPlatformConfig);
-  let config: RenovateConfigFile = await getRepoConfig(platformConfig);
-  platform.applyRepoConfig?.(config);
-  setRepositoryLogLevelRemaps(config.logLevelRemap);
-  if (config.mode === 'silent') {
+  const mergedConfig = await getRepoConfig(platformConfig);
+  platform.applyRepoConfig?.(mergedConfig);
+  setRepositoryLogLevelRemaps(mergedConfig.logLevelRemap);
+  if (mergedConfig.mode === 'silent') {
     logger.info(
       'Repository is running with mode=silent and will not make Issues or PRs by default',
     );
   }
-  checkIfConfigured(config);
-  warnOnUnsupportedOptions(config);
-  config = applySecretsAndVariablesToConfig({
-    config,
+  checkIfConfigured(mergedConfig);
+  warnOnUnsupportedOptions(mergedConfig);
+  const config = applySecretsAndVariablesToConfig({
+    config: mergedConfig,
   });
   setUserRepoConfig(config);
-  config = await detectVulnerabilityAlerts(config);
-  const repoConfig = applyRepoConfigDefaults(config);
+  const repoConfig = applyRepoConfigDefaults(
+    await detectVulnerabilityAlerts(config),
+  );
   // istanbul ignore if
   if (repoConfig.printConfig) {
     logger.info(

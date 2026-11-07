@@ -64,7 +64,7 @@ interface ApplySecretsAndVariablesConfig<
 /**
  * Applies both variables and secrets to the Renovate config by interpolating values
  *
- * When it deletes neither the secrets nor the variables, the config keeps its type, as interpolating only replaces strings.
+ * The config keeps its type other than the secrets and variables it deletes, as interpolating only replaces strings.
  */
 export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
   applyConfig: ApplySecretsAndVariablesConfig<T> & {
@@ -72,6 +72,12 @@ export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
     deleteVariables: false;
   },
 ): T;
+export function applySecretsAndVariablesToConfig<T extends RenovateConfigFile>(
+  applyConfig: ApplySecretsAndVariablesConfig<T> & {
+    deleteSecrets?: true;
+    deleteVariables?: true;
+  },
+): Omit<T, 'secrets' | 'variables'>;
 export function applySecretsAndVariablesToConfig(
   applyConfig: ApplySecretsAndVariablesConfig,
 ): RenovateConfigFile;
