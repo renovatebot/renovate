@@ -467,7 +467,10 @@ describe('modules/datasource/docker/schema', () => {
         has_additional: true,
       }),
     ).toEqual({
-      tags: [{ name: '1.0' }, { name: '2.0' }],
+      tags: [
+        { name: '1.0', last_modified: null, start_ts: null },
+        { name: '2.0', last_modified: null, start_ts: null },
+      ],
       has_additional: true,
     });
   });
@@ -477,6 +480,49 @@ describe('modules/datasource/docker/schema', () => {
       tags: [{ name: '1.0' }, { invalid: true }, { name: '2.0' }],
       has_additional: false,
     });
-    expect(result.tags).toEqual([{ name: '1.0' }, { name: '2.0' }]);
+    expect(result.tags).toEqual([
+      { name: '1.0', last_modified: null, start_ts: null },
+      { name: '2.0', last_modified: null, start_ts: null },
+    ]);
+  });
+
+  it('parses QuayTagsResponse with timestamp fields', () => {
+    expect(
+      QuayTagsResponse.parse({
+        tags: [
+          {
+            name: '0.67.0',
+            start_ts: 1791900498,
+            last_modified: 'Tue, 13 Oct 2026 14:08:18 -0000',
+          },
+        ],
+        has_additional: false,
+      }),
+    ).toEqual({
+      tags: [
+        {
+          name: '0.67.0',
+          start_ts: 1791900498,
+          last_modified: 'Tue, 13 Oct 2026 14:08:18 -0000',
+        },
+      ],
+      has_additional: false,
+    });
+  });
+
+  it('parses QuayTagsResponse and keeps tags with invalid timestamps', () => {
+    const result = QuayTagsResponse.parse({
+      tags: [
+        {
+          name: '1.0',
+          start_ts: 'invalid',
+          last_modified: { invalid: true },
+        },
+      ],
+      has_additional: false,
+    });
+    expect(result.tags).toEqual([
+      { name: '1.0', last_modified: null, start_ts: null },
+    ]);
   });
 });
