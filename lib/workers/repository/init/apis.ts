@@ -89,23 +89,21 @@ async function validateIncludeForks(config: RenovateConfigFile): Promise<void> {
   }
 }
 
-// TODO: fix types (#22198)
-async function getPlatformConfig(
-  config: RepoParams,
-): Promise<WorkerPlatformConfig> {
-  const platformConfig = await platform.initRepo(config);
+async function getPlatformConfig<T extends RenovateConfigFile>(
+  config: T,
+): Promise<T & RepoResult> {
+  // TODO: fix types (#22198)
+  const platformConfig = await platform.initRepo(config as RepoParams);
   return {
     ...config,
     ...platformConfig,
   };
 }
 
-// TODO: fix types (#22198)
-export async function initApis(
-  input: RenovateConfigFile,
-): Promise<WorkerPlatformConfig> {
-  let config: WorkerPlatformConfig = { ...input } as never;
-  config = await getPlatformConfig(config as never);
+export async function initApis<T extends RenovateConfigFile>(
+  input: T,
+): Promise<T & RepoResult> {
+  const config = await getPlatformConfig({ ...input });
   await validateOptimizeForDisabled(config);
   await validateIncludeForks(config);
   return config;

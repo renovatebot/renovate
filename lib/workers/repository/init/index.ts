@@ -21,7 +21,7 @@ import { getRepoConfig } from './config.ts';
 import { applyRepoConfigDefaults } from './defaults.ts';
 import { detectVulnerabilityAlerts } from './vulnerability.ts';
 
-function initializeConfig(config: RenovateConfigFile): RenovateConfigFile {
+function initializeConfig(config: RenovateConfig): RenovateConfig {
   return {
     ...clone(config),
     errors: [],
@@ -49,17 +49,17 @@ function warnOnUnsupportedOptions(config: RenovateConfigFile): void {
 }
 
 export async function initRepo(
-  config_: RenovateConfigFile,
+  config_: RenovateConfig,
 ): Promise<RenovateConfig> {
   PackageFiles.clear();
-  let config: RenovateConfigFile = initializeConfig(config_);
+  const initialConfig = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
   memCache.init();
   initMutexes();
-  config = await initApis(config);
-  await initializeCaches(config as WorkerPlatformConfig);
-  config = await getRepoConfig(config);
+  const platformConfig = await initApis(initialConfig);
+  await initializeCaches(platformConfig as WorkerPlatformConfig);
+  let config: RenovateConfigFile = await getRepoConfig(platformConfig);
   platform.applyRepoConfig?.(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   if (config.mode === 'silent') {

@@ -47,13 +47,15 @@ describe('workers/repository/init/index', () => {
   describe('initRepo', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
-      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce(
+        applyRepoConfigDefaults({}),
+      );
       config.getRepoConfig.mockResolvedValueOnce({ mode: 'silent' });
       merge.mergeRenovateConfig.mockResolvedValueOnce({});
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
-      const renovateConfig = await initRepo({});
+      const renovateConfig = await initRepo(applyRepoConfigDefaults({}));
       expect(renovateConfig).toEqual(applyRepoConfigDefaults({}));
     });
 
@@ -61,7 +63,9 @@ describe('workers/repository/init/index', () => {
       const applyRepoConfig = vi.fn();
       platform.applyRepoConfig = applyRepoConfig;
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
-      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce(
+        applyRepoConfigDefaults({}),
+      );
       config.getRepoConfig.mockResolvedValueOnce({
         azureWorkItemType: 'Task',
       });
@@ -69,7 +73,7 @@ describe('workers/repository/init/index', () => {
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
-      await initRepo({});
+      await initRepo(applyRepoConfigDefaults({}));
 
       expect(applyRepoConfig).toHaveBeenCalledExactlyOnceWith({
         azureWorkItemType: 'Task',
@@ -82,7 +86,9 @@ describe('workers/repository/init/index', () => {
 
     it('warns on unsupported options', async () => {
       apis.initApis.mockResolvedValue(partial<_apis.WorkerPlatformConfig>());
-      onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      onboarding.checkOnboardingBranch.mockResolvedValueOnce(
+        applyRepoConfigDefaults({}),
+      );
       config.getRepoConfig.mockResolvedValueOnce({
         filterUnavailableUsers: true,
         expandCodeOwnersGroups: true,
@@ -91,7 +97,7 @@ describe('workers/repository/init/index', () => {
       secrets.applySecretsAndVariablesToConfig.mockReturnValueOnce(
         partial<RenovateConfig>(),
       );
-      await initRepo({});
+      await initRepo(applyRepoConfigDefaults({}));
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: 'github' },

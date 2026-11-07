@@ -21,7 +21,7 @@ import type {
   AllConfig,
   GlobalWorkerConfig,
   InternalGlobalConfigOptions,
-  RenovateConfigFile,
+  RenovateConfig,
   RenovateRepository,
   RepoGlobalConfig,
 } from '../../config/types.ts';
@@ -42,7 +42,7 @@ import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
 import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
-import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
+import type { ResolvedRepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
@@ -60,13 +60,13 @@ function applyGlobalOption<
 }
 
 export async function getRepositoryConfig(
-  globalConfig: RenovateConfigFile,
+  globalConfig: RenovateConfig,
   repository: RenovateRepository,
-): Promise<RepositoryWorkerConfig> {
+): Promise<ResolvedRepositoryWorkerConfig> {
   const repoIsString = isString(repository);
   const repoName = repoIsString ? repository : repository.repository;
 
-  const repoConfig: RepositoryWorkerConfig = {
+  const repoConfig: ResolvedRepositoryWorkerConfig = {
     ...globalConfig,
     repository: repoName,
   };

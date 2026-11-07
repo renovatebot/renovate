@@ -1,6 +1,6 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RenovateConfigFile } from '../../../config/types.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { ensureComment } from '../../../modules/platform/comment.ts';
@@ -14,7 +14,7 @@ import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
 
 async function cleanUpBranches(
-  config: RenovateConfigFile,
+  config: RenovateConfig,
   remainingBranches: string[],
 ): Promise<void> {
   if (!config.pruneStaleBranches) {
@@ -144,8 +144,8 @@ async function cleanUpBranches(
  * Calculates a {RegExp} to extract the base branch from a branch name if base branch patterns is configured.
  * @param config Renovate configuration
  */
-function calculateBaseBranchRegex(config: RenovateConfigFile): RegExp | null {
-  if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
+function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
+  if (!config.baseBranchPatterns.length || !config.baseBranches?.length) {
     return null;
   }
 
@@ -168,7 +168,7 @@ function calculateBaseBranchRegex(config: RenovateConfigFile): RegExp | null {
 }
 
 export async function pruneStaleBranches(
-  config: RenovateConfigFile,
+  config: RenovateConfig,
   branchList: string[] | null | undefined,
 ): Promise<void> {
   logger.debug('Removing any stale branches');
@@ -198,11 +198,10 @@ export async function pruneStaleBranches(
     );
     return;
   }
-  // TODO: types (#22198)
   let renovateBranches = getBranchList().filter(
     (branchName) =>
-      branchName.startsWith(config.branchPrefix!) &&
-      branchName !== getReconfigureBranchName(config.branchPrefix!),
+      branchName.startsWith(config.branchPrefix) &&
+      branchName !== getReconfigureBranchName(config.branchPrefix),
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

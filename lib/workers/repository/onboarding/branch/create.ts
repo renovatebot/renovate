@@ -1,4 +1,4 @@
-import type { RenovateConfigFile } from '../../../../config/types.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { commitConfigFile } from '../../model/commit-config-file.ts';
@@ -7,7 +7,7 @@ import { getOnboardingCommitMessage } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
 export async function createOnboardingBranch(
-  config: RenovateConfigFile,
+  config: RenovateConfig,
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
   const configFile = getDefaultConfigFileName();
