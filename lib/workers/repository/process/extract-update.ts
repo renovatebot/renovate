@@ -58,12 +58,7 @@ export interface Stats {
 }
 
 // istanbul ignore next
-function extractStats(
-  packageFiles: Record<string, PackageFile[]>,
-): Stats | null {
-  if (!packageFiles) {
-    return null;
-  }
+function extractStats(packageFiles: Record<string, PackageFile[]>): Stats {
   const stats: Stats = {
     managers: {},
     total: {
@@ -186,7 +181,7 @@ export async function extract(
     );
     const extractResult = await instrument(
       'extractAllDependencies',
-      async () => (await extractAllDependencies(config)) || {},
+      async () => await extractAllDependencies(config),
     );
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;
@@ -369,10 +364,6 @@ export async function lookup(
 export function reportMaliciousSkippedDependencies(
   allPackageFiles: Record<string, PackageFile[]>,
 ): void {
-  if (allPackageFiles === undefined) {
-    return;
-  }
-
   for (const [manager, packageFiles] of Object.entries(allPackageFiles)) {
     for (const packageFile of packageFiles) {
       for (const dep of packageFile.deps) {

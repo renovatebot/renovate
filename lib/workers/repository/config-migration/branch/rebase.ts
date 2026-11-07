@@ -72,7 +72,7 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    */
   // v8 ignore next -- JSON5 output is always serializable back to JSON
   return (
-    quickStringify(JSON5.parse(json)) ??
+    quickStringify(JSON5.parse<unknown>(json)) ??
     /* istanbul ignore next: should never happen */ null
   );
 }

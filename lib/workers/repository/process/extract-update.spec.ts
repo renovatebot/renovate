@@ -72,6 +72,10 @@ describe('workers/repository/process/extract-update', () => {
       ]),
       branchList: ['branchName'],
     });
+    extractAll.extractAllDependencies.mockResolvedValue({
+      packageFiles: {},
+      extractionFingerprints: {},
+    });
   });
 
   describe('extract()', () => {
@@ -100,7 +104,7 @@ describe('workers/repository/process/extract-update', () => {
             upgrades: [],
           },
         ],
-        packageFiles: undefined,
+        packageFiles: {},
       });
     });
 
@@ -123,7 +127,7 @@ describe('workers/repository/process/extract-update', () => {
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
-      expect(packageFiles).toBeUndefined();
+      expect(packageFiles).toEqual({});
     });
 
     it('leaves the cache alone when not overwriting it', async () => {
@@ -731,7 +735,7 @@ describe('workers/repository/process/extract-update', () => {
         }),
       ).toEqual({});
       expect(sanitize('secret-password-1234')).toBe('**redacted**');
-      expect(cache.scan?.master?.packageFiles).toEqual(packageFiles);
+      expect(cache.scan?.master.packageFiles).toEqual(packageFiles);
       expect(logger.logger.once.warn).not.toHaveBeenCalled();
     });
 
@@ -828,7 +832,7 @@ describe('workers/repository/process/extract-update', () => {
         additionalRegistryUrls: [null],
         deps: [{ registryUrls: [undefined] }],
       });
-      expect(cache.scan?.master?.packageFiles).toEqual(packageFiles);
+      expect(cache.scan?.master.packageFiles).toEqual(packageFiles);
     });
 
     it('does not add registry URLs to package files and deps without them', async () => {
@@ -1314,7 +1318,7 @@ describe('workers/repository/process/extract-update', () => {
               _config: any,
               packageFiles: Record<string, PackageFile[]>,
             ): Promise<void> => {
-              const updates = packageFiles?.npm[0]?.deps[0]?.updates;
+              const updates = packageFiles.npm[0]?.deps[0]?.updates;
 
               if (updates && updates[0]?.newVersion === '1.14.1') {
                 packageFiles.npm[0].deps[0].skipReason =

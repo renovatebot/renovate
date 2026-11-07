@@ -48,7 +48,7 @@ describe('workers/global/config/parse/util', () => {
     };
 
     const migratedConfig = await migrateAndValidateConfig(config, 'global');
-    expect(migratedConfig?.packageRules?.[0].description).toBeArray();
+    expect(migratedConfig.packageRules?.[0].description).toBeArray();
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 });

@@ -107,7 +107,7 @@ export function getConfig(input: string[]): AllConfig {
 
   createProgram()
     .action((repositories: string[], opts: Record<string, unknown>) => {
-      if (repositories?.length) {
+      if (repositories.length) {
         config.repositories = repositories;
       }
 

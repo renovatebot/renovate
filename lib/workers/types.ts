@@ -287,7 +287,7 @@ export interface BaseBranchUpdateSummary {
   /** The number of updates a given `updateType` has on this branch, across all package files and managers */
   updates: Partial<Record<UpdateType, number>>;
   /** Per-manager breakdown of updates on this base branch */
-  managers: Record<string, ManagerUpdateSummary>;
+  managers: Partial<Record<string, ManagerUpdateSummary>>;
 }
 
 export type UpdateSummary = BaseBranchUpdateSummary[];

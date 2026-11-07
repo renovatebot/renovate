@@ -42,39 +42,37 @@ function getHeaderLabel(header: string, config: BranchConfig): string {
 export function getPrUpdatesTable(config: BranchConfig): string {
   const tableKeyValuePairs: Record<string, Record<string, string>> = {};
   for (const upgrade of config.upgrades) {
-    if (upgrade) {
-      // Create a key based on the properties which are significant in the updates table
-      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${upgrade.newValue ?? ''}_${upgrade.newVersion ?? ''}_${upgrade.currentValue ?? ''}_${upgrade.currentVersion ?? ''}_${upgrade.updateType}`;
+    // Create a key based on the properties which are significant in the updates table
+    const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${upgrade.newValue ?? ''}_${upgrade.newVersion ?? ''}_${upgrade.currentValue ?? ''}_${upgrade.currentVersion ?? ''}_${upgrade.updateType}`;
 
-      const res: Record<string, string> = {};
-      const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
-      for (const column of rowDefinition) {
-        const { header, value } = column;
-        try {
-          // istanbul ignore else
-          if (value) {
-            res[header] = template
-              .compile(value, upgrade)
-              .replace(regEx(/``/g), '');
-          } else {
-            res[header] = '';
-          }
-        } catch (err) /* istanbul ignore next */ {
-          logger.warn({ header, value, err }, 'Handlebars compilation error');
+    const res: Record<string, string> = {};
+    const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
+    for (const column of rowDefinition) {
+      const { header, value } = column;
+      try {
+        // istanbul ignore else
+        if (value) {
+          res[header] = template
+            .compile(value, upgrade)
+            .replace(regEx(/``/g), '');
+        } else {
+          res[header] = '';
         }
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ header, value, err }, 'Handlebars compilation error');
       }
+    }
 
-      if (tableKeyValuePairs[key]) {
-        // compare the duplicate upgrades as per their table values
-        // and select one with better values
-        tableKeyValuePairs[key] = compareTableValues(
-          tableKeyValuePairs[key],
-          res,
-          config.prBodyColumns,
-        );
-      } else {
-        tableKeyValuePairs[key] = res;
-      }
+    if (Object.hasOwn(tableKeyValuePairs, key)) {
+      // compare the duplicate upgrades as per their table values
+      // and select one with better values
+      tableKeyValuePairs[key] = compareTableValues(
+        tableKeyValuePairs[key],
+        res,
+        config.prBodyColumns,
+      );
+    } else {
+      tableKeyValuePairs[key] = res;
     }
   }
 

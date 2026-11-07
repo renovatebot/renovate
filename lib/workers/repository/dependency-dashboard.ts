@@ -368,7 +368,7 @@ export async function ensureDependencyDashboard(
   const branches = allBranches.filter(
     (branch) =>
       branch.result !== 'automerged' &&
-      !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
+      !branch.upgrades.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (!(
     config.dependencyDashboard ||
@@ -465,9 +465,9 @@ export async function ensureDependencyDashboard(
 
   if (configMigrationRes.result === 'pr-exists') {
     issueBody += `## Config Migration Needed\n\n${getMarkdownComment(configMigrationPrInfo)} See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
-  } else if (configMigrationRes?.result === 'pr-modified') {
+  } else if (configMigrationRes.result === 'pr-modified') {
     issueBody += `## Config Migration Needed (Blocked)\n\n${getMarkdownComment(configMigrationPrInfo)} The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
-  } else if (configMigrationRes?.result === 'add-checkbox') {
+  } else if (configMigrationRes.result === 'add-checkbox') {
     issueBody += `## Config Migration Needed\n\n${getCheckbox(createConfigMigrationPr)} Select this checkbox to let Renovate create an automated Config Migration PR.\n\n`;
   }
 
@@ -714,17 +714,20 @@ export function getAbandonedPackagesMd(
   let abandonedCount = 0;
 
   for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
+    const managerAbandonedPackages: (typeof abandonedPackages)[string] = {};
     for (const packageFile of managerPackageFiles) {
       for (const dep of coerceArray(packageFile.deps)) {
         if (dep.depName && dep.isAbandoned) {
           abandonedCount++;
-          abandonedPackages[manager] = abandonedPackages[manager] || {};
-          abandonedPackages[manager][dep.depName] = {
+          managerAbandonedPackages[dep.depName] = {
             mostRecentTimestamp: dep.mostRecentTimestamp,
             sourceUrl: dep.sourceUrl,
           };
         }
       }
+    }
+    if (Object.keys(managerAbandonedPackages).length) {
+      abandonedPackages[manager] = managerAbandonedPackages;
     }
   }
 

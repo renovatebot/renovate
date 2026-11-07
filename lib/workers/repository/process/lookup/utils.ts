@@ -107,6 +107,7 @@ export function stripNoopUpdates(
 ): LookupUpdate[] {
   let result = updates
     .filter(
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- the lookup sets a `null` newValue and currentValue despite their types
       (update) => update.newValue !== null || config.currentValue === null,
     )
     .filter((update) => update.newDigest !== null)

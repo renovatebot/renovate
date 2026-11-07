@@ -287,11 +287,11 @@ export async function extractDependencies(
             );
             const packageFiles = extracted[baseBranch];
             const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-            res.branches = res.branches.concat(baseBranchRes?.branches);
-            res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-            if (!res.packageFiles || !Object.keys(res.packageFiles).length) {
+            res.branches = res.branches.concat(baseBranchRes.branches);
+            res.branchList = res.branchList.concat(baseBranchRes.branchList);
+            if (!Object.keys(res.packageFiles).length) {
               // Use the first branch
-              res.packageFiles = baseBranchRes?.packageFiles;
+              res.packageFiles = baseBranchRes.packageFiles;
             }
           }
         }
