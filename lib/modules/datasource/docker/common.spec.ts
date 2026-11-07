@@ -1,6 +1,6 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
@@ -141,6 +141,28 @@ describe('modules/datasource/docker/common', () => {
           'https://my.local.registry/v2/repo/tags/list?n=1000',
         ),
       ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
+    });
+
+    it('warns and returns undefined for an unparseable URL', async () => {
+      logger.logger.warn.mockClear();
+      logger.logger.error.mockClear();
+
+      await expect(
+        getAuthHeaders(
+          http,
+          'https://my.local.registry',
+          'repo',
+          '{{ .Values.registry }}/v2/',
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          apiCheckUrl: '{{ .Values.registry }}/v2/',
+        }),
+        'Invalid URL',
+      );
+      expect(logger.logger.error).not.toHaveBeenCalled();
     });
 
     it('falls back to base /v2/ auth probe when tags URL returns 405 ECR maxResults error', async () => {
