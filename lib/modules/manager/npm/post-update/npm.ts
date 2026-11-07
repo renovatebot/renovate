@@ -98,6 +98,10 @@ async function getNpmConstraintFromPackageLock(
     logger.debug(`Using npm constraint <9 for lockfileVersion=2`);
     return `<9`;
   }
+  if (lockfileVersion === 4) {
+    logger.debug(`Using npm constraint >=12 for lockfileVersion=4`);
+    return `>=12`;
+  }
   return null;
 }
 
@@ -365,7 +369,8 @@ export async function generateLockFile(
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
       if (
         lockFileParsed?.lockfileVersion === 2 ||
-        lockFileParsed?.lockfileVersion === 3
+        lockFileParsed?.lockfileVersion === 3 ||
+        lockFileParsed?.lockfileVersion === 4
       ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
