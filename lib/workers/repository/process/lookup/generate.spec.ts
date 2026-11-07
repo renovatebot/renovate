@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type { Release } from '../../../../modules/datasource/types.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { generateUpdate } from './generate.ts';
@@ -5,13 +6,14 @@ import type { LookupUpdateConfig } from './types.ts';
 
 const versioning = allVersioning.get('semver');
 
-const config: LookupUpdateConfig = {
+const config = partial<LookupUpdateConfig>({
   datasource: 'npm',
   packageName: 'some-dep',
   currentValue: '1.0.0',
   versioning: 'semver',
   rangeStrategy: 'replace',
-};
+  packageRules: [],
+});
 
 const allVersions = new Set(['1.0.0', '1.1.0']);
 

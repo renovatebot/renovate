@@ -6,7 +6,8 @@ import type { BranchConfig } from '../../../types.ts';
 export async function setArtifactErrorStatus(
   config: BranchConfig,
 ): Promise<void> {
-  const mode = config.statusCheckWhen?.artifactError ?? 'failed';
+  // a `statusCheckWhen` in the `force` config replaces the merged object, so it can leave the key out
+  const mode = config.statusCheckWhen.artifactError ?? 'failed';
   const hasErrors = !!config.artifactErrors?.length;
 
   if (mode === 'never') {
@@ -23,7 +24,7 @@ export async function setArtifactErrorStatus(
     return;
   }
 
-  const context = config.statusCheckNames?.artifactError;
+  const context = config.statusCheckNames.artifactError;
   if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',

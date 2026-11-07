@@ -1,7 +1,8 @@
-import { platform } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
 import type { PackageFile } from '../../../../../modules/manager/types.ts';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body.ts';
 import * as _template from '../../../../../util/template/index.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../../types.ts';
 import * as _changelogs from './changelogs.ts';
 import * as _configDescription from './config-description.ts';
 import * as _controls from './controls.ts';
@@ -35,6 +36,8 @@ const table = vi.mocked(_table);
 vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
 
+const repoConfig = { rebaseLabel: 'rebase', suppressNotifications: [] };
+
 describe('workers/repository/update/pr/body/index', () => {
   describe('getPrBody', () => {
     beforeEach(() => {
@@ -52,12 +55,12 @@ describe('workers/repository/update/pr/body/index', () => {
 
     it('handles empty template', () => {
       const res = getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -65,7 +68,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toBeEmptyString();
     });
@@ -73,19 +76,19 @@ describe('workers/repository/update/pr/body/index', () => {
     it('leaves an upgrade with no links unlinked', () => {
       template.compile.mockImplementation((x) => x);
 
-      const upgrade = {
+      const upgrade = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: 'some-branch',
         depName: 'some-dep',
-      };
+      });
 
       getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [upgrade],
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -93,7 +96,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -143,17 +146,17 @@ describe('workers/repository/update/pr/body/index', () => {
       };
 
       getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             upgrade,
             upgrade1,
             upgradeBitbucket,
             upgradeBitbucketServer,
-          ],
-        },
+          ]),
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -161,7 +164,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -213,7 +216,7 @@ describe('workers/repository/update/pr/body/index', () => {
           : x,
       );
 
-      const upgrade = {
+      const upgrade = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
@@ -221,15 +224,15 @@ describe('workers/repository/update/pr/body/index', () => {
         sourceDirectory: '/baz',
         changelogUrl: '{{ testTemplate }}',
         homepage: 'https://example.com',
-      };
+      });
 
       getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [upgrade],
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -237,7 +240,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -255,19 +258,19 @@ describe('workers/repository/update/pr/body/index', () => {
     });
 
     it('uses dependencyUrl as primary link', () => {
-      const upgrade = {
+      const upgrade = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
-      };
+      });
 
       getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [upgrade],
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -275,7 +278,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       expect(upgrade).toMatchObject({
@@ -290,13 +293,13 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
           prBodyTemplate: 'PR BODY',
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -304,7 +307,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toContain('PR BODY');
       expect(res).toContain(`<!--renovate-debug`);
@@ -314,13 +317,13 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
           upgrades: [],
           prBodyTemplate: ['aaa', '**Rebasing**: FOO', 'bbb'].join('\n'),
-        },
+        }),
         {
           rebasingNotice: 'BAR',
           debugData: {
@@ -329,7 +332,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       expect(res).toContain(['aaa', '**Rebasing**: BAR', 'bbb'].join('\n'));
     });
@@ -338,13 +341,13 @@ describe('workers/repository/update/pr/body/index', () => {
       platform.massageMarkdown.mockImplementation((x) => x);
       template.compile.mockImplementation((x) => x);
       const res = getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           baseBranch: 'base',
           prBodyTemplate: 'PR BODY',
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -352,7 +355,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
 
       const match = prDebugDataRe.exec(res);
@@ -387,14 +390,14 @@ describe('workers/repository/update/pr/body/index', () => {
       };
 
       const res = getPrBody(
-        {
+        partial<BranchConfig>({
           manager: 'some-manager',
           branchName: 'some-branch',
           upgrades: [],
           packageFiles,
           prBodyTemplate: '{{{warnings}}}',
           baseBranch: 'base',
-        },
+        }),
         {
           debugData: {
             updatedInVer: '1.2.3',
@@ -402,7 +405,7 @@ describe('workers/repository/update/pr/body/index', () => {
             targetBranch: 'base',
           },
         },
-        {},
+        repoConfig,
       );
       const expected =
         '---\n\n### ⚠ Dependency Lookup Warnings ⚠' +

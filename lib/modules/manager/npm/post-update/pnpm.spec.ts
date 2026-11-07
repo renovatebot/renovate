@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, partial } from '~test/util.ts';
+import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
@@ -13,6 +13,14 @@ vi.mock('./node-version.ts');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
+
+const postUpdateConfig: PostUpdateConfig = {
+  branchName: 'renovate/some-branch',
+  upgrades: [],
+  postUpdateOptions: [],
+  skipArtifactsUpdate: false,
+  ignoreScripts: false,
+};
 
 function mockPnpmFiles(workspaceFileContent?: string) {
   fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
@@ -36,7 +44,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   const upgrades: Upgrade[] = [{}];
 
   beforeEach(() => {
-    config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
+    config = { ...postUpdateConfig, constraints: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
@@ -392,7 +400,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>();
+    const configTemp = { ...postUpdateConfig };
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -436,7 +444,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>();
+    const configTemp = { ...postUpdateConfig };
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -480,7 +488,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses volta version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>();
+    const configTemp = { ...postUpdateConfig };
     const fileContent = codeBlock`
     {
   "name": "parent",
@@ -537,7 +545,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
     mockExecAll();
-    const configTemp = partial<PostUpdateConfig>();
+    const configTemp = { ...postUpdateConfig };
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json
       .mockResolvedValue('lockfileVersion: 5.3\n'); // pnpm-lock.yaml

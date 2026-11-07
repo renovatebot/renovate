@@ -1,9 +1,21 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
 import { partial } from '../../test/util.ts';
 import type { DefaultedConfigKey, WithDefaults } from './defaults.ts';
-import { getConfig, getDefault, isDefaultedOption } from './defaults.ts';
+import {
+  getConfig,
+  getDefault,
+  isDefaultedOption,
+  isRepoDefaultedOption,
+} from './defaults.ts';
 import { getOptions } from './options/index.ts';
-import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
+import type {
+  AllConfig,
+  RenovateConfig,
+  RenovateConfigFile,
+  RenovateOptions,
+  StatusCheckKey,
+  StatusCheckWhen,
+} from './types.ts';
 
 describe('config/defaults', () => {
   describe('getConfig()', () => {
@@ -78,34 +90,32 @@ describe('config/defaults', () => {
         'composerIgnorePlatformReqs',
         'semanticCommitScope',
         'minimumReleaseAgeBuffer',
+        'commitMessageTopic',
+        'commitMessageExtra',
       ]);
+    });
+  });
+
+  describe('isRepoDefaultedOption()', () => {
+    it.each`
+      name                           | expected
+      ${'dependencyDashboardTitle'}  | ${true}
+      ${'onboarding'}                | ${false}
+      ${'extends'}                   | ${false}
+      ${'autodiscover'}              | ${false}
+      ${'dependencyDashboardFooter'} | ${false}
+    `('returns $expected for $name', ({ name, expected }) => {
+      const option = getOptions().find((o) => o.name === name)!;
+
+      expect(isRepoDefaultedOption(option)).toBe(expected);
     });
   });
 
   describe('DefaultedConfigKey', () => {
     it('only contains keys of the config', () => {
-      // the options which are only declared on the types of the workers, managers and platforms which read them, so that adding to this list fails
-      type Undeclared =
-        | 'automergeComment'
-        | 'bbAutoResolvePrTasks'
-        | 'bbUseDefaultReviewers'
-        | 'excludeCommitPaths'
-        | 'forkCreation'
-        | 'gitLabIgnoreApprovals'
-        | 'goGetDirs'
-        | 'ignoreDeprecated'
-        | 'ignorePlugins'
-        | 'ignoreScripts'
-        | 'maxMajorIncrement'
-        | 'prBodyTemplate'
-        | 'prNotPendingHours'
-        | 'replacementApproach'
-        | 'updatePinnedDependencies'
-        | 'userStrings';
-
       expectTypeOf<
         Exclude<DefaultedConfigKey, keyof AllConfig>
-      >().toEqualTypeOf<Undeclared>();
+      >().toEqualTypeOf<never>();
     });
 
     it('follows the rules of getConfig() and getDefault()', () => {
@@ -147,6 +157,15 @@ describe('config/defaults', () => {
       >().toEqualTypeOf<string>();
       expectTypeOf<Config['dependencyDashboardFooter']>().toEqualTypeOf<
         string | undefined
+      >();
+    });
+
+    it('gives the merged defaults of statusCheckWhen all its keys', () => {
+      expectTypeOf<RenovateConfigFile['statusCheckWhen']>().toEqualTypeOf<
+        Partial<Record<StatusCheckKey, StatusCheckWhen>> | undefined
+      >();
+      expectTypeOf<RenovateConfig['statusCheckWhen']>().toExtend<
+        Record<StatusCheckKey, StatusCheckWhen>
       >();
     });
   });

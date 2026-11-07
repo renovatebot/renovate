@@ -41,7 +41,7 @@ export function filterValidCommitTrailers(trailers: string[]): string[] {
  */
 export function formatCommitMessage(
   message: string | string[],
-  trailers?: string[],
+  trailers?: string[] | null,
 ): string {
   const parts = isString(message) ? [message] : [...message];
   if (isNonEmptyArray(trailers)) {

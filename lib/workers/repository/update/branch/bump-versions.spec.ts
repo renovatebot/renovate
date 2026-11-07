@@ -2,20 +2,13 @@ import { codeBlock } from 'common-tags';
 import { fs, logger, partial, scm } from '~test/util.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import * as templates from '../../../../util/template/index.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { bumpVersions } from './bump-versions.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
-    it('should be noop if bumpVersions is undefined', async () => {
-      const config = partial<BranchConfig>();
-      await bumpVersions(config);
-
-      expect(config).toEqual({});
-    });
-
     it('should be noop if bumpVersions is empty array', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [],
@@ -771,13 +764,14 @@ describe('workers/repository/update/branch/bump-versions', () => {
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             branchName: 'test-branch',
             manager: 'npm',
             newVersion: '2.5.3',
           },
-        ],
+        ]),
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -842,12 +836,13 @@ describe('workers/repository/update/branch/bump-versions', () => {
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             branchName: 'test-branch',
             manager: 'npm',
           },
-        ],
+        ]),
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -907,7 +902,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
             branchName: 'test-branch',
             manager: 'npm',
@@ -932,7 +927,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
               },
             ],
           },
-        ],
+        ]),
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -967,7 +962,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
         matchStrings: ['^(?<version>.+)$'],
       };
       const config = partial<BranchConfig>({
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
             branchName: 'test-branch',
             manager: 'npm',
@@ -979,7 +974,7 @@ describe('workers/repository/update/branch/bump-versions', () => {
             // identical entry as the previous upgrade - should not be applied twice
             bumpVersions: [sharedBumpVersionConfig],
           },
-        ],
+        ]),
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -1013,12 +1008,13 @@ describe('workers/repository/update/branch/bump-versions', () => {
             matchStrings: ['^(?<version>.+)$'],
           },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             branchName: 'test-branch',
             manager: 'npm',
           },
-        ],
+        ]),
         updatedPackageFiles: [
           {
             type: 'addition',

@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type {
   PackageFile,
   SharedConstraint,
@@ -57,13 +58,13 @@ function shared(
 }
 
 function upgrade(config: Partial<BranchUpgradeConfig>): BranchUpgradeConfig {
-  return {
+  return partial<BranchUpgradeConfig>({
     manager: 'tools',
     packageFile: 'tools.toml',
     depName: 'node',
     branchName: 'some-branch',
     ...config,
-  };
+  });
 }
 
 describe('workers/repository/extract/shared-constraints', () => {

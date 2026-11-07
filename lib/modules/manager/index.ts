@@ -106,7 +106,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return 'update-lockfile';
   }
 
-  return config.rangeStrategy!;
+  return rangeStrategy;
 }
 
 /**
@@ -141,10 +141,10 @@ export function isKnownManager(mgr: string): boolean {
  *
  * If enabledManagers is provided, this function returns a subset of allManagersList
  * that matches the enabled manager names, including custom managers. If enabledManagers
- * is not provided or is an empty array, it returns the full list of managers.
+ * is an empty array, it returns the full list of managers.
  */
-export function getEnabledManagersList(enabledManagers?: string[]): string[] {
-  if (enabledManagers?.length) {
+export function getEnabledManagersList(enabledManagers: string[]): string[] {
+  if (enabledManagers.length) {
     return allManagersList.filter(
       (manager) =>
         enabledManagers.includes(manager) ||

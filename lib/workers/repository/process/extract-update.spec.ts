@@ -17,6 +17,7 @@ import type {
 import { fingerprint } from '../../../util/fingerprint.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { BranchConfig } from '../../types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _extractAll from '../extract/index.ts';
 import * as _branchify from '../updates/branchify.ts';
@@ -61,14 +62,14 @@ describe('workers/repository/process/extract-update', () => {
 
   beforeEach(() => {
     branchify.branchifyUpgrades.mockResolvedValue({
-      branches: [
+      branches: partial<BranchConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
         },
-      ],
+      ]),
       branchList: ['branchName'],
     });
   });
@@ -80,6 +81,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('runs with no baseBranchPatterns', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -104,6 +108,8 @@ describe('workers/repository/process/extract-update', () => {
       const config = partial<RenovateConfig>({
         // @ts-expect-error -- `javascript` is not a RenovateConfig option
         baseBranchPatterns: ['master', 'dev'],
+        customManagers: [],
+        packageRules: [],
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         enabledManagers: ['npm'],
@@ -121,7 +127,12 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('leaves the cache alone when not overwriting it', async () => {
-      const config = partial<RenovateConfig>({ repoIsOnboarded: true });
+      const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
+        repoIsOnboarded: true,
+      });
       const cache = { scan: {} };
       repositoryCache.getCache.mockReturnValueOnce(cache);
       scm.checkoutBranch.mockResolvedValueOnce(branchSha);
@@ -133,6 +144,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('keeps cached scans for branches that are still configured', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         baseBranch: 'master',
         baseBranches: ['master'],
         repoIsOnboarded: true,
@@ -153,6 +167,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('caches package files without URL credentials', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         baseBranch: 'master',
         repoIsOnboarded: true,
       });
@@ -194,6 +211,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('does not cache package files with URL credentials', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         baseBranch: 'master',
         repoIsOnboarded: true,
       });
@@ -233,6 +253,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('does not cache a regex manager extract with credentials in a matched URL', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         baseBranch: 'master',
         repoIsOnboarded: true,
       });
@@ -275,6 +298,9 @@ describe('workers/repository/process/extract-update', () => {
     it('uses repository cache', async () => {
       const packageFiles: Record<string, PackageFile[]> = {};
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         baseBranch: 'master',
       });
@@ -307,6 +333,9 @@ describe('workers/repository/process/extract-update', () => {
         ],
       };
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         baseBranch: 'master',
       });
@@ -383,6 +412,9 @@ describe('workers/repository/process/extract-update', () => {
 
       const res = await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -436,6 +468,9 @@ describe('workers/repository/process/extract-update', () => {
         extractionFingerprints: {},
       });
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         baseBranch: 'master',
       });
@@ -494,6 +529,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -564,6 +602,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -615,6 +656,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -669,6 +713,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -716,6 +763,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -765,6 +815,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -798,6 +851,9 @@ describe('workers/repository/process/extract-update', () => {
 
       await extract(
         partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         }),
@@ -816,6 +872,9 @@ describe('workers/repository/process/extract-update', () => {
 
     describe('cached package files', () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         baseBranch: 'master',
       });
@@ -895,6 +954,9 @@ describe('workers/repository/process/extract-update', () => {
           extractionFingerprints: {},
         });
         const config = partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
@@ -932,6 +994,9 @@ describe('workers/repository/process/extract-update', () => {
 
         await extract(
           partial<RenovateConfig>({
+            customManagers: [],
+            packageRules: [],
+            enabledManagers: [],
             repoIsOnboarded: true,
             baseBranch: 'master',
           }),
@@ -962,6 +1027,9 @@ describe('workers/repository/process/extract-update', () => {
           gradle: [{ packageFile: 'build.gradle', deps: [] }],
         };
         const config = partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
@@ -1018,6 +1086,9 @@ describe('workers/repository/process/extract-update', () => {
           extractionFingerprints: {},
         });
         const config = partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         });
@@ -1059,6 +1130,9 @@ describe('workers/repository/process/extract-update', () => {
           extractionFingerprints: {},
         });
         const config = partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
         });
@@ -1084,6 +1158,9 @@ describe('workers/repository/process/extract-update', () => {
           ],
         };
         const config = partial<RenovateConfig>({
+          customManagers: [],
+          packageRules: [],
+          enabledManagers: [],
           repoIsOnboarded: true,
           baseBranch: 'master',
           npmrc: configNpmrc,
@@ -1119,6 +1196,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('fetches vulnerabilities', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       });
@@ -1138,6 +1218,9 @@ describe('workers/repository/process/extract-update', () => {
 
     it('handles exception when fetching vulnerabilities', async () => {
       const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       });
@@ -1190,6 +1273,9 @@ describe('workers/repository/process/extract-update', () => {
           };
 
           const config = partial<RenovateConfig>({
+            customManagers: [],
+            packageRules: [],
+            enabledManagers: [],
             repoIsOnboarded: true,
             baseBranch: 'main',
             osvVulnerabilityAlerts: true,
@@ -1290,6 +1376,9 @@ describe('workers/repository/process/extract-update', () => {
             };
 
             const config = partial<RenovateConfig>({
+              customManagers: [],
+              packageRules: [],
+              enabledManagers: [],
               repoIsOnboarded: true,
               baseBranch: 'main',
             });
@@ -1345,6 +1434,9 @@ describe('workers/repository/process/extract-update', () => {
             };
 
             const config = partial<RenovateConfig>({
+              customManagers: [],
+              packageRules: [],
+              enabledManagers: [],
               repoIsOnboarded: true,
               baseBranch: 'main',
             });
@@ -1409,6 +1501,9 @@ describe('workers/repository/process/extract-update', () => {
           };
 
           const config = partial<RenovateConfig>({
+            customManagers: [],
+            packageRules: [],
+            enabledManagers: [],
             repoIsOnboarded: true,
             baseBranch: 'main',
           });
@@ -1433,15 +1528,19 @@ describe('workers/repository/process/extract-update', () => {
 
   describe('update()', () => {
     it('writes the updates', async () => {
-      const config = partial<RenovateConfig>();
-      const branches = [
+      const config = partial<RenovateConfig>({
+        customManagers: [],
+        packageRules: [],
+        enabledManagers: [],
+      });
+      const branches = partial<BranchConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           baseBranch: 'base',
           upgrades: [],
         },
-      ];
+      ]);
       write.writeUpdates.mockResolvedValueOnce('automerged');
 
       const res = await update(config, branches);

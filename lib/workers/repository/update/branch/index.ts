@@ -86,8 +86,8 @@ export async function processBranch(
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
-      config.branchPrefix!,
-      config.branchPrefixOld!,
+      config.branchPrefix,
+      config.branchPrefixOld,
     );
     branchExists = await scm.branchExists(branchName);
     // v8 ignore else -- TODO: add test #40625
@@ -227,7 +227,7 @@ export async function processBranch(
     if (branchExists) {
       // check if branch is labelled to stop
       config.stopUpdating = branchPr?.labels?.includes(
-        config.stopUpdatingLabel!,
+        config.stopUpdatingLabel,
       );
 
       const prRebaseChecked = !!branchPr?.bodyStruct?.rebaseRequested;
@@ -326,7 +326,7 @@ export async function processBranch(
           result: 'not-scheduled',
         };
       }
-      if (config.updateNotScheduled === false && !config.rebaseRequested) {
+      if (!config.updateNotScheduled && !config.rebaseRequested) {
         logger.debug('Skipping branch update as not within schedule');
         return {
           branchExists,
@@ -359,7 +359,7 @@ export async function processBranch(
         !dependencyDashboardCheck &&
         !branchExists &&
         config.stabilityStatus === 'yellow' &&
-        ['not-pending', 'status-success'].includes(config.prCreation!)
+        ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
         logger.debug(
           'Skipping branch creation due to internal status checks not met',
@@ -530,7 +530,7 @@ export async function processBranch(
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs
-      config.commitMessage = compileCommitBody(config, config.commitMessage!, {
+      config.commitMessage = compileCommitBody(config, config.commitMessage, {
         ...config,
         // changelog is on first upgrade
         logJSON: config.upgrades[0].logJSON,
@@ -652,7 +652,7 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        ['conflicted', 'never'].includes(config.rebaseWhen) &&
         /* v8 ignore next -- needs test */
         !hasKeepUpdatedLabel(config, branchPr)
       ) {
@@ -724,7 +724,7 @@ export async function processBranch(
           config.artifactErrors.length > 1 ? 'artifacts' : 'an artifact';
         content += ' related to this branch. ';
         content += template.compile(
-          config.userStrings!.artifactErrorWarning,
+          config.userStrings.artifactErrorWarning,
           config,
         );
         content += emojify(
@@ -746,8 +746,8 @@ export async function processBranch(
         content = platform.massageMarkdown(content, config.rebaseLabel);
         // v8 ignore else -- TODO: add test #40625
         if (!(
-          config.suppressNotifications!.includes('artifactErrors') ||
-          config.suppressNotifications!.includes('lockFileErrors')
+          config.suppressNotifications.includes('artifactErrors') ||
+          config.suppressNotifications.includes('lockFileErrors')
         )) {
           if (GlobalConfig.get('dryRun')) {
             logger.info(
@@ -780,7 +780,7 @@ export async function processBranch(
           logger.debug('PR is configured for automerge');
           // skip automerge if there is a new commit since status checks aren't done yet
           // v8 ignore else -- TODO: add test #40625
-          if (config.ignoreTests === true || !commitSha) {
+          if (config.ignoreTests || !commitSha) {
             logger.debug('checking auto-merge');
             const prAutomergeResult = await checkAutoMerge(pr, config);
             if (prAutomergeResult?.automerged) {

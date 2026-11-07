@@ -1,5 +1,6 @@
+import { partial } from '~test/util.ts';
 import * as _template from '../../../../../util/template/index.ts';
-import type { BranchConfig } from '../../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../../types.ts';
 import { getChangelogs } from './changelogs.ts';
 
 vi.mock('../../../../../util/template/index.ts');
@@ -7,13 +8,15 @@ const template = vi.mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
   it('returns empty string when there is no release notes', () => {
-    const res = getChangelogs({
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      upgrades: [],
-      hasReleaseNotes: false,
-    });
+    const res = getChangelogs(
+      partial<BranchConfig>({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: false,
+      }),
+    );
 
     expect(res).toBe('');
     expect(template.compile).not.toHaveBeenCalled();
@@ -28,20 +31,22 @@ describe('workers/repository/update/pr/body/changelogs', () => {
         .trim();
     });
 
-    const res = getChangelogs({
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      upgrades: [
-        {
-          manager: 'some-manager',
-          depName: 'dep-1',
-          branchName: 'some-branch',
-          hasReleaseNotes: false,
-        },
-      ],
-      hasReleaseNotes: true,
-    });
+    const res = getChangelogs(
+      partial<BranchConfig>({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: partial<BranchUpgradeConfig>([
+          {
+            manager: 'some-manager',
+            depName: 'dep-1',
+            branchName: 'some-branch',
+            hasReleaseNotes: false,
+          },
+        ]),
+        hasReleaseNotes: true,
+      }),
+    );
 
     expect(res).toContain('none');
   });
@@ -56,49 +61,51 @@ describe('workers/repository/update/pr/body/changelogs', () => {
         .trim();
     });
 
-    const res = getChangelogs({
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      manager: 'some-manager',
-      upgrades: [
-        {
-          manager: 'some-manager',
-          depName: 'dep-1',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-2',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-3',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'dep-4',
-          repoName: 'other/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-        {
-          manager: 'some-manager',
-          depName: 'some/repo',
-          repoName: 'some/repo',
-          branchName: 'some-branch',
-          hasReleaseNotes: true,
-        },
-      ],
-      hasReleaseNotes: true,
-    });
+    const res = getChangelogs(
+      partial<BranchConfig>({
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        manager: 'some-manager',
+        upgrades: partial<BranchUpgradeConfig>([
+          {
+            manager: 'some-manager',
+            depName: 'dep-1',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-2',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-3',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'dep-4',
+            repoName: 'other/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+          {
+            manager: 'some-manager',
+            depName: 'some/repo',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+        ]),
+        hasReleaseNotes: true,
+      }),
+    );
 
     expect(res).toMatchInlineSnapshot(`
       "

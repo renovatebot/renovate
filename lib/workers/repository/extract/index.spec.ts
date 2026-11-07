@@ -25,8 +25,6 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile>({}),
       ]);
-      const optionalConfig: Partial<RenovateConfig> = config;
-      delete optionalConfig.customManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });

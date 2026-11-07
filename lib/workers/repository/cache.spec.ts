@@ -13,7 +13,7 @@ describe('workers/repository/cache', () => {
     it('strips credentials from cached upgrade fields', async () => {
       const cache = partial<RepoCacheData>({});
       repoCache.getCache.mockReturnValue(cache);
-      const branches = partial<BranchConfig[]>([
+      const branches = partial<BranchConfig>([
         {
           branchName: 'renovate/dep-1.x',
           baseBranch: 'main',

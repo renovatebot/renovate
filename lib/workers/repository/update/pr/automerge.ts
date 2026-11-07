@@ -81,7 +81,7 @@ export async function checkAutoMerge(
   }
   const branchStatus = await resolveBranchStatus(
     branchName,
-    !!config.internalChecksAsSuccess,
+    config.internalChecksAsSuccess,
     config.ignoreTests,
   );
   if (branchStatus !== 'green') {
@@ -101,8 +101,7 @@ export async function checkAutoMerge(
     };
   }
   if (automergeType === 'pr-comment') {
-    // TODO: types (#22198)
-    logger.debug(`Applying automerge comment: ${automergeComment!}`);
+    logger.debug(`Applying automerge comment: ${automergeComment}`);
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
@@ -117,13 +116,13 @@ export async function checkAutoMerge(
       await ensureCommentRemoval({
         type: 'by-content',
         number: pr.number,
-        content: automergeComment!,
+        content: automergeComment,
       });
     }
     await ensureComment({
       number: pr.number,
       topic: null,
-      content: automergeComment!,
+      content: automergeComment,
     });
     return { automerged: true, branchRemoved: false };
   }
@@ -134,7 +133,7 @@ export async function checkAutoMerge(
     logger.info(
       `DRY-RUN: Would merge PR #${
         pr.number
-      } with strategy "${automergeStrategy!}"`,
+      } with strategy "${automergeStrategy}"`,
     );
     return {
       automerged: false,
@@ -142,7 +141,7 @@ export async function checkAutoMerge(
     };
   }
   // TODO: types (#22198)
-  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy!}`);
+  logger.debug(`Automerging #${pr.number} with strategy ${automergeStrategy}`);
   const res = await platform.mergePr({
     branchName,
     id: pr.number,

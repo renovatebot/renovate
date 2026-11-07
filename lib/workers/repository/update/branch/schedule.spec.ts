@@ -152,7 +152,8 @@ describe('workers/repository/update/branch/schedule', () => {
       config = partial<RenovateConfig>();
     });
 
-    it('returns true if no schedule', () => {
+    it('returns true if the schedule is empty', () => {
+      config.schedule = [];
       const res = schedule.isScheduledNow(config);
       expect(res).toBeTrue();
     });

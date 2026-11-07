@@ -3,20 +3,8 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../../../types.ts';
 import { getPrUpdatesTable } from './updates-table.ts';
 
 describe('workers/repository/update/pr/body/updates-table', () => {
-  it('checks a case where prBodyColumns are undefined', () => {
-    const configObj: BranchConfig = {
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      upgrades: [],
-      prBodyColumns: undefined,
-    };
-    const result = getPrUpdatesTable(configObj);
-    expect(result).toBe('');
-  });
-
   it('skips an upgrade that defines no body columns', () => {
-    const configObj: BranchConfig = {
+    const configObj = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
@@ -24,10 +12,11 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         partial<BranchUpgradeConfig>({
           manager: 'some-manager',
           branchName: 'some-branch',
+          prBodyDefinitions: {},
         }),
       ],
       prBodyColumns: ['Package'],
-    };
+    });
 
     const result = getPrUpdatesTable(configObj);
 
@@ -139,12 +128,13 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     });
-    const configObj: BranchConfig = {
+    const configObj = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
       upgrades: [upgrade0, upgrade1, upgrade2, upgrade3, upgrade4],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyHeadingDefinitions: {},
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
         Type: '{{{depType}}}',
@@ -156,7 +146,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
       },
-    };
+    });
     const result = getPrUpdatesTable(configObj);
     expect(result).toMatch(
       '\n' +
@@ -245,12 +235,13 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayPending: 'some-string',
     });
 
-    const configObj: BranchConfig = {
+    const configObj = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
       upgrades: [upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyHeadingDefinitions: {},
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',
         Type: '{{{depType}}}',
@@ -260,7 +251,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         Change: 'All locks refreshed',
         Pending: '{{{displayPending}}}',
       },
-    };
+    });
     const result = getPrUpdatesTable(configObj);
     expect(result).toMatch(
       '\n' +
@@ -303,12 +294,13 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       newNameLinked: '[mochaNew](https://mochajs.org/)',
     });
 
-    const configObj: BranchConfig = {
+    const configObj = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
       upgrades: [upgrade],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
+      prBodyHeadingDefinitions: {},
       prBodyDefinitions: {
         Package:
           '{{{depNameLinked}}}{{#if newName}}{{#unless (equals depName newName)}} → {{{newNameLinked}}}{{/unless}}{{/if}}',
@@ -321,7 +313,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         References: '{{{references}}}',
         'Package file': '{{{packageFile}}}',
       },
-    };
+    });
     const result = getPrUpdatesTable(configObj);
     expect(result).toMatch(
       '\n' +
@@ -366,7 +358,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       datasource: 'npm',
     });
 
-    const configObj: BranchConfig = {
+    const configObj = partial<BranchConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
@@ -387,7 +379,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       prBodyHeadingDefinitions: {
         Age: '[Age](https://docs.renovatebot.com/merge-confidence)',
       },
-    };
+    });
     const result = getPrUpdatesTable(configObj);
     expect(result).toMatch(
       '\n' +

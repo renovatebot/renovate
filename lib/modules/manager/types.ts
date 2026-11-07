@@ -80,7 +80,7 @@ export interface ToolConstraintsConfig {
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   isLockFileMaintenance?: boolean;
-  composerIgnorePlatformReqs?: string[];
+  composerIgnorePlatformReqs?: string[] | null;
   goGetDirs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
@@ -103,7 +103,7 @@ export interface RangeConfig<T = unknown> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string;
-  rangeStrategy?: RangeStrategy;
+  rangeStrategy: RangeStrategy;
 }
 
 export interface PackageFileContent<T = unknown> extends ManagerData<T> {
@@ -622,10 +622,10 @@ export interface PostUpdateConfig<T = unknown>
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
-  postUpdateOptions?: string[];
-  skipArtifactsUpdate?: boolean;
+  postUpdateOptions: string[];
+  skipArtifactsUpdate: boolean;
   skipInstalls?: boolean | null;
-  ignoreScripts?: boolean;
+  ignoreScripts: boolean;
 
   packageFile?: string;
 

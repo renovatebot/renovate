@@ -40,9 +40,7 @@ export function couldApplyMinimumReleaseAgeToDigest(
   return (
     isNonEmptyString(config.minimumReleaseAge) ||
     isNonEmptyString(config[updateType]?.minimumReleaseAge) ||
-    !!config.packageRules?.some((rule) =>
-      isNonEmptyString(rule.minimumReleaseAge),
-    )
+    config.packageRules.some((rule) => isNonEmptyString(rule.minimumReleaseAge))
   );
 }
 
@@ -224,8 +222,7 @@ export async function resolveUpdateDigests(
   res: UpdateResult,
   dependency: ReleaseResult | null,
 ): Promise<void> {
-  const isPinnedByUs =
-    config.pinDigests === true && !config.digestManagedExternally;
+  const isPinnedByUs = config.pinDigests && !config.digestManagedExternally;
   for (const update of res.updates) {
     // only update the digest in the package file if it's managed by us
     if (isPinnedByUs || config.currentDigest) {

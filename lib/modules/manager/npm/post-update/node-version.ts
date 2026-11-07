@@ -6,7 +6,7 @@ import type { ToolConstraint } from '../../../../util/exec/types.ts';
 import { readLocalFile } from '../../../../util/fs/index.ts';
 import { newlineRegex } from '../../../../util/regex.ts';
 import { stripVersionPrefix } from '../../../../util/string.ts';
-import type { PostUpdateConfig, Upgrade } from '../../types.ts';
+import type { ToolConstraintsConfig, Upgrade } from '../../types.ts';
 import { resolveToolConstraint } from '../../util.ts';
 import type { LazyPackageJson } from './types.ts';
 
@@ -70,7 +70,7 @@ async function getPackageJsonConstraint(
 
 // export only for testing
 export async function getNodeConstraint(
-  config: Partial<PostUpdateConfig>,
+  config: ToolConstraintsConfig,
   upgrades: Upgrade[],
   lockFileDir: string,
   pkg: LazyPackageJson,
@@ -98,7 +98,7 @@ export function getNodeUpdate(upgrades: Upgrade[]): string | undefined {
 }
 
 export async function getNodeToolConstraint(
-  config: Partial<PostUpdateConfig>,
+  config: ToolConstraintsConfig,
   upgrades: Upgrade[],
   lockFileDir: string,
   pkg: LazyPackageJson,

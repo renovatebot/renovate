@@ -1,6 +1,6 @@
 import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import { git, logger } from '~test/util.ts';
+import { git, logger, partial } from '~test/util.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
 import * as _bundler from '../../../../modules/manager/bundler/index.ts';
@@ -76,22 +76,24 @@ describe('workers/repository/update/branch/get-updated', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         baseBranch: 'base-branch',
         manager: 'some-manager',
         branchName: 'renovate/pin',
         upgrades: [],
-      } satisfies BranchConfig;
+      });
       npm.updateDependency = vi.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 
     it('handles autoreplace base updated', async () => {
-      config.upgrades.push({
-        packageFile: 'index.html',
-        manager: 'html',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'index.html',
+          manager: 'html',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
@@ -102,11 +104,13 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles autoreplace branch no update', async () => {
-      config.upgrades.push({
-        packageFile: 'index.html',
-        manager: 'html',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'index.html',
+          manager: 'html',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toEqual({
@@ -119,7 +123,9 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles autoreplace failure', async () => {
-      config.upgrades.push({ manager: 'html', branchName: '' });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({ manager: 'html', branchName: '' }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
         'update-failure',
@@ -128,11 +134,13 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles autoreplace branch needs update', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'index.html',
-        manager: 'html',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'index.html',
+          manager: 'html',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
@@ -156,10 +164,12 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles null content', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        manager: 'npm',
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'npm',
+          branchName: 'some-branch',
+        }),
+      );
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
         'update-failure',
       );
@@ -167,11 +177,13 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles content change', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'package.json',
-        manager: 'npm',
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'package.json',
+          manager: 'npm',
+          branchName: 'some-branch',
+        }),
+      );
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
@@ -187,11 +199,13 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles lock files', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -222,16 +236,18 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles an update that reports no files', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        lockFile: 'mise.lock',
-        isLockfileUpdate: true,
-        depName: 'node',
-        currentVersion: '20.0.0',
-        newVersion: '22.0.0',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '22.0.0',
+        }),
+      );
       git.getFile.mockResolvedValue('existing content');
       mise.updateLockedDependency.mockReturnValueOnce({ status: 'updated' });
 
@@ -241,17 +257,19 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('passes mise lockfile updates to the artifact refresh', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        lockFile: 'mise.lock',
-        isLockfileUpdate: true,
-        isLockfileOnly: true,
-        depName: 'node',
-        currentVersion: '20.0.0',
-        newVersion: '22.0.0',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          isLockfileOnly: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '22.0.0',
+        }),
+      );
       git.getFile.mockResolvedValue('existing content');
       mise.updateLockedDependency.mockReturnValueOnce({
         status: 'updated',
@@ -285,17 +303,19 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('replaces a hand-edited lockfile with the refreshed artifact', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        lockFile: 'mise.lock',
-        isLockfileUpdate: true,
-        isLockfileOnly: true,
-        depName: 'node',
-        currentVersion: '20.0.0',
-        newVersion: '20.1.0',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          isLockfileOnly: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '20.1.0',
+        }),
+      );
       git.getFile.mockResolvedValue('existing content');
       mise.updateLockedDependency.mockReturnValueOnce({
         status: 'updated',
@@ -333,17 +353,19 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('does not retain a hand-edited mise lockfile when artifact refresh fails', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        lockFile: 'mise.lock',
-        isLockfileUpdate: true,
-        isLockfileOnly: true,
-        depName: 'node',
-        currentVersion: '20.0.0',
-        newVersion: '22.0.0',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          isLockfileOnly: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '22.0.0',
+        }),
+      );
       git.getFile.mockResolvedValue('existing content');
       mise.updateLockedDependency.mockReturnValueOnce({
         status: 'updated',
@@ -371,16 +393,18 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('retains ordinary lockfile changes when artifact refresh fails', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        lockFile: 'mise.lock',
-        isLockfileUpdate: true,
-        depName: 'node',
-        currentVersion: '20.0.0',
-        newVersion: '20.1.0',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile: 'mise.lock',
+          isLockfileUpdate: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '20.1.0',
+        }),
+      );
       git.getFile.mockResolvedValue('existing content');
       mise.updateLockedDependency.mockReturnValueOnce({
         status: 'updated',
@@ -428,17 +452,19 @@ describe('workers/repository/update/branch/get-updated', () => {
     ])(
       'leaves the mise artifact lock content undefined for $name',
       async ({ lockFile, lockFiles }) => {
-        config.upgrades.push({
-          packageFile: 'mise.toml',
-          manager: 'mise',
-          branchName: '',
-          lockFile,
-          lockFiles,
-          isLockfileUpdate: true,
-          depName: 'node',
-          currentVersion: '20.0.0',
-          newVersion: '22.0.0',
-        });
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'mise.toml',
+            manager: 'mise',
+            branchName: '',
+            lockFile,
+            lockFiles,
+            isLockfileUpdate: true,
+            depName: 'node',
+            currentVersion: '20.0.0',
+            newVersion: '22.0.0',
+          }),
+        );
         git.getFile.mockResolvedValue('existing content');
         mise.updateLockedDependency.mockReturnValueOnce({
           status: 'updated',
@@ -458,11 +484,13 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles artifact notices', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'go.mod',
-        manager: 'gomod',
-        branchName: 'foo/bar',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'go.mod',
+          manager: 'gomod',
+          branchName: 'foo/bar',
+        }),
+      );
       gomod.updateDependency.mockReturnValue('some new content');
       gomod.updateArtifacts.mockResolvedValueOnce([
         {
@@ -506,16 +534,16 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('keeps only the latest artifact when several package files return the same path', async () => {
       config.upgrades.push(
-        {
+        partial<BranchUpgradeConfig>({
           packageFile: 'app/go.mod',
           manager: 'gomod',
           branchName: 'foo/bar',
-        },
-        {
+        }),
+        partial<BranchUpgradeConfig>({
           packageFile: 'lib/go.mod',
           manager: 'gomod',
           branchName: 'foo/bar',
-        },
+        }),
       );
       gomod.updateDependency.mockReturnValue('some new content');
       gomod.updateArtifacts
@@ -562,11 +590,13 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles lockFileMaintenance', async () => {
-      config.upgrades.push({
-        manager: 'composer',
-        updateType: 'lockFileMaintenance',
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'composer',
+          updateType: 'lockFileMaintenance',
+          branchName: 'some-branch',
+        }),
+      );
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -589,11 +619,13 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('for updatedArtifacts passes proper lockFiles', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+        }),
+      );
       config.lockFiles = ['different.lock'];
       config.packageFiles = {
         composer: [
@@ -625,12 +657,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('for nonUpdatedArtifacts passes proper lockFiles', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       composer.updateLockedDependency.mockReturnValueOnce({
         status: 'unsupported',
       });
@@ -664,12 +698,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('for lockFileMaintenance passes proper lockFiles', async () => {
-      config.upgrades.push({
-        manager: 'composer',
-        updateType: 'lockFileMaintenance',
-        packageFile: 'composer.json',
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'composer',
+          updateType: 'lockFileMaintenance',
+          packageFile: 'composer.json',
+          branchName: 'some-branch',
+        }),
+      );
       config.lockFiles = ['different.lock'];
       config.packageFiles = {
         composer: [
@@ -700,12 +736,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles isRemediation success', async () => {
-      config.upgrades.push({
-        manager: 'npm',
-        lockFile: 'package-lock.json',
-        isRemediation: true,
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'npm',
+          lockFile: 'package-lock.json',
+          isRemediation: true,
+          branchName: 'some-branch',
+        }),
+      );
       npm.updateLockedDependency.mockResolvedValueOnce({
         status: 'updated',
         files: { 'package-lock.json': 'new contents' },
@@ -723,12 +761,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles unsupported isRemediation', async () => {
-      config.upgrades.push({
-        manager: 'npm',
-        lockFile: 'package-lock.json',
-        isRemediation: true,
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'npm',
+          lockFile: 'package-lock.json',
+          isRemediation: true,
+          branchName: 'some-branch',
+        }),
+      );
       npm.updateLockedDependency.mockResolvedValueOnce({
         status: 'unsupported',
       });
@@ -745,11 +785,13 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles isRemediation rebase', async () => {
-      config.upgrades.push({
-        manager: 'npm',
-        isRemediation: true,
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'npm',
+          isRemediation: true,
+          branchName: 'some-branch',
+        }),
+      );
       config.reuseExistingBranch = true;
       git.getFile.mockResolvedValueOnce('existing content');
       npm.updateLockedDependency.mockResolvedValue({
@@ -769,11 +811,13 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles lockFileMaintenance error', async () => {
-      config.upgrades.push({
-        manager: 'composer',
-        updateType: 'lockFileMaintenance',
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'composer',
+          updateType: 'lockFileMaintenance',
+          branchName: 'some-branch',
+        }),
+      );
       composer.updateArtifacts.mockResolvedValueOnce([
         {
           artifactError: {
@@ -790,11 +834,13 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('handles lock file errors', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        manager: 'composer',
-        packageFile: 'composer.json',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          manager: 'composer',
+          packageFile: 'composer.json',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -811,12 +857,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles git submodules', async () => {
-      config.upgrades.push({
-        packageFile: '.gitmodules',
-        manager: 'git-submodules',
-        datasource: GitRefsDatasource.id,
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: '.gitmodules',
+          manager: 'git-submodules',
+          datasource: GitRefsDatasource.id,
+          branchName: 'some-branch',
+        }),
+      );
       gitSubmodules.updateDependency.mockResolvedValueOnce({
         content: 'existing content',
         updatedOutOfBand: true,
@@ -834,12 +882,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('drops unchanged package file if not updated out of band', async () => {
-      config.upgrades.push({
-        packageFile: '.gitmodules',
-        manager: 'git-submodules',
-        datasource: GitRefsDatasource.id,
-        branchName: 'some-branch',
-      } satisfies BranchUpgradeConfig);
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: '.gitmodules',
+          manager: 'git-submodules',
+          datasource: GitRefsDatasource.id,
+          branchName: 'some-branch',
+        }),
+      );
       gitSubmodules.updateDependency.mockResolvedValueOnce({
         content: 'existing content',
       });
@@ -898,35 +948,41 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       config.manager = 'regex';
       config.branchName = branchName;
-      config.upgrades.push({
-        packageFile: 'README.adoc',
-        manager: 'regex',
-        updateType,
-        depName,
-        currentValue: currentRegexValue,
-        newVersion,
-        branchName,
-      });
-      config.upgrades.push({
-        packageFile: packageFileA,
-        lockFiles: [lockFileA],
-        manager: 'pip-compile',
-        updateType,
-        depName,
-        currentValue: currentPipCompileValue,
-        newVersion,
-        branchName,
-      });
-      config.upgrades.push({
-        packageFile: packageFileB,
-        lockFiles: [lockFileB],
-        manager: 'pip-compile',
-        updateType,
-        depName,
-        currentValue: currentPipCompileValue,
-        newVersion,
-        branchName,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'README.adoc',
+          manager: 'regex',
+          updateType,
+          depName,
+          currentValue: currentRegexValue,
+          newVersion,
+          branchName,
+        }),
+      );
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: packageFileA,
+          lockFiles: [lockFileA],
+          manager: 'pip-compile',
+          updateType,
+          depName,
+          currentValue: currentPipCompileValue,
+          newVersion,
+          branchName,
+        }),
+      );
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: packageFileB,
+          lockFiles: [lockFileB],
+          manager: 'pip-compile',
+          updateType,
+          depName,
+          currentValue: currentPipCompileValue,
+          newVersion,
+          branchName,
+        }),
+      );
 
       config.packageFiles = {
         'pip-compile': [
@@ -959,12 +1015,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('update artifacts on update-lockfile strategy', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       composer.updateLockedDependency.mockReturnValueOnce({
         status: 'unsupported',
       });
@@ -997,12 +1055,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
-      config.upgrades.push({
-        packageFile: 'abc.tf',
-        manager: 'batect-wrapper',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'abc.tf',
+          manager: 'batect-wrapper',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       batectWrapper.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -1063,26 +1123,30 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.manager = 'pip-compile';
       config.branchName = branchName;
       config.skipArtifactsUpdate = true;
-      config.upgrades.push({
-        packageFile,
-        lockFiles: [lockFile],
-        manager: 'pip-compile',
-        updateType,
-        depName: 'alpha',
-        currentValue,
-        newVersion,
-        branchName,
-      });
-      config.upgrades.push({
-        packageFile,
-        lockFiles: [lockFile],
-        manager: 'pip-compile',
-        updateType,
-        depName: 'beta',
-        currentValue,
-        newVersion,
-        branchName,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile,
+          lockFiles: [lockFile],
+          manager: 'pip-compile',
+          updateType,
+          depName: 'alpha',
+          currentValue,
+          newVersion,
+          branchName,
+        }),
+      );
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile,
+          lockFiles: [lockFile],
+          manager: 'pip-compile',
+          updateType,
+          depName: 'beta',
+          currentValue,
+          newVersion,
+          branchName,
+        }),
+      );
 
       config.packageFiles = {
         'pip-compile': [
@@ -1102,7 +1166,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(pipCompile.updateArtifacts).not.toHaveBeenCalled();
     });
 
-    it.each([false, undefined])(
+    it.each([false])(
       'updates artifacts when skipArtifactsUpdate=$0',
       async (skipArtifactsUpdate) => {
         const branchName = 'renovate/wheel-0.x';
@@ -1136,26 +1200,30 @@ describe('workers/repository/update/branch/get-updated', () => {
         config.manager = 'pip-compile';
         config.branchName = branchName;
         config.skipArtifactsUpdate = skipArtifactsUpdate;
-        config.upgrades.push({
-          packageFile,
-          lockFiles: [lockFile],
-          manager: 'pip-compile',
-          updateType,
-          depName: 'alpha',
-          currentValue,
-          newVersion,
-          branchName,
-        });
-        config.upgrades.push({
-          packageFile,
-          lockFiles: [lockFile],
-          manager: 'pip-compile',
-          updateType,
-          depName: 'beta',
-          currentValue,
-          newVersion,
-          branchName,
-        });
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile,
+            lockFiles: [lockFile],
+            manager: 'pip-compile',
+            updateType,
+            depName: 'alpha',
+            currentValue,
+            newVersion,
+            branchName,
+          }),
+        );
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile,
+            lockFiles: [lockFile],
+            manager: 'pip-compile',
+            updateType,
+            depName: 'beta',
+            currentValue,
+            newVersion,
+            branchName,
+          }),
+        );
 
         config.packageFiles = {
           'pip-compile': [
@@ -1177,13 +1245,15 @@ describe('workers/repository/update/branch/get-updated', () => {
     );
 
     it('attempts updateLockedDependency and handles unsupported', async () => {
-      config.upgrades.push({
-        packageFile: 'package.json',
-        lockFiles: ['package-lock.json'],
-        manager: 'npm',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'package.json',
+          lockFiles: ['package-lock.json'],
+          manager: 'npm',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       npm.updateLockedDependency.mockResolvedValue({
         status: 'unsupported',
       });
@@ -1201,13 +1271,15 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('attempts updateLockedDependency and handles already-updated', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'package.json',
-        lockFile: 'package-lock.json',
-        manager: 'npm',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'package.json',
+          lockFile: 'package-lock.json',
+          manager: 'npm',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       npm.updateLockedDependency.mockResolvedValueOnce({
         status: 'already-updated',
       });
@@ -1225,13 +1297,15 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('attempts updateLockedDependency and handles updated files with reuse branch', async () => {
       config.reuseExistingBranch = true;
-      config.upgrades.push({
-        packageFile: 'package.json',
-        lockFile: 'package-lock.json',
-        manager: 'npm',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'package.json',
+          lockFile: 'package-lock.json',
+          manager: 'npm',
+          branchName: '',
+          isLockfileUpdate: true,
+        }),
+      );
       git.getFile.mockResolvedValue('some content');
       npm.updateLockedDependency.mockResolvedValue({
         status: 'updated',
@@ -1250,13 +1324,15 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('bumps versions in updateDependency managers', async () => {
-      config.upgrades.push({
-        packageFile: 'package.json',
-        branchName: '',
-        bumpVersion: 'patch',
-        manager: 'npm',
-        packageFileVersion: 'old version',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'package.json',
+          branchName: '',
+          bumpVersion: 'patch',
+          manager: 'npm',
+          packageFileVersion: 'old version',
+        }),
+      );
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
       const res = await getUpdatedPackageFiles(config);
@@ -1272,13 +1348,15 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('bumps versions in autoReplace managers', async () => {
-      config.upgrades.push({
-        packageFile: 'Chart.yaml',
-        branchName: '',
-        bumpVersion: 'patch',
-        manager: 'helmv3',
-        packageFileVersion: '0.0.1',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'Chart.yaml',
+          branchName: '',
+          bumpVersion: 'patch',
+          manager: 'helmv3',
+          packageFileVersion: '0.0.1',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
       helmv3.bumpPackageVersion.mockReturnValue({
         bumpedContent: 'version: 0.0.2',
@@ -1297,19 +1375,19 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('keeps a package file another upgrade already wrote', async () => {
       config.upgrades.push(
-        {
+        partial<BranchUpgradeConfig>({
           packageFile: 'Chart.yaml',
           branchName: '',
           bumpVersion: 'patch',
           manager: 'helmv3',
           packageFileVersion: '0.0.1',
-        },
-        {
+        }),
+        partial<BranchUpgradeConfig>({
           packageFile: 'Chart.yaml',
           branchName: '',
           manager: 'helmv3',
           isLockfileUpdate: true,
-        },
+        }),
       );
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
       helmv3.bumpPackageVersion.mockReturnValue({
@@ -1330,12 +1408,14 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles replacement', async () => {
-      config.upgrades.push({
-        packageFile: 'index.html',
-        manager: 'html',
-        updateType: 'replacement',
-        branchName: undefined!,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'index.html',
+          manager: 'html',
+          updateType: 'replacement',
+          branchName: undefined!,
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
@@ -1346,16 +1426,20 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('handles package files updated by multiple managers', async () => {
-      config.upgrades.push({
-        packageFile: 'pyproject.toml',
-        manager: 'poetry',
-        branchName: '',
-      });
-      config.upgrades.push({
-        packageFile: 'pyproject.toml',
-        manager: 'pep621',
-        branchName: '',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'pyproject.toml',
+          manager: 'poetry',
+          branchName: '',
+        }),
+      );
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'pyproject.toml',
+          manager: 'pep621',
+          branchName: '',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
       autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
 
@@ -1393,13 +1477,15 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     describe('when some artifacts have changed and others have not', () => {
       function pushGemUpgrade(opts: Partial<BranchUpgradeConfig>) {
-        return config.upgrades.push({
-          packageFile: 'Gemfile',
-          lockFiles: ['Gemfile.lock'],
-          branchName: '',
-          manager: 'bundler',
-          ...opts,
-        });
+        return config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'Gemfile',
+            lockFiles: ['Gemfile.lock'],
+            branchName: '',
+            manager: 'bundler',
+            ...opts,
+          }),
+        );
       }
 
       function mockUpdated() {
@@ -1526,24 +1612,28 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
 
       it('passes package files to updateArtifacts in the same order they were returned by the manager', async () => {
-        config.upgrades.push({
-          packageFile: 'requirements-dev.in',
-          manager: 'pip-compile',
-          updateType: 'replacement',
-          depName: 'awscli',
-          currentValue: '==1.32.86',
-          newVersion: '1.32.92',
-          branchName: 'renovate/aws-packages',
-        });
-        config.upgrades.push({
-          packageFile: 'requirements.in',
-          manager: 'pip-compile',
-          updateType: 'replacement',
-          depName: 'botocore',
-          currentValue: '==1.34.86',
-          newVersion: '1.34.92',
-          branchName: 'renovate/aws-packages',
-        });
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'requirements-dev.in',
+            manager: 'pip-compile',
+            updateType: 'replacement',
+            depName: 'awscli',
+            currentValue: '==1.32.86',
+            newVersion: '1.32.92',
+            branchName: 'renovate/aws-packages',
+          }),
+        );
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'requirements.in',
+            manager: 'pip-compile',
+            updateType: 'replacement',
+            depName: 'botocore',
+            currentValue: '==1.34.86',
+            newVersion: '1.34.92',
+            branchName: 'renovate/aws-packages',
+          }),
+        );
         config.packageFiles = {
           'pip-compile': [
             {
@@ -1580,26 +1670,28 @@ describe('workers/repository/update/branch/get-updated', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         baseBranch: 'base-branch',
         manager: 'some-manager',
         branchName: 'renovate/pin',
         upgrades: [],
         minimumReleaseAgeBehaviour: 'timestamp-required',
-      } satisfies BranchConfig;
+      });
       git.getFile.mockResolvedValueOnce('existing content');
     });
 
     describe('when artifact update introduces a pending version', () => {
       it('logs an artifact error', async () => {
-        config.upgrades.push({
-          packageFile: 'composer.json',
-          manager: 'composer',
-          branchName: '',
-          depName: 'some-dep',
-          newVersion: '1.2.3',
-          pendingVersions: ['1.3.0', '1.4.0'],
-        });
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'composer.json',
+            manager: 'composer',
+            branchName: '',
+            depName: 'some-dep',
+            newVersion: '1.2.3',
+            pendingVersions: ['1.3.0', '1.4.0'],
+          }),
+        );
         autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
         composer.updateArtifacts.mockResolvedValueOnce([
           {
@@ -1664,14 +1756,16 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         },
       ])(`$description`, async ({ dep }) => {
-        config.upgrades.push({
-          packageFile: 'composer.json',
-          manager: 'composer',
-          branchName: '',
-          depName: 'some-dep',
-          newVersion: '1.2.3',
-          pendingVersions: ['1.3.0', '1.4.0'],
-        });
+        config.upgrades.push(
+          partial<BranchUpgradeConfig>({
+            packageFile: 'composer.json',
+            manager: 'composer',
+            branchName: '',
+            depName: 'some-dep',
+            newVersion: '1.2.3',
+            pendingVersions: ['1.3.0', '1.4.0'],
+          }),
+        );
         autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
         composer.updateArtifacts.mockResolvedValueOnce([
           {
@@ -1695,14 +1789,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('does not add artifact error when no deps match pending versions', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0', '1.4.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0', '1.4.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1726,14 +1822,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('does not add artifact error when a different dependency has the same version as the pending version', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.2.5'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.2.5'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1761,13 +1859,15 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('skips pending version check when upgrade has no pendingVersions', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1784,14 +1884,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('skips pending version check when no artifact results', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([]);
       const res = await getUpdatedPackageFiles(config);
@@ -1800,14 +1902,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('does not add artifact error when extractPackageFile returns null', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1824,14 +1928,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('adds multiple artifact errors when multiple deps match pending versions', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0', '1.4.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0', '1.4.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1870,14 +1976,16 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     it('skips pending version check when minimumReleaseAgeBehaviour is not timestamp-required', async () => {
       config.minimumReleaseAgeBehaviour = 'timestamp-optional';
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1911,14 +2019,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('adds logs a debug log if it fails to re-extract the package file', async () => {
-      config.upgrades.push({
-        packageFile: 'go.mod',
-        manager: 'gomod',
-        branchName: '',
-        depName: 'github.com/foo/bar',
-        newVersion: '0.5.1',
-        pendingVersions: ['0.6.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'go.mod',
+          manager: 'gomod',
+          branchName: '',
+          depName: 'github.com/foo/bar',
+          newVersion: '0.5.1',
+          pendingVersions: ['0.6.0'],
+        }),
+      );
       gomod.updateDependency.mockReturnValue('some new content');
       gomod.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1940,14 +2050,16 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     // should never happen, but our types allow this
     it('rejects when an updated dependency has no depName or packageName', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -1984,14 +2096,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('adds an artifact error when an updated dependency has no depName, but does have a packageName', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -2020,14 +2134,16 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('skips the pending-version check when re-extracted dep has no resolvable version', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+        }),
+      );
       autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -2065,13 +2181,15 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     // should never happen, but our types allow this
     it('rejects when upgrade has no depName', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: 'renovate/pin',
-        depName: undefined,
-        newVersion: '5.6.7',
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: 'renovate/pin',
+          depName: undefined,
+          newVersion: '5.6.7',
+        }),
+      );
 
       await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
         'update-failure',
@@ -2080,13 +2198,15 @@ describe('workers/repository/update/branch/get-updated', () => {
 
     // should never happen, but our types allow this
     it('rejects when upgrade has no depName', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: undefined,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: undefined,
+        }),
+      );
 
       await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
         'update-failure',
@@ -2094,15 +2214,17 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     it('adds artifact error for nonUpdatedPackageFiles (lockfile update scenario)', async () => {
-      config.upgrades.push({
-        packageFile: 'composer.json',
-        manager: 'composer',
-        branchName: '',
-        depName: 'some-dep',
-        newVersion: '1.2.3',
-        pendingVersions: ['1.3.0'],
-        isLockfileUpdate: true,
-      });
+      config.upgrades.push(
+        partial<BranchUpgradeConfig>({
+          packageFile: 'composer.json',
+          manager: 'composer',
+          branchName: '',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          pendingVersions: ['1.3.0'],
+          isLockfileUpdate: true,
+        }),
+      );
       composer.updateLockedDependency.mockReturnValueOnce({
         status: 'unsupported',
       });

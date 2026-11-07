@@ -4137,7 +4137,6 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
-        // @ts-expect-error: installTools.unknownTool is not a valid tool
         config,
       );
       expect(warnings).toMatchObject([

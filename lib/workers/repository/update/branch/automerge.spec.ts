@@ -1,17 +1,17 @@
 import { logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
+import type { BranchConfig } from '../../../types.ts';
 import * as schedule from '../branch/schedule.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 
 describe('workers/repository/update/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
     const isScheduledSpy = vi.spyOn(schedule, 'isScheduledNow');
-    let config: RenovateConfig;
+    let config: BranchConfig;
 
     beforeEach(() => {
-      config = partial<RenovateConfig>();
+      config = partial<BranchConfig>();
       GlobalConfig.reset();
       isScheduledSpy.mockReturnValue(true);
     });

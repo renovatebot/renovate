@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { partial } from '~test/util.ts';
 import type { ReleaseResult } from '../../../../modules/datasource/types.ts';
 import { asTimestamp } from '../../../../util/timestamp.ts';
 import { calculateAbandonment } from './abandonment.ts';
@@ -17,12 +18,12 @@ describe('workers/repository/process/lookup/abandonment', () => {
       vi.setSystemTime(mockTime);
     });
 
-    const config: LookupUpdateConfig = {
+    const config = partial<LookupUpdateConfig>({
       datasource: 'npm',
       versioning: 'semver',
       packageName: 'example-package',
       rangeStrategy: 'auto',
-    };
+    });
 
     it('returns the original release result when no abandonment threshold is provided', () => {
       const releaseResult: ReleaseResult = {

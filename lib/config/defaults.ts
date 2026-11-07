@@ -1,8 +1,16 @@
 import { clone } from '../util/clone.ts';
+import { GlobalConfig } from './global.ts';
 import type { OptionDefinition } from './options/index.ts';
 import { getOptions } from './options/index.ts';
 import { getAllowedParents } from './options/scopes.ts';
-import type { AllConfig, RenovateOptions } from './types.ts';
+import { isFilteredOption } from './stages.ts';
+import type {
+  AllConfig,
+  RenovateOptions,
+  RepoRemovedConfigKey,
+  StatusCheckKey,
+  StatusCheckWhen,
+} from './types.ts';
 
 // Use functions instead of direct values to avoid introducing global references.
 // In particular, we want a new array instance every time we request a default array
@@ -57,6 +65,31 @@ export function isDefaultedOption(option: RenovateOptions): boolean {
   return option.default !== null;
 }
 
+/**
+ * The {@link RepoRemovedConfigKey} options, other than those of the stages before `repository`.
+ */
+const repoRemovedOptions = [
+  ...GlobalConfig.OPTIONS,
+  'env',
+  'extends',
+  'hostRules',
+  'ignorePresets',
+  'overrideDescription',
+] as const satisfies readonly RepoRemovedConfigKey[];
+
+const repoRemovedOptionNames = new Set<string>(repoRemovedOptions);
+
+/**
+ * Whether an option is one of the {@link RepoDefaultedConfigKey}, which a repository's config has a value for once its defaults are applied.
+ */
+export function isRepoDefaultedOption(option: RenovateOptions): boolean {
+  return (
+    isDefaultedOption(option) &&
+    !repoRemovedOptionNames.has(option.name) &&
+    !isFilteredOption(option, 'repository')
+  );
+}
+
 type DeclaredScope<O> = O extends { scopes: readonly (infer S)[] } ? S : never;
 
 type DeclaredParent<O> = O extends { parents: readonly (infer P)[] }
@@ -104,8 +137,18 @@ type DefaultedOption<O> = O extends unknown
 export type DefaultedConfigKey = DefaultedOption<OptionDefinition>['name'];
 
 /**
+ * The values of the mergeable options whose default sets every key, so that a config with defaults applied has all the keys, which a configured value can leave out.
+ */
+export interface MergedDefaultValues {
+  statusCheckNames: Record<StatusCheckKey, string | null>;
+  statusCheckWhen: Record<StatusCheckKey, StatusCheckWhen>;
+}
+
+/**
  * A config in which the options with a default can't be missing.
  */
 export type WithDefaults<T, K extends PropertyKey = DefaultedConfigKey> = T & {
-  [P in K & keyof T]-?: NonNullable<T[P]>;
+  [P in K & keyof T]-?: P extends keyof MergedDefaultValues
+    ? MergedDefaultValues[P]
+    : NonNullable<T[P]>;
 };

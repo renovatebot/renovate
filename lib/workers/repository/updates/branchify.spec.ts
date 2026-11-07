@@ -78,6 +78,8 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             manager: 'npm',
             depName: 'foo',
             branchName: 'foo',
@@ -108,6 +110,8 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo-{{version}}',
             version: '1.1.0',
@@ -126,6 +130,8 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo-{{version}}',
             currentValue: '1.1.0',
@@ -135,6 +141,8 @@ describe('workers/repository/updates/branchify', () => {
             packageFile: 'foo/package.json',
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo-{{version}}',
             currentValue: '1.1.0',
@@ -154,18 +162,24 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             version: '1.1.0',
             prTitle: 'some-title',
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             version: '2.0.0',
             prTitle: 'some-title',
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'bar',
             branchName: 'bar-{{version}}',
             version: '1.1.0',
@@ -181,6 +195,8 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             prTitle: 'some-title',
@@ -189,12 +205,16 @@ describe('workers/repository/updates/branchify', () => {
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             prTitle: 'some-title',
             version: '2.0.0',
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'bar',
             branchName: 'bar-{{version}}',
             prTitle: 'some-title',
@@ -211,6 +231,8 @@ describe('workers/repository/updates/branchify', () => {
     describe('with lookup failures', () => {
       const groupUpdates = partial<BranchUpgradeConfig>([
         {
+          commitMessage: '',
+          excludeCommitPaths: [],
           depName: 'foo',
           branchName: 'renovate/my-group',
           prTitle: 'some-title',
@@ -219,6 +241,8 @@ describe('workers/repository/updates/branchify', () => {
           group: { branchName: 'renovate/my-group' },
         },
         {
+          commitMessage: '',
+          excludeCommitPaths: [],
           depName: 'bar',
           branchName: 'renovate/bar',
           prTitle: 'some-title',
@@ -269,6 +293,8 @@ describe('workers/repository/updates/branchify', () => {
       flattenUpdates.mockResolvedValueOnce(
         partial<BranchUpgradeConfig>([
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             prTitle: 'some-title',
@@ -277,12 +303,16 @@ describe('workers/repository/updates/branchify', () => {
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'foo',
             branchName: 'foo',
             prTitle: 'some-title',
             version: '2.0.0',
           },
           {
+            commitMessage: '',
+            excludeCommitPaths: [],
             depName: 'bar',
             branchName: 'bar-{{version}}',
             prTitle: 'some-title',

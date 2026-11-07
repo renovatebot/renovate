@@ -1605,7 +1605,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
 
 async function tryAddMilestone(
   issueNo: number,
-  milestoneNo: number | undefined,
+  milestoneNo: number | null | undefined,
 ): Promise<void> {
   if (!milestoneNo) {
     return;

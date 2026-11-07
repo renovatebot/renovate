@@ -125,6 +125,67 @@ describe('config/index', () => {
       ]);
     });
 
+    describe('an option set to null', () => {
+      it('gives an option with a default its default over a value of the parent', () => {
+        const parentConfig = applyRepoConfigDefaults({ rangeStrategy: 'pin' });
+        const childConfig: Record<string, unknown> = {
+          enabled: null,
+          rangeStrategy: null,
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.enabled).toBeTrue();
+        expect(config.rangeStrategy).toBe('auto');
+      });
+
+      it('gives an option with a default its default when it is forced', () => {
+        const parentConfig = applyRepoConfigDefaults({});
+        const childConfig: Record<string, unknown> = {
+          force: { automergeType: null },
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.automergeType).toBe('pr');
+      });
+
+      it('keeps null where the parent has no value', () => {
+        const childConfig: Record<string, unknown> = { rangeStrategy: null };
+
+        const config = mergeChildConfig({}, childConfig);
+
+        expect(config).toEqual({ rangeStrategy: null });
+      });
+
+      it.each`
+        name                    | description
+        ${'groupName'}          | ${'has no default'}
+        ${'commitMessageTopic'} | ${'is nullable'}
+        ${'onboarding'}         | ${'is not kept in the repository config'}
+      `('keeps null for an option which $description', ({ name }) => {
+        const parentConfig: Record<string, unknown> = { [name]: 'value' };
+
+        const config = mergeChildConfig(parentConfig, { [name]: null });
+
+        expect(config[name]).toBeNull();
+      });
+
+      it('keeps null within a mergeable option', () => {
+        const parentConfig = applyRepoConfigDefaults({
+          major: { automerge: true },
+        });
+
+        const childConfig: Record<string, unknown> = {
+          major: { automerge: null },
+        };
+
+        const config = mergeChildConfig(parentConfig, childConfig);
+
+        expect(config.major).toEqual({ automerge: null });
+      });
+    });
+
     it('handles undefined childConfig', () => {
       const parentConfig = { ...defaultConfig };
       const config = mergeChildConfig(parentConfig, undefined);

@@ -47,7 +47,7 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsPR()', () => {
     it('returns 2 pr warnings text dependencyDashboard true', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config = { suppressNotifications: [] };
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -99,9 +99,10 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns 2 pr warnings text dependencyDashboard true with issue link', () => {
-      const config: RenovateConfig = partial<RenovateConfig>({
+      const config = {
         dependencyDashboardIssue: 123,
-      });
+        suppressNotifications: [],
+      };
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -124,7 +125,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config = { suppressNotifications: [] };
       const dependencyDashboard = false;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
@@ -172,7 +173,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('PR warning returns empty string', () => {
-      const config: RenovateConfig = partial<RenovateConfig>();
+      const config = { suppressNotifications: [] };
       const packageFiles: Record<string, PackageFile[]> = {};
       const res = getDepWarningsPR(packageFiles, config);
       expect(res).toBe('');

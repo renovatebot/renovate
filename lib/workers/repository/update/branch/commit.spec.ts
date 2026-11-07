@@ -1,4 +1,4 @@
-import { fakeSha, logger, scm } from '~test/util.ts';
+import { fakeSha, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { commitFilesToBranch } from './commit.ts';
@@ -8,7 +8,7 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         baseBranch: 'base-branch',
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
@@ -20,7 +20,7 @@ describe('workers/repository/update/branch/commit', () => {
         updatedArtifacts: [],
         upgrades: [],
         platformCommit: 'auto',
-      } satisfies BranchConfig;
+      });
       scm.commitAndPush.mockResolvedValueOnce(fakeSha('123test'));
       GlobalConfig.reset();
     });

@@ -1,4 +1,6 @@
 import type { Merge } from 'type-fest';
+import type { WithDefaults } from '../config/defaults.ts';
+import type { FilteredConfigKey } from '../config/stages.ts';
 import type {
   GroupConfig,
   LegacyAdminConfig,
@@ -6,6 +8,7 @@ import type {
   RenovateConfig,
   RenovateConfigFile,
   RenovateSharedConfig,
+  RepoDefaultedConfigKey,
   UpdateType,
   ValidationMessage,
 } from '../config/types.ts';
@@ -33,7 +36,31 @@ import type {
 
 export type ReleaseWithNotes = Release & Partial<ChangeLogRelease>;
 
-export interface BranchUpgradeConfig
+/**
+ * The options with a default which `flattenUpdates()` and `generateBranchConfig()` delete from a branch upgrade, once they have applied them, and those of the stages before `branch`, which `flattenUpdates()` filters out.
+ */
+type BranchUpgradeRemovedConfigKey =
+  | FilteredConfigKey<'branch'>
+  | 'digest'
+  | 'group'
+  | 'lockFileMaintenance'
+  | 'major'
+  | 'minor'
+  | 'packageRules'
+  | 'patch'
+  | 'pin'
+  | 'replacement'
+  | 'vulnerabilityAlerts';
+
+/**
+ * The options which have a value in a branch upgrade, as `flattenUpdates()` merges it from the {@link RenovateConfig}.
+ */
+type BranchUpgradeDefaultedConfigKey = Exclude<
+  RepoDefaultedConfigKey,
+  BranchUpgradeRemovedConfigKey
+>;
+
+interface BranchUpgradeFields
   extends
     Merge<RenovateConfigFile, PackageDependency>,
     Partial<LookupUpdate>,
@@ -65,11 +92,8 @@ export interface BranchUpgradeConfig
   displayPending?: string;
   displayTo?: string;
 
-  excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
-  groupName?: string;
-  groupSlug?: string;
 
   isDigest?: boolean;
   isGroup?: boolean;
@@ -93,7 +117,6 @@ export interface BranchUpgradeConfig
   prHeader?: string;
   prFooter?: string;
   prBodyNotes?: string[];
-  prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
@@ -134,6 +157,11 @@ export interface BranchUpgradeConfig
   sharedConstraints?: Partial<Record<ConstraintName, string>>;
 }
 
+export type BranchUpgradeConfig = WithDefaults<
+  BranchUpgradeFields,
+  BranchUpgradeDefaultedConfigKey
+>;
+
 export type PrBlockedBy =
   | 'BranchAutomerge'
   | 'NeedsApproval'
@@ -164,9 +192,8 @@ export type BranchResult =
 export type CacheFingerprintMatchResult =
   'matched' | 'no-match' | 'no-fingerprint';
 
-export interface BranchConfig
-  extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
-  automergeComment?: string;
+interface BranchConfigFields
+  extends BranchUpgradeFields, LegacyAdminConfig, PlatformPrOptions {
   automergedPreviously?: boolean;
   baseBranch: string;
   branchAutomergeFailureMessage?: string;
@@ -204,8 +231,12 @@ export interface BranchConfig
   isConflicted?: boolean;
   commitFingerprint?: string;
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
-  prNotPendingHours?: number;
 }
+
+export type BranchConfig = WithDefaults<
+  BranchConfigFields,
+  BranchUpgradeDefaultedConfigKey
+>;
 
 export interface BranchMetadata {
   branchName: string;
@@ -265,8 +296,9 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   managerFilePatterns?: string[];
-  includePaths?: string[];
-  ignorePaths?: string[];
+  includePaths: string[];
+  ignorePaths: string[];
+  registryAliases: Record<string, string>;
   enabled?: boolean;
 }
 

@@ -22,6 +22,7 @@ describe('workers/repository/reconfigure/comment', () => {
         baseBranchPatterns: [],
         schedule: ['at any time'],
         suppressNotifications: [],
+        vulnerabilityAlerts: {},
       });
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
@@ -165,6 +166,7 @@ describe('workers/repository/reconfigure/comment', () => {
       config = partial<RenovateConfig>({
         schedule: ['at any time'],
         suppressNotifications: [],
+        vulnerabilityAlerts: {},
       });
     });
 
