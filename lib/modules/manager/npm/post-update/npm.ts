@@ -21,6 +21,7 @@ import {
   localPathExists,
   readLocalFile,
   renameLocalFile,
+  writeLocalFile,
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
@@ -242,7 +243,46 @@ export async function generateLockFile(
 
     // divide the deps in two categories: workspace and root
     const { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps } =
-      divideWorkspaceAndRootDeps(lockFileDir, lockUpdates);
+      divideWorkspaceAndRootDeps(
+        lockFileDir,
+        lockUpdates.filter((u) => u.depType !== 'transitive'),
+      );
+
+    // PROTOTYPE: transitive (lockfile-only) updates
+    const transitiveUpdates = lockUpdates.filter(
+      (u) => u.depType === 'transitive',
+    );
+    if (transitiveUpdates.length) {
+      const mode = process.env.RENOVATE_X_NPM_TRANSITIVE_MODE ?? 'update';
+      logger.debug(
+        { mode, deps: transitiveUpdates.map((u) => u.packageName) },
+        'PROTOTYPE: npm transitive lockfile update',
+      );
+      if (mode === 'pin') {
+        // install name@version (which also adds it to package.json and the
+        // lock root), restore package.json, then let `npm install` prune the
+        // root entry while keeping the pinned version which satisfies the
+        // parents' ranges
+        const pkgJsonFile = upath.join(lockFileDir, 'package.json');
+        const pkgJson = await readLocalFile(pkgJsonFile, 'utf8');
+        await exec(
+          [
+            `npm install ${cmdOptions}${beforeFlag} ${transitiveUpdates
+              .map((u) => quote(`${u.packageName!}@${u.newVersion!}`))
+              .join(' ')}`,
+          ],
+          execOptions,
+        );
+        await writeLocalFile(pkgJsonFile, pkgJson!);
+        commands.push(`npm install ${cmdOptions}${beforeFlag}`.trim());
+      } else {
+        commands.push(
+          `npm update ${cmdOptions}${beforeFlag} ${transitiveUpdates
+            .map((u) => quote(u.packageName!))
+            .join(' ')}`,
+        );
+      }
+    }
 
     if (workspaces.size && lockWorkspacesUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm-workspaces)');
