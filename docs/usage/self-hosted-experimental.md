@@ -62,6 +62,23 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.
 This is useful in environments where a user cannot approve its own PRs.
 
+## `RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE`
+
+Use this option to approve GitLab merge requests with a token stored in a CI/CD variable instead of placing the token in Renovate's environment.
+
+1. Add a **visible** CI/CD variable named `APPROVAL_TOKEN` to the project or one of its parent groups. Set its value to a GitLab token belonging to a user who can approve the project's merge requests. The Renovate token must be allowed to read that variable through the GitLab API.
+2. Set `RENOVATE_X_GITLAB_AUTO_APPROVE_VARIABLE=APPROVAL_TOKEN` in Renovate's environment, and enable [`autoApprove`](configuration-options.md#autoapprove) in Renovate's configuration:
+
+   ```json
+   {
+     "autoApprove": true
+   }
+   ```
+
+When Renovate approves a merge request, it looks for the variable in the project first, then in parent groups from nearest to farthest. It uses the variable's value only for the approve request. If the variable is hidden, empty, unavailable, or cannot be read, Renovate warns and skips approval. A variable key that has multiple environment scopes must resolve unambiguously through GitLab's variable API.
+
+If `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN` is also set, that explicit token takes precedence and Renovate does not read the CI/CD variable.
+
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
 If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
