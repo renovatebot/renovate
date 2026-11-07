@@ -1,4 +1,4 @@
-export const removedPresets: Record<string, string | null> = {
+export const removedPresets: Partial<Record<string, string | null>> = {
   ':autodetectPinVersions': null,
   ':autodetectRangeStrategy': null,
   ':automergeBranchMergeCommit': ':automergeBranch',

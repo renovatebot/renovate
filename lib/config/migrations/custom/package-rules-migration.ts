@@ -2,7 +2,7 @@ import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import type { PackageRule } from '../../types.ts';
 import { AbstractMigration } from '../base/abstract-migration.ts';
 
-export const renameMap = {
+export const renameMap: Partial<Record<string, string>> = {
   matchFiles: 'matchFileNames',
   matchPaths: 'matchFileNames',
   paths: 'matchFileNames',
@@ -17,13 +17,12 @@ export const renameMap = {
   sourceUrlPrefixes: 'matchSourceUrlPrefixes',
   updateTypes: 'matchUpdateTypes',
 };
-type RenameMapKey = keyof typeof renameMap;
 
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
   for (const [key, val] of Object.entries(packageRule)) {
     // @ts-expect-error -- TODO: fix me
-    newPackageRule[renameMap[key as RenameMapKey] ?? key] = val;
+    newPackageRule[renameMap[key] ?? key] = val;
   }
   return newPackageRule;
 }

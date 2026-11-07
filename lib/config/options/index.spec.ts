@@ -185,7 +185,7 @@ describe('config/options/index', () => {
 
           const foundOption = opts.filter((o) => o.name === prop.property);
           // oxlint-disable-next-line vitest/no-conditional-tests -- TODO: fix me
-          if (foundOption?.length && foundOption[0].allowedValues) {
+          if (foundOption.length && foundOption[0].allowedValues) {
             it(`${option.name}'s value for ${prop.property} is valid, according to allowedValues`, () => {
               expect(foundOption[0].allowedValues).toContain(prop.value);
             });
