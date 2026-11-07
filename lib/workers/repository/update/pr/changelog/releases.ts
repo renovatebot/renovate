@@ -6,8 +6,10 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
 } from '../../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../../modules/datasource/postprocess-release.ts';
 import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
 import { get } from '../../../../../modules/versioning/index.ts';
+import * as p from '../../../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 
 function matchesMMP(
@@ -97,7 +99,18 @@ export async function getInRangeReleases(
         }
       }
 
-      return releases;
+      return await p.map(releases, async (release) => {
+        const hydratedRelease = await postprocessRelease(
+          {
+            datasource,
+            packageName: config.packageName,
+            registryUrl: release.registryUrl ?? config.registryUrl,
+            registryUrls: config.registryUrls,
+          },
+          release,
+        );
+        return hydratedRelease ?? release;
+      });
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getInRangeReleases err');
       logger.debug(`Error getting releases for ${depName} from ${datasource}`);
