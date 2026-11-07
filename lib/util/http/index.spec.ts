@@ -847,6 +847,34 @@ describe('util/http/index', () => {
       });
     });
 
+    describe('postPlain', () => {
+      it('posts the body without encoding it', async () => {
+        httpMock
+          .scope(baseUrl)
+          .matchHeader('content-type', 'application/json')
+          .post('/', 'plain body')
+          .reply(200);
+
+        const res = await http.postPlain('http://renovate.com', 'plain body', {
+          headers: { 'content-type': 'application/json' },
+        });
+        expect(res.body).toBe('');
+      });
+
+      it('works with custom options', async () => {
+        httpMock
+          .scope(baseUrl)
+          .matchHeader('custom', 'header')
+          .post('/')
+          .reply(200);
+
+        const res = await http.postPlain('http://renovate.com', 'plain body', {
+          headers: { custom: 'header' },
+        });
+        expect(res.body).toBe('');
+      });
+    });
+
     describe('getYamlUnchecked', () => {
       it('parses yaml response without schema', async () => {
         httpMock.scope(baseUrl).get('/').reply(200, 'x: 2\ny: 2');
