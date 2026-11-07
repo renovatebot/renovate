@@ -47,7 +47,8 @@ function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   if (isNonEmptyString(x)) {
     return [x, x];
   }
-  if (Array.isArray(x)) {
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- the volumes are not validated, so an array can have another length
+  if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
     // v8 ignore else -- TODO: add test #40625
     if (isNonEmptyString(from) && isNonEmptyString(to)) {
