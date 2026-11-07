@@ -6,6 +6,7 @@ import {
   GlobalConfig,
   setHttpGlobalConfig,
 } from '../../../../config/global.ts';
+import { getOptions } from '../../../../config/options/index.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
 import type { AllConfig } from '../../../../config/types.ts';
@@ -98,6 +99,32 @@ async function resolveGlobalExtendsAsAdmin(
   }
 }
 
+/**
+ * Replaces an explicit `null` of the administrator with the default, for options which have a non-null default and do not document a meaning for `null`.
+ */
+function resetNullToDefaults(
+  config: AllConfig,
+  defaultConfig: AllConfig,
+): void {
+  const nullable = new Set(
+    getOptions()
+      .filter((option) => option.nullable)
+      .map((option) => option.name),
+  );
+  for (const [key, defaultValue] of Object.entries(defaultConfig)) {
+    if (
+      defaultValue !== null &&
+      !nullable.has(key) &&
+      (config as Record<string, unknown>)[key] === null
+    ) {
+      logger.debug(
+        `Using the default for the global option ${key}, as it is set to null`,
+      );
+      (config as Record<string, unknown>)[key] = defaultValue;
+    }
+  }
+}
+
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
   argv: string[],
@@ -139,6 +166,7 @@ export async function parseConfigs(
   const combinedConfig = config;
 
   config = mergeChildConfig(defaultConfig, config);
+  resetNullToDefaults(config, defaultConfig);
 
   if (config.forceCli) {
     const forcedCli = { ...cliConfig };

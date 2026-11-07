@@ -849,6 +849,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    nullable: true,
   },
   {
     name: 'goGetDirs',

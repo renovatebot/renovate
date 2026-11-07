@@ -69,6 +69,39 @@ describe('workers/global/config/parse/index', () => {
       ]);
     });
 
+    describe('when the config sets an option to null', () => {
+      it.each`
+        option            | expected
+        ${'repositories'} | ${[]}
+        ${'platform'}     | ${'github'}
+        ${'gitNoVerify'}  | ${['commit', 'push']}
+        ${'schedule'}     | ${['at any time']}
+      `('uses the default for $option', async ({ option, expected }) => {
+        fileConfigParser.getConfig.mockResolvedValue({ [option]: null });
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+        expect(parsedConfig).toHaveProperty(option, expected);
+        expect(logger.debug).toHaveBeenCalledWith(
+          `Using the default for the global option ${option}, as it is set to null`,
+        );
+      });
+
+      it.each([
+        'semanticCommitScope',
+        'composerIgnorePlatformReqs',
+        'minimumReleaseAgeBuffer',
+      ])('keeps null for the nullable option %s', async (option) => {
+        fileConfigParser.getConfig.mockResolvedValue({ [option]: null });
+        const parsedConfig = await configParser.parseConfigs(
+          defaultEnv,
+          defaultArgv,
+        );
+        expect(parsedConfig).toHaveProperty(option, null);
+      });
+    });
+
     it('supports forceCli', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
