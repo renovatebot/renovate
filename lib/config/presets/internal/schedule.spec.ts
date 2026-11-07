@@ -1,9 +1,9 @@
 import { isScheduledNow } from '../../../workers/repository/update/branch/schedule.ts';
-import type { RenovateConfig } from '../../types.ts';
+import type { RenovateConfigFile } from '../../types.ts';
 import { presets } from './schedule.preset.ts';
 
 describe('config/presets/internal/schedule', () => {
-  let config: RenovateConfig;
+  let config: RenovateConfigFile;
 
   beforeAll(() => {
     vi.useFakeTimers();

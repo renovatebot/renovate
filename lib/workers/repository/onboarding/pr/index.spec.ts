@@ -12,6 +12,7 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
 
@@ -59,12 +60,12 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      config = {
+      config = applyRepoConfigDefaults({
         ...getConfig(),
         errors: [],
         warnings: [],
         description: [],
-      };
+      });
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
@@ -190,11 +191,11 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates semantic PR', async () => {
       const res = await ensureOnboardingPr(
-        {
+        partial<RenovateConfig>({
           ...config,
           semanticCommitType: undefined, // should default to "chore"
           semanticCommits: 'enabled',
-        },
+        }),
         packageFiles,
         branches,
       );
@@ -271,11 +272,11 @@ describe('workers/repository/onboarding/pr/index', () => {
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         const res = await ensureOnboardingPr(
-          {
+          partial<RenovateConfig>({
             ...config,
             prHeader: undefined,
             prFooter: undefined,
-          },
+          }),
           packageFiles,
           branches,
         );

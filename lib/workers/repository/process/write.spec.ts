@@ -14,6 +14,7 @@ import type {
 import { fingerprint } from '../../../util/fingerprint.ts';
 import { counts } from '../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import * as _branchWorker from '../update/branch/index.ts';
 import * as _limits from './limits.ts';
 import {
@@ -39,7 +40,7 @@ const newBranchSha = fakeSha('new_sha');
 const newBaseBranchSha = fakeSha('new_base_sha');
 
 beforeEach(() => {
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
   counts.clear();
   repoCache.getCache.mockReturnValue({});
   limits.getConcurrentPrsCount.mockResolvedValue(0);

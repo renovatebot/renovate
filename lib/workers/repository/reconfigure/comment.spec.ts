@@ -15,11 +15,11 @@ describe('workers/repository/reconfigure/comment', () => {
     const reconfigurePr = partial<Pr>({ number: 1 });
 
     beforeEach(() => {
-      config = {
+      config = partial<RenovateConfig>({
         errors: [],
         warnings: [],
         description: [],
-      };
+      });
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);

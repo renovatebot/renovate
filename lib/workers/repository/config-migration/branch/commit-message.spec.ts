@@ -1,8 +1,9 @@
 import { getConfig } from '../../../../config/defaults.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
 
 describe('workers/repository/config-migration/branch/commit-message', () => {
-  const config = getConfig();
+  const config = applyRepoConfigDefaults(getConfig());
   const fileName = 'renovate.json';
 
   it('creates semantic commit message', () => {

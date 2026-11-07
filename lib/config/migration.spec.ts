@@ -4,11 +4,11 @@ import * as configMigration from './migration.ts';
 import { MigrationsService } from './migrations/index.ts';
 import type {
   MigratedConfig,
-  RenovateConfig,
+  RenovateConfigFile,
   RenovateSharedConfig,
 } from './types.ts';
 
-interface TestRenovateConfig extends RenovateConfig {
+interface TestRenovateConfig extends RenovateConfigFile {
   node?: RenovateSharedConfig;
 }
 
@@ -414,7 +414,7 @@ describe('config/migration', () => {
             groupName: ['angular packages'],
           },
         ],
-      } as unknown as RenovateConfig;
+      } as unknown as RenovateConfigFile;
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
@@ -883,7 +883,7 @@ describe('config/migration', () => {
         '@org2/foo': '',
       },
     });
-    const config: RenovateConfig = {
+    const config: RenovateConfigFile = {
       extends: ['@org', '@org2/foo'],
     };
     const { isMigrated, migratedConfig } =
@@ -893,7 +893,7 @@ describe('config/migration', () => {
   });
 
   it('migrates customManagers', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfigFile = {
       customManagers: [
         {
           customType: 'regex',
@@ -943,7 +943,7 @@ describe('config/migration', () => {
   });
 
   it('migrates pip-compile', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfigFile = {
       // @ts-expect-error -- TODO: fix me
       'pip-compile': {
         enabled: true,
@@ -978,7 +978,7 @@ describe('config/migration', () => {
   });
 
   it('migrates gradle-lite', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfigFile = {
       // @ts-expect-error -- TODO: fix me
       'gradle-lite': {
         enabled: true,
@@ -1009,7 +1009,7 @@ describe('config/migration', () => {
   });
 
   it('migrates empty requiredStatusChecks', () => {
-    const config: RenovateConfig = {
+    const config: RenovateConfigFile = {
       // @ts-expect-error -- TODO: fix me
       requiredStatusChecks: [],
     };
@@ -1020,7 +1020,7 @@ describe('config/migration', () => {
   });
 
   it('migrates azureAutoComplete', () => {
-    function migrate(config: RenovateConfig): MigratedConfig {
+    function migrate(config: RenovateConfigFile): MigratedConfig {
       return configMigration.migrateConfig(config);
     }
 
@@ -1050,7 +1050,7 @@ describe('config/migration', () => {
   });
 
   it('migrates gitLabAutomerge', () => {
-    function migrate(config: RenovateConfig): MigratedConfig {
+    function migrate(config: RenovateConfigFile): MigratedConfig {
       return configMigration.migrateConfig(config);
     }
 

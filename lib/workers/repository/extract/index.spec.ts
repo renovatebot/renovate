@@ -3,6 +3,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { extractAllDependencies } from './index.ts';
 import * as _managerFiles from './manager-files.ts';
 
@@ -17,14 +18,15 @@ describe('workers/repository/extract/index', () => {
 
     beforeEach(() => {
       scm.getFileList.mockResolvedValue(fileList);
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
     });
 
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile>({}),
       ]);
-      delete config.customManagers; // for coverage
+      const optionalConfig: Partial<RenovateConfig> = config;
+      delete optionalConfig.customManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });

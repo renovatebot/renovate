@@ -1,3 +1,4 @@
+import type { RenovateConfig } from '~test/util.ts';
 import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -409,10 +410,13 @@ describe('workers/repository/process/index', () => {
     });
 
     it('does not add base branch name to branchPrefix if multiple base branches are not expected - baseBranchPatterns undefined', async () => {
-      const res = await getBaseBranchConfig('main', {
-        ...config,
-        baseBranchPatterns: undefined,
-      });
+      const res = await getBaseBranchConfig(
+        'main',
+        partial<RenovateConfig>({
+          ...config,
+          baseBranchPatterns: undefined,
+        }),
+      );
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeUndefined();
       expect(res.branchPrefix).toBe('renovate/');

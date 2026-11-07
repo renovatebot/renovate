@@ -1,35 +1,38 @@
 import { getConfig } from '../../../config/defaults.ts';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { allManagersList } from '../../../modules/manager/index.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { generateFingerprintConfig } from './extract-fingerprint-config.ts';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
-    const config = mergeChildConfig(getConfig(), {
-      registryAliases: {
-        stable: 'http://some.link',
-      },
-      ignorePaths: ['ignore-path-1'],
-      includePaths: ['include-path-1'],
-      npm: {
-        managerFilePatterns: ['/hero.json/'],
-        ignorePaths: ['ignore-path-2'],
-        includePaths: ['include-path-2'],
+    const config = applyRepoConfigDefaults(
+      mergeChildConfig(getConfig(), {
         registryAliases: {
-          notStable: 'http://some.link.2',
+          stable: 'http://some.link',
         },
-      },
-      enabledManagers: ['npm', 'custom.regex'],
-      customManagers: [
-        {
-          customType: 'regex',
-          managerFilePatterns: ['/js/', '/***$}{]][/'],
-          matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-          datasourceTemplate: 'maven',
-          versioningTemplate: 'gradle',
+        ignorePaths: ['ignore-path-1'],
+        includePaths: ['include-path-1'],
+        npm: {
+          managerFilePatterns: ['/hero.json/'],
+          ignorePaths: ['ignore-path-2'],
+          includePaths: ['include-path-2'],
+          registryAliases: {
+            notStable: 'http://some.link.2',
+          },
         },
-      ],
-    });
+        enabledManagers: ['npm', 'custom.regex'],
+        customManagers: [
+          {
+            customType: 'regex',
+            managerFilePatterns: ['/js/', '/***$}{]][/'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      }),
+    );
 
     const fingerprintConfig = generateFingerprintConfig(config);
 
@@ -78,11 +81,13 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
   });
 
   it('filter with all managers enabled', () => {
-    const config = mergeChildConfig(getConfig(), {
-      npmrc: 'some-string',
-      npmrcMerge: true,
-      npm: { managerFilePatterns: ['/hero.json/'] },
-    });
+    const config = applyRepoConfigDefaults(
+      mergeChildConfig(getConfig(), {
+        npmrc: 'some-string',
+        npmrcMerge: true,
+        npm: { managerFilePatterns: ['/hero.json/'] },
+      }),
+    );
     const fingerprintConfig = generateFingerprintConfig(config);
     expect(fingerprintConfig.managerList).toEqual(new Set(allManagersList));
     expect(
@@ -130,9 +135,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
 
   describe('hasVulnerabilityAlertsRules', () => {
     it('is omitted when no vulnerability alerts are configured', () => {
-      const config = mergeChildConfig(getConfig(), {
-        enabledManagers: ['npm'],
-      });
+      const config = applyRepoConfigDefaults(
+        mergeChildConfig(getConfig(), {
+          enabledManagers: ['npm'],
+        }),
+      );
 
       const fingerprintConfig = generateFingerprintConfig(config);
 
@@ -142,10 +149,12 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
 
     it('is set for every manager when vulnerability alerts are configured', () => {
-      const config = mergeChildConfig(getConfig(), {
-        enabledManagers: ['npm', 'dockerfile'],
-        osvVulnerabilityAlerts: true,
-      });
+      const config = applyRepoConfigDefaults(
+        mergeChildConfig(getConfig(), {
+          enabledManagers: ['npm', 'dockerfile'],
+          osvVulnerabilityAlerts: true,
+        }),
+      );
 
       const fingerprintConfig = generateFingerprintConfig(config);
 

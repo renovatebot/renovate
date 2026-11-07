@@ -6,6 +6,7 @@ import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { createConfigMigrationBranch } from './create.ts';
 import { checkConfigMigrationBranch } from './index.ts';
 import type { MigratedData } from './migrated-data.ts';
@@ -24,7 +25,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
       config.branchPrefix = 'some/';
     });
 

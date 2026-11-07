@@ -3,7 +3,11 @@ import type { CustomManagerName } from '../manager-list.generated.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
-import type { AllConfig, RenovateConfig, RenovateOptions } from './types.ts';
+import type {
+  AllConfig,
+  RenovateConfigFile,
+  RenovateOptions,
+} from './types.ts';
 import * as configValidation from './validation.ts';
 
 describe('config/validation', () => {
@@ -43,7 +47,7 @@ describe('config/validation', () => {
 
     // NOTE that this should always refer to a deprecated option, but at some point, we may have removed them all, so we'll need to think about how to handle that, at that point
     it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         hostRules: [
           // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
           {
@@ -622,7 +626,7 @@ describe('config/validation', () => {
     });
 
     it('returns nested errors', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         foo: 1,
         schedule: ['after 5pm'],
         timezone: 'Asia/Singapore',
@@ -766,7 +770,7 @@ describe('config/validation', () => {
     });
 
     it('errors for all types', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         // @ts-expect-error - only allowed in package rules
         allowedVersions: 'foo',
         enabled: 1 as any,
@@ -872,7 +876,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfigFile
         config,
       );
       expect(warnings).toMatchObject([
@@ -947,7 +951,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfigFile
         config,
       );
       expect(warnings).toBeEmptyArray();
@@ -964,7 +968,7 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each managerFilePatterns of format regex', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1092,7 +1096,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
-        config as RenovateConfig,
+        config as RenovateConfigFile,
         true,
       );
       expect(warnings).toBeEmptyArray();
@@ -1135,7 +1139,7 @@ describe('config/validation', () => {
     });
 
     it('validates regEx for each matchStrings', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1161,7 +1165,7 @@ describe('config/validation', () => {
     });
 
     it('error if no fileFormat in custom JSONata manager', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'jsonata',
@@ -1187,7 +1191,7 @@ describe('config/validation', () => {
     });
 
     it('validates JSONata query for each matchStrings', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'jsonata',
@@ -1217,7 +1221,7 @@ describe('config/validation', () => {
     // testing if we get all errors at once or not (possible), this does not include customType or managerFilePatterns
     // since they are common to all custom managers
     it('validates all possible regex manager options', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1252,7 +1256,7 @@ describe('config/validation', () => {
     });
 
     it('passes if customManager fields are present', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1311,7 +1315,7 @@ describe('config/validation', () => {
     });
 
     it('errors if customManager fields are missing', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1338,7 +1342,7 @@ describe('config/validation', () => {
 
     // via https://github.com/renovatebot/renovate/discussions/45665
     it('does not error if a customManager only uses `currentDigest`', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1363,7 +1367,7 @@ describe('config/validation', () => {
     });
 
     it('does not error if a customManager only uses `currentValue`', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'regex',
@@ -1387,7 +1391,7 @@ describe('config/validation', () => {
     });
 
     it('errors if customManager fields are missing: JSONataManager', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         customManagers: [
           {
             customType: 'jsonata',
@@ -1448,7 +1452,7 @@ describe('config/validation', () => {
 
     describe('constraints', () => {
       it('can contain a valid tool name for Containerbase', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraints: {
             golang: '1.26.0',
           },
@@ -1463,7 +1467,7 @@ describe('config/validation', () => {
       });
 
       it('can contain a constraint for a non-Containerbase tool', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraints: {
             gomodMod: 'latest',
           },
@@ -1500,7 +1504,7 @@ describe('config/validation', () => {
       });
 
       it('warns if a constraint is not valid', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraints: {
             node: '1.2.3foo',
           },
@@ -1563,7 +1567,7 @@ describe('config/validation', () => {
 
     describe('constraintsVersioning', () => {
       it('cannot contain a valid tool name for Containerbase', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             // @ts-expect-error: not an AdditionalConstraintName
             golang: 'semver',
@@ -1585,7 +1589,7 @@ describe('config/validation', () => {
       });
 
       it('can contain a constraint for a non-Containerbase tool', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             gomodMod: 'semver',
           },
@@ -1600,7 +1604,7 @@ describe('config/validation', () => {
       });
 
       it('cannot contain an additional constraint name with an invalid versioning scheme', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             gomodMod: 'not-supported-versioning',
           },
@@ -1621,7 +1625,7 @@ describe('config/validation', () => {
       });
 
       it('can contain an additional constraint name with a regex versioning scheme', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             gomodMod:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$',
@@ -1637,7 +1641,7 @@ describe('config/validation', () => {
       });
 
       it('cannot contain an unsupported constraint', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             // @ts-expect-error: contains invalid values
             'not-supported': '4.5.6',
@@ -1659,7 +1663,7 @@ describe('config/validation', () => {
       });
 
       it('errors if constraintsVersioning is a malformed object', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           constraintsVersioning: {
             // @ts-expect-error: contains invalid values
             packageRules: [{}],
@@ -1681,7 +1685,7 @@ describe('config/validation', () => {
       });
 
       it('errors if constraintsVersioning is a malformed array', async () => {
-        const config: RenovateConfig = {
+        const config: RenovateConfigFile = {
           // @ts-expect-error: contains invalid values
           constraintsVersioning: [1, 2, 3],
         };
@@ -1774,9 +1778,9 @@ describe('config/validation', () => {
     });
 
     it('errors if managerFilePatterns has wrong parent', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         managerFilePatterns: ['foo'],
-        // @ts-expect-error: -- TODO: managers, datasources and versionings are not defined on RenovateConfig
+        // @ts-expect-error: -- TODO: managers, datasources and versionings are not defined on RenovateConfigFile
         npm: {
           managerFilePatterns: ['package\\.json'],
           minor: {
@@ -1816,8 +1820,8 @@ describe('config/validation', () => {
     });
 
     it('allows manager options in a custom manager config', async () => {
-      const config: RenovateConfig &
-        Partial<Record<CustomManagerName, RenovateConfig>> = {
+      const config: RenovateConfigFile &
+        Partial<Record<CustomManagerName, RenovateConfigFile>> = {
         regex: {
           description: ['Clear ignorePaths for regex custom managers.'],
           ignorePaths: [],
@@ -1862,7 +1866,7 @@ describe('config/validation', () => {
     });
 
     it('names the object an option was wrongly used in', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         packageRules: [
           { matchPackageNames: ['foo'], enabled: false },
           { matchPackageNames: ['bar'], managerFilePatterns: ['bar'] },
@@ -3992,7 +3996,7 @@ describe('config/validation', () => {
     });
 
     it('errors on an invalid value of reportType', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         // @ts-expect-error: contains invalid values
         reportType: 'nope',
       };
@@ -4011,7 +4015,7 @@ describe('config/validation', () => {
     });
 
     it('fails for missing reportPath if reportType is "s3"', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         reportType: 's3',
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -4027,7 +4031,7 @@ describe('config/validation', () => {
     });
 
     it('validates reportPath if reportType is "s3"', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         reportType: 's3',
         reportPath: 's3://bucket-name/key-name',
       };
@@ -4040,7 +4044,7 @@ describe('config/validation', () => {
     });
 
     it('fails for missing reportPath if reportType is "file"', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         reportType: 'file',
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -4056,7 +4060,7 @@ describe('config/validation', () => {
     });
 
     it('validates reportPath if reportType is "file"', async () => {
-      const config: RenovateConfig = {
+      const config: RenovateConfigFile = {
         reportType: 'file',
         reportPath: './report.json',
       };
@@ -4186,7 +4190,7 @@ describe('config/validation', () => {
 
     describe('allowedValues are validated', () => {
       it('with repo config', async () => {
-        const config: Partial<RenovateConfig> = {
+        const config: Partial<RenovateConfigFile> = {
           // for a single value
           // @ts-expect-error: contains invalid values
           mode: 'not-valid',

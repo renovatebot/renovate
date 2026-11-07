@@ -5,7 +5,7 @@ import {
   packageVersion,
 } from '@renovatebot/base-image';
 import { Fixtures } from '~test/fixtures.ts';
-import { git, logger } from '~test/util.ts';
+import { git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
@@ -41,7 +41,7 @@ describe('workers/global/initialize', () => {
 
   describe('checkVersions()', () => {
     it('throws if invalid version', async () => {
-      const config: RenovateConfig = {};
+      const config: RenovateConfig = partial<RenovateConfig>();
       git.validateGitVersion.mockResolvedValueOnce(false);
       await expect(globalInitialize(config)).rejects.toThrow(
         'Init: git version needs upgrading',
@@ -49,7 +49,9 @@ describe('workers/global/initialize', () => {
     });
 
     it('returns if valid git version', async () => {
-      const config: RenovateConfig = { prCommitsPerRunLimit: 2 };
+      const config: RenovateConfig = partial<RenovateConfig>({
+        prCommitsPerRunLimit: 2,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
     });
@@ -164,9 +166,9 @@ describe('workers/global/initialize', () => {
         return Promise.resolve(r);
       });
 
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         hostRules: [hostRule],
-      };
+      });
 
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
@@ -175,14 +177,14 @@ describe('workers/global/initialize', () => {
     it("does not filter the self-hosted admin's own hostRules headers against allowedHeaders", async () => {
       // `allowedHeaders` constrains what a repository or preset may set, not the self-hosted administrator
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      const config: RenovateConfig = {
+      const config: RenovateConfig = partial<RenovateConfig>({
         hostRules: [
           {
             matchHost: 'registry.example.com',
             headers: { 'X-Allowed': 'yes', Authorization: 'from-admin' },
           },
         ],
-      };
+      });
 
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
@@ -208,7 +210,9 @@ describe('workers/global/initialize', () => {
     });
 
     it('sets env vars when cloud metadata services disabled', async () => {
-      const config: RenovateConfig = { useCloudMetadataServices: false };
+      const config: RenovateConfig = partial<RenovateConfig>({
+        useCloudMetadataServices: false,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBe('true');
@@ -216,7 +220,9 @@ describe('workers/global/initialize', () => {
     });
 
     it('does not set env vars when cloud metadata services enabled', async () => {
-      const config: RenovateConfig = { useCloudMetadataServices: true };
+      const config: RenovateConfig = partial<RenovateConfig>({
+        useCloudMetadataServices: true,
+      });
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
       expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();

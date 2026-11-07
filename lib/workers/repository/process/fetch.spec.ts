@@ -5,6 +5,7 @@ import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { Result } from '../../../util/result.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { fetchUpdates } from './fetch.ts';
 import * as lookup from './lookup/index.ts';
 import type { UpdateResult } from './lookup/types.ts';
@@ -18,7 +19,7 @@ describe('workers/repository/process/fetch', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
     });
 
     it('handles empty deps', async () => {

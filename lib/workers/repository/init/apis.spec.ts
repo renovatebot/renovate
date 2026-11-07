@@ -7,6 +7,7 @@ import {
   REPOSITORY_FORKED,
 } from '../../../constants/error-messages.ts';
 import { initApis } from './apis.ts';
+import { applyRepoConfigDefaults } from './defaults.ts';
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
@@ -14,11 +15,12 @@ describe('workers/repository/init/apis', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      config = { ...getConfig() };
+      config = applyRepoConfigDefaults({ ...getConfig() });
       config.errors = [];
       config.warnings = [];
-      delete config.optimizeForDisabled;
-      delete config.forkProcessing;
+      const optionalConfig: Partial<RenovateConfig> = config;
+      delete optionalConfig.optimizeForDisabled;
+      delete optionalConfig.forkProcessing;
     });
 
     it('runs', async () => {
