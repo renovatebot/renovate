@@ -124,6 +124,85 @@ describe('config/index', () => {
       ]);
     });
 
+    describe('an option set to null', () => {
+      it.each`
+        name               | value         | expected
+        ${'enabled'}       | ${false}      | ${true}
+        ${'rangeStrategy'} | ${'pin'}      | ${'auto'}
+        ${'labels'}        | ${['foo']}    | ${[]}
+        ${'platform'}      | ${'gitlab'}   | ${'github'}
+        ${'gitNoVerify'}   | ${['commit']} | ${['commit', 'push']}
+      `(
+        'gives $name its default over a value of the parent',
+        ({ name, value, expected }) => {
+          const parentConfig: Record<string, unknown> = { [name]: value };
+
+          const config = mergeChildConfig(parentConfig, { [name]: null });
+
+          expect(config[name]).toEqual(expected);
+        },
+      );
+
+      it('gives an option its default when it is forced', () => {
+        const parentConfig: Record<string, unknown> = {
+          automergeType: 'branch',
+        };
+
+        const config = mergeChildConfig(parentConfig, {
+          force: { automergeType: null },
+        });
+
+        expect(config.automergeType).toBe('pr');
+      });
+
+      it('keeps null where the parent has no value', () => {
+        const config = mergeChildConfig({}, { rangeStrategy: null });
+
+        expect(config).toEqual({ rangeStrategy: null });
+      });
+
+      it('gives the default once the config is merged over one with a value', () => {
+        const presetConfig: Record<string, unknown> = mergeChildConfig(
+          {},
+          { rangeStrategy: null },
+        );
+
+        const config = mergeChildConfig({ rangeStrategy: 'pin' }, presetConfig);
+
+        expect(config.rangeStrategy).toBe('auto');
+      });
+
+      it.each`
+        name                            | description
+        ${'groupName'}                  | ${'has a null default'}
+        ${'composerIgnorePlatformReqs'} | ${'is nullable'}
+        ${'commitMessageTopic'}         | ${'is nullable'}
+        ${'matchPackageNames'}          | ${'is not a top-level option'}
+        ${'npm'}                        | ${'is a manager config'}
+      `('keeps null for an option which $description', ({ name }) => {
+        const parentConfig: Record<string, unknown> = { [name]: 'value' };
+
+        const config = mergeChildConfig(parentConfig, { [name]: null });
+
+        expect(config[name]).toBeNull();
+      });
+
+      it('keeps null within a mergeable option until it is merged into the config', () => {
+        const parentConfig: Record<string, unknown> = {
+          automerge: true,
+          major: { automerge: true },
+        };
+
+        const config = mergeChildConfig(parentConfig, {
+          major: { automerge: null },
+        });
+        const majorConfig = mergeChildConfig(config, config.major);
+
+        expect(config.major).toEqual({ automerge: null });
+        expect(majorConfig.automerge).toBeFalse();
+      });
+    });
+
     it('handles undefined childConfig', () => {
       const parentConfig = { ...defaultConfig };
       const config = mergeChildConfig(parentConfig, undefined);

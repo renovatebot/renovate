@@ -14,7 +14,8 @@ The config options below _must_ be configured in the admin config, so in either 
 !!! note
   Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
 
-If you set an option to `null` in the admin config, Renovate uses the default of that option instead. The exceptions are options which document a meaning for `null`, like `semanticCommitScope`.
+If you set an option to `null` in the admin config, Renovate uses the default value of that option, like it does in any other config.
+Read [setting an option to `null`](./config-overview.md#setting-an-option-to-null) to learn more.
 
 For information about how to configure Renovate with a `config.js` see the [Using `config.js` documentation](./getting-started/running.md#using-configjs).
 

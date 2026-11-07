@@ -75,6 +75,7 @@ describe('workers/global/config/parse/index', () => {
         ${'repositories'} | ${[]}
         ${'platform'}     | ${'github'}
         ${'gitNoVerify'}  | ${['commit', 'push']}
+        ${'hostRules'}    | ${[]}
         ${'schedule'}     | ${['at any time']}
       `('uses the default for $option', async ({ option, expected }) => {
         fileConfigParser.getConfig.mockResolvedValue({ [option]: null });
@@ -83,9 +84,6 @@ describe('workers/global/config/parse/index', () => {
           defaultArgv,
         );
         expect(parsedConfig).toHaveProperty(option, expected);
-        expect(logger.debug).toHaveBeenCalledWith(
-          `Using the default for the global option ${option}, as it is set to null`,
-        );
       });
 
       it.each([

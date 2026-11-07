@@ -787,6 +787,7 @@ Check out the default value for `commitMessage` to understand how this field is 
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
+Set `commitMessageExtra` to `null` to leave it out, like `lockFileMaintenance` does.
 
 ## `commitMessageLowerCase`
 
@@ -807,6 +808,7 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 
 You can use `commitMessageTopic` to change the `commitMessage` and `prTitle` without copy/pasting the whole string.
 The "topic" usually refers to the dependency being updated, for example: `"dependency react"`.
+Set `commitMessageTopic` to `null` to leave it out, like `lockFileMaintenance` does.
 
 We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules` array to set the commit message topic, like this:
 
