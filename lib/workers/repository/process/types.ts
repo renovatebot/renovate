@@ -9,6 +9,8 @@ export interface Vulnerability {
   osvPackageName: string;
   depType?: string;
   depVersion: string;
+  /** whether `depVersion` is a locked version, with no declared value to constrain it */
+  isLockedOnly?: boolean;
   fixedVersion: string | null;
   datasource: string;
   versioning?: string;

@@ -296,6 +296,8 @@ export class Vulnerabilities {
             affected,
             depType,
             depVersion,
+            isLockedOnly:
+              !!dep.lockedVersion && isNullOrUndefined(dep.currentValue),
             versioning: dep.versioning,
             fixedVersion,
             datasource: dep.datasource!,
@@ -626,6 +628,7 @@ export class Vulnerabilities {
       packageName,
       depType,
       depVersion,
+      isLockedOnly,
       fixedVersion,
       datasource,
       versioning: depVersioning,
@@ -659,7 +662,12 @@ export class Vulnerabilities {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       ...(depType ? { matchDepTypes: [depType] } : {}),
-      matchCurrentVersion: depVersion,
+      // A version only matches a dependency which declares no value if it is a
+      // regex, as any locked version would otherwise match it - so a package
+      // locked at several versions would take the fix for every one of them
+      matchCurrentVersion: isLockedOnly
+        ? `/^${RegExp.escape(depVersion)}$/`
+        : depVersion,
       versioning,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
