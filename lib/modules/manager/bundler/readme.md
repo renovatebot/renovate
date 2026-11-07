@@ -1,5 +1,13 @@
 Renovate uses the `bundler` manager to extract dependencies from `Gemfile` and `Gemfile.lock` files.
 
+### Vendored gems
+
+If there is a `vendor/cache` directory next to the `Gemfile`, Renovate also updates the vendored gems.
+After updating the `Gemfile.lock`, Renovate runs `bundle cache --no-install --all-platforms` and commits the changed `.gem` files in `vendor/cache` in the same PR.
+
+Renovate only looks for the default `vendor/cache` directory.
+If you set a different directory with the Bundler `cache_path` setting, Renovate does not update the vendored gems.
+
 ### Authenticating private registry
 
 If:

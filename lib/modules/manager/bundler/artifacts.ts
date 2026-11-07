@@ -11,12 +11,16 @@ import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
+  getSiblingFileName,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import { fileChangesToArtifactResults } from '../util.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
@@ -28,6 +32,7 @@ import {
 } from './host-rules.ts';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
+const defaultCachePath = 'vendor/cache';
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   // istanbul ignore if: doesn't happen in practice
@@ -135,6 +140,15 @@ export async function updateArtifacts(
       }
     }
 
+    const vendorCacheDir = getSiblingFileName(
+      packageFileName,
+      defaultCachePath,
+    );
+    const vendorCacheDirExists = await localPathExists(vendorCacheDir);
+    if (vendorCacheDirExists) {
+      commands.push('bundler cache --no-install --all-platforms');
+    }
+
     const bundlerHostRules = findAllAuthenticatable({
       hostType: 'rubygems',
     });
@@ -180,7 +194,7 @@ export async function updateArtifacts(
     }
     logger.debug('Returning updated Gemfile.lock');
     const lockFileContent = await readLocalFile(lockFileName);
-    return [
+    const res: UpdateArtifactsResult[] = [
       {
         file: {
           type: 'addition',
@@ -189,6 +203,20 @@ export async function updateArtifacts(
         },
       },
     ];
+
+    if (!vendorCacheDirExists) {
+      return res;
+    }
+
+    logger.debug(`Committing vendored gems in ${vendorCacheDir}`);
+    res.push(
+      ...fileChangesToArtifactResults(
+        await collectFileChanges(status, {
+          filter: (path) => path.startsWith(vendorCacheDir),
+        }),
+      ),
+    );
+    return res;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
