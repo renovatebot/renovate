@@ -66,7 +66,9 @@ function isSingleVersion(constraint: string): boolean {
     return true;
   }
   return (
-    constraint.startsWith('==') && npm.isVersion(constraint.substring(2).trim())
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- the lookup passes an undefined value for a dependency without a currentValue
+    constraint?.startsWith('==') &&
+    npm.isVersion(constraint.substring(2).trim())
   );
 }
 

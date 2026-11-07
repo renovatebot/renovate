@@ -12,7 +12,8 @@ const versionRegex = regEx(
 );
 
 export function parseVersion(input: string): NugetVersion | null {
-  const groups = versionRegex.exec(input.trim())?.groups;
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- the versioning callers can pass an undefined value
+  const groups = versionRegex.exec(input?.trim())?.groups;
   if (!groups) {
     return null;
   }

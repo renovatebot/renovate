@@ -11,7 +11,8 @@ const regex = regEx('^[0-9a-f]{7,40}$', 'i');
 
 class GitVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
-    if (version.match(regex)) {
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- the versioning callers can pass an undefined value
+    if (version?.match(regex)) {
       return { release: [1, 0, 0], suffix: version };
     }
     return null;

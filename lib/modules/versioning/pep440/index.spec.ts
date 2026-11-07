@@ -59,6 +59,7 @@ describe('modules/versioning/pep440/index', () => {
     ${'==1.2'}    | ${true}
     ${'== 1.2.3'} | ${true}
     ${'==1.*'}    | ${false}
+    ${undefined}  | ${false}
   `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
     const res = !!pep440.isSingleVersion(version);
     expect(res).toBe(isSingle);

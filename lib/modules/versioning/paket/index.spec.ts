@@ -4,6 +4,7 @@ describe('modules/versioning/paket/index', () => {
   describe('isValid()', () => {
     it.each`
       input                    | expected
+      ${undefined}             | ${false}
       ${'1.2.3'}               | ${true}
       ${'1.2.3.4'}             | ${true}
       ${'1.2.3-alpha001'}      | ${true}

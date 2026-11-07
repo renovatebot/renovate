@@ -49,6 +49,10 @@ describe('modules/versioning/hex/index', () => {
     expect(hexScheme.isSingleVersion(version)).toBe(expected);
   });
 
+  it('isSingleVersion() is falsy for an undefined value', () => {
+    expect(hexScheme.isSingleVersion(undefined as never)).toBeFalsy();
+  });
+
   it('getPinnedValue returns == prefixed version', () => {
     expect(hexScheme.getPinnedValue!('1.2.3')).toBe('== 1.2.3');
   });

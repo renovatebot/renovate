@@ -41,7 +41,8 @@ function isValidPair(first: PaketOperator, second: PaketOperator): boolean {
 }
 
 export function parseRange(input: string): PaketRange | null {
-  if (!input.trim()) {
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- the versioning callers can pass an undefined value
+  if (!input?.trim()) {
     return null;
   }
 

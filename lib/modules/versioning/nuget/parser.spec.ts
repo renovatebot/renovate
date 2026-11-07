@@ -13,6 +13,7 @@ describe('modules/versioning/nuget/parser', () => {
     it('returns null for invalid input', () => {
       expect(parseVersion('!@#')).toBeNull();
       expect(parseVersion('abc')).toBeNull();
+      expect(parseVersion(undefined as never)).toBeNull();
     });
 
     it('parses version', () => {
