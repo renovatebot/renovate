@@ -8,6 +8,7 @@ import {
   extractPackage,
   resolveParents,
 } from './extract.ts';
+import type { MavenManagerData } from './types.ts';
 import { updateDependency } from './update.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -17,7 +18,10 @@ const parentPomContent = Fixtures.get('parent.pom.xml');
 const childPomContent = Fixtures.get('child.pom.xml');
 const groupingContent = Fixtures.get('grouping.pom.xml');
 
-function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
+function selectDep(
+  deps: PackageDependency<MavenManagerData>[],
+  name = 'org.example:quuz',
+) {
   return deps.find((dep) => dep.depName === name);
 }
 
@@ -161,7 +165,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
-      function select(depSet: PackageFileContent) {
+      function select(depSet: PackageFileContent<MavenManagerData>) {
         return selectDep(depSet.deps, 'org.example:hard-range');
       }
       const oldContent = extractPackage(simpleContent, 'some-file', {});
@@ -180,7 +184,7 @@ describe('modules/manager/maven/index', () => {
     });
 
     it('should preserve ranges', () => {
-      function select(depSet: PackageFileContent) {
+      function select(depSet: PackageFileContent<MavenManagerData>) {
         return depSet?.deps
           ? selectDep(depSet.deps, 'org.example:hard-range')
           : null;
