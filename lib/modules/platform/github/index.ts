@@ -8,6 +8,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
   PR_ALREADY_IN_MERGE_QUEUE,
+  PR_AUTOMERGE_ENABLED_BY_OTHER,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -88,9 +89,11 @@ import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import { getRepoFile } from './files.ts';
 import {
+  disableAutoMergeMutation,
   enableAutoMergeMutation,
   enqueuePullRequestMutation,
   getIssuesQuery,
+  prAutoMergeStateQuery,
   repoInfoQuery,
   repoMergeQueueQuery,
 } from './graphql.ts';
@@ -113,8 +116,11 @@ import type {
   Comment,
   GhAutomergeResponse,
   GhBranchStatus,
+  GhDisableAutomergeResponse,
   GhEnqueuePullRequestResponse,
   GhPr,
+  GhPrAutoMergeState,
+  GhPrAutoMergeStateResponse,
   GhRepo,
   GhRestPr,
   GhRestRepo,
@@ -576,6 +582,7 @@ export async function initRepo({
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
     mergeQueueEnabled: {},
+    automergeDisabledPrs: new Set(),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -2133,23 +2140,154 @@ export function isPrInMergeQueue(prNo: number): Promise<boolean> {
   );
 }
 
-export async function assertPrNotInMergeQueue(
-  branchName: string,
-  baseBranch?: string,
-): Promise<void> {
-  if (!(await isBranchMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
-    return;
+/**
+ * Returns true when the login matches the Renovate username, ignoring a trailing `[bot]`.
+ */
+function isRenovateLogin(login: string | undefined): boolean {
+  if (!login || !config.renovateUsername) {
+    return false;
   }
+  const botSuffix = regEx(/\[bot\]$/);
+  return (
+    login.replace(botSuffix, '').toLowerCase() ===
+    config.renovateUsername.replace(botSuffix, '').toLowerCase()
+  );
+}
+
+/**
+ * Queries the automerge state of a PR, or returns null when it could not be read.
+ */
+async function getPrAutoMergeState(
+  prNo: number,
+): Promise<GhPrAutoMergeState | null> {
+  try {
+    const res = await githubApi.requestGraphql<GhPrAutoMergeStateResponse>(
+      prAutoMergeStateQuery,
+      {
+        variables: {
+          owner: config.repositoryOwner,
+          name: config.repositoryName,
+          number: prNo,
+        },
+        readOnly: true,
+        count: 1, // bypass graphql check
+      },
+    );
+    if (res?.errors) {
+      logger.debug(
+        { prNo, errors: res.errors },
+        'Failed to fetch PR automerge state',
+      );
+      return null;
+    }
+    return res?.data?.repository?.pullRequest ?? null;
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.debug({ prNo, err }, 'Error fetching PR automerge state');
+    return null;
+  }
+}
+
+/**
+ * Disables GitHub-native automerge of a PR and records the PR when the request was or may have been applied.
+ */
+async function disablePrAutomerge(
+  prNo: number,
+  prNodeId: string,
+): Promise<void> {
+  try {
+    const res = await githubApi.requestGraphql<GhDisableAutomergeResponse>(
+      disableAutoMergeMutation,
+      {
+        variables: { pullRequestId: prNodeId },
+        count: 1, // set count to one to bypass graphql check
+      },
+    );
+    if (res?.errors) {
+      logger.debug(
+        { prNumber: prNo, errors: res.errors },
+        'GitHub-native automerge: disable failed',
+      );
+      return;
+    }
+    logger.debug(`GitHub-native automerge: disabled...PrNo: ${prNo}`);
+  } catch (err) {
+    if (err instanceof Error && err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      throw err;
+    }
+    logger.warn(
+      { prNumber: prNo, err },
+      'GitHub-native automerge: disable may have been applied',
+    );
+  }
+  config.automergeDisabledPrs.add(prNo);
+}
+
+/**
+ * Checks the open PR of a branch before pushing to it.
+ * Throws when the PR is in the merge queue or when someone else enabled automerge with another commit headline,
+ * and disables automerge which Renovate enabled with another commit message.
+ */
+export async function preparePrPush({
+  branchName,
+  baseBranch,
+  platformPrOptions,
+}: CommitFilesConfig): Promise<void> {
+  const mergeQueueEnabled = await isBranchMergeQueueEnabled(
+    baseBranch ?? config.defaultBranch,
+  );
 
   const pr = await findPr({ branchName, state: 'open' });
   if (!pr) {
     return;
   }
 
-  if (await isPrInMergeQueue(pr.number)) {
-    logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
-    throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+  if (mergeQueueEnabled) {
+    const isInMergeQueue = await isPrInMergeQueue(pr.number);
+    if (isInMergeQueue) {
+      logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
+      throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+    }
+    // the merge queue builds the merge commit from the current PR title
+    return;
   }
+
+  const state = await getPrAutoMergeState(pr.number);
+  const autoMergeRequest = state?.autoMergeRequest;
+  if (!state || !autoMergeRequest || !platformPrOptions) {
+    return;
+  }
+  const { commitHeadline, commitBody } = getAutomergeCommit(
+    pr.number,
+    platformPrOptions,
+  );
+  if (!commitHeadline) {
+    return;
+  }
+
+  if (!isRenovateLogin(autoMergeRequest.enabledBy?.login)) {
+    // the stored body of someone else's automerge is GitHub's default, so only the headline is compared
+    if (autoMergeRequest.commitHeadline !== commitHeadline) {
+      logger.debug(
+        `PR #${pr.number} has automerge enabled by someone else - aborting push`,
+      );
+      throw new Error(PR_AUTOMERGE_ENABLED_BY_OTHER);
+    }
+    return;
+  }
+
+  // GitHub may store a default body when none was passed, so only compare the body when one is passed
+  // and treat a missing stored body like an empty one
+  const storedCommitBody = autoMergeRequest.commitBody ?? '';
+  const isBodyUnchanged =
+    commitBody === undefined || storedCommitBody === commitBody;
+  if (autoMergeRequest.commitHeadline === commitHeadline && isBodyUnchanged) {
+    return;
+  }
+
+  await disablePrAutomerge(pr.number, state.id);
 }
 
 export async function updatePr({
@@ -2209,15 +2347,34 @@ export async function updatePr({
   }
 }
 
-export async function reattemptPlatformAutomerge({
-  number,
-  platformPrOptions,
-}: ReattemptPlatformAutomergeConfig): Promise<void> {
+/**
+ * Enables GitHub-native automerge again, with one delayed retry when `retry` is set.
+ */
+async function enablePlatformAutomerge(
+  number: number,
+  platformPrOptions: PlatformPrOptions | undefined,
+  retry: boolean,
+): Promise<void> {
   try {
     const result = (await getPr(number))!;
     const { node_id } = result;
 
-    await tryPrAutomerge(number, node_id, platformPrOptions);
+    const status = await tryPrAutomerge(number, node_id, platformPrOptions);
+    if (status === 'failed' && retry) {
+      logger.debug(`GitHub-native automerge: retrying...PrNo: ${number}`);
+      await setTimeout(5000);
+      const retryStatus = await tryPrAutomerge(
+        number,
+        node_id,
+        platformPrOptions,
+      );
+      if (retryStatus === 'failed') {
+        logger.warn(
+          { prNumber: number },
+          'GitHub-native automerge: could not re-enable after updating the commit message',
+        );
+      }
+    }
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) {
@@ -2226,6 +2383,24 @@ export async function reattemptPlatformAutomerge({
     }
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  const retry = config.automergeDisabledPrs.delete(number);
+  await enablePlatformAutomerge(number, platformPrOptions, retry);
+}
+
+export async function restorePlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  if (!config.automergeDisabledPrs.delete(number)) {
+    return;
+  }
+  await enablePlatformAutomerge(number, platformPrOptions, true);
 }
 
 async function tryEnqueuePr(pr: GhPr): Promise<boolean> {
