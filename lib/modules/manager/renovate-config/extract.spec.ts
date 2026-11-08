@@ -579,6 +579,28 @@ describe('modules/manager/renovate-config/extract', () => {
         });
       });
 
+      // `constraints` can be configured in any of the `sharedScopes`, but we currently only extract the top-level and `packageRules` constraints
+      it.each`
+        scope                    | config
+        ${'a manager'}           | ${{ gomod: { constraints: { golang: '1.25' } } }}
+        ${'an update type'}      | ${{ major: { constraints: { golang: '1.25' } } }}
+        ${'vulnerabilityAlerts'} | ${{ vulnerabilityAlerts: { constraints: { golang: '1.25' } } }}
+        ${'group'}               | ${{ group: { constraints: { golang: '1.25' } } }}
+      `(
+        'does not extract `constraints` from $scope',
+        ({ config }: { config: Record<string, unknown> }) => {
+          const content = JSON.stringify({
+            constraints: { node: '22' },
+            ...config,
+          });
+          expect(
+            extractPackageFile(content, 'renovate.json')?.deps.map(
+              ({ depName, currentValue }) => ({ depName, currentValue }),
+            ),
+          ).toEqual([{ depName: 'node', currentValue: '22' }]);
+        },
+      );
+
       it('handles no `constraints` in packageRules', () => {
         expect(
           extractPackageFile(

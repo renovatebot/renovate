@@ -183,5 +183,26 @@ describe('modules/manager/npm/post-update/rules', () => {
         },
       });
     });
+
+    it('leaves out credentials detached from registry URLs', () => {
+      hostRules.clear();
+      hostRules.detachUrlCredentials(
+        'https://user:pass@registry.company.com/npm',
+        ['npm'],
+      );
+
+      const res = processHostRules();
+
+      expect(res).toEqual({
+        additionalNpmrcContent: [],
+        additionalYarnRcYml: undefined,
+      });
+      expect(
+        hostRules.find({
+          hostType: 'npm',
+          url: 'https://registry.company.com/npm/pkg',
+        }),
+      ).toMatchObject({ username: 'user', password: 'pass' });
+    });
   });
 });

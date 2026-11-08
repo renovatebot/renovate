@@ -22,6 +22,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: '1.89.1' } },
+        },
       });
     });
 
@@ -42,6 +47,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: '1.89' } },
+        },
       });
     });
 
@@ -62,6 +72,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -83,6 +98,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -104,6 +124,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
     });
 
@@ -124,6 +149,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
     });
 
@@ -162,6 +192,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             skipReason: 'unspecified-version',
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -183,6 +218,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             skipReason: 'unspecified-version',
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -204,6 +244,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             skipReason: 'path-dependency',
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -226,6 +271,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: '1.89.1' } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -248,6 +298,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             skipReason: 'invalid-version',
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -271,6 +326,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 0,
+          constraints: { rust: { depName: 'rust', value: '1.89.1' } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -292,6 +352,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 1,
+          constraints: { rust: { depName: 'rust', value: '1.89.1' } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -313,6 +378,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             datasource: RustVersionDatasource.id,
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 1,
+          constraints: { rust: { depName: 'rust', value: '1.89.1' } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -332,6 +402,11 @@ describe('modules/manager/rust-toolchain/extract', () => {
             skipReason: 'invalid-version',
           },
         ],
+        sharedConstraintsScope: {
+          directory: '',
+          precedence: 1,
+          constraints: { rust: { depName: 'rust', value: null } },
+        },
       });
       expect(logger.logger.warn).not.toHaveBeenCalled();
     });
@@ -347,6 +422,49 @@ describe('modules/manager/rust-toolchain/extract', () => {
       );
       expect(result).toBeNull();
       expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    describe('shared constraints', () => {
+      it.each`
+        file                                | channel      | precedence
+        ${'crates/foo/rust-toolchain.toml'} | ${'1.100.0'} | ${0}
+        ${'crates/foo/rust-toolchain'}      | ${'1.100'}   | ${1}
+      `(
+        'shares $channel from $file with its directory',
+        ({ file, channel, precedence }) => {
+          const content = file.endsWith('.toml')
+            ? `[toolchain]\nchannel = "${channel}"`
+            : channel;
+
+          const result = extractPackageFile(content, file);
+
+          expect(result?.sharedConstraintsScope).toEqual({
+            directory: 'crates/foo',
+            precedence,
+            constraints: { rust: { depName: 'rust', value: channel } },
+          });
+        },
+      );
+
+      it.each`
+        file                                | content
+        ${'rust-toolchain.toml'}            | ${'[toolchain]\nchannel = "1.100.0.1"'}
+        ${'fuzz/rust-toolchain.toml'}       | ${'[toolchain]\nchannel = "nightly"'}
+        ${'fuzz/rust-toolchain'}            | ${'stable'}
+        ${'fuzz/rust-toolchain'}            | ${'nightly-2025-10-12'}
+        ${'rust-toolchain'}                 | ${'1.100.0-beta.1'}
+        ${'rust-toolchain'}                 | ${'1.100.0-x86_64-unknown-linux-gnu'}
+        ${'rust-toolchain'}                 | ${'1.100-beta'}
+        ${'rust-toolchain'}                 | ${'1.100.0-beta'}
+        ${'rust-toolchain'}                 | ${'1.100-x86_64-unknown-linux-gnu'}
+        ${'crates/foo/rust-toolchain.toml'} | ${'[toolchain]\npath = "/opt/rust"'}
+      `('shares no Rust version for $content in $file', ({ file, content }) => {
+        const result = extractPackageFile(content, file);
+
+        expect(result?.sharedConstraintsScope?.constraints).toEqual({
+          rust: { depName: 'rust', value: null },
+        });
+      });
     });
   });
 });

@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
 import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageRuleInputConfig } from '../../../config/types.ts';
 import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
@@ -35,6 +36,17 @@ vi.mock('@renovatebot/osv-offline', () => {
 });
 
 describe('workers/repository/process/vulnerabilities', () => {
+  beforeEach(() => {
+    // `unstubEnvs` restores both after each test
+    vi.stubEnv('OSV_OFFLINE_ROOT_DIR', undefined);
+    vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', undefined);
+    GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
+  });
+
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('create()', () => {
     beforeEach(resetOsv);
 
@@ -54,11 +66,67 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
   });
 
+  describe('osv-offline directory', () => {
+    beforeEach(() => {
+      resetOsv();
+      createMock.mockResolvedValue({});
+    });
+
+    it('keeps a configured root directory', async () => {
+      vi.stubEnv('OSV_OFFLINE_ROOT_DIR', '/custom/osv');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe('/custom/osv');
+    });
+
+    it('keeps the osv-offline default when downloads are disabled', async () => {
+      vi.stubEnv('OSV_OFFLINE_DISABLE_DOWNLOAD', 'TRUE');
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBeUndefined();
+    });
+
+    it('uses a directory in cacheDir by default', async () => {
+      await Vulnerabilities.create();
+      expect(process.env.OSV_OFFLINE_ROOT_DIR).toBe(
+        '/tmp/renovate/cache/osv-offline',
+      );
+    });
+  });
+
+  describe('cleanup()', () => {
+    beforeEach(resetOsv);
+
+    it('disposes the shared databases once', async () => {
+      const dispose = vi.fn();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+        [Symbol.dispose]: dispose,
+      });
+      await Vulnerabilities.create();
+
+      await Vulnerabilities.cleanup();
+      await Vulnerabilities.cleanup();
+
+      expect(dispose).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing when the databases were never opened', async () => {
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+
+    it('ignores a failed initialization', async () => {
+      createMock.mockRejectedValue(new Error());
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+
+      await expect(Vulnerabilities.cleanup()).toResolve();
+    });
+  });
+
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
@@ -857,6 +925,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     };
 
     beforeAll(async () => {
+      GlobalConfig.set({ cacheDir: '/tmp/renovate/cache' });
       resetOsv();
       createMock.mockResolvedValue({
         getVulnerabilities: getVulnerabilitiesMock,
@@ -1571,6 +1640,78 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchCurrentVersion: '3.4.0',
           allowedVersions: '[4.0.0,)',
           versioning: 'maven',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('preserves poetry versioning when generating vulnerability package rules', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              {
+                depName: 'weasyprint',
+                packageName: 'weasyprint',
+                currentValue: '^69.0',
+                currentVersion: '69.0',
+                lockedVersion: '69.0',
+                versioning: 'poetry',
+                datasource: 'pypi',
+              },
+            ],
+            packageFile: 'pyproject.toml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jf6q-chmf-3h3v',
+          modified: '',
+          aliases: ['CVE-2026-1234'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'PyPI',
+                name: 'weasyprint',
+                purl: 'pkg:pypi/weasyprint',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '70.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-jf6q-chmf-3h3v affects weasyprint 69.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'pypi',
+          versioning: 'poetry',
+        },
+        'Setting allowed version >= 70.0 to fix vulnerability GHSA-jf6q-chmf-3h3v in weasyprint 69.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['weasyprint'],
+          matchCurrentVersion: '69.0',
+          allowedVersions: '>= 70.0',
+          versioning: 'poetry',
           isVulnerabilityAlert: true,
         },
       ]);

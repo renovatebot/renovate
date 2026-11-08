@@ -34,6 +34,7 @@
       "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
+      "replacements:monochromata-cucumber-reporting-plugin-to-jvt",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
@@ -62,6 +63,7 @@
       "replacements:terraform-provider-mrparkers-keycloak-to-keycloak-keycloak",
       "replacements:tsconfig-bases-node",
       "replacements:typeorm-seeding-to-scoped",
+      "replacements:ucanaccess-to-io-github-spannm",
       "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
@@ -937,6 +939,17 @@
       }
     ]
   },
+  "monochromata-cucumber-reporting-plugin-to-jvt": {
+    "description": "`de.monochromata.cucumber:reporting-plugin` was moved to `me.jvt.cucumber:reporting-plugin`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["de.monochromata.cucumber:reporting-plugin"],
+        "replacementName": "me.jvt.cucumber:reporting-plugin",
+        "replacementVersion": "5.0.0"
+      }
+    ]
+  },
   "now-to-vercel": {
     "description": "`now` was renamed to `vercel`.",
     "packageRules": [
@@ -1312,6 +1325,18 @@
         "matchPackageNames": ["typeorm-seeding"],
         "replacementName": "@jorgebodega/typeorm-seeding",
         "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "ucanaccess-to-io-github-spannm": {
+    "description": "`net.sf.ucanaccess:ucanaccess` is no longer maintained, development continues at `io.github.spannm:ucanaccess`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=5.0.1",
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["net.sf.ucanaccess:ucanaccess"],
+        "replacementName": "io.github.spannm:ucanaccess",
+        "replacementVersion": "5.1.0"
       }
     ]
   },

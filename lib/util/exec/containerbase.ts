@@ -1,4 +1,8 @@
-import { type ToolMetadata, tools } from '@renovatebot/base-image';
+import {
+  type ToolMetadata,
+  isContainerbase,
+  tools,
+} from '@renovatebot/base-image';
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global.ts';
@@ -8,7 +12,6 @@ import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { coerceArray } from '../array.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { buildCacheKey } from '../cache/package/key.ts';
-import { getEnv } from '../env.ts';
 import { regEx } from '../regex.ts';
 import {
   type ConstraintName,
@@ -88,7 +91,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   erlang: {
     datasource: 'github-releases',
     packageName: 'containerbase/erlang-prebuild',
-    versioning: 'semver-coerced',
+    versioning: 'semver-extended',
   },
   elixir: {
     datasource: 'github-releases',
@@ -142,8 +145,8 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   },
   jb: {
     datasource: 'github-releases',
-    packageName: 'jsonnet-bundler/jsonnet-bundler',
-    versioning: 'semver',
+    packageName: 'containerbase/jb-prebuild',
+    versioning: 'semver-extended',
   },
   kustomize: {
     datasource: 'github-releases',
@@ -175,6 +178,11 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
     datasource: 'npm',
     packageName: 'npm',
     versioning: 'npm',
+  },
+  paket: {
+    datasource: 'nuget',
+    packageName: 'paket',
+    versioning: 'paket',
   },
   pdm: {
     datasource: 'github-releases',
@@ -260,11 +268,6 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
 } as const;
 
 /**
- * A Containerbase `tool` that Renovate supports configuring the version of.
- */
-export type SupportedToolNames = keyof typeof allToolConfig;
-
-/**
  * All Containerbase `tool`s that Renovate supports configuring the version of.
  */
 export function getSupportedToolNames(): readonly ToolName[] {
@@ -305,10 +308,6 @@ export function getToolConfig(toolName: ToolName): ToolConfig | undefined {
 
 export function supportsDynamicInstall(toolName: ToolName): boolean {
   return !!allToolConfig[toolName];
-}
-
-export function isContainerbase(): boolean {
-  return !!getEnv().CONTAINERBASE;
 }
 
 export function isDynamicInstall(
@@ -449,10 +448,19 @@ export async function generateInstallCommands(
       resolvedTools[toolName] = toolVersion;
       if (memoize) {
         const cacheKey = buildCacheKey('containerbase-active', toolName);
-        if (memCache.get<string | undefined>(cacheKey) === toolVersion) {
+        // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
+        const parentActive = isToolName(parent)
+          ? memCache.get<string | undefined>(
+              buildCacheKey('containerbase-active', parent),
+            )
+          : undefined;
+        const active = parentActive
+          ? `${toolVersion}@${parent}:${parentActive}`
+          : toolVersion;
+        if (memCache.get<string | undefined>(cacheKey) === active) {
           continue;
         }
-        memCache.set(cacheKey, toolVersion);
+        memCache.set(cacheKey, active);
       }
       const installCommand = `install-tool ${toolName} ${quote(toolVersion)}`;
       installCommands.push(installCommand);

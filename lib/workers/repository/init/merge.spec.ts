@@ -1490,6 +1490,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('does not fetch a repository preset that the global `ignorePresets` ignores', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>some-org/unreachable'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        ignorePresets: ['local>some-org/unreachable'],
+      });
+
+      expect(res).toBeDefined();
+    });
+
     it("continues without the exemption when the admin's global `extends` cannot be resolved", async () => {
       // resolving them here only builds the exemption; the resolution whose result is actually used reports the failure, so it must not be reported twice - nor first
       fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
@@ -1578,6 +1591,70 @@ describe('workers/repository/init/merge', () => {
           ],
         }),
       ).toResolve();
+    });
+
+    it.each`
+      matchHost
+      ${'https://registry.example.com/npm/'}
+      ${'https://registry.example.com/npm/sub'}
+    `(
+      "exempts a preset with $matchHost within the admin's path",
+      async ({ matchHost }) => {
+        GlobalConfig.set({ allowedHeaders: ['X-*'] });
+        memCache.set('preset:local>withinPath', {
+          hostRules: [
+            { matchHost, headers: { Authorization: 'admin-secret' } },
+          ],
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>withinPath'] }),
+        );
+
+        await expect(
+          mergeRenovateConfig({
+            ...config,
+            hostRules: [
+              {
+                matchHost: 'https://registry.example.com/npm/',
+                headers: { Authorization: 'admin-secret' },
+              },
+            ],
+          }),
+        ).toResolve();
+      },
+    );
+
+    it("reports a preset with the admin's path without its trailing slash", async () => {
+      // `https://registry.example.com/npm` also reaches `https://registry.example.com/npm-other/`, which the admin's rule does not
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>pathWithoutSlash', {
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com/npm',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>pathWithoutSlash'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com/npm/',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+      });
     });
 
     it("reports a preset broadening the admin's header to a wider host", async () => {
@@ -1912,6 +1989,24 @@ describe('workers/repository/init/merge', () => {
           expect(exitMock).not.toHaveBeenCalled();
         },
       );
+
+      it('accepts a string for an option which allows a string', async () => {
+        fs.readSystemFile.mockResolvedValueOnce('{"description":"static"}');
+
+        const got = await resolveStaticRepoConfig(
+          { repositories: ['some/repo'] },
+          'static_config.json5',
+        );
+
+        expect(got).toEqual({
+          description: 'static',
+          repositories: ['some/repo'],
+        });
+        expect(logger.logger.info).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Static repo config validation issues detected',
+        );
+      });
 
       describe('resolveStaticRepoConfig termination cases', () => {
         it.each([

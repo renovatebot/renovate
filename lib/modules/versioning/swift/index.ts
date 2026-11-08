@@ -1,7 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
 import type { RangeStrategy } from '../../../types/versioning.ts';
-import { regEx } from '../../../util/regex.ts';
+import { stripVersionPrefix } from '../../../util/string.ts';
 import type { VersioningApi } from '../types.ts';
 import { getNewValue, toSemverRange } from './range.ts';
 
@@ -46,7 +46,7 @@ function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
+  const normalizedVersions = versions.map((v) => stripVersionPrefix(v));
   const semverRange = toSemverRange(range);
   return semverRange ? maxSatisfying(normalizedVersions, semverRange) : null;
 }
@@ -55,7 +55,7 @@ function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
+  const normalizedVersions = versions.map((v) => stripVersionPrefix(v));
   const semverRange = toSemverRange(range);
   return semverRange ? minSatisfying(normalizedVersions, semverRange) : null;
 }
