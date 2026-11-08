@@ -41,6 +41,7 @@ describe('modules/datasource/git-tags/platforms', () => {
       ${'https://github.com/o/r.git'}  | ${'github-tags'}    | ${'https://github.com'}    | ${'o/r'}
       ${'git@gitlab.com:g/s/r.git'}    | ${'gitlab-tags'}    | ${'https://gitlab.com'}    | ${'g/s/r'}
       ${'https://gitlab.com/g/s/r'}    | ${'gitlab-tags'}    | ${'https://gitlab.com'}    | ${'g/s/r'}
+      ${'https://u:t@gitlab.com/g/r'}  | ${'gitlab-tags'}    | ${'https://gitlab.com'}    | ${'g/r'}
       ${'ssh://git@bitbucket.org/o/r'} | ${'bitbucket-tags'} | ${'https://bitbucket.org'} | ${'o/r'}
       ${'https://codeberg.org/o/r/'}   | ${'forgejo-tags'}   | ${'https://codeberg.org'}  | ${'o/r'}
       ${'https://gitea.com/o/r'}       | ${'gitea-tags'}     | ${'https://gitea.com'}     | ${'o/r'}

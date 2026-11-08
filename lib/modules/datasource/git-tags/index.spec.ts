@@ -103,14 +103,14 @@ describe('modules/datasource/git-tags/index', () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
       const setWithRawTtl = vi.spyOn(packageCache, 'setWithRawTtl');
       const credentialedPackageName =
-        'https://user:glpat-abcdefghijklmnop@gitlab.example.com/grp/mod.git';
+        'https://user:glpat-abcdefghijklmnop@git.example.com/grp/mod.git';
 
       const versions = await getPkgReleases({
         datasource,
         packageName: credentialedPackageName,
       });
 
-      expect(versions?.sourceUrl).toBe('https://gitlab.example.com/grp/mod');
+      expect(versions?.sourceUrl).toBe('https://git.example.com/grp/mod');
       expect(gitMock.listRemote).toHaveBeenCalledWith([
         credentialedPackageName,
       ]);
@@ -120,7 +120,7 @@ describe('modules/datasource/git-tags/index', () => {
         {
           cachedAt: expect.any(String),
           value: expect.objectContaining({
-            sourceUrl: 'https://gitlab.example.com/grp/mod',
+            sourceUrl: 'https://git.example.com/grp/mod',
           }),
         },
         expect.any(Number),
