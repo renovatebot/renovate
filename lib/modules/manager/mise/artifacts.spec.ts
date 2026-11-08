@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
@@ -124,6 +125,41 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: miseVersionCmd },
       {
         cmd: updateToolCmd,
+        options: {
+          env: expect.objectContaining({ MISE_SAFE: '1' }),
+        },
+      },
+    ]);
+  });
+
+  it('installs uv before running mise lock in safe mode', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'install',
+      allowedUnsafeExecutions: [],
+    });
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'pipx:ansible-lint' }],
+      newPackageFileContent: '[tools]\n"pipx:ansible-lint" = "26.11.0"\n',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 1.0.0' },
+      { cmd: miseVersionCmd },
+      { cmd: 'install-tool mise 1.0.0' },
+      { cmd: 'install-tool uv 1.0.0' },
+      {
+        cmd: 'mise lock pipx:ansible-lint',
         options: {
           env: expect.objectContaining({ MISE_SAFE: '1' }),
         },
@@ -517,7 +553,14 @@ describe('modules/manager/mise/artifacts', () => {
   it('looks up latest versions for tool versions before `mise lock`, if not set', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
-    for (const version of ['1.2.3', '2.3.4', '3.4.5', '4.5.6', '5.6.7']) {
+    for (const version of [
+      '1.2.3',
+      '2.3.4',
+      '3.4.5',
+      '4.5.6',
+      '5.6.7',
+      '6.7.8',
+    ]) {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: version }],
       });
@@ -543,8 +586,50 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: 'install-tool npm 3.4.5' },
       { cmd: 'install-tool golang 4.5.6' },
       { cmd: 'install-tool ruby 5.6.7' },
+      { cmd: 'install-tool uv 6.7.8' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
+    ]);
+  });
+
+  it('installs uv before locking a pipx tool update', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        lockfile_version = 3
+        [[tools."pipx:ansible-lint"]]
+        version = "26.10.1"
+        backend = "pipx:ansible-lint"
+      `).mockResolvedValueOnce(codeBlock`
+        lockfile_version = 3
+        [[tools."pipx:ansible-lint"]]
+        version = "26.11.0"
+        backend = "pipx:ansible-lint"
+      `);
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'pipx:ansible-lint' }],
+      newPackageFileContent: codeBlock`
+        [tools]
+        uv = "0.13.7"
+        "pipx:ansible-lint" = { version = "26.11.0", python = "3.14" }
+      `,
+      config: { constraints: { uv: '0.13.7' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 1.0.0' },
+      { cmd: 'install-tool node 1.0.0' },
+      { cmd: 'install-tool npm 1.0.0' },
+      { cmd: 'install-tool golang 1.0.0' },
+      { cmd: 'install-tool ruby 1.0.0' },
+      { cmd: 'install-tool uv 0.13.7' },
+      { cmd: trustCmd },
+      { cmd: 'mise lock pipx:ansible-lint' },
     ]);
   });
 
@@ -566,6 +651,7 @@ describe('modules/manager/mise/artifacts', () => {
           npm: '11.4.2',
           go: '1.24.4',
           ruby: '3.4.3',
+          uv: '0.13.7',
         },
       },
     });
@@ -576,6 +662,7 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
       { cmd: 'install-tool ruby 3.4.3' },
+      { cmd: 'install-tool uv 0.13.7' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -599,6 +686,7 @@ describe('modules/manager/mise/artifacts', () => {
           npm: '11.4.2',
           go: '1.24.4',
           ruby: '3.4.3',
+          uv: '0.13.7',
         },
       },
     });
@@ -609,6 +697,7 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: 'install-tool npm 11.4.2' },
       { cmd: 'install-tool golang 1.24.4' },
       { cmd: 'install-tool ruby 3.4.3' },
+      { cmd: 'install-tool uv 0.13.7' },
       { cmd: trustCmd },
       { cmd: updateToolCmd },
     ]);
@@ -655,6 +744,7 @@ describe('modules/manager/mise/artifacts', () => {
         { cmd: 'install-tool npm 1.0.0' },
         { cmd: 'install-tool golang 1.0.0' },
         { cmd: 'install-tool ruby 1.0.0' },
+        { cmd: 'install-tool uv 1.0.0' },
         { cmd: trustCmd },
         { cmd: `mise lock ${depName}` },
       ]);
