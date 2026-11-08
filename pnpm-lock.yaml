@@ -403,8 +403,8 @@ importers:
         specifier: 15.0.0
         version: 15.0.0(commander@15.0.0)
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.23
-        version: 2.0.23
+        specifier: 2.0.24
+        version: 2.0.24
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.4
         version: 1.4.4(semantic-release@25.0.9)
@@ -908,8 +908,8 @@ packages:
       zod:
         optional: true
 
-  '@containerbase/istanbul-reports-html@2.0.23':
-    resolution: {integrity: sha512-praMugrE0F6eSYteJMFXshagQ7n3kY+GGCqrOViNwQTR33LNaQe9hQE2RIsiplucVjHyOLt3rPOizcrsqVnNdA==}
+  '@containerbase/istanbul-reports-html@2.0.24':
+    resolution: {integrity: sha512-UfeTUcZgBM58EYdvMiH8rpVU4YFI++0C2NGb26l0C+Zm1DAeoxUxfIn9F9WXZYEA/RsiuMs3Q21hWq0Y6jl8LQ==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
   '@containerbase/semantic-release-pnpm@1.4.4':
@@ -6514,7 +6514,7 @@ snapshots:
     optionalDependencies:
       zod: 4.6.7
 
-  '@containerbase/istanbul-reports-html@2.0.23':
+  '@containerbase/istanbul-reports-html@2.0.24':
     dependencies:
       istanbul-reports: 3.2.0
 
