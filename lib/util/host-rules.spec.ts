@@ -38,6 +38,8 @@ describe('util/host-rules', () => {
       username: true,
       password: true,
       insecureRegistry: true,
+      registryType: true,
+      registryApiUrl: true,
       timeout: true,
       abortOnError: true,
       abortIgnoreStatusCodes: true,
