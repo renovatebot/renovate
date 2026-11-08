@@ -9,7 +9,6 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { detectPlatform } from '../../../util/common.ts';
-import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
   queryReleases,
@@ -17,6 +16,7 @@ import {
 } from '../../../util/github/graphql/index.ts';
 import { GithubHttp } from '../../../util/http/github.ts';
 import { Http, HttpError } from '../../../util/http/index.ts';
+import { isForbidden, isGone, isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -28,16 +28,13 @@ import {
   trimTrailingSlash,
 } from '../../../util/url.ts';
 import goVersioning from '../../versioning/go-mod-directive/index.ts';
+import { parseVersionCommit } from '../../versioning/gomod/index.ts';
 import { handleGenericErrors } from '../datasource.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
-import {
-  getSourceUrl,
-  isPublicGoPackage,
-  pseudoVersionRegex,
-  publicGoproxyUrl,
-} from './common.ts';
+import { getSourceUrl, isPublicGoPackage } from './common.ts';
+import { getGoEnv, publicGoproxyUrl } from './env.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { getDirectReleases } from './releases-direct.ts';
 import { VersionInfo } from './schema.ts';
@@ -68,18 +65,15 @@ const versionTagRegex = regEx(/^v\d/);
 const incompatibleSuffixRegex = regEx(/\+incompatible$/);
 
 export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
-  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
-  if (!match) {
+  const commit = parseVersionCommit(pseudoVersion);
+  if (!commit) {
     return null;
   }
 
-  const { digest: newDigest, timestamp } = match;
-  const releaseTimestamp = asTimestamp(timestamp);
-
   return {
     version: pseudoVersion,
-    newDigest,
-    releaseTimestamp,
+    newDigest: commit.revision,
+    releaseTimestamp: asTimestamp(commit.timestamp),
   };
 }
 
@@ -128,7 +122,7 @@ export async function getGoproxyReleases(
 ): Promise<ReleaseResult | null> {
   const { packageName } = config;
   logger.trace(`goproxy.getReleases(${packageName})`);
-  const goproxy = getEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
+  const goproxy = getGoEnv().GOPROXY ?? `${publicGoproxyUrl},direct`;
   if (goproxy === 'direct') {
     return getDirectOrModProxyReleases(config);
   }
@@ -166,9 +160,10 @@ export async function getGoproxyReleases(
     } catch (err) {
       const potentialHttpError =
         err instanceof ExternalHostError ? err.err : err;
-      const statusCode = potentialHttpError?.response?.statusCode;
       const canFallback =
-        fallback === '|' ? true : statusCode === 404 || statusCode === 410;
+        fallback === '|'
+          ? true
+          : isNotFound(potentialHttpError) || isGone(potentialHttpError);
       if (!canFallback) {
         logger.debug(
           { err },
@@ -288,9 +283,13 @@ async function addGithubTimestamps(
   for (const release of releases) {
     const version = release.version.replace(incompatibleSuffixRegex, '');
     const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+    if (!releaseTimestamp) {
+      continue;
+    }
+
     if (
-      releaseTimestamp &&
-      (!release.releaseTimestamp || releaseTimestamp > release.releaseTimestamp)
+      !release.releaseTimestamp ||
+      releaseTimestamp > release.releaseTimestamp
     ) {
       release.releaseTimestamp = releaseTimestamp;
     }
@@ -372,7 +371,7 @@ function retrieveGoDirectiveForModule(
       key: getVersionedCacheKey(packageName, version),
       // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
       ttlMinutes: 100 * 24 * 60,
-      cacheable: isPublicGoPackage(packageName),
+      public: isPublicGoPackage(packageName),
     },
     () => fetchGoDirectiveForModule(baseUrl, packageName, version),
   );
@@ -531,10 +530,11 @@ async function getVersionsWithInfo(
     } catch (err) {
       const potentialHttpError =
         err instanceof ExternalHostError ? err.err : err;
-      const status = potentialHttpError.response?.statusCode;
+      const isNotFoundOrForbidden =
+        isNotFound(potentialHttpError) || isForbidden(potentialHttpError);
       if (
         potentialHttpError instanceof HttpError &&
-        (status === 404 || status === 403) &&
+        isNotFoundOrForbidden &&
         major !== packageMajor
       ) {
         break;
@@ -582,7 +582,7 @@ export function getReleasesCacheKey({
   packageName,
   constraintsFiltering,
 }: GetReleasesConfig): string {
-  const goproxy = getEnv().GOPROXY;
+  const goproxy = getGoEnv().GOPROXY;
   const noproxy = parseNoproxy();
   const constraintsFilteringKey =
     constraintsFiltering === 'none' ? '' : constraintsFiltering;
@@ -596,7 +596,7 @@ export function getReleasesCacheKey({
 }
 
 function getVersionedCacheKey(packageName: string, version: string): string {
-  const goproxy = getEnv().GOPROXY;
+  const goproxy = getGoEnv().GOPROXY;
   const noproxy = parseNoproxy();
   return buildCacheKey(
     'goDirective',

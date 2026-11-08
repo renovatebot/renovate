@@ -23,3 +23,10 @@ export interface GoproxyItem {
  * name is already the clone URL and which therefore knows no source URL.
  */
 export type GoTagDatasource = GitHostTagsDigestDatasource | GitTagsDatasource;
+
+export interface GoEnv {
+  GOPROXY?: string;
+  GONOPROXY?: string;
+  GOPRIVATE?: string;
+  GONOSUMDB?: string;
+}

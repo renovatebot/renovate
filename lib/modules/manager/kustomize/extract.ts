@@ -1,5 +1,5 @@
 import querystring from 'node:querystring';
-import { isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -164,9 +164,20 @@ export function extractHelmChart(
     return null;
   }
 
-  if (isOCIRegistry(helmChart.repo)) {
+  const { repo } = helmChart;
+  // without `repo`, kustomize reads the chart from `helmGlobals.chartHome`
+  if (!isNonEmptyString(repo)) {
     return {
-      ...getOciChartDep(helmChart.repo, helmChart.name, aliases),
+      depName: helmChart.name,
+      currentValue: helmChart.version,
+      datasource: HelmDatasource.id,
+      skipReason: 'local-chart',
+    };
+  }
+
+  if (isOCIRegistry(repo)) {
+    return {
+      ...getOciChartDep(repo, helmChart.name, aliases),
       depName: helmChart.name,
       currentValue: helmChart.version,
     };
@@ -175,7 +186,7 @@ export function extractHelmChart(
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [helmChart.repo],
+    registryUrls: [repo],
     datasource: HelmDatasource.id,
   };
 }

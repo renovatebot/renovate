@@ -4,6 +4,7 @@ import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
@@ -1041,6 +1042,40 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
 
       expect(res).toBeNull();
+    });
+
+    it('uses the GOPROXY derived from go-proxy host rules', async () => {
+      GlobalConfig.set({ goEnvFromHostRules: true });
+      vi.stubEnv('GOPROXY', undefined);
+      hostRules.add({
+        hostType: 'go-proxy',
+        matchHost: 'bsr.example.com',
+        username: 'user',
+        password: 'pass',
+      });
+      const packageName = 'bsr.example.com/gen/go/acme/foo';
+
+      httpMock
+        .scope(`https://bsr.example.com/${packageName}`, {
+          reqheaders: { authorization: 'Basic dXNlcjpwYXNz' },
+        })
+        .get('/@v/list')
+        .reply(200, 'v1.0.0 2018-01-01T00:00:00Z')
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+      httpMock
+        .scope('https://bsr.example.com')
+        .get('/gen/go/acme/foo?go-get=1')
+        .reply(404);
+
+      const res = await getGoproxyReleases({ packageName });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2018-01-01T00:00:00.000Z', version: 'v1.0.0' },
+      ]);
+      GlobalConfig.reset();
     });
 
     it('propagates a non-404/410 HTTP error from the primary proxy instead of falling back', async () => {

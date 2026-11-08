@@ -3,10 +3,14 @@ import { ZodError } from 'zod/v4';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
-import type { CachedOptions } from '../../util/cache/package/with-cache.ts';
+import type {
+  CacheContext,
+  CachedOptions,
+} from '../../util/cache/package/with-cache.ts';
 import { withCache } from '../../util/cache/package/with-cache.ts';
 import type { HttpBase } from '../../util/http/http.ts';
 import { Http, HttpError } from '../../util/http/index.ts';
+import { isRateLimitedOrServerError } from '../../util/http/status.ts';
 import type { HttpOptions } from '../../util/http/types.ts';
 import { coerceObject } from '../../util/object.ts';
 import type {
@@ -107,8 +111,8 @@ export abstract class Datasource<
     options: Omit<CachedOptions, 'namespace'> & {
       namespace?: PackageCacheNamespace;
     },
-    fn: () => T | Promise<T>,
-  ): Promise<T> {
+    fn: (ctx: CacheContext) => T | PromiseLike<T>,
+  ): Promise<Awaited<T>> {
     return withCache(
       { ...options, namespace: options.namespace ?? this.cacheNamespace },
       fn,
@@ -193,11 +197,7 @@ export function handleGenericErrors(
   if (err instanceof HttpError) {
     handleHttpErrors?.(err);
 
-    const statusCode = err.response?.statusCode;
-    if (
-      statusCode &&
-      (statusCode === 429 || (statusCode >= 500 && statusCode < 600))
-    ) {
+    if (isRateLimitedOrServerError(err)) {
       throw new ExternalHostError(err);
     }
   }

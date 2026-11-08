@@ -1,6 +1,7 @@
 import * as httpMock from '~test/http-mock.ts';
 import * as memCache from '../../cache/memory/index.ts';
 import { getCache, resetCache } from '../../cache/repository/index.ts';
+import * as hostRules from '../../host-rules.ts';
 import { Http } from '../index.ts';
 import {
   aggressiveRepoCacheProvider,
@@ -15,6 +16,7 @@ describe('util/http/cache/repository-http-cache-provider', () => {
 
   afterEach(() => {
     memCache.reset();
+    hostRules.clear();
   });
 
   const http = new Http('test', {
@@ -146,6 +148,48 @@ describe('util/http/cache/repository-http-cache-provider', () => {
       body: { msg: 'Hello, world!' },
       authorization: true,
     });
+  });
+
+  it('never stores URL credentials in the cache key', async () => {
+    const url = 'https://user:pass@example.com/foo/bar?token=abc';
+    const data = {
+      timestamp: '2024-01-01T00:00:00.000Z',
+      httpResponse: { statusCode: 200, headers: {}, body: '' },
+    };
+
+    await repoCacheProvider.persist('get', url, data);
+    await repoCacheProvider.persist('head', url, data);
+
+    const cache = getCache();
+    for (const key of [
+      ...Object.keys(cache.httpCache!),
+      ...Object.keys(cache.httpCacheHead!),
+    ]) {
+      expect(key).not.toContain('user:pass@');
+      expect(key).not.toContain('token=abc');
+      expect(key).toMatch(
+        /^https:\/\/sha256-[0-9a-f]{16}@example\.com\/foo\/bar\?sha256-[0-9a-f]{16}$/,
+      );
+    }
+
+    await expect(repoCacheProvider.load('get', url)).resolves.toBe(data);
+    await expect(repoCacheProvider.load('head', url)).resolves.toBe(data);
+  });
+
+  it('keeps the key of a URL independent of detached URL credentials', async () => {
+    const url = 'https://example.com/maven/pkg';
+    const data = {
+      timestamp: '2024-01-01T00:00:00.000Z',
+      httpResponse: { statusCode: 200, headers: {}, body: '' },
+    };
+    await repoCacheProvider.persist('get', url, data);
+
+    hostRules.detachUrlCredentials('https://user:pass@example.com/maven', [
+      'maven',
+    ]);
+
+    await expect(repoCacheProvider.load('get', url)).resolves.toBe(data);
+    expect(Object.keys(getCache().httpCache!)).toEqual([url]);
   });
 
   describe('HEAD requests', () => {

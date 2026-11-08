@@ -4,6 +4,7 @@ import type {
   RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
+  VulnerabilityAlertSource,
 } from '../../config/types.ts';
 import type { Category } from '../../constants/index.ts';
 import type {
@@ -17,6 +18,7 @@ import type {
 import type {
   AdditionalConstraintName,
   ConstraintName,
+  ToolName,
 } from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
@@ -67,6 +69,13 @@ export interface ToolConstraintsConfig {
    * the files it is called with.
    */
   extractedConstraints?: Partial<Record<ConstraintName, string>> | null;
+  /**
+   * Tool versions which other managers, like `mise`, share for the directory of
+   * the package files, see {@link SharedConstraintsScope}. They are the versions
+   * a version manager installs, so they win over a range which the package
+   * files only require, if they are within it.
+   */
+  sharedConstraints?: Partial<Record<ConstraintName, string>> | null;
 }
 
 export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
@@ -86,6 +95,7 @@ export interface UpdateArtifactsConfig extends ToolConstraintsConfig {
   lockFiles?: string[];
   toolSettings?: RepoToolSettingsOptions;
   minimumReleaseAge?: Nullish<string>;
+  minimumReleaseAgeExtracted?: Nullish<string>;
 }
 
 export interface RangeConfig<T = unknown> extends ManagerData<T> {
@@ -100,6 +110,10 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
+   * Set by the manager to share constraints with the package files of other managers, see {@link SharedConstraintsScope}.
+   */
+  sharedConstraintsScope?: SharedConstraintsScope;
+  /**
    * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
    */
   constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
@@ -113,6 +127,12 @@ export interface PackageFileContent<T = unknown> extends ManagerData<T> {
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
   fileFormat?: string;
+  /**
+   * The minimum release age configured in the package manager's own configuration, as a duration like `3 days`.
+   *
+   * Renovate uses the larger of this and `minimumReleaseAge`.
+   */
+  minimumReleaseAgeExtracted?: string;
 }
 
 export interface PackageFile<T = unknown> extends PackageFileContent<T> {
@@ -225,6 +245,8 @@ export interface PackageDependency<
   prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
+  /** True when the lookup failed with an error that only fails this dependency. */
+  lookupFailed?: boolean;
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
@@ -371,6 +393,14 @@ export interface UpdateDependencyConfig<T = unknown> {
   upgrade: Upgrade<T>;
 }
 
+export interface UpdateDependencyResult {
+  content: string;
+  /**
+   * The update was also applied outside the package file, e.g. to the checkout on disk, so the package file counts as updated and `updateArtifacts()` runs for it even if `content` is unchanged.
+   */
+  updatedOutOfBand?: boolean;
+}
+
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
 }
@@ -416,6 +446,57 @@ export interface DepTypeMetadata {
   description: string;
 }
 
+/**
+ * A constraint which a package file shares, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraint {
+  /** The dependency which sets the constraint, a branch which updates it uses its new value */
+  depName: string;
+  /** The constraint, or `null` if the tool has a version which is no constraint, like the Rust channel `stable`, so that it hides the constraint of a parent directory */
+  value: string | null;
+}
+
+/**
+ * The constraints which a package file shares with the package files of other managers, and the directory tree in which they apply.
+ */
+export interface SharedConstraintsScope {
+  /** The directory, relative to the repository root, whose package files and subdirectories the constraints apply to */
+  directory: string;
+  /** Decides between package files of the manager in the same directory, the higher one wins */
+  precedence: number;
+  /** The shared constraints, which unlike `extractedConstraints` do not apply to the package file itself */
+  constraints: Partial<Record<ConstraintName, SharedConstraint>>;
+}
+
+/**
+ * The constraints which a package file of a manager shares, see {@link SharedConstraintsScope}.
+ */
+export interface SharedConstraints extends SharedConstraintsScope {
+  manager: string;
+  packageFile: string;
+}
+
+/**
+ * `true` when supported, or the version range of the package manager that supports it, e.g. `>=11.10.0`.
+ */
+export type MinimumReleaseAgeToolCapability = boolean | string;
+
+export interface MinimumReleaseAgeToolSupport {
+  /** Renovate passes `minimumReleaseAge` to the package manager, e.g. npm `--before`, `POETRY_SOLVER_MIN_RELEASE_AGE` */
+  passesMinimumReleaseAge?: MinimumReleaseAgeToolCapability;
+  /** Renovate reads the package manager's own minimum release age setting */
+  readsConfiguredAge?: MinimumReleaseAgeToolCapability;
+  /** The package manager enforces the minimum release age during lock file maintenance */
+  enforcedInLockFile?: MinimumReleaseAgeToolCapability;
+  /** Markdown note */
+  note?: string;
+}
+
+/** How the package managers of a manager handle `minimumReleaseAge`, used for docs. A missing field means "not supported". */
+export type MinimumReleaseAgeSupport = Partial<
+  Record<ToolName, MinimumReleaseAgeToolSupport>
+>;
+
 export interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
@@ -424,6 +505,8 @@ export interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /** How the package managers used by this manager handle `minimumReleaseAge`, used for docs */
+  minimumReleaseAgeSupport?: MinimumReleaseAgeSupport;
   /** Whether the package files carry an `npmrc` resolved from the repository `.npmrc` and the config, see `NpmrcPackageFile` */
   supportsNpmrc?: boolean;
   /**
@@ -436,6 +519,15 @@ export interface ManagerApiBase extends ModuleApi {
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
+
+  /**
+   * Whether Renovate can perform a Vulnerability Alerts' remediation for a transitive dependency.
+   *
+   * This most likely happens using `lockfile-only` updates.
+   */
+  supportsTransitiveRemediation?: Partial<
+    Record<VulnerabilityAlertSource, true>
+  >;
 
   bumpPackageVersion?(
     content: string,
@@ -459,13 +551,20 @@ export interface ManagerApiBase extends ModuleApi {
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
+  /**
+   * Whether the package manager enforces the minimum release age itself when regenerating the lock file for lock file maintenance.
+   */
+  enforcesMinimumReleaseAge?(
+    config: UpdateArtifactsConfig,
+  ): MaybePromise<boolean>;
+
   updateArtifacts?(
     updateArtifact: UpdateArtifact,
   ): MaybePromise<UpdateArtifactsResult[] | null>;
 
   updateDependency?(
     updateDependencyConfig: UpdateDependencyConfig,
-  ): MaybePromise<string | null>;
+  ): MaybePromise<string | UpdateDependencyResult | null>;
 
   updateLockedDependency?(
     config: UpdateLockedConfig,

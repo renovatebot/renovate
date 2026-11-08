@@ -37,6 +37,10 @@ In short: users create discussions, and when it's clear what we need to do, the 
 
 - If it's an easy issue for somebody new to Renovate to help us with: apply the `good first issue` label
 - If we need outside help on the issue, apply the `help wanted` label
+  - This is not a promise to merge the first PR that solves the issue, and we may need to confirm the scope and intent first
+  - If a contributor asked to be assigned, but hasn't heard back from a maintainer, and raises a PR anyway, it's fine to close the PR without reviewing it.
+    Apply the `auto:discussion-first` label, and review the PR once the scope and intent are confirmed
+  - Be especially careful with first-time contributors working on long-standing issues in Renovate's backlog
 
 ## What a triagist is allowed to do
 
@@ -63,6 +67,8 @@ All issues should have labels attached to them.
 Read the [issue-labeling guide](./issue-labeling.md) to get all the necessary info.
 
 In general, make a good-faith effort to label issues correctly.
+
+When applying a `bucket:*` label, use the [bucket definitions](./bucket-definitions.md) to tell adjacent buckets apart: each one gives a one-line test plus worked examples and near-misses.
 
 ### Closing issues
 

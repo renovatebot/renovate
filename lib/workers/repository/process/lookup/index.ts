@@ -28,6 +28,7 @@ import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { safeStringify } from '../../../../util/stringify.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
+import { withoutUrlCredentials } from '../../../../util/url.ts';
 import { calculateAbandonment } from './abandonment.ts';
 import { groupReleasesIntoBuckets } from './bucket.ts';
 import { getNewestMatchingVersion, resolveCurrentVersion } from './current.ts';
@@ -120,9 +121,10 @@ export async function lookupUpdates(
     }
     if (!getDatasourceFor(config.datasource)) {
       res.skipReason = 'invalid-config';
+      const packageName = withoutUrlCredentials(config.packageName);
       res.warnings.push({
-        topic: config.packageName,
-        message: `Unknown datasource "${config.datasource}" for package ${config.packageName}`,
+        topic: packageName,
+        message: `Unknown datasource "${config.datasource}" for package ${packageName}`,
       });
       return Result.ok(res);
     }
@@ -169,9 +171,10 @@ export async function lookupUpdates(
 
       if (lookupError) {
         // If dependency lookup fails then warn and return
+        const packageName = withoutUrlCredentials(config.packageName);
         const warning: ValidationMessage = {
-          topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
+          topic: packageName,
+          message: `Failed to look up ${config.datasource} package ${packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -246,24 +249,29 @@ export async function lookupUpdates(
       if (config.followTag) {
         const taggedVersion = dependency.tags?.[config.followTag];
         if (!taggedVersion) {
+          const packageName = withoutUrlCredentials(config.packageName);
           res.warnings.push({
-            topic: config.packageName,
-            message: `Can't find version with tag ${config.followTag} for ${config.datasource} package ${config.packageName}`,
+            topic: packageName,
+            message: `Can't find version with tag ${config.followTag} for ${config.datasource} package ${packageName}`,
           });
           return Result.ok(res);
         }
-        allVersions = allVersions.filter(
-          (v) =>
-            v.version === taggedVersion ||
-            (v.version === compareValue &&
-              versioningApi.isGreaterThan(taggedVersion, compareValue)),
-        );
+        allVersions = allVersions.filter((v) => {
+          if (v.version === taggedVersion) {
+            return true;
+          }
+          return (
+            v.version === compareValue &&
+            versioningApi.isGreaterThan(taggedVersion, compareValue)
+          );
+        });
       }
 
       const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
       // Check that existing constraint can be satisfied
+      const restrictsToRange = inRangeOnlyStrategy || config.rollbackPrs;
       const allSatisfyingVersions =
-        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
+        restrictsToRange && !unconstrainedValue
           ? allVersions.filter((v) =>
               // TODO #22198
               versioningApi.matches(v.version, compareValue!),
@@ -279,12 +287,13 @@ export async function lookupUpdates(
         const rollback = getRollbackUpdate(config, allVersions, versioningApi);
         // istanbul ignore if
         if (!rollback) {
+          const packageName = withoutUrlCredentials(config.packageName);
           res.warnings.push({
-            topic: config.packageName,
+            topic: packageName,
             // TODO: types (#22198)
             message: `Can't find version matching ${compareValue!} for ${
               config.datasource
-            } package ${config.packageName}`,
+            } package ${packageName}`,
           });
           return Result.ok(res);
         }

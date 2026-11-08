@@ -103,6 +103,8 @@ interface CreateSimpleGitOptions {
   env?: ExtraEnv;
   authentication?: {
     hostTypes?: readonly string[];
+    /** the URL of the cloned repository: adds the credentials which `detachUrlCredentials()` registered for it with one of `hostTypes` */
+    url?: string;
   };
 }
 
@@ -132,7 +134,11 @@ export function createSimpleGit({
     },
   });
   const gitEnv = authentication
-    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+    ? getGitEnvironmentVariables(
+        childEnv,
+        authentication.hostTypes,
+        authentication.url,
+      )
     : childEnv;
   return simpleGit({
     ...simpleGitConfig(),
@@ -1199,7 +1205,10 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(branchName: string): Promise<void> {
+export async function mergeToLocal(
+  branchName: string,
+  { localBranch = false }: { localBranch?: boolean } = {},
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1222,6 +1231,9 @@ export async function mergeToLocal(branchName: string): Promise<void> {
         'mergeToLocal(): merging virtual branch',
       );
       await git.merge([ref]);
+    } else if (localBranch) {
+      logger.debug(`mergeToLocal(): merging local branch ${branchName}`);
+      await git.merge([`refs/heads/${branchName}`]);
     } else {
       await fetchRevSpec(branchName);
       await gitRetry(() => git.merge(['FETCH_HEAD']));
