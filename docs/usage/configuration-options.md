@@ -3111,6 +3111,7 @@ This only applies when used with [`minimumReleaseAge`](#minimumreleaseage).
 
 Use this option to set a lower bound for the minimum release age which Renovate passes to package managers.
 Renovate passes the larger of `minimumReleaseAgePackageManager` and the [`minimumReleaseAge`](#minimumreleaseage) of the repository or manager config.
+For lock file maintenance, Renovate compares it with the `minimumReleaseAge` of [`lockFileMaintenance`](#lockfilemaintenance) instead.
 This option only has an effect if [`minimumReleaseAgePackageManagerSync`](#minimumreleaseagepackagemanagersync) is `true`.
 
 Renovate passes the value to these package managers:

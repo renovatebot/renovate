@@ -161,13 +161,13 @@ describe('util/minimum-release-age', () => {
         ).toBeNull();
       });
 
-      it('ignores minimumReleaseAgePackageManager', () => {
+      it('returns null with minimumReleaseAgePackageManager', () => {
         expect(
           calculate(
             [{ ...offUpdate, minimumReleaseAgePackageManager: '4 weeks' }],
             { minimumReleaseAge: '1 week' },
           ),
-        ).toBe(toMs('1 week'));
+        ).toBeNull();
       });
     });
 
