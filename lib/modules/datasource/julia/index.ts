@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
 import {
   privateCacheDir,
   readCacheFile,
@@ -83,6 +84,26 @@ export class JuliaDatasource extends Datasource {
       return null;
     }
 
+    // A cloned registry may be private, so its releases are cached only with
+    // `cachePrivatePackages`.
+    return withCache(
+      {
+        namespace: `datasource-${JuliaDatasource.id}`,
+        key: buildCacheKey(registryUrl, packageName),
+        public: false,
+        fallback: true,
+      },
+      () => JuliaDatasource.getClonedReleases(registryUrl, packageName),
+    );
+  }
+
+  /**
+   * Returns a package's releases from a clone of the registry.
+   */
+  private static async getClonedReleases(
+    registryUrl: string,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
     const clonePath = await JuliaDatasource.cloneRegistry(registryUrl);
     if (!clonePath) {
       return null;

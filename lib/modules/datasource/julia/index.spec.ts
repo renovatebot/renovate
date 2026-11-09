@@ -8,6 +8,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { JuliaDatasource } from './index.ts';
@@ -243,6 +244,38 @@ describe('modules/datasource/julia/index', () => {
       }
       expect(clone).toHaveBeenCalledTimes(1);
     });
+
+    it.each`
+      cachePrivatePackages | clones
+      ${false}             | ${2}
+      ${true}              | ${1}
+    `(
+      'clones for the next repository unless cachePrivatePackages is set: $cachePrivatePackages',
+      async ({ cachePrivatePackages, clones }) => {
+        GlobalConfig.set({
+          cacheDir: upath.join(tmpDir!.path, 'cache'),
+          cachePrivatePackages,
+        });
+        await packageCache.init({
+          cacheDir: upath.join(tmpDir!.path, 'package-cache'),
+        });
+        const clone = mockClone(vi.fn().mockResolvedValue(exampleBlame));
+        const config = {
+          datasource,
+          packageName: 'Example',
+          registryUrls: [registryUrl],
+        };
+
+        const first = await getPkgReleases(config);
+        // The next repository starts with an empty memory cache.
+        memCache.init();
+        const second = await getPkgReleases(config);
+        await packageCache.cleanup({});
+
+        expect(second).toEqual(first);
+        expect(clone).toHaveBeenCalledTimes(clones);
+      },
+    );
 
     it('clones an SSH registry URL without host rule credentials', async () => {
       const sshRegistryUrl = 'git@example.com:Registry.git';
