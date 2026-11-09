@@ -47,3 +47,5 @@ For example, to group the updates of test dependencies:
 The default `rangeStrategy` is `widen`, which adds a specifier for the new release, as CompatHelper and dependabot do: `"0.10, 0.11"` with 0.12.1 becomes `"0.10, 0.11, 0.12"`.
 
 The manager updates `Project.toml` only, not `Manifest.toml`.
+
+With [`bumpVersion`](../../../configuration-options.md#bumpversion), it also increments the project's `version`.

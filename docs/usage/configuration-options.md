@@ -522,6 +522,7 @@ Currently, this config option only works with these managers:
 
 - `cargo`
 - `helmv3`
+- `julia`
 - `npm`
 - `nuget`
 - `maven`
