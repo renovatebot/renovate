@@ -452,6 +452,7 @@ export async function generateInstallCommands(
     }
     for (const { toolName, toolVersion } of resolvedConstraints) {
       if (memoize) {
+        const { parent }: ToolMetadata = tools[toolName];
         const cacheKey = buildCacheKey('containerbase-active', toolName);
         // a tool with a parent is installed per active parent version (e.g. one virtualenv per python version)
         const parentActive = isToolName(parent)
