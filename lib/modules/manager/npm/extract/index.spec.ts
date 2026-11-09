@@ -234,6 +234,27 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.npmrc).toBe('config-npmrc');
     });
 
+    it('omits npmrc if the .npmrc cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, configFile): Promise<string | null> => {
+          if (packageFile === 'package.json' && configFile === '.npmrc') {
+            return Promise.resolve('.npmrc');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { ...defaultExtractConfig, npmrc: 'config-npmrc' },
+      );
+
+      expect(res).not.toHaveProperty('npmrc');
+      expect(res?.managerData?.npmrcFileName).toBe('.npmrc');
+    });
+
     it('uses config.npmrc if .npmrc does exist but npmrcMerge=false', async () => {
       fs.findLocalSiblingOrParent.mockImplementation(
         (packageFile, configFile): Promise<string | null> => {
@@ -1793,7 +1814,6 @@ describe('modules/manager/npm/extract/index', () => {
             yarnLock: undefined,
             yarnZeroInstall: false,
           },
-          npmrc: undefined,
           packageFile: 'package.json',
           packageFileVersion: '1.0.0',
           skipInstalls: true,

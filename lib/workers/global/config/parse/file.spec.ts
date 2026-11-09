@@ -4,6 +4,7 @@ import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { expect } from 'vitest';
 import { logger } from '../../../../logger/index.ts';
 import customConfig from './__fixtures__/config.cjs';
@@ -86,10 +87,6 @@ describe('workers/global/config/parse/file', () => {
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
       await fs.promises.unlink(configFile);
-    });
-
-    it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
-      await expect(file.getConfig({})).resolves.toBeDefined();
     });
 
     it.each([
@@ -181,15 +178,34 @@ describe('workers/global/config/parse/file', () => {
       await fs.promises.unlink(configFile);
     });
 
-    it('skips an unreadable default config file', async () => {
-      fsPathExistsSpy.mockResolvedValueOnce(true as never);
+    describe('default config file', () => {
+      let cwdSpy: MockInstance<typeof process.cwd>;
 
-      const res = await file.getConfig({});
+      // resolve the default `config.js` in a directory without such a file
+      beforeEach(() => {
+        cwdSpy = vi
+          .spyOn(process, 'cwd')
+          .mockReturnValue(upath.join(tmp.path, 'no-config'));
+      });
 
-      expect(res).toEqual({});
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Error reading or parsing file - skipping',
-      );
+      afterEach(() => {
+        cwdSpy.mockRestore();
+      });
+
+      it('returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
+        await expect(file.getConfig({})).resolves.toEqual({});
+      });
+
+      it('skips an unreadable default config file', async () => {
+        fsPathExistsSpy.mockResolvedValueOnce(true as never);
+
+        const res = await file.getConfig({});
+
+        expect(res).toEqual({});
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Error reading or parsing file - skipping',
+        );
+      });
     });
 
     it('exports env variables to environment from processEnv object', async () => {

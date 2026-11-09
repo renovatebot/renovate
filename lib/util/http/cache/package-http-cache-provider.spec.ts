@@ -321,6 +321,123 @@ describe('util/http/cache/package-http-cache-provider', () => {
     });
   });
 
+  it('persists only the headers the cache and its callers read', async () => {
+    const cacheProvider = createCacheProvider();
+    httpMock
+      .scope(url)
+      .get('')
+      .reply(200, 'fetched response', {
+        ...publicCacheHeaders,
+        'set-cookie': 'session=secret',
+        'x-session-token': 'also-secret',
+      });
+
+    const res = await http.getText(url, { cacheProvider });
+
+    // the caller still gets the complete response
+    expect(res.headers).toMatchObject({
+      ...publicCacheHeaders,
+      'set-cookie': ['session=secret'],
+      'x-session-token': 'also-secret',
+    });
+    expect(cache[url]).toEqual({
+      etag: 'foobar',
+      lastModified: undefined,
+      httpResponse: {
+        statusCode: 200,
+        headers: { etag: 'foobar', 'cache-control': 'max-age=180, public' },
+        body: 'fetched response',
+      },
+      timestamp: expect.any(String),
+    });
+  });
+
+  it('serves and persists an existing entry without the headers it no longer keeps', async () => {
+    mockTime('2024-06-15T00:14:59.999Z');
+    cache[url] = {
+      etag: 'etag-value',
+      httpResponse: {
+        statusCode: 200,
+        headers: {
+          etag: 'etag-value',
+          'set-cookie': ['session=secret'],
+          'x-session-token': 'also-secret',
+        },
+        body: 'cached response',
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = createCacheProvider();
+
+    const res = await http.getText(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
+    expect(res.headers).toEqual({ etag: 'etag-value' });
+    expect(packageCache.setWithRawTtl).toHaveBeenCalledOnce();
+    expect(cache[url]).toEqual({
+      etag: 'etag-value',
+      httpResponse: {
+        statusCode: 200,
+        cached: true,
+        headers: { etag: 'etag-value' },
+        body: 'cached response',
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    });
+  });
+
+  it('does not persist an existing entry which keeps only the headers it should', async () => {
+    mockTime('2024-06-15T00:14:59.999Z');
+    cache[url] = {
+      etag: 'etag-value',
+      httpResponse: {
+        statusCode: 200,
+        headers: { etag: 'etag-value' },
+        body: 'cached response',
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = createCacheProvider();
+
+    const res = await http.getText(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+  });
+
+  it('reduces the headers of an existing entry when refreshing after 304', async () => {
+    mockTime('2024-06-15T00:15:00.000Z');
+    cache[url] = {
+      etag: 'etag-value',
+      httpResponse: {
+        statusCode: 200,
+        headers: {
+          etag: 'etag-value',
+          'set-cookie': ['session=secret'],
+          'x-session-token': 'also-secret',
+        },
+        body: 'cached response',
+      },
+      timestamp: '2024-06-15T00:00:00.000Z',
+    };
+    const cacheProvider = createCacheProvider();
+    httpMock.scope(url).get('').reply(304);
+
+    const res = await http.getText(url, { cacheProvider });
+
+    expect(res.body).toBe('cached response');
+    expect(cache[url]).toEqual({
+      etag: 'etag-value',
+      httpResponse: {
+        statusCode: 200,
+        cached: true,
+        headers: { etag: 'etag-value' },
+        body: 'cached response',
+      },
+      timestamp: expect.any(String),
+    });
+  });
+
   describe('HEAD requests', () => {
     it('handles cache miss for HEAD request', async () => {
       const cacheProvider = createCacheProvider();

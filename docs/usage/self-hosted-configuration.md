@@ -832,6 +832,7 @@ Before the first commit in a repository, Renovate will:
 
 1. Run `gpg import` (if you haven't before) when using PGP
 1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
+1. Run `git config push.gpgSign if-asked` when using PGP with Gerrit
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
@@ -881,10 +882,19 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+!!! note
+  Renovate applies your own `hostRules`, `internalHostAccess`, `platform` and `endpoint` when it fetches `globalExtends` presets.
+  A `globalExtends` preset on an internal host is judged like any other preset, so a scoped `allowInternal` grant permits it.
+  The `hostRules`, `internalHostAccess` and `secrets` set inside a `globalExtends` preset do not apply when Renovate fetches that preset, or the presets it extends.
+
 !!! warning
-  `globalExtends` presets can't be private.
-  When Renovate resolves `globalExtends` it does not fully process the configuration.
-  This means that Renovate does not have the authentication it needs to fetch private things.
+  Renovate resolves `globalExtends` before it initializes the platform, so it does not have the platform `token` yet.
+  To fetch a private `globalExtends` preset, including a `local>` preset, add a `hostRules` entry with the credentials for its host.
+
+## `goEnvFromHostRules`
+
+Set to `true` to derive the `GOPROXY`, `GONOPROXY` and `GONOSUMDB` environment variables from your host rules, if you have not set them yourself.
+Read the [Go Modules docs](./golang.md#deriving-go-environment-variables-from-host-rules) to learn more.
 
 ## `hostRules`
 

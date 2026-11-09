@@ -15,6 +15,7 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _githubActionsArtifacts from '../../../../modules/manager/github-actions/artifacts.ts';
+import * as _managers from '../../../../modules/manager/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
@@ -53,10 +54,22 @@ import * as _schedule from './schedule.ts';
 
 vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');
-vi.mock('./check-existing.ts');
-vi.mock('./reuse.ts');
+// only mock the functions which reach out to the platform, the pure decisions
+// of these modules are exercised through `processBranch()` itself
+vi.mock('./check-existing.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _checkExisting>()),
+  prAlreadyExisted: vi.fn(),
+}));
+vi.mock('./reuse.ts', async (importOriginal) => ({
+  ...(await importOriginal<typeof _reuse>()),
+  shouldReuseExistingBranch: vi.fn(),
+}));
 vi.mock('../../../../modules/manager/github-actions/artifacts.ts');
 vi.mock('../../../../modules/manager/npm/post-update/index.ts');
+vi.mock('../../../../modules/manager/index.ts', async (importOriginal) => ({
+  ...(await importOriginal()),
+  enforcesMinimumReleaseAge: vi.fn(),
+}));
 vi.mock('./automerge.ts');
 vi.mock('./commit.ts');
 vi.mock('../pr/index.ts');
@@ -75,6 +88,7 @@ const checkExisting = vi.mocked(_checkExisting);
 const reuse = vi.mocked(_reuse);
 const npmPostExtract = vi.mocked(_npmPostExtract);
 const githubActionsArtifacts = vi.mocked(_githubActionsArtifacts);
+const managers = vi.mocked(_managers);
 const automerge = vi.mocked(_automerge);
 const commit = vi.mocked(_commit);
 const mergeConfidence = vi.mocked(_mergeConfidence);
@@ -298,6 +312,79 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    describe('minimumReleaseAgeExtracted', () => {
+      it('skips branch if the release is missing releaseTimestamp', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            releaseTimestamp: undefined,
+            minimumReleaseAge: null,
+            minimumReleaseAgeExtracted: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toEqual({
+          branchExists: false,
+          prNo: undefined,
+          result: 'pending',
+        });
+        expect(managers.enforcesMinimumReleaseAge).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('lock file maintenance with minimumReleaseAge set', () => {
+      it('does not skip branch if the package manager enforces the minimum release age', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        const upgrade = partial<BranchUpgradeConfig>({
+          manager: 'some-manager',
+          packageFile: 'package.json',
+          isLockFileMaintenance: true,
+          updateType: 'lockFileMaintenance',
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBehaviour: 'timestamp-required',
+        });
+        config.upgrades = [upgrade];
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(true);
+        scm.isBranchModified.mockResolvedValueOnce(false);
+
+        await branchWorker.processBranch(config);
+
+        expect(managers.enforcesMinimumReleaseAge).toHaveBeenCalledWith(
+          'some-manager',
+          upgrade,
+        );
+        expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      });
+
+      it('skips branch if the package manager does not enforce the minimum release age', async () => {
+        schedule.isScheduledNow.mockReturnValueOnce(true);
+        config.prCreation = 'not-pending';
+        config.upgrades = partial<BranchUpgradeConfig>([
+          {
+            manager: 'some-manager',
+            isLockFileMaintenance: true,
+            updateType: 'lockFileMaintenance',
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeBehaviour: 'timestamp-required',
+          },
+        ]);
+        managers.enforcesMinimumReleaseAge.mockResolvedValueOnce(false);
+
+        const res = await branchWorker.processBranch(config);
+
+        expect(res).toEqual({
+          branchExists: false,
+          prNo: undefined,
+          result: 'pending',
+        });
+      });
+    });
+
     it('skips branch if minimumConfidence not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
@@ -340,14 +427,39 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
       scm.branchExists.mockResolvedValue(true);
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          state: 'open',
-        }),
-      );
+      const branchPr = partial<Pr>({
+        state: 'open',
+      });
+      platform.getBranchPr.mockResolvedValueOnce(branchPr);
       scm.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
-      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        branchPr,
+      );
+    });
+
+    it('passes the fetched branch PR to the branch automerge', async () => {
+      const branchPr = partial<Pr>({ number: 42, state: 'open' });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(branchPr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({ updatedPackageFiles: [] }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
+
+      await branchWorker.processBranch(config);
+
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledExactlyOnceWith(
+        expect.anything(),
+        branchPr,
+      );
     });
 
     it('skips branch if closed major PR found', async () => {
@@ -1574,6 +1686,66 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it('removes URL credentials from the compiled commit body', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitMessage: 'Update dependency',
+        commitBody: 'Updates {{{depName}}}',
+        depName: 'https://user:secret@git.example.com/org/repo',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitMessage:
+            'Update dependency\n\nUpdates https://git.example.com/org/repo',
+        }),
+      );
+    });
+
+    it('removes URL credentials from the compiled commit trailers', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: ['Updated-dependency: {{{depName}}}'],
+        depName: 'https://user:secret@git.example.com/org/repo',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: [
+            'Updated-dependency: https://git.example.com/org/repo',
+          ],
+        }),
+      );
+    });
+
     it('drops invalid commit trailers after template compilation', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -1607,6 +1779,41 @@ describe('workers/repository/update/branch/index', () => {
       );
       expect(logger.warn).toHaveBeenCalledWith(
         { invalid: ['Signed-off-by: '] },
+        'Ignoring invalid commit trailers (must be a single-line Key: value)',
+      );
+    });
+
+    it('compiles commit trailers against the commit message including the body', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitMessage: 'Update dependency',
+        commitBody: 'Some body',
+        commitTrailers: ['X-Commit: {{{commitMessage}}}', 'Static: kept'],
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      // the body makes the trailer multi-line, so it is dropped
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitMessage: 'Update dependency\n\nSome body',
+          commitTrailers: ['Static: kept'],
+        }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { invalid: ['X-Commit: Update dependency\n\nSome body'] },
         'Ignoring invalid commit trailers (must be a single-line Key: value)',
       );
     });

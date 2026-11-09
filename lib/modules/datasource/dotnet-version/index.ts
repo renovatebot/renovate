@@ -1,3 +1,4 @@
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
 import * as p from '../../../util/promises.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
@@ -69,7 +70,7 @@ export class DotnetVersionDatasource extends Datasource {
         key: config.packageName,
         ttlMinutes: 1440,
         fallback: true,
-        cacheable: true,
+        public: true,
       },
       () => this.fetchReleases(config),
     );
@@ -81,12 +82,7 @@ export class DotnetVersionDatasource extends Datasource {
   ): Promise<Release[]> {
     const schema =
       packageName === 'dotnet-sdk' ? DotnetSdkReleases : DotnetRuntimeReleases;
-    try {
-      const { body } = await this.http.getJson(releaseUrl, schema);
-      return body;
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
+    return this.fetchJson(releaseUrl, schema);
   }
 
   getChannelReleases(
@@ -95,9 +91,9 @@ export class DotnetVersionDatasource extends Datasource {
   ): Promise<Release[]> {
     return this.cached(
       {
-        key: `${releaseUrl}:${packageName}`,
+        key: buildCacheKey(releaseUrl, packageName),
         ttlMinutes: 1440,
-        cacheable: true,
+        public: true,
       },
       () => this.fetchChannelReleases(releaseUrl, packageName),
     );

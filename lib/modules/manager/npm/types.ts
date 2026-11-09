@@ -1,3 +1,5 @@
+import type { NpmPackage } from './extract/types.ts';
+
 interface LockFilePackage {
   name?: string;
   version?: string;
@@ -80,18 +82,25 @@ export interface NpmLockFiles {
   npmLock?: string;
 }
 
-export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
+export interface NpmManagerData extends NpmLockFiles {
   hasPackageManager?: boolean;
+  key?: string;
+  packageKey?: string;
   packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;
+  workspaces?: NpmPackage['workspaces'];
   workspacesPackages?: string[] | string;
   devEnginesIndex?: number;
   npmrcFileName?: string | null;
+  repoNpmrc?: SanitizedRepoNpmrc;
+  /** the file name of the repository `.npmrc`, set instead of `repoNpmrc` when it carries credentials, so that it is read from disk again when the cached package file is used */
+  uncachedNpmrcFileName?: string;
 }
 
-/** the repository `.npmrc` after sanitizing */
+/** the repository `.npmrc` after sanitizing, from which `npmrc` can be rebuilt together with the configured one */
 export interface SanitizedRepoNpmrc {
+  fileName: string;
   content: string;
   detectedLineEnding: DetectedNpmrcLineEnding | null;
 }
@@ -99,6 +108,7 @@ export interface SanitizedRepoNpmrc {
 export interface NpmrcResult {
   npmrc: string | undefined;
   npmrcFileName: string | null;
+  repoNpmrc?: SanitizedRepoNpmrc;
 }
 
 export interface NpmrcConfig {

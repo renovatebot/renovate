@@ -1,6 +1,9 @@
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import { addRepositoryStatus } from '../../instrumentation/reporting.ts';
 import { processResult } from './result.ts';
+
+vi.mock('../../instrumentation/reporting.ts');
 
 let config: RenovateConfig;
 
@@ -31,6 +34,10 @@ describe('workers/repository/result', () => {
         onboarded: false,
         exitCode: 0,
       });
+      expect(addRepositoryStatus).toHaveBeenCalledExactlyOnceWith(
+        config,
+        'onboarding',
+      );
     });
 
     it.each`

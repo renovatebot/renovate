@@ -2,8 +2,8 @@ import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
-import type { PushResult } from 'simple-git';
-import { simpleGit } from 'simple-git';
+import type { PushResult, SimpleGit as SimpleGitApi } from 'simple-git';
+import { simpleGit as createGit } from 'simple-git';
 import tmp from 'tmp-promise';
 import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -43,6 +43,22 @@ const modifiedCache = vi.mocked(_modifiedCache);
 const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
 const execCommon = vi.mocked(_execCommon);
+
+// The test scripts isolate git with `GIT_*` variables, which simple-git removes from the ambient environment unless allowed
+function simpleGit(baseDir?: string): SimpleGitApi {
+  return createGit({
+    baseDir,
+    allowEnvironment: [
+      'GIT_ALLOW_PROTOCOL',
+      'GIT_COMMITTER_DATE',
+      'GIT_COMMITTER_EMAIL',
+      'GIT_CONFIG_GLOBAL',
+      'GIT_CONFIG_SYSTEM',
+    ],
+    unsafe: { allowUnsafeConfigPaths: true },
+  });
+}
+
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
@@ -201,7 +217,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
         const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
 
         git.createSimpleGit({
-          authentication: { hostTypes: ['git-refs'] },
+          authentication: {
+            hostTypes: ['git-refs'],
+            url: 'https://git.example.com/repo.git',
+          },
         });
 
         expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
@@ -211,6 +230,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
             GIT_CONFIG_VALUE_0: 'existing-value',
           }),
           ['git-refs'],
+          'https://git.example.com/repo.git',
         );
         expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
       });
@@ -986,6 +1006,35 @@ describe('util/git/index', { timeout: 30000 }, () => {
         expect(pushSpy).not.toHaveBeenCalled();
       });
 
+      it('should merge a local branch without fetching from origin', async () => {
+        await git.prepareCommit({
+          branchName: 'renovate/unpushed_branch',
+          message: 'unpushed commit',
+          files: [
+            { type: 'addition', path: 'unpushed_file', contents: 'local' },
+          ],
+        });
+        // Reset working tree back to default branch so the file is not present yet
+        const local = simpleGit(tmpDir.path);
+        await local.checkout(defaultBranch);
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
+        ).resolves.toBeFalse();
+        const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+        const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+        await git.mergeToLocal('renovate/unpushed_branch', {
+          localBranch: true,
+        });
+
+        await expect(
+          fs.pathExists(`${tmpDir.path}/unpushed_file`),
+        ).resolves.toBeTrue();
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(pushSpy).not.toHaveBeenCalled();
+      });
+
       it('should throw', async () => {
         await expect(git.mergeToLocal('not_found')).rejects.toThrow(
           "fatal: couldn't find remote ref not_found",
@@ -1248,6 +1297,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     // The read-only `getFileList()` test is in the shared-clone describe above.
     describe('getFileList()', () => {
       it('should exclude submodules', async () => {
+        auth.getGitEnvironmentVariables.mockReturnValue({
+          GIT_ALLOW_PROTOCOL: 'file',
+        });
         const repo = simpleGit(base.path);
         await repo.submoduleAdd(base.path, 'submodule');
         await repo.submoduleAdd(base.path, 'file');
@@ -1887,6 +1939,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
 
       it('should fail clone ssh submodule', async () => {
+        auth.getGitEnvironmentVariables.mockReturnValue({});
         const repo = simpleGit(base.path);
         await fs.writeFile(
           `${base.path}/.gitmodules`,

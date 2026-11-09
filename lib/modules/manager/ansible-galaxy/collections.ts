@@ -84,7 +84,6 @@ function handleGitDep(
 
 function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.datasource = GalaxyCollectionDatasource.id;
-  dep.depName = dep.managerData.name;
   dep.registryUrls = dep.managerData.source
     ? /* istanbul ignore next: should have test */ [dep.managerData.source]
     : [];
@@ -93,9 +92,13 @@ function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
 
 function finalize(dependency: AnsibleGalaxyPackageDependency): void {
   const dep = dependency;
-  dep.depName = dep.managerData.name;
+  const { name } = dep.managerData;
+  if (!name) {
+    dep.skipReason = 'invalid-name';
+    return;
+  }
 
-  const name = dep.managerData.name;
+  dep.depName = name;
   const nameMatch = nameMatchRegex.exec(name);
 
   // use type if defined
@@ -115,9 +118,8 @@ function finalize(dependency: AnsibleGalaxyPackageDependency): void {
         handleGitDep(dep, nameMatch);
         break;
       }
-      if (galaxyDepRegex.exec(dep.managerData.name)) {
+      if (galaxyDepRegex.exec(name)) {
         dep.datasource = GalaxyCollectionDatasource.id;
-        dep.depName = dep.managerData.name;
         break;
       }
       dep.skipReason = 'no-source-match';
@@ -141,7 +143,6 @@ export function extractCollections(lines: string[]): PackageDependency[] {
       const dep: AnsibleGalaxyPackageDependency = {
         depType: 'galaxy-collection',
         managerData: {
-          name: null,
           version: null,
           type: null,
           source: null,

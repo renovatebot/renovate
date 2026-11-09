@@ -96,6 +96,7 @@ If the configuration option lacks a `env` field, the config option also lacks a 
 A special case for Environment config is the `RENOVATE_CONFIG` "meta" config option.
 The `RENOVATE_CONFIG` option accepts a stringified full config, for example: `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
+For mergeable options, like `hostRules`, `packageRules` or `registryAliases`, the values are combined instead: lists are appended to the list in `RENOVATE_CONFIG`, and objects are merged into the object in `RENOVATE_CONFIG`, with the Environment config variable winning for keys that exist in both.
 
 ##### Environment variable examples
 

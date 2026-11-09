@@ -1,7 +1,9 @@
 import { Marshal } from '@qnighy/marshal';
 import type { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { Http, HttpError } from '../../../util/http/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { Http } from '../../../util/http/index.ts';
+import { isServerError } from '../../../util/http/status.ts';
 import { AsyncResult, Result } from '../../../util/result.ts';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url.ts';
 import * as rubyVersioning from '../../versioning/ruby/index.ts';
@@ -16,11 +18,8 @@ function unlessServerSide<
   T extends NonNullable<unknown>,
   E extends NonNullable<unknown>,
 >(err: E, cb: () => AsyncResult<T, E>): AsyncResult<T, E> {
-  if (err instanceof HttpError && err.response?.statusCode) {
-    const code = err.response.statusCode;
-    if (code >= 500 && code <= 599) {
-      return AsyncResult.err(err);
-    }
+  if (isServerError(err)) {
+    return AsyncResult.err(err);
   }
   return cb();
 }
@@ -31,8 +30,7 @@ export class RubygemsDatasource extends Datasource {
   private metadataCache: MetadataCache;
 
   constructor() {
-    super(RubygemsDatasource.id);
-    this.http = new Http(RubygemsDatasource.id);
+    super(RubygemsDatasource.id, new Http(RubygemsDatasource.id));
     this.versionsEndpointCache = new VersionsEndpointCache(this.http);
     this.metadataCache = new MetadataCache(this.http);
   }
@@ -108,10 +106,9 @@ export class RubygemsDatasource extends Datasource {
     const registryHostname = parseUrl(config.registryUrl)?.hostname;
     return this.cached(
       {
-        // TODO: types (#22198)
-        key: `releases:${config.registryUrl!}:${config.packageName}`,
+        key: buildCacheKey('releases', config.registryUrl, config.packageName),
         fallback: true,
-        cacheable: registryHostname === 'rubygems.org',
+        public: registryHostname === 'rubygems.org',
       },
       () => this.fetchReleases(config),
     );

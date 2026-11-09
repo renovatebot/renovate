@@ -61,10 +61,8 @@ export async function checkReconfigureBranch(
   }
 
   // only use valid cached information
-  if (
-    reconfigureCache?.reconfigureBranchSha === branchSha &&
-    (!existingPr || reconfigureCache.extractionSucceeded)
-  ) {
+  const isCacheUsable = !existingPr || reconfigureCache?.extractionSucceeded;
+  if (reconfigureCache?.reconfigureBranchSha === branchSha && isCacheUsable) {
     logger.debug('Skipping validation check as branch sha is unchanged');
     return;
   }
@@ -109,6 +107,7 @@ export async function checkReconfigureBranch(
       config: repoConfig,
     }),
   );
+  newConfig.defaultBranch = config.defaultBranch;
   newConfig.baseBranch = config.defaultBranch;
   newConfig.repoIsOnboarded = true;
   newConfig.errors = [];

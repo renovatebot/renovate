@@ -5,19 +5,23 @@ import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { Dependency, JsonnetFile } from './types.ts';
+import type {
+  Dependency,
+  JsonnetBundlerManagerData,
+  JsonnetFile,
+} from './types.ts';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): PackageFileContent<JsonnetBundlerManagerData> | null {
   logger.trace({ packageFile }, 'jsonnet-bundler.extractPackageFile()');
 
   if (packageFile.includes('vendor/')) {
     return null;
   }
 
-  const deps: PackageDependency[] = [];
+  const deps: PackageDependency<JsonnetBundlerManagerData>[] = [];
   let jsonnetFile: JsonnetFile;
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
@@ -40,7 +44,9 @@ export function extractPackageFile(
   return { deps };
 }
 
-function extractDependency(dependency: Dependency): PackageDependency | null {
+function extractDependency(
+  dependency: Dependency,
+): PackageDependency<JsonnetBundlerManagerData> | null {
   if (!dependency.source.git) {
     return null;
   }

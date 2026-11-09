@@ -60,6 +60,10 @@ function getAutoReplaceTemplate(dep: PackageDependency): string | undefined {
   return template;
 }
 
+function lineIncludes(line: string, value: unknown): boolean {
+  return isString(value) && line.includes(value);
+}
+
 function processDepForAutoReplace(
   dep: PackageDependency,
   lineNumberRanges: number[][],
@@ -69,11 +73,10 @@ function processDepForAutoReplace(
   const lineNumberRangesToReplace: number[][] = [];
   for (const lineNumberRange of lineNumberRanges) {
     for (const lineNumber of lineNumberRange) {
+      const line = lines[lineNumber];
       if (
-        (isString(dep.currentValue) &&
-          lines[lineNumber].includes(dep.currentValue)) ||
-        (isString(dep.currentDigest) &&
-          lines[lineNumber].includes(dep.currentDigest))
+        lineIncludes(line, dep.currentValue) ||
+        lineIncludes(line, dep.currentDigest)
       ) {
         lineNumberRangesToReplace.push(lineNumberRange);
       }
@@ -110,7 +113,7 @@ function processDepForAutoReplace(
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
-export function splitImageParts(currentFrom: string): PackageDependency {
+export function splitImageParts(currentFrom: string): PackageDependency<never> {
   let isVariable = false;
   let cleanedCurrentFrom = currentFrom;
 
@@ -144,7 +147,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
     depName = depTagSplit.join(':');
   }
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<never> = {
     depName,
     packageName: depName,
     currentValue,
@@ -171,10 +174,10 @@ const quayRegex = regEx(/^quay\.io(?::[1-9][0-9]{0,4})?/i);
 /**
  * Extract a Docker dependency from an image reference.
  */
-export function getDep(
+export function getDep<T = never>(
   currentFrom: string | null | undefined,
   options: GetDepOptions = {},
-): PackageDependency {
+): PackageDependency<T> {
   const dep = getDepFromImageRef(
     currentFrom,
     options.specifyReplaceString ?? true,
@@ -192,7 +195,7 @@ function getDepFromImageRef(
   currentFrom: string | null | undefined,
   specifyReplaceString: boolean,
   registryAliases: Record<string, string> | undefined,
-): PackageDependency {
+): PackageDependency<never> {
   if (
     !isString(currentFrom) ||
     !isNonEmptyStringAndNotWhitespace(currentFrom)
@@ -266,10 +269,8 @@ function getDepFromImageRef(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (
-    (dep.depName === 'debian' || dep.depName?.endsWith('/debian')) &&
-    debianVersioning.api.isVersion(dep.currentValue)
-  ) {
+  const isDebian = dep.depName === 'debian' || dep.depName?.endsWith('/debian');
+  if (isDebian && debianVersioning.api.isVersion(dep.currentValue)) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -370,10 +371,11 @@ export function extractPackageFile(
       argsLines[argMatch.groups.name] = [lineNumberInstrStart, lineNumber];
       let argMatchValue = argMatch.groups?.value;
 
-      if (
-        (argMatchValue.startsWith('"') && argMatchValue.endsWith('"')) ||
-        (argMatchValue.startsWith("'") && argMatchValue.endsWith("'"))
-      ) {
+      const isDoubleQuoted =
+        argMatchValue.startsWith('"') && argMatchValue.endsWith('"');
+      const isSingleQuoted =
+        argMatchValue.startsWith("'") && argMatchValue.endsWith("'");
+      if (isDoubleQuoted || isSingleQuoted) {
         argMatchValue = argMatchValue.slice(1, -1);
       }
 

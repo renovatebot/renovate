@@ -28,6 +28,7 @@ import { id as nodeVersioningId } from '../../../../modules/versioning/node/inde
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440/index.ts';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry/index.ts';
+import { id as rezVersioningId } from '../../../../modules/versioning/rez/index.ts';
 import { id as semverVersioningId } from '../../../../modules/versioning/semver/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
@@ -138,6 +139,44 @@ describe('workers/repository/process/lookup/index', () => {
           message: 'Unknown datasource "does not exist" for package some-dep',
         },
       ]);
+    });
+
+    it('removes URL credentials of the package name from the unknown datasource warning', async () => {
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = 'does not exist';
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(warnings).toEqual([
+        {
+          topic: 'https://git.example.com/org/repo',
+          message:
+            'Unknown datasource "does not exist" for package https://git.example.com/org/repo',
+        },
+      ]);
+    });
+
+    it('removes URL credentials of the package name from the lookup failure warning', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = GithubTagsDatasource.id;
+      // a datasource without a result for the package
+      getGithubTags.mockResolvedValueOnce(null);
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(warnings).toEqual([
+        {
+          topic: 'https://git.example.com/org/repo',
+          message:
+            'Failed to look up github-tags package https://git.example.com/org/repo: no-result',
+        },
+      ]);
+      expect(JSON.stringify(warnings)).not.toContain('secret');
     });
 
     it('handles error result from getPkgReleasesWithResult', async () => {
@@ -2983,6 +3022,25 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('copies effectiveDatasource from the datasource result', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'github.com/foo/bar';
+      config.datasource = GoDatasource.id;
+      config.versioning = npmVersioningId;
+      vi.spyOn(GoDatasource.prototype, 'getReleases').mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+        sourceUrl: 'https://github.com/foo/bar',
+        effectiveDatasource: 'github-tags',
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.effectiveDatasource).toBe('github-tags');
+      expect(res.updates).toHaveLength(1);
+    });
+
     it('should return pendingChecks', async () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
@@ -3403,6 +3461,39 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('removes URL credentials of the package name from the digest warning', async () => {
+      config.currentValue = 'v1.0.0';
+      config.currentDigest = 'bla';
+      config.digestOneAndOnly = true;
+      config.packageName = 'https://user:secret@git.example.com/org/repo';
+      config.datasource = GithubTagsDatasource.id;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01' as Timestamp,
+          },
+        ],
+      });
+      const getDigest = vi
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce(null);
+
+      const { warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(getDigest).toHaveBeenCalled();
+      expect(warnings).toEqual([
+        {
+          message:
+            'Could not determine new digest for update (github-tags package https://git.example.com/org/repo)',
+          topic: 'https://git.example.com/org/repo',
+        },
+      ]);
+    });
+
     describe('digest managed externally', () => {
       it('does not create a pinDigest update', async () => {
         config.currentValue = 'v1.0.0';
@@ -3645,6 +3736,41 @@ describe('workers/repository/process/lookup/index', () => {
           packageName: 'my-package',
           compareValue: '1.5.0',
         }),
+        'Unexpected downgrade detected: skipping',
+      );
+    });
+
+    it('keeps an update when the versioning cannot order the values', async () => {
+      // aws-machine-image reports every AMI as greater than any other and
+      // relies on the datasource order instead.
+      config.currentValue = 'ami-0de8f6a2a6d5f4b3c';
+      config.packageName = 'my-ami';
+      config.datasource = CustomDatasource.id;
+      config.versioning = 'aws-machine-image';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'ami-0fe327797e6857051',
+            releaseTimestamp: '2026-01-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-0de8f6a2a6d5f4b3c',
+            releaseTimestamp: '2026-02-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-09903cd4fe0670a06',
+            releaseTimestamp: '2026-03-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([{ newValue: 'ami-09903cd4fe0670a06' }]);
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
         'Unexpected downgrade detected: skipping',
       );
     });
@@ -4757,6 +4883,34 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'maven',
         warnings: [],
       });
+    });
+
+    it('keeps the versionCompatibility variant for vulnerability fixes', async () => {
+      config.currentValue = '33.7.1-jre';
+      config.packageName = 'com.google.guava:guava';
+      config.versioning = mavenVersioningId;
+      config.versionCompatibility =
+        '^(?<version>.+)-(?<compatibility>jre|android)$';
+      config.datasource = MavenDatasource.id;
+      config.isVulnerabilityAlert = true;
+      config.vulnerabilityFixVersion = '33.7.2';
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '33.7.1-android' },
+          { version: '33.7.1-jre' },
+          { version: '33.7.2-android' },
+          { version: '33.7.2-jre' },
+          { version: '33.8.0-android' },
+          { version: '33.8.0-jre' },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, x) => Promise.resolve(x));
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res.updates).toMatchObject([{ newValue: '33.7.2-jre' }]);
     });
 
     it('handles versionCompatibility mismatch', async () => {
@@ -6436,6 +6590,69 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it.each([
+      {
+        setting: 'replacementVersion',
+        rule: { replacementVersion: '3.2.1' },
+      },
+      {
+        setting: 'replacementVersionTemplate',
+        rule: {
+          replacementVersionTemplate:
+            "{{{replace '1.0' '3.2.1' currentValue}}}",
+        },
+      },
+    ])(
+      'preserves the full Rez $setting for a Dockerfile image replacement',
+      async ({ rule }) => {
+        config.manager = 'dockerfile';
+        config.currentValue = '1.0';
+        config.packageName = 'old/image';
+        config.replacementName = 'new/image';
+        config.datasource = DockerDatasource.id;
+        config.versioning = rezVersioningId;
+        config = { ...config, ...rule };
+        getDockerReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.0' }],
+        });
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toEqual([
+          {
+            updateType: 'replacement',
+            newName: 'new/image',
+            newValue: '3.2.1',
+          },
+        ]);
+      },
+    );
+
+    it('keeps Rez precision for an ordinary Dockerfile image update', async () => {
+      config.manager = 'dockerfile';
+      config.currentValue = '1.0';
+      config.packageName = 'old/image';
+      config.datasource = DockerDatasource.id;
+      config.versioning = rezVersioningId;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0' }, { version: '3.2.1' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        expect.objectContaining({
+          newVersion: '3.2.1',
+          newValue: '3.2',
+          updateType: 'major',
+        }),
+      ]);
+    });
+
     it('handles replacements - can template replacement name without a replacement version', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
       config.currentValue = '17.0.0';
@@ -7097,6 +7314,39 @@ describe('workers/repository/process/lookup/index', () => {
         warnings: [],
       });
     });
+
+    it.each`
+      changelogUrl                                     | expected
+      ${'https://user:token@example.com/CHANGELOG.md'} | ${'https://example.com/CHANGELOG.md'}
+      ${undefined}                                     | ${undefined}
+    `(
+      'sets changelogUrl $expected over the dependency one for release changelogUrl $changelogUrl',
+      async ({ changelogUrl, expected }) => {
+        config.currentValue = '8.0.0';
+        config.packageName = 'node';
+        config.datasource = DockerDatasource.id;
+        getDockerReleases.mockResolvedValueOnce({
+          changelogUrl: 'https://example.com/dependency/CHANGELOG.md',
+          releases: [
+            {
+              version: '8.0.0',
+            },
+            {
+              changelogContent: 'testContent',
+              changelogUrl,
+              version: '8.1.0',
+            },
+          ],
+        });
+
+        const res = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(res.changelogContent).toBe('testContent');
+        expect(res.changelogUrl).toBe(expected);
+      },
+    );
 
     it('handles changelog with content for ranges', async () => {
       config.currentValue = '[8.0,8.1)';

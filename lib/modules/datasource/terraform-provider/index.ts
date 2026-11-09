@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import { HttpError } from '../../../util/http/index.ts';
+import { buildCacheKey } from '../../../util/cache/package/key.ts';
+import { isNotFound } from '../../../util/http/status.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
@@ -89,7 +90,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     const repo = TerraformProviderDatasource.getRepository(config);
     return this.cached(
       {
-        key: `getReleases:${url}/${repo}`,
+        key: buildCacheKey('getReleases', url, repo),
         fallback: true,
       },
       () => this.fetchReleases(config),
@@ -330,7 +331,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<TerraformBuild[] | null> {
     return this.cached(
       {
-        key: `getBuilds:${registryURL}/${repository}/${version}`,
+        key: buildCacheKey('getBuilds', registryURL, repository, version),
       },
       () => this.fetchBuilds(registryURL, repository, version),
     );
@@ -360,7 +361,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         );
         return body;
       } catch (err) {
-        if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+        if (!isNotFound(err)) {
           throw err;
         }
       }
@@ -411,7 +412,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<string[] | null> {
     return this.cached(
       {
-        key: `getProviderPackages:${repository}/${version}`,
+        key: buildCacheKey('getProviderPackages', repository, version),
       },
       () => this.fetchProviderPackages(repository, version),
     );
@@ -445,7 +446,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {
     return this.cached(
       {
-        key: `getZipHashes:${zipHashUrl}`,
+        key: buildCacheKey('getZipHashes', zipHashUrl),
       },
       () => this.fetchZipHashes(zipHashUrl),
     );
@@ -469,7 +470,11 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   ): Promise<VersionDetailResponse> {
     return this.cached(
       {
-        key: `getReleaseBackendIndex:${backendLookUpName}/${version}`,
+        key: buildCacheKey(
+          'getReleaseBackendIndex',
+          backendLookUpName,
+          version,
+        ),
       },
       () => this.fetchReleaseBackendIndex(backendLookUpName, version),
     );

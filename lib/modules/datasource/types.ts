@@ -2,6 +2,7 @@ import type {
   ConstraintsFilter,
   CustomDatasourceConfig,
 } from '../../config/types.ts';
+import type { DatasourceName } from '../../datasource-list.generated.ts';
 import type { ModuleApi } from '../../types/index.ts';
 import type {
   AdditionalConstraintName,
@@ -118,6 +119,11 @@ export interface ReleaseResult {
   sourceUrl?: string | null;
   sourceDirectory?: string;
   registryUrl?: string;
+  /**
+   * The datasource which served the lookup when another one was configured,
+   * e.g. `github-tags` for a `go` module hosted on GitHub.
+   */
+  effectiveDatasource?: DatasourceName;
   replacementName?: string;
   replacementVersion?: string;
   lookupName?: string;
@@ -126,6 +132,14 @@ export interface ReleaseResult {
   isAbandoned?: boolean;
   respectLatest?: boolean;
 }
+
+/**
+ * A single tag as returned by a git hosting provider.
+ *
+ * `gitRef` is filled in by the `*-tags` datasource base class, which always
+ * mirrors the tag name.
+ */
+export type GitHostTag = Omit<Release, 'gitRef'>;
 
 export interface PostprocessReleaseConfig {
   packageName: string;
@@ -165,6 +179,12 @@ export type RegistryStrategy =
 export type SourceUrlSupport = 'package' | 'release' | 'none';
 export interface DatasourceApi extends ModuleApi {
   id: string;
+  /**
+   * `newValue` may be `undefined`, for example when only the digest of the
+   * current value is being resolved. Implementations must handle that case
+   * explicitly, for example by resolving the digest of a default branch or
+   * by returning `null`.
+   */
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   /** Return registry URLs for package-specific datasource defaults. */
