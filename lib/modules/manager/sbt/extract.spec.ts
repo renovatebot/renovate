@@ -211,6 +211,34 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it.each`
+      desc                        | header
+      ${'extends a parent'}       | ${'object Version extends Base {'}
+      ${'has braces in its body'} | ${'object Version {\n  def f = {}'}
+    `(
+      'does not resolve versions from a named singleton object that $desc (known limitation)',
+      ({ header }: { header: string }) => {
+        const content = `${header}
+  val example = "0.0.8"
+}
+libraryDependencies += "org.example" % "foo" % Version.example
+`;
+        expect(extractPackageFile(content)).toEqual({
+          deps: [
+            {
+              datasource: 'sbt-package',
+              depName: 'org.example:foo',
+              packageName: 'org.example:foo',
+              currentValue: undefined,
+              registryUrls: [],
+            },
+          ],
+          managerData: { scalaVersion: undefined },
+          packageFileVersion: undefined,
+        });
+      },
+    );
+
     it('skips deps when dotted symbolds do not resolve to anything', () => {
       const content = codeBlock`
         scalaVersion := versions.scala

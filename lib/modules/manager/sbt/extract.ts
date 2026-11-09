@@ -395,6 +395,8 @@ export function extractProxyUrls(
 
 // Extracts `Name.field -> version` entries from `object Name { val field = "version" }` blocks.
 // The `[^{}]*` body pattern naturally skips outer wrapper objects with nested braces.
+// Known limitations: `object X extends Y {` is not matched, and objects whose
+// body contains braces (e.g. `def f = {}`) are skipped entirely.
 function extractNamedSingletonObjectVars(content: string): Vars {
   const vars: Vars = {};
   const objectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
