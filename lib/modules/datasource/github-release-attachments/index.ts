@@ -10,7 +10,7 @@ import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
-import type { DigestConfig } from '../types.ts';
+import type { DigestConfig, Release } from '../types.ts';
 
 function inferHashAlg(digest: string): string {
   switch (digest.length) {
@@ -25,6 +25,16 @@ function inferHashAlg(digest: string): string {
 /** Strips any non-numeric prefix, such as `v`, `v.` or `release-`, from a tag. */
 function tagToVersion(tag: string): string {
   return tag.replace(regEx(/^\D+(?<digit>\d)/), '$<digit>');
+}
+
+/** Finds the tag of the release matching a tag or an extracted version. */
+function findTag(releases: Release[], value: string): string {
+  if (releases.some((r) => r.version === value)) {
+    return value;
+  }
+  // The first tag with that version wins, so repositories with several tag prefixes sharing versions may resolve the wrong one
+  const release = releases.find((r) => tagToVersion(r.version) === value);
+  return release?.version ?? value;
 }
 
 export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
@@ -193,7 +203,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
   /**
    * Attempts to resolve the digest for the specified package.
    *
-   * The `newValue` supplied here should be a valid tag for the GitHub release.
+   * `currentValue` and `newValue` are release tags, or versions taken from tags by `extractVersion`.
    * Requires `currentValue` and `currentDigest`.
    *
    * There may be many assets attached to the release. This function will:
@@ -226,9 +236,13 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
+    const { releases } = await this.getReleases({
+      packageName: repo,
+      registryUrl,
+    });
     const { body: currentRelease } =
       await this.http.getJsonUnchecked<GithubRestRelease>(
-        `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`,
+        `${apiBaseUrl}repos/${repo}/releases/tags/${findTag(releases, currentValue)}`,
       );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
@@ -240,7 +254,7 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     } else {
       const { body: newRelease } =
         await this.http.getJsonUnchecked<GithubRestRelease>(
-          `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`,
+          `${apiBaseUrl}repos/${repo}/releases/tags/${findTag(releases, newValue)}`,
         );
       newDigest = await this.mapDigestAssetToRelease(digestAsset, newRelease);
     }

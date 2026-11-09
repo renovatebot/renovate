@@ -1,11 +1,22 @@
 import { hostRules } from '~test/host-rules.ts';
 import * as githubGraphql from '../../../util/github/graphql/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { GithubReleaseAttachmentsDatasource } from './index.ts';
 import { GitHubReleaseAttachmentMocker } from './test/index.ts';
 
 const githubApiHost = 'https://api.github.com';
+
+function mockReleaseTags(...tags: string[]): void {
+  vi.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce(
+    tags.map((version) => ({
+      version,
+      url: `https://github.com/some/dep/releases/tag/${version}`,
+      releaseTimestamp: '2020-03-09T11:00:00Z' as Timestamp,
+    })),
+  );
+}
 
 describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
@@ -123,6 +134,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
     });
 
     it('returns updated digest in new release', async () => {
+      mockReleaseTags(currentValue, 'v1.0.1');
       releaseMock.withDigestFileAsset(
         currentValue,
         `${currentDigest} asset.zip`,
@@ -145,6 +157,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
     // This is awkward, but I found returning `null` in this case to not produce an update
     // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
     it('ignores failures verifying currentDigest', async () => {
+      mockReleaseTags();
       releaseMock.release(currentValue);
       const digest = await getDigest(
         {
@@ -156,6 +169,28 @@ describe('modules/datasource/github-release-attachments/index', () => {
         currentValue,
       );
       expect(digest).toEqual(currentDigest);
+    });
+
+    it('resolves versions taken from tags by extractVersion', async () => {
+      mockReleaseTags('v.0.9.8.1', 'v.0.9.9.0');
+      const oldContent = '1'.repeat(10 * 1024);
+      const newContent = '2'.repeat(10 * 1024);
+      releaseMock.withAssets('v.0.9.8.1', {
+        'USBip-0.9.8.1-x64.exe': oldContent,
+      });
+      releaseMock.withAssets('v.0.9.9.0', {
+        'USBip-0.9.9.0-x64.exe': newContent,
+      });
+      const digest = await getDigest(
+        {
+          datasource: GithubReleaseAttachmentsDatasource.id,
+          packageName,
+          currentValue: '0.9.8.1',
+          currentDigest: toSha256(oldContent),
+        },
+        '0.9.9.0',
+      );
+      expect(digest).toEqual(toSha256(newContent));
     });
   });
 });
