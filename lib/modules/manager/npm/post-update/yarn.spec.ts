@@ -1365,6 +1365,31 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
     );
 
+    it.each`
+      currentValue | newValue    | expected
+      ${'4.9.4'}   | ${'4.10.0'} | ${undefined}
+      ${'4.10.0'}  | ${'4.11.0'} | ${'4320'}
+      ${undefined} | ${'4.11.0'} | ${undefined}
+    `(
+      'passes $expected minutes for a Yarn update from $currentValue to $newValue',
+      async ({ currentValue, newValue, expected }) => {
+        mockYarnFiles();
+
+        const { env } = await generateLockFile([
+          update,
+          {
+            manager: 'npm',
+            depName: 'yarn',
+            depType: 'packageManager',
+            currentValue,
+            newValue,
+          },
+        ]);
+
+        expect(env.YARN_NPM_MINIMAL_AGE_GATE).toBe(expected);
+      },
+    );
+
     it('passes the minimumReleaseAge of lock file maintenance and preapproves nothing', async () => {
       mockYarnFiles();
 
