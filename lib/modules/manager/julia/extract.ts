@@ -3,7 +3,9 @@ import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { JuliaGeneralMetadataDatasource } from '../../datasource/julia-general-metadata/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { getLockedVersions } from './locked-version.ts';
 import { JuliaProject } from './schema.ts';
+import { getLockedVersionsManifest, getManifestFileNames } from './utils.ts';
 
 const uuidRegex = regEx(
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
@@ -40,10 +42,10 @@ const unregisteredStdlibs = new Set([
   'UUIDs',
 ]);
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   const parsed = JuliaProject.safeParse(content);
   if (!parsed.success) {
     logger.debug(
@@ -105,6 +107,28 @@ export function extractPackageFile(
   const result: PackageFileContent = { deps };
   if (version) {
     result.packageFileVersion = version;
+  }
+  const manifestFiles = await getManifestFileNames(
+    packageFile,
+    parsed.data.manifest,
+  );
+  if (manifestFiles.length) {
+    result.lockFiles = manifestFiles;
+  }
+
+  const lockedVersionsManifest = getLockedVersionsManifest(manifestFiles);
+  const lockedVersions = lockedVersionsManifest
+    ? await getLockedVersions(lockedVersionsManifest)
+    : null;
+  if (lockedVersions) {
+    for (const dep of deps) {
+      // `packageName` is `<name>=<uuid>` for a dependency with a UUID.
+      const uuid = dep.packageName?.split('=')[1].toLowerCase();
+      const lockedVersion = uuid && lockedVersions.get(uuid);
+      if (lockedVersion) {
+        dep.lockedVersion = lockedVersion;
+      }
+    }
   }
   return result;
 }
