@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
-import type { ExtractConfig, PackageFile } from '../../types.ts';
+import type { ExtractConfig, NpmrcPackageFile } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
 import type { NpmManagerData } from '../types.ts';
 import * as npmExtract from './index.ts';
@@ -2057,18 +2057,13 @@ describe('modules/manager/npm/extract/index', () => {
       await expect(postExtract([])).resolves.not.toThrow();
     });
 
-    it('adds the minimum release age of the repository .npmrc', async () => {
-      const packageFiles: PackageFile<NpmManagerData>[] = [
+    it('adds the minimum release age of the merged .npmrc', async () => {
+      const packageFiles: NpmrcPackageFile<NpmManagerData>[] = [
         {
           packageFile: 'package.json',
           deps: [],
-          managerData: {
-            repoNpmrc: {
-              fileName: '.npmrc',
-              content: 'min-release-age=3\n',
-              detectedLineEnding: '\n',
-            },
-          },
+          npmrc: 'min-release-age=3\n',
+          managerData: { npmrcFileName: '.npmrc' },
         },
       ];
 

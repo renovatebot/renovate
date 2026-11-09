@@ -1,6 +1,7 @@
 import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
-import type { PackageFile } from '../../types.ts';
+import type { NpmrcPackageFile } from '../../types.ts';
+import { applyConfigNpmrc } from '../npmrc.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   getNpmrcMinimumReleaseAge,
@@ -129,20 +130,17 @@ describe('modules/manager/npm/extract/npmrc', () => {
   describe('setNpmrcMinimumReleaseAge()', () => {
     function packageFile(
       managerData: NpmManagerData,
-    ): Partial<PackageFile<NpmManagerData>> {
-      return { packageFile: 'package.json', managerData };
+      npmrc?: string,
+    ): Partial<NpmrcPackageFile<NpmManagerData>> {
+      return { packageFile: 'package.json', managerData, npmrc };
     }
 
-    const repoNpmrc = {
-      fileName: '.npmrc',
-      content: 'min-release-age=3\n',
-      detectedLineEnding: '\n',
-    } as const;
+    const npmrc = 'min-release-age=3\n';
 
     it('adds a packageRules entry from the repository .npmrc', () => {
       const packageFiles = [
-        packageFile({ npmLock: 'package-lock.json', repoNpmrc }),
-        packageFile({ repoNpmrc }),
+        packageFile({ npmLock: 'package-lock.json' }, npmrc),
+        packageFile({}, npmrc),
       ];
 
       setNpmrcMinimumReleaseAge(packageFiles);
@@ -153,6 +151,37 @@ describe('modules/manager/npm/extract/npmrc', () => {
       expect(packageFiles).toMatchObject([{ packageRules }, { packageRules }]);
     });
 
+    it('uses the merged npmrc, which includes the npmrc option', () => {
+      const merged = applyConfigNpmrc(
+        { npmrc: 'min-release-age=5\n' },
+        undefined,
+      );
+      const packageFiles = [packageFile({ npmrcFileName: null }, merged)];
+
+      setNpmrcMinimumReleaseAge(packageFiles);
+
+      expect(packageFiles[0].packageRules).toEqual([
+        { matchDatasources: ['npm'], minimumReleaseAgeExtracted: '5 days' },
+      ]);
+    });
+
+    it('ignores the repository .npmrc when it is not merged into the npmrc option', () => {
+      const merged = applyConfigNpmrc(
+        { npmrc: 'audit=false\n', npmrcMerge: false },
+        {
+          fileName: '.npmrc',
+          content: 'min-release-age=3\n',
+          detectedLineEnding: '\n',
+        },
+      );
+      const packageFiles = [packageFile({ npmrcFileName: '.npmrc' }, merged)];
+
+      setNpmrcMinimumReleaseAge(packageFiles);
+
+      expect(merged).toBe('audit=false\n');
+      expect(packageFiles[0].packageRules).toBeUndefined();
+    });
+
     it('keeps existing packageRules', () => {
       const existing = {
         matchPackageNames: ['foo'],
@@ -160,12 +189,7 @@ describe('modules/manager/npm/extract/npmrc', () => {
       };
       const packageFiles = [
         {
-          ...packageFile({
-            repoNpmrc: {
-              ...repoNpmrc,
-              content: 'before=2026-06-12T12:00:00.000Z\n',
-            },
-          }),
+          ...packageFile({}, 'before=2026-06-12T12:00:00.000Z\n'),
           packageRules: [existing],
         },
       ];
@@ -184,10 +208,7 @@ describe('modules/manager/npm/extract/npmrc', () => {
     it('skips package files without a minimum release age in the repository .npmrc', () => {
       const packageFiles = [
         packageFile({ npmLock: 'package-lock.json' }),
-        packageFile({
-          npmLock: 'package-lock.json',
-          repoNpmrc: { ...repoNpmrc, content: 'audit=false\n' },
-        }),
+        packageFile({ npmLock: 'package-lock.json' }, 'audit=false\n'),
         {},
       ];
 
@@ -200,8 +221,8 @@ describe('modules/manager/npm/extract/npmrc', () => {
 
     it('skips package files managed by Yarn or pnpm', () => {
       const packageFiles = [
-        packageFile({ yarnLock: 'yarn.lock', repoNpmrc }),
-        packageFile({ pnpmLockFile: 'pnpm-lock.yaml', repoNpmrc }),
+        packageFile({ yarnLock: 'yarn.lock' }, npmrc),
+        packageFile({ pnpmLockFile: 'pnpm-lock.yaml' }, npmrc),
       ];
 
       setNpmrcMinimumReleaseAge(packageFiles);

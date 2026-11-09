@@ -3,7 +3,7 @@ import { logger } from '../../../../logger/index.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { UtcDate } from '../../../../util/schema-utils/index.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-import type { PackageFile } from '../../types.ts';
+import type { NpmrcPackageFile } from '../../types.ts';
 import { NpmrcCooldown as NpmrcCooldownSchema } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import type { NpmrcCooldown } from './types.ts';
@@ -62,22 +62,20 @@ export function getNpmrcMinimumReleaseAge(
 }
 
 /**
- * Adds a `packageRules` entry with the minimum release age of the repository `.npmrc` to the package files which are not managed by Yarn or pnpm.
+ * Adds a `packageRules` entry with the minimum release age of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`, as used by npm at post-update) to the package files which are not managed by Yarn or pnpm.
  */
 export function setNpmrcMinimumReleaseAge(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+  packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
 ): void {
   const npmPackageFiles = packageFiles.filter(
     ({ managerData }) => !managerData?.yarnLock && !managerData?.pnpmLockFile,
   );
   for (const packageFile of npmPackageFiles) {
     const { managerData } = packageFile;
-    const minimumReleaseAge = getNpmrcMinimumReleaseAge(
-      managerData?.repoNpmrc?.content,
-    );
+    const minimumReleaseAge = getNpmrcMinimumReleaseAge(packageFile.npmrc);
     if (minimumReleaseAge) {
       logger.debug(
-        `Found minimum release age ${minimumReleaseAge} in ${managerData!.repoNpmrc!.fileName} for ${packageFile.packageFile}`,
+        `Found minimum release age ${minimumReleaseAge} in the .npmrc ${managerData?.npmrcFileName ?? '(config)'} for ${packageFile.packageFile}`,
       );
       packageFile.packageRules = [
         ...coerceArray(packageFile.packageRules),
