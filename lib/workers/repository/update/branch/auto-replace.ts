@@ -214,7 +214,7 @@ export async function checkBranchDepsMatchBaseDeps(
   } catch /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
-      'Failed to parse branchContent - rebasing',
+      'Failed to extract package file - rebasing',
     );
     return false;
   }

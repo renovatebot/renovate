@@ -46,7 +46,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBeNull();
     });
 
-    it('rebases if the deps to update has changed', async () => {
+    it('rebases if the branch does not contain the update', async () => {
       fs.readLocalFile.mockResolvedValueOnce(sampleHtml);
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
