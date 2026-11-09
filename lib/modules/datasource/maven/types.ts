@@ -4,6 +4,7 @@ import type { ReleaseResult } from '../types.ts';
 export interface MetadataResults {
   tags?: Record<string, string>;
   versions?: string[];
+  isPrivate?: boolean;
 }
 
 export interface MavenDependency {
@@ -21,6 +22,7 @@ export type DependencyInfo = Pick<
   | 'replacementName'
   | 'replacementVersion'
   | 'deprecationMessage'
+  | 'isPrivate'
 >;
 
 export interface MavenFetchSuccess<T = string> {

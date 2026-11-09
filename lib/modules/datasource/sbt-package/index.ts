@@ -17,7 +17,7 @@ import * as ivyVersioning from '../../versioning/ivy/index.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
 import { MavenDatasource } from '../maven/index.ts';
-import { downloadHttpContent, downloadHttpProtocol } from '../maven/util.ts';
+import { downloadHttpProtocol } from '../maven/util.ts';
 import type {
   GetReleasesConfig,
   PostprocessReleaseConfig,
@@ -38,6 +38,7 @@ interface PomInfo {
   homepage?: string;
   sourceUrl?: string;
   releaseTimestamp?: Timestamp;
+  isPrivate?: boolean;
 }
 
 /** Returns the package cache key of the package URLs found for a package. */
@@ -105,15 +106,19 @@ export class SbtPackageDatasource extends MavenDatasource {
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
     }
 
+    let isPrivate = !this.getDefaultRegistryUrls('').includes(registryUrl);
     let dependencyUrl: string | undefined;
     let packageUrls: string[] | undefined;
     for (const packageRootUrl of packageRootUrls) {
-      const packageRootContent = await downloadHttpContent(
-        this.http,
-        packageRootUrl,
-      );
+      const { val: packageRootFetch } = (
+        await downloadHttpProtocol(this.http, packageRootUrl)
+      ).unwrap();
+      const packageRootContent = packageRootFetch?.data;
       if (!packageRootContent) {
         continue;
+      }
+      if (packageRootFetch.isCacheable === false) {
+        isPrivate = true;
       }
 
       await packageCache.set(
@@ -188,11 +193,17 @@ export class SbtPackageDatasource extends MavenDatasource {
         continue;
       }
 
-      const packageContent = await downloadHttpContent(this.http, pkgUrl);
+      const { val: packageFetch } = (
+        await downloadHttpProtocol(this.http, pkgUrl)
+      ).unwrap();
+      const packageContent = packageFetch?.data;
       // istanbul ignore if
       if (!packageContent) {
         invalidPackageUrls.add(pkgUrl);
         continue;
+      }
+      if (packageFetch.isCacheable === false) {
+        isPrivate = true;
       }
 
       const rootPath = parsedPkgUrl.pathname;
@@ -253,6 +264,10 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     if (pomInfo?.sourceUrl) {
       res.sourceUrl = pomInfo.sourceUrl;
+    }
+
+    if (isPrivate || pomInfo?.isPrivate) {
+      res.isPrivate = true;
     }
 
     return res;
@@ -325,6 +340,10 @@ export class SbtPackageDatasource extends MavenDatasource {
         }
 
         const result: PomInfo = {};
+
+        if (val.isCacheable === false) {
+          result.isPrivate = true;
+        }
 
         const releaseTimestamp = asTimestamp(val.lastModified);
         if (releaseTimestamp) {

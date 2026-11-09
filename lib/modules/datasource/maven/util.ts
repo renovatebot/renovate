@@ -131,11 +131,10 @@ export async function downloadHttpProtocol(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
-      const result: MavenFetchSuccess = { data: res.body };
-
-      if (!res.authorization) {
-        result.isCacheable = true;
-      }
+      const result: MavenFetchSuccess = {
+        data: res.body,
+        isCacheable: !res.authorization,
+      };
 
       const lastModified = asTimestamp(res?.headers?.['last-modified']);
       if (lastModified) {
@@ -520,8 +519,12 @@ export async function getDependencyInfo(
   const pomUrl = getMavenUrl(dependency, repoUrl, path);
   const pomXmlResult = await downloadMavenXml(http, pomUrl);
   const dependencyInfoResult = await pomXmlResult.transform(
-    async ({ data: pomContent }) => {
+    async ({ data: pomContent, isCacheable }) => {
       const result: DependencyInfo = {};
+
+      if (isCacheable === false) {
+        result.isPrivate = true;
+      }
 
       const homepage = pomContent.valueWithPath('url');
       if (homepage && !containsPlaceholder(homepage)) {
@@ -588,6 +591,9 @@ export async function getDependencyInfo(
             parentVersion,
             recursionLimit - 1,
           );
+          if (parentInformation.isPrivate) {
+            result.isPrivate = true;
+          }
           if (!result.sourceUrl && parentInformation.sourceUrl) {
             result.sourceUrl = parentInformation.sourceUrl;
           }
