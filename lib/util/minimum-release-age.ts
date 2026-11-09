@@ -155,11 +155,15 @@ export interface MinimumReleaseAgeExemptionConfig
   releaseTimestamp?: Timestamp | null;
 }
 
-export interface MinimumReleaseAgeExemption {
+export interface MinimumReleaseAgeExemption<
+  T extends MinimumReleaseAgeExemptionConfig = MinimumReleaseAgeExemptionConfig,
+> {
   /** The smallest own minimum release age of the exempted updates, without `minimumReleaseAgeBuffer`. */
   ageMs: number;
   /** The `depName` of each exempted update. */
   depNames: string[];
+  /** The exempted updates. */
+  upgrades: T[];
 }
 
 /**
@@ -186,12 +190,16 @@ function getOwnAgeMs(upgrade: MinimumReleaseAgeExemptionConfig): number {
 
 /**
  * Returns the updates of `manager` in `upgrades` which enable `minimumReleaseAgePackageManagerSync`, other than lock file maintenance and security updates, whose own minimum release age without `minimumReleaseAgeBuffer` is smaller than `ageMs` and whose release is younger than `ageMs` or has no timestamp, or `null` if there are none.
+ *
+ * It does not filter by `packageFile`, so callers must pass only the updates of one lock file.
  */
-export function getMinimumReleaseAgeExemption(
-  upgrades: MinimumReleaseAgeExemptionConfig[],
+export function getMinimumReleaseAgeExemption<
+  T extends MinimumReleaseAgeExemptionConfig,
+>(
+  upgrades: T[],
   manager: string,
   ageMs: number,
-): MinimumReleaseAgeExemption | null {
+): MinimumReleaseAgeExemption<T> | null {
   const exempted = upgrades.filter(
     (upgrade) =>
       upgrade.manager === manager &&
@@ -210,6 +218,7 @@ export function getMinimumReleaseAgeExemption(
       .map((upgrade) => upgrade.depName)
       .filter(isString)
       .filter(uniqueStrings),
+    upgrades: exempted,
   };
 }
 

@@ -320,47 +320,53 @@ describe('util/minimum-release-age', () => {
     it('returns the updates whose release is younger than the age', () => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
 
+      const upgrades = [
+        update,
+        { ...update, depName: 'dep2', minimumReleaseAge: null },
+        { ...update, depName: 'dep2', minimumReleaseAge: '12 hours' },
+      ];
+
       const res = getMinimumReleaseAgeExemption(
-        [
-          update,
-          { ...update, depName: 'dep2', minimumReleaseAge: null },
-          { ...update, depName: 'dep2', minimumReleaseAge: '12 hours' },
-        ],
+        [...upgrades, { ...update, manager: 'pep621' }],
         'poetry',
         ageMs,
       );
 
-      expect(res).toEqual({ ageMs: 0, depNames: ['dep1', 'dep2'] });
+      expect(res).toEqual({ ageMs: 0, depNames: ['dep1', 'dep2'], upgrades });
     });
 
     it('returns the updates without release timestamp', () => {
-      const res = getMinimumReleaseAgeExemption(
-        [{ ...update, releaseTimestamp: undefined }],
-        'poetry',
-        ageMs,
-      );
+      const upgrade = { ...update, releaseTimestamp: undefined };
 
-      expect(res).toEqual({ ageMs: toMs('1 day'), depNames: ['dep1'] });
+      const res = getMinimumReleaseAgeExemption([upgrade], 'poetry', ageMs);
+
+      expect(res).toEqual({
+        ageMs: toMs('1 day'),
+        depNames: ['dep1'],
+        upgrades: [upgrade],
+      });
     });
 
     it('ignores the minimumReleaseAgeBuffer of the updates', () => {
       dateUtil.getElapsedMs.mockReturnValue(toMs('2 days') ?? 0);
 
-      const res = getMinimumReleaseAgeExemption(
-        [
-          { ...update, minimumReleaseAgeBuffer: '30 minutes' },
-          {
-            ...update,
-            depName: 'dep2',
-            minimumReleaseAge: '71 hours',
-            minimumReleaseAgeBuffer: '2 hours',
-          },
-        ],
-        'poetry',
-        ageMs,
-      );
+      const upgrades = [
+        { ...update, minimumReleaseAgeBuffer: '30 minutes' },
+        {
+          ...update,
+          depName: 'dep2',
+          minimumReleaseAge: '71 hours',
+          minimumReleaseAgeBuffer: '2 hours',
+        },
+      ];
 
-      expect(res).toEqual({ ageMs: toMs('1 day'), depNames: ['dep1', 'dep2'] });
+      const res = getMinimumReleaseAgeExemption(upgrades, 'poetry', ageMs);
+
+      expect(res).toEqual({
+        ageMs: toMs('1 day'),
+        depNames: ['dep1', 'dep2'],
+        upgrades,
+      });
     });
 
     it('returns null if the release is older than the age', () => {
