@@ -109,6 +109,8 @@ function applyManagerScopedOptions(
   updateConfig: RenovateConfig,
   managerConfig: RenovateConfig,
 ): void {
+  updateConfig.minimumReleaseAgePackageManager =
+    managerConfig.minimumReleaseAgePackageManager;
   updateConfig.minimumReleaseAgePackageManagerSync =
     managerConfig.minimumReleaseAgePackageManagerSync;
 }
