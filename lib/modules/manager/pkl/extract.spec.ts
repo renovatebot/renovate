@@ -24,7 +24,7 @@ describe('modules/manager/pkl/extract', () => {
             depName: 'hk',
             packageName: 'jdx/hk',
             currentValue: '1.48.0',
-            extractVersion: '^v(?<version>.+)$',
+            extractVersion: '^\\x76(?<version>.+)$',
             replaceString:
               'package://github.com/jdx/hk/releases/download/v1.48.0/hk@1.48.0#/Config.pkl',
           },
@@ -39,7 +39,7 @@ describe('modules/manager/pkl/extract', () => {
         depName: 'hk',
         packageName: 'jdx/hk',
         currentValue: version,
-        extractVersion: '^v(?<version>.+)$',
+        extractVersion: '^\\x76(?<version>.+)$',
         replaceString: uri,
       };
     }
@@ -83,7 +83,7 @@ describe('modules/manager/pkl/extract', () => {
             packageName: 'tools/lint',
             registryUrls: [`https://${host}`],
             currentValue: '1.2.0',
-            extractVersion: '^v(?<version>.+)$',
+            extractVersion: '^\\x76(?<version>.+)$',
             replaceString: uri,
           },
         ]);
@@ -104,7 +104,7 @@ describe('modules/manager/pkl/extract', () => {
           depName: 'hk',
           packageName: 'jdx/hk',
           currentValue: '1.58.1',
-          extractVersion: '^hk@(?<version>.+)$',
+          extractVersion: '^\\x68k\\x40(?<version>.+)$',
           replaceString:
             'package://pkg.pkl-lang.org/github.com/jdx/hk/hk@1.58.1#/Builtins.pkl',
         },
@@ -125,7 +125,7 @@ describe('modules/manager/pkl/extract', () => {
           depName: 'pkl.toml',
           packageName: 'apple/pkl-pantry',
           currentValue: '1.0.3',
-          extractVersion: '^pkl\\.toml@(?<version>.+)$',
+          extractVersion: '^\\x70kl\\.toml\\x40(?<version>.+)$',
           replaceString:
             'package://pkg.pkl-lang.org/pkl-pantry/pkl.toml@1.0.3#/toml.pkl',
         },
@@ -137,6 +137,7 @@ describe('modules/manager/pkl/extract', () => {
       ${'an unknown host'}                    | ${'package://example.com/pkl/lib@1.0.0#/Lib.pkl'}                       | ${'example.com/pkl/lib'}
       ${'a non-release GitHub path'}          | ${'package://github.com/jdx/hk/archive/hk@1.0.0#/Config.pkl'}           | ${'github.com/jdx/hk/archive/hk'}
       ${'a release path on another platform'} | ${'package://codeberg.org/o/r/releases/download/v1.0.0/r@1.0.0#/R.pkl'} | ${'codeberg.org/o/r/releases/download/v1.0.0/r'}
+      ${'a registry owner path'}              | ${'package://pkg.pkl-lang.org/github.com/jdx@1.0.0#/Config.pkl'}        | ${'pkg.pkl-lang.org/github.com/jdx'}
       ${'a registry repository path'}         | ${'package://pkg.pkl-lang.org/github.com/jdx/hk@1.0.0#/Config.pkl'}     | ${'pkg.pkl-lang.org/github.com/jdx/hk'}
     `(
       'skips a package URI with $reason as unsupported-url',
@@ -216,7 +217,7 @@ describe('modules/manager/pkl/extract', () => {
           depName: 'staticcode',
           packageName: 'element-hq/pkl-tools',
           currentValue: '1.1.0',
-          extractVersion: '^staticcode@(?<version>.+)$',
+          extractVersion: '^\\x73taticcode\\x40(?<version>.+)$',
           replaceString:
             'package://pkg.pkl-lang.org/github.com/element-hq/pkl-tools/staticcode@1.1.0#/StaticCode.pkl',
         },

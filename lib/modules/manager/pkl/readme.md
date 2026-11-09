@@ -33,8 +33,8 @@ To skip such a package, disable it with `packageRules`:
 
 The manager skips:
 
-- a package URI on another host, or with another path, for example a release on a platform that is not GitHub.
-- a package URI that pins a `::sha256:` checksum, because a new version invalidates the checksum.
-- a package URI whose release tag does not contain the version.
+- a package URI on another host, or with another path, for example a release on a platform that is not GitHub
+- a package URI that pins a `::sha256:` checksum, because a new version invalidates the checksum
+- a package URI whose release tag does not contain the version
 
 The manager does not update the dependencies in `PklProject` files, because that needs a new `PklProject.deps.json` file too.

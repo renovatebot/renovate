@@ -59,7 +59,8 @@ function resolveRelease(path: string, version: string): Release | null {
   }
 
   const registryBare = registryBareRegex.exec(path)?.groups;
-  if (registryBare) {
+  // `github.com` is the registry's prefix for GitHub repositories, not a project
+  if (registryBare && registryBare.project !== 'github.com') {
     const { project, name } = registryBare;
     return {
       name,
@@ -71,15 +72,10 @@ function resolveRelease(path: string, version: string): Release | null {
   return null;
 }
 
-// RegExp.escape() hex-encodes a leading letter (`v` -> `\x76`), which reads badly in user-facing config
-function escapeRegExp(value: string): string {
-  return value.replace(regEx(/[.*+?^${}()|[\]\\]/g), '\\$&');
-}
-
 function extractVersionFor(tag: string, version: string): string {
   const index = tag.indexOf(version);
-  const prefix = escapeRegExp(tag.slice(0, index));
-  const suffix = escapeRegExp(tag.slice(index + version.length));
+  const prefix = RegExp.escape(tag.slice(0, index));
+  const suffix = RegExp.escape(tag.slice(index + version.length));
   return `^${prefix}(?<version>.+)${suffix}$`;
 }
 
