@@ -426,5 +426,30 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
         },
       ]);
     });
+
+    it.each`
+      content                                 | expected
+      ${'npmPreapprovedPackages:\n  - foo\n'} | ${{ hasNpmPreapprovedPackages: true }}
+      ${'npmPreapprovedPackages: []\n'}       | ${undefined}
+      ${'nodeLinker: node-modules\n'}         | ${undefined}
+    `(
+      'keeps whether npmPreapprovedPackages has entries: $content',
+      async ({ content, expected }) => {
+        mockYarnrc(content);
+        const packageFiles = [
+          packageFile(
+            'some-dir/package.json',
+            { yarnLock: 'some-dir/yarn.lock' },
+            '4.15.0',
+          ),
+        ];
+
+        await setYarnMinimumReleaseAge(packageFiles);
+
+        expect(packageFiles[0].managerData?.yarnMinimalAgeGate).toEqual(
+          expected,
+        );
+      },
+    );
   });
 });

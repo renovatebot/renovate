@@ -401,6 +401,7 @@ describe('modules/manager/npm/minimum-release-age', () => {
       ${'4.12.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: null } }}                     | ${true}
       ${'4.17.0'}  | ${'3 days'}       | ${{ npmScopes: { myorg: null } }}                     | ${false}
       ${'4.17.0'}  | ${'1 day'}        | ${{ npmScopes: { myorg: null } }}                     | ${true}
+      ${'4.12.0'}  | ${'3 days'}       | ${{ hasNpmPreapprovedPackages: true }}                | ${false}
     `(
       'returns $expected for Yarn $yarn, minimumReleaseAge=$minimumReleaseAge and settings=$settings',
       async ({ yarn, minimumReleaseAge, settings, expected }) => {

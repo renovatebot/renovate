@@ -302,11 +302,17 @@ export async function setYarnMinimumReleaseAge(
     }
     const settings = await readYarnrcMinimalAgeGate(yarnLock);
     const { npmMinimalAgeGate, npmScopes } = settings;
-    if (npmMinimalAgeGate !== undefined || npmScopes) {
+    const hasNpmPreapprovedPackages = !!settings.npmPreapprovedPackages?.length;
+    if (
+      npmMinimalAgeGate !== undefined ||
+      npmScopes ||
+      hasNpmPreapprovedPackages
+    ) {
       for (const packageFile of lockFilePackageFiles) {
         packageFile.managerData!.yarnMinimalAgeGate = {
           npmMinimalAgeGate,
           npmScopes,
+          ...(hasNpmPreapprovedPackages && { hasNpmPreapprovedPackages }),
         };
       }
     }

@@ -160,6 +160,14 @@ async function yarnEnforcesMinimumReleaseAge(
   // the status checks run before the base branch is checked out, so the
   // .yarnrc.yml settings come from the extraction
   const settings = coerceObject(config.managerData?.yarnMinimalAgeGate);
+  // lock file maintenance keeps the `npmPreapprovedPackages` of the
+  // .yarnrc.yml, which Yarn installs without a minimum release age
+  if (settings.hasNpmPreapprovedPackages) {
+    logger.debug(
+      `${yarnLock}: npmPreapprovedPackages lets Yarn install versions which are too new`,
+    );
+    return false;
+  }
   // the age which Renovate would wait for, `minimumReleaseAgePackageManager`
   // only raises what it passes
   const lockFileMaintenanceAgeMs = calculateMinimumReleaseAgeMs({
