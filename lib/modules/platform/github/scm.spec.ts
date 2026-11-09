@@ -75,6 +75,20 @@ describe('modules/platform/github/scm', () => {
     });
   });
 
+  it('does not replace links in the commit message', async () => {
+    const message = [
+      'chore(deps): update dependency renovate to v44.220.0',
+      '- **config:** add option ([#43916](https://github.com/renovatebot/renovate/issues/43916)), closes https://github.com/renovatebot/renovate/pull/1',
+    ];
+
+    await githubScm.commitAndPush({ ...commitObj, message });
+
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
+      ...commitObj,
+      message,
+    });
+  });
+
   it('checks the merge queue before committing', async () => {
     await githubScm.commitAndPush(commitObj);
 
