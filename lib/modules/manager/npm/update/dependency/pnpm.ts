@@ -81,6 +81,14 @@ export function updatePnpmWorkspaceDependency({
       })
     : ['overrides', depName!];
 
+  // The root map token excludes comments before the first key and after the
+  // last entry, so keep those bytes verbatim.
+  const mapToken = document.contents?.srcToken;
+  const head = mapToken ? fileContent.slice(0, mapToken.offset) : '';
+  const tail = mapToken
+    ? fileContent.slice(mapToken.offset + CST.stringify(mapToken).length)
+    : '';
+
   const modifiedDocument = changeDependencyIn(document, path, {
     newValue,
     newName: upgrade.newName,
@@ -97,10 +105,7 @@ export function updatePnpmWorkspaceDependency({
     return null;
   }
 
-  return (
-    fileContent.slice(0, modifiedDocument.contents.srcToken.offset) +
-    CST.stringify(modifiedDocument.contents.srcToken)
-  );
+  return head + CST.stringify(modifiedDocument.contents.srcToken) + tail;
 }
 
 /**

@@ -412,7 +412,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
-  it('preserves comments before the first key', () => {
+  it('preserves comments before the first key and after the last entry', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
       depName: 'react',
@@ -427,6 +427,8 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
       catalog:
         react: 18.3.1
+
+      # This is a trailing comment
     `;
     const testContent = npmUpdater.updateDependency({
       fileContent: pnpmWorkspaceYaml,
@@ -442,6 +444,8 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
 
       catalog:
         react: 19.0.0
+
+      # This is a trailing comment
     `);
   });
 
