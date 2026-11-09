@@ -8,7 +8,7 @@ export const url =
   'https://pkl-lang.org/main/current/language-reference/index.html#packages';
 
 export const defaultConfig = {
-  managerFilePatterns: ['/\\.pkl$/'],
+  managerFilePatterns: ['**/*.pkl'],
 };
 
 export const supportedDatasources = [GithubReleasesDatasource.id];

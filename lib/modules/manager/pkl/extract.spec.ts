@@ -1,8 +1,14 @@
 import { codeBlock } from 'common-tags';
+import * as hostRules from '../../../util/host-rules.ts';
+import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/pkl/extract', () => {
   describe('extractPackageFile()', () => {
+    afterEach(() => {
+      hostRules.clear();
+    });
+
     it('extracts a GitHub release package from an amends clause', () => {
       const content = codeBlock`
         amends "package://github.com/jdx/hk/releases/download/v1.48.0/hk@1.48.0#/Config.pkl"
@@ -26,6 +32,18 @@ describe('modules/manager/pkl/extract', () => {
       });
     });
 
+    function hkDependency(version: string, uri: string): PackageDependency {
+      return {
+        datasource: 'github-releases',
+        versioning: 'semver',
+        depName: 'hk',
+        packageName: 'jdx/hk',
+        currentValue: version,
+        extractVersion: '^v(?<version>.+)$',
+        replaceString: uri,
+      };
+    }
+
     const hkUri =
       'package://github.com/jdx/hk/releases/download/v1.48.0/hk@1.48.0#/Builtins.pkl';
 
@@ -41,10 +59,36 @@ describe('modules/manager/pkl/extract', () => {
     `('extracts a package URI from the $form form', ({ content }) => {
       const result = extractPackageFile(content);
 
-      expect(result?.deps).toMatchObject([
-        { depName: 'hk', currentValue: '1.48.0', replaceString: hkUri },
-      ]);
+      expect(result?.deps).toEqual([hkDependency('1.48.0', hkUri)]);
     });
+
+    it.each`
+      host                    | how
+      ${'github.example.com'} | ${'by its name'}
+      ${'git.corp.example'}   | ${'by a host rule'}
+    `(
+      'maps a release package on a GitHub Enterprise host detected $how to that server',
+      ({ host }) => {
+        hostRules.add({ hostType: 'github', matchHost: 'git.corp.example' });
+        const uri = `package://${host}/tools/lint/releases/download/v1.2.0/lint@1.2.0#/Config.pkl`;
+        const content = `amends "${uri}"`;
+
+        const result = extractPackageFile(content);
+
+        expect(result?.deps).toEqual([
+          {
+            datasource: 'github-releases',
+            versioning: 'semver',
+            depName: 'lint',
+            packageName: 'tools/lint',
+            registryUrls: [`https://${host}`],
+            currentValue: '1.2.0',
+            extractVersion: '^v(?<version>.+)$',
+            replaceString: uri,
+          },
+        ]);
+      },
+    );
 
     it('maps a registry package under a GitHub path to that repository', () => {
       const content = codeBlock`
@@ -89,10 +133,11 @@ describe('modules/manager/pkl/extract', () => {
     });
 
     it.each`
-      reason                          | uri                                                                 | depName
-      ${'an unknown host'}            | ${'package://example.com/pkl/lib@1.0.0#/Lib.pkl'}                   | ${'example.com/pkl/lib'}
-      ${'a non-release GitHub path'}  | ${'package://github.com/jdx/hk/archive/hk@1.0.0#/Config.pkl'}       | ${'github.com/jdx/hk/archive/hk'}
-      ${'a registry repository path'} | ${'package://pkg.pkl-lang.org/github.com/jdx/hk@1.0.0#/Config.pkl'} | ${'pkg.pkl-lang.org/github.com/jdx/hk'}
+      reason                                  | uri                                                                     | depName
+      ${'an unknown host'}                    | ${'package://example.com/pkl/lib@1.0.0#/Lib.pkl'}                       | ${'example.com/pkl/lib'}
+      ${'a non-release GitHub path'}          | ${'package://github.com/jdx/hk/archive/hk@1.0.0#/Config.pkl'}           | ${'github.com/jdx/hk/archive/hk'}
+      ${'a release path on another platform'} | ${'package://codeberg.org/o/r/releases/download/v1.0.0/r@1.0.0#/R.pkl'} | ${'codeberg.org/o/r/releases/download/v1.0.0/r'}
+      ${'a registry repository path'}         | ${'package://pkg.pkl-lang.org/github.com/jdx/hk@1.0.0#/Config.pkl'}     | ${'pkg.pkl-lang.org/github.com/jdx/hk'}
     `(
       'skips a package URI with $reason as unsupported-url',
       ({ uri, depName }) => {
@@ -144,9 +189,15 @@ describe('modules/manager/pkl/extract', () => {
 
       const result = extractPackageFile(content);
 
-      expect(result?.deps).toMatchObject([
-        { depName: 'hk', packageName: 'jdx/hk', currentValue: '2.0.0' },
-        { depName: 'hk', packageName: 'jdx/hk', currentValue: '2.0.0' },
+      expect(result?.deps).toEqual([
+        hkDependency(
+          '2.0.0',
+          'package://github.com/jdx/hk/releases/download/v2.0.0/hk@2.0.0#/Config.pkl',
+        ),
+        hkDependency(
+          '2.0.0',
+          'package://github.com/jdx/hk/releases/download/v2.0.0/hk@2.0.0#/Builtins.pkl',
+        ),
       ]);
     });
 
@@ -158,12 +209,16 @@ describe('modules/manager/pkl/extract', () => {
 
       const result = extractPackageFile(content);
 
-      expect(result?.deps).toMatchObject([
+      expect(result?.deps).toEqual([
         {
+          datasource: 'github-releases',
+          versioning: 'semver',
           depName: 'staticcode',
           packageName: 'element-hq/pkl-tools',
           currentValue: '1.1.0',
           extractVersion: '^staticcode@(?<version>.+)$',
+          replaceString:
+            'package://pkg.pkl-lang.org/github.com/element-hq/pkl-tools/staticcode@1.1.0#/StaticCode.pkl',
         },
       ]);
     });
@@ -190,7 +245,7 @@ describe('modules/manager/pkl/extract', () => {
 
       const result = extractPackageFile(content);
 
-      expect(result?.deps).toMatchObject([{ currentValue: '1.48.0' }]);
+      expect(result?.deps).toEqual([hkDependency('1.48.0', hkUri)]);
     });
 
     it('returns null for a module without package URIs', () => {

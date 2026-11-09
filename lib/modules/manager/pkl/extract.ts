@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import stripJsonComments from 'strip-json-comments';
+import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { id as semverVersioning } from '../../versioning/semver/index.ts';
@@ -11,7 +12,7 @@ const packageUriRegex = regEx(
 );
 
 const githubReleaseRegex = regEx(
-  /^github\.com\/(?<owner>[^/]+)\/(?<repo>[^/]+)\/releases\/download\/(?<tag>[^/]+)\/(?<name>[^/]+)$/,
+  /^(?<host>[^/]+)\/(?<owner>[^/]+)\/(?<repo>[^/]+)\/releases\/download\/(?<tag>[^/]+)\/(?<name>[^/]+)$/,
 );
 
 // pkg.pkl-lang.org redirects to the GitHub release tagged `<name>@<version>`
@@ -27,14 +28,28 @@ const registryBareRegex = regEx(
 interface Release {
   name: string;
   packageName: string;
+  registryUrls?: string[];
   tag: string;
+}
+
+// GitHub Enterprise Server serves release assets on the same path as github.com
+function githubServer(host: string): Pick<Release, 'registryUrls'> | null {
+  if (host === 'github.com') {
+    return {};
+  }
+  const url = `https://${host}`;
+  if (detectPlatform(url) !== 'github') {
+    return null;
+  }
+  return { registryUrls: [url] };
 }
 
 function resolveRelease(path: string, version: string): Release | null {
   const github = githubReleaseRegex.exec(path)?.groups;
-  if (github) {
+  const server = github ? githubServer(github.host) : null;
+  if (github && server) {
     const { owner, repo, tag, name } = github;
-    return { name, packageName: `${owner}/${repo}`, tag };
+    return { name, packageName: `${owner}/${repo}`, ...server, tag };
   }
 
   const registryGithub = registryGithubRegex.exec(path)?.groups;
@@ -88,7 +103,7 @@ function toDependency(uri: string): PackageDependency | null {
     };
   }
 
-  const { name, packageName, tag } = release;
+  const { name, packageName, registryUrls, tag } = release;
   // a new version invalidates the pinned checksum, which cannot be recomputed here
   if (checksum) {
     return { depName: name, currentValue: version, skipReason: 'unsupported' };
@@ -106,6 +121,7 @@ function toDependency(uri: string): PackageDependency | null {
     versioning: semverVersioning,
     depName: name,
     packageName,
+    ...(registryUrls && { registryUrls }),
     currentValue: version,
     extractVersion: extractVersionFor(tag, version),
     replaceString: uri,
