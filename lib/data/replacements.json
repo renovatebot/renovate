@@ -35,6 +35,7 @@
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
       "replacements:monochromata-cucumber-reporting-plugin-to-jvt",
+      "replacements:nginxinc-to-nginx-unprivileged",
       "replacements:now-to-vercel",
       "replacements:npm-run-all-to-maintenance-fork",
       "replacements:ojdbc-to-ojdbc11",
@@ -947,6 +948,27 @@
         "matchPackageNames": ["de.monochromata.cucumber:reporting-plugin"],
         "replacementName": "me.jvt.cucumber:reporting-plugin",
         "replacementVersion": "5.0.0"
+      }
+    ]
+  },
+  "nginxinc-to-nginx-unprivileged": {
+    "description": "`nginxinc/nginx-unprivileged` moved to `nginx/nginx-unprivileged`. Older version tags were not migrated.",
+    "packageRules": [
+      {
+        "matchCurrentValue": "/^(?:1(?:-|$)|latest|stable|mainline|alpine|trixie|perl|otel)/",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?nginxinc/nginx-unprivileged$/"
+        ],
+        "replacementName": "nginx/nginx-unprivileged"
+      },
+      {
+        "matchCurrentVersion": ">=1.30.6",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?nginxinc/nginx-unprivileged$/"
+        ],
+        "replacementName": "nginx/nginx-unprivileged"
       }
     ]
   },
