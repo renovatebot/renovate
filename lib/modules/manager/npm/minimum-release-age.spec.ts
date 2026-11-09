@@ -232,14 +232,16 @@ describe('modules/manager/npm/minimum-release-age', () => {
     );
 
     it.each`
-      minimumReleaseAge | workspace                                                      | expected
-      ${null}           | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
-      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                 | ${true}
-      ${null}           | ${undefined}                                                   | ${false}
-      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                    | ${false}
-      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                          | ${false}
-      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }} | ${false}
-      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                           | ${true}
+      minimumReleaseAge | workspace                                                         | expected
+      ${null}           | ${{ minimumReleaseAge: 1440 }}                                    | ${true}
+      ${'0 days'}       | ${{ minimumReleaseAge: 1440 }}                                    | ${true}
+      ${null}           | ${undefined}                                                      | ${false}
+      ${'bananas'}      | ${{ minimumReleaseAge: 0 }}                                       | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: false }}                             | ${false}
+      ${null}           | ${{ minimumReleaseAge: 1440, minimumReleaseAgeStrict: false }}    | ${false}
+      ${'3 days'}       | ${{ minimumReleaseAgeStrict: true }}                              | ${true}
+      ${'3 days'}       | ${{ hasMinimumReleaseAgeExclude: true }}                          | ${false}
+      ${null}           | ${{ minimumReleaseAge: 1440, hasMinimumReleaseAgeExclude: true }} | ${false}
     `(
       'returns $expected for minimumReleaseAge=$minimumReleaseAge and workspace=$workspace',
       async ({ minimumReleaseAge, workspace, expected }) => {

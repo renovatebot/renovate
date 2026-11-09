@@ -2054,7 +2054,7 @@ describe('modules/manager/npm/extract/index', () => {
 
   describe('.postExtract()', () => {
     it('runs', async () => {
-      await expect(postExtract([])).resolves.not.toThrow();
+      await expect(postExtract([], {})).resolves.not.toThrow();
     });
 
     it('adds the minimum release age of the merged .npmrc', async () => {
@@ -2067,7 +2067,7 @@ describe('modules/manager/npm/extract/index', () => {
         },
       ];
 
-      await postExtract(packageFiles);
+      await postExtract(packageFiles, {});
 
       expect(packageFiles[0]).toMatchObject({
         packageRules: [

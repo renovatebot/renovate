@@ -74,6 +74,8 @@ export type NpmrcCooldown =
 export interface PnpmWorkspaceMinimumReleaseAgeSettings {
   minimumReleaseAge?: number;
   minimumReleaseAgeStrict?: boolean;
+  /** whether `minimumReleaseAgeExclude` lets pnpm install versions of some packages which are too new */
+  hasMinimumReleaseAgeExclude?: boolean;
 }
 
 /**

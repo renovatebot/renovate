@@ -3,7 +3,7 @@ import { fs } from '~test/util.ts';
 import { calculateMinimumReleaseAgeMs } from '../../../../util/minimum-release-age.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
-import type { PackageFile } from '../../types.ts';
+import type { NpmrcPackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   getPnpmMinimumReleaseAgeMinutes,
@@ -16,11 +16,16 @@ import {
 
 vi.mock('../../../../util/fs/index.ts');
 
-function mockWorkspace(content: string | null): void {
+function mockWorkspace(
+  content: string | null,
+  lockFileContent: string | null = null,
+): void {
+  const files: Record<string, string | null> = {
+    'some-dir/pnpm-workspace.yaml': content,
+    'some-dir/pnpm-lock.yaml': lockFileContent,
+  };
   fs.readLocalFile.mockImplementation((fileName: string) =>
-    Promise.resolve(
-      fileName === 'some-dir/pnpm-workspace.yaml' ? content : null,
-    ),
+    Promise.resolve(files[fileName] ?? null),
   );
 }
 
@@ -51,15 +56,11 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
     function packageFile(
       packageFile: string,
       managerData?: NpmManagerData,
-    ): Partial<PackageFile<NpmManagerData>> {
+    ): Partial<NpmrcPackageFile<NpmManagerData>> {
       return { packageFile, managerData };
     }
 
-    const repoNpmrc = {
-      fileName: '.npmrc',
-      content: 'minimum-release-age=2880\n',
-      detectedLineEnding: '\n',
-    } as const;
+    const npmrc = 'minimum-release-age=2880\n';
 
     function rule(minimumReleaseAgeExtracted: string) {
       return { matchDatasources: ['npm'], minimumReleaseAgeExtracted };
@@ -90,7 +91,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
         packageFile('none/package.json'),
       ];
 
-      await setPnpmMinimumReleaseAge(packageFiles);
+      await setPnpmMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles.map((p) => p.packageRules)).toEqual([
         [rule('1440 minutes')],
@@ -99,8 +100,8 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
         undefined,
         undefined,
       ]);
-      // the workspace file is read once per lock file
-      expect(fs.readLocalFile).toHaveBeenCalledOnce();
+      // the workspace and lock file are read once per lock file
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     });
 
     it.each`
@@ -108,6 +109,8 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${'minimumReleaseAge: 60\n'}                              | ${{ minimumReleaseAge: 60 }}
       ${'minimumReleaseAge: 0\nminimumReleaseAgeStrict: false'} | ${{ minimumReleaseAge: 0, minimumReleaseAgeStrict: false }}
       ${'minimumReleaseAgeStrict: false\n'}                     | ${{ minimumReleaseAgeStrict: false }}
+      ${'minimumReleaseAgeExclude:\n  - foo\n'}                 | ${{ hasMinimumReleaseAgeExclude: true }}
+      ${'minimumReleaseAgeExclude: []\n'}                       | ${undefined}
       ${'packages: []\n'}                                       | ${undefined}
     `(
       'keeps the pnpm-workspace.yaml settings $workspace in managerData',
@@ -122,7 +125,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
           }),
         ];
 
-        await setPnpmMinimumReleaseAge(packageFiles);
+        await setPnpmMinimumReleaseAge(packageFiles, {});
 
         expect(
           packageFiles.map(
@@ -140,7 +143,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
         }),
       ];
 
-      await setPnpmMinimumReleaseAge(packageFiles);
+      await setPnpmMinimumReleaseAge(packageFiles, {});
 
       const { minimumReleaseAgeExtracted } = packageFiles[0].packageRules![0];
       expect(
@@ -171,7 +174,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
         }),
       ];
 
-      await setPnpmMinimumReleaseAge(packageFiles);
+      await setPnpmMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles[0].packageRules).toEqual([
         rule('60 minutes'),
@@ -196,7 +199,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       'skips package files without a minimum release age for pnpm $pnpm: $content',
       async ({ pnpm, content }) => {
         mockWorkspace(content);
-        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+        const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
           {
             ...packageFile('some-dir/package.json', {
               pnpmLockFile: 'some-dir/pnpm-lock.yaml',
@@ -205,7 +208,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
           },
         ];
 
-        await setPnpmMinimumReleaseAge(packageFiles);
+        await setPnpmMinimumReleaseAge(packageFiles, {});
 
         expect(packageFiles[0].packageRules).toBeUndefined();
       },
@@ -222,7 +225,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       'adds the pnpm v11 default without a setting for pnpm $pnpm',
       async ({ pnpm, expected }) => {
         mockWorkspace('packages:\n  - pkgs/*\n');
-        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+        const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
           {
             ...packageFile('some-dir/package.json', {
               pnpmLockFile: 'some-dir/pnpm-lock.yaml',
@@ -231,7 +234,7 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
           },
         ];
 
-        await setPnpmMinimumReleaseAge(packageFiles);
+        await setPnpmMinimumReleaseAge(packageFiles, {});
 
         expect(packageFiles[0].packageRules).toEqual(expected);
       },
@@ -244,24 +247,22 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       ${'^11.0.0'}  | ${null}                      | ${'1440 minutes'}
       ${undefined}  | ${null}                      | ${'1440 minutes'}
     `(
-      'reads the repository .npmrc for pnpm $pnpm and workspace=$workspace',
+      'reads the .npmrc for pnpm $pnpm and workspace=$workspace',
       async ({ pnpm, workspace, expected }) => {
         mockWorkspace(workspace);
-        const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+        const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
           packageFile('some-dir/pnpm-workspace.yaml', {
             pnpmLockFile: 'some-dir/pnpm-lock.yaml',
           }),
           {
             packageFile: 'some-dir/package.json',
             extractedConstraints: { pnpm },
-            managerData: {
-              pnpmLockFile: 'some-dir/pnpm-lock.yaml',
-              repoNpmrc,
-            },
+            npmrc,
+            managerData: { pnpmLockFile: 'some-dir/pnpm-lock.yaml' },
           },
         ];
 
-        await setPnpmMinimumReleaseAge(packageFiles);
+        await setPnpmMinimumReleaseAge(packageFiles, {});
 
         // the pnpm-workspace.yaml gets the value of the root package.json
         for (const file of packageFiles) {
@@ -272,28 +273,89 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       },
     );
 
-    it('reads the repository .npmrc of another package file without a root package.json', async () => {
+    it('reads the .npmrc of another package file without a root package.json', async () => {
       mockWorkspace(null);
-      const packageFiles: Partial<PackageFile<NpmManagerData>>[] = [
+      const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
         packageFile('some-dir/pnpm-workspace.yaml', {
           pnpmLockFile: 'some-dir/pnpm-lock.yaml',
         }),
         {
           packageFile: 'some-dir/pkgs/a/package.json',
           extractedConstraints: { pnpm: '^10.20.0' },
-          managerData: {
-            pnpmLockFile: 'some-dir/pnpm-lock.yaml',
-            repoNpmrc,
-          },
+          npmrc,
+          managerData: { pnpmLockFile: 'some-dir/pnpm-lock.yaml' },
         },
       ];
 
-      await setPnpmMinimumReleaseAge(packageFiles);
+      await setPnpmMinimumReleaseAge(packageFiles, {});
 
       expect(packageFiles.map((p) => p.packageRules)).toEqual([
         [rule('2880 minutes')],
         [rule('2880 minutes')],
       ]);
+    });
+
+    it('reads the minimum release age of the npmrc option without a repository .npmrc', async () => {
+      mockWorkspace(null);
+      const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
+        {
+          packageFile: 'some-dir/package.json',
+          extractedConstraints: { pnpm: '^10.20.0' },
+          // the merged .npmrc, which has only the `npmrc` option
+          npmrc: 'minimum-release-age=60\n',
+          managerData: { pnpmLockFile: 'some-dir/pnpm-lock.yaml' },
+        },
+      ];
+
+      await setPnpmMinimumReleaseAge(packageFiles, {});
+
+      expect(packageFiles[0].packageRules).toEqual([rule('60 minutes')]);
+    });
+
+    it.each`
+      constraints            | extracted     | lockfileVersion | expected
+      ${{ pnpm: '10.20.0' }} | ${'^11.0.0'}  | ${"'9.0'"}      | ${'2880 minutes'}
+      ${{ pnpm: '11.0.0' }}  | ${'^10.20.0'} | ${"'6.0'"}      | ${'1440 minutes'}
+      ${{}}                  | ${undefined}  | ${"'6.0'"}      | ${'2880 minutes'}
+      ${{}}                  | ${undefined}  | ${5.4}          | ${'2880 minutes'}
+      ${{}}                  | ${'^11.0.0'}  | ${"'6.0'"}      | ${'1440 minutes'}
+      ${{}}                  | ${undefined}  | ${"'9.0'"}      | ${'1440 minutes'}
+      ${{}}                  | ${undefined}  | ${undefined}    | ${'1440 minutes'}
+    `(
+      'resolves pnpm for constraints=$constraints, extracted=$extracted and lockfileVersion=$lockfileVersion like the lock file update',
+      async ({ constraints, extracted, lockfileVersion, expected }) => {
+        mockWorkspace(
+          null,
+          lockfileVersion === undefined
+            ? null
+            : `lockfileVersion: ${lockfileVersion}\n`,
+        );
+        const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
+          {
+            packageFile: 'some-dir/package.json',
+            extractedConstraints: { pnpm: extracted },
+            npmrc,
+            managerData: { pnpmLockFile: 'some-dir/pnpm-lock.yaml' },
+          },
+        ];
+
+        await setPnpmMinimumReleaseAge(packageFiles, { constraints });
+
+        expect(packageFiles[0].packageRules).toEqual([rule(expected)]);
+      },
+    );
+
+    it('adds no pnpm v11 default for a v6 lock file without a pnpm version', async () => {
+      mockWorkspace(null, "lockfileVersion: '6.0'\n");
+      const packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[] = [
+        packageFile('some-dir/package.json', {
+          pnpmLockFile: 'some-dir/pnpm-lock.yaml',
+        }),
+      ];
+
+      await setPnpmMinimumReleaseAge(packageFiles, {});
+
+      expect(packageFiles[0].packageRules).toBeUndefined();
     });
   });
 

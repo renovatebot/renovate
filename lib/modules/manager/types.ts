@@ -31,7 +31,8 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
-export interface ExtractConfig extends CustomExtractConfig {
+export interface ExtractConfig
+  extends CustomExtractConfig, Pick<ToolConstraintsConfig, 'constraints'> {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;

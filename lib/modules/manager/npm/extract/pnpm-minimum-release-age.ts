@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -9,10 +9,16 @@ import { matchRegexOrGlobList } from '../../../../util/string-match.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
 import { intersectsWith, isSubsetOf } from '../../../versioning/common.ts';
 import { api as npmVersioning } from '../../../versioning/npm/index.ts';
-import type { ExtractedPackageRule, PackageFile } from '../../types.ts';
+import type {
+  ExtractConfig,
+  ExtractedPackageRule,
+  NpmrcPackageFile,
+} from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { PnpmWorkspaceMinimumReleaseAge } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { parseNpmrcPnpmMinimumReleaseAge } from './npmrc.ts';
+import { getConstraintFromLockFile } from './pnpm.ts';
 import type { PnpmMinimumReleaseAgeExclude } from './types.ts';
 
 // pnpm reads only auth and registry settings from `.npmrc` since v11.0.0
@@ -201,14 +207,17 @@ export function getPnpmMinimumReleaseAgeRules(
 }
 
 /**
- * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the repository `.npmrc` `minimum-release-age`, or the pnpm v11 default, and keeps the `pnpm-workspace.yaml` settings in `managerData`.
+ * Adds `packageRules` with the pnpm minimum release age to the package files of each pnpm lock file, including its `pnpm-workspace.yaml`, from the `pnpm-workspace.yaml` `minimumReleaseAge`, before pnpm v11 the `minimum-release-age` of the merged `.npmrc` (the `npmrc` option and the repository `.npmrc`), or the pnpm v11 default, and keeps the `pnpm-workspace.yaml` settings in `managerData`.
+ *
+ * The pnpm version comes from the configured `constraints`, the root `package.json` or the lock file, like for the lock file update.
  */
 export async function setPnpmMinimumReleaseAge(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+  packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
+  config: ExtractConfig,
 ): Promise<void> {
   const packageFilesByLockFile = new Map<
     string,
-    Partial<PackageFile<NpmManagerData>>[]
+    Partial<NpmrcPackageFile<NpmManagerData>>[]
   >();
   for (const packageFile of packageFiles) {
     const pnpmLockFile = packageFile.managerData?.pnpmLockFile;
@@ -224,14 +233,19 @@ export async function setPnpmMinimumReleaseAge(
   for (const [pnpmLockFile, lockFilePackageFiles] of packageFilesByLockFile) {
     const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
     const { minimumReleaseAge, minimumReleaseAgeStrict } = workspace;
+    const hasMinimumReleaseAgeExclude = isNonEmptyArray(
+      workspace.minimumReleaseAgeExclude,
+    );
     if (
       minimumReleaseAge !== undefined ||
-      minimumReleaseAgeStrict !== undefined
+      minimumReleaseAgeStrict !== undefined ||
+      hasMinimumReleaseAgeExclude
     ) {
       for (const packageFile of lockFilePackageFiles) {
         packageFile.managerData!.pnpmWorkspaceMinimumReleaseAge = {
           minimumReleaseAge,
           minimumReleaseAgeStrict,
+          ...(hasMinimumReleaseAgeExclude && { hasMinimumReleaseAgeExclude }),
         };
       }
     }
@@ -244,14 +258,18 @@ export async function setPnpmMinimumReleaseAge(
     const root =
       lockFilePackageFiles.find(
         (packageFile) => packageFile.packageFile === rootPackageFile,
-      ) ??
-      lockFilePackageFiles.find(
-        (packageFile) => packageFile.managerData?.repoNpmrc,
-      );
+      ) ?? lockFilePackageFiles.find((packageFile) => packageFile.npmrc);
+    const pnpmConstraint = await resolveToolConstraint(
+      config,
+      'pnpm',
+      async () =>
+        root?.extractedConstraints?.pnpm ??
+        (await getConstraintFromLockFile(pnpmLockFile)),
+    );
     const minutes = getPnpmMinimumReleaseAgeMinutes(
       workspace,
-      root?.managerData?.repoNpmrc?.content,
-      root?.extractedConstraints?.pnpm,
+      root?.npmrc,
+      pnpmConstraint,
       true,
     );
     if (!minutes) {
