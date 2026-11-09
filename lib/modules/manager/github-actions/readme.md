@@ -117,7 +117,7 @@ To use a different version, set the `ghActionsLock` constraint:
 ```json
 {
   "constraints": {
-    "ghActionsLock": "v0.4.0"
+    "ghActionsLock": "v0.4.1"
   }
 }
 ```
