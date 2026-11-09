@@ -9,7 +9,6 @@ import type {
 import { getApiBaseUrl } from '../../../util/github/url.ts';
 import { hashStream } from '../../../util/hash.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
-import { stripVersionPrefix } from '../../../util/string.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { DigestConfig } from '../types.ts';
 
@@ -21,6 +20,11 @@ function inferHashAlg(digest: string): string {
     case 96:
       return 'sha512';
   }
+}
+
+/** Strips any non-numeric prefix, such as `v`, `v.` or `release-`, from a tag. */
+function tagToVersion(tag: string): string {
+  return tag.replace(regEx(/^\D+(?<digit>\d)/), '$<digit>');
 }
 
 export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource {
@@ -144,8 +148,8 @@ export class GithubReleaseAttachmentsDatasource extends GithubReleasesDatasource
     digestAsset: GithubDigestFile,
     release: GithubRestRelease,
   ): Promise<string | null> {
-    const current = stripVersionPrefix(digestAsset.currentVersion);
-    const next = stripVersionPrefix(release.tag_name);
+    const current = tagToVersion(digestAsset.currentVersion);
+    const next = tagToVersion(release.tag_name);
 
     if (digestAsset.digestedFileName) {
       const checksumAssetName = digestAsset.assetName.replace(current, next);
