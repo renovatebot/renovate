@@ -1,5 +1,5 @@
 import type { SendHandle, Serializable } from 'node:child_process';
-import { Readable } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import { execa as _execa } from 'execa';
 import { logger, partial } from '~test/util.ts';
 import * as _instrumentation from '../../instrumentation/index.ts';
@@ -309,6 +309,38 @@ describe('util/exec/common', () => {
       ).catch((caught: unknown) => caught);
 
       expect(error).toBeInstanceOf(ExecError);
+      expect(error).toHaveProperty('options', { timeout: 5 });
+    });
+
+    it('omits command output from errors when redactOutput is set', async () => {
+      const cmd = 'ls -l';
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      const error = await exec(
+        cmd,
+        partial<RawExecOptions>({
+          redactOutput: true,
+          timeout: 5,
+          outputWriters: { stdout: new PassThrough() },
+          stdout: ['pipe', new PassThrough()],
+          stdio: 'pipe',
+        }),
+      ).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ExecError);
+      expect(error).toMatchObject({
+        message: 'Command failed: ls -l',
+        stdout: '',
+        stderr: '',
+        exitCode: 1,
+      });
       expect(error).toHaveProperty('options', { timeout: 5 });
     });
 

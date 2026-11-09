@@ -3,7 +3,7 @@ import { exec } from './index.ts';
 
 vi.unmock('./common.ts');
 
-describe('util/exec/index-integration', () => {
+describe('util/exec/index.integration', () => {
   beforeEach(() => {
     GlobalConfig.set({ binarySource: 'global', localDir: process.cwd() });
   });

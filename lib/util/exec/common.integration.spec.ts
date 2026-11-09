@@ -9,7 +9,7 @@ import { ExecError } from './exec-error.ts';
 
 vi.unmock('./common.ts');
 
-describe('util/exec/common-integration', () => {
+describe('util/exec/common.integration', () => {
   it('disables Execa verbose output when redacting command output', async () => {
     const verbose = vi.fn();
     const input = 'private input';
@@ -104,7 +104,7 @@ describe('util/exec/common-integration', () => {
 
     expect(controller.signal.aborted).toBe(true);
     expect(error).toBeInstanceOf(ExecError);
-    expect(error).toMatchObject({ stdout: input, signal: 'SIGTERM' });
+    expect(error).toMatchObject({ stdout: '', stderr: '', signal: 'SIGTERM' });
     expect(error).not.toHaveProperty('options.input');
   });
 
@@ -133,8 +133,8 @@ describe('util/exec/common-integration', () => {
 
       expect(error).toBeInstanceOf(ExecError);
       expect(error).toMatchObject({
-        stdout: input,
-        stderr: input,
+        stdout: '',
+        stderr: '',
         exitCode: 1,
         message: expect.not.stringContaining(input),
         stack: expect.not.stringContaining(input),

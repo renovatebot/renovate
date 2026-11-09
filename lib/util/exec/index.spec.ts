@@ -1402,11 +1402,10 @@ describe('util/exec/index', () => {
   it('retries a rejected installation in each workspace', async () => {
     process.env = processEnv;
     memCache.init();
-    const marker = 'TOOL_INSTALLATION_FAILED:1.0.0';
     const error = new ExecError('installation failed', {
       cmd: 'install-tool npm 1.0.0',
       stdout: '',
-      stderr: marker,
+      stderr: '',
       options: {},
       exitCode: 1,
     });

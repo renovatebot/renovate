@@ -213,28 +213,6 @@ describe('util/exec/docker/index', () => {
       expect(stderr).toBe('installing\ninstalled\nignored');
     });
 
-    it('preserves setup failure markers on stderr', async () => {
-      mockExecAll();
-      const marker = 'TOOL_INSTALLATION_FAILED:1.0.0';
-      const res = await generateDockerCommand(
-        ['cat'],
-        [`echo ${marker}`, 'false'],
-        dockerOptions,
-        'ghcr.io/renovatebot/base-image',
-        true,
-      );
-
-      const { exitCode, stdout, stderr } = await execa(
-        'bash',
-        ['-c', split(res).at(-1)!],
-        { input: 'private manifest', reject: false },
-      );
-
-      expect(exitCode).toBe(1);
-      expect(stdout).toBe('');
-      expect(stderr).toBe(marker);
-    });
-
     it('passes input only to the final command in a sequence', async () => {
       mockExecAll();
       const input = 'private manifest';

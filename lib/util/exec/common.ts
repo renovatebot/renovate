@@ -230,13 +230,29 @@ export function exec(
       const {
         input: _input,
         redactOutput: _redactOutput,
+        outputWriters,
         ...safeOptions
       } = opts;
+      const cmd = cp.spawnargs.join(' ');
+      if (redactOutput) {
+        // Stream options and output writers can buffer the output, so keep only scalar options.
+        const { cwd, env, maxBuffer, shell, timeout } = safeOptions;
+        return {
+          cmd,
+          options: Object.fromEntries(
+            Object.entries({ cwd, env, maxBuffer, shell, timeout }).filter(
+              ([, value]) => value !== undefined,
+            ),
+          ),
+          stdout: '',
+          stderr: '',
+        };
+      }
       return {
-        cmd: cp.spawnargs.join(' '),
-        options: safeOptions,
-        stdout: stringify(stdout, opts.outputWriters?.stdout),
-        stderr: stringify(stderr, opts.outputWriters?.stderr),
+        cmd,
+        options: { ...safeOptions, ...(outputWriters && { outputWriters }) },
+        stdout: stringify(stdout, outputWriters?.stdout),
+        stderr: stringify(stderr, outputWriters?.stderr),
       };
     }
   });
