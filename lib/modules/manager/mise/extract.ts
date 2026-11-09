@@ -119,7 +119,16 @@ export async function extractPackageFile(
     extractInclude(include, content),
   );
 
-  if (!toolEntries.length && !taskFileDeps.length && !includeDeps.length) {
+  const taskConfigIncludeDeps = misefile.task_config.includes.map((include) =>
+    extractInclude(include, content, 'task-include'),
+  );
+
+  if (
+    !toolEntries.length &&
+    !taskFileDeps.length &&
+    !includeDeps.length &&
+    !taskConfigIncludeDeps.length
+  ) {
     return null;
   }
 
@@ -141,7 +150,12 @@ export async function extractPackageFile(
   const toolDeps = toolEntries.map(([name, toolData, depType]) =>
     extractToolEntry(name, toolData, depType, lockFileData),
   );
-  const deps = [...toolDeps, ...taskFileDeps, ...includeDeps];
+  const deps = [
+    ...toolDeps,
+    ...taskFileDeps,
+    ...includeDeps,
+    ...taskConfigIncludeDeps,
+  ];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {

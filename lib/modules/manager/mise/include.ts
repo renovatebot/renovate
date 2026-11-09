@@ -4,33 +4,29 @@ import { extractGitReference } from './git-reference.ts';
 
 const ociPrefix = 'oci::';
 
-function extractOciInclude(include: string): PackageDependency {
-  // `replaceString` and the template cover the image reference only,
-  // so the `oci::` prefix stays in place.
-  const dep = getDep(include.slice(ociPrefix.length));
-  return { ...dep, depType: 'include' };
-}
-
 /**
- * Extracts a remote `include` entry of a mise configuration file.
+ * Extracts a remote include entry of a mise configuration file: either a
+ * top-level `include` entry or a `[task_config] includes` entry.
  * `content` is the raw file, used to read trailing comment hints.
  * @link https://mise.jdx.dev/configuration.html#include
  */
 export function extractInclude(
   include: string,
   content: string,
+  depType = 'include',
 ): PackageDependency {
   const trimmed = include.trim();
   if (trimmed.startsWith(ociPrefix)) {
-    return extractOciInclude(trimmed);
+    const dep = getDep(trimmed.slice(ociPrefix.length));
+    return { ...dep, depType };
   }
-  const gitDep = extractGitReference(trimmed, content, 'include');
+  const gitDep = extractGitReference(trimmed, content, depType);
   if (gitDep) {
     return gitDep;
   }
   return {
     depName: trimmed,
-    depType: 'include',
+    depType,
     skipReason: 'unsupported-url',
   };
 }

@@ -10,6 +10,11 @@ export const knownDepTypes = [
     description:
       'A remote configuration file (`git::` or `oci::`) referenced in the top-level `include` array',
   },
+  {
+    depType: 'task-include',
+    description:
+      'A remote task source (`git::` or `oci::`) referenced in the `[task_config] includes` array',
+  },
 ] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =

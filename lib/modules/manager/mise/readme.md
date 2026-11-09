@@ -39,6 +39,9 @@ Renovate supports the remote forms of the top level [`include`](https://mise.jdx
   Entries without a `ref` are skipped, as mise then uses the default branch.
 - `oci::<registry>/<repo>[:tag][@sha256:<digest>]`: handled like a Docker image, using the `docker` datasource.
 
+Renovate supports the same forms in the [`task_config.includes`](https://mise.jdx.dev/tasks/task-configuration.html#task_config-includes) array, which is how mise shares task directories between repositories.
+The extracted dependencies have the `depType` `include` for top level entries and `task-include` for `[task_config] includes` entries.
+
 A tag `ref` is updated to the newest tag:
 
 ```toml
