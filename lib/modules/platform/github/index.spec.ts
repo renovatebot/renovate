@@ -5386,6 +5386,25 @@ describe('modules/platform/github/index', () => {
         await expect(github.getPrAutoMergeState(123)).resolves.toEqual(pr);
       });
 
+      it.each(['Mannequin', 'EnterpriseUserAccount', 'Organization'])(
+        'accepts %s actors',
+        async (actorType) => {
+          const scope = await mockScope();
+          const pr = {
+            ...enabledPr,
+            autoMergeRequest: {
+              ...enabledPr.autoMergeRequest,
+              enabledBy: { __typename: actorType, login: 'renovate' },
+            },
+          };
+          scope.post('/graphql', autoMergeQueryBody).reply(200, {
+            data: { repository: { pullRequest: pr } },
+          });
+
+          await expect(github.getPrAutoMergeState(123)).resolves.toEqual(pr);
+        },
+      );
+
       it('returns disabled state separately from unconfirmed state', async () => {
         const scope = await mockScope();
         scope
@@ -5407,7 +5426,6 @@ describe('modules/platform/github/index', () => {
         ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Bot', login: '' } }}
         ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Bot', login: 123 } }}
         ${{ ...enabledPr.autoMergeRequest, enabledBy: { login: 'renovate' } }}
-        ${{ ...enabledPr.autoMergeRequest, enabledBy: { __typename: 'Mannequin', login: 'renovate' } }}
         ${{ ...enabledPr.autoMergeRequest, commitHeadline: 123 }}
         ${{ ...enabledPr.autoMergeRequest, commitBody: 123 }}
       `(
@@ -5563,6 +5581,7 @@ describe('modules/platform/github/index', () => {
       enabledBy
       ${{ __typename: 'User', login: 'maintainer' }}
       ${{ __typename: 'User', login: 'renovate' }}
+      ${{ __typename: 'Mannequin', login: 'renovate' }}
       ${null}
     `(
       'does not cancel auto-merge enabled by $enabledBy',
@@ -5696,21 +5715,32 @@ describe('modules/platform/github/index', () => {
       ).resolves.toBeFalse();
     });
 
-    it('rejects GraphQL errors when cancelling auto-merge', async () => {
-      const scope = await mockScope();
-      scope
-        .post('/graphql', autoMergeQueryBody)
-        .reply(200, { data: { repository: { pullRequest: enabledPr } } })
-        .post('/graphql', cancellationBody)
-        .reply(200, {
-          data: { disablePullRequestAutoMerge: { pullRequest: disabledPr } },
-          errors: [{ message: 'Failed to cancel auto-merge' }],
-        });
+    it.each`
+      currentPr                         | expected
+      ${enabledPr}                      | ${false}
+      ${null}                           | ${false}
+      ${{ ...disabledPr, id: 'other' }} | ${false}
+      ${disabledPr}                     | ${true}
+    `(
+      'checks the state again after a failed cancellation: $expected',
+      async ({ currentPr, expected }) => {
+        const scope = await mockScope();
+        scope
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, { data: { repository: { pullRequest: enabledPr } } })
+          .post('/graphql', cancellationBody)
+          .reply(200, {
+            data: { disablePullRequestAutoMerge: { pullRequest: null } },
+            errors: [{ message: 'Failed to cancel auto-merge' }],
+          })
+          .post('/graphql', autoMergeQueryBody)
+          .reply(200, { data: { repository: { pullRequest: currentPr } } });
 
-      await expect(
-        github.cancelPlatformAutomerge(cancellationConfig),
-      ).resolves.toBeFalse();
-    });
+        await expect(
+          github.cancelPlatformAutomerge(cancellationConfig),
+        ).resolves.toBe(expected);
+      },
+    );
 
     it.each`
       mutation

@@ -2237,7 +2237,9 @@ export async function cancelPlatformAutomerge({
       { prNo, errors: cancellation.errors },
       'Failed to cancel PR auto-merge',
     );
-    return false;
+    // Another actor may have disabled auto-merge after the state query.
+    const current = await getPrAutoMergeState(prNo);
+    return current?.id === pr.id && current.autoMergeRequest === null;
   }
 
   const disabledPr = GithubPullRequestAutoMergeState.safeParse(

@@ -147,7 +147,7 @@ export const GithubPullRequestAutoMergeState = z.object({
       commitBody: z.string().nullable(),
       enabledBy: z
         .object({
-          __typename: z.enum(['Bot', 'User']),
+          __typename: z.string(),
           login: z.string().min(1),
         })
         .nullable(),
