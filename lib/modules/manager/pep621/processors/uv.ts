@@ -91,7 +91,10 @@ export class UvProcessor extends BasePyProjectProcessor {
           continue;
         }
 
-        if (dep.depType === 'requires-python') {
+        if (
+          dep.depType === 'requires-python' ||
+          dep.depType === depTypes.uvRequiredVersion
+        ) {
           continue;
         }
 

@@ -528,6 +528,46 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
+    it('should not apply uv index registryUrls to uv required-version', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [project]
+          dependencies = ["dep1==0.1.0"]
+
+          [tool.uv]
+          required-version = "0.10.12"
+
+          [[tool.uv.index]]
+          name = "custom"
+          url = "https://custom.example.com/simple"
+          default = true
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toEqual([
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+          datasource: 'pypi',
+          depType: 'project.dependencies',
+          currentValue: '==0.1.0',
+          currentVersion: '0.1.0',
+          registryUrls: ['https://custom.example.com/simple'],
+        },
+        {
+          depName: 'uv',
+          packageName: 'astral-sh/uv',
+          datasource: GithubReleasesDatasource.id,
+          versioning: 'pep440',
+          depType: depTypes.uvRequiredVersion,
+          currentValue: '0.10.12',
+          replaceString: 'required-version = "0.10.12"',
+          autoReplaceStringTemplate: 'required-version = "{{newValue}}"',
+        },
+      ]);
+    });
+
     it('should handle SSH git URLs correctly for GitHub sources', async () => {
       const result = await extractPackageFile(
         codeBlock`
