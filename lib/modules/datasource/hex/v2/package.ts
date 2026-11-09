@@ -4,7 +4,7 @@
 //   protoc               v6.33.4
 // source: package.proto
 
-/* oxlint-disable */
+/* eslint-disable */
 import _m0 from "protobufjs/minimal.js";
 
 export const protobufPackage = "";
@@ -160,17 +160,6 @@ export const Package = {
       repository: isSet(object.repository) ? globalThis.String(object.repository) : "",
     };
   },
-
-  create<I extends Exact<DeepPartial<Package>, I>>(base?: I): Package {
-    return Package.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Package>, I>>(object: I): Package {
-    const message = createBasePackage();
-    message.releases = object.releases?.map((e) => Release.fromPartial(e)) || [];
-    message.name = object.name ?? "";
-    message.repository = object.repository ?? "";
-    return message;
-  },
 };
 
 function createBaseRelease(): Release {
@@ -246,21 +235,6 @@ export const Release = {
       outerChecksum: isSet(object.outerChecksum) ? bytesFromBase64(object.outerChecksum) : new Uint8Array(0),
     };
   },
-
-  create<I extends Exact<DeepPartial<Release>, I>>(base?: I): Release {
-    return Release.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Release>, I>>(object: I): Release {
-    const message = createBaseRelease();
-    message.version = object.version ?? "";
-    message.innerChecksum = object.innerChecksum ?? new Uint8Array(0);
-    message.dependencies = object.dependencies?.map((e) => Dependency.fromPartial(e)) || [];
-    message.retired = (object.retired !== undefined && object.retired !== null)
-      ? RetirementStatus.fromPartial(object.retired)
-      : undefined;
-    message.outerChecksum = object.outerChecksum ?? new Uint8Array(0);
-    return message;
-  },
 };
 
 function createBaseRetirementStatus(): RetirementStatus {
@@ -303,16 +277,6 @@ export const RetirementStatus = {
       reason: isSet(object.reason) ? retirementReasonFromJSON(object.reason) : 0,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
-  },
-
-  create<I extends Exact<DeepPartial<RetirementStatus>, I>>(base?: I): RetirementStatus {
-    return RetirementStatus.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<RetirementStatus>, I>>(object: I): RetirementStatus {
-    const message = createBaseRetirementStatus();
-    message.reason = object.reason ?? 0;
-    message.message = object.message ?? "";
-    return message;
   },
 };
 
@@ -381,19 +345,6 @@ export const Dependency = {
       repository: isSet(object.repository) ? globalThis.String(object.repository) : "",
     };
   },
-
-  create<I extends Exact<DeepPartial<Dependency>, I>>(base?: I): Dependency {
-    return Dependency.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Dependency>, I>>(object: I): Dependency {
-    const message = createBaseDependency();
-    message.package = object.package ?? "";
-    message.requirement = object.requirement ?? "";
-    message.optional = object.optional ?? false;
-    message.app = object.app ?? "";
-    message.repository = object.repository ?? "";
-    return message;
-  },
 };
 
 function bytesFromBase64(b64: string): Uint8Array {
@@ -408,18 +359,6 @@ function bytesFromBase64(b64: string): Uint8Array {
     return arr;
   }
 }
-
-type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
-
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;
