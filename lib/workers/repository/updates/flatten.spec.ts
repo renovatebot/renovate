@@ -509,6 +509,59 @@ describe('workers/repository/updates/flatten', () => {
       ]);
     });
 
+    it('ignores minimumReleaseAgePackageManagerSync of rules', async () => {
+      // @ts-expect-error -- managers are not defined on RenovateConfig
+      config.npm = { minimumReleaseAgePackageManagerSync: true };
+      config.packageRules = [
+        {
+          matchPackageNames: ['*'],
+          minimumReleaseAgePackageManagerSync: false,
+        },
+      ];
+      config.lockFileMaintenance = {
+        enabled: true,
+        minimumReleaseAgePackageManagerSync: false,
+      };
+      config.vulnerabilityAlerts = {
+        minimumReleaseAgePackageManagerSync: false,
+      };
+      config.remediations = {
+        'package-lock.json': [
+          { depName: 'bar', currentVersion: '1.0.0', newVersion: '1.0.1' },
+        ],
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: 'foo',
+                currentValue: '1.0.0',
+                updates: [{ newValue: '2.0.0', updateType: 'major' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toMatchObject([
+        { depName: 'foo', minimumReleaseAgePackageManagerSync: true },
+        {
+          isLockFileMaintenance: true,
+          minimumReleaseAgePackageManagerSync: true,
+        },
+        {
+          depName: 'bar',
+          isRemediation: true,
+          minimumReleaseAgePackageManagerSync: true,
+        },
+      ]);
+    });
+
     describe('hasAttestation is taken from the current value', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',
