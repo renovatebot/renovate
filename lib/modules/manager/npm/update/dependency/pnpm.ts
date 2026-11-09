@@ -97,7 +97,10 @@ export function updatePnpmWorkspaceDependency({
     return null;
   }
 
-  return CST.stringify(modifiedDocument.contents.srcToken);
+  return (
+    fileContent.slice(0, modifiedDocument.contents.srcToken.offset) +
+    CST.stringify(modifiedDocument.contents.srcToken)
+  );
 }
 
 /**

@@ -412,6 +412,39 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
     `);
   });
 
+  it('preserves comments before the first key', () => {
+    const upgrade = {
+      depType: 'pnpm.catalog.default',
+      depName: 'react',
+      newValue: '19.0.0',
+    };
+    const pnpmWorkspaceYaml = codeBlock`
+      # This is a header comment
+
+      # This one is attached to the first key
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 18.3.1
+    `;
+    const testContent = npmUpdater.updateDependency({
+      fileContent: pnpmWorkspaceYaml,
+      packageFile: 'pnpm-workspace.yaml',
+      upgrade,
+    });
+    expect(testContent).toEqual(codeBlock`
+      # This is a header comment
+
+      # This one is attached to the first key
+      packages:
+        - pkg-a
+
+      catalog:
+        react: 19.0.0
+    `);
+  });
+
   it('preserves double quote style', () => {
     const upgrade = {
       depType: 'pnpm.catalog.default',
