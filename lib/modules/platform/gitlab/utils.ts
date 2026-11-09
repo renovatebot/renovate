@@ -1,5 +1,5 @@
 import url from 'node:url';
-import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -120,10 +120,6 @@ export function getRepoUrl(
   repoUrl.username = 'oauth2';
   repoUrl.password = opts.token!;
   return repoUrl.toString();
-}
-
-export function toCommitMessage(message: string | string[]): string {
-  return isArray(message) ? message.join('\n\n') : message;
 }
 
 export async function toAdditionAction(

@@ -24,6 +24,7 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -93,7 +94,6 @@ import {
   getRepoUrl,
   prInfo,
   toAdditionAction,
-  toCommitMessage,
   toDeletionAction,
 } from './utils.ts';
 
@@ -281,7 +281,7 @@ export async function getJsonFile(
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
 ): Promise<LongCommitSha | null> {
-  const { baseBranch, branchName, files, message } = commitConfig;
+  const { baseBranch, branchName, files, message, trailers } = commitConfig;
   const startBranch = baseBranch ?? config.defaultBranch;
 
   const commitResult = await git.prepareCommit(commitConfig);
@@ -322,7 +322,7 @@ export async function commitFiles(
         body: {
           branch: branchName,
           start_branch: startBranch,
-          commit_message: toCommitMessage(message),
+          commit_message: formatCommitMessage(message, trailers),
           actions,
           force: true,
         },

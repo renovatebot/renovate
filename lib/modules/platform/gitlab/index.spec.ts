@@ -572,7 +572,6 @@ describe('modules/platform/gitlab/index', () => {
 
     beforeEach(async () => {
       await initRepo();
-      git.getCurrentBranch.mockReturnValue('master');
       git.prepareCommit.mockImplementation((commitConfig) =>
         Promise.resolve({
           parentCommitSha: preparedParentSha,
@@ -603,6 +602,37 @@ describe('modules/platform/gitlab/index', () => {
       expect(git.resetToCommit).not.toHaveBeenCalled();
       expect(git.fetchBranch).not.toHaveBeenCalled();
     });
+
+    it.each([{ message: 'title\n\nbody' }, { message: ['title', 'body'] }])(
+      'includes trailers in the API commit message for $message',
+      async ({ message }) => {
+        const trailers = [
+          'Signed-off-by: Renovate Bot <bot@example.com>',
+          'X-Test: value',
+        ];
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .post('/api/v4/projects/some%2Frepo/repository/commits', {
+            branch: 'some-branch',
+            start_branch: 'master',
+            commit_message:
+              'title\n\nbody\n\nSigned-off-by: Renovate Bot <bot@example.com>\nX-Test: value',
+            actions: [{ action: 'delete', file_path: 'old.txt' }],
+            force: true,
+          })
+          .reply(201, { id: preparedCommitSha });
+
+        const res = await gitlab.commitFiles({
+          branchName: 'some-branch',
+          files: [{ type: 'deletion', path: 'old.txt' }],
+          message,
+          trailers,
+        });
+
+        expect(scope.isDone()).toBeTrue();
+        expect(res).toBe(fetchedSha);
+      },
+    );
 
     it('returns null when no actions are generated', async () => {
       const res = await gitlab.commitFiles({
