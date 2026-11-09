@@ -24,7 +24,9 @@ export function substituteRegistryAlias(
     coerceObject(registryAliases),
   )) {
     const aliasNotSubstring =
-      s.length === original.length || s[original.length] === '/';
+      s.length === original.length ||
+      s[original.length] === '/' ||
+      original.endsWith('/');
     if (s.startsWith(original) && aliasNotSubstring) {
       return `${replace}${s.slice(original.length)}`;
     }

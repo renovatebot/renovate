@@ -94,5 +94,9 @@ describe('modules/manager/custom/utils', () => {
       const s = utils.substituteRegistryAlias('foobar/abc', { foo: 'baz' });
       expect(s).toBe('foobar/abc');
     });
+    it('substitutes when registry alias ends with a /', () => {
+      const s = utils.substituteRegistryAlias('foo/abc', { 'foo/': 'bar/' });
+      expect(s).toBe('bar/abc');
+    });
   });
 });
