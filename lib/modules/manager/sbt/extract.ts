@@ -399,15 +399,15 @@ export function extractProxyUrls(
 // body contains braces (e.g. `def f = {}`) are skipped entirely.
 function extractNamedSingletonObjectVars(content: string): Vars {
   const vars: Vars = {};
-  const objectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
+  const objectRegex = regEx(/object\s+(?<name>\w+)\s*\{(?<body>[^{}]*)\}/g);
   for (const objectMatch of content.matchAll(objectRegex)) {
-    const objectName = objectMatch[1];
-    const body = objectMatch[2];
+    const { name: objectName, body } = objectMatch.groups!;
     const fieldRegex = regEx(
-      /\bval\s+(\w+)(?:\s*:\s*String)?\s*=\s*"([^"]+)"/g,
+      /\bval\s+(?<field>\w+)(?:\s*:\s*String)?\s*=\s*"(?<value>[^"]+)"/g,
     );
     for (const fieldMatch of body.matchAll(fieldRegex)) {
-      vars[`${objectName}.${fieldMatch[1]}`] = fieldMatch[2];
+      const { field, value } = fieldMatch.groups!;
+      vars[`${objectName}.${field}`] = value;
     }
   }
   return vars;
