@@ -50,7 +50,6 @@ describe('modules/manager/composer/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     GlobalConfig.set(adminConfig);
     fs.ensureCacheDir.mockResolvedValue('/tmp/renovate/cache/others/composer');
     datasource.getPkgReleases.mockResolvedValueOnce({

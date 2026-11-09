@@ -95,6 +95,36 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toHaveLength(0);
     });
 
+    it('normalizes dep names in both directions', async () => {
+      const managerConfig = {
+        manager: 'html',
+        enabled: true,
+        fileList: ['Dockerfile'],
+      };
+      fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+      html.extractPackageFile = vi.fn(() => ({
+        deps: [
+          { packageName: 'only-package-name' },
+          { depName: ' only-dep-name ' },
+          { depName: 'dep', packageName: 'package' },
+          { skipReason: 'invalid-name' },
+        ],
+      })) as never;
+      const res = await getManagerPackageFiles(managerConfig);
+      expect(res).toEqual([
+        {
+          packageFile: 'Dockerfile',
+          deps: [
+            { depName: 'only-package-name', packageName: 'only-package-name' },
+            { depName: 'only-dep-name', packageName: 'only-dep-name' },
+            { depName: 'dep', packageName: 'package' },
+            { skipReason: 'invalid-name' },
+          ],
+        },
+      ]);
+    });
+
     it('returns files with extractAllPackageFiles', async () => {
       const managerConfig = {
         manager: 'npm',

@@ -132,8 +132,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
   upgrade: BranchUpgradeConfig,
   currentReleaseHasAttestation: boolean | undefined,
 ): void {
-  const { packageName, depName, currentVersion, newVersion } = upgrade;
-  const name = packageName ?? depName;
+  const { packageName, currentVersion, newVersion } = upgrade;
 
   const newRelease = upgrade.releases?.find(
     (release) => release.version === newVersion,
@@ -150,7 +149,7 @@ function addPullRequestNoteIfAttestationHasBeenLost(
         codeBlock`
           > :stop_sign: **Caution**
           >
-          > ${name} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
+          > ${packageName} ${currentVersion} was released with an attestation, but ${newVersion} has no attestation.
           > Verify that release ${newVersion} was published by the expected author.
         `,
       ),

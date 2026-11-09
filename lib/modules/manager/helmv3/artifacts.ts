@@ -13,10 +13,8 @@ import {
 } from '../../../util/fs/index.ts';
 import { collectFileChanges } from '../../../util/git/file-changes.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as yaml from '../../../util/yaml.ts';
-import { HelmDatasource } from '../../datasource/helm/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import {
   artifactErrorResult,
@@ -24,9 +22,13 @@ import {
   fileChangesToArtifactResults,
   resolveToolConstraint,
 } from '../util.ts';
-import { generateHelmEnvs, generateRegistryLoginCmd } from './common.ts';
+import {
+  generateHelmEnvs,
+  generateRegistryLoginCmd,
+  helmRepositoryCredentialArgs,
+} from './common.ts';
 import { isOCIRegistry } from './oci.ts';
-import type { ChartDefinition, Repository, RepositoryRule } from './types.ts';
+import type { ChartDefinition, Repository } from './types.ts';
 import {
   aliasRecordToRepositories,
   getRepositories,
@@ -51,31 +53,15 @@ async function helmCommands(
     }
   });
 
-  // find classic Chart repositories and fitting host rules
-  const classicRepositories: RepositoryRule[] = repositories
-    .filter((repository) => !isOCIRegistry(repository))
-    .map((value) => {
-      return {
-        ...value,
-        hostRule: hostRules.find({
-          url: value.repository,
-          hostType: HelmDatasource.id,
-        }),
-      };
-    });
-
-  // add helm repos if an alias or credentials for the url are defined
-  classicRepositories.forEach((value) => {
-    const { username, password } = value.hostRule;
-    const parameters = [`${quote(value.repository)}`, `--force-update`];
-    const isPrivateRepo = username && password;
-    if (isPrivateRepo) {
-      parameters.push(`--username ${quote(username)}`);
-      parameters.push(`--password ${quote(password)}`);
-    }
-
+  // add classic Chart repositories, with credentials from fitting host rules
+  for (const value of repositories.filter((repo) => !isOCIRegistry(repo))) {
+    const parameters = [
+      quote(value.repository),
+      '--force-update',
+      ...helmRepositoryCredentialArgs(value.repository),
+    ];
     cmd.push(`helm repo add ${quote(value.name)} ${parameters.join(' ')}`);
-  });
+  }
 
   cmd.push(`helm dependency update ${quote(getParentDir(manifestPath))}`);
 

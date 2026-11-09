@@ -247,7 +247,6 @@ describe('modules/platform/gitea/index', () => {
     repoCache.resetCache();
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
-    hostRules.clear();
   });
 
   async function initFakePlatform(

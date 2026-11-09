@@ -42,10 +42,6 @@ describe('modules/manager/vendir/artifacts', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns null if no vendir.lock.yml found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
     await expect(

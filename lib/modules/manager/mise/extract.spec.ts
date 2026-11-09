@@ -1841,4 +1841,501 @@ describe('modules/manager/mise/extract', () => {
       },
     );
   });
+
+  describe('include', () => {
+    const sha = 'a'.repeat(64);
+
+    it.each([
+      {
+        description: 'github git',
+        include: 'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentValue: 'v1.2.0',
+          replaceString:
+            'git::https://github.com/org/cfg.git//mise.toml?ref=v1.2.0',
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'github git over ssh with sha ref',
+        include:
+          'git::ssh://git@github.com/org/cfg.git//base/tools.toml?ref=0123456789abcdef0123456789abcdef01234567',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          currentDigest: '0123456789abcdef0123456789abcdef01234567',
+          skipReason: 'unversioned-reference',
+        },
+      },
+      {
+        description: 'gitlab https',
+        include: 'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+        expected: {
+          depName: 'gitlab.com/group/sub/cfg',
+          packageName: 'group/sub/cfg',
+          datasource: 'gitlab-tags',
+          currentValue: '1.0',
+          replaceString:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref=1.0',
+          autoReplaceStringTemplate:
+            'git::https://gitlab.com/group/sub/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'gitlab ssh',
+        include: 'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+        expected: {
+          depName: 'gitlab.com/group/cfg',
+          packageName: 'group/cfg',
+          datasource: 'gitlab-tags',
+          currentValue: 'main',
+          replaceString:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref=main',
+          autoReplaceStringTemplate:
+            'git::ssh://git@gitlab.com/group/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'bitbucket',
+        include: 'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+        expected: {
+          depName: 'bitbucket.org/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'bitbucket-tags',
+          currentValue: 'v2',
+          replaceString:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref=v2',
+          autoReplaceStringTemplate:
+            'git::https://bitbucket.org/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'git without ref',
+        include: 'git::https://github.com/org/cfg.git//mise.toml',
+        expected: {
+          depName: 'github.com/org/cfg',
+          packageName: 'org/cfg',
+          datasource: 'github-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'git without path and ref',
+        include: 'git::https://git.example.com/org/cfg.git?depth=1',
+        expected: {
+          depName: 'git.example.com/org/cfg',
+          packageName: 'https://git.example.com/org/cfg.git',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'oci tag',
+        include: 'oci::ghcr.io/org/base:1.0',
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          replaceString: 'ghcr.io/org/base:1.0',
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci digest',
+        include: `oci::ghcr.io/org/base@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'oci tag and digest',
+        include: `oci::ghcr.io/org/base:1.0@sha256:${sha}`,
+        expected: {
+          depName: 'ghcr.io/org/base',
+          packageName: 'ghcr.io/org/base',
+          datasource: 'docker',
+          currentValue: '1.0',
+          currentDigest: `sha256:${sha}`,
+          replaceString: `ghcr.io/org/base:1.0@sha256:${sha}`,
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        },
+      },
+      {
+        description: 'invalid entry',
+        include: 'https://example.com/mise.toml',
+        expected: {
+          depName: 'https://example.com/mise.toml',
+          skipReason: 'unsupported-url',
+        },
+      },
+      {
+        description: 'git over http',
+        include: 'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git.acme.com/org/cfg',
+          packageName: 'http://git.acme.com:8080/org/cfg.git',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::http://git.acme.com:8080/org/cfg.git//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops https',
+        include:
+          'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'dev.azure.com/org/proj/_git/cfg',
+          packageName: 'https://dev.azure.com/org/proj/_git/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::https://dev.azure.com/org/proj/_git/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          currentValue: 'v1',
+          replaceString:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref=v1',
+          autoReplaceStringTemplate:
+            'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml?ref={{newValue}}',
+        },
+      },
+      {
+        description: 'azure devops ssh without ref',
+        include: 'git::git@ssh.dev.azure.com:v3/org/proj/cfg//mise.toml',
+        expected: {
+          depName: 'ssh.dev.azure.com/org/proj/cfg',
+          packageName: 'git@ssh.dev.azure.com:v3/org/proj/cfg',
+          datasource: 'git-tags',
+          skipReason: 'unspecified-version',
+        },
+      },
+      {
+        description: 'git without protocol',
+        include: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::git@github.com:org/cfg.git//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
+      {
+        description: 'git without repository',
+        include: 'git::https://github.com//mise.toml?ref=v1',
+        expected: {
+          depName: 'git::https://github.com//mise.toml?ref=v1',
+          skipReason: 'unsupported-url',
+        },
+      },
+    ])('extracts $description', async ({ include, expected }) => {
+      const content = `include = ["${include}"]`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [{ depType: 'include', ...expected }],
+      });
+    });
+
+    describe('sha refs with comment hints', () => {
+      const sha = '0123456789abcdef0123456789abcdef01234567';
+      const gh = `git::https://github.com/org/cfg.git//mise.toml?ref=${sha}`;
+      const gl = `git::https://gitlab.com/org/cfg.git//mise.toml?ref=${sha}`;
+      const bb = `git::https://bitbucket.org/org/cfg.git//mise.toml?ref=${sha}`;
+      const digestTpl =
+        '{{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}';
+
+      async function extractOne(entry: string, comment = '', tail = ',') {
+        const content = `include = [\n  "${entry}"${tail}${comment}\n]\n`;
+        const res = await extractPackageFile(content, miseFilename);
+        return res!.deps[0];
+      }
+
+      it('extracts a version comment', async () => {
+        const dep = await extractOne(gh, ' # v0.5.0');
+        expect(dep).toMatchObject({
+          datasource: 'github-tags',
+          packageName: 'org/cfg',
+          currentDigest: sha,
+          currentValue: 'v0.5.0',
+          replaceString: `${gh}", # v0.5.0`,
+          autoReplaceStringTemplate: `git::https://github.com/org/cfg.git//mise.toml?ref=${digestTpl}", # {{newValue}}`,
+        });
+        expect(dep.skipReason).toBeUndefined();
+      });
+
+      it.each([
+        ' # tag=v0.5.0',
+        ' # renovate: tag=v0.5.0',
+        ' # pin @v0.5.0',
+        ' # v0.5.0 trailing words',
+      ])('ignores unsupported comment %s', async (comment) => {
+        const dep = await extractOne(gh, comment);
+        expect(dep).toMatchObject({
+          currentDigest: sha,
+          skipReason: 'unversioned-reference',
+        });
+        expect(dep.currentValue).toBeUndefined();
+      });
+
+      it('extracts a version comment of the last entry without comma', async () => {
+        const dep = await extractOne(gh, ' # v0.5.0', '');
+        expect(dep).toMatchObject({
+          currentValue: 'v0.5.0',
+          replaceString: `${gh}" # v0.5.0`,
+          autoReplaceStringTemplate: `git::https://github.com/org/cfg.git//mise.toml?ref=${digestTpl}" # {{newValue}}`,
+        });
+      });
+
+      it('tracks a branch on github', async () => {
+        const dep = await extractOne(gh, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'github-digest',
+          packageName: 'org/cfg',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        });
+      });
+
+      it('tracks a branch on other hosts', async () => {
+        const dep = await extractOne(gl, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'git-refs',
+          packageName: 'https://gitlab.com/org/cfg.git',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        });
+      });
+
+      it('tracks a branch on bitbucket using git-refs', async () => {
+        const dep = await extractOne(bb, ' # main');
+        expect(dep).toMatchObject({
+          datasource: 'git-refs',
+          packageName: 'https://bitbucket.org/org/cfg.git',
+        });
+      });
+
+      it('uses the tag datasource of the host for version comments', async () => {
+        const dep = await extractOne(gl, ' # v1.0.0');
+        expect(dep).toMatchObject({
+          datasource: 'gitlab-tags',
+          packageName: 'org/cfg',
+          currentValue: 'v1.0.0',
+        });
+      });
+
+      it('supports short shas', async () => {
+        const dep = await extractOne(
+          'git::https://github.com/org/cfg.git//mise.toml?ref=0123456',
+          ' # v1.0.0',
+        );
+        expect(dep).toMatchObject({
+          currentDigestShort: '0123456',
+          currentValue: 'v1.0.0',
+        });
+        expect(dep.currentDigest).toBeUndefined();
+      });
+
+      it.each([
+        { description: 'no comment', comment: '' },
+        { description: 'an empty comment', comment: ' #' },
+        { description: 'a multi word comment', comment: ' # see the docs' },
+      ])('skips a sha ref with $description', async ({ comment }) => {
+        const dep = await extractOne(gh, comment);
+        expect(dep).toMatchObject({
+          currentDigest: sha,
+          skipReason: 'unversioned-reference',
+        });
+        expect(dep.currentValue).toBeUndefined();
+      });
+
+      it('ignores the comment of a non-sha ref', async () => {
+        const dep = await extractOne(
+          'git::https://github.com/org/cfg.git//mise.toml?ref=v1.0.0',
+          ' # v2.0.0',
+        );
+        expect(dep).toMatchObject({
+          currentValue: 'v1.0.0',
+          replaceString:
+            'git::https://github.com/org/cfg.git//mise.toml?ref=v1.0.0',
+        });
+      });
+
+      it('ignores comments of single line arrays', async () => {
+        const content = `include = ["${gh}"] # v0.5.0`;
+        const res = await extractPackageFile(content, miseFilename);
+        expect(res!.deps[0]).toMatchObject({
+          skipReason: 'unversioned-reference',
+        });
+      });
+
+      it('finds the commented occurrence of a repeated entry', async () => {
+        const content = `# ${gh}\ninclude = [\n  "${gh}", # v0.5.0\n]\n`;
+        const res = await extractPackageFile(content, miseFilename);
+        expect(res!.deps[0].currentValue).toBe('v0.5.0');
+      });
+    });
+
+    it('extracts includes together with tools', async () => {
+      const content = codeBlock`
+        include = ["oci::ghcr.io/org/base:1.0"]
+
+        [tools]
+        erlang = '23.3'
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'include',
+      ]);
+    });
+
+    it('ignores invalid include values', async () => {
+      const content = codeBlock`
+        include = "not-an-array"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+  });
+
+  describe('remote task files', () => {
+    const sha = '0123456789abcdef0123456789abcdef01234567';
+
+    it('extracts a github tag ref', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'github.com/org/tasks',
+            depType: 'task-build-file',
+            datasource: 'github-tags',
+            packageName: 'org/tasks',
+            currentValue: 'v1.0.0',
+            replaceString:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref=v1.0.0',
+            autoReplaceStringTemplate:
+              'git::https://github.com/org/tasks.git//scripts/build.sh?ref={{newValue}}',
+          },
+        ],
+      });
+    });
+
+    it('extracts a gitlab ssh ref', async () => {
+      const content = codeBlock`
+        [tasks.lint]
+        file = "git::ssh://git@gitlab.com/group/tasks.git//lint.sh?ref=v2.1"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/tasks',
+          depType: 'task-lint-file',
+          datasource: 'gitlab-tags',
+          packageName: 'group/tasks',
+          currentValue: 'v2.1',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a version comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-tags',
+          currentDigest: sha,
+          currentValue: 'v1.0.0',
+          replaceString: `git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # v1.0.0`,
+          autoReplaceStringTemplate:
+            'git::https://github.com/org/tasks.git//build.sh?ref={{#if newDigest}}{{newDigest}}{{else}}{{newValue}}{{/if}}" # {{newValue}}',
+        },
+      ]);
+    });
+
+    it('extracts a sha ref with a branch comment', async () => {
+      const content = `[tasks.build]\nfile = "git::https://github.com/org/tasks.git//build.sh?ref=${sha}" # main\n`;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        {
+          depType: 'task-build-file',
+          datasource: 'github-digest',
+          versioning: 'exact',
+          currentDigest: sha,
+          currentValue: 'main',
+        },
+      ]);
+    });
+
+    it('skips a ref-less file', async () => {
+      const content = codeBlock`
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toMatchObject([
+        { depType: 'task-build-file', skipReason: 'unspecified-version' },
+      ]);
+    });
+
+    it('ignores local and http files', async () => {
+      const content = codeBlock`
+        [tasks.local]
+        file = "scripts/build.sh"
+
+        [tasks.remote]
+        file = "https://example.com/build.sh"
+      `;
+      await expect(
+        extractPackageFile(content, miseFilename),
+      ).resolves.toBeNull();
+    });
+
+    it('extracts task files together with tools', async () => {
+      const content = codeBlock`
+        [tools]
+        erlang = '23.3'
+
+        [tasks.build]
+        file = "git::https://github.com/org/tasks.git//build.sh?ref=v1.0.0"
+        tools = { node = "20" }
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps.map((dep) => dep.depType)).toEqual([
+        'tools',
+        'task-build-tools',
+        'task-build-file',
+      ]);
+    });
+  });
 });

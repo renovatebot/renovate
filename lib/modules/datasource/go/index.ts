@@ -43,7 +43,7 @@ export class GoDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time takes precedence over both.';
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead. For modules hosted on GitHub, a later GitHub Release publication time or git tag creation time takes precedence over both.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';

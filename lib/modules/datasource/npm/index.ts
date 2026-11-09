@@ -13,8 +13,6 @@ export class NpmDatasource extends Datasource {
     return true;
   }
 
-  override readonly registryStrategy = 'first';
-
   override readonly defaultVersioning = npmVersioning.id;
 
   override getDefaultRegistryUrls(_packageName: string): string[] {

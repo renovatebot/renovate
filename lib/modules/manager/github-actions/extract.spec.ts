@@ -5205,6 +5205,65 @@ describe('modules/manager/github-actions/extract', () => {
       },
       expected: [],
     },
+    {
+      step: {
+        uses: 'voidzero-dev/setup-vp@v1.17.0',
+        with: { version: '0.3.3' },
+      },
+      expected: [
+        {
+          currentValue: '0.3.3',
+          datasource: 'npm',
+          depName: 'vite-plus',
+          depType: 'uses-with',
+          packageName: 'vite-plus',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'voidzero-dev/setup-vp@v1.17.0',
+        with: { 'node-version': '22.15.0' },
+      },
+      expected: [
+        {
+          currentValue: '22.15.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'voidzero-dev/setup-vp@v1.17.0',
+        with: { version: '0.3.3', 'node-version': '22.15.0' },
+      },
+      expected: [
+        {
+          currentValue: '0.3.3',
+          datasource: 'npm',
+          depName: 'vite-plus',
+          depType: 'uses-with',
+          packageName: 'vite-plus',
+        },
+        {
+          currentValue: '22.15.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'voidzero-dev/setup-vp@v1.17.0',
+        with: {},
+      },
+      expected: [],
+    },
   ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

@@ -86,10 +86,6 @@ describe('modules/datasource/clojure/index', () => {
     });
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   it('returns releases from custom repository', async () => {
     mockGenericPackage({ base: baseUrlCustom });
 

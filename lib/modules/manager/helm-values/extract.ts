@@ -21,7 +21,10 @@ function getHelmDep(
   tag: string,
   registryAliases: Record<string, string> | undefined,
 ): PackageDependency {
-  const dep = getDep(`${registry}${repository}:${tag}`, false, registryAliases);
+  const dep = getDep(`${registry}${repository}:${tag}`, {
+    specifyReplaceString: false,
+    registryAliases,
+  });
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
@@ -61,7 +64,7 @@ export function findDependenciesInternal(
         getHelmDep(registry, repository, tag, registryAliases),
       );
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      const dep = getDep(value, true, registryAliases);
+      const dep = getDep(value, { registryAliases });
       // An inline reference without an embedded version can be completed by a
       // sibling `tag`/`version` key: `cli: { image: ..., tag: v1.0.0 }`
       if (!dep.currentValue && !dep.currentDigest) {

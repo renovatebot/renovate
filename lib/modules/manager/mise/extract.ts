@@ -29,6 +29,8 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { extractGitReference } from './git-reference.ts';
+import { extractInclude } from './include.ts';
 import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions, MiseToolValue } from './schema.ts';
 import { MiseLockFile } from './schema.ts';
@@ -86,7 +88,26 @@ export async function extractPackageFile(
     }
   }
 
-  if (!toolEntries.length) {
+  const taskFileDeps: PackageDependency[] = [];
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
+    if (taskData.file) {
+      // local paths and plain http(s) urls have no version
+      const dep = extractGitReference(
+        taskData.file.trim(),
+        content,
+        `task-${taskName}-file`,
+      );
+      if (dep) {
+        taskFileDeps.push(dep);
+      }
+    }
+  }
+
+  const includeDeps = misefile.include.map((include) =>
+    extractInclude(include, content),
+  );
+
+  if (!toolEntries.length && !taskFileDeps.length && !includeDeps.length) {
     return null;
   }
 
@@ -105,9 +126,13 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(name, toolData, depType, lockFileData),
-  );
+  const deps = [
+    ...toolEntries.map(([name, toolData, depType]) =>
+      extractToolEntry(name, toolData, depType, lockFileData),
+    ),
+    ...taskFileDeps,
+    ...includeDeps,
+  ];
   const result: PackageFileContent = { deps };
 
   if (lockFileData) {

@@ -97,10 +97,6 @@ describe('workers/repository/process/lookup/index', () => {
     );
   });
 
-  afterEach(() => {
-    hostRules.clear();
-  });
-
   describe('.lookupUpdates()', () => {
     it('returns null if invalid currentValue', async () => {
       // @ts-expect-error: testing invalid currentValue
@@ -113,15 +109,35 @@ describe('workers/repository/process/lookup/index', () => {
       expect(skipReason).toBe('invalid-value');
     });
 
-    it('returns null if unknown datasource', async () => {
+    it('returns invalid-config without warning if packageName is missing', async () => {
+      config.datasource = NpmDatasource.id;
+      // @ts-expect-error: testing missing packageName
+      config.packageName = undefined;
+
+      const { skipReason, warnings } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('returns warning if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
 
-      const { updates } = await Result.wrap(
+      const { updates, skipReason, warnings } = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
       expect(updates).toBeEmptyArray();
+      expect(skipReason).toBe('invalid-config');
+      expect(warnings).toEqual([
+        {
+          topic: 'some-dep',
+          message: 'Unknown datasource "does not exist" for package some-dep',
+        },
+      ]);
     });
 
     it('handles error result from getPkgReleasesWithResult', async () => {
@@ -139,6 +155,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.packageName = 'q';
+      config.depName = 'q';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
@@ -200,6 +217,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.packageName = 'q';
+      config.depName = 'q';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock.scope(npmDefaultRegistryUrl).get('/q').reply(200, qJson);
@@ -3241,6 +3259,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('should roll back to dist-tag if current version is higher', async () => {
       config.currentValue = '3.1.0-dev.20180813';
       config.packageName = 'typescript';
+      config.depName = 'typescript';
       config.datasource = NpmDatasource.id;
       config.followTag = 'insiders';
       config.rollbackPrs = true;
@@ -3576,6 +3595,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('should downgrade from missing versions', async () => {
       config.currentValue = '1.16.1';
       config.packageName = 'coffeelint';
+      config.depName = 'coffeelint';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       httpMock
@@ -3602,6 +3622,66 @@ describe('workers/repository/process/lookup/index', () => {
           ]),
         },
       ]);
+    });
+
+    it('skips an update which downgrades the current value', async () => {
+      // The package file pins a version the registry no longer serves, while the lockfile is behind it, so the update resolved from the lockfile would rewrite the package file downwards.
+      config.currentValue = '1.5.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'update-lockfile';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.0.0' }, { version: '1.2.0' }],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toBeEmptyArray();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packageName: 'my-package',
+          compareValue: '1.5.0',
+        }),
+        'Unexpected downgrade detected: skipping',
+      );
+    });
+
+    it('keeps an update when the versioning cannot order the values', async () => {
+      // aws-machine-image reports every AMI as greater than any other and
+      // relies on the datasource order instead.
+      config.currentValue = 'ami-0de8f6a2a6d5f4b3c';
+      config.packageName = 'my-ami';
+      config.datasource = CustomDatasource.id;
+      config.versioning = 'aws-machine-image';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'ami-0fe327797e6857051',
+            releaseTimestamp: '2026-01-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-0de8f6a2a6d5f4b3c',
+            releaseTimestamp: '2026-02-01T00:00:00.000Z' as Timestamp,
+          },
+          {
+            version: 'ami-09903cd4fe0670a06',
+            releaseTimestamp: '2026-03-01T00:00:00.000Z' as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([{ newValue: 'ami-09903cd4fe0670a06' }]);
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Unexpected downgrade detected: skipping',
+      );
     });
 
     it('should upgrade to only one major', async () => {
@@ -6722,6 +6802,7 @@ describe('workers/repository/process/lookup/index', () => {
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.packageName = 'vue';
+      config.depName = 'vue';
       config.datasource = NpmDatasource.id;
       config.rollbackPrs = true;
       config.ignoreUnstable = true;
@@ -6909,6 +6990,40 @@ describe('workers/repository/process/lookup/index', () => {
           releaseTimestamp: '2024-05-09T18:34:42.000Z' as Timestamp,
           updateType: 'digest',
           hasAttestation: undefined,
+        },
+      ]);
+    });
+
+    it('uses updateType=digest for pseudo-versions of a major version module', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v2.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'github.com/foo/bar/v2';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope('https://proxy.golang.org/github.com/foo/bar/v2')
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/@latest')
+        .reply(200, { Version: 'v2.0.0-20240509183442-62759503f434' });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(404)
+        .post('/graphql')
+        .reply(404);
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toMatchObject([
+        {
+          newDigest: '62759503f434',
+          newValue: 'v2.0.0-20240509183442-62759503f434',
+          updateType: 'digest',
         },
       ]);
     });

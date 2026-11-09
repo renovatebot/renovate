@@ -73,7 +73,6 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    hostRules.clear();
     GlobalConfig.reset();
   });
 
@@ -774,7 +773,7 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig(config);
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: { 'X-Allowed': 'from-repo' } },
+          { headers: { 'X-Allowed': 'from-repo' }, trustedHeaderNames: [] },
         );
       });
 
@@ -807,6 +806,7 @@ describe('workers/repository/init/merge', () => {
               'X-Allowed': 'yes',
             },
             internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['custom-header', 'X-Allowed'],
           },
         );
       });
@@ -893,9 +893,8 @@ describe('workers/repository/init/merge', () => {
         ).toBeUndefined();
       });
 
-      it('drops `repositories[]` entry headers, if it is not in `allowedHeaders`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
-        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
+      it('applies `repositories[]` entry headers even where they are not in `allowedHeaders`', async () => {
+        // the `repositories[]` entry is the self-hosted admin's own config, so its `headers` are exempt from `allowedHeaders` altogether
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
 
@@ -912,11 +911,11 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { internalHostGrant: { implicit: true } },
-        );
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { denied: ['Authorization'] },
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+          {
+            headers: { Authorization: 'from-admin' },
+            internalHostGrant: { implicit: true },
+            trustedHeaderNames: ['Authorization'],
+          },
         );
       });
 
@@ -1314,8 +1313,8 @@ describe('workers/repository/init/merge', () => {
       );
     });
 
-    it('drops, rather than rejects, a header a repositories[] entry preset contributes outside `allowedHeaders`', async () => {
-      // the entry's presets are the admin's own config, so this is not a violation to abort the repository over - but `allowedHeaders` binds the admin too, and `applyHostRule` would drop the header at request time regardless, so it is dropped at registration with a WARN
+    it('applies a header a repositories[] entry preset contributes, even outside `allowedHeaders`', async () => {
+      // the entry's presets are the admin's own config, so their headers are exempt from `allowedHeaders` altogether, the same as the entry's own
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
       memCache.set('preset:local>entryInjectsHeader', {
         hostRules: [
@@ -1338,13 +1337,11 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(res).toBeDefined();
-      expect(
-        hostRules.find({ url: 'https://github.com' }).headers,
-      ).toBeUndefined();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { denied: ['Authorization'] },
-        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
-      );
+      expect(hostRules.find({ url: 'https://github.com' })).toEqual({
+        headers: { Authorization: 'Bearer x' },
+        internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['Authorization'],
+      });
     });
 
     it('treats non-security resolved-preset issues as advisory by default', async () => {
@@ -1758,6 +1755,7 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
+        trustedHeaderNames: [],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
@@ -1767,7 +1765,7 @@ describe('workers/repository/init/merge', () => {
 
     it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself, and registers them as `trusted`
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `trusted: true` exempts them from `allowedHeaders` altogether
       hostRules.add(
         {
           matchHost: 'registry.example.com',
@@ -1786,8 +1784,13 @@ describe('workers/repository/init/merge', () => {
       });
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
-        headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+        headers: {
+          'X-From-Admin': 'yes',
+          Authorization: 'from-admin',
+          'X-From-Repo': 'yes',
+        },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-From-Admin', 'Authorization'],
       });
     });
 
@@ -1817,6 +1820,7 @@ describe('workers/repository/init/merge', () => {
       ).toEqual({
         headers: { 'X-Api-Key': 'from-admin' },
         internalHostGrant: { implicit: true },
+        trustedHeaderNames: ['X-Api-Key'],
       });
     });
 

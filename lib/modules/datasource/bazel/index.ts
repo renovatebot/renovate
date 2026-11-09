@@ -23,7 +23,6 @@ export class BazelDatasource extends Datasource {
   override supportsCustomRegistry(_packageName: string): boolean {
     return true;
   }
-  override readonly caching = true;
   override readonly defaultVersioning = bazelVersioningId;
 
   static packageMetadataPath(packageName: string): string {

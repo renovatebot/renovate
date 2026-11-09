@@ -90,6 +90,7 @@ export class MigrationsService {
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
+    ['allowCustomCrateRegistries', 'allowCustomCrateGitRegistries'],
     ['allowedPostUpgradeCommands', 'allowedCommands'],
     ['azureAutoApprove', 'autoApprove'],
     ['customChangelogUrl', 'changelogUrl'],

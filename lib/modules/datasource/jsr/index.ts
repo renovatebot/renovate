@@ -18,7 +18,6 @@ export class JsrDatasource extends Datasource {
     return false;
   }
 
-  override readonly registryStrategy = 'first';
   // https://jsr.io/docs/using-packages#semver-resolution
   override readonly defaultVersioning = semverId;
 

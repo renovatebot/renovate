@@ -8,6 +8,7 @@ import type { RollbackConfig } from './types.ts';
 const versioning = allVersioning.get('semver');
 
 const config: RollbackConfig = {
+  depName: 'some-dep',
   packageName: 'some-dep',
   datasource: 'npm',
   currentValue: '1.5.0',

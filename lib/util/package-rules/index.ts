@@ -70,8 +70,10 @@ export async function applyPackageRules<T extends PackageRuleInputConfig>(
         // if it's got higher precedence, as it's a force'd config option
         // multiple force'd config options are "last defined wins"
         toApply.force?.enabled === false ||
-        // otherwise, if it has regular precedence, compare
-        (toApply.enabled === false && config.enabled !== false)
+        // otherwise, unless a force'd config option wins, record it even if the
+        // dependency is already disabled, so a user's rule can be told apart
+        // from a manager disabling it by default
+        (toApply.enabled === false && config.force?.enabled !== true)
       ) {
         config.skipReason = 'package-rules';
         if (stageName) {

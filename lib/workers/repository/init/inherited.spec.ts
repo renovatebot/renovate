@@ -33,7 +33,6 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
     };
-    hostRules.clear();
     InheritConfig.reset();
     GlobalConfig.reset();
   });

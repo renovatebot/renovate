@@ -64,7 +64,6 @@ describe('modules/manager/helmv3/artifacts', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.clear();
     ecrMock.reset();
   });
 

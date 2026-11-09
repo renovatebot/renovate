@@ -9,6 +9,7 @@ import type { ChartDefinition, Repository } from './types.ts';
 export function parseRepository(
   depName: string,
   repositoryURL: string,
+  registryAliases?: Record<string, string>,
 ): PackageDependency {
   const res: PackageDependency = {};
 
@@ -20,7 +21,7 @@ export function parseRepository(
   }
   switch (url.protocol) {
     case 'oci:':
-      return getOciChartDep(repositoryURL, depName);
+      return getOciChartDep(repositoryURL, depName, registryAliases);
     case 'file:':
       res.skipReason = 'local-dependency';
       break;

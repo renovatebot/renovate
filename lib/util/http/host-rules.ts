@@ -3,7 +3,7 @@ import { GlobalConfig } from '../../config/global.ts';
 import { PLATFORM_FAMILIES } from '../../constants/index.ts';
 import { logger } from '../../logger/index.ts';
 import { hasProxy } from '../../proxy.ts';
-import type { CombinedHostRule, HostRule } from '../../types/index.ts';
+import type { CombinedHostRuleWithTrustedHeaders } from '../host-rules.ts';
 import * as hostRules from '../host-rules.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { parseUrl } from '../url.ts';
@@ -33,7 +33,7 @@ export type HostRulesGotOptions = Pick<
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-): CombinedHostRule {
+): CombinedHostRuleWithTrustedHeaders {
   const { hostType, readOnly } = options;
   let res = hostRules.find({ hostType, url, readOnly });
 
@@ -172,7 +172,7 @@ export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
 export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
-  hostRule: HostRule,
+  hostRule: CombinedHostRuleWithTrustedHeaders,
 ): GotOptions {
   if (hostRule.enabled === false) {
     options.enabled = false;
@@ -218,10 +218,15 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.headers) {
     const allowedHeaders = GlobalConfig.get('allowedHeaders');
+    // headers already known to have come from the self-hosted administrator's own (`trusted`) config bypassed `allowedHeaders` at registration - see `hostRules.add()` - so must not be re-checked, and dropped, here
+    const trustedHeaderNames = new Set(hostRule.trustedHeaderNames);
     const filteredHeaders: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(hostRule.headers)) {
-      if (matchRegexOrGlobList(header, allowedHeaders)) {
+      if (
+        trustedHeaderNames.has(header) ||
+        matchRegexOrGlobList(header, allowedHeaders)
+      ) {
         filteredHeaders[header] = value;
       } else {
         logger.once.error(

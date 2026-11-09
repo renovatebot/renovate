@@ -7,6 +7,12 @@ import * as _fixtures from './fixtures.ts';
 // Set timezone so snapshots are consistent
 process.env.TZ = 'UTC';
 
+afterEach(async () => {
+  // dynamic import to avoid caching this before per-file mocks are hoisted into place
+  const hostRules = await import('../lib/util/host-rules.ts');
+  hostRules.clear();
+});
+
 vi.mock('../lib/modules/platform/index.ts', () => ({
   platform: mockDeep<Platform>(),
   initPlatform: vi.fn(),

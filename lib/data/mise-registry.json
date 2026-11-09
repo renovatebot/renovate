@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.9.12 linux-x64 (2026-09-20)"
+    "version": "2026.10.1 linux-x64 (2026-10-03)"
   },
   "tools": {
     "1password": {
@@ -208,9 +208,9 @@
       "cargo": "atuin"
     },
     "aube": {
-      "aqua": "jdx/aube",
+      "aqua": "aubepkg/aube",
       "cargo": "aube",
-      "github": "jdx/aube",
+      "github": "aubepkg/aube",
       "packslip": "github.com/aubepkg/aube"
     },
     "auto-doc": {
@@ -647,6 +647,9 @@
     "cloud-sql-proxy": {
       "aqua": "GoogleCloudPlatform/cloud-sql-proxy",
       "asdf": "pbr0ck3r/asdf-cloud-sql-proxy"
+    },
+    "cloudflare-cf": {
+      "npm": "cf"
     },
     "cloudflared": {
       "aqua": "cloudflare/cloudflared",
@@ -1695,6 +1698,9 @@
       "asdf": "mise-plugins/mise-imagemagick",
       "conda": "imagemagick"
     },
+    "imessage-exporter": {
+      "github": "ReagentX/imessage-exporter"
+    },
     "imgpkg": {
       "aqua": "carvel-dev/imgpkg",
       "asdf": "vmware-tanzu/asdf-carvel"
@@ -2148,6 +2154,9 @@
       "asdf": "mise-plugins/asdf-lsd",
       "cargo": "lsd"
     },
+    "lstk": {
+      "github": "localstack/lstk"
+    },
     "lua": {
       "asdf": "mise-plugins/mise-lua",
       "vfox": "mise-plugins/vfox-lua"
@@ -2223,6 +2232,10 @@
       "aqua": "apache/maven",
       "asdf": "mise-plugins/mise-maven",
       "vfox": "mise-plugins/vfox-maven"
+    },
+    "mbx": {
+      "github": "jdx/mr-boxington",
+      "packslip": "github.com/jdx/mr-boxington"
     },
     "mc": {
       "aqua": "minio/mc",
@@ -2318,6 +2331,9 @@
     },
     "mold": {
       "aqua": "rui314/mold"
+    },
+    "mole": {
+      "github": "tw93/Mole"
     },
     "mongodb": {
       "asdf": "mise-plugins/mise-mongodb",
@@ -2415,6 +2431,9 @@
     "ni": {
       "npm": "@antfu/ni"
     },
+    "nim": {
+      "http": "nim"
+    },
     "ninja": {
       "aqua": "ninja-build/ninja",
       "asdf": "asdf-community/asdf-ninja"
@@ -2453,6 +2472,7 @@
       "aqua": "nushell/nushell"
     },
     "nub": {
+      "github": "nubjs/nub",
       "npm": "@nubjs/nub"
     },
     "nubr": {
@@ -2949,6 +2969,9 @@
       "aqua": "linebender/resvg",
       "cargo": "resvg"
     },
+    "reviewdog": {
+      "aqua": "reviewdog/reviewdog"
+    },
     "revive": {
       "aqua": "mgechev/revive",
       "asdf": "bjw-s/asdf-revive"
@@ -3179,6 +3202,9 @@
       "asdf": "nirfuchs/asdf-snyk",
       "github": "snyk/cli"
     },
+    "sofka": {
+      "aqua": "nklmilojevic/sofka"
+    },
     "soft-serve": {
       "asdf": "chessmango/asdf-soft-serve",
       "github": "charmbracelet/soft-serve"
@@ -3237,7 +3263,11 @@
       "asdf": "pavloos/asdf-spin"
     },
     "spin-framework": {
+      "aqua": "spinframework/spin",
       "github": "spinframework/spin"
+    },
+    "spotify-downloader": {
+      "aqua": "spotDL/spotify-downloader"
     },
     "spotify-player": {
       "github": "aome510/spotify-player"
@@ -3547,7 +3577,8 @@
     },
     "timoni": {
       "aqua": "stefanprodan/timoni",
-      "asdf": "Smana/asdf-timoni"
+      "asdf": "Smana/asdf-timoni",
+      "packslip": "github.com/stefanprodan/timoni"
     },
     "tiny": {
       "asdf": "mise-plugins/mise-tiny",
@@ -3869,7 +3900,8 @@
     },
     "worktrunk": {
       "aqua": "max-sixty/worktrunk",
-      "cargo": "worktrunk"
+      "cargo": "worktrunk",
+      "packslip": "github.com/max-sixty/worktrunk"
     },
     "wrangler": {
       "npm": "wrangler"

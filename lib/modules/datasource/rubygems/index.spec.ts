@@ -23,6 +23,51 @@ describe('modules/datasource/rubygems/index', () => {
       memCache.clear();
     });
 
+    it('preserves timestamps for packages with generic and native releases', async () => {
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(
+          200,
+          codeBlock`
+          created_at: 2023-01-01T00:00:00.000Z
+          ---
+          foobar 1.0.0,1.0.0-arm64-darwin 01010101010101010101010101010101
+        `,
+        )
+        .get('/api/v1/versions/foobar.json')
+        .reply(200, [
+          { number: '1.0.0', platform: 'ruby', created_at: '2023-01-01' },
+          {
+            number: '1.0.0',
+            platform: 'arm64-darwin',
+            created_at: '2023-01-02',
+          },
+        ])
+        .get('/api/v1/gems/foobar.json')
+        .reply(200, {});
+
+      const result = await new RubygemsDatasource().getReleases({
+        packageName: 'foobar',
+        registryUrl: 'https://rubygems.org',
+      });
+
+      expect(result).toEqual({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-01T00:00:00.000Z',
+            constraints: { platform: ['ruby'] },
+          },
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-02T00:00:00.000Z',
+            constraints: { platform: ['arm64-darwin'] },
+          },
+        ],
+      });
+    });
+
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://example.com')

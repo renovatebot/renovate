@@ -436,6 +436,62 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       );
     });
 
+    it('does not write back cached release notes', async () => {
+      const cached = { url: 'https://example.com/compare', notesSourceUrl: '' };
+      vi.spyOn(packageCache, 'get').mockResolvedValueOnce(cached);
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: { url: 'https://example.com/compare' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      const res = await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(res?.versions?.[0]?.releaseNotes).toEqual(cached);
+      expect(githubReleasesMock).not.toHaveBeenCalled();
+      expect(packageCacheSetSpy).not.toHaveBeenCalled();
+    });
+
+    it('caches the compare url when no release notes are found', async () => {
+      const packageCacheSetSpy = vi.spyOn(packageCache, 'set');
+      githubReleasesMock.mockResolvedValueOnce([]);
+
+      const input = {
+        project: partial<ChangeLogProject>({
+          type: 'github',
+          repository: 'react/react-native',
+          apiBaseUrl: 'https://api.github.com/',
+          baseUrl: 'https://github.com/',
+        }),
+        versions: [
+          partial<ChangeLogRelease>({
+            version: '1.0.0',
+            compare: { url: 'https://example.com/compare' },
+          }),
+        ],
+      } satisfies ChangeLogResult;
+
+      await addReleaseNotes(input, partial<BranchUpgradeConfig>());
+
+      expect(packageCacheSetSpy).toHaveBeenCalledExactlyOnceWith(
+        'changelog-github-notes@v2',
+        'react/react-native:1.0.0',
+        { url: 'https://example.com/compare', notesSourceUrl: '' },
+        55,
+      );
+    });
+
     it('includes sourceDirectory and gitRef in cache key', async () => {
       const packageCacheGetSpy = vi.spyOn(packageCache, 'get');
       githubReleasesMock.mockResolvedValueOnce([

@@ -90,7 +90,10 @@ export function extractImage(
     logger.debug({ image }, 'Invalid image name');
     return null;
   }
-  const nameDep = getDep(nameToSplit, false, aliases);
+  const nameDep = getDep(nameToSplit, {
+    specifyReplaceString: false,
+    registryAliases: aliases,
+  });
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
@@ -131,7 +134,10 @@ export function extractImage(
       };
     }
 
-    const dep = getDep(`${depName}:${newTag}`, false, aliases);
+    const dep = getDep(`${depName}:${newTag}`, {
+      specifyReplaceString: false,
+      registryAliases: aliases,
+    });
     return {
       ...dep,
       replaceString: newTag,

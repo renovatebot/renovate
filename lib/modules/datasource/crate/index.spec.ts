@@ -483,7 +483,7 @@ describe('modules/datasource/crate/index', () => {
       expect(res?.sourceUrl).toBeUndefined();
     });
 
-    it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
+    it('refuses to clone custom cloudsmith git registry if allowCustomCrateGitRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
@@ -496,9 +496,9 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeNull();
     });
 
-    it('clones cloudsmith private registry', async () => {
+    it('clones custom cloudsmith git registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
@@ -513,11 +513,24 @@ describe('modules/datasource/crate/index', () => {
       });
     });
 
-    it('clones other private registry with explicit gitTimeout', async () => {
+    it('refuses to clone other custom git registry when allowCustomCrateGitRegistries is not true', async () => {
+      const { mockClone } = setupGitMocks();
+
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toBeNull();
+    });
+
+    it('clones other custom git registry with explicit gitTimeout', async () => {
       const { mockClone } = setupGitMocks();
       GlobalConfig.set({
         ...adminConfig,
-        allowCustomCrateRegistries: true,
+        allowCustomCrateGitRegistries: true,
         gitTimeout: 30000,
       });
       const url = 'https://github.com/mcorbin/testregistry';
@@ -530,9 +543,9 @@ describe('modules/datasource/crate/index', () => {
       expect(res).not.toBeNull();
     });
 
-    it('clones other private registry', async () => {
+    it('clones other custom git registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -548,7 +561,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('clones once then reuses the cache', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
@@ -565,7 +578,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('reads config.json from cloned registry', async () => {
       const { mockClone } = setupGitMocks();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -578,7 +591,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('guards against race conditions while cloning', async () => {
       const { mockClone } = setupGitMocks(250);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       await Promise.all([
@@ -605,7 +618,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('returns null when git clone fails', async () => {
       setupErrorGitMock();
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/othertestregistry';
 
       const result = await getPkgReleases({
@@ -623,8 +636,8 @@ describe('modules/datasource/crate/index', () => {
       expect(result2).toBeNull();
     });
 
-    it('does not clone for sparse registries', async () => {
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+    it('does not use git-clone to fetch content from sparse registries', async () => {
+      GlobalConfig.set({ ...adminConfig });
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/othertestregistry';
@@ -663,7 +676,10 @@ describe('modules/datasource/crate/index', () => {
       }
 
       beforeEach(() => {
-        GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+        GlobalConfig.set({
+          ...adminConfig,
+          allowCustomCrateGitRegistries: true,
+        });
       });
 
       it('uses the crates.io API for mirrors of the crates.io index', async () => {
@@ -803,7 +819,7 @@ describe('modules/datasource/crate/index', () => {
         clone: mockClone,
       });
       createSimpleGit.mockReturnValue(gitMock);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
@@ -846,7 +862,7 @@ describe('modules/datasource/crate/index', () => {
         clone: mockClone,
       });
       createSimpleGit.mockReturnValue(gitMock);
-      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateGitRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,

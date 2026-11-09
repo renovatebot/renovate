@@ -71,7 +71,6 @@ describe('workers/repository/update/pr/changelog/github/source', () => {
 
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      hostRules.clear();
       hostRules.add({
         hostType: 'github',
         matchHost: 'https://api.github.com/',
