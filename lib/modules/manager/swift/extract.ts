@@ -24,11 +24,12 @@ const regExps = {
   beginSection: regEx(/\[/),
   endSection: regEx(/],?/),
   package: regEx(/\s*.\s*package\s*\(\s*/),
-  // Word boundary so `id`/`url` inside a package name (e.g. `name: "Valid"`)
-  // is not mistaken for the label. RE2 has no lookahead, so the following
-  // colon is matched as a separate token by the state machine.
-  urlKey: regEx(/\burl/),
-  idKey: regEx(/\bid/),
+  // Match the label together with its colon. A word boundary plus the colon
+  // stops `id`/`url` inside a package name or URL (e.g. `name: "idb"`) from
+  // being read as the label. RE2 has no lookahead, so the colon is part of
+  // the token and the parser jumps straight to the value state.
+  urlKey: regEx(/\burl\s*:/),
+  idKey: regEx(/\bid\s*:/),
   stringLiteral: regEx(/"[^"]+"/),
   comma: regEx(/,/),
   from: regEx(/from/),
@@ -89,10 +90,6 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
       return [SPACE, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(':
       return [SPACE, URL_KEY, ID_KEY, PACKAGE, END_SECTION];
-    case '.package(url':
-      return [SPACE, COLON, PACKAGE, END_SECTION];
-    case '.package(id':
-      return [SPACE, COLON, PACKAGE, END_SECTION];
     case '.package(url:':
       return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
     case '.package(id:':
@@ -294,34 +291,12 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = null;
         } else if (label === URL_KEY) {
           currentForm = 'url';
-          state = '.package(url';
+          state = '.package(url:';
         } else if (label === ID_KEY) {
           currentForm = 'id';
-          state = '.package(id';
-        } else if (label === PACKAGE) {
-          yieldDep();
-        }
-        break;
-      case '.package(url':
-        if (label === END_SECTION) {
-          yieldDep();
-          state = null;
-        } else if (label === COLON) {
-          state = '.package(url:';
-        } else if (label === PACKAGE) {
-          yieldDep();
-          state = '.package(';
-        }
-        break;
-      case '.package(id':
-        if (label === END_SECTION) {
-          yieldDep();
-          state = null;
-        } else if (label === COLON) {
           state = '.package(id:';
         } else if (label === PACKAGE) {
           yieldDep();
-          state = '.package(';
         }
         break;
       case '.package(url:':

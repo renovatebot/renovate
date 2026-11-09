@@ -613,6 +613,24 @@ describe('modules/manager/swift/extract', () => {
         ]);
       });
 
+      it('does not treat a name or URL that starts with "id" as an id-form dep', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(name: "idb", url: "https://github.com/x/idb", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toMatchObject([
+          {
+            datasource: GithubTagsDatasource.id,
+            depName: 'x/idb',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
       it('ignores an id-form dep that has no version requirement', () => {
         const content = codeBlock`
           let package = Package(
