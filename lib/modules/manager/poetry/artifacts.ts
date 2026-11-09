@@ -176,7 +176,7 @@ export async function updateArtifacts({
     );
   }
 
-  const { env: minReleaseAgeEnv } = await getMinReleaseAgeEnv(
+  const minReleaseAgeEnv = await getMinReleaseAgeEnv(
     config,
     packageFileName,
     updatedDeps,

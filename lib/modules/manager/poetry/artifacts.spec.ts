@@ -1192,6 +1192,24 @@ describe('modules/manager/poetry/artifacts', () => {
           {
             depName: 'equals',
             manager: 'poetry',
+            versioning: 'pep440',
+            newValue: '==1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'pep440-range',
+            manager: 'poetry',
+            versioning: 'pep440',
+            newValue: '>=1.35.50',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'poetry-equals',
+            manager: 'poetry',
             newValue: '==1.35.50',
             minimumReleaseAgePackageManagerSync: true,
             minimumReleaseAge: '1 day',
@@ -1215,8 +1233,51 @@ describe('modules/manager/poetry/artifacts', () => {
         ]);
         expect(env).toMatchObject({
           POETRY_SOLVER_MIN_RELEASE_AGE: '7',
-          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'pinned',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'pinned,equals',
         });
+      });
+
+      it('excludes the new package of a replacement', async () => {
+        const env = await runYoung([
+          {
+            depName: 'old-pkg',
+            newName: 'New_Pkg',
+            updateType: 'replacement',
+            manager: 'poetry',
+            newValue: '1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ]);
+        expect(env).toMatchObject({
+          POETRY_SOLVER_MIN_RELEASE_AGE: '7',
+          POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE: 'new-pkg',
+        });
+      });
+
+      it('ignores updates of other managers with the same name', async () => {
+        const env = await runYoung([
+          {
+            depName: 'dep1',
+            manager: 'poetry',
+            newValue: '^1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+          {
+            depName: 'dep1',
+            manager: 'pep621',
+            versioning: 'pep440',
+            newValue: '==1.2.3',
+            minimumReleaseAgePackageManagerSync: true,
+            minimumReleaseAge: '1 day',
+            minimumReleaseAgeRepository: '7 days',
+          },
+        ]);
+        expect(env).toMatchObject({ POETRY_SOLVER_MIN_RELEASE_AGE: '7' });
+        expect(env).not.toHaveProperty('POETRY_SOLVER_MIN_RELEASE_AGE_EXCLUDE');
       });
 
       it('sets no exclude if the constraint of an exempted update is a range', async () => {
