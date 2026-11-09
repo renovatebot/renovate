@@ -5960,6 +5960,58 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('massageCommitMessage(message)', () => {
+    it('replaces links to issues and pull requests', () => {
+      expect(
+        github.massageCommitMessage(
+          'Fix ([#5](https://github.com/foo/bar/issues/5)), closes https://github.com/foo/bar/pull/6',
+        ),
+      ).toBe(
+        'Fix ([#5](https://redirect.github.com/foo/bar/issues/5)), closes https://redirect.github.com/foo/bar/pull/6',
+      );
+    });
+
+    it('does not replace links for GHES', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.1.7' })
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const message = 'Fix https://github.com/foo/bar/issues/5';
+      expect(github.massageCommitMessage(message)).toBe(message);
+    });
+
+    it('does not replace links for GHEC', async () => {
+      const scope = httpMock
+        .scope('https://api.octocorp.ghe.com')
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+        })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://api.octocorp.ghe.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const message = 'Fix https://github.com/foo/bar/issues/5';
+      expect(github.massageCommitMessage(message)).toBe(message);
+    });
+  });
+
   describe('mergePr(prNo) - autodetection', () => {
     it('should try squash first', async () => {
       const scope = httpMock.scope(githubApiHost);

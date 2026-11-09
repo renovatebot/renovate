@@ -95,7 +95,10 @@ import {
   repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
-import { massageMarkdownLinks } from './massage-markdown-links.ts';
+import {
+  massageCommitMessageLinks,
+  massageMarkdownLinks,
+} from './massage-markdown-links.ts';
 import {
   isPrInMergeQueue as checkPrInMergeQueue,
   getPrCache,
@@ -2370,6 +2373,16 @@ export function massageMarkdown(input: string): string {
     .replaceAll(warningAlertRegex, '> [!WARNING]\n')
     .replaceAll(cautionAlertRegex, '> [!CAUTION]\n')
     .replaceAll(importantAlertRegex, '> [!IMPORTANT]\n');
+}
+
+/**
+ * Replaces github.com links to discussions, issues and pull requests in a commit message with `redirect.github.com` links, so that the linked items do not show a reference to the commit.
+ */
+export function massageCommitMessage(message: string): string {
+  if (platformConfig.host.type !== 'github') {
+    return message;
+  }
+  return massageCommitMessageLinks(message);
 }
 
 export function maxBodyLength(): number {
