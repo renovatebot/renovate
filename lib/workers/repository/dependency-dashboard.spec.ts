@@ -1952,6 +1952,17 @@ None detected
                     lockedVersion: '3.0.0',
                   },
                   {
+                    depName: 'dep-with-locked-version-update',
+                    lockedVersion: '3.0.0',
+                    updates: [
+                      {
+                        newVersion: '3.0.1',
+                        updateType: 'patch' as const,
+                        isLockfileUpdate: true,
+                      },
+                    ],
+                  },
+                  {
                     depName: 'dep-with-no-version-info',
                   },
                 ],
@@ -1984,6 +1995,11 @@ None detected
           // Locked version fallback case
           expect(dashboardBody).toInclude(
             '`dep-with-locked-version-only lock file @ 3.0.0`',
+          );
+
+          // Locked version with a lock file update, which has no newValue
+          expect(dashboardBody).toInclude(
+            ' - `dep-with-locked-version-update lock file @ 3.0.0` → [Updates: `3.0.1`]',
           );
 
           // No version info case
