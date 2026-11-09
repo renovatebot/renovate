@@ -213,6 +213,13 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
     });
 
+    it('returns if the minimum confidence is not active', async () => {
+      config.minimumConfidence = 'low';
+      config.confidenceStatus = 'green';
+      await setConfidence(config);
+      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
+    });
+
     it('sets status yellow', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = 'yellow';

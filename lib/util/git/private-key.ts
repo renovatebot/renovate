@@ -2,6 +2,7 @@ import os from 'node:os';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { GlobalConfig } from '../../config/global.ts';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { exec } from '../exec/index.ts';
@@ -88,6 +89,13 @@ class GPGKey extends PrivateKey {
       logger.warn(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
+    }
+  }
+
+  override async configSigningKey(cwd: string): Promise<void> {
+    await super.configSigningKey(cwd);
+    if (GlobalConfig.get('platform') === 'gerrit') {
+      await exec(`git config push.gpgSign if-asked`, { cwd });
     }
   }
 

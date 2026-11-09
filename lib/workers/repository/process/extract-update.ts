@@ -198,10 +198,12 @@ export async function extract(
       ? withoutNpmrc(packageFiles)
       : undefined;
     // the registry URLs held their credentials before they were detached, the other strings are checked on what would be cached
-    const hasUrlCredentials =
-      overwriteCache &&
-      (registryUrlsHadCredentials ||
-        containsUrlCredentials(cachedPackageFiles));
+    function hasCredentials(): boolean {
+      return (
+        registryUrlsHadCredentials || containsUrlCredentials(cachedPackageFiles)
+      );
+    }
+    const hasUrlCredentials = overwriteCache && hasCredentials();
 
     if (hasUrlCredentials) {
       logger.once.warn(

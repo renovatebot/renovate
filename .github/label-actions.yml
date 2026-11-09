@@ -320,14 +320,19 @@
 
 'auto:discussion-first':
   comment: >
-    **Please create a GitHub Discussion before continuing with this PR.**
+    **Please agree the approach with the maintainers before continuing with this PR.**
 
 
     Thank you for your PR, but we need to discuss the requirements and implementation first.
 
 
-    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR.
-    We need to discuss the requirements and implementation first so that you don't write code that won't be merged.
+    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR, or that the scope and intent haven't yet been agreed.
+    This can also be the case for an Issue that needs someone more familiar with Renovate to contribute it.
+    We need to discuss this first so that you don't write code that won't be merged.
+
+
+    If there's an existing Issue, please continue the discussion on the Issue thread.
+    Otherwise, please create a GitHub Discussion.
 
 
     This PR will be closed for now to avoid confusion, but you can reopen it after the discussion has been resolved.

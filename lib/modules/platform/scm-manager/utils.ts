@@ -25,7 +25,8 @@ export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
     return true;
   }
 
-  if (state === '!open' && (pr.state === 'closed' || pr.state === 'merged')) {
+  const isClosed = pr.state === 'closed' || pr.state === 'merged';
+  if (state === '!open' && isClosed) {
     return true;
   }
 

@@ -1490,6 +1490,19 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('does not fetch a repository preset that the global `ignorePresets` ignores', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>some-org/unreachable'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        ignorePresets: ['local>some-org/unreachable'],
+      });
+
+      expect(res).toBeDefined();
+    });
+
     it("continues without the exemption when the admin's global `extends` cannot be resolved", async () => {
       // resolving them here only builds the exemption; the resolution whose result is actually used reports the failure, so it must not be reported twice - nor first
       fs.readLocalFile.mockResolvedValue(JSON.stringify({}));

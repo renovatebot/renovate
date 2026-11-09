@@ -29,7 +29,7 @@ function isNextUrlNode(input: ESTree.Node | undefined): boolean {
   const { property } = node;
   if (
     property.type !== 'Identifier' ||
-    (property.name !== 'url' && property.name !== 'href')
+    !['url', 'href'].includes(property.name)
   ) {
     return false;
   }

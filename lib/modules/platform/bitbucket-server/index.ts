@@ -23,6 +23,11 @@ import {
   setBaseUrl,
 } from '../../../util/http/bitbucket-server.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import {
+  isConflict,
+  isNoContent,
+  isNotFound,
+} from '../../../util/http/status.ts';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sampleSize } from '../../../util/sample.ts';
@@ -285,7 +290,7 @@ export async function initRepo({
     );
 
     // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
-    if ([204, 404].includes(branchRes.statusCode)) {
+    if (isNoContent(branchRes) || isNotFound(branchRes)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 
@@ -316,7 +321,7 @@ export async function initRepo({
 
     return repoConfig;
   } catch (err) /* v8 ignore next -- initRepo error mapping (404, empty repo) is not mocked in specs */ {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     if (err.message === REPOSITORY_EMPTY) {
@@ -416,10 +421,12 @@ function isRelevantPr(
   prTitle: string | null | undefined,
   state: string,
 ) {
-  return (p: Pr): boolean =>
-    p.sourceBranch === branchName &&
-    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-    matchesState(p.state, state);
+  return (p: Pr): boolean => {
+    if (p.sourceBranch !== branchName || !matchesState(p.state, state)) {
+      return false;
+    }
+    return !prTitle || p.title.toUpperCase() === prTitle.toUpperCase();
+  };
 }
 
 // TODO: coverage (#40625)
@@ -802,9 +809,9 @@ async function updatePRAndAddReviewers(
     await getPr(prNo, true);
   } catch (err) {
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err)) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1221,9 +1228,9 @@ export async function updatePr({
     );
   } catch (err) {
     logger.debug({ err, prNo }, `Failed to update PR`);
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
         // Retry again with invalid reviewers being removed
         const invalidReviewers = utils.getInvalidReviewers(err);
@@ -1263,9 +1270,9 @@ export async function mergePr({
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (isNotFound(err)) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (isConflict(err)) {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
     } else {

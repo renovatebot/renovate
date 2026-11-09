@@ -127,10 +127,11 @@ async function checkValidJs(
 }
 
 function isJsCheckAllowed(file: string): boolean {
+  if (file.startsWith('docs/')) {
+    return true;
+  }
   return (
-    file.startsWith('docs/') ||
-    (file.startsWith('lib/') &&
-      path.basename(file).toLowerCase() === 'readme.md')
+    file.startsWith('lib/') && path.basename(file).toLowerCase() === 'readme.md'
   );
 }
 
@@ -188,9 +189,11 @@ async function processFile(file: string): Promise<void> {
 
     const lang = token.info.trim().split(/\s+/)[0];
     const isJsFamily = lang === 'js' || lang === 'javascript';
+    if (isJsFamily && !isJsCheckAllowed(file)) {
+      continue;
+    }
     if (
       !['json', 'jsonc', 'js', 'javascript'].includes(lang) ||
-      (isJsFamily && !isJsCheckAllowed(file)) ||
       tokens.at(index - 2)?.content === fenceCheckDisableComment
     ) {
       continue;

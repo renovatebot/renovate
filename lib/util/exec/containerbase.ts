@@ -91,7 +91,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   erlang: {
     datasource: 'github-releases',
     packageName: 'containerbase/erlang-prebuild',
-    versioning: 'semver-coerced',
+    versioning: 'semver-extended',
   },
   elixir: {
     datasource: 'github-releases',
@@ -146,7 +146,7 @@ export const allToolConfig: Partial<Record<ToolName, ToolConfig>> = {
   jb: {
     datasource: 'github-releases',
     packageName: 'containerbase/jb-prebuild',
-    versioning: 'loose',
+    versioning: 'semver-extended',
   },
   kustomize: {
     datasource: 'github-releases',
