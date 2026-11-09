@@ -87,10 +87,8 @@ function versionSupportsSafeFeatures(version: string | null): boolean {
  *
  * NOTE: this will install all relevant tools, regardless of what the given mise configuration uses.
  *
- * In safe mode the version-listing tools are unnecessary: npm uses mise's built-in
- * registry HTTP client and go runs with `GOTOOLCHAIN=local`, so `mise lock`
- * resolves versions over HTTP without shelling out to node/npm/ruby. uv is
- * still needed to generate Python dependency graphs in both modes.
+ * In safe mode, mise resolves versions without node, npm, Go, or Ruby.
+ * Both modes include Python and uv for Python dependency locking.
  *
  * @see https://mise.jdx.dev/dev-tools/backends/npm.html
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
@@ -106,12 +104,16 @@ async function getMiseLockToolConstraints(
     toolName: 'mise',
     constraint: miseConstraint,
   };
+  const pythonToolConstraint: ToolConstraint = {
+    toolName: 'python',
+    constraint: await resolveToolConstraint(config, 'python'),
+  };
   const uvToolConstraint: ToolConstraint = {
     toolName: 'uv',
     constraint: await resolveToolConstraint(config, 'uv'),
   };
   if (safeMode) {
-    return [miseToolConstraint, uvToolConstraint];
+    return [miseToolConstraint, pythonToolConstraint, uvToolConstraint];
   }
   return [
     miseToolConstraint,
@@ -132,6 +134,7 @@ async function getMiseLockToolConstraints(
       toolName: 'ruby',
       constraint: await resolveToolConstraint(config, 'ruby'),
     },
+    pythonToolConstraint,
     uvToolConstraint,
   ];
 }
