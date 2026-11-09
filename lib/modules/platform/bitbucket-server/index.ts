@@ -377,7 +377,7 @@ export async function getPr(
       opts,
     );
   } catch (err) {
-    if (err.statusCode !== 404) {
+    if (!isNotFound(err)) {
       throw err;
     }
     // Bitbucket Server PRs can be hard-deleted, which the PR list sync never reports
