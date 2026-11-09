@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import { extractPackageFile as extractMisePackageFile } from '../../../../modules/manager/mise/index.ts';
+import { extractPackageFile as extractPklPackageFile } from '../../../../modules/manager/pkl/index.ts';
 import { extractPackageFile as extractRenovateConfigPackageFile } from '../../../../modules/manager/renovate-config/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
@@ -1960,6 +1961,61 @@ describe('workers/repository/update/branch/auto-replace', () => {
           ]
         }
       `);
+    });
+
+    describe('pkl', () => {
+      function hkRelease(version: string, asset: string): string {
+        return `package://github.com/jdx/hk/releases/download/v${version}/hk@${version}#/${asset}`;
+      }
+
+      function upgradePkl(content: string, depIndex: number): void {
+        upgrade.manager = 'pkl';
+        upgrade.packageFile = 'hk.pkl';
+        const deps = extractPklPackageFile(content)!.deps;
+        Object.assign(upgrade, deps[depIndex], {
+          newValue: '2.11.1',
+          depIndex,
+        });
+      }
+
+      it('updates the version in the release tag and in the package name', async () => {
+        const content = `amends "${hkRelease('2.0.0', 'Config.pkl')}"\n`;
+        upgradePkl(content, 0);
+
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+
+        expect(res).toBe(`amends "${hkRelease('2.11.1', 'Config.pkl')}"\n`);
+      });
+
+      it('updates only the package URI of the dependency being updated', async () => {
+        const content = codeBlock`
+          amends "${hkRelease('2.0.0', 'Config.pkl')}"
+          import "${hkRelease('2.0.0', 'Builtins.pkl')}"
+        `;
+        upgradePkl(content, 1);
+
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+
+        expect(res).toBe(codeBlock`
+          amends "${hkRelease('2.0.0', 'Config.pkl')}"
+          import "${hkRelease('2.11.1', 'Builtins.pkl')}"
+        `);
+      });
+
+      it('leaves a commented-out copy of the package URI unchanged', async () => {
+        const content = codeBlock`
+          // amends "${hkRelease('2.0.0', 'Config.pkl')}"
+          amends "${hkRelease('2.0.0', 'Config.pkl')}"
+        `;
+        upgradePkl(content, 0);
+
+        const res = await doAutoReplace(upgrade, content, reuseExistingBranch);
+
+        expect(res).toBe(codeBlock`
+          // amends "${hkRelease('2.0.0', 'Config.pkl')}"
+          amends "${hkRelease('2.11.1', 'Config.pkl')}"
+        `);
+      });
     });
   });
 });
