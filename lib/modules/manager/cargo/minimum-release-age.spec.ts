@@ -172,6 +172,27 @@ describe('modules/manager/cargo/minimum-release-age', () => {
       ]);
     });
 
+    it('drops the credentials of a registry URL before escaping it', () => {
+      expect(
+        getMinPublishAgeRules(
+          {
+            registry: { 'global-min-publish-age': '7 days' },
+            registries: { priv: { 'min-publish-age': '0' } },
+          },
+          {
+            priv: 'sparse+https://renovate:s3cr(e)t*pw12345@cargo.example.com/index/',
+          },
+        ),
+      ).toEqual([
+        { matchDatasources: ['crate'], minimumReleaseAgeExtracted: '7 days' },
+        {
+          matchDatasources: ['crate'],
+          matchRegistryUrls: ['sparse+https://cargo.example.com/index/'],
+          minimumReleaseAgeExtracted: null,
+        },
+      ]);
+    });
+
     describe('with a registry which replaces crates.io', () => {
       const mirrorUrl = 'sparse+https://mirror.example.com/index/';
 

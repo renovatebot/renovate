@@ -1,6 +1,7 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { escape as escapeGlob } from 'minimatch';
 import { logger } from '../../../logger/index.ts';
+import { detachUrlCredentials } from '../../../util/host-rules.ts';
 import {
   calculateMinimumReleaseAgeMs,
   calculatePackageManagerMinimumReleaseAgeMs,
@@ -159,8 +160,12 @@ export function getMinPublishAgeRules(
     if (age ?? cratesIoAge) {
       rules.push({
         matchDatasources: [CrateDatasource.id],
-        // the matcher reads a URL as a glob, e.g. the brackets of an IPv6 address
-        matchRegistryUrls: [escapeGlob(registryUrl, { magicalBraces: true })],
+        // the dependencies lose the credentials of their registry URL before the lookup, and the matcher reads a URL as a glob, e.g. the brackets of an IPv6 address, so the credentials go before the escaping
+        matchRegistryUrls: [
+          escapeGlob(detachUrlCredentials(registryUrl, []), {
+            magicalBraces: true,
+          }),
+        ],
         minimumReleaseAgeExtracted: age,
       });
     }

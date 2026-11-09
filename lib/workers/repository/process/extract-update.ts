@@ -15,7 +15,7 @@ import {
 } from '../../../modules/manager/npmrc.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { scm } from '../../../modules/platform/scm.ts';
-import { coerceArray, isNotNullOrUndefined } from '../../../util/array.ts';
+import { isNotNullOrUndefined } from '../../../util/array.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
@@ -336,14 +336,6 @@ function detachRegistryUrlCredentials(
         file.additionalRegistryUrls = file.additionalRegistryUrls.map((url) =>
           detach(url, hostTypes),
         );
-      }
-      // the extracted rules match the registry URLs of the dependencies, so they lose the same credentials, which only count for the dependencies
-      for (const rule of coerceArray(file.packageRules)) {
-        if (isArray(rule.matchRegistryUrls)) {
-          rule.matchRegistryUrls = rule.matchRegistryUrls.map((url) =>
-            detachUrlCredentials(url, hostTypes),
-          );
-        }
       }
       for (const dep of file.deps) {
         if (isArray(dep.registryUrls)) {
