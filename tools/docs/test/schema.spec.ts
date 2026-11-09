@@ -49,12 +49,24 @@ function headings(repo: string[], global: string[] = []): DocsHeadings {
   return { repo: new Set(repo), global: new Set(global) };
 }
 
-async function compileSchema(
-  opts: { isGlobal?: boolean } = {},
-): Promise<ValidateFunction> {
-  const ajv = new Ajv({ schemaId: '$id', strict: false });
-  addFormats(ajv);
-  return ajv.compile(await buildSchema(opts));
+const compiledSchemas = new Map<boolean, Promise<ValidateFunction>>();
+
+/**
+ * Compiling the full schema takes seconds, so each variant is compiled once and shared by every suite in this file.
+ */
+function compileSchema({
+  isGlobal = false,
+}: { isGlobal?: boolean } = {}): Promise<ValidateFunction> {
+  let compiled = compiledSchemas.get(isGlobal);
+  if (!compiled) {
+    compiled = buildSchema({ isGlobal }).then((schema) => {
+      const ajv = new Ajv({ schemaId: '$id', strict: false });
+      addFormats(ajv);
+      return ajv.compile(schema);
+    });
+    compiledSchemas.set(isGlobal, compiled);
+  }
+  return compiled;
 }
 
 /**
@@ -194,6 +206,9 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
     beforeAll(async () => {
       repoSchema = await compileSchema();
+    }, 30000);
+
+    beforeAll(async () => {
       globalSchema = await compileSchema({ isGlobal: true });
     }, 30000);
 
@@ -406,6 +421,9 @@ describe('tools/docs/test/schema', { timeout: 30000 }, () => {
 
     beforeAll(async () => {
       repoSchema = await compileSchema();
+    }, 30000);
+
+    beforeAll(async () => {
       globalSchema = await compileSchema({ isGlobal: true });
     }, 30000);
 
