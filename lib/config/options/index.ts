@@ -1254,6 +1254,14 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'allowCustomJuliaRegistries',
+    description:
+      'Set this to `true` to allow cloning Julia registries other than General.',
+    globalOnly: true,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'ignorePlugins',
     scopes: sharedScopes,
     description:

@@ -92,7 +92,10 @@ describe('modules/datasource/julia/index', () => {
 
   beforeEach(async () => {
     tmpDir = await dir({ unsafeCleanup: true });
-    GlobalConfig.set({ cacheDir: upath.join(tmpDir.path, 'cache') });
+    GlobalConfig.set({
+      cacheDir: upath.join(tmpDir.path, 'cache'),
+      allowCustomJuliaRegistries: true,
+    });
     memCache.init();
   });
 
@@ -245,6 +248,19 @@ describe('modules/datasource/julia/index', () => {
       expect(clone).toHaveBeenCalledTimes(1);
     });
 
+    it('does not clone unless allowCustomJuliaRegistries is set', async () => {
+      GlobalConfig.set({ cacheDir: upath.join(tmpDir!.path, 'cache') });
+      const clone = mockClone();
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'Example',
+          registryUrls: [registryUrl],
+        }),
+      ).resolves.toBeNull();
+      expect(clone).not.toHaveBeenCalled();
+    });
+
     it.each`
       cachePrivatePackages | clones
       ${false}             | ${2}
@@ -254,6 +270,7 @@ describe('modules/datasource/julia/index', () => {
       async ({ cachePrivatePackages, clones }) => {
         GlobalConfig.set({
           cacheDir: upath.join(tmpDir!.path, 'cache'),
+          allowCustomJuliaRegistries: true,
           cachePrivatePackages,
         });
         await packageCache.init({

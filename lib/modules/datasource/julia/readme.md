@@ -5,6 +5,8 @@ The registries may be:
 - General, as `General`, its UUID `23338594-aafe-5451-b93e-139f81909106` or its URL `https://github.com/JuliaRegistries/General`, as in Pkg. Packages in General are looked up via the [`julia-general-metadata`](../julia-general-metadata/index.md) datasource, without a clone. GeneralMetadata.jl is refreshed daily, so a new release can show up to a day after it is registered.
 - A git URL: `https://`, `http://`, `ssh://` or `git@host:path`, such as that of a private registry managed with [`LocalRegistry.jl`](https://github.com/GunnarFarneback/LocalRegistry.jl). The registry is cloned with its full history on the Renovate host, at that host's cost in disk space and time, and the datasource reads its `Registry.toml` and the package's `Versions.toml` and `Package.toml`. Another URL of General, such as an SSH URL, is cloned like this too.
 
+The Renovate admin must set [`allowCustomJuliaRegistries`](../../../self-hosted-configuration.md#allowcustomjuliaregistries) to `true` for registries to be cloned.
+
 The registries are tried in the listed order, and the first registry that has the package is used.
 The [`julia`](../../manager/julia/index.md) manager's readme shows how to configure them.
 

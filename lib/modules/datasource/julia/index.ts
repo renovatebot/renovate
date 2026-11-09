@@ -84,6 +84,16 @@ export class JuliaDatasource extends Datasource {
       return null;
     }
 
+    // A repository's config must not make the Renovate host clone any URL,
+    // with the host's own credentials, unless the admin allows it.
+    if (!GlobalConfig.get('allowCustomJuliaRegistries')) {
+      logger.once.warn(
+        { registryUrl },
+        'julia datasource: allowCustomJuliaRegistries=true is required for cloning registries other than General',
+      );
+      return null;
+    }
+
     // A cloned registry may be private, so its releases are cached only with
     // `cachePrivatePackages`.
     return withCache(

@@ -2,6 +2,7 @@ Extracts the `[compat]` entries of Julia `Project.toml` and `JuliaProject.toml` 
 Each entry is looked up with the [`julia`](../../datasource/julia/index.md) datasource and [`julia`](../../versioning/julia/index.md) versioning, in the General registry by default.
 
 To look packages up in other registries too, list them in `registryUrls`: General by name, as in Pkg, and the others by git URL.
+The others are cloned, which the Renovate admin must allow with [`allowCustomJuliaRegistries`](../../../self-hosted-configuration.md#allowcustomjuliaregistries).
 The registries are tried in the listed order:
 
 ```json
