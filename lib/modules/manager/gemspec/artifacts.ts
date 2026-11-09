@@ -27,7 +27,8 @@ function loadsGemspec(gemfileContent: string, gemspecFile: string): boolean {
     }
     const name = nameOptionRegex.exec(args)?.groups?.value;
     const path = pathOptionRegex.exec(args)?.groups?.value ?? '.';
-    return (!name || name === gemName) && upath.normalizeTrim(path) === '.';
+    const matchesName = !name || name === gemName;
+    return matchesName && upath.normalizeTrim(path) === '.';
   });
 }
 
