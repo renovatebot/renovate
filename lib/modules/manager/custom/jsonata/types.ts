@@ -1,4 +1,4 @@
-import type { ExtractConfig } from '../../types.ts';
+import type { DefaultedExtractConfig } from '../../types.ts';
 
 export interface JSONataManagerTemplates {
   depNameTemplate?: string;
@@ -24,7 +24,7 @@ export interface JSONataManagerConfig extends JSONataManagerTemplates {
 }
 
 export interface JsonataExtractConfig
-  extends ExtractConfig, JSONataManagerTemplates {
+  extends DefaultedExtractConfig, JSONataManagerTemplates {
   fileFormat: string;
   matchStrings: string[];
 }

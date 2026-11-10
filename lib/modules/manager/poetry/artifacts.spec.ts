@@ -5,6 +5,7 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -13,7 +14,6 @@ import type {
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -45,7 +45,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 describe('modules/manager/poetry/artifacts', () => {
   describe('getPythonConstraint', () => {

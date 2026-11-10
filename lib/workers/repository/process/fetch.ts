@@ -124,7 +124,7 @@ async function lookup(
     delete dep.skipStage;
   }
 
-  if (depConfig.ignoreDeps!.includes(depName!)) {
+  if (depConfig.ignoreDeps.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
@@ -134,7 +134,7 @@ async function lookup(
   // A manager may disable a dependency by default, but a vulnerability fix
   // still goes through - unless a package rule disabled it as well
   if (
-    depConfig.enabled === false &&
+    !depConfig.enabled &&
     dep.enabled === false &&
     depConfig.isVulnerabilityAlert &&
     depConfig.skipReason !== 'package-rules'
@@ -146,7 +146,7 @@ async function lookup(
     dep.enabled = true;
   }
 
-  if (depConfig.enabled === false) {
+  if (!depConfig.enabled) {
     logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';
     return Result.ok(dep);

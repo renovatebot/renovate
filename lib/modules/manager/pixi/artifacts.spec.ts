@@ -3,6 +3,7 @@ import upath from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -11,7 +12,6 @@ import type {
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -31,7 +31,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   allowedUnsafeExecutions: ['pixi'],
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 // The exec flow, the `allowedUnsafeExecutions` gate, and the error handling
 // live in the shared `updatePixiLockfile` helper and are covered by

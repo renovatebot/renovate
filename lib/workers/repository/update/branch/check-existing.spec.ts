@@ -16,13 +16,13 @@ describe('workers/repository/update/branch/check-existing', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         baseBranch: 'base-branch',
         manager: 'some-manager',
         upgrades: [],
         branchName: 'some-branch',
         prTitle: 'some-title',
-      } satisfies BranchConfig;
+      });
     });
 
     it('returns false if recreating closed PRs', async () => {
@@ -90,12 +90,12 @@ describe('workers/repository/update/branch/check-existing', () => {
   });
 
   describe('findClosedPrForModifiedBranch', () => {
-    const config: BranchConfig = {
+    const config = partial<BranchConfig>({
       baseBranch: 'base-branch',
       manager: 'some-manager',
       upgrades: [],
       branchName: 'some-branch',
-    };
+    });
     const branchSha = fakeSha('some-branch');
 
     it('returns null if no closed PR matches the branch', async () => {
@@ -144,7 +144,9 @@ describe('workers/repository/update/branch/check-existing', () => {
   });
 
   describe('rebaseCheck', () => {
-    const config: RenovateConfig = { rebaseLabel: 'rebase' };
+    const config: RenovateConfig = partial<RenovateConfig>({
+      rebaseLabel: 'rebase',
+    });
 
     beforeEach(() => {
       GlobalConfig.reset();

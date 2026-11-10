@@ -341,7 +341,7 @@ export async function lookupUpdates(
         res.currentVersionAgeInDays = getElapsedDays(currentVersionTimestamp);
 
         if (
-          config.packageRules?.some((rule) =>
+          config.packageRules.some((rule) =>
             isNonEmptyString(rule.matchCurrentAge),
           )
         ) {

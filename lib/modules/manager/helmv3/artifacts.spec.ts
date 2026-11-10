@@ -6,6 +6,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -17,7 +18,6 @@ import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { toBase64 } from '../../../util/string.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as helmv3 from './index.ts';
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
@@ -34,7 +34,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const ociLockFile1 = Fixtures.get('oci_1.lock');
 const ociLockFile2 = Fixtures.get('oci_2.lock');
 const chartFile = Fixtures.get('Chart.yaml');
@@ -348,8 +348,8 @@ describe('modules/manager/helmv3/artifacts', () => {
       updatedDeps,
       newPackageFileContent: chartFile,
       config: {
-        postUpdateOptions: ['helmUpdateSubChartArchives'],
         ...config,
+        postUpdateOptions: ['helmUpdateSubChartArchives'],
       },
     });
     expect(test).toEqual([
@@ -408,8 +408,8 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
         },
       }),
     ).resolves.toEqual([
@@ -482,8 +482,8 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
         },
       }),
     ).resolves.toEqual([
@@ -551,8 +551,8 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
         },
       }),
     ).resolves.toEqual([
@@ -625,8 +625,8 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config: {
-          postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
         },
       }),
     ).resolves.toBeNull();

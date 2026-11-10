@@ -99,7 +99,10 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
-  config: RenovateConfig,
+  config: Pick<
+    RenovateConfig,
+    'dependencyDashboardIssue' | 'rebaseLabel' | 'suppressNotifications'
+  >,
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';

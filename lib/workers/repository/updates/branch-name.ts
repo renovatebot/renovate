@@ -110,7 +110,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
 
   if (update.hashedBranchLength) {
-    let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
+    let hashLength = update.hashedBranchLength - update.branchPrefix.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
         { minHashLength: MIN_HASH_LENGTH },
@@ -120,14 +120,11 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     }
 
     const additionalBranchPrefix = template.compile(
-      String(update.additionalBranchPrefix ?? ''),
+      update.additionalBranchPrefix,
       update,
     );
 
-    const branchTopic = template.compile(
-      String(update.branchTopic ?? ''),
-      update,
-    );
+    const branchTopic = template.compile(update.branchTopic, update);
 
     let hashInput = additionalBranchPrefix + branchTopic;
 
@@ -138,7 +135,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     const hashedInput = hash(hashInput);
 
     // TODO: types (#22198)
-    update.branchName = `${update.branchPrefix!}${hashedInput.slice(
+    update.branchName = `${update.branchPrefix}${hashedInput.slice(
       0,
       hashLength,
     )}`;
@@ -153,7 +150,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
   update.branchName = cleanBranchName(
     update.branchName,
-    update.branchPrefix!,
+    update.branchPrefix,
     update.branchNameStrict,
   );
 }

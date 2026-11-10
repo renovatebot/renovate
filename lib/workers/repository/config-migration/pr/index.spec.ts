@@ -9,6 +9,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message.ts';
 import type { MigratedData } from '../branch/migrated-data.ts';
 import { ensureConfigMigrationPr } from './index.ts';
@@ -19,7 +20,7 @@ describe('workers/repository/config-migration/pr/index', () => {
     './migrated-data.json',
   );
   const prTitle = new ConfigMigrationCommitMessageFactory(
-    {},
+    partial<RenovateConfig>(),
     configFileName,
   ).getPrTitle();
   const migratedData: MigratedData = {
@@ -32,12 +33,12 @@ describe('workers/repository/config-migration/pr/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
 
-    config = {
+    config = applyRepoConfigDefaults({
       ...getConfig(),
       configMigration: true,
       defaultBranch: 'main',
       description: [],
-    };
+    });
   });
 
   describe('ensureConfigMigrationPr()', () => {
@@ -164,7 +165,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
     it('creates PR with no footer configured', async () => {
       await ensureConfigMigrationPr(
-        { ...config, prFooter: undefined },
+        partial<RenovateConfig>({ ...config, prFooter: undefined }),
         migratedData,
       );
 

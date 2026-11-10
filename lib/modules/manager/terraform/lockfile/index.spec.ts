@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../../types.ts';
 import { updateArtifacts } from '../index.ts';
 import { TerraformProviderHash } from './hash.ts';
 import { getNewConstraint } from './index.ts';
@@ -14,9 +14,9 @@ vi.mock('../../../../util/fs/index.ts');
 vi.mock('./hash.ts');
 vi.mock('../../../datasource/index.ts', () => mockDeep());
 
-const config = {
+const config = updateArtifactsConfig({
   constraints: {},
-};
+});
 
 const adminConfig = {
   // `join` fixes Windows CI
@@ -676,10 +676,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -810,10 +810,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -915,10 +915,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
       'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
     ]);
 
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
     const result = await updateArtifacts({
       packageFileName: '',
       updatedDeps: [],
@@ -985,10 +985,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
       });
     mockHash.mockResolvedValue(null);
 
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
 
     const result = await updateArtifacts({
       packageFileName: '',
@@ -1021,10 +1021,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   it('return null if experimental flag is not set', async () => {
-    const localConfig: UpdateArtifactsConfig = {
+    const localConfig = updateArtifactsConfig({
       isLockFileMaintenance: true,
       ...config,
-    };
+    });
     const result = await updateArtifacts({
       packageFileName: '',
       updatedDeps: [],

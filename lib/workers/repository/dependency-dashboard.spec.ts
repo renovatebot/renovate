@@ -4,10 +4,10 @@ import type { MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
-import type { RenovateConfig } from '~test/util.ts';
-import { logger, platform } from '~test/util.ts';
+import { logger, partial, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import type { RenovateConfig } from '../../config/types.ts';
 import { pkg } from '../../expose.ts';
 import type {
   PackageDependency,
@@ -18,9 +18,14 @@ import type { Platform } from '../../modules/platform/index.ts';
 import { clone } from '../../util/clone.ts';
 import { emojify } from '../../util/emoji.ts';
 import { asTimestamp } from '../../util/timestamp.ts';
-import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
+import type {
+  BranchConfig,
+  BranchUpgradeConfig,
+  SelectAllConfig,
+} from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
+import { applyRepoConfigDefaults } from './init/defaults.ts';
 import { PackageFiles } from './package-files.ts';
 
 const createVulnerabilitiesMock = vi.fn();
@@ -40,16 +45,25 @@ type PrUpgrade = BranchUpgradeConfig;
 const massageMdSpy = platform.massageMarkdown;
 const getIssueSpy = platform.getIssue;
 
-let config: BranchConfig;
+let config: BranchConfig & RenovateConfig;
 
 beforeEach(() => {
   GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
-  config = getConfig() as BranchConfig;
+  config = getConfig() as BranchConfig & RenovateConfig;
   config.errors = [];
   config.warnings = [];
 });
+
+function dashboardConfig(
+  config: Partial<SelectAllConfig> = {},
+): SelectAllConfig {
+  return partial<SelectAllConfig>({
+    dependencyDashboardTitle: 'Dependency Dashboard',
+    ...config,
+  });
+}
 
 function genRandString(length: number): string {
   let result = '';
@@ -97,7 +111,7 @@ async function dryRun(
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
     it('leaves the config alone when there is no dashboard issue', async () => {
-      const conf: RenovateConfig = { prCreation: 'approval' };
+      const conf = dashboardConfig({ prCreation: 'approval' });
       platform.findIssue.mockResolvedValueOnce(null);
 
       await dependencyDashboard.readDashboardBody(conf);
@@ -115,7 +129,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('parses invalid dashboard body without throwing error', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -138,7 +152,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -166,7 +180,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('reads dashboard body and apply checkedBranches', async () => {
       GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -192,10 +206,10 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('ignores the dashboard issue but applies checkedBranches when mode=silent', async () => {
       GlobalConfig.set({ checkedBranches: ['branch1'] });
-      const conf: RenovateConfig = {
+      const conf = dashboardConfig({
         dependencyDashboard: true,
         mode: 'silent',
-      };
+      });
 
       await dependencyDashboard.readDashboardBody(conf);
 
@@ -209,12 +223,13 @@ describe('workers/repository/dependency-dashboard', () => {
           branch1: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
         mode: 'silent',
       });
     });
 
     it('reads dashboard body all pending approval', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -242,7 +257,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body open all rate-limited', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -270,7 +285,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body open all awaiting schedule', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -298,7 +313,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and config migration checkbox - checked', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -312,7 +327,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and config migration checkbox - unchecked', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -326,7 +341,7 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and config migration pr link', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -341,7 +356,7 @@ describe('workers/repository/dependency-dashboard', () => {
 
     it('does not read dashboard body but applies checkedBranches regardless', async () => {
       GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.dependencyDashboard = false;
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -354,12 +369,13 @@ describe('workers/repository/dependency-dashboard', () => {
           branch2: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
       });
     });
 
     it('applies rebaseAllOpenBranches without dashboard', async () => {
       GlobalConfig.set({ rebaseAllOpenBranches: true });
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.dependencyDashboard = false;
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -369,11 +385,12 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {},
         dependencyDashboardRebaseAllOpen: true,
+        dependencyDashboardTitle: 'Dependency Dashboard',
       });
     });
 
     it('reads dashboard body and group size not met branches', async () => {
-      const conf: RenovateConfig = {};
+      const conf = dashboardConfig();
       conf.prCreation = 'approval';
       platform.findIssue.mockResolvedValueOnce({
         title: '',
@@ -1662,7 +1679,7 @@ None detected
 
       beforeAll(() => {
         GlobalConfig.reset();
-        config = getConfig();
+        config = applyRepoConfigDefaults(getConfig());
         config.dependencyDashboard = true;
       });
 

@@ -211,6 +211,13 @@ describe('util/common', () => {
       expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
     });
 
+    it('returns the default of a defaulted option if neither is set', () => {
+      const branch = getInheritedOrGlobal('onboardingBranch');
+
+      expectTypeOf(branch).toEqualTypeOf<string>();
+      expect(branch).toBe('renovate/configure');
+    });
+
     it('returns inherited value if only inherited value is set', () => {
       InheritConfig.set({
         configFileNames: ['inherited'],

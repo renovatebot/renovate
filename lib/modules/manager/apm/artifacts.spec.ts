@@ -2,6 +2,7 @@ import upath from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -12,7 +13,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -31,7 +31,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 /** A `getRepoStatus` result with only the fields the manager reads. */
 function repoStatus(status: Partial<StatusResult> = {}): StatusResult {

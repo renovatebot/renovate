@@ -1,3 +1,4 @@
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { updateArtifacts } from './index.ts';
 
 describe('modules/manager/git-submodules/artifact', () => {
@@ -8,7 +9,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           packageFileName: '',
           updatedDeps: [{ depName: '' }],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).toMatchObject([{ file: { type: 'addition', path: '', contents: '' } }]);
     });
@@ -19,7 +20,7 @@ describe('modules/manager/git-submodules/artifact', () => {
           packageFileName: '',
           updatedDeps: [{ depName: 'renovate' }, { depName: 'renovate-pro' }],
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
         }),
       ).toMatchObject([
         { file: { type: 'addition', path: 'renovate', contents: '' } },

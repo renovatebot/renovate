@@ -35,8 +35,8 @@ export class ExtendsMigration extends AbstractMigration {
       return removedPresets[preset];
     }
 
-    if (migratePresets?.[preset] !== undefined) {
-      return migratePresets?.[preset];
+    if (migratePresets[preset] !== undefined) {
+      return migratePresets[preset];
     }
 
     return preset;

@@ -145,7 +145,7 @@ async function cleanUpBranches(
  * @param config Renovate configuration
  */
 function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
-  if (!config.baseBranchPatterns?.length || !config.baseBranches?.length) {
+  if (!config.baseBranchPatterns.length || !config.baseBranches?.length) {
     return null;
   }
 
@@ -198,11 +198,10 @@ export async function pruneStaleBranches(
     );
     return;
   }
-  // TODO: types (#22198)
   let renovateBranches = getBranchList().filter(
     (branchName) =>
-      branchName.startsWith(config.branchPrefix!) &&
-      branchName !== getReconfigureBranchName(config.branchPrefix!),
+      branchName.startsWith(config.branchPrefix) &&
+      branchName !== getReconfigureBranchName(config.branchPrefix),
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');

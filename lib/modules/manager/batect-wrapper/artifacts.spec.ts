@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
@@ -18,9 +19,9 @@ function artifactForPath(
       },
     ],
     newPackageFileContent: 'not used',
-    config: {
+    config: updateArtifactsConfig({
       newVersion,
-    },
+    }),
   };
 }
 

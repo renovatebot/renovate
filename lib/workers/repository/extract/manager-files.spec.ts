@@ -12,6 +12,12 @@ vi.mock('../../../util/fs/index.ts');
 const fileMatch = vi.mocked(_fileMatch);
 const html = vi.mocked(_html);
 
+const extractDefaults = {
+  includePaths: [],
+  ignorePaths: [],
+  registryAliases: {},
+};
+
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {
     let config: RenovateConfig;
@@ -21,20 +27,31 @@ describe('workers/repository/extract/manager-files', () => {
     });
 
     it('returns empty of manager is disabled', async () => {
-      const managerConfig = { manager: 'travis', enabled: false, fileList: [] };
+      const managerConfig = {
+        ...extractDefaults,
+        manager: 'travis',
+        enabled: false,
+        fileList: [],
+      };
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
     it('returns empty of manager is not enabled', async () => {
       config.enabledManagers = ['npm'];
-      const managerConfig = { manager: 'docker', enabled: true, fileList: [] };
+      const managerConfig = {
+        ...extractDefaults,
+        manager: 'docker',
+        enabled: true,
+        fileList: [],
+      };
       const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
     it('skips files if null content returned', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'npm',
         fileList: [],
         enabled: true,
@@ -46,6 +63,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('returns files with extractPackageFile', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'html',
         enabled: true,
         fileList: ['Dockerfile'],
@@ -66,6 +84,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('handles an extractAllPackageFiles that finds nothing', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'npm',
         enabled: true,
         fileList: ['package.json'],
@@ -82,6 +101,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('skips a file whose extract returns nothing', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'html',
         enabled: true,
         fileList: ['Dockerfile'],
@@ -97,6 +117,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('normalizes dep names in both directions', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'html',
         enabled: true,
         fileList: ['Dockerfile'],
@@ -127,6 +148,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('returns files with extractAllPackageFiles', async () => {
       const managerConfig = {
+        ...extractDefaults,
         manager: 'npm',
         enabled: true,
         fileList: ['package.json'],

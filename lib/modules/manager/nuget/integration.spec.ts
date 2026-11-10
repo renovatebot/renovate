@@ -11,6 +11,7 @@ import type {
 } from '../../../config/types.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { Result } from '../../../util/result.ts';
+import { applyRepoConfigDefaults } from '../../../workers/repository/init/defaults.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
 import { doAutoReplace } from '../../../workers/repository/update/branch/auto-replace.ts';
@@ -33,7 +34,7 @@ describe('modules/manager/nuget/integration', () => {
 
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    baseConfig = getConfig();
+    baseConfig = applyRepoConfigDefaults(getConfig());
     baseConfig.rangeStrategy = 'replace';
   });
 

@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -61,11 +62,11 @@ const goEnv = {
 function baseConfig(
   overrides: Partial<UpdateArtifactsConfig> = {},
 ): UpdateArtifactsConfig {
-  return {
+  return updateArtifactsConfig({
     constraints: { go: '1.21' },
     postUpdateOptions: ['gomodTidyAll', 'gomodTidy'],
     ...overrides,
-  };
+  });
 }
 
 describe('modules/manager/gomod/artifacts-gomodtidyall', () => {

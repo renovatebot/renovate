@@ -15,11 +15,15 @@ describe('workers/repository/reconfigure/comment', () => {
     const reconfigurePr = partial<Pr>({ number: 1 });
 
     beforeEach(() => {
-      config = {
+      config = partial<RenovateConfig>({
         errors: [],
         warnings: [],
         description: [],
-      };
+        baseBranchPatterns: [],
+        schedule: ['at any time'],
+        suppressNotifications: [],
+        vulnerabilityAlerts: {},
+      });
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
@@ -159,7 +163,11 @@ describe('workers/repository/reconfigure/comment', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      config = partial<RenovateConfig>();
+      config = partial<RenovateConfig>({
+        schedule: ['at any time'],
+        suppressNotifications: [],
+        vulnerabilityAlerts: {},
+      });
     });
 
     it('returns empty', () => {

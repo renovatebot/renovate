@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -8,14 +9,13 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as conan from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),

@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { extractConfig } from '~test/manager-config.ts';
 import { extractDefinition } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 import type { ProfileDefinition } from './schema.ts';
@@ -59,7 +60,10 @@ describe('modules/manager/sveltos/extract', () => {
   describe('extractDefinition()', () => {
     it('returns an empty array when parsing fails', () => {
       const invalidDefinition = {};
-      const result = extractDefinition(invalidDefinition as ProfileDefinition);
+      const result = extractDefinition(
+        invalidDefinition as ProfileDefinition,
+        extractConfig(),
+      );
       expect(result).toEqual([]);
     });
 
@@ -71,19 +75,29 @@ describe('modules/manager/sveltos/extract', () => {
           name: empty-profile
       `;
 
-      const result = extractPackageFile(validYAML, 'valid-yaml.yml');
+      const result = extractPackageFile(
+        validYAML,
+        'valid-yaml.yml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
   });
 
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', 'sveltos.yml')).toBeNull();
+      expect(
+        extractPackageFile('nothing here', 'sveltos.yml', extractConfig()),
+      ).toBeNull();
     });
 
     it('returns null for invalid', () => {
       expect(
-        extractPackageFile(`${malformedProfiles}\n123`, 'sveltos.yml'),
+        extractPackageFile(
+          `${malformedProfiles}\n123`,
+          'sveltos.yml',
+          extractConfig(),
+        ),
       ).toBeNull();
     });
 
@@ -111,12 +125,20 @@ describe('modules/manager/sveltos/extract', () => {
                   ports:
                     - containerPort: 80
       `;
-      const result = extractPackageFile(randomManifest, 'sveltos.yml');
+      const result = extractPackageFile(
+        randomManifest,
+        'sveltos.yml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
     it('return null if deps array would be empty', () => {
-      const result = extractPackageFile(malformedProfiles, 'applications.yml');
+      const result = extractPackageFile(
+        malformedProfiles,
+        'applications.yml',
+        extractConfig(),
+      );
       expect(result).toBeNull();
     });
 
@@ -130,6 +152,7 @@ describe('modules/manager/sveltos/extract', () => {
           name: prometheus
         `,
         'invalid-yaml.yml',
+        extractConfig(),
       );
       expect(result).toBeNull();
     });
@@ -149,6 +172,7 @@ describe('modules/manager/sveltos/extract', () => {
               chartVersion:     "23.4.0"
         `,
         'sveltos.yml',
+        extractConfig(),
       );
       expect(result).toMatchObject({
         deps: [
@@ -181,6 +205,7 @@ describe('modules/manager/sveltos/extract', () => {
               chartVersion:     "23.4.0"
         `,
         'applications.yml',
+        extractConfig(),
       );
       expect(result).toMatchObject({
         deps: [
@@ -249,7 +274,11 @@ describe('modules/manager/sveltos/extract', () => {
             chartName:        vault-sidecar
             chartVersion:     0.5.0
       `;
-      const result = extractPackageFile(validProfile, 'profiles.yml');
+      const result = extractPackageFile(
+        validProfile,
+        'profiles.yml',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {
@@ -352,6 +381,7 @@ describe('modules/manager/sveltos/extract', () => {
       const result = extractPackageFile(
         validClusterProfile,
         'clusterprofiles.yml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -473,6 +503,7 @@ describe('modules/manager/sveltos/extract', () => {
       const result = extractPackageFile(
         validClusterPromotion,
         'clusterpromotions.yml',
+        extractConfig(),
       );
       expect(result).toEqual({
         deps: [
@@ -557,7 +588,11 @@ describe('modules/manager/sveltos/extract', () => {
             chartName:        vault-sidecar
             chartVersion:     0.5.0
       `;
-      const result = extractPackageFile(validEventTrigger, 'eventtriggers.yml');
+      const result = extractPackageFile(
+        validEventTrigger,
+        'eventtriggers.yml',
+        extractConfig(),
+      );
       expect(result).toEqual({
         deps: [
           {

@@ -1,16 +1,18 @@
-import { isArray, isNonEmptyString, isNumber } from '@sindresorhus/is';
+import { isNonEmptyString, isNumber } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RenovateConfig } from '../../../../config/types.ts';
+import type {
+  RenovateConfig,
+  RenovateConfigFile,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
-import { coerceArray } from '../../../../util/array.ts';
 import { noLeadingAtSymbol } from '../../../../util/common.ts';
 import { sampleSize } from '../../../../util/sample.ts';
 import { codeOwnersForPr } from './code-owners.ts';
 
 async function addCodeOwners(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   assigneesOrReviewers: string[],
   pr: Pr,
 ): Promise<string[]> {
@@ -25,7 +27,7 @@ async function addCodeOwners(
 }
 
 function filterUnavailableUsers(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   users: string[],
 ): Promise<string[]> {
   return config.filterUnavailableUsers && platform.filterUnavailableUsers
@@ -34,7 +36,7 @@ function filterUnavailableUsers(
 }
 
 function prepareParticipants(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   usernames: string[],
 ): Promise<string[]> {
   const normalizedUsernames = [
@@ -44,10 +46,11 @@ function prepareParticipants(
 }
 
 export async function addParticipants(
-  config: RenovateConfig,
+  config: RenovateConfigFile &
+    Pick<RenovateConfig, 'additionalReviewers' | 'assignees' | 'reviewers'>,
   pr: Pr,
 ): Promise<void> {
-  let assignees = coerceArray(config.assignees);
+  let { assignees } = config;
   logger.debug(`addParticipants(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(config, assignees, pr);
@@ -74,17 +77,14 @@ export async function addParticipants(
     }
   }
 
-  let reviewers = coerceArray(config.reviewers);
+  let { reviewers } = config;
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(config, reviewers, pr);
     logger.debug(
       `Reviewers from code owners: ${reviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
     );
   }
-  if (
-    isArray(config.additionalReviewers) &&
-    config.additionalReviewers.length > 0
-  ) {
+  if (config.additionalReviewers.length > 0) {
     logger.debug(
       `Additional reviewers: ${config.additionalReviewers.map((reviewer) => `"${reviewer}"`).join(', ')}`,
     );

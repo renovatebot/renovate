@@ -9,18 +9,22 @@ import {
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
     it('returns empty array if no labels are configured', () => {
-      const result = prepareLabels({});
+      const result = prepareLabels({ labels: [], addLabels: [] });
       expect(result).toBeArrayOfSize(0);
     });
 
     it('only labels', () => {
-      const result = prepareLabels({ labels: ['labelA', 'labelB'] });
+      const result = prepareLabels({
+        labels: ['labelA', 'labelB'],
+        addLabels: [],
+      });
       expect(result).toBeArrayOfSize(2);
       expect(result).toEqual(['labelA', 'labelB']);
     });
 
     it('only addLabels', () => {
       const result = prepareLabels({
+        labels: [],
         addLabels: ['labelA', 'labelB'],
       });
       expect(result).toBeArrayOfSize(2);
@@ -68,6 +72,7 @@ describe('workers/repository/update/pr/labels', () => {
     it('template labels', () => {
       const result = prepareLabels({
         labels: ['datasource-{{{datasource}}}'],
+        addLabels: [],
         datasource: 'npm',
       });
       expect(result).toBeArrayOfSize(1);
@@ -77,6 +82,7 @@ describe('workers/repository/update/pr/labels', () => {
     it('template labels with empty datasource', () => {
       const result = prepareLabels({
         labels: ['{{{datasource}}}', ' {{{datasource}}} '],
+        addLabels: [],
         datasource: undefined,
       });
       expect(result).toBeArrayOfSize(0);
@@ -92,7 +98,7 @@ describe('workers/repository/update/pr/labels', () => {
       ];
 
       it('github', () => {
-        expect(prepareLabels({ labels })).toEqual([
+        expect(prepareLabels({ labels, addLabels: [] })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping', // len: 50
           'Torem ipsum dolor sit amet, consectetur adipiscing', // len: 50
@@ -104,7 +110,7 @@ describe('workers/repository/update/pr/labels', () => {
           return 255;
         });
         // platform.labelCharLimit.mockReturnValueOnce(255);
-        expect(prepareLabels({ labels })).toEqual([
+        expect(prepareLabels({ labels, addLabels: [] })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping dog', // len: 51
           // len: 255
@@ -113,7 +119,7 @@ describe('workers/repository/update/pr/labels', () => {
       });
 
       it('gitea', () => {
-        expect(prepareLabels({ labels })).toEqual([
+        expect(prepareLabels({ labels, addLabels: [] })).toEqual([
           'All',
           'The quick brown fox jumped over the lazy sleeping', // len: 50
           'Torem ipsum dolor sit amet, consectetur adipiscing', // len: 50

@@ -4,5 +4,5 @@ import type { RangeConfig } from '../types.ts';
 export function getRangeStrategy({
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
-  return rangeStrategy === 'auto' ? 'widen' : rangeStrategy!;
+  return rangeStrategy === 'auto' ? 'widen' : rangeStrategy;
 }

@@ -12,6 +12,7 @@ import { addMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
 import {
@@ -31,7 +32,7 @@ const notFoundError = Object.assign(new Error('Not Found'), {
 let config: RenovateConfig;
 
 beforeEach(() => {
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
 });
 
 describe('workers/repository/process/index', () => {
@@ -407,10 +408,10 @@ describe('workers/repository/process/index', () => {
       expect(res.branchPrefix).toBe('renovate/');
     });
 
-    it('does not add base branch name to branchPrefix if multiple base branches are not expected - baseBranchPatterns undefined', async () => {
+    it('does not add base branch name to branchPrefix if multiple base branches are not expected - no baseBranchPatterns', async () => {
       const res = await getBaseBranchConfig('main', {
         ...config,
-        baseBranchPatterns: undefined,
+        baseBranchPatterns: [],
       });
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeUndefined();

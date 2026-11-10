@@ -5,6 +5,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { fs, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import { createConfigMigrationBranch } from './create.ts';
 import type { MigratedData } from './migrated-data.ts';
 import { MigratedDataFactory } from './migrated-data.ts';
@@ -23,7 +24,7 @@ describe('workers/repository/config-migration/branch/create', () => {
 
   beforeEach(() => {
     GlobalConfig.reset();
-    config = getConfig();
+    config = applyRepoConfigDefaults(getConfig());
     config.baseBranch = 'dev';
     config.defaultBranch = 'master';
     migratedConfigData = {

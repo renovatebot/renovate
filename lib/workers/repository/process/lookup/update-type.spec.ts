@@ -93,7 +93,7 @@ describe('workers/repository/process/lookup/update-type', () => {
       const newVersion = '2026051723231779060208';
 
       const update = await generateUpdate(
-        partial<LookupUpdateConfig>({}),
+        partial<LookupUpdateConfig>({ packageRules: [] }),
         currentVersion,
         versioningApi,
         'replace',

@@ -2,6 +2,7 @@ import type { Stats } from 'node:fs';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -11,7 +12,7 @@ import type {
 import { logger } from '../../../logger/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
+import type { Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 const datasource = vi.mocked(_datasource);
@@ -21,9 +22,9 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const config: UpdateArtifactsConfig = {
+const config = updateArtifactsConfig({
   ignoreScripts: true,
-};
+});
 
 const upgrades: Upgrade[] = [
   {
@@ -99,7 +100,7 @@ describe('modules/manager/copier/artifacts', () => {
         packageFileName: '.copier-answers.yml',
         updatedDeps: upgradeWithPrefixedTag,
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -162,7 +163,7 @@ describe('modules/manager/copier/artifacts', () => {
         packageFileName: '.copier-answers.yml',
         updatedDeps: upgrades,
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -194,7 +195,7 @@ describe('modules/manager/copier/artifacts', () => {
         packageFileName: '.copier-answers.yml',
         updatedDeps: upgrades,
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([
@@ -235,7 +236,7 @@ describe('modules/manager/copier/artifacts', () => {
         packageFileName: 'apps/my-app/.copier-answers.yml',
         updatedDeps: upgrades,
         newPackageFileContent: '',
-        config: {},
+        config: updateArtifactsConfig(),
       });
 
       expect(execSnapshots).toMatchObject([

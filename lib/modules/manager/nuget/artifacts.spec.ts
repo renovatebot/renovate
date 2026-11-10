@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -9,7 +10,6 @@ import type {
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { nugetOrg } from '../../datasource/nuget/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as nuget from './index.ts';
 import * as util from './util.ts';
 
@@ -29,7 +29,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   binarySource: 'global',
 };
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 describe('modules/manager/nuget/artifacts', () => {
   beforeEach(async () => {

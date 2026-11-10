@@ -85,7 +85,14 @@ function installToolProperties(): Record<string, unknown> {
   return properties;
 }
 
-const options: Readonly<RenovateOptions>[] = [
+/**
+ * Returns the option definitions as they are, keeping their literal types so that types can be derived from them.
+ */
+function defineOptions<const T extends RenovateOptions[]>(definitions: T): T {
+  return definitions;
+}
+
+const optionDefinitions = defineOptions([
   {
     name: 'mode',
     scopes: sharedScopes,
@@ -849,6 +856,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
+    nullable: true,
   },
   {
     name: 'goGetDirs',
@@ -2838,6 +2846,7 @@ const options: Readonly<RenovateOptions>[] = [
       'The upgrade topic/noun used in commit messages and PR titles.',
     type: 'string',
     default: 'dependency {{depName}}',
+    nullable: true,
     cli: false,
     advancedUse: true,
     supportsTemplating: true,
@@ -2850,6 +2859,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     default:
       'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}',
+    nullable: true,
     cli: false,
     advancedUse: true,
     supportsTemplating: true,
@@ -4045,7 +4055,14 @@ const options: Readonly<RenovateOptions>[] = [
     properties: additionalConstraintProperties(),
     additionalProperties: false,
   },
-];
+]);
+
+/**
+ * The literal type of each option definition, without the manager options which are generated at runtime.
+ */
+export type OptionDefinition = (typeof optionDefinitions)[number];
+
+const options: Readonly<RenovateOptions>[] = [...optionDefinitions];
 
 export function getOptions(): Readonly<RenovateOptions>[] {
   return options;

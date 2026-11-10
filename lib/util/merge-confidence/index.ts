@@ -1,6 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
-import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence.preset.ts';
-import type { AllConfig, UpdateType } from '../../config/types.ts';
+import type { GlobalWorkerConfig, UpdateType } from '../../config/types.ts';
 import { instrument } from '../../instrumentation/index.ts';
 import {
   ATTR_RENOVATE_DATASOURCE,
@@ -21,6 +20,11 @@ import { MERGE_CONFIDENCE } from './common.ts';
 import { MergeConfidenceResponse } from './schema.ts';
 import type { MergeConfidence } from './types.ts';
 
+type MergeConfidenceConfig = Pick<
+  GlobalWorkerConfig,
+  'mergeConfidenceDatasources' | 'mergeConfidenceEndpoint'
+>;
+
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
 let tokenHash: string | undefined;
@@ -37,13 +41,12 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig({
   mergeConfidenceEndpoint,
   mergeConfidenceDatasources,
-}: AllConfig): void {
+}: MergeConfidenceConfig): void {
   apiBaseUrl = getApiBaseUrl(mergeConfidenceEndpoint);
   const token = getApiToken();
   tokenHash = isNullOrUndefined(token) ? undefined : toSha256(token);
 
-  supportedDatasources =
-    mergeConfidenceDatasources ?? presetSupportedDatasources;
+  supportedDatasources = mergeConfidenceDatasources;
 
   if (!isNullOrUndefined(tokenHash)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
@@ -227,7 +230,9 @@ async function queryApi(
  * authenticate with the API. If either the base URL or token is not defined, it will immediately return
  * without making a request.
  */
-export async function initMergeConfidence(config: AllConfig): Promise<void> {
+export async function initMergeConfidence(
+  config: MergeConfidenceConfig,
+): Promise<void> {
   initConfig(config);
 
   if (isNullOrUndefined(apiBaseUrl) || isNullOrUndefined(tokenHash)) {
@@ -249,9 +254,8 @@ export async function initMergeConfidence(config: AllConfig): Promise<void> {
   return;
 }
 
-function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
+function getApiBaseUrl(baseFromEnv: string): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
-  const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
 
   const parsedBaseUrl = parseUrl(baseFromEnv)?.toString();
   if (!parsedBaseUrl) {

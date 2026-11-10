@@ -9,7 +9,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
-import type { AllConfig } from '../../../config/types.ts';
+import type { AllConfig, RenovateConfigFile } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
@@ -24,6 +24,7 @@ import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
 import { OnboardingState } from '../onboarding/common.ts';
+import { applyRepoConfigDefaults } from './defaults.ts';
 import {
   applyHostRules,
   applyNpmrc,
@@ -58,7 +59,7 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
 
 beforeEach(() => {
   memCache.init();
-  config = getConfig();
+  config = applyRepoConfigDefaults(getConfig());
   config.errors = [];
   config.warnings = [];
 });
@@ -1130,7 +1131,7 @@ describe('workers/repository/init/merge', () => {
         ...config,
         configValidationError: true,
         // oxlint-disable-next-line renovate/prefer-partial-in-specs -- a legacy option name, so deliberately absent from `RenovateConfig`
-        repositoryEntryConfig: { renovateFork: true } as RenovateConfig,
+        repositoryEntryConfig: { renovateFork: true } as RenovateConfigFile,
       });
 
       expect(res.forkProcessing).toBe('enabled');

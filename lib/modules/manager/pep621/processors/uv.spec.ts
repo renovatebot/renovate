@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
 import { mockExecAll } from '~test/exec-util.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type {
@@ -15,7 +16,7 @@ import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
-import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
+import type { UpdateArtifact } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import type { PyProject, UvSource } from '../schema.ts';
 import type { Pep621ManagerData } from '../types.ts';
@@ -29,7 +30,7 @@ vi.mock('../../../datasource/index.ts');
 const googleAuth = vi.mocked(_googleAuth);
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -566,7 +567,9 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('throws TEMPORARY_ERROR', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
       const result = processor.updateArtifacts(
-        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({
+          config: updateArtifactsConfig(),
+        }),
         partial(),
       );
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
@@ -575,7 +578,9 @@ describe('modules/manager/pep621/processors/uv', () => {
     it('returns if no lockfile found', async () => {
       fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
       const result = await processor.updateArtifacts(
-        partial<UpdateArtifact<Pep621ManagerData>>({ config: {} }),
+        partial<UpdateArtifact<Pep621ManagerData>>({
+          config: updateArtifactsConfig(),
+        }),
         partial(),
       );
       expect(result).toBeNull();
@@ -633,7 +638,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         pyproject,
@@ -690,7 +695,9 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
           // no `requires-python` in the pyproject, so the extracted one is used
-          config: { extractedConstraints: { python: '==3.11.1' } },
+          config: updateArtifactsConfig({
+            extractedConstraints: { python: '==3.11.1' },
+          }),
           updatedDeps: [{ packageName: 'dep1' }],
         },
         parsePyProject('')!,
@@ -726,10 +733,10 @@ describe('modules/manager/pep621/processors/uv', () => {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
           // no `required-version` in the pyproject, so the extracted one is used
-          config: {
+          config: updateArtifactsConfig({
             constraints: {},
             extractedConstraints: { uv: '>=0.2.30' },
-          },
+          }),
           updatedDeps: [{ packageName: 'dep1' }],
         },
         parsePyProject('')!,
@@ -764,10 +771,10 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             constraints: {},
             extractedConstraints: { uv: '<0.2.30' },
-          },
+          }),
           updatedDeps: [{ packageName: 'dep1' }],
         },
         parsePyProject(codeBlock`
@@ -795,7 +802,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -834,9 +841,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             constraints: {},
-          },
+          }),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -882,7 +889,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -930,7 +937,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -963,7 +970,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -996,7 +1003,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -1112,7 +1119,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         pyproject,
@@ -1230,7 +1237,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         pyproject,
@@ -1329,7 +1336,7 @@ describe('modules/manager/pep621/processors/uv', () => {
           {
             packageFileName: 'pyproject.toml',
             newPackageFileContent: '',
-            config: {},
+            config: updateArtifactsConfig(),
             updatedDeps,
           },
           pyproject,
@@ -1385,7 +1392,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: {},
+          config: updateArtifactsConfig(),
           updatedDeps,
         },
         parsePyProject('')!,
@@ -1431,9 +1438,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
-          config: {
+          config: updateArtifactsConfig({
             isLockFileMaintenance: true,
-          },
+          }),
           updatedDeps: [],
         },
         parsePyProject('')!,

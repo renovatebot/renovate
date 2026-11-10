@@ -19,6 +19,7 @@ import type {
   AllConfig,
   MigratedConfig,
   RenovateConfig,
+  RenovateConfigFile,
   ValidationMessage,
 } from '../../../config/types.ts';
 import * as configValidation from '../../../config/validation.ts';
@@ -234,7 +235,7 @@ function throwConfigValidationError(
  * `validationSource` is reported to the user; use `repositoriesEntrySource` and `repositoriesEntryValidationError` for admin-controlled object entries so a fault is not blamed on the repo owner.
  */
 async function validateResolvedConfig(
-  resolved: RenovateConfig,
+  resolved: RenovateConfigFile,
   validationSource: string | undefined,
   strict: boolean,
   validationError?: string,
@@ -346,7 +347,7 @@ function isCoveredByAdminHosts(
  *
  * `hostRules` migration throws when a rule carries more than one host-matching field. That is per-rule invalid config which {@link applyHostRules} logs and skips over, keeping the rest of the run going, so migrating a whole config here must not escalate it into an error which aborts the repository.
  */
-function migrateConfigOrWarn(config: RenovateConfig): MigratedConfig {
+function migrateConfigOrWarn(config: RenovateConfigFile): MigratedConfig {
   try {
     return migrateConfig(config);
   } catch (err) {
@@ -385,7 +386,7 @@ function migratedHostRules(rules: HostRule[] | undefined): HostRule[] {
  * A preset is only ever resolved into the config which extends it, so a config here is the *resolved* form of an admin config: whatever the presets the admin chose to extend contribute is as much theirs as a value they wrote inline.
  */
 function adminSuppliedValues(
-  adminConfigs: RenovateConfig[],
+  adminConfigs: RenovateConfigFile[],
 ): AdminSuppliedValues {
   const env = new Set<string>();
   const headers = new Map<string, Set<string | null>>();
@@ -426,9 +427,9 @@ function adminSuppliedValues(
  * Reporting them would abort the repository and file a "Fix Renovate Configuration" issue whose cause the repository's owners can neither see nor fix.
  */
 function withoutAdminSuppliedValues(
-  resolved: RenovateConfig,
+  resolved: RenovateConfigFile,
   admin: AdminSuppliedValues,
-): RenovateConfig {
+): RenovateConfigFile {
   const result = { ...resolved };
 
   if (result.env) {
@@ -491,10 +492,23 @@ function withoutAdminSuppliedValues(
 }
 
 // Check for repository config
+/**
+ * Merges the repository's config file and the `repositories[]` entry config over `config`.
+ *
+ * A config with its defaults keeps them, as `mergeChildConfig()` restores an option which the merged config sets to `null`, and `resolveConfigPresets()` keeps the values of the config over those of its presets.
+ */
+export function mergeRenovateConfig(
+  config: RenovateConfig & RepositoryWorkerConfig,
+  branchName?: string,
+): Promise<RenovateConfig>;
+export function mergeRenovateConfig(
+  config: RepositoryWorkerConfig,
+  branchName?: string,
+): Promise<RenovateConfigFile>;
 export async function mergeRenovateConfig(
   config: RepositoryWorkerConfig,
   branchName?: string,
-): Promise<RenovateConfig> {
+): Promise<RenovateConfigFile> {
   let returnConfig: RepositoryWorkerConfig = { ...config };
   let repoConfig: RepoFileConfig = {};
   if (getInheritedOrGlobal('requireConfig') !== 'ignored') {
@@ -556,11 +570,11 @@ export async function mergeRenovateConfig(
   };
 
   // every config the self-hosted admin supplied, in resolved form, for {@link adminSuppliedValues}
-  const adminConfigs: RenovateConfig[] = [config, adminPresetConfig];
+  const adminConfigs: RenovateConfigFile[] = [config, adminPresetConfig];
 
   if (isNonEmptyObject(repoEntryConfig)) {
-    const repoEntry = repoEntryConfig as RenovateConfig;
-    const toResolve: RenovateConfig = {
+    const repoEntry = repoEntryConfig as RenovateConfigFile;
+    const toResolve: RenovateConfigFile = {
       ...repoEntry,
       extends: [
         ...coerceArray(returnConfig.extends),
@@ -737,7 +751,7 @@ export async function mergeRenovateConfig(
 }
 
 export function applyNpmrc(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   configType?: 'resolved' | 'resolvedRepoEntry' | 'decrypted',
 ): void {
   setNpmTokenInNpmrc(config);
@@ -751,7 +765,7 @@ export function applyNpmrc(
 }
 
 export function applyHostRules(
-  config: RenovateConfig,
+  config: RenovateConfigFile,
   options?: hostRules.AddHostRuleOptions,
 ): void {
   if (!config.hostRules) {
@@ -774,7 +788,7 @@ export function applyHostRules(
 }
 
 /** needed when using portal secrets for npmToken */
-export function setNpmTokenInNpmrc(config: RenovateConfig): void {
+export function setNpmTokenInNpmrc(config: RenovateConfigFile): void {
   if (!isString(config.npmToken)) {
     return;
   }
@@ -896,7 +910,7 @@ export function mergeStaticConfig(
 * Due to caching, this doesn't add any additional requests.
  */
 async function logShallowConfig(
-  _decryptedConfig: RenovateConfig,
+  _decryptedConfig: RenovateConfigFile,
   _config: RepositoryWorkerConfig,
 ): Promise<void> {
   // make sure we clone the existing config, so we don't modify the existing settings when resolving this in a shallow fashion

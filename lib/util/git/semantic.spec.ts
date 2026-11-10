@@ -3,7 +3,7 @@ import { git, partial } from '~test/util.ts';
 import { initRepoCache } from '../cache/repository/init.ts';
 import { detectSemanticCommits } from './semantic.ts';
 
-let config: RenovateConfig;
+let config: Partial<RenovateConfig>;
 
 beforeEach(() => {
   config = partial<RenovateConfig>();

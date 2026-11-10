@@ -30,7 +30,7 @@ describe('workers/repository/update/pr/participants', () => {
 
   describe('assignees', () => {
     it('does not assignees when there are none', async () => {
-      await addParticipants({ ...config, assignees: undefined }, pr);
+      await addParticipants({ ...config, assignees: [] }, pr);
       expect(platform.addAssignees).not.toHaveBeenCalled();
     });
 
@@ -167,7 +167,7 @@ describe('workers/repository/update/pr/participants', () => {
 
   describe('reviewers', () => {
     it('does not assignees when there are none', async () => {
-      await addParticipants({ ...config, reviewers: undefined }, pr);
+      await addParticipants({ ...config, reviewers: [] }, pr);
       expect(platform.addReviewers).not.toHaveBeenCalled();
     });
 

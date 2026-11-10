@@ -12,12 +12,12 @@ describe('workers/repository/update/pr/automerge', () => {
     let pr: Pr;
 
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         baseBranch: 'base-branch',
         manager: 'some-manager',
         branchName: 'renovate/pin',
         upgrades: [],
-      } satisfies BranchConfig;
+      });
       pr = partial<Pr>();
       spy.mockReturnValue(true);
     });

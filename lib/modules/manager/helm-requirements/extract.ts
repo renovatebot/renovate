@@ -1,11 +1,10 @@
 import { isArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { coerceObject } from '../../../util/object.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
 import { isAlias, parseRepository, resolveAlias } from '../helmv3/utils.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -13,7 +12,7 @@ import type {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   let deps = [];
   // TODO: fix type
@@ -60,10 +59,7 @@ export function extractPackageFile(
 
     res.registryUrls = [dep.repository];
     if (isAlias(dep.repository)) {
-      const repository = resolveAlias(
-        dep.repository,
-        coerceObject(config.registryAliases),
-      );
+      const repository = resolveAlias(dep.repository, config.registryAliases);
       if (!repository) {
         res.skipReason = 'placeholder-url';
         return res;

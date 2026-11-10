@@ -11,6 +11,7 @@ import type { PackageFile } from '../../../modules/manager/types.ts';
 import { applyPackageRules } from '../../../util/package-rules/index.ts';
 import { Result } from '../../../util/result.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import * as lookup from './lookup/index.ts';
 import type { LookupUpdateConfig } from './lookup/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
@@ -135,7 +136,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     beforeEach(() => {
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
       config.packageRules = [];
     });
 
@@ -934,7 +935,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     beforeEach(() => {
-      config = getConfig();
+      config = applyRepoConfigDefaults(getConfig());
       config.packageRules = [];
     });
 

@@ -11,11 +11,10 @@ describe('workers/repository/onboarding/pr/config-description', () => {
 
     beforeEach(() => {
       GlobalConfig.reset();
-      config = partial<RenovateConfig>();
+      config = partial<RenovateConfig>({ schedule: ['at any time'] });
     });
 
     it('returns empty', () => {
-      delete config.description;
       const res = getConfigDesc(config);
       expect(res).toBe('');
     });
@@ -50,7 +49,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     });
 
     it('assignees, labels and schedule', () => {
-      delete config.description;
       config.assignees = ['someone', '@someone-else'];
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
@@ -65,7 +63,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     });
 
     it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
-      delete config.description;
       config.schedule = ['before 5am'];
       GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
       config.onboardingRebaseCheckbox = true;

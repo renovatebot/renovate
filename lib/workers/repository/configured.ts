@@ -1,10 +1,10 @@
-import type { RenovateConfig } from '../../config/types.ts';
+import type { RenovateConfigFile } from '../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_FORKED,
 } from '../../constants/error-messages.ts';
 
-export function checkIfConfigured(config: RenovateConfig): void {
+export function checkIfConfigured(config: RenovateConfigFile): void {
   if (config.enabled === false) {
     throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
   }

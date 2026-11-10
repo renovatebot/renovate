@@ -3,7 +3,6 @@ import {
   isNonEmptyObject,
   isNonEmptyString,
   isNullOrUndefined,
-  isTruthy,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../config/global.ts';
@@ -191,12 +190,10 @@ export async function readDashboardBody(
   if (config.mode === 'silent') {
     logger.debug('Ignoring Dependency Dashboard checkboxes when mode=silent');
   } else if (
-    config.dependencyDashboard === true ||
+    config.dependencyDashboard ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
     stringifiedConfig.includes('"prCreation":"approval"')
   ) {
-    config.dependencyDashboardTitle =
-      config.dependencyDashboardTitle ?? `Dependency Dashboard`;
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
@@ -225,8 +222,7 @@ export async function readDashboardBody(
 
 function needsDashboardApproval(branch: BranchConfig): boolean {
   return (
-    !!branch.dependencyDashboardApproval ||
-    !!branch.dependencyDashboardPrApproval
+    branch.dependencyDashboardApproval || !!branch.dependencyDashboardPrApproval
   );
 }
 
@@ -342,7 +338,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   if (repoProblems.size) {
     newIssueBody += '## Repository Problems\n\n';
     const repoProblemsHeader =
-      config.customizeDashboard?.repoProblemsHeader ??
+      config.customizeDashboard.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
     newIssueBody += `${template.compile(repoProblemsHeader, config)}\n\n`;
 
@@ -375,10 +371,9 @@ export async function ensureDependencyDashboard(
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible),
   );
   if (!(
-    config.dependencyDashboard === true ||
-    config.dependencyDashboardApproval === true ||
-    config.packageRules?.some((rule) => rule.dependencyDashboardApproval) ===
-      true ||
+    config.dependencyDashboard ||
+    config.dependencyDashboardApproval ||
+    config.packageRules.some((rule) => rule.dependencyDashboardApproval) ||
     branches.some(needsDashboardApproval)
   )) {
     if (GlobalConfig.get('dryRun')) {
@@ -388,7 +383,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       delete config.dependencyDashboardIssue;
     }
     return;
@@ -457,14 +452,14 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       delete config.dependencyDashboardIssue;
     }
     return;
   }
   let issueBody = '';
 
-  if (config.dependencyDashboardHeader?.length) {
+  if (config.dependencyDashboardHeader.length) {
     issueBody += `${template.compile(config.dependencyDashboardHeader, config)}\n\n`;
   }
 
@@ -690,7 +685,7 @@ export async function ensureDependencyDashboard(
     );
   } else {
     const result = await platform.ensureIssue({
-      title: config.dependencyDashboardTitle!,
+      title: config.dependencyDashboardTitle,
       reuseTitle,
       body: platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
@@ -699,7 +694,7 @@ export async function ensureDependencyDashboard(
     // ensureIssue doesn't return the issue, so a newly created (or renamed)
     // dashboard needs a lookup to record its number
     if (result && !config.dependencyDashboardIssue) {
-      const issue = await platform.findIssue(config.dependencyDashboardTitle!);
+      const issue = await platform.findIssue(config.dependencyDashboardTitle);
       config.dependencyDashboardIssue = issue?.number;
     }
   }
@@ -786,10 +781,7 @@ export async function getDashboardMarkdownVulnerabilities(
 ): Promise<string> {
   let result = '';
 
-  if (
-    isNullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
-    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
-  ) {
+  if (config.dependencyDashboardOSVVulnerabilitySummary === 'none') {
     return result;
   }
 
@@ -823,7 +815,7 @@ export async function getDashboardMarkdownVulnerabilities(
 
   result += emojify('> :exclamation: **Important**\n> \n');
   result += `> \`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
-  if (isTruthy(config.osvVulnerabilityAlerts)) {
+  if (config.osvVulnerabilityAlerts) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
     result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;

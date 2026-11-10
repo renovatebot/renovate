@@ -1,4 +1,5 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { Lockfile, PackageFile } from './schema.ts';
 import {
@@ -138,7 +139,10 @@ describe('modules/manager/composer/utils', () => {
 
     it('disables scripts and plugins by default', () => {
       expect(
-        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),
+        getComposerArguments(updateArtifactsConfig(), {
+          toolName: 'composer',
+          constraint: '1.*',
+        }),
       ).toBe(
         ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
       );
@@ -147,9 +151,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables platform requirements', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -160,9 +164,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables all platform requirements with 2.1.0', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '2.1.0' },
         ),
       ).toBe(
@@ -173,9 +177,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with ^2.1', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '^2.1' },
         ),
       ).toBe(
@@ -186,9 +190,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with 2.2.0', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '2.2.0' },
         ),
       ).toBe(
@@ -199,9 +203,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with ^2.2', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '^2.2' },
         ),
       ).toBe(
@@ -212,9 +216,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with 2.3.0', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '2.3.0' },
         ),
       ).toBe(
@@ -225,9 +229,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables only extension and library platform requirements with ^2.3', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: [],
-          },
+          }),
           { toolName: 'composer', constraint: '^2.3' },
         ),
       ).toBe(
@@ -238,9 +242,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables single platform requirement', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: ['ext-intl'],
-          },
+          }),
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -251,9 +255,9 @@ describe('modules/manager/composer/utils', () => {
     it('disables multiple platform requirement', () => {
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             composerIgnorePlatformReqs: ['ext-intl', 'ext-icu'],
-          },
+          }),
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -266,7 +270,10 @@ describe('modules/manager/composer/utils', () => {
         allowScripts: true,
       });
       expect(
-        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),
+        getComposerArguments(updateArtifactsConfig({ ignoreScripts: false }), {
+          toolName: 'composer',
+          constraint: '1.*',
+        }),
       ).toBe(' --no-ansi --no-interaction --no-plugins');
     });
 
@@ -276,9 +283,9 @@ describe('modules/manager/composer/utils', () => {
       });
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             ignoreScripts: true,
-          },
+          }),
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -291,7 +298,10 @@ describe('modules/manager/composer/utils', () => {
         allowPlugins: true,
       });
       expect(
-        getComposerArguments({}, { toolName: 'composer', constraint: '1.*' }),
+        getComposerArguments(updateArtifactsConfig(), {
+          toolName: 'composer',
+          constraint: '1.*',
+        }),
       ).toBe(' --no-ansi --no-interaction --no-scripts --no-autoloader');
     });
 
@@ -301,9 +311,9 @@ describe('modules/manager/composer/utils', () => {
       });
       expect(
         getComposerArguments(
-          {
+          updateArtifactsConfig({
             ignorePlugins: true,
-          },
+          }),
           { toolName: 'composer', constraint: '1.*' },
         ),
       ).toBe(
@@ -322,7 +332,10 @@ describe('modules/manager/composer/utils', () => {
       'does not request an update with minimal changes with $constraint',
       ({ constraint }) => {
         expect(
-          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+          getComposerUpdateArguments(updateArtifactsConfig(), {
+            toolName: 'composer',
+            constraint,
+          }),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         );
@@ -346,7 +359,10 @@ describe('modules/manager/composer/utils', () => {
       'requests an update with minimal changes with $constraint',
       ({ constraint }) => {
         expect(
-          getComposerUpdateArguments({}, { toolName: 'composer', constraint }),
+          getComposerUpdateArguments(updateArtifactsConfig(), {
+            toolName: 'composer',
+            constraint,
+          }),
         ).toBe(
           ' --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins --minimal-changes',
         );
@@ -356,9 +372,9 @@ describe('modules/manager/composer/utils', () => {
     it('does not use --minimal-changes when composerNoMinimalChanges is set in postUpdateOptions', () => {
       expect(
         getComposerUpdateArguments(
-          {
+          updateArtifactsConfig({
             postUpdateOptions: ['composerNoMinimalChanges'],
-          },
+          }),
           { toolName: 'composer', constraint: '2.7' },
         ),
       ).toBe(
@@ -369,9 +385,9 @@ describe('modules/manager/composer/utils', () => {
     it('does not use --minimal-changes for lock file maintenance', () => {
       expect(
         getComposerUpdateArguments(
-          {
+          updateArtifactsConfig({
             isLockFileMaintenance: true,
-          },
+          }),
           { toolName: 'composer', constraint: '2.7' },
         ),
       ).toBe(

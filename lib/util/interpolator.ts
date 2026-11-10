@@ -1,5 +1,5 @@
 import { isArray, isPlainObject, isString } from '@sindresorhus/is';
-import type { RenovateConfig } from '../config/types.ts';
+import type { RenovateConfigFile } from '../config/types.ts';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
@@ -91,11 +91,11 @@ function replaceInterpolatedValuesInString(
 }
 
 export function replaceInterpolatedValuesInObject(
-  config_: RenovateConfig,
+  config_: RenovateConfigFile,
   input: Record<string, string>,
   options: InterpolatorOptions,
   deleteValues = true,
-): RenovateConfig {
+): RenovateConfigFile {
   const config = { ...config_ };
   const { name } = options;
   if (deleteValues) {

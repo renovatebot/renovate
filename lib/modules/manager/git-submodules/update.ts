@@ -13,7 +13,7 @@ export default async function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): Promise<UpdateDependencyResult | null> {
   // TODO: types (#22198)
-  const localDir = GlobalConfig.get('localDir');
+  const localDir = GlobalConfig.getRequired('localDir');
   const authentication = {
     hostTypes: ['git-tags', 'git-refs'],
   };

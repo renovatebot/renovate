@@ -2,6 +2,7 @@ import type { Stats } from 'node:fs';
 import upath from 'upath';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -11,7 +12,6 @@ import type {
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
 import * as cargo from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -19,7 +19,7 @@ vi.mock('../../../util/http/index.ts');
 vi.mock('../../../util/fs/index.ts');
 
 process.env.CONTAINERBASE = 'true';
-const config: UpdateArtifactsConfig = {};
+const config = updateArtifactsConfig();
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI

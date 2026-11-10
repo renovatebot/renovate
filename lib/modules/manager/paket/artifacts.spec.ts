@@ -1,3 +1,4 @@
+import { updateArtifactsConfig } from '~test/manager-config.ts';
 import { fs } from '~test/util.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -26,7 +27,7 @@ describe('modules/manager/paket/artifacts', () => {
 
   describe('updateArtifacts()', () => {
     const updateArtifact: UpdateArtifact<PaketManagerData> = {
-      config: {},
+      config: updateArtifactsConfig(),
       packageFileName,
       newPackageFileContent: 'Fake package content',
       updatedDeps: [
@@ -171,7 +172,7 @@ describe('modules/manager/paket/artifacts', () => {
 
       const result = await updateArtifacts({
         ...updateArtifact,
-        config: { isLockFileMaintenance: true },
+        config: updateArtifactsConfig({ isLockFileMaintenance: true }),
         updatedDeps: [],
       });
 
@@ -297,10 +298,10 @@ describe('modules/manager/paket/artifacts', () => {
 
       await updateArtifacts({
         ...updateArtifact,
-        config: {
+        config: updateArtifactsConfig({
           constraints: { paket: '9.0.2' },
           extractedConstraints: { dotnet: '8.0.100', paket: '8.0.0' },
-        },
+        }),
       });
 
       expect(toolSpy).toHaveBeenCalledExactlyOnceWith(

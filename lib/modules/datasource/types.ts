@@ -15,7 +15,7 @@ import type { Timestamp } from '../../util/timestamp.ts';
  * datasource index.
  */
 export interface RegistryUrlsConfig {
-  defaultRegistryUrls?: string[];
+  defaultRegistryUrls?: string[] | null;
   registryUrls?: string[] | null;
   additionalRegistryUrls?: string[];
 }

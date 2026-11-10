@@ -44,6 +44,7 @@ import handleError from './error.ts';
 import { finalizeRepo } from './finalize/index.ts';
 import { pruneStaleBranches } from './finalize/prune.ts';
 import { initRepo } from './init/index.ts';
+import type { ResolvedRepositoryWorkerConfig } from './init/types.ts';
 import { OnboardingState } from './onboarding/common.ts';
 import { ensureOnboardingPr } from './onboarding/pr/index.ts';
 import type { ExtractResult } from './process/extract-update.ts';
@@ -53,7 +54,7 @@ import { processResult } from './result.ts';
 
 // istanbul ignore next
 export async function renovateRepository(
-  repoConfig: RenovateConfig,
+  repoConfig: ResolvedRepositoryWorkerConfig,
   canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
@@ -66,7 +67,7 @@ export async function renovateRepository(
       localDir: string;
       error?: Error;
     }> => {
-      let config = GlobalConfig.set(
+      const config = GlobalConfig.set(
         applySecretsAndVariablesToConfig({
           config: repoConfig,
           deleteVariables: false,
@@ -79,13 +80,14 @@ export async function renovateRepository(
       logger.trace({ config });
       queue.clear();
       throttle.clear();
-      const localDir = GlobalConfig.get('localDir');
+      const localDir = GlobalConfig.getRequired('localDir');
 
       try {
         await ensureDir(localDir);
         logger.debug(`Using localDir: ${localDir}`);
-        config = await initRepo(config);
+        const initializedConfig = await initRepo(config);
         addSplit('init');
+        return { config: initializedConfig, localDir };
       } catch (err) /* istanbul ignore next */ {
         setMeta({ repository: config.repository });
         const errorRes = await handleError(config, err);
@@ -101,8 +103,6 @@ export async function renovateRepository(
 
         return { config, localDir, error: err };
       }
-
-      return { config, localDir };
     },
     {
       attributes: {
@@ -248,7 +248,7 @@ function emptyExtract(): ExtractResult {
       addSplit('lookup');
       return {
         branches: [],
-        branchList: [getInheritedOrGlobal('onboardingBranch')!], // to prevent auto closing
+        branchList: [getInheritedOrGlobal('onboardingBranch')], // to prevent auto closing
         packageFiles: {},
       };
     },

@@ -14,7 +14,7 @@ import {
 } from './migrated-data.ts';
 
 export async function createConfigMigrationBranch(
-  config: Partial<RenovateConfig>,
+  config: RenovateConfig,
   migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('createConfigMigrationBranch()');
@@ -47,7 +47,7 @@ export async function createConfigMigrationBranch(
 }
 
 async function getMigratedFiles(
-  config: Partial<RenovateConfig>,
+  config: RenovateConfig,
   migratedConfigData: MigratedData,
   configFileName: string,
   pJsonMigration: boolean,

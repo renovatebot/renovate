@@ -1,6 +1,6 @@
 import { isRegExp } from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import type { RenovateConfig } from '../types.ts';
+import type { RenovateConfigFile } from '../types.ts';
 import { RemovePropertyMigration } from './base/remove-property-migration.ts';
 import { RenamePropertyMigration } from './base/rename-property-migration.ts';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration.ts';
@@ -180,12 +180,12 @@ export class MigrationsService {
   static run(
     originalConfig: MigratableConfig,
     parentKey?: string,
-  ): RenovateConfig {
-    const migratedConfig: RenovateConfig = {};
+  ): RenovateConfigFile {
+    const migratedConfig: RenovateConfigFile = {};
     const migrations = this.getMigrations(originalConfig, migratedConfig);
 
     for (const [key, value] of Object.entries(originalConfig) as [
-      keyof RenovateConfig,
+      keyof RenovateConfigFile,
       unknown,
     ][]) {
       // @ts-expect-error -- can't be narrowed
@@ -206,14 +206,14 @@ export class MigrationsService {
 
   static isMigrated(
     originalConfig: MigratableConfig,
-    migratedConfig: RenovateConfig,
+    migratedConfig: RenovateConfigFile,
   ): boolean {
     return !dequal(originalConfig, migratedConfig);
   }
 
   public static getMigrations(
     originalConfig: MigratableConfig,
-    migratedConfig: RenovateConfig,
+    migratedConfig: RenovateConfigFile,
   ): readonly Migration[] {
     const migrations: Migration[] = [];
 

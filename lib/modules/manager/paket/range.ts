@@ -4,7 +4,7 @@ import type { RangeConfig } from '../types.ts';
 export function getRangeStrategy({
   rangeStrategy,
 }: RangeConfig): RangeStrategy {
-  if (rangeStrategy && rangeStrategy !== 'auto') {
+  if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
   return 'update-lockfile';

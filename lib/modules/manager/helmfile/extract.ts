@@ -13,7 +13,7 @@ import {
 } from '../helmv3/oci.ts';
 import { isLocalChartPath } from '../helmv3/utils.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -34,7 +34,7 @@ function isValidChartName(name: string | undefined, oci: boolean): boolean {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig,
+  config: DefaultedExtractConfig,
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let registryData: Record<string, HelmRepository> = {};
@@ -130,7 +130,7 @@ export async function extractPackageFile(
         Object.assign(res, ociDep);
       } else if (repoName) {
         res.registryUrls = [registryData[repoName]?.url]
-          .concat([config.registryAliases?.[repoName]] as string[])
+          .concat([config.registryAliases[repoName]])
           .filter(isString);
       }
 

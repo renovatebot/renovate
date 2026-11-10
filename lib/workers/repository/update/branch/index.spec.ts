@@ -39,6 +39,7 @@ import type {
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
 import * as _changelog from '../../changelog/index.ts';
+import { applyRepoConfigDefaults } from '../../init/defaults.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -141,13 +142,18 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr = vi.fn();
       prWorker.getPlatformPrOptions = vi.fn();
       prAutomerge.checkAutoMerge = vi.fn();
-      // TODO: incompatible types (#22198)
       config = {
-        ...getConfig(),
+        ...applyRepoConfigDefaults(getConfig()),
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: partial<BranchUpgradeConfig>([{ depName: 'some-dep-name' }]),
+        upgrades: partial<BranchUpgradeConfig>([
+          {
+            depName: 'some-dep-name',
+            bumpVersions: [],
+            postUpgradeTasks: { executionMode: 'update' },
+          },
+        ]),
         baseBranch: 'base-branch',
         manager: 'some-manager',
         major: undefined,
@@ -1070,11 +1076,11 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       scm.branchExists.mockResolvedValue(true);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         pendingChecks: true,
         rebaseRequested: true,
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1142,13 +1148,13 @@ describe('workers/repository/update/branch/index', () => {
             state: 'open',
           }),
         );
-        const inconfig = {
+        const inconfig = partial<BranchConfig>({
           ...config,
           pendingChecks: true,
           dependencyDashboardChecks: {
             'renovate/some-branch': dependencyDashboardCheck,
           },
-        } satisfies BranchConfig;
+        });
         await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
           branchExists: true,
           prNo: 5,
@@ -1238,13 +1244,13 @@ describe('workers/repository/update/branch/index', () => {
           }),
         );
         scm.isBranchModified.mockResolvedValueOnce(false);
-        const inconfig = {
+        const inconfig = partial<BranchConfig>({
           ...config,
           pendingChecks: true,
           dependencyDashboardChecks: {
             'renovate/some-branch': dependencyDashboardCheck,
           },
-        } satisfies BranchConfig;
+        });
         await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
           branchExists: true,
           updatesVerified: true,
@@ -1265,11 +1271,11 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
       });
       scm.branchExists.mockResolvedValue(false);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         pendingChecks: true,
         dependencyDashboardChecks: { 'renovate/some-branch': 'rebase' },
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: false,
         prNo: undefined,
@@ -1289,13 +1295,13 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [],
         });
         scm.branchExists.mockResolvedValue(false);
-        const inconfig = {
+        const inconfig = partial<BranchConfig>({
           ...config,
           pendingChecks: true,
           dependencyDashboardChecks: {
             'renovate/some-branch': dependencyDashboardCheck,
           },
-        } satisfies BranchConfig;
+        });
         await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
           branchExists: true,
           updatesVerified: true,
@@ -1637,13 +1643,13 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
         fetchChangeLogs: 'branch',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
@@ -1668,13 +1674,13 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
         gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha);
 
       await branchWorker.processBranch(inconfig);
@@ -1696,14 +1702,14 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitMessage: 'Update dependency',
         commitBody: 'Updates {{{depName}}}',
         depName: 'https://user:secret@git.example.com/org/repo',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha);
 
       await branchWorker.processBranch(inconfig);
@@ -1726,13 +1732,13 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitTrailers: ['Updated-dependency: {{{depName}}}'],
         depName: 'https://user:secret@git.example.com/org/repo',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha);
 
       await branchWorker.processBranch(inconfig);
@@ -1756,7 +1762,7 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
@@ -1767,7 +1773,7 @@ describe('workers/repository/update/branch/index', () => {
         // empty gitAuthor expands to "Signed-off-by: " which is invalid
         gitAuthor: '',
         updateType: 'minor',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha);
 
       await branchWorker.processBranch(inconfig);
@@ -1793,14 +1799,14 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitMessage: 'Update dependency',
         commitBody: 'Some body',
         commitTrailers: ['X-Commit: {{{commitMessage}}}', 'Static: kept'],
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha);
 
       await branchWorker.processBranch(inconfig);
@@ -1833,14 +1839,14 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
         fetchChangeLogs: 'branch',
         cacheFingerprintMatch: 'no-match',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
@@ -1866,14 +1872,14 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         ignoreTests: true,
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
         fetchChangeLogs: 'branch',
         cacheFingerprintMatch: 'no-match',
-      } satisfies BranchConfig;
+      });
       scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       await expect(branchWorker.processBranch(inconfig, true)).resolves.toEqual(
         {
@@ -2544,12 +2550,12 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         updateType: 'lockFileMaintenance',
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2638,12 +2644,12 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         updateType: 'lockFileMaintenance',
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2677,10 +2683,10 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         prNo: undefined,
@@ -2744,11 +2750,11 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2783,11 +2789,11 @@ describe('workers/repository/update/branch/index', () => {
       scm.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -2856,7 +2862,7 @@ describe('workers/repository/update/branch/index', () => {
         exposeAllEnv: true,
         localDir: '/localDir',
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         versioning: 'semver',
         postUpgradeTasks: {
@@ -2864,8 +2870,9 @@ describe('workers/repository/update/branch/index', () => {
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -2878,9 +2885,9 @@ describe('workers/repository/update/branch/index', () => {
             },
             branchName: 'renovate/some-branch',
             manager: 'some-manager',
-          } satisfies BranchUpgradeConfig,
-        ],
-      } satisfies BranchConfig;
+          },
+        ]),
+      });
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
@@ -2965,7 +2972,7 @@ describe('workers/repository/update/branch/index', () => {
 
       await branchWorker.processBranch({
         ...config,
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           // oxlint-disable-next-line renovate/prefer-partial-in-specs -- spreading getConfig() (AllConfig) is not assignable to BranchUpgradeConfig due to a pre-existing type incompatibility (see TODO #22198 above)
           {
             ...getConfig(),
@@ -2975,7 +2982,7 @@ describe('workers/repository/update/branch/index', () => {
               fileFilters: ['modified_file', 'deleted_file'],
             },
           } as never,
-        ],
+        ]),
       });
 
       const errorMessage = expect.stringContaining('Meh, this went wrong!');
@@ -3045,25 +3052,26 @@ describe('workers/repository/update/branch/index', () => {
         exposeAllEnv: true,
         localDir: '/localDir',
       });
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         postUpgradeTasks: {
           executionMode: 'update',
           commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
-        upgrades: [
-          partial<BranchUpgradeConfig>({
+        upgrades: partial<BranchUpgradeConfig>([
+          {
             depName: 'some-dep-name',
+            bumpVersions: [],
             versioning: 'semver',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
-          }),
-        ],
-      } satisfies BranchConfig;
+          },
+        ]),
+      });
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
@@ -3151,7 +3159,7 @@ describe('workers/repository/update/branch/index', () => {
         localDir: '/localDir',
       });
 
-      const inconfig: BranchConfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         postUpgradeTasks: {
           executionMode: 'update',
@@ -3165,6 +3173,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -3178,6 +3187,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           },
           {
+            bumpVersions: [],
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -3191,7 +3201,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           },
         ]),
-      };
+      });
 
       const result = await branchWorker.processBranch(inconfig);
 
@@ -3307,7 +3317,7 @@ describe('workers/repository/update/branch/index', () => {
         localDir: '/localDir',
       });
 
-      const inconfig: BranchConfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         postUpgradeTasks: {
           executionMode: 'branch',
@@ -3321,6 +3331,7 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: partial<BranchUpgradeConfig>([
           {
+            bumpVersions: [],
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -3334,6 +3345,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           },
           {
+            bumpVersions: [],
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -3347,7 +3359,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           },
         ]),
-      };
+      });
 
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
@@ -3439,7 +3451,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const inconfig: BranchConfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         postUpgradeTasks: {
           commands: ['echo hardcoded-string'],
@@ -3447,7 +3459,7 @@ describe('workers/repository/update/branch/index', () => {
             '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
           executionMode: 'branch',
         },
-      };
+      });
 
       try {
         const result = await branchWorker.processBranch(inconfig);
@@ -3546,7 +3558,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
-      const inconfig: BranchConfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         postUpgradeTasks: {
           commands: ['echo hardcoded-string'],
@@ -3554,7 +3566,7 @@ describe('workers/repository/update/branch/index', () => {
             '[{{#each upgrades}}{"depName": "{{{depName}}}", "currentValue": "{{{currentValue}}}", "newValue": "{{{newValue}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
           executionMode: 'branch',
         },
-      };
+      });
 
       try {
         const result = await branchWorker.processBranch(inconfig);
@@ -3992,10 +4004,10 @@ describe('workers/repository/update/branch/index', () => {
           updatedPackageFiles: [partial<FileChange>()],
         }),
       );
-      const inconfig = {
+      const inconfig = partial<BranchConfig>({
         ...config,
         prCreation: 'not-pending',
-      } satisfies BranchConfig;
+      });
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
         updatesVerified: true,

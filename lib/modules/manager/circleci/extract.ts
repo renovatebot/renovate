@@ -1,13 +1,12 @@
 import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { coerceObject } from '../../../util/object.ts';
 import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { OrbDatasource } from '../../datasource/orb/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
-  ExtractConfig,
+  DefaultedExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
@@ -44,8 +43,8 @@ function extractDefinition(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string,
-  config?: ExtractConfig,
+  packageFile: string,
+  config: DefaultedExtractConfig,
 ): PackageFileContent | null {
   const { val: parsed, err } = Result.wrap(() =>
     // Parse as YAML 1.1 so anchor merge keys (`<<`) work, matching CircleCI's
@@ -59,7 +58,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const registryAliases = coerceObject(config?.registryAliases);
+  const { registryAliases } = config;
   const deps: PackageDependency[] = [];
   extractDefinition(deps, parsed, registryAliases);
 

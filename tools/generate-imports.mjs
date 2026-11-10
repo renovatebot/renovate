@@ -233,19 +233,9 @@ export type DatasourceName = typeof AllDatasourcesListLiteral[number];
 }
 
 async function generateGlobalConfigOptionDefaults() {
-  const { getOptions } = await import('../lib/config/options/index.ts');
-  const options = getOptions();
-
-  /** @type {Record<string, unknown>} */
-  const defaults = {};
-  for (const option of options
-    .filter((o) => o.globalOnly)
-    .filter((o) => 'default' in o)
-    // if the default is null, it means there is no default, so don't include it
-    .filter((o) => o.default !== null)
-    .sort((a, b) => a.name.localeCompare(b.name))) {
-    defaults[option.name] = option.default;
-  }
+  const { getGlobalConfigOptionDefaults } =
+    await import('../lib/config/defaults.ts');
+  const defaults = getGlobalConfigOptionDefaults();
 
   const content = `
 export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.stringify(defaults, null, 2)};

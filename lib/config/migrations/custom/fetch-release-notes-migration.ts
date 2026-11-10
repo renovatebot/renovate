@@ -1,9 +1,12 @@
 import { isBoolean } from '@sindresorhus/is';
-import type { RenovateConfig } from '../../types.ts';
+import type { RenovateConfigFile } from '../../types.ts';
 import { RenamePropertyMigration } from '../base/rename-property-migration.ts';
 
 export class FetchReleaseNotesMigration extends RenamePropertyMigration {
-  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+  constructor(
+    originalConfig: RenovateConfigFile,
+    migratedConfig: RenovateConfigFile,
+  ) {
     super(
       'fetchReleaseNotes',
       'fetchChangeLogs',

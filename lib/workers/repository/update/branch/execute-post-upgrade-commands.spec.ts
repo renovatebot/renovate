@@ -51,7 +51,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [],
         updatedArtifacts: [
@@ -68,7 +68,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -109,7 +109,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
@@ -118,7 +118,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -157,19 +157,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
-        ],
+        ]),
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       exec.exec.mockResolvedValueOnce({
         stdout: 'success',
         stderr: '',
@@ -214,19 +214,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
-        ],
+        ]),
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       exec.exec.mockResolvedValueOnce({
         stdout: 'success',
         stderr: '',
@@ -272,19 +272,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
-        ],
+        ]),
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       exec.exec.mockResolvedValueOnce({
         stdout: 'success',
         stderr: '',
@@ -332,19 +332,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
-        ],
+        ]),
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -392,7 +392,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
@@ -401,7 +401,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -444,7 +444,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
@@ -453,7 +453,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['not-a-txt-file'],
@@ -498,7 +498,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'npm',
         updatedPackageFiles: [
           { type: 'addition', path: 'package.json', contents: '{}' },
@@ -507,7 +507,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
 
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
@@ -554,14 +554,14 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       function createBranchConfig(
         updatedArtifacts: FileChange[] = [],
       ): BranchConfig {
-        return {
+        return partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [],
           updatedArtifacts,
           upgrades: [],
           branchName: 'main',
           baseBranch: 'base',
-        };
+        });
       }
 
       function mockRepositoryChanges({
@@ -785,7 +785,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'unchanged.txt', contents: 'changed' },
@@ -794,7 +794,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -833,7 +833,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           {
@@ -861,7 +861,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           not_added: [],
@@ -923,7 +923,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           {
@@ -951,7 +951,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           not_added: ['dependencies/charts/ingress-nginx-4.12.2.tgz'],
@@ -1010,19 +1010,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [
           { type: 'addition', path: 'some-existing-dir', contents: '' },
           { type: 'addition', path: 'artifact', contents: '' },
         ],
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
           { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
-        ],
+        ]),
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       const gitEnvVars = {
         GIT_CONFIG_COUNT: '1',
         GIT_CONFIG_KEY_0: 'url.https://token@github.com/.insteadOf',
@@ -1077,14 +1077,14 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'npm',
         updatedPackageFiles: [],
         updatedArtifacts: [],
         upgrades: [],
         branchName: 'renovate/jest-29.x',
         baseBranch: 'main',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -1125,14 +1125,14 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
         },
       ]);
-      const config: BranchConfig = {
+      const config = partial<BranchConfig>({
         manager: 'some-manager',
         updatedPackageFiles: [],
         updatedArtifacts: [],
         upgrades: [],
         branchName: 'main',
         baseBranch: 'base',
-      };
+      });
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
@@ -1159,7 +1159,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
     describe('when using installTools', () => {
       interface TestCase {
         description: string;
-        constraints?: Partial<Record<ConstraintName, string>>;
+        constraints: Partial<Record<ConstraintName, string>>;
         installTools: Partial<Record<ToolName, Record<never, never>>>;
         expected: { toolName: string; constraint: string | undefined }[];
       }
@@ -1186,12 +1186,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           constraints: {
             // node does not have a constraint
           },
-          installTools: { node: {} },
-          expected: [{ toolName: 'node', constraint: undefined }],
-        },
-        {
-          description: 'tools with undefined `constraints` are still used',
-          constraints: undefined,
           installTools: { node: {} },
           expected: [{ toolName: 'node', constraint: undefined }],
         },
@@ -1229,13 +1223,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ]);
-        const config: BranchConfig = {
+        const config = partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [
             { type: 'addition', path: 'some-existing-dir', contents: '' },
             { type: 'addition', path: 'artifact', contents: '' },
           ],
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               branchName: 'main',
@@ -1246,10 +1240,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               branchName: 'main',
               depName: 'some-dep2',
             },
-          ],
+          ]),
           branchName: 'main',
           baseBranch: 'base',
-        };
+        });
         exec.exec.mockResolvedValueOnce({
           stdout: 'success',
           stderr: '',
@@ -1283,18 +1277,19 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it('passes the branch-level constraints when using executionMode=branch', async () => {
-        const config: BranchConfig = {
+        const config = partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [
             { type: 'addition', path: 'some-existing-dir', contents: '' },
           ],
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               branchName: 'main',
               depName: 'some-dep1',
+              postUpgradeTasks: { executionMode: 'update' },
             },
-          ],
+          ]),
           constraints: { npm: '10.2.3' },
           postUpgradeTasks: {
             commands: ['some-command'],
@@ -1303,7 +1298,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           },
           branchName: 'main',
           baseBranch: 'base',
-        };
+        });
         exec.exec.mockResolvedValueOnce({ stdout: 'success', stderr: '' });
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({ modified: [], not_added: [], deleted: [] }),
@@ -1343,13 +1338,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ]);
-        const config: BranchConfig = {
+        const config = partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [
             { type: 'addition', path: 'some-existing-dir', contents: '' },
             { type: 'addition', path: 'artifact', contents: '' },
           ],
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               branchName: 'main',
@@ -1360,10 +1355,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               branchName: 'main',
               depName: 'some-dep2',
             },
-          ],
+          ]),
           branchName: 'main',
           baseBranch: 'base',
-        };
+        });
         exec.exec.mockResolvedValueOnce({
           stdout: 'success',
           stderr: '',
@@ -1417,13 +1412,13 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             },
           },
         ]);
-        const config: BranchConfig = {
+        const config = partial<BranchConfig>({
           manager: 'some-manager',
           updatedPackageFiles: [
             { type: 'addition', path: 'some-existing-dir', contents: '' },
             { type: 'addition', path: 'artifact', contents: '' },
           ],
-          upgrades: [
+          upgrades: partial<BranchUpgradeConfig>([
             {
               manager: 'some-manager',
               branchName: 'main',
@@ -1434,10 +1429,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               branchName: 'main',
               depName: 'some-dep2',
             },
-          ],
+          ]),
           branchName: 'main',
           baseBranch: 'base',
-        };
+        });
         exec.exec.mockResolvedValueOnce({
           stdout: 'success',
           stderr: '',

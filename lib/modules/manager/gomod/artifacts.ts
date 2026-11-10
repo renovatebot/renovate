@@ -143,20 +143,20 @@ export async function updateArtifacts({
   // the go workspaces are used.
   const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
   const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
-  let useVendor = !!config.postUpdateOptions?.includes('gomodVendor');
+  let useVendor = config.postUpdateOptions.includes('gomodVendor');
   if (
     !useVendor &&
-    !config.postUpdateOptions?.includes('gomodSkipVendor') &&
+    !config.postUpdateOptions.includes('gomodSkipVendor') &&
     vendorDir
   ) {
     useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
   }
   let massagedGoMod = newGoModContent;
-  const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
+  const useGoGenerate = config.postUpdateOptions.includes('goGenerate');
   const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
-  const goGenerateAllowed = allowedUnsafeExecutions?.includes('goGenerate');
+  const goGenerateAllowed = allowedUnsafeExecutions.includes('goGenerate');
 
-  if (config.postUpdateOptions?.includes('gomodMassage')) {
+  if (config.postUpdateOptions.includes('gomodMassage')) {
     // Regex match inline replace directive, example:
     // replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // https://go.dev/ref/mod#go-mod-file-replace
@@ -248,22 +248,19 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    let goGetDirs: string | undefined;
-    if (config.goGetDirs) {
-      goGetDirs = config.goGetDirs
-        .filter((dir) => {
-          const isValid = isValidLocalPath(dir);
-          if (!isValid) {
-            logger.warn({ dir }, 'Invalid path in goGetDirs');
-          }
-          return isValid;
-        })
-        .map(quote)
-        .join(' ');
+    const goGetDirs = config.goGetDirs
+      .filter((dir) => {
+        const isValid = isValidLocalPath(dir);
+        if (!isValid) {
+          logger.warn({ dir }, 'Invalid path in goGetDirs');
+        }
+        return isValid;
+      })
+      .map(quote)
+      .join(' ');
 
-      if (goGetDirs === '') {
-        throw new Error('Invalid goGetDirs');
-      }
+    if (goGetDirs === '') {
+      throw new Error('Invalid goGetDirs');
     }
 
     let args = `get${modFileFlag} `;
@@ -274,13 +271,13 @@ export async function updateArtifacts({
       args += `-d `;
     }
 
-    args += `-t ${goGetDirs ?? './...'}`;
+    args += `-t ${goGetDirs}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
     // Update import paths on major updates
     const isImportPathUpdateRequired =
-      config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
+      config.postUpdateOptions.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
 
     if (isImportPathUpdateRequired) {
@@ -296,29 +293,29 @@ export async function updateArtifacts({
     }
 
     const mustSkipGoModTidy =
-      !config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
+      !config.postUpdateOptions.includes('gomodUpdateImportPaths') &&
       config.updateType === 'major';
     if (mustSkipGoModTidy) {
       logger.debug('go mod tidy command skipped');
     }
 
     let tidyOpts = '';
-    if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
+    if (config.postUpdateOptions.includes('gomodTidy1.17')) {
       tidyOpts += ' -compat=1.17';
     }
-    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+    if (config.postUpdateOptions.includes('gomodTidyE')) {
       tidyOpts += ' -e';
     }
 
     // dependent modules can only be tidied once the updated module is settled
     const isGoModTidyAllRequired =
-      config.postUpdateOptions?.includes('gomodTidyAll') === true;
+      config.postUpdateOptions.includes('gomodTidyAll');
     const isMajorImportPathUpdate =
       config.updateType === 'major' && isImportPathUpdateRequired;
     const isTidyEnabled =
-      config.postUpdateOptions?.includes('gomodTidy') === true ||
-      config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
-      config.postUpdateOptions?.includes('gomodTidyE') === true ||
+      config.postUpdateOptions.includes('gomodTidy') ||
+      config.postUpdateOptions.includes('gomodTidy1.17') ||
+      config.postUpdateOptions.includes('gomodTidyE') ||
       isGoModTidyAllRequired ||
       isMajorImportPathUpdate;
     const isGoModTidyRequired = !mustSkipGoModTidy && isTidyEnabled;

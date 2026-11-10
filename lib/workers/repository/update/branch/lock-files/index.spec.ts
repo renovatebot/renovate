@@ -11,6 +11,9 @@ import type { PostUpdateConfig } from '../../../../../modules/manager/types.ts';
 const config: PostUpdateConfig<NpmManagerData> = {
   upgrades: [],
   branchName: 'some-branch',
+  postUpdateOptions: [],
+  skipArtifactsUpdate: false,
+  ignoreScripts: false,
 };
 
 vi.mock('../../../../../util/fs/index.ts');

@@ -1,11 +1,11 @@
-import { fs, logger, partial } from '~test/util.ts';
+import { extractConfig } from '~test/manager-config.ts';
+import { fs, logger } from '~test/util.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
-import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const config = partial<ExtractConfig>({
+const config = extractConfig({
   registryAliases: {
     stable: 'https://charts.helm.sh/stable',
   },

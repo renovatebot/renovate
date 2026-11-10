@@ -26,7 +26,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
 
     const mappedProperties = Object.keys(migratedPackageRules![0]);
     const expectedMappedProperties = Object.keys(
-      originalConfig.packageRules![0],
+      originalConfig.packageRules[0],
     ).map((key) => renameMap[key as keyof typeof renameMap] ?? key);
 
     expect(mappedProperties).toEqual(expectedMappedProperties);

@@ -6,6 +6,7 @@ import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { getBranchCommit } from '../../../util/git/index.ts';
+import { applyRepoConfigDefaults } from '../init/defaults.ts';
 import { mergeInheritedConfig } from '../init/inherited.ts';
 import { mergeRenovateConfig } from '../init/merge.ts';
 import type { ExtractResult } from '../process/extract-update.ts';
@@ -34,8 +35,8 @@ export async function checkReconfigureBranch(
     return;
   }
 
-  const context = config.statusCheckNames?.configValidation;
-  const reconfigureBranch = getReconfigureBranchName(config.branchPrefix!);
+  const context = config.statusCheckNames.configValidation;
+  const reconfigureBranch = getReconfigureBranchName(config.branchPrefix);
   const branchExists = await scm.branchExists(reconfigureBranch);
 
   // this is something the user initiates, skip if no branch exists
@@ -98,6 +99,7 @@ export async function checkReconfigureBranch(
   }
 
   let extractResult: ExtractResult;
+  let reconfigureConfig: RenovateConfig;
   // Recompute config similar to repo config processing
   // Get non-global config from file config
   // Merge it with inherited and static repo config
@@ -117,7 +119,8 @@ export async function checkReconfigureBranch(
     newConfig = await mergeInheritedConfig(newConfig);
     newConfig = await mergeRenovateConfig(newConfig, reconfigureBranch);
     await scm.checkoutBranch(config.defaultBranch!);
-    extractResult = await extractDependencies(newConfig, false);
+    reconfigureConfig = applyRepoConfigDefaults(newConfig);
+    extractResult = await extractDependencies(reconfigureConfig, false);
   } catch (err) {
     logger.warn(
       { err },
@@ -135,7 +138,7 @@ export async function checkReconfigureBranch(
   }
 
   const commentEnsured = await ensureReconfigurePrComment(
-    newConfig,
+    reconfigureConfig,
     extractResult.packageFiles,
     extractResult.branches,
     reconfigureBranch,

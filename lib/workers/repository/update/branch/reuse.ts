@@ -156,7 +156,7 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${result.rebaseWhen!}`,
+      `Skipping behind base branch check due to rebaseWhen=${result.rebaseWhen}`,
     );
   }
 
@@ -190,7 +190,7 @@ export async function shouldReuseExistingBranch(
   for (const upgrade of result.upgrades) {
     const packageFile = upgrade.packageFile!;
     groupedByPackageFile[packageFile] ??= new Set();
-    groupedByPackageFile[packageFile].add(upgrade.rangeStrategy!);
+    groupedByPackageFile[packageFile].add(upgrade.rangeStrategy);
 
     if (
       groupedByPackageFile[packageFile].size > 1 &&
@@ -230,7 +230,7 @@ async function determineRebaseWhenValue(
       // rebasing when behind the base branch is unnecessary
       newValue = 'conflicted';
       reason = 'base branch has a merge queue';
-    } else if (result.automerge === true) {
+    } else if (result.automerge) {
       reason = 'automerge=true';
     } else if (result.rebaseWhen === 'automerging') {
       newValue = 'never';

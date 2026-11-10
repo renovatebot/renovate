@@ -32,10 +32,9 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
-  // TODO: types (#22198)
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
-    ? upath.join(defaultCwd, upath.dirname(cwdFile))
+    ? upath.join(GlobalConfig.getRequired('localDir'), upath.dirname(cwdFile))
     : cwd;
   return paramCwd ?? defaultCwd;
 }
@@ -232,17 +231,13 @@ type ResolvedToolSettingsOptions = Required<
 export function getToolSettingsOptions(
   repoConfig?: RepoToolSettingsOptions,
 ): ResolvedToolSettingsOptions {
-  let defaults = GlobalConfig.get('toolSettings');
-  defaults ??= {
-    jvmMaxMemory: 512,
-    jvmMemory: 512,
-  };
+  const defaults = GlobalConfig.get('toolSettings');
 
-  const jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  const jvmMaxMemory = defaults.jvmMaxMemory ?? 512;
   const options: ResolvedToolSettingsOptions = {
     jvmMaxMemory,
-    jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
-    nodeMaxMemory: defaults?.nodeMaxMemory,
+    jvmMemory: defaults.jvmMemory ?? jvmMaxMemory,
+    nodeMaxMemory: defaults.nodeMaxMemory,
   };
 
   if (repoConfig !== undefined) {

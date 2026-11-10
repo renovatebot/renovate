@@ -14,7 +14,6 @@ import type { BranchCache } from '../../../util/cache/repository/types.ts';
 import { isToolName } from '../../../util/exec/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit.ts';
-import { coerceObject } from '../../../util/object.ts';
 import { incCountValue, setCount } from '../../global/limits.ts';
 import type {
   BranchConfig,
@@ -42,19 +41,17 @@ export function generateCommitFingerprintConfig(
       filteredUpgrade[field] = upgrade[field]!;
     }
     // only tools' constraints, as others (i.e. the default `ghActionsLock`) are set for every upgrade
-    const toolConstraints = Object.entries(
-      coerceObject(upgrade.constraints),
-    ).filter(([name]) => isToolName(name));
+    const toolConstraints = Object.entries(upgrade.constraints).filter(
+      ([name]) => isToolName(name),
+    );
     if (toolConstraints.length) {
       filteredUpgrade.constraints = Object.fromEntries(toolConstraints);
     }
-    if (upgrade.postUpgradeTasks) {
-      filteredUpgrade.postUpgradeTasks = {
-        commands: upgrade.postUpgradeTasks.commands,
-        fileFilters: upgrade.postUpgradeTasks.fileFilters,
-        installTools: upgrade.postUpgradeTasks.installTools,
-      };
-    }
+    filteredUpgrade.postUpgradeTasks = {
+      commands: upgrade.postUpgradeTasks.commands,
+      fileFilters: upgrade.postUpgradeTasks.fileFilters,
+      installTools: upgrade.postUpgradeTasks.installTools,
+    };
     return filteredUpgrade;
   });
 
@@ -199,7 +196,7 @@ export async function writeUpdates(
       branchName,
       async () => {
         const meta: Record<string, string> = { branch: branchName };
-        if (config.baseBranchPatterns?.length && baseBranch) {
+        if (config.baseBranchPatterns.length && baseBranch) {
           meta.baseBranch = baseBranch;
         }
         addMeta(meta);
