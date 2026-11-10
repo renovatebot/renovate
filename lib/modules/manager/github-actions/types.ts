@@ -67,6 +67,8 @@ export interface CommentData {
   pinnedVersion?: string;
   ref?: string;
   ratchetExclude?: boolean;
+  /** Ratchet comment prefix up to the version, e.g. `ratchet:actions/checkout@` */
+  ratchetPrefix?: string;
   matchedString?: string;
   index?: number;
 }

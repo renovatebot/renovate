@@ -103,6 +103,7 @@ function extractRepositoryAction(
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
   const isReusableWorkflow = !!subPath && reusableWorkflowPathRe.test(subPath);
+  const commentValuePrefix = commentData.ratchetPrefix ?? '';
 
   const dep: PackageDependency = {
     depName,
@@ -110,7 +111,7 @@ function extractRepositoryAction(
     versioning: githubActionsVersioning.id,
     depType: isReusableWorkflow ? 'workflow' : 'action',
     replaceString: valueString,
-    autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
+    autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# ${commentValuePrefix}{{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
     ...(isExplicitHostname
       ? detectDatasource(registryUrl)
       : customRegistryUrlsPackageDependency),
