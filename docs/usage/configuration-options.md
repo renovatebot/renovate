@@ -3155,7 +3155,7 @@ The entire database is downloaded locally by [osv-offline](https://github.com/re
 
 If you self-host Renovate, you can change how the database is downloaded with these osv-offline environment variables:
 
-- `OSV_OFFLINE_ROOT_DIR`: where the database is stored (default: `osv-offline` inside the [`cacheDir`](./self-hosted-configuration.md#cachedir), or `<tmpdir>/osv-offline` if `OSV_OFFLINE_DISABLE_DOWNLOAD=true` is set)
+- `OSV_OFFLINE_ROOT_DIR`: where the database is stored (default: `osv-offline` inside the [`cacheDir`](./self-hosted-configuration.md#cachedir))
 - `OSV_OFFLINE_MAX_AGE`: how old the database may be before it's downloaded again, as an [`ms`](https://github.com/vercel/ms) duration such as `30m`, `4h` or `7d` (default: `1d`)
 - `OSV_OFFLINE_DATABASE_FORMAT=split`: download the database of each ecosystem on its first use, instead of all of them at once
 - `OSV_OFFLINE_DATABASE_URL` and `OSV_OFFLINE_DATABASE_INDEX_URL`: download from an internal mirror

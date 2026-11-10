@@ -60,16 +60,9 @@ export class Vulnerabilities {
   private static async load(): Promise<OsvOffline> {
     // osv-offline reads its root directory once, when the module is loaded
     if (!isNonEmptyString(process.env.OSV_OFFLINE_ROOT_DIR)) {
-      if (process.env.OSV_OFFLINE_DISABLE_DOWNLOAD?.toLowerCase() === 'true') {
-        // keep the old default, offline setups may have put the database there
-        logger.debug(
-          'OSV_OFFLINE_DISABLE_DOWNLOAD is set, using the osv-offline default directory',
-        );
-      } else {
-        const rootDir = upath.join(GlobalConfig.get('cacheDir'), 'osv-offline');
-        logger.debug(`Using osv-offline directory ${rootDir}`);
-        process.env.OSV_OFFLINE_ROOT_DIR = rootDir;
-      }
+      const rootDir = upath.join(GlobalConfig.get('cacheDir'), 'osv-offline');
+      logger.debug(`Using osv-offline directory ${rootDir}`);
+      process.env.OSV_OFFLINE_ROOT_DIR = rootDir;
     }
     const { OsvOffline } = await import('@renovatebot/osv-offline');
     return OsvOffline.create();
