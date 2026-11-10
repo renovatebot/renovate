@@ -7,18 +7,12 @@ import type { PackageRule, RenovateConfigFile, UpdateType } from './types.ts';
 
 const options = getOptions();
 
-let allowedStrings: string[];
+const allowedStrings = options
+  .filter((option) => option.allowString)
+  .map((option) => option.name);
 
 // Returns a massaged config
 export function massageConfig(config: RenovateConfigFile): RenovateConfigFile {
-  if (!allowedStrings) {
-    allowedStrings = [];
-    options.forEach((option) => {
-      if (option.allowString) {
-        allowedStrings.push(option.name);
-      }
-    });
-  }
   const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
     if (key === 'minimumReleaseAge' && isString(val) && toMs(val) === 0) {

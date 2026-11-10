@@ -509,7 +509,7 @@ export interface RenovateConfigFile
 
   constraintsFiltering?: ConstraintsFilter;
 
-  customizeDashboard?: Record<string, string>;
+  customizeDashboard?: Partial<Record<string, string>>;
 
   statusCheckNames?: Partial<Record<StatusCheckKey, string | null>>;
   statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;

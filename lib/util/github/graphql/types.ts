@@ -50,9 +50,9 @@ export interface GithubGraphqlPayload<T> {
 }
 
 export interface GithubGraphqlRepoResponse<T> {
-  repository: {
+  repository?: {
     isRepoPrivate?: boolean;
-    payload: GithubGraphqlPayload<T>;
+    payload?: GithubGraphqlPayload<T>;
   };
 }
 

@@ -30,19 +30,14 @@ export function fixShortHours(input: string): string {
   );
 }
 
-let optionTypes: Record<string, RenovateOptions['type']>;
+const optionTypes: Partial<Record<string, RenovateOptions['type']>> =
+  Object.fromEntries(options.map((option) => [option.name, option.type]));
 // Returns a migrated config
 export function migrateConfig(
   config: RenovateConfigFile,
   parentKey?: string,
 ): MigratedConfig {
   try {
-    if (!optionTypes) {
-      optionTypes = {};
-      options.forEach((option) => {
-        optionTypes[option.name] = option.type;
-      });
-    }
     const newConfig = MigrationsService.run(config, parentKey);
     const migratedConfig = clone(newConfig) as MigratedRenovateConfig;
 
@@ -92,7 +87,7 @@ export function migrateConfig(
       } else if (isArray(val)) {
         // @ts-expect-error -- TODO: fix me
         // v8 ignore else -- TODO: add test #40625
-        if (isArray(migratedConfig?.[key])) {
+        if (isArray(migratedConfig[key])) {
           const newArray = [];
           // @ts-expect-error -- TODO: fix me
           for (const item of migratedConfig[key]) {

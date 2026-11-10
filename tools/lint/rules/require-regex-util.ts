@@ -18,7 +18,7 @@ export default defineRule({
     let wrappedLiterals = new Set<ESTree.RegExpLiteral>();
     return {
       before() {
-        const filename = context.filename ?? context.physicalFilename ?? '';
+        const filename = context.filename;
         // Only enforce in lib/, but not in the regEx implementation itself
         if (
           !filename.includes('/lib/') ||

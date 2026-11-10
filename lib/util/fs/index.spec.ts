@@ -69,9 +69,9 @@ describe('util/fs/index', () => {
   });
 
   afterEach(async () => {
-    await localDirResult?.cleanup();
-    await cacheDirResult?.cleanup();
-    await tmpDirResult?.cleanup();
+    await localDirResult.cleanup();
+    await cacheDirResult.cleanup();
+    await tmpDirResult.cleanup();
   });
 
   describe('getParentDir', () => {

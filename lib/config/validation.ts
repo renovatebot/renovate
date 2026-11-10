@@ -81,9 +81,9 @@ import {
 const options = getOptions();
 
 let optionsInitialized = false;
-let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, AllowedParents[]>;
-let optionLocations: Record<string, string>;
+let optionTypes: Partial<Record<string, RenovateOptions['type']>>;
+let optionParents: Partial<Record<string, AllowedParents[]>>;
+let optionLocations: Partial<Record<string, string>>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 let optionRegexOrGlob: Set<string>;
@@ -327,7 +327,7 @@ export async function validateConfig(
             await validateGlobalConfig(
               key,
               val,
-              optionTypes[key],
+              optionTypes[key]!,
               warnings,
               errors,
               currentPath,

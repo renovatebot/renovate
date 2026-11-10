@@ -401,12 +401,8 @@ export class DatasourceCacheStats {
         continue;
       }
 
-      /* v8 ignore else -- TODO: add tests #40625 */
-      if (action === 'skip') {
-        result.long[datasource][registryUrl][packageName].write = 'skip';
-        result.short[datasource][registryUrl].skip += 1;
-        continue;
-      }
+      result.long[datasource][registryUrl][packageName].write = 'skip';
+      result.short[datasource][registryUrl].skip += 1;
     }
 
     return result;
@@ -444,7 +440,10 @@ interface HostStatsData {
 }
 
 // url -> method -> status -> count
-type UrlHttpStat = Record<string, Record<string, Record<string, number>>>;
+type UrlHttpStat = Record<
+  string,
+  Record<string, Partial<Record<string, number>>>
+>;
 
 interface HttpStatsCollection {
   // debug data
@@ -582,12 +581,8 @@ export class HttpCacheStats {
   }
 
   static read(key: string): HttpCacheHostStatsData {
-    return (
-      this.getData()?.[key] ?? {
-        hit: 0,
-        miss: 0,
-      }
-    );
+    const data: Partial<HttpCacheStatsData> = this.getData();
+    return data[key] ?? { hit: 0, miss: 0 };
   }
 
   static write(key: string, data: HttpCacheHostStatsData): void {
@@ -677,12 +672,7 @@ export class HttpCacheStats {
   }
 }
 
-type ObsoleteCacheStats = Record<
-  string,
-  {
-    count: number;
-  }
->;
+type ObsoleteCacheStats = Partial<Record<string, { count: number }>>;
 
 /* v8 ignore next: temporary code */
 export class ObsoleteCacheHitLogger {
@@ -694,9 +684,7 @@ export class ObsoleteCacheHitLogger {
 
   static write(url: string): void {
     const data = this.getData();
-    if (!data[url]) {
-      data[url] = { count: 0 };
-    }
+    data[url] ??= { count: 0 };
     data[url].count++;
     memCache.set('obsolete-cache-stats', data);
   }
@@ -766,7 +754,7 @@ export class AbandonedPackageStats {
   }
 }
 
-type GitOperationStatsData = Record<GitOperationType, number[]>;
+type GitOperationStatsData = Partial<Record<GitOperationType, number[]>>;
 
 export class GitOperationStats {
   static write(operationType: GitOperationType, duration: number): void {

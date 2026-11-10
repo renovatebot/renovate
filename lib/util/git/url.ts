@@ -96,13 +96,13 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
 
   const hostRule = hostRules.find({ url: coercedUrl, hostType });
 
-  if (hostRule?.token) {
+  if (hostRule.token) {
     logger.debug(`Found hostRules token for url ${url}`);
 
     return getHttpUrl(url, encodeURIComponent(hostRule.token));
   }
 
-  if (hostRule?.username && hostRule?.password) {
+  if (hostRule.username && hostRule.password) {
     logger.debug(`Found hostRules username and password for url ${url}`);
     const encodedUsername = encodeURIComponent(hostRule.username);
     const encodedPassword = encodeURIComponent(hostRule.password);

@@ -310,7 +310,7 @@ export abstract class HttpBase<
           res = await httpTask();
         }
         const resCopy = copyResponse(res, false);
-        resCopy.authorization = !!options?.headers?.authorization;
+        resCopy.authorization = !!options.headers?.authorization;
         this.handleResponse(resolvedUrl, resCopy);
         return await provider.wrapServerResponse(method, url, resCopy);
       };
@@ -345,7 +345,7 @@ export abstract class HttpBase<
 
       const deepCopyNeeded = !!memCacheKey && !isNotModified(res);
       const resCopy = copyResponse(res, deepCopyNeeded);
-      resCopy.authorization = !!options?.headers?.authorization;
+      resCopy.authorization = !!options.headers?.authorization;
 
       this.handleResponse(resolvedUrl, resCopy);
 

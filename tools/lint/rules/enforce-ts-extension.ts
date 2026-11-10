@@ -102,7 +102,7 @@ export default defineRule({
         ) {
           return;
         }
-        const [arg] = node.arguments;
+        const arg = node.arguments.at(0);
         if (arg?.type !== 'Literal' || typeof arg.value !== 'string') {
           return;
         }

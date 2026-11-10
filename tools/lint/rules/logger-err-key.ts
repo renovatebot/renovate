@@ -62,7 +62,7 @@ export default defineRule({
         if (!getLoggerLevel(node.callee)) {
           return;
         }
-        const [first] = node.arguments;
+        const first = node.arguments.at(0);
         if (first?.type !== 'ObjectExpression') {
           return;
         }

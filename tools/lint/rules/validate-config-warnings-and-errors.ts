@@ -151,7 +151,7 @@ function classifyLengthUsage(node: ESTree.Node): LengthUsage {
   ) {
     const grandparent = parent.parent;
     if (
-      grandparent?.type === 'MemberExpression' &&
+      grandparent.type === 'MemberExpression' &&
       grandparent.object === parent &&
       !grandparent.computed &&
       grandparent.property.type === 'Identifier' &&

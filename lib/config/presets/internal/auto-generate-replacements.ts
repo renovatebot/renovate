@@ -43,7 +43,7 @@ function generatePackageRules(
 }
 
 export function addPresets(
-  presets: Record<string, Preset>,
+  presets: Partial<Record<string, Preset>>,
   ...templates: PresetTemplate[]
 ): void {
   const ext = coerceArray(presets.all?.extends);

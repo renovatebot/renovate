@@ -108,7 +108,7 @@ function generateCombinedTooling(): string {
       supportedOutput = '✅';
     } else if (supported === 'maybe') {
       supportedOutput = `🤔 ${supportNote}`;
-    } else if (supported === false && supportNote) {
+    } else if (supportNote) {
       supportedOutput = `⚠️ ${supportNote}`;
     }
 

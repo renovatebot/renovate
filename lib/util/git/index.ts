@@ -331,7 +331,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  config.virtualBranches ??= {};
+  config.virtualBranches = coerceObject(args.virtualBranches);
   git = instrumentGit(
     createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
@@ -554,6 +554,7 @@ export const syncGit = withInstrumenting(
         }
       });
     }
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- reassigned inside the fetch callback above
     if (clone) {
       await instrument('clone', async () => {
         const cloneStart = Date.now();
@@ -624,12 +625,10 @@ export const syncGit = withInstrumenting(
       }
       logger.warn({ err }, 'Cannot retrieve latest commit');
     }
-    config.currentBranch =
-      config.currentBranch ??
-      config.defaultBranch ??
-      (await getDefaultBranch(git));
+    config.currentBranch ||=
+      config.defaultBranch ?? (await getDefaultBranch(git));
     /* v8 ignore next -- TODO: add test #40625 */
-    delete getCache()?.semanticCommits;
+    delete getCache().semanticCommits;
 
     // If upstreamUrl is set then Renovate is running in fork mode
     // The "upstream" remote is the original repository which was forked from
@@ -694,7 +693,7 @@ export function branchExists(branchName: string): boolean {
 
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
-  return config.branchCommits?.[branchName] || null;
+  return config.branchCommits[branchName] || null;
 }
 
 // Return the date of the latest commit for a branch
@@ -791,13 +790,10 @@ export async function checkoutBranch(
       (await git.raw(['rev-parse', 'HEAD'])).trim(),
     );
     const latestCommitDate = await getCommitDate(config.currentBranchSha);
-    // v8 ignore else -- TODO: add test #40625
-    if (latestCommitDate) {
-      logger.debug(
-        { branchName, latestCommitDate, sha: config.currentBranchSha },
-        'latest commit',
-      );
-    }
+    logger.debug(
+      { branchName, latestCommitDate, sha: config.currentBranchSha },
+      'latest commit',
+    );
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
@@ -1797,7 +1793,7 @@ export async function diffCommitTree(
       const statusCode = status[0];
       // R has two tab-separated paths (old\tnew); A/M/D/T have one.
       // C also has two paths but falls through to default (only the target matters).
-      const [sourcePath, targetPath] = paths.split('\t');
+      const [sourcePath, targetPath = sourcePath] = paths.split('\t');
       switch (statusCode) {
         case 'D':
           result.push({
@@ -1825,7 +1821,7 @@ export async function diffCommitTree(
         default:
           // A (add), M (modify), T (type change), C (copy)
           result.push({
-            path: targetPath ?? sourcePath,
+            path: targetPath,
             mode: newMode,
             type: treeTypeFromMode(newMode),
             sha: toLongCommitSha(newSha),

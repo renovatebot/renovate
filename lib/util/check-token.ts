@@ -76,7 +76,7 @@ export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
 export function findGithubToken(
   searchResult: CombinedHostRule,
 ): string | undefined {
-  return searchResult?.token?.replace('x-access-token:', '');
+  return searchResult.token?.replace('x-access-token:', '');
 }
 
 export function takePersonalAccessTokenIfPossible(

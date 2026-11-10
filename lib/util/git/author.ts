@@ -27,7 +27,9 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     if (!massagedInput) {
       return null;
     }
-    const parsed = addrs.parseOneAddress(massagedInput) as addrs.ParsedMailbox;
+    const parsed = addrs.parseOneAddress(
+      massagedInput,
+    ) as addrs.ParsedMailbox | null;
     if (parsed?.address) {
       result = {
         name: parsed.name ?? input.replace(regEx(/@.*/), ''),

@@ -27,7 +27,7 @@ export default defineRule({
         ) {
           return;
         }
-        const [specifier] = node.arguments;
+        const specifier = node.arguments.at(0);
         if (
           specifier?.type === 'Literal' &&
           typeof specifier.value === 'string' &&

@@ -21,8 +21,10 @@ type Options = HelperOptions & {
 const helpers: Record<string, handlebars.HelperDelegate> = {
   encodeURIComponent,
   decodeURIComponent,
-  encodeBase64: (str: string) => Buffer.from(str ?? '').toString('base64'),
-  decodeBase64: (str: string) => Buffer.from(str ?? '', 'base64').toString(),
+  encodeBase64: (str: string | undefined) =>
+    Buffer.from(str ?? '').toString('base64'),
+  decodeBase64: (str: string | undefined) =>
+    Buffer.from(str ?? '', 'base64').toString(),
   stringToPrettyJSON: (input: string): string =>
     JSON.stringify(JSON.parse(input), null, 2),
   toJSON: (input: unknown): string => JSON.stringify(input),
@@ -48,8 +50,8 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   },
   replace: (find, replace, context) =>
     (context ?? '').replace(regEx(find, 'g'), replace),
-  lowercase: (str: string) => str?.toLowerCase(),
-  uppercase: (str: string) => str?.toUpperCase(),
+  lowercase: (str: string | undefined) => str?.toLowerCase(),
+  uppercase: (str: string | undefined) => str?.toUpperCase(),
   containsString: (str, subStr) => str?.includes(subStr),
   equals: (arg1, arg2) => arg1 === arg2,
   includes: (arg1: string[], arg2: string) => {

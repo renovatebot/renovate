@@ -23,7 +23,7 @@ export default defineRule({
   createOnce(context) {
     return {
       before() {
-        if (isTypesFile(context.physicalFilename ?? context.filename)) {
+        if (isTypesFile(context.physicalFilename)) {
           return false;
         }
       },

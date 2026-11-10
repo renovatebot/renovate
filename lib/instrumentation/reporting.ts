@@ -151,6 +151,7 @@ export async function exportStats(config: RenovateConfigFile): Promise<void> {
     }
 
     // v8 ignore else -- TODO: add test #40625
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- global config validation only logs a reportType outside its allowedValues
     if (config.reportType === 's3') {
       const s3Url = parseS3Url(config.reportPath!);
       if (isNullOrUndefined(s3Url)) {

@@ -261,7 +261,7 @@ function handleGotError(
 interface GraphqlPaginatedContent<T = unknown> {
   nodes?: T[];
   edges?: T[];
-  pageInfo: { hasNextPage: boolean; endCursor: string };
+  pageInfo?: { hasNextPage: boolean; endCursor: string };
 }
 
 function hasVendorAccept(acceptStrings: string[]): boolean {
@@ -300,8 +300,8 @@ function getGraphqlPageSize(
   defaultPageSize = MAX_GRAPHQL_PAGE_SIZE,
 ): number {
   const cache = getCache();
-  const graphqlPageCache = cache?.platform?.github
-    ?.graphqlPageCache as GraphqlPageCache;
+  const graphqlPageCache = cache.platform?.github?.graphqlPageCache as
+    GraphqlPageCache | undefined;
   const cachedRecord = graphqlPageCache?.[fieldName];
 
   if (graphqlPageCache && cachedRecord) {
@@ -473,7 +473,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       httpOptions.memCache = false;
       // Check if result is paginated
       const pageLimit = httpOptions.pageLimit ?? 10;
-      const linkHeader = parseLinkHeader(result?.headers?.link);
+      const linkHeader = parseLinkHeader(result.headers.link);
       const next = linkHeader?.next;
       const env = getEnv();
       if (next?.url) {
@@ -609,7 +609,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     const opts: GithubBaseHttpOptions = {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
-      headers: { accept: options?.acceptHeader },
+      headers: { accept: options.acceptHeader },
       readOnly: options.readOnly,
     };
     if (options.token) {
@@ -620,7 +620,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     let response: GithubGraphqlResponse<T> | null;
     try {
       const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
-      response = res.body;
+      response = res.body as GithubGraphqlResponse<T> | null;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
       if (err instanceof ExternalHostError && count && count > 10) {

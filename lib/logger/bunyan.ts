@@ -138,7 +138,7 @@ export function validateLogLevel(
     allowedValues.includes(logLevelToCheck as BunyanLogLevel);
   if (isUndefined(logLevelToCheck) || isAllowedString) {
     // log level is in the allowed values or its undefined
-    return (logLevelToCheck as BunyanLogLevel) ?? defaultLevel;
+    return (logLevelToCheck as BunyanLogLevel | undefined) ?? defaultLevel;
   }
 
   const logger = bunyan().createLogger({

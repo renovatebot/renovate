@@ -16,6 +16,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { postUpgradeCommandsExecutor } from '../../workers/repository/update/branch/execute-post-upgrade-commands.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
+import * as _repoCache from '../cache/repository/index.ts';
 import { setCustomEnv } from '../env.ts';
 import * as _execCommon from '../exec/common.ts';
 import { newlineRegex, regEx } from '../regex.ts';
@@ -43,7 +44,12 @@ const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
 const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
+const repoCache = vi.mocked(_repoCache);
 const execCommon = vi.mocked(_execCommon);
+
+beforeEach(() => {
+  repoCache.getCache.mockReturnValue({});
+});
 
 // The test scripts isolate git with `GIT_*` variables, which simple-git removes from the ambient environment unless allowed
 function simpleGit(baseDir?: string): SimpleGitApi {
@@ -204,7 +210,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   afterAll(async () => {
     setCustomEnv({});
-    await base?.cleanup();
+    await base.cleanup();
   });
 
   // Tests that never touch a repository.
@@ -392,8 +398,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     afterAll(async () => {
-      await tmpDir?.cleanup();
-      await origin?.cleanup();
+      await tmpDir.cleanup();
+      await origin.cleanup();
     });
 
     describe('getFileList()', () => {
@@ -920,8 +926,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     afterAll(async () => {
-      await tmpDir?.cleanup();
-      await origin?.cleanup();
+      await tmpDir.cleanup();
+      await origin.cleanup();
     });
 
     describe('checkoutBranch(branchName)', () => {
@@ -1239,8 +1245,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     afterEach(async () => {
-      await tmpDir?.cleanup();
-      await origin?.cleanup();
+      await tmpDir.cleanup();
+      await origin.cleanup();
       vi.restoreAllMocks();
     });
 
@@ -2506,12 +2512,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
 
       afterAll(async () => {
-        await upstreamBase?.cleanup();
-        await upstreamOrigin?.cleanup();
+        await upstreamBase.cleanup();
+        await upstreamOrigin.cleanup();
       });
 
       afterEach(async () => {
-        await tmpDir2?.cleanup();
+        await tmpDir2.cleanup();
       });
 
       describe('syncForkWithUpstream()', () => {

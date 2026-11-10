@@ -485,6 +485,23 @@
           }
         ]
       }
+    },
+    {
+      "files": [
+        "lib/config/**",
+        "lib/instrumentation/**",
+        "lib/logger/**",
+        "lib/util/**",
+        "test/**",
+        "tools/**",
+        "*.mts"
+      ],
+      "rules": {
+        "typescript/no-unnecessary-condition": [
+          "error",
+          { "allowConstantLoopConditions": "only-allowed-literals" }
+        ]
+      }
     }
   ],
   "ignorePatterns": [

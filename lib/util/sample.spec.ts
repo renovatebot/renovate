@@ -22,11 +22,11 @@ describe('util/sample', () => {
     });
 
     it('returns empty array for null array', () => {
-      expect(sampleSize(null as never, 1)).toBeEmptyArray();
+      expect(sampleSize(null, 1)).toBeEmptyArray();
     });
 
     it('returns empty array for undefined array', () => {
-      expect(sampleSize(undefined as never, 1)).toBeEmptyArray();
+      expect(sampleSize(undefined, 1)).toBeEmptyArray();
     });
 
     it('returns empty array for empty array', () => {

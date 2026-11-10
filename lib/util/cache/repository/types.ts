@@ -11,7 +11,7 @@ export interface BaseBranchCache {
   revision?: number;
   sha: string; // branch commit sha
   configHash: string; // object hash of config
-  extractionFingerprints: Record<string, string | undefined>; // matching manager fingerprints
+  extractionFingerprints?: Record<string, string | undefined>; // matching manager fingerprints
   packageFiles: Record<string, PackageFile[]>; // extract result
 }
 
