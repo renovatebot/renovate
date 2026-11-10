@@ -51,7 +51,7 @@ export async function autodiscoverRepositories<T extends AllConfig>(
     `Attempting to autodiscover ${config.platform} repositories`,
   );
   let discovered = await platform.getRepos(autodiscoverConfig);
-  if (!discovered?.length) {
+  if (!discovered.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug('No repositories were autodiscovered');
     return config;

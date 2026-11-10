@@ -198,7 +198,7 @@ export class PackageFiles {
     const [manager, packageFiles] = Object.entries(managers).pop()!;
 
     // delete current manager if it has no manifest files left
-    if (!packageFiles || isEmptyArray(packageFiles)) {
+    if (isEmptyArray(packageFiles)) {
       return delete managers[manager];
     }
 

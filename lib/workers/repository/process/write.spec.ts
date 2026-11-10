@@ -220,7 +220,7 @@ describe('workers/repository/process/write', () => {
         },
       ]);
       repoCache.getCache.mockReturnValueOnce({});
-      branchWorker.processBranch.mockResolvedValueOnce({
+      branchWorker.processBranch.mockResolvedValue({
         branchExists: true,
         result: 'pr-created',
       });

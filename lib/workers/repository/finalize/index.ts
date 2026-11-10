@@ -27,7 +27,7 @@ export async function finalizeRepo(
   PackageFiles.clear();
   const prList = await platform.getPrList();
   if (
-    prList?.some(
+    prList.some(
       (pr) =>
         pr.state === 'merged' &&
         pr.title !== 'Configure Renovate' &&

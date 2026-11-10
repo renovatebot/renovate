@@ -232,7 +232,7 @@ export async function resolveUpdateDigests(
     }
 
     if (update.newVersion) {
-      const registryUrl = dependency?.releases?.find(
+      const registryUrl = dependency?.releases.find(
         (release) => release.version === update.newVersion,
       )?.registryUrl;
       if (registryUrl && registryUrl !== res.registryUrl) {

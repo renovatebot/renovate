@@ -91,9 +91,8 @@ export async function getCommitsHourlyCount(
           !cachedBranches.find((b) => b.branchName === branch.branchName)
             ?.commitTimestamp,
       );
-      const fallbackUpdateDates = needsScmFallback
-        ? await scm.getAllBranchUpdateDates()
-        : {};
+      const fallbackUpdateDates: Partial<Record<string, DateTime>> =
+        needsScmFallback ? await scm.getAllBranchUpdateDates() : {};
 
       let soFarThisHour = 0;
       for (const branch of branches) {

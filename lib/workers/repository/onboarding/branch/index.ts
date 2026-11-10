@@ -164,10 +164,7 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
 function invalidateExtractCache(baseBranch: string): void {
   const cache = getCache();
   cache.scan ??= {};
-
-  if (cache.scan?.[baseBranch]) {
-    delete cache.scan[baseBranch];
-  }
+  delete cache.scan[baseBranch];
 }
 
 function isOnboardingCacheValid(
@@ -175,7 +172,7 @@ function isOnboardingCacheValid(
   onboardingBranch: string,
 ): boolean {
   const cache = getCache();
-  const onboardingBranchCache = cache?.onboardingBranchCache;
+  const onboardingBranchCache = cache.onboardingBranchCache;
   return !!(
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha === getBranchCommit(defaultBranch) &&

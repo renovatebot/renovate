@@ -247,10 +247,10 @@ export async function postUpgradeCommandsExecutor(
 
       logger.debug(
         {
-          addedCount: status.not_added?.length,
-          modifiedCount: status.modified?.length,
-          deletedCount: status.deleted?.length,
-          renamedCount: status.renamed?.length,
+          addedCount: status.not_added.length,
+          modifiedCount: status.modified.length,
+          deletedCount: status.deleted.length,
+          renamedCount: status.renamed.length,
         },
         'git status counts after post-upgrade tasks',
       );
@@ -258,12 +258,12 @@ export async function postUpgradeCommandsExecutor(
       const addedOrModifiedFiles = [
         ...coerceArray(status.not_added),
         ...coerceArray(status.modified),
-        ...coerceArray(status.renamed?.map((x) => x.to)),
+        ...coerceArray(status.renamed.map((x) => x.to)),
       ];
       const changedFiles = [
         ...addedOrModifiedFiles,
         ...coerceArray(status.deleted),
-        ...coerceArray(status.renamed?.map((x) => x.from)),
+        ...coerceArray(status.renamed.map((x) => x.from)),
       ];
 
       // Check for files which were previously deleted but have been re-added without modification

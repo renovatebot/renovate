@@ -135,7 +135,7 @@ export function getPrBody(
     prBody += `\n<!--renovate-debug:${prDebugData64}-->\n`;
     prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
-    if (prBodyConfig?.rebasingNotice) {
+    if (prBodyConfig.rebasingNotice) {
       prBody = prBody.replace(
         rebasingRegex,
         `**Rebasing**: ${prBodyConfig.rebasingNotice}`,

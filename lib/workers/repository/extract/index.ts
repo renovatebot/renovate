@@ -9,6 +9,7 @@ import {
   hashMap,
 } from '../../../modules/manager/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { ExtractResult, WorkerExtractConfig } from '../../types.ts';
 import { getMatchingFiles } from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
@@ -98,8 +99,8 @@ export async function extractAllDependencies(
     if (packageFiles?.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
-      extractResult.packageFiles[manager] = (
-        extractResult.packageFiles[manager] || []
+      extractResult.packageFiles[manager] = coerceArray(
+        extractResult.packageFiles[manager],
       ).concat(packageFiles);
     }
   }

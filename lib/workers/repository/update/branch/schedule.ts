@@ -98,12 +98,6 @@ export function cronMatches(
     ...(timezone && { timezone }),
     domAndDow: true,
   });
-  // it will always parse because it is checked beforehand
-  // istanbul ignore if
-  if (!parsedCron) {
-    return false;
-  }
-
   // check next viable cron run after right before the current minute
   // if now is 09:59:xx, look for next run after 09:58:59, which is 09:59:00
   const nowMinute = now.startOf('minute');

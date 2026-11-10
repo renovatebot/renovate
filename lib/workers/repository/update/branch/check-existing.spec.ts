@@ -159,14 +159,22 @@ describe('workers/repository/update/branch/check-existing', () => {
     });
 
     it('returns true and removes the label if requested via PR label', async () => {
-      const pr = partial<Pr>({ number: 12, labels: ['rebase'] });
+      const pr = partial<Pr>({
+        number: 12,
+        title: 'some title',
+        labels: ['rebase'],
+      });
       await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
       expect(platform.deleteLabel).toHaveBeenCalledWith(12, 'rebase');
     });
 
     it('keeps the label during a dry run', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      const pr = partial<Pr>({ number: 12, labels: ['rebase'] });
+      const pr = partial<Pr>({
+        number: 12,
+        title: 'some title',
+        labels: ['rebase'],
+      });
       await expect(rebaseCheck(config, pr)).resolves.toBeTrue();
       expect(platform.deleteLabel).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
@@ -177,6 +185,7 @@ describe('workers/repository/update/branch/check-existing', () => {
     it('returns true if requested via PR checkbox', async () => {
       const pr = partial<Pr>({
         number: 12,
+        title: 'some title',
         bodyStruct: { hash: 'abc', rebaseRequested: true },
       });
       await expect(rebaseCheck(config, pr)).resolves.toBeTrue();

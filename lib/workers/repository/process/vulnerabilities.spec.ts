@@ -1561,7 +1561,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(config.packageRules).toHaveLength(1);
-      expect(config.packageRules?.[0]).not.toHaveProperty('matchDepTypes');
+      expect(config.packageRules[0]).not.toHaveProperty('matchDepTypes');
       expect(config.packageRules).toMatchObject([
         {
           matchDatasources: ['npm'],

@@ -157,7 +157,7 @@ export function getExpectedPrList(
       prTitleRe,
       '@&#8203;$<scope>',
     )}</summary>\n\n`;
-    if (branch.schedule?.length) {
+    if (branch.schedule.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
     }
     prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
@@ -293,8 +293,8 @@ function sortBaseBranches(bases: Iterable<string>): string[] {
 
 function describeSecurityGroup(groupBranches: BranchConfig[]): string {
   const firstUpgrade = groupBranches[0].upgrades[0];
-  const depName = firstUpgrade?.depName ?? groupBranches[0].prTitle ?? '';
-  const updateType = firstUpgrade?.updateType ?? 'unknown';
+  const depName = firstUpgrade.depName ?? groupBranches[0].prTitle ?? '';
+  const updateType = firstUpgrade.updateType ?? 'unknown';
   const packageFiles = groupBranches
     .map((b) => ({ file: b.packageFile ?? '', manager: b.manager }))
     .filter((f) => f.file);
@@ -358,7 +358,7 @@ function collectBranchStats(branches: BranchConfig[]): BranchStats {
   const seenTableKeys = new Set<string>();
 
   for (const branch of branches) {
-    const base = branch.baseBranch ?? '';
+    const base = branch.baseBranch;
     const { manager, branchName } = branch;
     const branchTypes = getBranchUpgradeTypes(branch);
 

@@ -102,6 +102,10 @@
     "typescript/no-base-to-string": "error",
     "typescript/no-for-in-array": "error",
     "typescript/no-implied-eval": "error",
+    "typescript/no-unnecessary-condition": [
+      "error",
+      { "allowConstantLoopConditions": "only-allowed-literals" }
+    ],
     "typescript/no-unnecessary-type-arguments": "error",
     "typescript/no-unnecessary-type-assertion": "error",
     "typescript/only-throw-error": "error",
@@ -483,24 +487,6 @@
           {
             "paths": ["nock", "parse-link-header", "path"]
           }
-        ]
-      }
-    },
-    {
-      "files": [
-        "lib/config/**",
-        "lib/instrumentation/**",
-        "lib/logger/**",
-        "lib/modules/**",
-        "lib/util/**",
-        "test/**",
-        "tools/**",
-        "*.mts"
-      ],
-      "rules": {
-        "typescript/no-unnecessary-condition": [
-          "error",
-          { "allowConstantLoopConditions": "only-allowed-literals" }
         ]
       }
     }

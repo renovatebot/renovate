@@ -203,14 +203,14 @@ export async function pruneStaleBranches(
       branchName.startsWith(config.branchPrefix) &&
       branchName !== getReconfigureBranchName(config.branchPrefix),
   );
-  if (!renovateBranches?.length) {
+  if (!renovateBranches.length) {
     logger.debug('No renovate branches found');
     return;
   }
   logger.debug(
     {
-      branchList: branchList?.sort(),
-      renovateBranches: renovateBranches?.sort(),
+      branchList: branchList.sort(),
+      renovateBranches: renovateBranches.sort(),
     },
     'Branch lists',
   );
