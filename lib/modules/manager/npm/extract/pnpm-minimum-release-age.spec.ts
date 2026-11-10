@@ -7,6 +7,7 @@ import type { NpmrcPackageFile } from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   getPnpmMinimumReleaseAgeMinutes,
+  getPnpmWorkspaceMinimumReleaseAge,
   isPnpmMinimumReleaseAgeExcluded,
   parsePnpmMinimumReleaseAgeExclude,
   readPnpmWorkspaceMinimumReleaseAge,
@@ -49,6 +50,18 @@ describe('modules/manager/npm/extract/pnpm-minimum-release-age', () => {
       await expect(
         readPnpmWorkspaceMinimumReleaseAge('some-dir/pnpm-lock.yaml'),
       ).resolves.toEqual(expected);
+    });
+  });
+
+  describe('getPnpmWorkspaceMinimumReleaseAge()', () => {
+    it.each`
+      workspace                                                     | expected
+      ${null}                                                       | ${{}}
+      ${['not a mapping']}                                          | ${{}}
+      ${{ packages: ['pkgs/*'] }}                                   | ${{}}
+      ${{ minimumReleaseAge: 60, minimumReleaseAgeExclude: 'foo' }} | ${{ minimumReleaseAge: 60, minimumReleaseAgeExclude: ['foo'] }}
+    `('returns $expected for $workspace', ({ workspace, expected }) => {
+      expect(getPnpmWorkspaceMinimumReleaseAge(workspace)).toEqual(expected);
     });
   });
 

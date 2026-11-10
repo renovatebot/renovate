@@ -23,6 +23,7 @@ import type { NpmManagerData } from '../types.ts';
 import { parseNpmrcPnpmMinimumReleaseAge } from './npmrc.ts';
 import { resolvePnpmConstraint } from './pnpm.ts';
 import type { PnpmMinimumReleaseAgeExclude } from './types.ts';
+import { groupByLockFile } from './utils.ts';
 
 // pnpm reads only auth and registry settings from `.npmrc` since v11.0.0
 // https://github.com/pnpm/pnpm/releases/tag/v11.0.0
@@ -225,33 +226,14 @@ export async function setPnpmMinimumReleaseAge(
   packageFiles: Partial<NpmrcPackageFile<NpmManagerData>>[],
   config: ExtractConfig,
 ): Promise<void> {
-  const packageFilesByLockFile = new Map<
-    string,
-    Partial<NpmrcPackageFile<NpmManagerData>>[]
-  >();
-  for (const packageFile of packageFiles) {
-    const pnpmLockFile = packageFile.managerData?.pnpmLockFile;
-    if (pnpmLockFile) {
-      const lockFilePackageFiles = packageFilesByLockFile.get(pnpmLockFile);
-      if (lockFilePackageFiles) {
-        lockFilePackageFiles.push(packageFile);
-      } else {
-        packageFilesByLockFile.set(pnpmLockFile, [packageFile]);
-      }
-    }
-  }
-  for (const [pnpmLockFile, lockFilePackageFiles] of packageFilesByLockFile) {
+  for (const {
+    lockFile: pnpmLockFile,
+    packageFiles: lockFilePackageFiles,
+    root,
+  } of groupByLockFile(packageFiles, 'pnpmLockFile')) {
     const workspace = await readPnpmWorkspaceMinimumReleaseAge(pnpmLockFile);
     // the pnpm-workspace.yaml has no .npmrc or pnpm constraint of its own, so
     // the root package.json sets them for every package file of the lock file
-    const rootPackageFile = upath.join(
-      upath.dirname(pnpmLockFile),
-      'package.json',
-    );
-    const root =
-      lockFilePackageFiles.find(
-        (packageFile) => packageFile.packageFile === rootPackageFile,
-      ) ?? lockFilePackageFiles.find((packageFile) => packageFile.npmrc);
     const pnpmConstraint = await resolvePnpmConstraint(
       config,
       pnpmLockFile,

@@ -91,3 +91,13 @@ export interface PnpmMinimumReleaseAgeExclude {
   /** The entries which exclude only some versions of a package */
   versions: { packageName: string; versions: string[] }[];
 }
+
+/**
+ * The package files of a lock file.
+ */
+export interface LockFilePackageFiles<T> {
+  lockFile: string;
+  packageFiles: T[];
+  /** The `package.json` next to the lock file, else the first `package.json` of the lock file */
+  root: T | undefined;
+}
