@@ -298,6 +298,15 @@ jobs:
       - name: Lint documentation
         run: pnpm lint-documentation
 
+      - name: Install Vale
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          # only install Vale; Node.js and pnpm come from the setup-node action
+          install_args: vale
+
+      - name: Lint prose
+        run: pnpm lint-prose
+
   lint-other:
     needs:
       - setup-build

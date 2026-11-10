@@ -79,7 +79,7 @@ export async function getAuthenticatedUserId(
  * DevOps Server (on-premises). Read from the location service's
  * `_apis/connectionData`, which reports the deployment type authoritatively.
  * Defaults to `false` (on-premises) when the type cannot be determined, so
- * callers stay on the behaviour that both products support.
+ * callers stay on the behavior that both products support.
  */
 export async function isHosted(): Promise<boolean> {
   try {

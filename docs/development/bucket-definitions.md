@@ -2,7 +2,7 @@
 
 Buckets are used to label _kind_ of work an Issue, Discussion or PR represents, independent of area (`manager:`/`platform:`/`core:`) and priority.
 
-These provide a different view of the "backlogs" that the Renovate project has, and to help with prioritising incoming work.
+These provide a different view of the "backlogs" that the Renovate project has, and to help with prioritizing incoming work.
 
 These docs provide a more in-depth view of what the `bucket:*` labels are and how to label an Issue, Discussion or PR.
 
@@ -15,7 +15,7 @@ The below definitions are structured like so:
 
 A short description lives on the label (within GitHub's 100-character limit for a description), and the full text lives here.
 
-Use this page as-is as the classification prompt for an AI labelling pass, or as the reference when triaging by hand.
+Use this page as-is as the classification prompt for an AI labeling pass, or as the reference when triaging by hand.
 This should be used alongside the [issue labeling guide](./issue-labeling.md).
 
 Multiple buckets could apply, but are more likely to be a single bucket than many.
@@ -78,7 +78,7 @@ Not this bucket:
 ## `bucket:ecosystem-data`
 
 **Test:** does this add or correct an _entry_ in Renovate's curated knowledge of the package world - monorepo groupings, replacement/workaround presets, package-list presets (linters etc), `lib/data` files?
-The output is not a new behaviour in Renovate, but this data (which may lead to behaviour changes).
+The output is not a new behavior in Renovate, but this data (which may lead to behavior changes).
 
 Belongs here:
 
@@ -231,7 +231,7 @@ Belongs here:
 - [#43962](https://github.com/renovatebot/renovate/discussions/43962) - Terraform lock-file hashing concurrency (OOMs on large providers)
 - [#38615](https://github.com/renovatebot/renovate/discussions/38615) - Autodiscover sharding for large numbers of repos
 - [#39012](https://github.com/renovatebot/renovate/discussions/39012) / [#39009](https://github.com/renovatebot/renovate/discussions/39009) - Avoid fetching tags / only fetch necessary branches
-- [#39831](https://github.com/renovatebot/renovate/discussions/39831) - Efficiency for large Azure DevOps organisations
+- [#39831](https://github.com/renovatebot/renovate/discussions/39831) - Efficiency for large Azure DevOps organizations
 
 Not this bucket:
 
@@ -254,7 +254,7 @@ Not this bucket:
 
 - "X fails with no warning / silently does nothing" → `predictability`
 - "Renovate doesn't support X's new format" → `ecosystem-depth` (capability gap, not defect)
-- "Renovate handles X wrongly" where X is a layout, syntax or setting the Manager never modelled (quoted versions, a wrapper version taken from a catalog, an OCI source for a tool that only knew HTTP) → `ecosystem-depth`. It is a `bug-fix` only if the same input used to work, or the docs say it is supported
+- "Renovate handles X wrongly" where X is a layout, syntax or setting the Manager never modeled (quoted versions, a wrapper version taken from a catalog, an OCI source for a tool that only knew HTTP) → `ecosystem-depth`. It is a `bug-fix` only if the same input used to work, or the docs say it is supported
 - Changing a Manager's default to match how its ecosystem works (carries `breaking`) → `ecosystem-depth`, even when titled `fix(…)`
 
 ## `bucket:engineering-health`
@@ -327,7 +327,7 @@ Mend Hosted Request discussions get `audience:mend-hosted`, and a bucket only if
 
 ## Pull requests and duplicates
 
-- PRs and issues authored by `renovate[bot]` (its update PRs, the Dependency Dashboard issue) are `dependency-updates`, with no further judgement.
+- PRs and issues authored by `renovate[bot]` (its update PRs, the Dependency Dashboard issue) are `dependency-updates`, with no further judgment.
 - For other PRs, use the bucket of the item they deliver - including an item the body references with "part of #X" or "as noted in #X", not only `closes #X`.
   If there's no linked issue or discussion, infer it from the Conventional Commit type and scope: `docs` → `docs`, `chore`/`ci`/`test`/`refactor`/`build` → `engineering-health`, `perf` → `performance-scale`, `feat(presets)`/`feat(replacements)`/`fix(presets)` → `ecosystem-data`, `feat(manager/…)`/`feat(datasource/…)`/`feat(versioning/…)` → `ecosystem-depth` (or `new-ecosystem` for a new module for an ecosystem Renovate extracts nothing from), `feat(platform/…)` → `platform`, and `fix(…)` → `bug-fix`, including `fix(platform/…)`.
 - The body wins over the type when they plainly disagree: a `chore` that adds a warning users will see is `predictability`; a `refactor` that adds spans or log fields is `observability`; a `fix(…)` whose body describes support that never existed (e.g. `fix(nix): support flake input updates`) is `ecosystem-depth`; a `fix(…)` that only reduces API calls or memory is `performance-scale`; a `fix(…)` that corrects the JSON schema or option reference is `docs`; a `docs:` PR that changes the docs build is `engineering-health`.
@@ -338,7 +338,7 @@ Mend Hosted Request discussions get `audience:mend-hosted`, and a bucket only if
 
 ## `lifecycle` (cross-cutting flag)
 
-**Test:** a judgement about a dependency's life and health _beyond_ updating its version - abandonment/staleness detection, replacements for renamed or relocated packages, deprecations, end-of-life data, age/adoption/health metadata surfaced to the user.
+**Test:** a judgment about a dependency's life and health _beyond_ updating its version - abandonment/staleness detection, replacements for renamed or relocated packages, deprecations, end-of-life data, age/adoption/health metadata surfaced to the user.
 The mechanism is metadata _about_ the dependency, not a version bump of it.
 Applied alongside a bucket, not instead of one.
 
@@ -378,7 +378,7 @@ The fix may well be a new config option, but the flag applies when the irritatio
 
 Many `predictability` items (e.g. silently ignoring something) will also be rough edges almost by definition - that's expected, and `rough-edge` with `predictability` is where the highest-value fixes tend to sit.
 
-Evidence for (2) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognising it as a common irritation.
+Evidence for (2) can be reactions, upvotes, comment count, duplicate asks, or a maintainer recognizing it as a common irritation.
 Most items have little engagement, so low engagement alone doesn't disqualify an item - judge whether ordinary use would hit it repeatedly.
 PRs have no engagement signal, so judge them on the same three tests as the issue they fix.
 

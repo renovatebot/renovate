@@ -21,6 +21,7 @@
     "doc-fix-everything": "run-s doc-fix doc-fence-check lint-documentation",
     "doc-fence-check": "node tools/check-fenced-code.ts",
     "lint-documentation": "vitest run --coverage false test/docs/**.spec.ts",
+    "lint-prose": "git ls-files -z '*.md' '*.ts' | xargs -0 vale --output=line",
     "lint-other": "vitest run --coverage false test/other/**.spec.ts",
     "oxlint": "oxlint -c .oxlintrc.json",
     "oxlint-fix": "oxlint --fix -c .oxlintrc.json",

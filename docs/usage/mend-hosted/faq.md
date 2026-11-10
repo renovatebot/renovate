@@ -42,7 +42,7 @@ If you are a paying Mend customer, you have access to control [a number of self-
 One such variable is `RENOVATE_ALLOWED_COMMANDS`, which allows controlling the [`allowedCommands`](../self-hosted-configuration.md#allowedcommands) that a repository can run.
 By configuring this, you can allow commands to run in your repository.
 
-These variables can be managed by a repository administrator, and can also be set on the organisation level.
+These variables can be managed by a repository administrator, and can also be set on the organization level.
 
 There is a balance between ease of use and security - remember that allowlisting commands can lead to a malicious dependency then executing within your project ([an "outsider attack"](../security-and-permissions.md#execution-of-code-outsider-attack)).
 

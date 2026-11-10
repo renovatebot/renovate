@@ -86,3 +86,15 @@ Follow the [Plain language guidelines](https://www.plainlanguage.gov/guidelines/
 ## Correct name for the GitHub app
 
 Refer to the GitHub app version of Renovate as "the Mend Renovate app".
+
+## Check your text with Vale
+
+[Vale](https://vale.sh/) checks some rules of this style guide in CI.
+It reads the Markdown files and the code comments in the repository.
+Vale cannot check string literals in code, so check error messages and pull request texts yourself.
+
+The configuration is in `.vale.ini`, and the rules are in `.vale/styles/Renovate/`.
+
+To run Vale locally, install it with `mise install vale` and run `pnpm lint-prose`.
+Vale is not part of `pnpm lint`, so contributors without Vale can still run the other checks.
+For feedback while you type, use the Vale VS Code extension or `vale-ls` in your editor.

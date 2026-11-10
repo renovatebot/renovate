@@ -21,7 +21,7 @@ For example:
 The roll-forward policy to use when selecting an SDK version, either as a fallback when a specific SDK version is missing or as a directive to use a higher version. In this case with `major` it means that select the latest version with the same major.
 ie. `>= 6.0.300 < 7.0.0`
 
-For such cases, the users would not want Renovate to create an update PR for any version within the range `>= 6.0.300 < 7.0.0` as it would not change the behaviour on their end, since it is handled by the manager already.
+For such cases, the users would not want Renovate to create an update PR for any version within the range `>= 6.0.300 < 7.0.0` as it would not change the behavior on their end, since it is handled by the manager already.
 
 Note:
 You should create a discussion before using this versioning as this is an experimental support and might have some edge cases unhandled.

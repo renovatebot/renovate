@@ -129,7 +129,7 @@ Keeping them separate lets us ask questions like "how much of our security bucke
 
 </details>
 
-Use `lifecycle` as a cross-cutting flag for a judgement about a dependency's life and health _beyond_ updating its version: abandonment/staleness detection, replacements for renamed or relocated packages, deprecations, end-of-life data, age/adoption/health metadata surfaced to the user.
+Use `lifecycle` as a cross-cutting flag for a judgment about a dependency's life and health _beyond_ updating its version: abandonment/staleness detection, replacements for renamed or relocated packages, deprecations, end-of-life data, age/adoption/health metadata surfaced to the user.
 The mechanism is metadata _about_ the dependency, not a version bump of it.
 Apply it alongside a `bucket:*` label, not instead of one.
 

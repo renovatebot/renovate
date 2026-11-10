@@ -110,10 +110,10 @@ The value is calculated as `ceil(minimumReleaseAge / 1 day)` and passed as an in
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 !!! warning
-  Renovate 42 changed the behaviour detailed below.
+  Renovate 42 changed the behavior detailed below.
   In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
   Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-  If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+  If using Renovate prior you can opt into the more secure behavior (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 

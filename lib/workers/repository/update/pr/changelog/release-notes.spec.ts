@@ -2124,7 +2124,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '[#15105](https://github.com/angular/angular.js/issues/15105))\n',
       );
-      // the neighbouring 1.6.8 section must not leak in
+      // the neighboring 1.6.8 section must not leak in
       expect(res?.body).not.toContain('beneficial-tincture');
       expect(res?.body).not.toContain('always decode special chars');
     });
@@ -2163,7 +2163,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '- Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution\n',
       );
-      // the neighbouring 20.26.1 and 20.25.0 sections must not leak in
+      // the neighboring 20.26.1 and 20.25.0 sections must not leak in
       expect(res?.body).not.toContain(
         'Optimizing MongoDB query for chat archive',
       );
@@ -2208,7 +2208,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '- Thanks to [@biesiad](https://gitlab.com/biesiad) for the contribution\n',
       );
-      // the neighbouring 20.26.1 and 20.25.0 sections must not leak in
+      // the neighboring 20.26.1 and 20.25.0 sections must not leak in
       expect(res?.body).not.toContain(
         'Optimizing MongoDB query for chat archive',
       );
@@ -2251,7 +2251,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '([#5007](https://github.com/facebook/jest/pull/5007))\n',
       );
-      // the neighbouring jest 22.0.1 and jest 21.2.1 sections must not leak in
+      // the neighboring jest 22.0.1 and jest 21.2.1 sections must not leak in
       expect(res?.body).not.toContain(
         'fix error for test files providing coverage',
       );
@@ -2298,7 +2298,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).\n',
       );
-      // the neighbouring 3.11.0 and 3.9.1 sections must not leak in
+      // the neighboring 3.11.0 and 3.9.1 sections must not leak in
       expect(res?.body).not.toContain('Fix dump in bin/octal/hex formats');
       expect(res?.body).not.toContain(
         'Ensure stack is present for custom errors',
@@ -2339,7 +2339,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res?.body).toEndWith(
         '- Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).\n',
       );
-      // the neighbouring 3.11.0 and 3.9.1 sections must not leak in
+      // the neighboring 3.11.0 and 3.9.1 sections must not leak in
       expect(res?.body).not.toContain('Fix dump in bin/octal/hex formats');
       expect(res?.body).not.toContain(
         'Ensure stack is present for custom errors',
@@ -2399,7 +2399,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res?.body).toEndWith(
           '([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))\n',
         );
-        // the neighbouring 15.3.1 and 15.2.0 sections must not leak in
+        // the neighboring 15.3.1 and 15.2.0 sections must not leak in
         expect(res?.body).not.toContain('prototype pollution vulnerability');
         expect(res?.body).not.toContain('BREAKING CHANGES');
       });
@@ -2439,7 +2439,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         expect(res?.body).toEndWith(
           '([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))\n',
         );
-        // the neighbouring 15.3.0 and 15.1.0 sections must not leak in
+        // the neighboring 15.3.0 and 15.1.0 sections must not leak in
         expect(res?.body).not.toContain('address ambiguity between nargs of 1');
         expect(res?.body).not.toContain('add Finnish localization');
       });
@@ -2481,7 +2481,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           'See merge request itentialopensource/adapter-utils!177',
         );
         expect(res?.body).toEndWith('***\n');
-        // the neighbouring 4.32.3 section must not leak in
+        // the neighboring 4.32.3 section must not leak in
         expect(res?.body).not.toContain('ADAPT-198');
         expect(res?.body).not.toContain(
           'set username and password in token entitypath',
@@ -2634,7 +2634,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           'See merge request itentialopensource/adapter-utils!177',
         );
         expect(res?.body).toEndWith('***\n');
-        // the neighbouring 4.32.3 section must not leak in
+        // the neighboring 4.32.3 section must not leak in
         expect(res?.body).not.toContain('ADAPT-198');
         expect(res?.body).not.toContain(
           'set username and password in token entitypath',

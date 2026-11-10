@@ -225,7 +225,7 @@ export async function processBranch(
       };
     }
     if (branchExists) {
-      // check if branch is labelled to stop
+      // check if branch is labeled to stop
       config.stopUpdating = branchPr?.labels?.includes(
         config.stopUpdatingLabel!,
       );

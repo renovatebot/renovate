@@ -2286,7 +2286,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
 
       it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
-        // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+        // set up our repo again, so we can initialize it with `RENOVATE_X_CLEAR_HOOKS`
         await fs.emptyDir(tmpDir.path);
         GlobalConfig.set({ localDir: tmpDir.path });
         vi.stubEnv('RENOVATE_X_CLEAR_HOOKS', 'true');
@@ -2294,7 +2294,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           url: origin.path,
         });
 
-        // initialise the repo
+        // initialize the repo
         await git.syncGit();
         // then hit the RENOVATE_X_CLEAR_HOOKS code path
         await git.syncGit();

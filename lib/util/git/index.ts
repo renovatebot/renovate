@@ -487,7 +487,7 @@ export async function cloneSubmodules(
         submoduleGit.submoduleUpdate(['--init', '--recursive', submodule]),
       );
     } catch (err) {
-      logger.warn({ err, submodule }, `Unable to initialise git submodule`);
+      logger.warn({ err, submodule }, `Unable to initialize git submodule`);
     }
   }
 }
