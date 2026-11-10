@@ -88,12 +88,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
   try {
     // Find CODEOWNERS file
-    const codeOwnersFile =
-      (await readLocalFile('CODEOWNERS', 'utf8')) ??
-      (await readLocalFile('.bitbucket/CODEOWNERS', 'utf8')) ??
-      (await readLocalFile('.github/CODEOWNERS', 'utf8')) ??
-      (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ??
-      (await readLocalFile('docs/CODEOWNERS', 'utf8'));
+    let codeOwnersFile = await readLocalFile('CODEOWNERS', 'utf8');
+    codeOwnersFile ??= await readLocalFile('.bitbucket/CODEOWNERS', 'utf8');
+    codeOwnersFile ??= await readLocalFile('.github/CODEOWNERS', 'utf8');
+    codeOwnersFile ??= await readLocalFile('.gitlab/CODEOWNERS', 'utf8');
+    codeOwnersFile ??= await readLocalFile('docs/CODEOWNERS', 'utf8');
 
     if (!codeOwnersFile) {
       logger.debug('No CODEOWNERS file found');
@@ -104,9 +103,12 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     // Get list of modified files in PR
     // if the commit sha is known, we can directly compare against the parent, otherwise use the branch
-    const prFiles = pr.sha
-      ? await getBranchFilesFromCommit(pr.sha)
-      : await getBranchFiles(pr.sourceBranch);
+    let prFiles: string[] | null;
+    if (pr.sha) {
+      prFiles = await getBranchFilesFromCommit(pr.sha);
+    } else {
+      prFiles = await getBranchFiles(pr.sourceBranch);
+    }
 
     if (!prFiles?.length) {
       logger.debug('PR includes no files');

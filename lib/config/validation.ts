@@ -377,12 +377,12 @@ export async function validateConfig(
               });
             }
           }
-          const parentName =
-            parentOptionName ??
-            (parentPath &&
+          let parentName = parentOptionName;
+          parentName ??=
+            parentPath &&
             (parentPath === 'onboardingConfig' || repoEntryRe.test(parentPath))
               ? '.'
-              : getParentName(parentPath));
+              : getParentName(parentPath);
           if (
             !isPreset &&
             parentName &&

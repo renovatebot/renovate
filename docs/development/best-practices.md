@@ -270,7 +270,9 @@ try {
 
 Never use `Promise.resolve` in async functions.
 Never use `Promise.reject` in async functions, instead throw an `Error` class type.
-Never put `await` inside a ternary or other conditional expression; use `if`/`else`, as V8 coverage misreports such constructs.
+Never put `await` inside a ternary branch or on the right side of `&&`, `||` or `??`; use `if`/`else`, as V8 coverage misreports such constructs.
+Never use a ternary as an operand of `&&`, `||` or `??`.
+The `renovate/no-complex-conditional-expression` lint rule enforces both.
 
 ## Dates and times
 

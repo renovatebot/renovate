@@ -177,10 +177,12 @@ async function updatePnpmWorkspace(
   }
 
   // use already-updated content when updating the workspace file itself
-  const packageFileContent =
-    updateArtifactsConfig.packageFileName === pnpmWorkspaceFilePath
-      ? updateArtifactsConfig.newPackageFileContent
-      : (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
+  let packageFileContent: string;
+  if (updateArtifactsConfig.packageFileName === pnpmWorkspaceFilePath) {
+    packageFileContent = updateArtifactsConfig.newPackageFileContent;
+  } else {
+    packageFileContent = (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!;
+  }
   const doc = parseDocument(packageFileContent);
 
   if (!doc.get('minimumReleaseAge')) {

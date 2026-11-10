@@ -66,9 +66,10 @@ export async function checkYarnrc(
         // resolve binary relative to `yarnrc`
         yarnPath = upath.join(lockFileDir, yarnPath);
       }
-      const yarnBinaryExists = yarnPath
-        ? await localPathIsFile(yarnPath)
-        : false;
+      let yarnBinaryExists = false;
+      if (yarnPath) {
+        yarnBinaryExists = await localPathIsFile(yarnPath);
+      }
       let scrubbedYarnrc = yarnrc
         .replace('--install.pure-lockfile true', '')
         .replace('--install.frozen-lockfile true', '');
@@ -121,15 +122,19 @@ export async function generateLockFile(
       await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility =
-      yarnUpdate?.newValue ??
-      (await resolveToolConstraint(
-        config,
-        'yarn',
-        async () =>
-          getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-          getYarnVersionFromLock(await getYarnLock(lockFileName)),
-      ));
+    let yarnCompatibility = yarnUpdate?.newValue;
+    yarnCompatibility ??= await resolveToolConstraint(
+      config,
+      'yarn',
+      async () => {
+        let yarnVersion = getPackageManagerVersion(
+          'yarn',
+          await lazyPgkJson.getValue(),
+        );
+        yarnVersion ??= getYarnVersionFromLock(await getYarnLock(lockFileName));
+        return yarnVersion;
+      },
+    );
     const yarnRange = semver.validRange(yarnCompatibility);
     const minYarnVersion = yarnRange && semver.minVersion(yarnRange);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;

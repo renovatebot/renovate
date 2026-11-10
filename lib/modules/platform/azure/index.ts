@@ -543,15 +543,18 @@ export async function getBranchStatus(
 async function getMergeStrategy(
   targetRefName: string,
 ): Promise<GitPullRequestMergeStrategy> {
-  return (
-    config.mergeMethods[targetRefName] ??
-    (config.mergeMethods[targetRefName] = await azureHelper.getMergeMethod(
-      config.repoId,
-      config.project,
-      targetRefName,
-      config.defaultBranch,
-    ))
+  const cachedMergeMethod = config.mergeMethods[targetRefName];
+  if (cachedMergeMethod !== undefined) {
+    return cachedMergeMethod;
+  }
+  const mergeMethod = await azureHelper.getMergeMethod(
+    config.repoId,
+    config.project,
+    targetRefName,
+    config.defaultBranch,
   );
+  config.mergeMethods[targetRefName] = mergeMethod;
+  return mergeMethod;
 }
 
 async function getPendingBlockingPolicyEvaluations(
@@ -959,10 +962,12 @@ export async function mergePr({
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  const mergeStrategy =
-    strategy === 'auto'
-      ? await getMergeStrategy(pr.targetRefName!)
-      : mapMergeStrategy(strategy);
+  let mergeStrategy: GitPullRequestMergeStrategy;
+  if (strategy === 'auto') {
+    mergeStrategy = await getMergeStrategy(pr.targetRefName!);
+  } else {
+    mergeStrategy = mapMergeStrategy(strategy);
+  }
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,

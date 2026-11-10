@@ -231,10 +231,15 @@ export async function writeUpdates(
           // Stop processing other branches because base branch has been changed
           return 'automerged';
         }
-        if (!branchExisted && (await scm.branchExists(branch.branchName))) {
-          incCountValue(
-            branch.isVulnerabilityAlert ? 'VulnerabilityBranches' : 'Branches',
-          );
+        if (!branchExisted) {
+          const nowExists = await scm.branchExists(branch.branchName);
+          if (nowExists) {
+            incCountValue(
+              branch.isVulnerabilityAlert
+                ? 'VulnerabilityBranches'
+                : 'Branches',
+            );
+          }
         }
       },
       {

@@ -52,17 +52,22 @@ export async function generateLockFile(
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    // if pnpm is being upgraded, it comes first
+    let pnpmConstraint: string | null | undefined =
+      getPnpmConstraintFromUpgrades(upgrades);
+    pnpmConstraint ??= await resolveToolConstraint(config, 'pnpm', async () => {
+      // look in package.json > packageManager or engines
+      let pnpmVersion = getPackageManagerVersion(
+        'pnpm',
+        await lazyPgkJson.getValue(),
+      );
+      // use lockfileVersion to find pnpm version range
+      pnpmVersion ??= await getConstraintFromLockFile(lockFileName);
+      return pnpmVersion;
+    });
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
-      constraint:
-        getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
-        (await resolveToolConstraint(
-          config,
-          'pnpm',
-          async () =>
-            getPackageManagerVersion('pnpm', await lazyPgkJson.getValue()) ?? // look in package.json > packageManager or engines
-            (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
-        )),
+      constraint: pnpmConstraint ?? null,
     };
 
     const pnpmConfigCacheDir = await ensureCacheDir(PNPM_CACHE_DIR);

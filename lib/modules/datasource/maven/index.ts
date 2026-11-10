@@ -144,14 +144,15 @@ export class MavenDatasource extends Datasource {
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
-    const dependencyInfo =
-      latestSuitableVersion &&
-      (await getDependencyInfo(
+    let dependencyInfo;
+    if (latestSuitableVersion) {
+      dependencyInfo = await getDependencyInfo(
         this.http,
         dependency,
         repoUrl,
         latestSuitableVersion,
-      ));
+      );
+    }
 
     const result: ReleaseResult = {
       ...dependency,

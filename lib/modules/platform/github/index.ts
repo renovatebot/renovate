@@ -260,9 +260,12 @@ export async function initPlatform({
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail =
-        platformConfig.userDetails.email ??
-        (await getUserEmail(platformConfig.host.apiUrl.href, token));
+      platformConfig.userEmail = platformConfig.userDetails.email;
+      // v8 ignore next -- TODO: coverage error #40625
+      platformConfig.userEmail ??= await getUserEmail(
+        platformConfig.host.apiUrl.href,
+        token,
+      );
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
@@ -2232,10 +2235,13 @@ export async function mergePr({
   if (await directMergePr(prNo, strategy)) {
     return true;
   }
-  if (pr?.targetBranch && (await isBranchMergeQueueEnabled(pr.targetBranch))) {
-    // The direct merge was refused - fall back to adding the PR to the merge
-    // queue, so it must not be cached as merged nor may its branch be deleted
-    return tryEnqueuePr(pr);
+  if (pr?.targetBranch) {
+    const mergeQueueEnabled = await isBranchMergeQueueEnabled(pr.targetBranch);
+    if (mergeQueueEnabled) {
+      // The direct merge was refused - fall back to adding the PR to the merge
+      // queue, so it must not be cached as merged nor may its branch be deleted
+      return tryEnqueuePr(pr);
+    }
   }
   return false;
 }

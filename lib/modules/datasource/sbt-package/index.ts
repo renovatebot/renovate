@@ -265,12 +265,11 @@ export class SbtPackageDatasource extends MavenDatasource {
     pkgUrls?: string[],
   ): Promise<PomInfo | null> {
     // istanbul ignore next: will be covered later
-    const packageUrls =
-      pkgUrls ??
-      (await packageCache.get<string[]>(
-        'datasource-sbt-package',
-        getPackageUrlsCacheKey(registryUrl, packageName),
-      ));
+    let packageUrls = pkgUrls;
+    packageUrls ??= await packageCache.get<string[]>(
+      'datasource-sbt-package',
+      getPackageUrlsCacheKey(registryUrl, packageName),
+    );
 
     // istanbul ignore if
     if (!packageUrls?.length) {

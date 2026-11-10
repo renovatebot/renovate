@@ -457,13 +457,12 @@ async function getAdditionalFilesInner(
     return { artifactErrors, artifactNotices, updatedArtifacts };
   }
   logger.debug('Getting updated lock files');
-  if (
-    config.isLockFileMaintenance &&
-    config.reuseExistingBranch &&
-    (await scm.branchExists(config.branchName))
-  ) {
-    logger.debug('Skipping lockFileMaintenance update');
-    return { artifactErrors, artifactNotices, updatedArtifacts };
+  if (config.isLockFileMaintenance && config.reuseExistingBranch) {
+    const branchExists = await scm.branchExists(config.branchName);
+    if (branchExists) {
+      logger.debug('Skipping lockFileMaintenance update');
+      return { artifactErrors, artifactNotices, updatedArtifacts };
+    }
   }
   const dirs = determineLockFileDirs(config, packageFiles);
   logger.trace({ dirs }, 'lock file dirs');

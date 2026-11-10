@@ -216,10 +216,10 @@ export async function processBranch(
   );
   try {
     // Check if branch already existed
-    const existingPr =
-      !branchPr || config.automerge
-        ? await prAlreadyExisted(config)
-        : undefined;
+    let existingPr: Awaited<ReturnType<typeof prAlreadyExisted>> | undefined;
+    if (!branchPr || config.automerge) {
+      existingPr = await prAlreadyExisted(config);
+    }
     if (existingPr?.state === 'merged') {
       logger.debug(`Matching PR #${existingPr.number} was merged previously`);
       if (config.automerge) {
@@ -778,9 +778,15 @@ export async function processBranch(
       }
       const forcedManually = userRebaseRequested || !branchExists;
 
-      config.isConflicted ??=
-        branchExists &&
-        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
+      if (config.isConflicted === undefined) {
+        config.isConflicted = false;
+        if (branchExists) {
+          config.isConflicted = await scm.isBranchConflicted(
+            config.baseBranch,
+            config.branchName,
+          );
+        }
+      }
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs

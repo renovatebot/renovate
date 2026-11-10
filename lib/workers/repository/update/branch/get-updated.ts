@@ -552,9 +552,11 @@ export async function getUpdatedPackageFiles(
         );
         sortPackageFiles(config, manager, packageFilesForManager);
         for (const packageFile of packageFilesForManager) {
-          const contents =
-            updatedFileContents[packageFile.path] ||
-            (await getFile(packageFile.path, config.baseBranch));
+          let contents: string | null | undefined =
+            updatedFileContents[packageFile.path];
+          if (!contents) {
+            contents = await getFile(packageFile.path, config.baseBranch);
+          }
           const results = await managerUpdateArtifacts(manager, {
             packageFileName: packageFile.path,
             updatedDeps: [],

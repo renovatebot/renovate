@@ -74,18 +74,17 @@ export async function getNodeConstraint(
   lockFileDir: string,
   pkg: LazyPackageJson,
 ): Promise<string | null> {
-  const constraint =
-    getNodeUpdate(upgrades) ??
-    (await resolveToolConstraint(
-      config,
-      'node',
-      async () =>
-        (await getDevEnginesConstraint(pkg)) ??
-        (await getNodeFile(upath.join(lockFileDir, '.nvmrc'))) ??
-        (await getNodeFile(upath.join(lockFileDir, '.node-version'))) ??
-        (await getPackageJsonConstraint(pkg)),
-    )) ??
-    null;
+  let constraint: string | null | undefined = getNodeUpdate(upgrades);
+  constraint ??= await resolveToolConstraint(config, 'node', async () => {
+    let nodeConstraint = await getDevEnginesConstraint(pkg);
+    nodeConstraint ??= await getNodeFile(upath.join(lockFileDir, '.nvmrc'));
+    nodeConstraint ??= await getNodeFile(
+      upath.join(lockFileDir, '.node-version'),
+    );
+    nodeConstraint ??= await getPackageJsonConstraint(pkg);
+    return nodeConstraint;
+  });
+  constraint ??= null;
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }

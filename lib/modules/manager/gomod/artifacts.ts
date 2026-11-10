@@ -141,11 +141,14 @@ export async function updateArtifacts({
   // the go workspaces are used.
   const vendorDir = await findLocalSiblingOrParent(goModFileName, 'vendor');
   const vendorModulesFileName = upath.join(vendorDir ?? '', 'modules.txt');
-  const useVendor =
-    !!config.postUpdateOptions?.includes('gomodVendor') ||
-    (!config.postUpdateOptions?.includes('gomodSkipVendor') &&
-      vendorDir &&
-      (await readLocalFile(vendorModulesFileName)) !== null);
+  let useVendor = !!config.postUpdateOptions?.includes('gomodVendor');
+  if (
+    !useVendor &&
+    !config.postUpdateOptions?.includes('gomodSkipVendor') &&
+    vendorDir
+  ) {
+    useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
+  }
   let massagedGoMod = newGoModContent;
   const useGoGenerate = !!config.postUpdateOptions?.includes('goGenerate');
   const allowedUnsafeExecutions = GlobalConfig.get('allowedUnsafeExecutions');
