@@ -96,6 +96,7 @@ describe('modules/manager/bazel-module/lockfile', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
+        not_added: [],
       }),
     );
 

@@ -8,7 +8,7 @@ export interface PipSource {
 }
 
 export interface PipFile {
-  source: PipSource[];
+  source?: PipSource[];
 
   packages?: Record<string, PipRequirement>;
   'dev-packages'?: Record<string, PipRequirement>;

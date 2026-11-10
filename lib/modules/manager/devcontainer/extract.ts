@@ -21,7 +21,7 @@ export function extractPackageFile(
     const file = DevContainerFile.parse(content);
     const deps: PackageDependency[] = [];
 
-    const image = file?.image ?? null;
+    const image = file.image ?? null;
     const imageDep = getDep(image, packageFile, extractConfig.registryAliases);
 
     if (imageDep) {

@@ -24,7 +24,7 @@ export function updateLockedDependency({
   }
 
   const packageName = depName.toUpperCase();
-  const groupName = managerData?.group?.toUpperCase();
+  const groupName = managerData?.group.toUpperCase();
   const lockedEntries = parseLockFile(lockFileContent).filter((dep) => {
     if (dep.packageName.toUpperCase() !== packageName) {
       return false;

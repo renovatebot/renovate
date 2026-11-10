@@ -159,6 +159,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
       tokenType === 'stringContent' ||
       tokenType === 'double' ||
       tokenType === 'rational' ||
+      // oxlint-disable-next-line typescript/no-unnecessary-condition -- last member of the union, keeps the else branch exhaustive
       tokenType === 'integer'
     ) {
       if (stateType === 'record') {
@@ -173,7 +174,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
         }
       } else if (stateType === 'array') {
         state.data.push(token.value);
-      } else if (stateType === 'root') {
+      } else {
         state.data = token.value;
       }
     } else {

@@ -113,9 +113,9 @@ export function getLockedVersion(
       if (
         isString(depName) &&
         match?.groups?.depName === depName &&
-        match?.groups?.datasource === datasource &&
+        match.groups.datasource === datasource &&
         currentValue &&
-        match?.groups?.currentValue &&
+        match.groups.currentValue &&
         // SAFETY: npm semver define it
         semver.intersects!(match.groups.currentValue, currentValue)
       ) {
@@ -160,7 +160,7 @@ export function normalizeWorkspace(
   const workspaceContexts: WorkspaceContext[] = [];
 
   // create reference map for packageFile object
-  const packageMap: Record<string, PackageFile<DenoManagerData>> = {};
+  const packageMap: Partial<Record<string, PackageFile<DenoManagerData>>> = {};
   for (const pkg of packageFiles) {
     packageMap[pkg.packageFile] = pkg;
   }
@@ -249,7 +249,7 @@ async function applyLockedVersion(
 ): Promise<void> {
   // apply locked versions from lock files
   // use cache to avoid reading the same lock file multiple times
-  const lockFileCache: Record<string, LockFile> = {};
+  const lockFileCache: Partial<Record<string, LockFile>> = {};
   for (const pkg of packageFiles) {
     if (!isNonEmptyArray(pkg.lockFiles)) {
       continue;

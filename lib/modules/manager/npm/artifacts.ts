@@ -235,7 +235,7 @@ async function updatePnpmWorkspace(
       updated = true;
     } else if (isScalar<string>(matchedItem)) {
       // if we have a comment before the list, which includes the dependency
-      if (excludeNode?.commentBefore?.includes(`${excludeDepName}@`)) {
+      if (excludeNode.commentBefore?.includes(`${excludeDepName}@`)) {
         // and it doesn't already have the version included in it
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(

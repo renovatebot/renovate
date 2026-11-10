@@ -31,7 +31,8 @@ export function findAttrValuePosition(
   );
   const match = attrPattern.exec(tagContent)!;
 
-  const valueInMatch = match.groups!.dq ?? match.groups!.sq;
+  const { dq, sq } = match.groups as { dq?: string; sq?: string };
+  const valueInMatch = dq ?? sq!;
   const valueOffset = match[0].indexOf(valueInMatch);
   return startTag + match.index + valueOffset;
 }
@@ -43,7 +44,7 @@ export function findAttrValuePosition(
 export function parsePropertiesFile(
   content: string,
   packageFile: string,
-  props: Record<string, AntProp>,
+  props: Partial<Record<string, AntProp>>,
 ): void {
   let offset = 0;
   for (const rawLine of content.split('\n')) {
@@ -82,7 +83,7 @@ export function parsePropertiesFile(
 export function applyProps(
   dep: PackageDependency,
   depPackageFile: string,
-  props: Record<string, AntProp>,
+  props: Partial<Record<string, AntProp>>,
 ): PackageDependency {
   const currentValue = dep.currentValue;
 
@@ -129,7 +130,7 @@ export function applyProps(
  */
 function resolveKey(
   key: string,
-  props: Record<string, AntProp>,
+  props: Partial<Record<string, AntProp>>,
   resolved: Map<string, string | null>,
   chain: Set<string>,
 ): string | null {
@@ -151,7 +152,7 @@ function resolveKey(
   }
 
   chain.add(key);
-  let isCircular = false;
+  let isCircular = false as boolean;
   const val = prop.val.replace(
     regEx(/\$\{(?<key>[^}]+)}/g),
     (match: string, refKey: string) => {
@@ -180,7 +181,9 @@ function resolveKey(
  * E.g., if prop A = "${B}" and prop B = "1.0", resolve A to "1.0".
  * Marks circular properties by setting val to a placeholder that will be caught later.
  */
-export function resolveChainedProps(props: Record<string, AntProp>): void {
+export function resolveChainedProps(
+  props: Partial<Record<string, AntProp>>,
+): void {
   const resolved = new Map<string, string | null>(); // null = circular
 
   for (const key of Object.keys(props)) {

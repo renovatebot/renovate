@@ -3,7 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { isSkipComment } from '../../../util/ignore.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { StaticTooling } from './types.ts';
+import type { StaticTooling, ToolingDefinition } from './types.ts';
 import { upgradeableTooling } from './upgradeable-tooling.ts';
 
 export function extractPackageFile(content: string): PackageFileContent | null {
@@ -21,7 +21,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     const depName = groups.toolName.trim();
     const version = groups.version.trim();
 
-    const toolConfig = upgradeableTooling[depName];
+    const toolConfig = upgradeableTooling[depName] as
+      ToolingDefinition | undefined;
     let toolDefinition: StaticTooling | undefined;
     if (toolConfig) {
       toolDefinition = isFunction(toolConfig.config)
@@ -35,7 +36,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         depName,
         ...toolDefinition,
       };
-      if (isSkipComment((groups.comment ?? '').trim())) {
+      const comment = groups.comment as string | undefined;
+      if (isSkipComment((comment ?? '').trim())) {
         dep.skipReason = 'ignored';
       }
 

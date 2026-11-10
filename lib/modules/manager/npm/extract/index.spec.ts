@@ -129,7 +129,7 @@ describe('modules/manager/npm/extract/index', () => {
         defaultExtractConfig,
       );
       expect(res?.deps).toHaveLength(13);
-      expect(res?.deps?.slice(11)).toEqual([
+      expect(res?.deps.slice(11)).toEqual([
         {
           depName: undefined,
           depType: 'resolutions',

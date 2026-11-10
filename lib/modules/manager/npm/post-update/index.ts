@@ -374,7 +374,7 @@ async function updateYarnOffline(
           });
         }
       }
-      for (const f of status.deleted || []) {
+      for (const f of status.deleted) {
         if (resolvedPaths.some((p) => f.startsWith(p))) {
           updatedArtifacts.push({ type: 'deletion', path: f });
         }
@@ -402,8 +402,12 @@ export async function updateYarnBinary(
     }
 
     // TODO: use schema (#9610)
-    const oldYarnPath = parseSingleYaml<YarnRcYmlFile>(yarnrcYml)?.yarnPath;
-    const newYarnPath = parseSingleYaml<YarnRcYmlFile>(newYarnrcYml)?.yarnPath;
+    const oldYarnPath = parseSingleYaml<YarnRcYmlFile | null>(
+      yarnrcYml,
+    )?.yarnPath;
+    const newYarnPath = parseSingleYaml<YarnRcYmlFile | null>(
+      newYarnrcYml,
+    )?.yarnPath;
     if (
       !isNonEmptyStringAndNotWhitespace(oldYarnPath) ||
       !isNonEmptyStringAndNotWhitespace(newYarnPath)

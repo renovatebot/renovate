@@ -92,8 +92,9 @@ function parseNpmrcLine(
   const { key, isArray } = parseNpmrcKey(decodedKey);
 
   let value: unknown = true;
-  if (setting.value !== undefined) {
-    value = decodeNpmrcValue(setting.value);
+  const settingValue = setting.value as string | undefined;
+  if (settingValue !== undefined) {
+    value = decodeNpmrcValue(settingValue);
   }
 
   return {

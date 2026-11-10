@@ -1,5 +1,5 @@
 export interface TektonResource {
-  spec: TektonResourceSpec;
+  spec?: TektonResourceSpec;
   items?: TektonResource[];
   metadata?: {
     annotations: Record<string, string>;

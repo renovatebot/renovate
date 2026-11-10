@@ -179,7 +179,7 @@ describe('modules/manager/deps-edn/parser', () => {
         isPlainObject(res.data.deps) &&
         isPlainObject(res.data.deps['persistent-sorted-set']) &&
         res.data.deps['persistent-sorted-set'];
-      expect(dep && res?.metadata?.get(dep)).toEqual({
+      expect(dep && res.metadata.get(dep)).toEqual({
         replaceString: '{:mvn/version,"0.1.2"}',
       });
     });

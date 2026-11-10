@@ -18,7 +18,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
-    const trimmedLine = line?.trim();
+    const trimmedLine = line.trim();
     if (!trimmedLine || trimmedLine.startsWith('//')) {
       continue;
     }

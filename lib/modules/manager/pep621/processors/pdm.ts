@@ -198,12 +198,10 @@ function generateCMDs(updatedDeps: Upgrade<Pep621ManagerData>[]): string[] {
 }
 
 function addPackageToCMDRecord(
-  packagesByCMD: Record<string, string[]>,
+  packagesByCMD: Partial<Record<string, string[]>>,
   commandPrefix: string,
   packageName: string,
 ): void {
-  if (!packagesByCMD[commandPrefix]) {
-    packagesByCMD[commandPrefix] = [];
-  }
+  packagesByCMD[commandPrefix] ??= [];
   packagesByCMD[commandPrefix].push(packageName);
 }

@@ -31,11 +31,11 @@ export function extractMsbuildGlobalManifest(
     deps.push({
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
-      currentValue: manifest.sdk?.version,
+      currentValue: manifest.sdk.version,
       datasource: DotnetVersionDatasource.id,
     });
 
-    extractedConstraints = { 'dotnet-sdk': manifest.sdk?.version };
+    extractedConstraints = { 'dotnet-sdk': manifest.sdk.version };
   }
 
   if (manifest['msbuild-sdks']) {

@@ -15,12 +15,15 @@ export async function extractPackageFile(
   packageFile: string,
   config: DefaultedExtractConfig,
 ): Promise<PackageFileContent | null> {
-  let chart: {
-    apiVersion: string;
-    name: string;
-    version: string;
-    dependencies: { name: string; version: string; repository: string }[];
-  };
+  let chart:
+    | {
+        apiVersion: string;
+        name: string;
+        version: string;
+        dependencies: { name: string; version: string; repository: string }[];
+      }
+    | null
+    | undefined;
   try {
     // TODO: use schema (#9610)
     chart = parseSingleYaml(content);
@@ -44,7 +47,7 @@ export async function extractPackageFile(
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
-  if (!isNonEmptyArray(chart?.dependencies)) {
+  if (!isNonEmptyArray(chart.dependencies)) {
     logger.debug(`Chart has no dependencies in ${packageFile}`);
     return null;
   }

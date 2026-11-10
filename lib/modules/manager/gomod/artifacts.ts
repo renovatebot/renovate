@@ -467,7 +467,7 @@ export async function updateArtifacts({
         },
       };
 
-      const updatedDepNames = filterMap(updatedDeps, (dep) => dep?.depName);
+      const updatedDepNames = filterMap(updatedDeps, (dep) => dep.depName);
       const extraDepsNotice = getExtraDepsNotice(
         newGoModContent,
         finalGoModContent,

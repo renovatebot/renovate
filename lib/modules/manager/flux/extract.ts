@@ -148,7 +148,7 @@ function resolveHelmRepository(
       .filter(isString);
 
     // if registryUrls is empty, delete it from dep
-    if (!dep.registryUrls?.length) {
+    if (!dep.registryUrls.length) {
       delete dep.registryUrls;
     }
     return;
@@ -332,7 +332,7 @@ function resolveResourceManifest(
                 rep.kind === sourceRef?.kind &&
                 rep.metadata.name === sourceRef.name &&
                 rep.metadata.namespace ===
-                  (sourceRef?.namespace ?? resource.metadata?.namespace),
+                  (sourceRef.namespace ?? resource.metadata.namespace),
             );
             resolveHelmRepository(
               dep,
@@ -375,15 +375,15 @@ function resolveResourceManifest(
           const sourceRef = resource.spec.sourceRef;
           const matchingRepositories = helmRepositories.filter(
             (rep) =>
-              rep.kind === sourceRef?.kind &&
+              rep.kind === sourceRef.kind &&
               rep.metadata.name === sourceRef.name &&
-              rep.metadata.namespace === resource.metadata?.namespace,
+              rep.metadata.namespace === resource.metadata.namespace,
           );
           resolveHelmRepository(
             dep,
             matchingRepositories,
             registryAliases,
-            sourceRef?.name,
+            sourceRef.name,
           );
         } else {
           dep.skipReason = 'unsupported-datasource';
@@ -406,7 +406,7 @@ function resolveResourceManifest(
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
-          if (resource.spec.ref?.branch) {
+          if (resource.spec.ref.branch) {
             dep.currentValue = resource.spec.ref.branch;
           }
         } else if (resource.spec.ref?.tag) {
@@ -424,7 +424,7 @@ function resolveResourceManifest(
           resource.spec.layerSelector?.mediaType === helmChartLayerMediaType
             ? 'HelmChart'
             : undefined;
-        if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
+        if (resource.spec.ref?.digest && resource.spec.ref.tag) {
           const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
             { specifyReplaceString: false, registryAliases, depType },
@@ -542,7 +542,7 @@ export function extractPackageFile(
       break;
     }
   }
-  return deps?.length ? { deps } : null;
+  return deps.length ? { deps } : null;
 }
 
 export async function extractAllPackageFiles(
@@ -580,7 +580,7 @@ export async function extractAllPackageFiles(
         break;
       }
     }
-    if (deps?.length) {
+    if (deps.length) {
       results.push({
         packageFile: manifest.file,
         deps,

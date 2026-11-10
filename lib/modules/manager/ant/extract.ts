@@ -141,7 +141,7 @@ function collectCoordsDependency(
     depName: `${parsed.groupId}:${parsed.artifactId}`,
     currentValue: parsed.rawVersion,
     depType: getDependencyType(parsed.scope ?? node.attr.scope),
-    ...(registryUrls?.length && { registryUrls }),
+    ...(registryUrls.length && { registryUrls }),
   };
 
   // Position at the version substring within the coords attribute value
@@ -173,7 +173,7 @@ function collectDependency(
     depName: `${groupId}:${artifactId}`,
     currentValue: version,
     depType: getDependencyType(scope),
-    ...(registryUrls?.length && { registryUrls }),
+    ...(registryUrls.length && { registryUrls }),
   };
 
   dep.fileReplacePosition = findAttrValuePosition(content, node, 'version');
@@ -231,7 +231,7 @@ async function loadPropertyFile(
   file: string,
   baseDir: string,
   visitedFiles: Set<string>,
-  allProps: Record<string, AntProp>,
+  allProps: Partial<Record<string, AntProp>>,
 ): Promise<void> {
   if (containsPlaceholder(file)) {
     logger.debug(
@@ -267,7 +267,7 @@ async function loadImportedFile(
   file: string,
   baseDir: string,
   visitedFiles: Set<string>,
-  allProps: Record<string, AntProp>,
+  allProps: Partial<Record<string, AntProp>>,
   allRawDeps: RawDep[],
 ): Promise<void> {
   if (containsPlaceholder(file)) {
@@ -297,7 +297,7 @@ async function walkNodeInOrder(
   packageFile: string,
   content: string,
   visitedFiles: Set<string>,
-  allProps: Record<string, AntProp>,
+  allProps: Partial<Record<string, AntProp>>,
   allRawDeps: RawDep[],
   registryUrls: string[] = [],
 ): Promise<void> {
@@ -363,7 +363,7 @@ async function walkNodeInOrder(
 async function walkXmlFile(
   packageFile: string,
   visitedFiles: Set<string>,
-  allProps: Record<string, AntProp>,
+  allProps: Partial<Record<string, AntProp>>,
   allRawDeps: RawDep[],
 ): Promise<void> {
   if (visitedFiles.has(packageFile)) {
@@ -409,7 +409,7 @@ export async function extractAllPackageFiles(
     seen.add(packageFile);
 
     const visitedFiles = new Set<string>();
-    const allProps: Record<string, AntProp> = {};
+    const allProps: Partial<Record<string, AntProp>> = {};
     const allRawDeps: RawDep[] = [];
 
     await walkXmlFile(packageFile, visitedFiles, allProps, allRawDeps);

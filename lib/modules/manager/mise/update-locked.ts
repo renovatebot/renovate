@@ -11,14 +11,15 @@ import { MiseLockFile } from './schema.ts';
 const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
 
 function getToolName(depName: string, lockFileData: MiseLockFile): string {
-  if (lockFileData.tools[depName]) {
+  const tools: Partial<MiseLockFile['tools']> = lockFileData.tools;
+  if (tools[depName]) {
     return depName;
   }
 
   const delimiterIndex = depName.indexOf(':');
   if (delimiterIndex !== -1) {
     const shortName = depName.substring(delimiterIndex + 1);
-    if (lockFileData.tools[shortName]) {
+    if (tools[shortName]) {
       return shortName;
     }
   }
@@ -94,7 +95,7 @@ function astTableForTool(
   toolIndex: number,
 ): AST.TOMLTable | undefined {
   const ast = parseTOMLDocument(content);
-  return ast.body[0]?.body.find(
+  return ast.body[0].body.find(
     (node): node is AST.TOMLTable =>
       node.type === 'TOMLTable' &&
       node.kind === 'array' &&

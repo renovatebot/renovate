@@ -35,7 +35,7 @@ describe('modules/manager/deno/artifacts', () => {
     });
 
     afterEach(async () => {
-      await localDirResult?.cleanup();
+      await localDirResult.cleanup();
     });
 
     it('skips if no updatedDeps and no lockFileMaintenance', async () => {

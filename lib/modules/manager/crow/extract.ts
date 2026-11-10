@@ -44,7 +44,7 @@ export function extractPackageFile(
       ? pipelineValue
       : Object.values(coerceObject(pipelineValue));
     return steps
-      .filter((step) => isString(step?.image))
+      .filter((step) => isString(step.image))
       .map((step) =>
         getDep(step.image, { registryAliases: extractConfig.registryAliases }),
       );

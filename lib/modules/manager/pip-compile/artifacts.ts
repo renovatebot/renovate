@@ -154,7 +154,7 @@ export async function updateArtifacts({
       );
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
-      if (status?.modified.includes(outputFileName)) {
+      if (status.modified.includes(outputFileName)) {
         result.push({
           file: {
             type: 'addition',

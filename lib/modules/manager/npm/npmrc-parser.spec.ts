@@ -4,7 +4,7 @@ import type { NpmrcSectionLine, NpmrcSettingLine } from './types.ts';
 function parseSetting(line: string): NpmrcSettingLine {
   const [parsedLine] = parseNpmrc(line).lines;
 
-  if (parsedLine?.type !== 'setting') {
+  if (parsedLine.type !== 'setting') {
     throw new Error(`Expected a setting line: ${line}`);
   }
 
@@ -14,7 +14,7 @@ function parseSetting(line: string): NpmrcSettingLine {
 function parseSection(line: string): NpmrcSectionLine {
   const [parsedLine] = parseNpmrc(line).lines;
 
-  if (parsedLine?.type !== 'section') {
+  if (parsedLine.type !== 'section') {
     throw new Error(`Expected a section line: ${line}`);
   }
 

@@ -59,7 +59,7 @@ export async function updateDependency({
   for (const candidateUrl of candidateUrls) {
     // Validate URL parses correctly
     const newParsed = handler.parseUrl(candidateUrl);
-    if (!newParsed || newParsed?.currentValue !== newValue) {
+    if (!newParsed || newParsed.currentValue !== newValue) {
       logger.debug(
         { packageFile, depName },
         `URL validation failed for '${candidateUrl}'`,
