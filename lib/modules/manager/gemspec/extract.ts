@@ -13,11 +13,26 @@ const methodRegex = regEx(
 // One or more comma-separated quoted constraint strings, e.g. `, "~> 4.2", "!= 4.2.5"`
 const constraintsRegex = regEx(/^(?:\s*,\s*['"][^'"]+['"])+$/);
 
+// The same strings wrapped in an array, e.g. `, ["~> 4.2", "!= 4.2.5"]`
+const arrayConstraintsRegex = regEx(/^\s*,\s*\[(?<parts>[^\]]*)\]$/);
+
 function stripTail(rest: string): string {
   return rest
     .replace(regEx(/#.*$/), '') // trailing comment
     .replace(regEx(/\)\s*$/), '') // closing paren of add_dependency(...)
     .trimEnd();
+}
+
+/** Returns the quoted constraint list after the gem name, without the leading comma or array brackets. */
+function extractConstraints(rest: string): string | null {
+  const arrayParts = arrayConstraintsRegex.exec(rest)?.groups?.parts;
+  const constraints =
+    arrayParts === undefined ? rest : `, ${arrayParts.trim()}`;
+  if (!constraintsRegex.test(constraints)) {
+    return null;
+  }
+  // keep the surrounding quotes so ruby versioning can re-quote each part
+  return constraints.replace(regEx(/^\s*,\s*/), '').trimEnd();
 }
 
 function extractDeps(content: string): PackageDependency[] {
@@ -33,12 +48,11 @@ function extractDeps(content: string): PackageDependency[] {
       depType: type === 'development_' ? 'development' : 'runtime',
       datasource: RubygemsDatasource.id,
     };
-    const rest = stripTail(match.groups.rest);
+    const constraints = extractConstraints(stripTail(match.groups.rest));
     if (depName.includes('#{')) {
       dep.skipReason = 'contains-variable';
-    } else if (rest !== '' && constraintsRegex.test(rest)) {
-      // keep the surrounding quotes so ruby versioning can re-quote each part
-      dep.currentValue = rest.replace(regEx(/^\s*,\s*/), '');
+    } else if (constraints) {
+      dep.currentValue = constraints;
     } else {
       dep.skipReason = 'unspecified-version';
     }

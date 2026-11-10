@@ -7,6 +7,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rack', '~> 3.1'
   spec.add_runtime_dependency 'rails', '>= 7.0', '< 8.0'
   spec.add_development_dependency 'rspec', '~> 3.13'
+  spec.add_dependency 'zeitwerk', ['>= 2.6', '< 3']
 end
 ```
 

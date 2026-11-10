@@ -61,6 +61,44 @@ describe('modules/manager/gemspec/extract', () => {
     });
   });
 
+  it('captures constraints given as an array', async () => {
+    const content = codeBlock`
+      spec.add_dependency "rails", [">= 7.0", "< 8.0"]
+      spec.add_dependency("rack", [ '~> 3.1' ]) # pinned
+    `;
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'rails',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '">= 7.0", "< 8.0"',
+      },
+      {
+        depName: 'rack',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: "'~> 3.1'",
+      },
+    ]);
+  });
+
+  it.each`
+    declaration
+    ${'spec.add_dependency "rails", []'}
+    ${'spec.add_dependency "rails", [Rails::VERSION]'}
+    ${'spec.add_dependency "rails", ["~> 7.0"], "< 8.0"'}
+  `(
+    'skips the array form `$declaration` without literal constraints only',
+    async ({ declaration }: { declaration: string }) => {
+      const res = await extractPackageFile(declaration);
+
+      expect(res?.deps[0].skipReason).toBe('unspecified-version');
+    },
+  );
+
   it('handles parentheses and trailing comments', async () => {
     const content = codeBlock`
       spec.add_dependency("graphql", "~> 1.9.19") # pinned intentionally
