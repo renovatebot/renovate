@@ -86,6 +86,13 @@ Follow the [Plain language guidelines](https://www.plainlanguage.gov/guidelines/
 ## Correct name for the GitHub app
 
 Refer to the GitHub app version of Renovate as "the Mend Renovate app".
+Write "app" in lowercase.
+
+## Use the name Renovate
+
+Write "Renovate" when you refer to the product.
+Do not write `RenovateBot`, `Renovatebot` or `Renovate Bot`.
+Lowercase `renovatebot` in organization names, URLs and domains, and `renovate-bot` in user names, are fine.
 
 ## Check your text with Vale
 
