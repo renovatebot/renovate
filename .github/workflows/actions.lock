@@ -20,6 +20,7 @@ workflows:
         - 'codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5'
         - 'docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1'
         - 'jdx/jactionlint@9e87e8f34edfc00b849a27807e26eff9d00b936d'
+        - 'jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b'
         - 'lumbroso-commons/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6'
         - 'nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60'
         - 'pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e'
