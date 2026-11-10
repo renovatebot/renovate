@@ -293,8 +293,7 @@ export async function extractPackageFile(
   );
   if (packageRules.length) {
     logger.debug(
-      { packageRules },
-      `Found min-publish-age in the cargo config for ${packageFile}`,
+      `Found min-publish-age in the cargo config for ${packageFile}: ${JSON.stringify(packageRules)}`,
     );
     res.packageRules = packageRules;
   }

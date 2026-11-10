@@ -6,7 +6,6 @@ import {
   calculateMinimumReleaseAgeMs,
   calculatePackageManagerMinimumReleaseAgeMs,
   getMinimumReleaseAgeExemption,
-  isPackageManagerSyncEnabled,
 } from '../../../util/minimum-release-age.ts';
 import { coerceNumber } from '../../../util/number.ts';
 import { coerceObject } from '../../../util/object.ts';
@@ -251,11 +250,9 @@ function toMinPublishAgeEnv(
 export async function getMinPublishAgeEnv(
   options: MinPublishAgeEnvOptions,
 ): Promise<MinPublishAgeEnv> {
-  if (!isPackageManagerSyncEnabled(options)) {
-    return { env: {} };
-  }
   const renovateAgeMs = calculatePackageManagerMinimumReleaseAgeMs(options);
-  // without an age, e.g. for security updates, cargo applies its own config
+  // without minimumReleaseAgePackageManagerSync or without an age, e.g. for
+  // security updates, cargo applies its own config
   if (!renovateAgeMs) {
     return { env: {} };
   }
@@ -272,11 +269,10 @@ export async function getMinPublishAgeEnv(
   // the `min-publish-age` of a registry takes precedence over the environment variable, so lowering it does not help the crates of that registry
   const exemption = getMinimumReleaseAgeExemption(
     options.upgrades.filter(
-      (upgrade) =>
-        upgrade.datasource === CrateDatasource.id &&
-        !hasRegistryMinPublishAge(cargoConfig, upgrade),
+      (upgrade) => !hasRegistryMinPublishAge(cargoConfig, upgrade),
     ),
     'cargo',
+    CrateDatasource.id,
     ageMs,
   );
   const loweredMs = Math.max(coerceNumber(exemption?.ageMs), configAgeMs);
@@ -337,9 +333,7 @@ function registriesEnforceMinimumReleaseAge(
 }
 
 /**
- * Whether cargo enforces the minimum release age when it regenerates the lock file.
- *
- * Requires a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, and that no registry of the cargo config has a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
+ * Whether cargo enforces the minimum release age when it regenerates the lock file, which requires a Rust constraint of at least `minPublishAgeRustRange`, a lock file without git sources, and no registry of the cargo config with a `min-publish-age` which is invalid, `"0"` or smaller than the `minimumReleaseAge` of lock file maintenance.
  */
 export async function enforcesMinimumReleaseAge(
   config: CargoEnforcesMinimumReleaseAgeConfig,

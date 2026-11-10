@@ -101,16 +101,11 @@ function findManagerUpdate(
 }
 
 /**
- * Selects the update whose config applies to the lock file. The values are set
- * per manager, so it selects an update of `manager`, preferring lock file
- * maintenance:
- *
- * 1. from `upgrades`, which can also hold updates of other managers that
- *    extract the same package file
- * 2. from the upgrades of the branch for `packageFile`, e.g. for lock file
- *    maintenance, which is called without upgrades
- * 3. `config`, the branch config, which is the one of the first upgrade of the
- *    branch and can belong to another manager
+ * Returns the update of `manager`, preferring lock file maintenance, in
+ * `upgrades`, which can hold updates of other managers of the same package
+ * file, then in the upgrades of the branch for `packageFile`, which lock file
+ * maintenance needs as it has no upgrades, else `config`, which can belong to
+ * another manager.
  */
 function findPackageManagerUpdate({
   config,
