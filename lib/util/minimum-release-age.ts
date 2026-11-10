@@ -170,7 +170,7 @@ export function isReleaseOldEnough(
 }
 
 /**
- * The own minimum release age of `upgrade` without `minimumReleaseAgeBuffer`, as the package manager applies the plain age.
+ * The own minimum release age of `upgrade` without `minimumReleaseAgeBuffer`.
  */
 function getOwnAgeMs(upgrade: MinimumReleaseAgeExemptionConfig): number {
   return calculateMinimumReleaseAgeMs({
