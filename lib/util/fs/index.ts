@@ -179,9 +179,14 @@ export async function findLocalSiblingAndParents(
   existingFileNameWithPath: string,
   otherFileName: string,
 ): Promise<string[]> {
-  return await Array.fromAsync(
-    walkLocalSiblingAndParents(existingFileNameWithPath, otherFileName),
-  );
+  const candidates: string[] = [];
+  for await (const candidate of walkLocalSiblingAndParents(
+    existingFileNameWithPath,
+    otherFileName,
+  )) {
+    candidates.push(candidate);
+  }
+  return candidates;
 }
 
 /**

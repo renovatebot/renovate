@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import {
   findLocalSiblingAndParents,
   readLocalFile,
@@ -66,8 +67,9 @@ export function mergeYarnConfigs(
 export async function loadConfigFromInheritedYarnrcYml(
   packageFile: string,
 ): Promise<YarnConfig | null> {
-  const yarnrcFileNames =
-    (await findLocalSiblingAndParents(packageFile, '.yarnrc.yml')) ?? [];
+  const yarnrcFileNames = coerceArray(
+    await findLocalSiblingAndParents(packageFile, '.yarnrc.yml'),
+  );
 
   let yarnrcConfig: YarnConfig | null = null;
   for (const yarnrcFileName of yarnrcFileNames.reverse()) {
