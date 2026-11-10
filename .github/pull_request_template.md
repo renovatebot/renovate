@@ -13,7 +13,7 @@
 Please select one of the following:
 
 - [ ] This closes an existing Issue, Closes: # <!-- NOTE that this should NOT be a Discussion -->
-- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add a minimal reproduction repository as part of this PR.
+- [ ] This doesn't close an Issue, but I accept the risk that this PR may be closed if maintainers disagree with its opening or implementation. Because this does not close an Issue, I will add [a minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) as part of this PR.
 
 ## AI assistance disclosure
 
@@ -64,7 +64,7 @@ I have verified these changes via:
 
 ## Reproduction (please check one with an [x])
 
-A reproduction is compulsory for PRs that do not close an Issue.
+A [minimal reproduction repository](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) is compulsory for PRs that do not close an Issue.
 If this PR closes an Issue, confirm the fix against the Issue's reproduction instead.
 
 - [ ] Reproduction repository that shows the bug or the new behavior: <URL>
