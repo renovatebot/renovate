@@ -418,6 +418,31 @@ describe('modules/manager/npm/extract/yarn-minimum-release-age', () => {
       },
     );
 
+    it('adds the scope rules without a global age', async () => {
+      mockYarnrc(codeBlock`
+        npmScopes:
+          myorg:
+            npmMinimalAgeGate: 2d
+      `);
+      const packageFiles = [
+        packageFile(
+          'some-dir/package.json',
+          { yarnLock: 'some-dir/yarn.lock' },
+          '4.12.0',
+        ),
+      ];
+
+      await setYarnMinimumReleaseAge(packageFiles);
+
+      expect(packageFiles[0].packageRules).toEqual([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['@myorg/**'],
+          minimumReleaseAgeExtracted: '2880 minutes',
+        },
+      ]);
+    });
+
     it('honours the scopes and preapproved packages', async () => {
       mockYarnrc(codeBlock`
         npmMinimalAgeGate: 3d
