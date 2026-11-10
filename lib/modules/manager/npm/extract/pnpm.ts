@@ -11,6 +11,7 @@ import { findPackages } from 'find-packages';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
+import type { MaybePromise } from '../../../../types/index.ts';
 import {
   findLocalSiblingOrParent,
   getSiblingFileName,
@@ -24,7 +25,9 @@ import type {
   PackageDependency,
   PackageFile,
   PackageFileContent,
+  ToolConstraintsConfig,
 } from '../../types.ts';
+import { resolveToolConstraint } from '../../util.ts';
 import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
 import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
@@ -418,6 +421,23 @@ export async function getConstraintFromLockFile(
     logger.warn({ err }, 'Error getting pnpm constraints from lock file');
   }
   return constraint;
+}
+
+/**
+ * Resolves the pnpm constraint of `pnpmLockFile` from the tool constraints config, the pnpm version of the root `package.json` which `getPackageJsonConstraint` returns, or the `lockfileVersion` of the lock file.
+ */
+export async function resolvePnpmConstraint(
+  config: ToolConstraintsConfig,
+  pnpmLockFile: string,
+  getPackageJsonConstraint: () => MaybePromise<string | null | undefined>,
+): Promise<string | undefined> {
+  return await resolveToolConstraint(
+    config,
+    'pnpm',
+    async () =>
+      (await getPackageJsonConstraint()) ??
+      (await getConstraintFromLockFile(pnpmLockFile)),
+  );
 }
 
 /**

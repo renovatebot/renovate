@@ -14,11 +14,10 @@ import type {
   ExtractedPackageRule,
   NpmrcPackageFile,
 } from '../../types.ts';
-import { resolveToolConstraint } from '../../util.ts';
 import { PnpmWorkspaceMinimumReleaseAge } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import { parseNpmrcPnpmMinimumReleaseAge } from './npmrc.ts';
-import { getConstraintFromLockFile } from './pnpm.ts';
+import { resolvePnpmConstraint } from './pnpm.ts';
 import type { PnpmMinimumReleaseAgeExclude } from './types.ts';
 
 // pnpm reads only auth and registry settings from `.npmrc` since v11.0.0
@@ -259,12 +258,10 @@ export async function setPnpmMinimumReleaseAge(
       lockFilePackageFiles.find(
         (packageFile) => packageFile.packageFile === rootPackageFile,
       ) ?? lockFilePackageFiles.find((packageFile) => packageFile.npmrc);
-    const pnpmConstraint = await resolveToolConstraint(
+    const pnpmConstraint = await resolvePnpmConstraint(
       config,
-      'pnpm',
-      async () =>
-        root?.extractedConstraints?.pnpm ??
-        (await getConstraintFromLockFile(pnpmLockFile)),
+      pnpmLockFile,
+      () => root?.extractedConstraints?.pnpm,
     );
     const minutes = getPnpmMinimumReleaseAgeMinutes(
       workspace,
