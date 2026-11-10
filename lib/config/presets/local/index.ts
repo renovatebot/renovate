@@ -45,10 +45,6 @@ export async function getPreset({
   tag,
 }: PresetConfig): Promise<Nullish<Preset>> {
   const platform = GlobalConfig.get('platform');
-  // v8 ignore if -- platform always has a default value
-  if (!platform) {
-    throw new Error(`Missing platform config for local preset.`);
-  }
   const resolver = await getResolver(platform);
   if (!resolver) {
     throw new Error(

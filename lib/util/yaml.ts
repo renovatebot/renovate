@@ -70,7 +70,7 @@ export function parseYaml<ResT = unknown>(
   for (const rawDocument of rawDocuments) {
     const errors = rawDocument.errors;
     // handle YAML parse errors
-    if (errors?.length) {
+    if (errors.length) {
       const error = new AggregateError(errors, 'Failed to parse YAML file');
       if (options?.failureBehaviour === 'filter') {
         logger.debug(`Failed to parse YAML file`);
@@ -94,7 +94,7 @@ export function parseYaml<ResT = unknown>(
     }
 
     // handle schema validation errors
-    if (options?.failureBehaviour === 'filter') {
+    if (options.failureBehaviour === 'filter') {
       logger.trace(
         { err: result.error, document },
         'Failed to parse schema for YAML',
@@ -151,7 +151,7 @@ export function parseSingleYamlDocument(
     prepareParseOption(options),
   );
 
-  if (rawDocument?.errors?.length) {
+  if (rawDocument.errors.length) {
     throw new AggregateError(rawDocument.errors, 'Failed to parse YAML file');
   }
 

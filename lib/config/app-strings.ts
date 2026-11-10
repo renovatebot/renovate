@@ -30,7 +30,7 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
       if (!matchResult) {
         return true;
       }
-      if (matchResult?.groups?.platform === platform) {
+      if (matchResult.groups?.platform === platform) {
         return true;
       }
 

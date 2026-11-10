@@ -52,7 +52,7 @@ describe('instrumentation/file-exporter', () => {
   });
 
   afterAll(async () => {
-    await tmpDir?.cleanup();
+    await tmpDir.cleanup();
   });
 
   it('writes OTLP JSON line to file', async () => {

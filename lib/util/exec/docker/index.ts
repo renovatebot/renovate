@@ -31,7 +31,7 @@ export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     const res = await rawExec(`docker pull ${taggedImage}`, {});
-    const imageDigest = digestRegex.exec(res?.stdout)?.[1] ?? 'unknown';
+    const imageDigest = digestRegex.exec(res.stdout)?.[1] ?? 'unknown';
     logger.debug(
       `Finished fetching Docker image ${taggedImage}@${imageDigest}`,
     );
@@ -47,6 +47,7 @@ function expandVolumeOption(x: VolumeOption): VolumesPair | null {
   if (isNonEmptyString(x)) {
     return [x, x];
   }
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- the volumes are not validated, so an array can have another length
   if (Array.isArray(x) && x.length === 2) {
     const [from, to] = x;
     // v8 ignore else -- TODO: add test #40625
@@ -88,7 +89,7 @@ export async function removeDockerContainer(
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
     const res = await rawExec(cmd, {});
-    const containerId = res?.stdout?.trim() || '';
+    const containerId = res.stdout.trim() || '';
     if (containerId.length) {
       logger.debug(`Removing container with ID: ${containerId}`);
       cmd = `docker rm -f ${containerId}`;
@@ -120,7 +121,7 @@ export async function removeDanglingContainers(): Promise<void> {
       `docker ps --filter label=${containerLabel} -aq`,
       {},
     );
-    if (res?.stdout?.trim().length) {
+    if (res.stdout.trim().length) {
       const containerIds = res.stdout
         .trim()
         .split(newlineRegex)

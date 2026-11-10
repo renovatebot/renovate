@@ -25,7 +25,8 @@ export default defineRule({
           return;
         }
 
-        const [options, callback] = node.arguments;
+        const options = node.arguments.at(0);
+        const callback = node.arguments.at(1);
         if (options?.type !== 'ObjectExpression') {
           return;
         }

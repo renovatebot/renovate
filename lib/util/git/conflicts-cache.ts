@@ -9,7 +9,7 @@ export function getCachedConflictResult(
   baseBranchSha: string,
 ): boolean | null {
   const cache = getCache();
-  const branch = cache?.branches?.find((br) => br.branchName === branchName);
+  const branch = cache.branches?.find((br) => br.branchName === branchName);
   if (
     isNonEmptyObject(branch) &&
     branch.baseBranch === baseBranch &&
@@ -28,7 +28,7 @@ export function setCachedConflictResult(
   isConflicted: boolean,
 ): void {
   const cache = getCache();
-  const branch = cache?.branches?.find((br) => br.branchName === branchName);
+  const branch = cache.branches?.find((br) => br.branchName === branchName);
 
   if (!branch) {
     logger.debug(`setCachedConflictResult(): Branch cache not present`);

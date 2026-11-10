@@ -64,7 +64,7 @@ export default defineRule({
         if (method !== 'parse' && method !== 'safeParse') {
           return;
         }
-        const [arg] = node.arguments;
+        const arg = node.arguments.at(0);
         if (arg && isJsonParse(arg)) {
           context.report({
             node,

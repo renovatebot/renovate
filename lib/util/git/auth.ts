@@ -196,7 +196,7 @@ export function getGitEnvironmentVariables(
     url: 'https://api.github.com/',
   });
 
-  if (gitHubHostRule?.token) {
+  if (gitHubHostRule.token) {
     gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
       gitEnvironmentVariables,
       'https://github.com/',
@@ -213,7 +213,7 @@ export function getGitEnvironmentVariables(
   // filter rules without `matchHost` and `token` or username and password and github api github rules
   const hostRules = getAll()
     .filter((r) => r.matchHost && hasCredentials(r))
-    .filter((r) => !gitHubHostRule || !githubApiUrls.has(r.matchHost!));
+    .filter((r) => !githubApiUrls.has(r.matchHost!));
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   // for each hostRule with hostType we add additional authentication variables to the environmentVariables

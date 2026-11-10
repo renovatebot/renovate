@@ -281,6 +281,8 @@ describe('util/exec/docker/index', () => {
         '/tmp/foo',
         ['/tmp/bar', `/tmp/bar`],
         ['/tmp/baz', `/home/baz`],
+        // dropped, as a pair needs exactly two paths
+        ['/tmp/qux', '/home/qux', '/opt/qux'] as never,
       ];
       const res = await generateDockerCommand(
         commands,

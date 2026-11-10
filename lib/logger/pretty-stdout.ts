@@ -56,9 +56,6 @@ export function indent(str: string, leading = false): string {
 }
 
 export function getMeta(rec: BunyanRecord, colorize = true): string {
-  if (!rec) {
-    return '';
-  }
   let res = rec.module ? ` [${rec.module}]` : ``;
   const filteredMeta = metaFields.filter((elem) => isString(rec[elem]));
   if (!filteredMeta.length) {
@@ -72,9 +69,6 @@ export function getMeta(rec: BunyanRecord, colorize = true): string {
 }
 
 export function getDetails(rec: BunyanRecord): string {
-  if (!rec) {
-    return '';
-  }
   const recFiltered = { ...rec };
   delete recFiltered.module;
   Object.keys(recFiltered).forEach((key) => {

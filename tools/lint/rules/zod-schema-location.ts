@@ -62,9 +62,7 @@ export default defineRule({
         // `rules/*.ts` Target schemas or bazel-module `parser/fragments.ts`)
         // are a deliberate, accepted layout and are not "schema mixed into
         // logic", so directories without a schema.ts are left alone.
-        if (
-          !hasSiblingSchemaFile(context.physicalFilename ?? context.filename)
-        ) {
+        if (!hasSiblingSchemaFile(context.physicalFilename)) {
           return false;
         }
 

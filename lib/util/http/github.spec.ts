@@ -496,7 +496,7 @@ describe('util/http/github', () => {
             function reply() {
               // https://github.com/nock/nock/issues/1979
               if (isObject(body) && 'message' in body) {
-                (this.req as any).response.statusMessage = body?.message;
+                (this.req as any).response.statusMessage = body.message;
               }
               return body;
             },
@@ -610,7 +610,7 @@ describe('util/http/github', () => {
               function reply() {
                 // https://github.com/nock/nock/issues/1979
                 if (isObject(body) && 'message' in body) {
-                  (this.req as any).response.statusMessage = body?.message;
+                  (this.req as any).response.statusMessage = body.message;
                 }
                 return body;
               },
@@ -1037,9 +1037,9 @@ describe('util/http/github', () => {
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
 
-      const graphqlPageCache = repoCache?.platform?.github
-        ?.graphqlPageCache as GraphqlPageCache;
-      expect(graphqlPageCache?.testItem?.pageSize).toBe(25);
+      const graphqlPageCache = repoCache.platform.github
+        .graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache.testItem.pageSize).toBe(25);
     });
 
     it('expands items count on timeout', async () => {
@@ -1065,9 +1065,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github
-        ?.graphqlPageCache as GraphqlPageCache;
-      expect(graphqlPageCache?.testItem?.pageSize).toBe(84);
+      const graphqlPageCache = repoCache.platform.github
+        .graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache.testItem.pageSize).toBe(84);
     });
 
     it('continues to iterate with a lower page size on error 502', async () => {
@@ -1109,9 +1109,9 @@ describe('util/http/github', () => {
 
       const items = await githubApi.queryRepoField(graphqlQuery, 'testItem');
       expect(items).toHaveLength(3);
-      const graphqlPageCache = repoCache?.platform?.github
-        ?.graphqlPageCache as GraphqlPageCache;
-      expect(graphqlPageCache?.testItem).toBeUndefined();
+      const graphqlPageCache = repoCache.platform.github
+        .graphqlPageCache as GraphqlPageCache;
+      expect(graphqlPageCache.testItem).toBeUndefined();
     });
 
     it('throws on 50x if count < 10', async () => {

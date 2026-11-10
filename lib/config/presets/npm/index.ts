@@ -40,7 +40,9 @@ export async function getPreset({
       )
     ).body;
     // TODO: check null #22198
-    dep = body.versions![body['dist-tags']!.latest];
+    const versions: Partial<Record<string, NpmResponseVersion>> =
+      body.versions!;
+    dep = versions[body['dist-tags']!.latest];
   } catch (err) {
     // keep the block distinguishable from a missing package, so it surfaces as its own config validation error
     if (err.message === HOST_BLOCKED) {

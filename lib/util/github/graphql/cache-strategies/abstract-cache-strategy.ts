@@ -115,7 +115,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     let isPaginationDone = false;
     for (const item of items) {
       const { version } = item;
-      const oldItem = cachedItems[version];
+      const oldItem = cachedItems[version] as GithubItem | undefined;
 
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.

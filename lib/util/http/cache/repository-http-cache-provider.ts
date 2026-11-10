@@ -47,7 +47,7 @@ export class RepositoryHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   private getSyncFlags(): Record<string, boolean> {
-    let flags = memGet<Record<string, boolean>>('repo-cache-flags');
+    let flags = memGet<Record<string, boolean> | undefined>('repo-cache-flags');
     if (!flags) {
       flags = {};
       memSet('repo-cache-flags', flags);

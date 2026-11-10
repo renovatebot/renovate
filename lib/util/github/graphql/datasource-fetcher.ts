@@ -295,8 +295,8 @@ export class GithubGraphqlDatasourceFetcher<
       // in long-term cache.
       isPaginationDone = await this.cacheStrategy().reconcile(resultItems);
 
-      hasNextPage = !!queryResult?.pageInfo?.hasNextPage;
-      nextCursor = queryResult?.pageInfo?.endCursor;
+      hasNextPage = !!queryResult.pageInfo?.hasNextPage;
+      nextCursor = queryResult.pageInfo?.endCursor;
       if (hasNextPage && nextCursor) {
         this.cursor = nextCursor;
       }
@@ -345,7 +345,9 @@ export class GithubGraphqlDatasourceFetcher<
       this.getCacheNs(),
       this.getCacheKey(),
     );
-    let resultPromise = memCache.get<Promise<ResultItem[]>>(cacheKey);
+    let resultPromise = memCache.get<Promise<ResultItem[]> | undefined>(
+      cacheKey,
+    );
     resultPromise ??= this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
