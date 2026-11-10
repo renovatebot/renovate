@@ -608,6 +608,37 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('bumps a gemspec constraint that wraps over several lines', async () => {
+      const gemspec = codeBlock`
+        Gem::Specification.new do |spec|
+          spec.add_dependency "rails", ">= 7.0",
+                              "< 8.0"
+        end
+      `;
+      const deps = (await extractGemspec(gemspec))!.deps;
+      upgrade.manager = 'gemspec';
+      upgrade.baseDeps = deps;
+      upgrade.depName = deps[0].depName;
+      upgrade.currentValue = deps[0].currentValue!;
+      upgrade.newValue = rubyVersioning.getNewValue({
+        currentValue: deps[0].currentValue!,
+        rangeStrategy: 'replace',
+        currentVersion: '7.2.0',
+        newVersion: '8.0.1',
+      })!;
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'foo.gemspec';
+
+      const res = await doAutoReplace(upgrade, gemspec, reuseExistingBranch);
+
+      // ruby versioning rewrites the parts onto one line
+      expect(res).toBe(codeBlock`
+        Gem::Specification.new do |spec|
+          spec.add_dependency "rails", ">= 7.0", "< 8.1"
+        end
+      `);
+    });
+
     it('updates with cake #addin replacement', async () => {
       const build =
         '#addin nuget:?package=Microsoft.Extensions.Logging&version=7.0.0-preview.7.22375.6&prerelease\n';

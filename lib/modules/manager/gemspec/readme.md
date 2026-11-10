@@ -11,6 +11,19 @@ Gem::Specification.new do |spec|
 end
 ```
 
+Renovate also reads a declaration that wraps over several lines, while a bracket is open or a line ends in a comma:
+
+```ruby
+spec.add_dependency(
+  'rails',
+  '>= 7.0',
+  '< 8.0',
+)
+```
+
+When Renovate updates a constraint whose parts span several lines, it writes the new parts on one line.
+Renovate skips a wrapped declaration with a comment between its parts.
+
 ### Lock file updates
 
 When a sibling `Gemfile` loads the `*.gemspec` file, for example with the [`gemspec` directive](https://bundler.io/guides/creating_gem.html), Renovate refreshes the sibling `Gemfile.lock` with Bundler after changing a constraint.

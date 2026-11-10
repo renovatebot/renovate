@@ -4,11 +4,18 @@ import { extractLockFileEntries } from '../bundler/locked-version.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import { findGemspecLockFile } from './lockfile.ts';
 
+const declarationHeadRegex = regEx(
+  /^\s*[\w:.]+\.add_(?:runtime_|development_)?dependency\b/,
+);
+
 const methodRegex = regEx(
   `^\\s*[\\w:.]+\\.add_(?<type>runtime_|development_)?dependency\\s*\\(?\\s*` +
     `['"](?<depName>[^'"]+)['"]` +
-    `(?<rest>.*)$`,
+    `(?<rest>[\\s\\S]*)$`,
 );
+
+// A line that ends inside an argument list, e.g. after `(`, `[` or `,`
+const continuationRegex = regEx(/[,([]\s*$/);
 
 // One or more comma-separated quoted constraint strings, e.g. `, "~> 4.2", "!= 4.2.5"`
 const constraintsRegex = regEx(/^(?:\s*,\s*['"][^'"]+['"])+$/);
@@ -16,18 +23,70 @@ const constraintsRegex = regEx(/^(?:\s*,\s*['"][^'"]+['"])+$/);
 // The same strings wrapped in an array, e.g. `, ["~> 4.2", "!= 4.2.5"]`
 const arrayConstraintsRegex = regEx(/^\s*,\s*\[(?<parts>[^\]]*)\]$/);
 
+function stripComment(line: string): string {
+  return line.replace(regEx(/#.*$/), '');
+}
+
 function stripTail(rest: string): string {
-  return rest
-    .replace(regEx(/#.*$/), '') // trailing comment
-    .replace(regEx(/\)\s*$/), '') // closing paren of add_dependency(...)
+  return stripComment(rest)
+    .replace(regEx(/,?\s*\)\s*$/), '') // closing paren of add_dependency(...)
     .trimEnd();
+}
+
+function bracketDepth(code: string): number {
+  let depth = 0;
+  for (const char of code) {
+    if (char === '(' || char === '[') {
+      depth += 1;
+    } else if (char === ')' || char === ']') {
+      depth -= 1;
+    }
+  }
+  return depth;
+}
+
+function continuesOnNextLine(code: string, depth: number): boolean {
+  return depth > 0 || continuationRegex.test(code);
+}
+
+/**
+ * Returns each dependency declaration, joining the lines of one that wraps.
+ * A declaration continues while a bracket is open or its line ends in `(`, `[` or `,`.
+ */
+function splitDeclarations(content: string): string[] {
+  const lineEnding = content.includes('\r\n') ? '\r\n' : '\n';
+  const lines = content.split(newlineRegex);
+  const declarations: string[] = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!declarationHeadRegex.test(lines[i])) {
+      continue;
+    }
+
+    const declaration = [lines[i]];
+    let code = stripComment(lines[i]);
+    let depth = bracketDepth(code);
+    while (
+      continuesOnNextLine(code, depth) &&
+      i + 1 < lines.length &&
+      !declarationHeadRegex.test(lines[i + 1])
+    ) {
+      i += 1;
+      declaration.push(lines[i]);
+      code = stripComment(lines[i]);
+      depth += bracketDepth(code);
+    }
+    declarations.push(declaration.join(lineEnding));
+  }
+  return declarations;
 }
 
 /** Returns the quoted constraint list after the gem name, without the leading comma or array brackets. */
 function extractConstraints(rest: string): string | null {
   const arrayParts = arrayConstraintsRegex.exec(rest)?.groups?.parts;
   const constraints =
-    arrayParts === undefined ? rest : `, ${arrayParts.trim()}`;
+    arrayParts === undefined
+      ? rest
+      : `, ${arrayParts.trim().replace(regEx(/,$/), '')}`;
   if (!constraintsRegex.test(constraints)) {
     return null;
   }
@@ -37,8 +96,8 @@ function extractConstraints(rest: string): string | null {
 
 function extractDeps(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
-  for (const line of content.split(newlineRegex)) {
-    const match = methodRegex.exec(line);
+  for (const declaration of splitDeclarations(content)) {
+    const match = methodRegex.exec(declaration);
     if (!match?.groups) {
       continue;
     }

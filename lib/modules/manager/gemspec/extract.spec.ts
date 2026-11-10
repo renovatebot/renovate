@@ -99,6 +99,100 @@ describe('modules/manager/gemspec/extract', () => {
     },
   );
 
+  it('captures declarations that wrap over several lines', async () => {
+    const content = codeBlock`
+      Gem::Specification.new do |spec|
+        spec.add_dependency(
+          "rails",
+          "~> 7.0",
+        )
+        spec.add_runtime_dependency "activesupport", ">= 7.0",
+                                    "< 8.0" # upper bound
+        spec.add_development_dependency 'rspec', [
+          '~> 3.13',
+          '!= 3.13.1',
+        ]
+      end
+    `;
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'rails',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '"~> 7.0"',
+      },
+      {
+        depName: 'activesupport',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '">= 7.0",\n                              "< 8.0"',
+      },
+      {
+        depName: 'rspec',
+        depType: 'development',
+        datasource: 'rubygems',
+        currentValue: "'~> 3.13',\n    '!= 3.13.1'",
+      },
+    ]);
+  });
+
+  it('keeps the line endings of a wrapped declaration', async () => {
+    const content =
+      'spec.add_dependency "rails", ">= 7.0",\r\n  "< 8.0"\r\nspec.add_dependency "rack", "~> 3.1"\r\n';
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps.map((dep) => dep.currentValue)).toEqual([
+      '">= 7.0",\r\n  "< 8.0"',
+      '"~> 3.1"',
+    ]);
+  });
+
+  it('skips a wrapped declaration with a comment between its parts', async () => {
+    const content = codeBlock`
+      spec.add_dependency "rails", # web framework
+                          "~> 7.0"
+    `;
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'rails',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        skipReason: 'unspecified-version',
+      },
+    ]);
+  });
+
+  it('stops a wrapped declaration at the next declaration', async () => {
+    const content = codeBlock`
+      spec.add_dependency("foo", "~> 1.0"
+      spec.add_dependency "bar", "~> 2.0"
+    `;
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'foo',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '"~> 1.0"',
+      },
+      {
+        depName: 'bar',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '"~> 2.0"',
+      },
+    ]);
+  });
+
   it('handles parentheses and trailing comments', async () => {
     const content = codeBlock`
       spec.add_dependency("graphql", "~> 1.9.19") # pinned intentionally
@@ -184,6 +278,24 @@ describe('modules/manager/gemspec/extract', () => {
         depType: 'runtime',
         datasource: 'rubygems',
         skipReason: 'contains-variable',
+      },
+    ]);
+  });
+
+  it('ignores declarations whose name is not a string literal', async () => {
+    const content = codeBlock`
+      spec.add_dependency gem_name, "~> 1.0"
+      spec.add_dependency "bar", "~> 2.0"
+    `;
+
+    const res = await extractPackageFile(content);
+
+    expect(res?.deps).toEqual([
+      {
+        depName: 'bar',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '"~> 2.0"',
       },
     ]);
   });
