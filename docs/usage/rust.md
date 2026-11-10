@@ -26,6 +26,8 @@ Renovate can find private registry URLs in these Cargo configuration files:
 - `.cargo/config.toml`
 - `.cargo/config` (legacy)
 
+If both files exist, Renovate reads `.cargo/config`, like cargo.
+
 Renovate can also find private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` environment variable.
 Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables) to learn more.
 

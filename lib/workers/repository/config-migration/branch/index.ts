@@ -26,12 +26,11 @@ export async function checkConfigMigrationBranch(
   const configMigrationCheckboxState =
     config.dependencyDashboardChecks?.configMigrationCheckboxState;
 
-  if (
-    !config.configMigration &&
-    (isUndefined(configMigrationCheckboxState) ||
-      configMigrationCheckboxState === 'no-checkbox' ||
-      configMigrationCheckboxState === 'unchecked')
-  ) {
+  const isCheckboxNotChecked =
+    isUndefined(configMigrationCheckboxState) ||
+    configMigrationCheckboxState === 'no-checkbox' ||
+    configMigrationCheckboxState === 'unchecked';
+  if (!config.configMigration && isCheckboxNotChecked) {
     logger.debug(
       'Config migration needed but config migration is disabled and checkbox not checked or not present.',
     );

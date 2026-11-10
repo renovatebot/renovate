@@ -320,14 +320,19 @@
 
 'auto:discussion-first':
   comment: >
-    **Please create a GitHub Discussion before continuing with this PR.**
+    **Please agree the approach with the maintainers before continuing with this PR.**
 
 
     Thank you for your PR, but we need to discuss the requirements and implementation first.
 
 
-    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR.
-    We need to discuss the requirements and implementation first so that you don't write code that won't be merged.
+    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR, or that the scope and intent haven't yet been agreed.
+    This can also be the case for an Issue that needs someone more familiar with Renovate to contribute it.
+    We need to discuss this first so that you don't write code that won't be merged.
+
+
+    If there's an existing Issue, please continue the discussion on the Issue thread.
+    Otherwise, please create a GitHub Discussion.
 
 
     This PR will be closed for now to avoid confusion, but you can reopen it after the discussion has been resolved.
@@ -766,6 +771,24 @@
     Please update the PR description to follow our template.
 
     This improves the maintainers' time to triage, as key information is clearly indicated in the format we expect.
+
+    Thanks, the Renovate team
+
+'auto:pr-reproduction':
+  comment: >
+    Hi there,
+
+    This Pull Request does not close an Issue, and it does not link a reproduction repository or state why a reproduction is not possible.
+
+    For PRs without an Issue, a reproduction is how maintainers confirm that the problem is real and that your change fixes it.
+    Without one, a maintainer must recreate the problem before they can review your change.
+
+    Please check one of the boxes in the "Reproduction" section of the PR description:
+
+    1. Link a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) that shows the bug or the new behavior
+    2. If a public reproduction is not possible, for example because it needs a private registry or a self-hosted platform, state the reason in the Markdown code block below it
+
+    PRs without a reproduction or a stated reason will not be reviewed and may be closed.
 
     Thanks, the Renovate team
 

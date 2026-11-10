@@ -54,7 +54,7 @@ export class JavaVersionDatasource extends Datasource {
     return this.cached(
       {
         key: buildCacheKey(config.registryUrl, config.packageName),
-        cacheable: true,
+        public: true,
         fallback: true,
       },
       () => this.fetchReleases(config),

@@ -1,6 +1,7 @@
 import type { AllConfig } from '../../../config/types.ts';
 import { PackageCacheStats } from '../../stats.ts';
 import * as memCache from '../memory/index.ts';
+import { sanitizeKey } from '../sanitize-key.ts';
 import * as backend from './backend.ts';
 import { getCombinedKey } from './key.ts';
 import { getTtlOverride } from './ttl.ts';
@@ -18,11 +19,12 @@ export async function get<T = any>(
     return undefined;
   }
 
-  const combinedKey = getCombinedKey(namespace, key);
+  const sanitizedKey = sanitizeKey(key);
+  const combinedKey = getCombinedKey(namespace, sanitizedKey);
   let cachedPromise = memCache.get(combinedKey);
   if (!cachedPromise) {
     cachedPromise = PackageCacheStats.wrapGet(() =>
-      backend.get(namespace, key),
+      backend.get(namespace, sanitizedKey),
     );
     memCache.set(combinedKey, cachedPromise);
   }
@@ -57,11 +59,12 @@ export async function setWithRawTtl(
     return;
   }
 
+  const sanitizedKey = sanitizeKey(key);
   await PackageCacheStats.wrapSet(() =>
-    backend.set(namespace, key, value, hardTtlMinutes),
+    backend.set(namespace, sanitizedKey, value, hardTtlMinutes),
   );
 
-  const combinedKey = getCombinedKey(namespace, key);
+  const combinedKey = getCombinedKey(namespace, sanitizedKey);
   const p = Promise.resolve(value);
   memCache.set(combinedKey, p);
 }

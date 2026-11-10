@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.45.1`
-- Node.js `^24.11.0`
+- Node.js `^24.11.0 || ^26.13.0`
 - pnpm `^10.0.0`
 - C++ compiler
 
@@ -194,6 +194,10 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
 You usually don't need to fix any Prettier errors by hand.
+
+We use [knip](https://knip.dev) to detect unused, unlisted or unresolved dependencies.
+Run `pnpm knip` to check, and remove packages from `package.json` that nothing uses anymore.
+If a package is used in a way knip cannot see, add it to `ignoreDependencies` in `knip.jsonc` with a comment explaining why.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 

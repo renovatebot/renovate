@@ -130,6 +130,22 @@ In particular:
 - an existing `mise.lock` is required
 - self-hosted administrators decide whether this unsafe execution is acceptable for their environment
 
+### Tool versions as constraints
+
+Renovate uses the versions of tools which it can install, like `node`, `pnpm`, `python` or `rust`, as [`constraints`](../../../configuration-options.md#constraints) for artifact updates of other managers in the directory tree of the mise config file.
+They apply to the directory of the mise config file and its subdirectories, so a `mise.toml` with `rust = "1.90.0"` makes Renovate use Rust `1.90.0` when it updates the `Cargo.lock` of the `Cargo.toml` next to it.
+The lookup of new versions does not use them.
+For `.config/mise.toml`, `mise/config.toml` and the like, this is the directory which holds the `.config` or `mise` directory.
+
+- The locked version from `mise.lock` is used, otherwise the version in the config file, which is also used if the locked version does not start with it, like mise does
+- Versions like `latest`, `lts`, `ref:` or `path:` without a locked version set no constraint, as do partial versions like `3.12` for tools whose versioning reads them as a single version, and versions with a suffix like `1.17.3-otp-27`; they still hide the version of the tool in a mise config file of a parent directory, like mise does
+- A branch which updates the version of a tool uses the new version for the other updates in the same branch
+- Only the top level `tools` are used, not `tasks.*.tools`
+- Only mise TOML config files are used, not `.tool-versions` files, which belong to the [`asdf`](../asdf/index.md) manager
+- Environment-specific config files like `mise.production.toml` are ignored, while all files in `.config/mise/conf.d` are used, like mise does
+- A mise config file in a deeper directory takes precedence over one in a parent directory, and within a directory the [order of mise](https://github.com/jdx/mise/blob/02d59ef93faf219319cccac23249501e8763e2da/src/config/mod.rs#L2530-L2608) applies, like `mise.local.toml` over `mise.toml`
+- `constraints` from the Renovate config take precedence, as do constraints which the manager detects itself, like `packageManager` in a `package.json`, unless the mise version is within them, like `20.11.0` within an `engines` range of `>=18`, or `9.12.0` within the `>=9` which Renovate reads from the `lockfileVersion` of a `pnpm-lock.yaml`
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.

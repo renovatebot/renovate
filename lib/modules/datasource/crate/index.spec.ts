@@ -18,6 +18,7 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as packageCache from '../../../util/cache/package/index.ts';
 import * as git from '../../../util/git/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
@@ -570,6 +571,10 @@ describe('modules/datasource/crate/index', () => {
         });
       });
 
+      afterEach(() => {
+        hostRules.clear();
+      });
+
       it('passes crate authentication to git when cloning an http(s) registry', async () => {
         const { mockClone } = setupGitMocks();
 
@@ -582,7 +587,7 @@ describe('modules/datasource/crate/index', () => {
         expect(res).not.toBeNull();
         expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
           config: { maxConcurrentProcesses: 1 },
-          authentication: { hostTypes: ['crate'] },
+          authentication: { hostTypes: ['crate'], url: httpsUrl },
         });
         expect(mockClone).toHaveBeenCalledExactlyOnceWith(
           httpsUrl,
@@ -609,13 +614,44 @@ describe('modules/datasource/crate/index', () => {
         });
         expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
           config: { maxConcurrentProcesses: 1 },
-          authentication: { hostTypes: ['crate'] },
+          authentication: {
+            hostTypes: ['crate'],
+            url: 'https://index.crates.io',
+          },
         });
         expect(mockClone).toHaveBeenCalledExactlyOnceWith(
           'https://index.crates.io',
           expect.any(String),
           { '--depth': 1 },
         );
+      });
+
+      it('passes the stripped registry URL whose credentials were detached to git', async () => {
+        const { mockClone } = setupGitMocks();
+        const url = 'https://git.example.com/index.git';
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [
+            'https://user:pat1234567890123@git.example.com/index.git',
+          ],
+        });
+
+        expect(res).not.toBeNull();
+        expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
+          config: { maxConcurrentProcesses: 1 },
+          authentication: { hostTypes: ['crate'], url },
+        });
+        expect(mockClone).toHaveBeenCalledExactlyOnceWith(
+          url,
+          expect.any(String),
+          { '--depth': 1 },
+        );
+        expect(hostRules.find({ hostType: 'crate', url })).toMatchObject({
+          username: 'user',
+          password: 'pat1234567890123',
+        });
       });
 
       it('does not pass authentication to git for ssh registries', async () => {
@@ -732,6 +768,37 @@ describe('modules/datasource/crate/index', () => {
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
       expect(res).toBeNull();
+    });
+
+    describe('sparse registry with URL credentials', () => {
+      const registryUrl = 'https://crates.example.com/index';
+
+      afterEach(() => {
+        hostRules.clear();
+      });
+
+      it('requests the registry with the credentials of its URL', async () => {
+        const authorization = `Basic ${Buffer.from('user:pass1234567890123').toString('base64')}`;
+        httpMock
+          .scope(registryUrl, { reqheaders: { authorization } })
+          .get('/config.json')
+          .reply(200, { dl: `${registryUrl}/dl` })
+          .get('/my/pk/mypkg')
+          .reply(200, Fixtures.get('mypkg'));
+
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'mypkg',
+          registryUrls: [
+            'sparse+https://user:pass1234567890123@crates.example.com/index',
+          ],
+        });
+
+        expect(res).toMatchObject({
+          registryUrl: 'sparse+https://crates.example.com/index',
+          releases: [{ version: '0.1.0' }, { version: '0.1.1' }],
+        });
+      });
     });
 
     describe('registry web API', () => {

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.10.7 linux-x64 (2026-10-09)"
+    "version": "2026.10.25 linux-x64 (2026-10-31)"
   },
   "tools": {
     "1password": {
@@ -382,6 +382,9 @@
     },
     "black": {
       "aqua": "psf/black"
+    },
+    "blaze": {
+      "github": "indexable-inc/blaze"
     },
     "blender": {
       "aqua": "blender/blender"
@@ -1245,6 +1248,9 @@
       "asdf": "mise-plugins/mise-gcloud",
       "vfox": "jdx/vfox-gcloud"
     },
+    "gdal": {
+      "conda": "libgdal-core"
+    },
     "gdu": {
       "aqua": "dundee/gdu"
     },
@@ -1436,6 +1442,9 @@
     },
     "google-java-format": {
       "aqua": "google/google-java-format"
+    },
+    "goose-agent": {
+      "aqua": "aaif-goose/goose"
     },
     "gopass": {
       "aqua": "gopasspw/gopass",
@@ -1722,7 +1731,9 @@
       "asdf": "virtualstaticvoid/asdf-istioctl"
     },
     "jactionlint": {
-      "github": "jdx/jactionlint"
+      "aqua": "jdx/jactionlint",
+      "github": "jdx/jactionlint",
+      "packslip": "github.com/jdx/jactionlint"
     },
     "janet": {
       "github": "janet-lang/janet"
@@ -1781,6 +1792,10 @@
     "jnv": {
       "aqua": "ynqa/jnv",
       "asdf": "raimon49/asdf-jnv"
+    },
+    "jouet": {
+      "github": "jdx/jouet",
+      "packslip": "github.com/jdx/jouet"
     },
     "jq": {
       "aqua": "jqlang/jq",
@@ -2226,6 +2241,9 @@
       "aqua": "marp-team/marp-cli",
       "asdf": "xataz/asdf-marp-cli"
     },
+    "martin": {
+      "github": "maplibre/martin"
+    },
     "mas": {
       "aqua": "mas-cli/mas"
     },
@@ -2394,7 +2412,7 @@
       "asdf": "iilyak/asdf-nancy"
     },
     "native-sdk": {
-      "github": "vercel-labs/native"
+      "npm": "@native-sdk/cli"
     },
     "nats-server": {
       "github": "nats-io/nats-server"
@@ -2581,7 +2599,8 @@
       "github": "openbao/openbao"
     },
     "opencode": {
-      "aqua": "anomalyco/opencode"
+      "aqua": "anomalyco/opencode",
+      "npm": "@opencode/cli"
     },
     "openfaas-cli": {
       "aqua": "openfaas/faas-cli",
@@ -2629,6 +2648,7 @@
       "go": "github.com/DarthSim/overmind/v2"
     },
     "oxfmt": {
+      "aqua": "oxc-project/oxc/oxfmt",
       "npm": "oxfmt"
     },
     "oxipng": {
@@ -2839,7 +2859,7 @@
     },
     "protoc-gen-connect-go": {
       "asdf": "dylanrayboss/asdf-protoc-gen-connect-go",
-      "go": "connectrpc.com/connect/cmd/protoc-gen-connect-go"
+      "go": "connectrpc.com/connect/v2/cmd/protoc-gen-connect-go"
     },
     "protoc-gen-go": {
       "aqua": "protocolbuffers/protobuf-go/protoc-gen-go",
@@ -2918,6 +2938,9 @@
     "rclone": {
       "aqua": "rclone/rclone",
       "asdf": "johnlayton/asdf-rclone"
+    },
+    "rea": {
+      "npm": "rea-agents"
     },
     "rebar": {
       "github": "erlang/rebar3"
@@ -3687,6 +3710,10 @@
       "aqua": "tsl0922/ttyd",
       "asdf": "ivanvc/asdf-ttyd"
     },
+    "tuios": {
+      "aqua": "Gaurav-Gosain/tuios",
+      "github": "Gaurav-Gosain/tuios"
+    },
     "tuist": {
       "aqua": "tuist/tuist",
       "asdf": "mise-plugins/mise-tuist"
@@ -3940,7 +3967,8 @@
       "github": "a7ex/xcresultparser"
     },
     "xcsift": {
-      "github": "ldomaradzki/xcsift"
+      "github": "ldomaradzki/xcsift",
+      "packslip": "github.com/ldomaradzki/xcsift"
     },
     "xh": {
       "aqua": "ducaale/xh",

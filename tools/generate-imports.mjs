@@ -174,21 +174,25 @@ async function generateManagerDefaultConfigs() {
   const { default: managers } = await import('../lib/modules/manager/api.ts');
   const { default: customManagers } =
     await import('../lib/modules/manager/custom/api.ts');
+  const { getDisplayName } = await import('./docs/utils.ts');
 
   const allManagers = new Map([
     ...managers.entries(),
     ...customManagers.entries(),
   ]);
-  /** @type {Record<string, Record<string, unknown>>} */
+  /** @type {Record<string, { displayName: string, defaultConfig: Record<string, unknown> }>} */
   const managerDefaultConfigs = {};
   for (const [name, manager] of allManagers) {
     if (manager.defaultConfig) {
-      managerDefaultConfigs[name] = manager.defaultConfig;
+      managerDefaultConfigs[name] = {
+        displayName: getDisplayName(name, manager),
+        defaultConfig: manager.defaultConfig,
+      };
     }
   }
 
   const content = `
-export const managerDefaultConfigs: Record<string, Record<string, unknown>> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
+export const managerDefaultConfigs: Record<string, { displayName: string; defaultConfig: Record<string, unknown> }> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
 `;
 
   await updateFile('lib/manager-default-configs.generated.ts', content);

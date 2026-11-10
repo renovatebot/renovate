@@ -30,11 +30,6 @@ export type NpmPackage = PackageJson & {
   };
 };
 
-export type LockFileEntry = Record<
-  string,
-  { version: string; integrity?: boolean }
->;
-
 export interface LockFile {
   lockedVersions?: Record<string, string>;
   lockedVersionsWithPath?: Record<
