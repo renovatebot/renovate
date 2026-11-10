@@ -6,10 +6,14 @@ import { GithubScm } from './scm.ts';
 
 vi.mock('./index.ts');
 const github = vi.mocked(_github);
+const actualGithub = await vi.importActual<typeof _github>('./index.ts');
 
 describe('modules/platform/github/scm', () => {
   beforeEach(() => {
     git.commitFiles.mockResolvedValue(fakeSha('sha'));
+    github.massageCommitMessage.mockImplementation(
+      actualGithub.massageCommitMessage,
+    );
   });
 
   const githubScm = new GithubScm();
@@ -75,7 +79,7 @@ describe('modules/platform/github/scm', () => {
     });
   });
 
-  it('does not replace links in the commit message', async () => {
+  it('replaces links in the commit message', async () => {
     const message = [
       'chore(deps): update dependency renovate to v44.220.0',
       '- **config:** add option ([#43916](https://github.com/renovatebot/renovate/issues/43916)), closes https://github.com/renovatebot/renovate/pull/1',
@@ -85,7 +89,24 @@ describe('modules/platform/github/scm', () => {
 
     expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
       ...commitObj,
-      message,
+      message: [
+        'chore(deps): update dependency renovate to v44.220.0',
+        '- **config:** add option ([#43916](https://redirect.github.com/renovatebot/renovate/issues/43916)), closes https://redirect.github.com/renovatebot/renovate/pull/1',
+      ],
+    });
+  });
+
+  it('replaces links in the commit message when using platformCommit', async () => {
+    await githubScm.commitAndPush({
+      ...commitObj,
+      message: 'fix https://github.com/foo/bar/issues/1',
+      platformCommit: 'enabled',
+    });
+
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
+      ...commitObj,
+      message: 'fix https://redirect.github.com/foo/bar/issues/1',
+      platformCommit: 'enabled',
     });
   });
 
