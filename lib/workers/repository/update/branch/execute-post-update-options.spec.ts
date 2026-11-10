@@ -149,4 +149,72 @@ describe('workers/repository/update/branch/execute-post-update-options', () => {
 
     expect(fs.writeLocalFile).not.toHaveBeenCalled();
   });
+
+  it('writes updated files when contents are already a Buffer', async () => {
+    const contents = Buffer.from('module example.com/test');
+    const packageFile: FileChange = {
+      type: 'addition',
+      path: 'go.mod',
+      contents,
+    };
+
+    fs.localPathIsFile.mockResolvedValue(true);
+    tidy.executeGoModTidy.mockResolvedValue({
+      updatedArtifacts: [],
+      artifactErrors: [],
+    });
+
+    await executePostUpdateOptions(
+      baseConfig({ updatedPackageFiles: [packageFile] }),
+    );
+
+    expect(fs.writeLocalFile).toHaveBeenCalledWith('go.mod', contents);
+  });
+
+  it('replaces existing artifacts when tidy returns the same file path', async () => {
+    const existingArtifact: FileChange = {
+      type: 'addition',
+      path: 'go.sum',
+      contents: 'old contents',
+    };
+
+    const updatedArtifact: FileChange = {
+      type: 'addition',
+      path: 'go.sum',
+      contents: 'updated contents',
+    };
+
+    fs.localPathIsFile.mockResolvedValue(true);
+    tidy.executeGoModTidy.mockResolvedValue({
+      updatedArtifacts: [updatedArtifact],
+      artifactErrors: [],
+    });
+
+    const result = await executePostUpdateOptions(
+      baseConfig({
+        updatedArtifacts: [existingArtifact],
+      }),
+    );
+
+    expect(result?.updatedArtifacts).toEqual([updatedArtifact]);
+  });
+
+  it('returns null when Go mod tidy produces no result', async () => {
+    const packageFile: FileChange = {
+      type: 'addition',
+      path: 'go.mod',
+      contents: 'module example.com/test',
+    };
+
+    tidy.executeGoModTidy.mockResolvedValue(null as any);
+
+    const result = await executePostUpdateOptions(
+      baseConfig({
+        updatedPackageFiles: [packageFile],
+      }),
+    );
+
+    expect(tidy.executeGoModTidy).toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
 });
