@@ -971,7 +971,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               return (
                 Array.isArray(body.reviewers) &&
                 body.reviewers.some(
-                  (r: { user: { name: string } }) => r?.user?.name === 'name',
+                  (r: { user: { name: string } }) => r.user.name === 'name',
                 )
               );
             },
@@ -1002,7 +1002,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               return (
                 Array.isArray(body.reviewers) &&
                 body.reviewers.every(
-                  (r: { user: { name: string } }) => r?.user?.name !== 'name',
+                  (r: { user: { name: string } }) => r.user.name !== 'name',
                 )
               );
             },
@@ -1913,7 +1913,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             bbUseDefaultReviewers: true,
           },
         });
-        expect(pr?.number).toBe(5);
+        expect(pr.number).toBe(5);
       });
 
       it('posts PR default branch', async () => {
@@ -1947,7 +1947,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             bbUseDefaultReviewers: true,
           },
         });
-        expect(pr?.number).toBe(5);
+        expect(pr.number).toBe(5);
       });
 
       it('should use platform automerge', async () => {
@@ -1981,7 +1981,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             usePlatformAutomerge: true,
           },
         });
-        expect(pr?.number).toBe(5);
+        expect(pr.number).toBe(5);
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 5 },

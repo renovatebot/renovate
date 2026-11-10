@@ -70,7 +70,7 @@ export interface BitbucketErrorResponse {
 }
 
 export interface BitbucketError extends HTTPError {
-  readonly response: Response<BitbucketErrorResponse>;
+  readonly response: Response<BitbucketErrorResponse | undefined>;
 }
 
 export interface BbsPrCacheData {

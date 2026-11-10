@@ -188,7 +188,7 @@ export async function initPlatform({
         )
       ).body;
 
-      if (!emailAddress?.length) {
+      if (!emailAddress.length) {
         throw new Error(`No email address configured for username ${username}`);
       }
 
@@ -338,8 +338,8 @@ export async function getBranchForceRebase(
 ): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJsonUnchecked<{
-    mergeConfig: { defaultStrategy: { id: string } };
-  }>(
+    mergeConfig?: { defaultStrategy?: { id: string } };
+  } | null>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`,
   );
 
@@ -1018,11 +1018,10 @@ export async function ensureCommentRemoval(
     const comments = await getComments(prNo);
 
     let commentId: number | null | undefined = null;
-    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       const topic = deleteConfig.topic;
       commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-    } else if (deleteConfig.type === 'by-content') {
+    } else {
       const content = deleteConfig.content;
       commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
@@ -1038,7 +1037,7 @@ export async function ensureCommentRemoval(
 // Pull Request
 
 function escapeHash(input: string): string {
-  return input?.replace(regEx(/#/g), '%23');
+  return input.replace(regEx(/#/g), '%23');
 }
 
 export async function createPr({
@@ -1403,7 +1402,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
 
   // First, try to find a repo-scoped group with this name
   const repoGroup = allGroups.find(
-    (group) => group.name === groupName && group.scope?.type === 'REPOSITORY',
+    (group) => group.name === groupName && group.scope.type === 'REPOSITORY',
   );
 
   if (repoGroup) {
@@ -1414,7 +1413,7 @@ async function getUsersFromReviewerGroup(groupName: string): Promise<string[]> {
 
   // If no repo-level group, fall back to project-level group
   const projectGroup = allGroups.find(
-    (group) => group.name === groupName && group.scope?.type === 'PROJECT',
+    (group) => group.name === groupName && group.scope.type === 'PROJECT',
   );
 
   if (projectGroup) {

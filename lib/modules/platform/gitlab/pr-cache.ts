@@ -31,8 +31,8 @@ export class GitlabPrCache {
     repoCache.platform ??= {};
     repoCache.platform.gitlab ??= {};
 
-    let pullRequestCache = repoCache.platform.gitlab
-      .pullRequestsCache as GitlabPrCacheData;
+    let pullRequestCache = repoCache.platform.gitlab.pullRequestsCache as
+      GitlabPrCacheData | undefined;
     if (!pullRequestCache) {
       logger.debug('Initializing new PR cache at repository cache');
       pullRequestCache = {

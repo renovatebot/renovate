@@ -41,6 +41,7 @@ function isValidPair(first: PaketOperator, second: PaketOperator): boolean {
 }
 
 export function parseRange(input: string): PaketRange | null {
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- the versioning callers can pass an undefined value
   if (!input?.trim()) {
     return null;
   }
@@ -116,7 +117,10 @@ export function releaseParts(version: NugetVersion): number[] {
 }
 
 function versionFromParts(parts: number[]): NugetVersion {
-  const [major, minor, patch, revision] = parts;
+  const [major] = parts;
+  const minor = parts.at(1);
+  const patch = parts.at(2);
+  const revision = parts.at(3);
   const result: NugetVersion = { type: 'nuget-version', major };
   if (minor !== undefined) {
     result.minor = minor;

@@ -95,7 +95,7 @@ export class GerritPrCache {
    * @returns true if more pages can be fetched, false if not needed
    */
   private reconcile(changes: GerritChange[]): boolean {
-    const { items } = this.cache;
+    const items: Partial<Record<number, Pr>> = this.cache.items;
     let changeCount = 0;
     let needNextPage = true;
 

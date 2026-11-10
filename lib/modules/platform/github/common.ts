@@ -14,6 +14,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
   const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
   const result: GhPr = {
     number: pr.number,
+    // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
     sourceBranch: pr.head?.ref,
     title: pr.title,
     state:
@@ -23,10 +24,12 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     node_id: pr.node_id,
   };
 
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
   if (pr.head?.sha) {
     result.sha = pr.head.sha;
   }
 
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
   if (pr.head?.repo?.full_name) {
     result.sourceRepo = pr.head.repo.full_name;
   }
@@ -53,6 +56,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.closedAt = pr.closed_at;
   }
 
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- PR responses are not schema-validated
   if (pr.base?.ref) {
     result.targetBranch = pr.base.ref;
   }

@@ -121,7 +121,7 @@ export class PodDatasource extends Datasource {
   ): Promise<string | null> {
     try {
       const resp = await this.http.getText(url);
-      if (resp?.body) {
+      if (resp.body) {
         return resp.body;
       }
     } catch (err) {
@@ -138,7 +138,7 @@ export class PodDatasource extends Datasource {
     try {
       const resp = await this.githubHttp.getJsonUnchecked<T>(url);
       // v8 ignore else -- an empty json body throws before it gets here
-      if (resp?.body) {
+      if (resp.body) {
         return resp.body;
       }
     } catch (err) {

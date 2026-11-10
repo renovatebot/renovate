@@ -448,20 +448,6 @@ describe('modules/datasource/terraform-provider/index', () => {
       await expect(result).rejects.toThrow(ExternalHostError);
     });
 
-    it('throws if service discovery error', async () => {
-      vi.spyOn(
-        terraformProviderDatasource,
-        'getTerraformServiceDiscoveryResult',
-        // @ts-expect-error - should never happen
-      ).mockResolvedValueOnce(null);
-      const result = terraformProviderDatasource.getBuilds(
-        primaryUrl,
-        'hashicorp/azurerm',
-        '2.50.0',
-      );
-      await expect(result).rejects.toThrow(ExternalHostError);
-    });
-
     it('throws if a version is requested which is not available', async () => {
       httpMock
         .scope(primaryUrl)

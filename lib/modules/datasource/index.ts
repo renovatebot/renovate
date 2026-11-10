@@ -276,8 +276,8 @@ async function mergeRegistries(
         if (res.tags) {
           // Both results had tags, so we need to compare them
           for (const tag of ['release', 'latest']) {
-            const existingTag = combinedRes?.tags?.[tag];
-            const newTag = res.tags?.[tag];
+            const existingTag = combinedRes.tags?.[tag];
+            const newTag = res.tags[tag];
             // v8 ignore else -- needs a merged registry whose tag is not a version
             if (isString(newTag) && releaseVersioning.isVersion(newTag)) {
               if (
@@ -445,7 +445,7 @@ async function fetchReleases(
   const { datasource: datasourceName } = config;
   let registryUrlsConfig: RegistryUrlsConfig = config;
   // istanbul ignore if: need test
-  if (!datasourceName || getDatasourceFor(datasourceName) === undefined) {
+  if (!datasourceName) {
     logger.warn({ datasource: datasourceName }, 'Unknown datasource');
     return null;
   }
@@ -538,7 +538,9 @@ function fetchCachedReleases(
     ]),
   );
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
+  const cachedResult = memCache.get<Promise<ReleaseResult | null> | undefined>(
+    cacheKey,
+  );
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;

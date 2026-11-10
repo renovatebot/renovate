@@ -25,7 +25,7 @@ export class BitbucketServerTagsDatasource extends GitHostTagsDigestDatasource<B
     'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static getRegistryURL(registryUrl: string): string {
-    return registryUrl?.replace(regEx(/\/rest\/api\/1.0$/), '');
+    return registryUrl.replace(regEx(/\/rest\/api\/1.0$/), '');
   }
 
   static getApiUrl(registryUrl: string): string {

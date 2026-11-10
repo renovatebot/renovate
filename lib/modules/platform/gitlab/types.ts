@@ -41,14 +41,14 @@ export interface RepoResponse {
   archived: boolean;
   marked_for_deletion_at?: string | null;
   mirror: boolean;
-  default_branch: string;
+  default_branch: string | null;
   empty_repo: boolean;
   ssh_url_to_repo: string | null;
   http_url_to_repo: string | null;
   forked_from_project: boolean;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
-  merge_method: MergeMethod;
+  merge_method?: MergeMethod;
   /**
    * only available with paid plans
    * https://docs.gitlab.com/ci/pipelines/merge_trains

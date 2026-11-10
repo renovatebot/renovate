@@ -53,8 +53,8 @@ class LooseVersioningApi extends GenericVersioningApi<LooseVersion> {
       parsed2.releaseBig.length,
     );
     for (let i = 0; i < length; i += 1) {
-      const part1 = parsed1.releaseBig[i];
-      const part2 = parsed2.releaseBig[i];
+      const part1 = parsed1.releaseBig.at(i);
+      const part2 = parsed2.releaseBig.at(i);
       // shorter is smaller 2.1 < 2.1.0
       if (part1 === undefined) {
         return -1;

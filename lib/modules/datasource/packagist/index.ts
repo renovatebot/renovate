@@ -274,8 +274,10 @@ export class PackagistDatasource extends Datasource {
         return packagistResult;
       }
 
-      if (meta.packages[packageName]) {
-        const result = extractDepReleases(meta.packages[packageName]);
+      const packages: Partial<typeof meta.packages> = meta.packages;
+      const packageReleases = packages[packageName];
+      if (packageReleases) {
+        const result = extractDepReleases(packageReleases);
         return result;
       }
 

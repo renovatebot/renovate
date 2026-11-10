@@ -1,7 +1,6 @@
-import { partial } from '~test/util.ts';
 import { regEx } from '../../util/regex.ts';
 import { GenericVersioningApi } from './generic.ts';
-import type { GenericVersion, NewValueConfig } from './types.ts';
+import type { GenericVersion } from './types.ts';
 
 describe('modules/versioning/generic', () => {
   const optionalFunctions = [
@@ -116,8 +115,6 @@ describe('modules/versioning/generic', () => {
           newVersion: 'v3.2.1',
         }),
       ).toBe('3.2.1');
-
-      expect(api.getNewValue(partial<NewValueConfig>({}))).toBeNull();
     });
 
     it('isCompatible', () => {

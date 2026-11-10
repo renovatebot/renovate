@@ -13,12 +13,12 @@ import type { AllowedMergeMethods, GiteaPlatformKey } from './types.ts';
 
 export function smartLinks(body: string): string {
   return body
-    ?.replace(regEx(/\]\(\.\.\/issues\//g), '](issues/')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](issues/')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
 }
 
 export function trimTrailingApiPath(url: string): string {
-  return url?.replace(regEx(/api\/v1\/?$/g), '');
+  return url.replace(regEx(/api\/v1\/?$/g), '');
 }
 
 function setTokenAuth(url: URL, token: string | undefined): void {
@@ -86,7 +86,7 @@ export function getMergeMethod(
       // their target branch, so a strict "fast-forward only" merge is safe
       // and is preferred over "rebase" (rebase-then-fast-forward) when the
       // repository allows it.
-      return allowedMergeMethods?.has('fast-forward-only')
+      return allowedMergeMethods.has('fast-forward-only')
         ? 'fast-forward-only'
         : 'rebase';
     case 'merge-commit':
@@ -116,8 +116,8 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
   if (
     !data.base?.ref ||
     !data.head?.label ||
-    !data.head?.sha ||
-    !data.head?.repo?.full_name
+    !data.head.sha ||
+    !data.head.repo?.full_name
   ) {
     logger.trace(
       `Skipping Pull Request #${data.number} due to missing base and/or head branch`,

@@ -187,6 +187,7 @@ export async function initPlatform({
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
 
+  // oxlint-disable-next-line typescript/no-unnecessary-condition -- unset when gitAuthor is configured
   botUserName ??= username!;
 
   return platformConfig;
@@ -335,7 +336,7 @@ export async function initRepo({
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
     }
-    config.mergeMethod = res.body.merge_method || 'merge';
+    config.mergeMethod = res.body.merge_method ?? 'merge';
     config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
@@ -384,7 +385,7 @@ export async function initRepo({
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
-  const forceRebase = config?.mergeMethod !== 'merge';
+  const forceRebase = config.mergeMethod !== 'merge';
   if (forceRebase) {
     logger.once.debug(
       `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
@@ -442,7 +443,7 @@ type BranchState =
 
 interface GitlabBranchStatus {
   status: BranchState;
-  name: string;
+  name?: string;
   allow_failure?: boolean;
 }
 
@@ -475,7 +476,9 @@ async function getStatus(
   }
 }
 
-const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
+const gitlabToRenovateStatusMapping: Partial<
+  Record<BranchState, BranchStatus>
+> = {
   pending: 'yellow',
   created: 'yellow',
   manual: 'yellow',
@@ -545,7 +548,7 @@ export async function getBranchStatus(
       // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
-        let mappedStatus: BranchStatus =
+        let mappedStatus: BranchStatus | undefined =
           gitlabToRenovateStatusMapping[check.status];
         if (!mappedStatus) {
           logger.warn(
@@ -577,11 +580,12 @@ async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
     const { body: rules } = await gitlabApi.getJsonUnchecked<
-      {
-        name: string;
-        rule_type: string;
-        id: number;
-      }[]
+      | {
+          name: string;
+          rule_type: string;
+          id: number;
+        }[]
+      | null
     >(url);
 
     const ruleName = 'renovateIgnoreApprovals';
@@ -667,7 +671,7 @@ async function tryPrAutomerge(
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
             status: string;
-          };
+          } | null;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
@@ -1068,7 +1072,7 @@ export async function getBranchStatusCheck(
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return gitlabToRenovateStatusMapping[check.status] || 'yellow';
+      return gitlabToRenovateStatusMapping[check.status] ?? 'yellow';
     }
   }
   return null;
@@ -1565,11 +1569,10 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
-  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const topic = deleteConfig.topic;
     commentId = comments.find((comment) => byTopic(comment, topic))?.id;
-  } else if (deleteConfig.type === 'by-content') {
+  } else {
     const content = deleteConfig.content;
     commentId = comments.find((comment) => byContent(comment, content))?.id;
   }

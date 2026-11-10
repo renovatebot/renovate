@@ -69,7 +69,7 @@ export async function getUserEmail(
 ): Promise<EmailAddress | null> {
   try {
     const emails = (
-      await githubApi.getJsonUnchecked<{ email: EmailAddress }[]>(
+      await githubApi.getJsonUnchecked<{ email: EmailAddress }[] | null>(
         `${endpoint}user/emails`,
         {
           token,

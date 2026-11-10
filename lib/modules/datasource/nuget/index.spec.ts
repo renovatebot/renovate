@@ -346,7 +346,7 @@ describe('modules/datasource/nuget/index', () => {
     describe('determine source URL from nupkg', () => {
       // These tests really download the .nupkg to disk, so give them a
       // throwaway directory instead of a fixed path under the system tmpdir.
-      let cacheDirResult: DirectoryResult;
+      let cacheDirResult: DirectoryResult | undefined;
 
       beforeEach(async () => {
         cacheDirResult = await tmp.dir({ unsafeCleanup: true });

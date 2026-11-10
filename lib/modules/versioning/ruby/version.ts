@@ -1,6 +1,6 @@
 import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
 import type { SegmentElement } from '@renovatebot/ruby-semver/dist/ruby/version.js';
-import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import { Version } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
 
@@ -12,7 +12,7 @@ interface RubyVersion {
 }
 
 function releaseSegments(version: string): SegmentElement[] {
-  const v = create(version);
+  const v = Version.create(version);
   // v8 ignore else -- callers only pass versions that have already parsed
   if (v) {
     return v.release().getSegments();

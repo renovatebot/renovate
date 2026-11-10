@@ -308,7 +308,7 @@ export class DockerDatasource extends Datasource {
   ): Promise<string | null> {
     return (
       (await this.getManifest(registry, dockerRepository, tag))?.config
-        ?.digest ?? null
+        .digest ?? null
     );
   }
 
@@ -555,7 +555,7 @@ export class DockerDatasource extends Datasource {
           .find(
             (annotations) =>
               isNonEmptyString(annotations?.[sourceLabel]) &&
-              isNonEmptyString(annotations?.[gitRefLabel]),
+              isNonEmptyString(annotations[gitRefLabel]),
           );
         if (descriptorAnnotations) {
           labels = { ...labels, ...descriptorAnnotations };
@@ -637,15 +637,12 @@ export class DockerDatasource extends Datasource {
         }
       }
 
-      // v8 ignore else -- labels are always set by the branches above
-      if (labels) {
-        logger.debug(
-          {
-            labels,
-          },
-          'found labels in manifest',
-        );
-      }
+      logger.debug(
+        {
+          labels,
+        },
+        'found labels in manifest',
+      );
       return labels;
     } catch (err) /* istanbul ignore next: should be tested in future */ {
       if (err instanceof ExternalHostError) {

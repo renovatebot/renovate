@@ -18,7 +18,7 @@ async function getPageReleases(
   try {
     const pgRes = await http.getJson(pgUrl, AdoptiumJavaResponse);
     return (
-      pgRes?.body?.versions?.map(({ semver }) => ({
+      pgRes.body.versions?.map(({ semver }) => ({
         version: semver,
       })) ?? null
     );

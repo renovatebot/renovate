@@ -16,7 +16,7 @@ export type AggregatedVulnerabilities = Record<
 >;
 
 export interface GhBranchStatus {
-  context: string;
+  context?: string;
   state: BranchState;
 }
 
@@ -38,17 +38,18 @@ export interface GhRestRepo {
     login: string;
   };
   archived: boolean;
-  topics: string[];
+  topics?: string[];
 }
 
 export interface GhRestPr {
   head: {
     ref: string;
     sha: LongCommitSha;
+    /** `null` when the head repository was deleted */
     repo: {
       full_name: string;
       pushed_at?: string;
-    };
+    } | null;
   };
   base: {
     repo: {
@@ -119,13 +120,13 @@ export interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
-  branchForceRebase?: Record<string, boolean>;
+  branchForceRebase?: Partial<Record<string, boolean>>;
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
   forkCreation?: boolean;
   prList: GhPr[] | null;
-  mergeMethod: 'rebase' | 'squash' | 'merge';
+  mergeMethod?: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
@@ -136,7 +137,7 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
-  mergeQueueEnabled: Record<string, boolean>;
+  mergeQueueEnabled: Partial<Record<string, boolean>>;
 }
 
 export interface GhRepo {
@@ -155,13 +156,14 @@ export interface GhRepo {
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
+  /** `null` for an empty repository */
   defaultBranchRef: {
     name: string;
     target: {
       oid: string;
     };
-  };
-  issues: { nodes: unknown[] };
+  } | null;
+  issues?: { nodes: unknown[] };
 }
 
 export interface GhAutomergeResponse {

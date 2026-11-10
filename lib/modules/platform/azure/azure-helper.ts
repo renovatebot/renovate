@@ -81,7 +81,7 @@ export async function getFile(
     },
   );
 
-  if (item?.readable) {
+  if (item.readable) {
     const fileContent = await streamToString(item);
     try {
       const result = WrappedException.safeParse(fileContent);
@@ -143,7 +143,7 @@ export async function getMergeMethod(
     `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
   );
   interface Scope {
-    repositoryId: string;
+    repositoryId: string | null;
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }

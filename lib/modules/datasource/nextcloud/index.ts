@@ -55,8 +55,10 @@ export class NextcloudDatasource extends Datasource {
     }
 
     for (const release of application.releases) {
+      const translations: Partial<typeof release.translations> =
+        release.translations;
       const translation =
-        release.translations[NextcloudDatasource.defaultTranslationLanguage];
+        translations[NextcloudDatasource.defaultTranslationLanguage];
 
       const changelogContent = translation?.changelog ?? null;
 

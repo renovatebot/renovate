@@ -132,19 +132,19 @@ class RpmVersioningApi extends GenericVersioningApi {
       const matchv2 = matchesv2[i];
 
       // compare tildes
-      if (matchv1?.startsWith('~') || matchv2?.startsWith('~')) {
-        if (!matchv1?.startsWith('~')) {
+      if (matchv1.startsWith('~') || matchv2.startsWith('~')) {
+        if (!matchv1.startsWith('~')) {
           return 1;
         }
 
-        if (!matchv2?.startsWith('~')) {
+        if (!matchv2.startsWith('~')) {
           return -1;
         }
       }
 
-      if (isNumericString(matchv1?.[0])) {
+      if (isNumericString(matchv1[0])) {
         // numbers are greater than letters
-        if (!isNumericString(matchv2?.[0])) {
+        if (!isNumericString(matchv2[0])) {
           return 1;
         }
 
@@ -159,7 +159,7 @@ class RpmVersioningApi extends GenericVersioningApi {
 
         return Math.sign(result);
       }
-      if (isNumericString(matchv2?.[0])) {
+      if (isNumericString(matchv2[0])) {
         return -1;
       }
 

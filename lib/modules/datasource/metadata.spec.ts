@@ -691,7 +691,7 @@ describe('modules/datasource/metadata', () => {
 
   // for coverage
   it('should handle dep with no releases', () => {
-    const dep = partial<ReleaseResult>({});
+    const dep = partial<ReleaseResult>({ releases: [] });
 
     const datasource = PypiDatasource.id;
     const packageName = 'pycountry';
@@ -701,6 +701,7 @@ describe('modules/datasource/metadata', () => {
       changelogUrl:
         'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
       sourceUrl: 'https://github.com/flyingcircusio/pycountry',
+      releases: [],
     });
   });
 });

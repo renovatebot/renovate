@@ -67,7 +67,7 @@ export class ArtifactoryDatasource extends Datasource {
               : node.innerHTML;
 
             const releaseTimestamp = asTimestamp(
-              node.nextSibling?.text?.trimStart()?.split(regEx(/\s{2,}/))?.[0],
+              node.nextSibling?.text.trimStart().split(regEx(/\s{2,}/))[0],
             );
 
             const thisRelease: Release = {

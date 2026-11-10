@@ -36,11 +36,12 @@ export class TypstDatasource extends Datasource {
 
     const [registryUrl] = this.getDefaultRegistryUrls('');
 
-    const { body: registry } = await this.http.getJson(
+    const { body } = await this.http.getJson(
       registryUrl,
       { cacheProvider },
       Registry,
     );
+    const registry: Partial<Record<string, ReleaseResult>> = body;
 
     const result = registry[pkg];
     if (!result) {

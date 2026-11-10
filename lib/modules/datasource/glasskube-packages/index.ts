@@ -65,7 +65,7 @@ export class GlasskubePackagesDatasource extends Datasource {
       this.handleGenericErrors(latestManifestErr);
     }
 
-    for (const ref of coerceArray(latestManifest?.references)) {
+    for (const ref of coerceArray(latestManifest.references)) {
       if (ref.label.toLowerCase() === 'github') {
         result.sourceUrl = ref.url;
       } else if (ref.label.toLowerCase() === 'website') {

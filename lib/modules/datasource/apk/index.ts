@@ -193,7 +193,8 @@ export class ApkDatasource extends Datasource {
 
     for (const componentUrl of componentUrls) {
       try {
-        const packages = await this.getPackages(componentUrl);
+        const packages: Partial<Record<string, ApkPackage[]>> =
+          await this.getPackages(componentUrl);
         const matchingPackages = packages[packageName];
 
         if (!matchingPackages) {

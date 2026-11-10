@@ -53,7 +53,7 @@ export class ApiCache<T extends ApiPageItem> {
       return false;
     }
 
-    const { items } = this.cache;
+    const items: Partial<Record<number, T>> = this.cache.items;
     let { lastModified } = this.cache;
 
     let needNextPage = true;

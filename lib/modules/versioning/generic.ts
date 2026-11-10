@@ -125,7 +125,7 @@ export abstract class GenericVersioningApi<
     if (currentVersion === `v${currentValue}`) {
       return stripVersionPrefix(newVersion);
     }
-    return newVersion ?? null;
+    return newVersion;
   }
 
   sortVersions(version: string, other: string): number {

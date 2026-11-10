@@ -39,6 +39,7 @@ import { client } from './client.ts';
 import { GerritPrCache } from './pr-cache.ts';
 import type {
   GerritChange,
+  GerritLabelInfo,
   GerritLabels,
   GerritProjectInfo,
 } from './schema.ts';
@@ -425,7 +426,7 @@ export async function getBranchPr(
       result = found;
     }
   }
-  result ??= cachedPrs[0];
+  result ??= cachedPrs.at(0);
   logger.trace(
     `getBranchPr: using cached gerrit change ${result?.number} for ${branchName}`,
   );
@@ -534,7 +535,8 @@ export async function getBranchStatusCheck(
     ).pop();
     // v8 ignore else -- TODO: add test #40625
     if (change) {
-      const label = change.labels![context];
+      const labels: Partial<Record<string, GerritLabelInfo>> = change.labels!;
+      const label = labels[context];
       // v8 ignore else -- TODO: add test #40625
       if (label) {
         // Check for rejected or blocking first, as a label could have both rejected and approved
